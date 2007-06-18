@@ -1,0 +1,39 @@
+<html>
+<body>
+<p>
+This package contains a program that reads a show file, and
+transforms all image assets to a mosaic.  It does this using a
+fairly brute-force "first fit" algorithm that's almost certainly
+non-optimal, but is sufficient at least to demonstrate the concept
+of a mosaic.  When run, this program produces a modified show file, 
+and a modified set of assets to be used by that show file.
+</p><p>
+This is a build-time tool that runs with the JDK.  It requires parts
+of the GRIN library to run, so you should probably just build the
+whole thing.  In order to test this with Ryan's Life, you can try
+something like this:
+</p>
+<pre>
+
+    rm -rf build/classes/compiled_assets
+    java -Xmx512m -cp build/classes com.hdcookbook.grin.build.mosaic.Main \
+	    -assets /com/hdcookbook/grin/test/assets/ \
+	    -show ryan_show.txt  \
+	    -out build/classes/compiled_assets
+
+    java -cp build/classes com.hdcookbook.grin.test.bigjdk.GrinTestRyan \
+	    -assets /com/hdcookbook/grin/test/assets/ -assets /compiled_assets \
+	    -imagemap images.map
+
+</pre>
+<p>
+As of this writing, the mosaic isn't optimized, and the mosaic image
+can only be in PNG.  Some players decode JPEG faster than PNG, but
+JPEG doesn't support alpha and you have to worry about setting the
+quality of JPEG output if you go that route.  This tool presently
+doesn't have a way of grouping related images together, which would
+be important for managing image loading and unloading if you can't
+just keep everything in memory.
+</p>
+</body>
+</html>

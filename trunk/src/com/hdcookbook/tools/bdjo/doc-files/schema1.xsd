@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="bdjo" type="bdjo"/>
+
+  <xs:complexType name="bdjo">
+    <xs:sequence>
+      <xs:element name="appCacheInfo" type="appCacheInfo" minOccurs="0"/>
+      <xs:element name="applicationManagementTable" type="applicationManagementTable" minOccurs="0"/>
+      <xs:element name="fileAccessInfo" type="xs:string" minOccurs="0"/>
+      <xs:element name="keyInterestTable" type="xs:int"/>
+      <xs:element name="tableOfAccessiblePlayLists" type="tableOfAccessiblePlayLists" minOccurs="0"/>
+      <xs:element name="terminalInfo" type="terminalInfo" minOccurs="0"/>
+      <xs:element name="version" type="version" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="appCacheInfo">
+    <xs:sequence>
+      <xs:element name="entries" type="appCacheEntry" nillable="true" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="appCacheEntry">
+    <xs:sequence>
+      <xs:element name="language" type="xs:string" minOccurs="0"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="type" type="xs:byte"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="applicationManagementTable">
+    <xs:sequence>
+      <xs:element name="applications" type="appInfo" nillable="true" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="appInfo">
+    <xs:sequence>
+      <xs:element name="applicationDescriptor" type="applicationDescriptor" minOccurs="0"/>
+      <xs:element name="applicationId" type="xs:short"/>
+      <xs:element name="controlCode" type="xs:byte"/>
+      <xs:element name="organizationId" type="xs:int"/>
+      <xs:element name="type" type="xs:byte"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="applicationDescriptor">
+    <xs:sequence>
+      <xs:element name="baseDirectory" type="xs:string" minOccurs="0"/>
+      <xs:element name="binding" type="binding" minOccurs="0"/>
+      <xs:element name="classpathExtension" type="xs:string" minOccurs="0"/>
+      <xs:element name="iconFlags" type="xs:short"/>
+      <xs:element name="iconLocator" type="xs:string" minOccurs="0"/>
+      <xs:element name="initialClassName" type="xs:string" minOccurs="0"/>
+      <xs:element name="names" type="appName" nillable="true" maxOccurs="unbounded" minOccurs="0"/>
+      <xs:element name="parameters" type="xs:string" nillable="true" maxOccurs="unbounded" minOccurs="0"/>
+      <xs:element name="priority" type="xs:short"/>
+      <xs:element name="profiles" type="appProfile" nillable="true" maxOccurs="unbounded" minOccurs="0"/>
+      <xs:element name="visibility" type="visibility" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="appName">
+    <xs:sequence>
+      <xs:element name="language" type="xs:string" minOccurs="0"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="appProfile">
+    <xs:sequence>
+      <xs:element name="majorVersion" type="xs:short"/>
+      <xs:element name="microVersion" type="xs:short"/>
+      <xs:element name="minorVersion" type="xs:short"/>
+      <xs:element name="profile" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="tableOfAccessiblePlayLists">
+    <xs:sequence>
+      <xs:element name="accessToAllFlag" type="xs:boolean"/>
+      <xs:element name="autostartFirstPlayListFlag" type="xs:boolean"/>
+      <xs:element name="playListFileNames" type="xs:string" nillable="true" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="terminalInfo">
+    <xs:sequence>
+      <xs:element name="defaultFontFile" type="xs:string" minOccurs="0"/>
+      <xs:element name="initialHaviConfig" type="haviDeviceConfig" minOccurs="0"/>
+      <xs:element name="menuCallMask" type="xs:boolean"/>
+      <xs:element name="titleSearchMask" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="binding">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="TITLE_BOUND_DISC_BOUND"/>
+      <xs:enumeration value="RESERVED"/>
+      <xs:enumeration value="TITLE_UNBOUND_DISC_BOUND"/>
+      <xs:enumeration value="TITLE_UNBOUND_DISC_UNBOUND"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="visibility">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="V_11"/>
+      <xs:enumeration value="V_10"/>
+      <xs:enumeration value="V_01"/>
+      <xs:enumeration value="V_00"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="haviDeviceConfig">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="QHD_960_540"/>
+      <xs:enumeration value="SD_60HZ_720_480"/>
+      <xs:enumeration value="SD_50HZ_720_576"/>
+      <xs:enumeration value="SD"/>
+      <xs:enumeration value="HD_1280_720"/>
+      <xs:enumeration value="HD_1920_1080"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="version">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="V_0200"/>
+      <xs:enumeration value="V_0100"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

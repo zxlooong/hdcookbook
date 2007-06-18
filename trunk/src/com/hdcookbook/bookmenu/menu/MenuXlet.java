@@ -1,0 +1,391 @@
+
+/*  
+ * Copyright (c) 2007, Sun Microsystems, Inc.
+ * 
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 
+ *  * Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *  * Neither the name of Sun Microsystems nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ *  Note:  In order to comply with the binary form redistribution 
+ *         requirement in the above license, the licensee may include 
+ *         a URL reference to a copy of the required copyright notice, 
+ *         the list of conditions and the disclaimer in a human readable 
+ *         file with the binary form of the code that is subject to the
+ *         above license.  For example, such file could be put on a 
+ *         Blu-ray disc containing the binary form of the code or could 
+ *         be put in a JAR file that is broadcast via a digital television 
+ *         broadcast medium.  In any event, you must include in any end 
+ *         user licenses governing any code that includes the code subject 
+ *         to the above license (in source and/or binary form) a disclaimer 
+ *         that is at least as protective of Sun as the disclaimers in the 
+ *         above license.
+ * 
+ *         A copy of the required copyright notice, the list of conditions and
+ *         the disclaimer will be maintained at 
+ *         https://hdcookbook.dev.java.net/misc/license.html .
+ *         Thus, licensees may comply with the binary form redistribution
+ *         requirement with a text file that contains the following text:
+ * 
+ *             A copy of the license(s) governing this code is located
+ *             at https://hdcookbook.dev.java.net/misc/license.html
+ */
+
+
+package com.hdcookbook.bookmenu.menu;
+
+import org.dvb.event.EventManager;
+import org.dvb.event.UserEvent;
+import org.dvb.event.UserEventListener;
+import org.dvb.event.UserEventRepository;
+import org.dvb.dsmcc.ServiceDomain;
+import org.dvb.io.ixc.IxcRegistry;
+import org.havi.ui.HScene;
+import org.havi.ui.HSceneFactory;
+
+import org.bluray.net.BDLocator;
+import org.bluray.ui.event.HRcEvent;
+
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+
+import javax.tv.service.selection.NormalContentEvent;
+import javax.tv.service.selection.ServiceContext;
+import javax.tv.service.selection.ServiceContextEvent;
+import javax.tv.service.selection.ServiceContextException;
+import javax.tv.service.selection.ServiceContextFactory;
+import javax.tv.service.selection.ServiceContextListener;
+import javax.tv.xlet.Xlet;
+import javax.tv.xlet.XletContext;
+import javax.tv.xlet.XletStateChangeException;
+
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.bookmenu.MonitorIXCInterface;
+
+
+/**
+ * Xlet for the main menu/controller in the HD Cookbook disc
+ **/
+public class MenuXlet implements Xlet, UserEventListener, 
+				 MouseListener, MouseMotionListener,
+				 ServiceContextListener
+{
+
+    public XletContext context;
+    public HScene scene;
+    public MenuDiscNavigator navigator;
+    public MenuWorker worker;
+    public MenuDirector director;
+    public Show show;
+    private MenuUI ui;
+
+    private boolean running = false;
+    private boolean destroyed = false;
+    private boolean isPresenting = false;	// Set by service context event
+    private ServiceContext ourServiceContext;
+    private MonitorIXCInterface monitorXlet = null;
+    private ServiceDomain assetsJar;
+
+    public void initXlet(XletContext ctx) throws XletStateChangeException {
+	this.context = ctx;
+	if (Debug.LEVEL > 0) {
+	    Debug.println("MenuXlet in initXlet");
+	}
+    }
+
+    public void startXlet() throws XletStateChangeException {
+	if (Debug.LEVEL > 0) {
+	    Debug.println("MenuXlet in startXlet");
+	}
+	if (running) {
+	    return;
+	}
+	running = true;
+	ServiceContextFactory scf = ServiceContextFactory.getInstance();
+	try {
+	    ourServiceContext = scf.getServiceContext(context);
+	} catch (ServiceContextException ex) {
+	    if (Debug.ASSERT) {
+		ex.printStackTrace();
+		Debug.assertFail();
+	    }
+	}
+	ourServiceContext.addListener(this);
+
+	worker = new MenuWorker(this);
+	new Thread(worker, "MenuXlet worker").start();
+	worker.waitUntilStarted();
+    }
+
+    public void receiveServiceContextEvent(ServiceContextEvent e)  {
+	if (e instanceof NormalContentEvent) {
+	    synchronized(this) {
+		isPresenting = true;
+		notifyAll();
+	    }
+	}
+    }
+
+    private void waitForServiceContextPresenting() {
+	synchronized(this) {
+	    if (ourServiceContext.getService() != null) {
+		isPresenting = true;
+	    }
+	    for (;;) {
+		if (isPresenting) {
+		    if (Debug.LEVEL > 0) {
+			Debug.println("Service context is presenting");
+		    }
+		    return;
+		} else if (destroyed) {
+		    return;
+		}
+		try {
+		    if (Debug.LEVEL > 0) {
+			Debug.println("Waiting for service context to present");
+		    }
+		    wait();
+		} catch (InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		    return;	// Bail out
+		}
+	    }
+	}
+    }
+
+
+    public synchronized MonitorIXCInterface getMonitorXlet() {
+	int tries = 0;
+	while (monitorXlet == null) {
+	    try {
+		String orgID = (String) context.getXletProperty("dvb.org.id");
+		String appID = (String) context.getXletProperty("dvb.app.id");
+		int appIDint = -1;
+		try {
+		    appIDint =  Integer.parseInt(appID, 16);
+		} catch (Exception ignored) {
+		    ignored.printStackTrace();
+		}
+		String name = "/" + orgID + 
+		              "/" + Integer.toHexString(appIDint - 1) +
+			      "/Monitor";
+		monitorXlet = (MonitorIXCInterface) 
+					IxcRegistry.lookup(context, name);
+		if (Debug.LEVEL > 0) {
+		    Debug.println("Connected to IXC object at " + name);
+		}
+		// The monitor app's app ID is one less than ours.
+	    } catch (RemoteException ignored) {
+		ignored.printStackTrace();
+		// Must be a bug
+	    } catch (NotBoundException ex) {
+		// Maybe the monitor xlet hasn't had time to start yet
+		// Give it two seconds
+		try {
+		    tries++;
+		    if (tries < 21) {
+			Thread.sleep(100);
+			continue;
+		    }
+		} catch (InterruptedException ex2) {
+		    Thread.currentThread().interrupt();
+		}
+	    }
+	    if (monitorXlet == null) {
+	    	// Give up, but provide a stub so at least we don't
+		// get null pointer exceptions.  If we get here, then
+		// there's  some kind of bug; this just adds a little bit
+		// of robustness in a bad situation.
+		if (Debug.LEVEL > 0) {
+		    Debug.println();
+		    Debug.println("***  Monitor xlet not found!  ***");
+		    Debug.println("This is a serious bug; all monitor app functionality won't be available.");
+		    Debug.println();
+		}
+		monitorXlet = new MonitorIXCInterface() {
+		    public void startGame(String s) {
+		    }
+		    public void startMenu(String s) {
+		    }
+		};
+	    }
+	}
+	return monitorXlet;
+    }
+
+    public void startGame() {
+	try {
+	    getMonitorXlet().startGame("");
+	} catch (RemoteException ignored) {
+	    ignored.printStackTrace();
+	}
+    }
+
+    //
+    // called from MenuWorker during initialization
+    //
+    void  initFromWorker() {
+	waitForServiceContextPresenting();
+	scene = HSceneFactory.getInstance().getDefaultHScene();
+	scene.setLayout(null);
+	scene.setBounds(0, 0, 1920, 1280);
+	ui = new MenuUI(this);
+	ui.setBounds(0, 0, 1920, 1280);
+	scene.add(ui);
+	ui.setVisible(true);
+	scene.setVisible(true);
+	navigator = new MenuDiscNavigator(this);
+
+	assetsJar = new ServiceDomain();
+	try {
+	    BDLocator loc = new BDLocator("bd://JAR:00004");
+	    assetsJar.attach(loc);
+	} catch (Exception ex) {
+	    // If this happens, it's a bug.
+	    ex.printStackTrace();
+	}
+	File[] path = { assetsJar.getMountPoint() } ;
+	AssetFinder.setHelper(new MenuAssetFinder(this));
+	AssetFinder.setSearchPath(null, path);
+	if (AssetFinder.tryURL("images.map") != null) {
+	    if (Debug.LEVEL > 0) {
+		Debug.println("Found images.map, using mosaic.");
+	    }
+	    AssetFinder.setImageMap("images.map");
+	} else if (Debug.LEVEL > 0) {
+		Debug.println("No images.map, not using mosaic.");
+	}
+
+	navigator.init();
+	navigator.pushVideo(navigator.menuVideoStartPL);
+
+	director = new MenuDirector(this);
+	director.init();
+	show = director.createShow();
+	show.initialize(scene);
+	show.activateSegment(show.getSegment("S:Initialize"));
+	System.gc();
+
+        UserEventRepository userEventRepo = new UserEventRepository("x");
+        userEventRepo.addAllArrowKeys();
+        userEventRepo.addAllColourKeys();
+        userEventRepo.addAllNumericKeys();
+        userEventRepo.addKey(HRcEvent.VK_ENTER);
+        userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
+        EventManager.getInstance().addUserEventListener(this, userEventRepo);
+
+	scene.addMouseMotionListener(this);
+	scene.addMouseListener(this);
+	scene.requestFocus();
+
+	worker.runShow(show);
+    }
+
+    public void pauseXlet() {
+	if (Debug.LEVEL > 0) {
+	    Debug.println("MenuXlet in pauseXlet");
+	}
+    }
+
+    public void destroyXlet(boolean unconditional) 
+	    throws XletStateChangeException 
+    {
+	if (Debug.LEVEL > 0) {
+	    Debug.println("MenuXlet in destroyXlet");
+	}
+	synchronized (this) {
+	    if (destroyed) {
+		return;
+	    }
+	    destroyed = true;
+	    notifyAll();
+	}
+	if (worker != null) {
+	    worker.destroy();
+	}
+	director.destroy();
+	show.destroy();
+	if (navigator != null) {
+	    navigator.destroy();
+	}
+	if (assetsJar != null) {
+	    try {
+		assetsJar.detach();
+	    } catch (Exception ex) {
+		ex.printStackTrace();
+	    }
+	}
+	if (ourServiceContext != null) {
+	    ourServiceContext.removeListener(this);
+	}
+	if (scene != null) {
+	    scene.remove(ui);
+	}
+	EventManager.getInstance().removeUserEventListener(this);
+    }
+
+    /**
+     * Mouse motion callback
+     **/
+    public void mouseMoved(MouseEvent e) {
+	show.handleMouseMoved(e.getX(), e.getY());
+    }
+
+    /**
+     * Mouse motion callback
+     **/
+    public void mouseDragged(MouseEvent e) {
+	show.handleMouseMoved(e.getX(), e.getY());
+    }
+
+    /**
+     * Mouse clicked callback
+     **/
+    public void mouseClicked(MouseEvent e) {
+	show.handleMouseClicked(e.getX(), e.getY());
+    }
+
+    public void mousePressed(MouseEvent e) { }
+    public void mouseReleased(MouseEvent e) { }
+    public void mouseEntered(MouseEvent e) { }
+    public void mouseExited(MouseEvent e) { }
+
+    /**
+     * A remote control event comes in via org.dvb.event.UserEventListener
+     **/
+    public void userEventReceived(UserEvent e) {
+	if (e.getType() == HRcEvent.KEY_PRESSED) {
+	    show.handleKeyPressed(e.getCode());
+	}
+    }
+
+}
+
