@@ -56,7 +56,7 @@
 
 package com.hdcookbook.grin;
 
-import java.awt.event.KeyEvent;  // This shouldn't be here! @@
+import java.awt.event.KeyEvent;
 
 
 /**

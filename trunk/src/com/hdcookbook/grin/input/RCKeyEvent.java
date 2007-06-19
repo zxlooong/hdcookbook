@@ -56,9 +56,11 @@
 package com.hdcookbook.grin.input;
 
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
 import java.util.Hashtable;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 
 
@@ -91,32 +93,30 @@ public class RCKeyEvent {
     //         generatePerfectHashOfEventCodes().
 
     /**
-     * VK_COLOURED_KEY_0 from HAVi.  It might not be red in
-     * some markets, but this is the standard from UK teletext,
-     * and seems to be common in the US.
+     * The red color key.
+     *
+     * @see com.hdcookbook.util.AssetFinder#getColorKeyCode(java.awt.Color)
      **/
     public static RCKeyEvent KEY_RED;
 
-    // @@ Set these up for real, as outlined in book
-
     /**
-     * VK_COLOURED_KEY_1 from HAVi.  It might not be red in
-     * some markets, but this is the standard from UK teletext,
-     * and seems to be common in the US.
+     * The green color key.
+     *
+     * @see com.hdcookbook.util.AssetFinder#getColorKeyCode(java.awt.Color)
      **/
     public static RCKeyEvent KEY_GREEN;
 
     /**
-     * VK_COLOURED_KEY_2 from HAVi.  It might not be red in
-     * some markets, but this is the standard from UK teletext,
-     * and seems to be common in the US.
+     * The yellow color key.
+     *
+     * @see com.hdcookbook.util.AssetFinder#getColorKeyCode(java.awt.Color)
      **/
     public static RCKeyEvent KEY_YELLOW;
 
     /**
-     * VK_COLOURED_KEY_3 from HAVi.  It might not be red in
-     * some markets, but this is the standard from UK teletext,
-     * and seems to be common in the US.
+     * The blue color key.
+     *
+     * @see com.hdcookbook.util.AssetFinder#getColorKeyCode(java.awt.Color)
      **/
     public static RCKeyEvent KEY_BLUE;
 
@@ -143,12 +143,17 @@ public class RCKeyEvent {
 
 	// For the color keys, I just lifted the constants out of the
 	// HAVi stubs.  This avoids a compilation dependency on HAVi.
-	KEY_RED = new RCKeyEvent("red", 403, 0x08000);
-	KEY_GREEN = new RCKeyEvent("green", 404, 0x10000);
-	KEY_YELLOW = new RCKeyEvent("yellow", 405, 0x20000);
-	KEY_BLUE = new RCKeyEvent("blue", 406, 0x40000);
+	KEY_RED = new RCKeyEvent("red", 
+			AssetFinder.getColorKeyCode(Color.red), 0x08000);
+	KEY_GREEN = new RCKeyEvent("green", 
+			AssetFinder.getColorKeyCode(Color.green), 0x10000);
+	KEY_YELLOW = new RCKeyEvent("yellow", 
+			AssetFinder.getColorKeyCode(Color.yellow), 0x20000);
+	KEY_BLUE = new RCKeyEvent("blue", 
+			AssetFinder.getColorKeyCode(Color.blue), 0x40000);
 
-	// For the popup key, I lifted the constant out of the BD-J spec.
+	// For the popup key, just use the integer value, rather than introduce
+	// a compile-time AI dependency.
 	KEY_POPUP_MENU = new RCKeyEvent("popup_menu", 461, 0x80000);
 
 	RCKeyEvent[] keys = new RCKeyEvent[] {

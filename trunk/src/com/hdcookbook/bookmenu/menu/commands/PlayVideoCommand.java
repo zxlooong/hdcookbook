@@ -68,20 +68,13 @@ public class PlayVideoCommand extends Command {
 
     private MenuXlet xlet;
     private BDLocator playlist;
-    private boolean playLast;
 
-    public PlayVideoCommand(MenuXlet xlet, BDLocator playlist, boolean playLast)
-    {
+    public PlayVideoCommand(MenuXlet xlet, BDLocator playlist) {
 	this.xlet = xlet;
 	this.playlist = playlist;
-	this.playLast = playLast;
     }
 
     public void execute() {
-	if (playLast) {
-	    xlet.navigator.popVideo();
-	} else {
-	    xlet.navigator.pushVideo(playlist);
-	}
+	xlet.navigator.startVideoAt(playlist);
     }
 }

@@ -91,7 +91,6 @@ public class ImageSequence extends Feature {
     private ImageSequence linkedTo;	
     	// We use linkedTo to count our frame and for end commands.  If
 	// we aren't linkedTo another ImageSequence, it's set to null.
-	// @@ Report of a bug where the linkedTo sequence doesn't display???
     private int startAnimationFrame;	// First frame we animate
     private ImageSequence activeSlave = null;	// Our active slave, if one
     private int activeLinkedCount = 0;	// # of active sequences linked to us
@@ -275,10 +274,6 @@ public class ImageSequence extends Feature {
             for (int i = 0; i < endCommands.length; i++) {
                 show.runCommand(endCommands[i]);
             }
-	    // @@ This assumes that the endCommands will cause us to move
-	    // @@ off this feature, which isn't a good assumption in general.
-	    // @@ When we replace the state container of ImageSequene with
-	    // @@ Timer this will fix itself.
         }
     }
 

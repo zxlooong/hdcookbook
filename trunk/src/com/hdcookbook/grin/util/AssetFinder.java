@@ -300,6 +300,53 @@ public class AssetFinder  {
     }
 
     /**
+     * Get the key code for the given color key.
+     *
+     * @param c		A color that is == to one of the standard
+     *			constants Color.red, Color.green, Color.yellow
+     *			or Color.blue.
+     *
+     * @return 	A HAVi key code in the range 403..406 inclusive
+     **/
+    public static int getColorKeyCode(Color c) {
+	int code = -1;
+	if (helper != null) {
+	    code = helper.getColorKeyCodeHelper(c);
+	}
+	if (code == -1) {
+	    if (c == Color.red) {
+		return 403;	// VK_COLORED_KEY_0
+	    } else if (c == Color.green) {
+		return 404;	// VK_COLORED_KEY_1
+	    } else if (c == Color.yellow) {
+		return 405;	// VK_COLORED_KEY_2
+	    } else if (c == Color.blue) {
+		return 406;	// VK_COLORED_KEY_3
+	    } 
+	} 
+	if (Debug.ASSERT) {
+	    if (code < 403 || code > 406) {
+		Debug.assertFail();
+	    }
+	}
+	return code;
+    }
+
+    /**
+     * Get the key code for the given color key.  Xlets may override
+     * this to do an intelligent assignment of the color keys.
+     *
+     * @param c		A color that is == to one of the standard
+     *			constants Color.red, Color.green, Color.yellow
+     *			or Color.blue.
+     *
+     * @return 	A HAVi key code in the range 403..406 inclusive
+     **/
+    protected int getColorKeyCodeHelper(Color c) {
+    	return -1;
+    }
+
+    /**
      * Called when the disc playback should abort.  This should only
      * be called when there's a fatal error, like an assertion failure.
      * The expected behavior is immediate termination - like

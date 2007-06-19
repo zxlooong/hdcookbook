@@ -243,6 +243,15 @@ public class ShowParser {
 		} else {
 		    lexer.reportError("Unrecognized token \"" + tok + "\"");
 		}
+	    } else if ("mosaic_hint".equals(tok)) {
+		String name = lexer.getString();
+		int width = lexer.getInt();
+		int height = lexer.getInt();
+		String[] files = parseStrings();
+		parseExpected(";");
+		if (extParser != null) {
+		    extParser.takeMosaicHint(name, width, height, files);
+		}
 	    } else {
 		lexer.reportError("Unrecognized token \"" + tok + "\"");
 	    }
@@ -312,7 +321,11 @@ public class ShowParser {
 		if (chapter == null) {
 		    c = null;
 		} else {
-		    c = show.getDirector().getChapterManager(chapter);
+		    if (show.getDirector() == null) {
+			c = null;
+		    } else {
+		        c = show.getDirector().getChapterManager(chapter);
+		    }
 		    if (c == null) {
 			reportError("Chapter \"" + name + "\" not found");
 		    }

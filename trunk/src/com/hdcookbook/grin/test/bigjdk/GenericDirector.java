@@ -84,10 +84,7 @@ public class GenericDirector extends Director {
 
     public GenericDirector(String showName) {
 	this.showName = showName;
-    	// @@ Need to do something about chapters...  Make them on-demand?
-	ChapterManager[] chapters = {
-	    new ChapterManager("the_chapter")
-	};
+	ChapterManager[] chapters = { }
 	setup(0, chapters);
     }
     

@@ -285,7 +285,10 @@ public class MenuXlet implements Xlet, UserEventListener,
 	}
 
 	navigator.init();
-	navigator.pushVideo(navigator.menuVideoStartPL);
+	navigator.startVideoAt(null);
+	// Video will be started by the show, via a command.  However,
+	// it's a good idea to have some video there, so we pause
+	// blank video to get to a known state.
 
 	director = new MenuDirector(this);
 	director.init();

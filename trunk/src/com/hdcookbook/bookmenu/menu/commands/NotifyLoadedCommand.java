@@ -53,93 +53,25 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin;
 
-import com.hdcookbook.grin.parser.ExtensionsParser;
+package com.hdcookbook.bookmenu.menu.commands;
 
-import java.util.Hashtable;
-import java.awt.event.KeyEvent;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.bookmenu.menu.MenuXlet;
+
+import java.io.IOException;
 
 
-/**
- * This class is a generic facade for the control entity that
- * manages a show.  It receives input from triggers embedded
- * in a show, positioning due to trick play, and remote control
- * key events.
- * <p>
- * A director manages itself by its state.  A director also keeps a
- * list of all states, indexed by name.  Most of the actual work
- * of the director is done by its states.
- * <p>
- * A director provides the controler that's needed by a Show
- * so that applications don't need to.
- * <p>
- * See also the Facade pattern (GoF page 185) and the State pattern
- * (GoF page 305).
- **/
 
-public abstract class Director {
+public class NotifyLoadedCommand extends Command {
 
-    private com.hdcookbook.grin.ChapterManager theController;
-    private Hashtable states = new Hashtable();
-    private Show show;
-    private ChapterManager initialState;
+    private MenuXlet xlet;
 
-    private ChapterManager currentState;		// never null
-
-    /**
-     * Create a new Director.
-     **/
-    public Director()  {
-    }
-    
-    /**
-     * 
-     * @param initialState	The initial state of the show
-     * @param states		All states of the show (including the
-     *				initial state)
-     **/
-    protected void setup(int initialState, ChapterManager[] states) {
-	this.initialState = states[initialState];
-	this.currentState = this.initialState;
-	for (int i = 0; i < states.length; i++) {
-	    states[i].setDirector(this);
-	    this.states.put(states[i].getName(), states[i]);
-	}
-    }
-    
-    protected void addState(ChapterManager state) {
-        state.setDirector(this);
-        states.put(state.getName(), state);
+    public NotifyLoadedCommand(MenuXlet xlet) {
+	this.xlet = xlet;
     }
 
-    //
-    // Called from Show constructor
-    //
-    void setShow(Show show) {
-	this.show = show;
+    public void execute() {
+	xlet.navigator.notifyShowLoaded();
     }
-
-    public Show getShow() {
-	return show;
-    }
-   
-    /** 
-     * Returns the ChapterManager for a given state.  Xlets
-     * can override this, but if they do the parameter to
-     * the constructor becomes meaningless.
-     **/
-    public ChapterManager getChapterManager(String name) {
-        return (ChapterManager) states.get(name);
-    }
-
-    /**
-     * Give the ExtensionsParser that will parse any new
-     * features or commands we've extended the framework with.
-     * If no extensions are returned, it's OK to return null.
-     *
-     * @return The extensions parser
-     **/
-    abstract public ExtensionsParser getExtensionsParser();
-
 }

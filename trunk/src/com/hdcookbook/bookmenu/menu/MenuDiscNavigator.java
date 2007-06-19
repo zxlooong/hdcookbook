@@ -94,7 +94,9 @@ import org.bluray.media.InvalidPlayListException;
 public class MenuDiscNavigator extends AbstractDiscNavigator {
 
     private MenuXlet xlet;
-    private int currentSubtitleStream = 0;
+    private int currentSubtitleStream = 0;	// For the feature video
+    private int currentAudioStream = 1;		// For the feature video
+    private boolean showIsLoaded = false;
 
     /**
      * The playlist entry for the background video that is shown during
@@ -103,11 +105,15 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
     public BDLocator menuVideoStartPL
     	= makeBDLocator("bd://0.PLAYLIST:00000.MARK:00000");
 
+    private int menuVideoPL_ID = menuVideoStartPL.getPlayListId();
+
     /**
      * The playlist entry for the main feature video.
      **/
     public BDLocator movieVideoStartPL
     	= makeBDLocator("bd://0.PLAYLIST:00001.MARK:00000");
+
+    private int movieVideoPL_ID = movieVideoStartPL.getPlayListId();
 
     /**
      * The playlist entry for the bonus feature video.
@@ -119,7 +125,7 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
      * The playlist entry for blank video
      **/
     public BDLocator blankVideo
-    	= makeBDLocator("bd://0.PLAYLIST:00004.MARK:00000");
+    	= makeBDLocator("bd://0.PLAYLIST:00002.MARK:00000"); // @@ s/b 4
 
     /**
      * PL for the scenes
@@ -150,29 +156,85 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
     public void init() {
     }
 
-    public void pushVideo(BDLocator playlist) {
+    public void startVideoAt(BDLocator playlist) {
 	if (playlist == null) {
 	    gotoPlaylistInCurrentTitle(blankVideo);
-	    mainPlayer.setRate(0.0f);
+	    pause(true);
 	} else {
 	    gotoPlaylistInCurrentTitle(playlist);
-	    mainPlayer.setRate(1.0f);
+	    pause(false);
 	}
     }
 
-    public void popVideo() {
-	// @@ do this
+    /**
+     * Called to notify the xlet when the video spontaneously stops.
+     * This is not called when the
+     * video is stopped because we stop it.
+     * <p>
+     * This is called with the navigator lock held, so applications
+     * should not do anything in this method that might cause deadlock.
+     **/
+    public void notifyStop() {
+	synchronized(this) {
+	    if (!showIsLoaded) {
+		return;		// Show will bring us to video soon
+	    }
+	}
+	if (currentPlaylistID == menuVideoPL_ID) {
+	    gotoPlaylistInCurrentTitle(menuVideoStartPL);
+	} else {
+	    // In all other cases, we go back to the main menu state.  Note
+	    // that show.getSegment and show.activateSegment
+	    // were written such that they don't take out any
+	    // global locks, so it's OK for us to call them, even
+	    // though we know the navigator lock is held.
+	    //
+	    // We don't need to select any video, because the transition
+	    // from S:Loading to S:MenuRollout contains a "BOOK:PlayVideo menu"
+	    // command.
+	    xlet.show.activateSegment(xlet.show.getSegment("S:Loading"));
+	}
+    }
+
+    /**
+     * After a playlist is selected, this method is called to let
+     * the subclass do any other setup, like subtitles or audio
+     * stream.  When it is called, the player will already be
+     * started, and the data member currentPlaylistID will be set.
+     * <p>
+     * This is called with the navigator lock held, so applications
+     * should not do anything in this method that might cause deadlock.
+     **/
+    protected void notifyAVStarted() {
+	synchronized(this) {
+	    if (!showIsLoaded) {
+		return;		// Show will change everything soon
+	    }
+	}
+	if (currentPlaylistID == movieVideoPL_ID) {
+	    selectSubtitleStream(currentSubtitleStream);
+	    selectAudio(currentAudioStream);
+	} else if (currentPlaylistID == menuVideoPL_ID) {
+		// Mute audio for the menu
+	    selectAudio(0);
+	}
+    }
+
+    /** 
+     * Called by the show to tell us that it's up and running
+     **/
+    public void notifyShowLoaded() {
+	synchronized(this) {
+	    showIsLoaded = true;
+	    // Nothing waits on this, so no need to notifyAll()
+	}
     }
 
     public void selectAudioStream(int streamNumber) {
-	// @@ do this
+	currentAudioStream = streamNumber;
+	selectAudio(streamNumber);
     }
 
-    public void setupVideoForPlaylist(BDLocator loc) {
-	if (loc.getPlayListId() == movieVideoStartPL.getPlayListId()) {
-	    selectSubtitleStream(currentSubtitleStream);
-	}
-    }
 
     /** 
      * @param	streamNumber   The stream number, or 0 for no subtitles
@@ -193,25 +255,4 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
 	sound.play();
     }
 
-
-
-    //***************************
-    //  PlaybackListener methods 
-    //***************************
-
-    public void markReached(PlaybackMarkEvent event) {
-	Debug.println("\n*************************");
-	Debug.println("" + event);
-	Debug.println("  Mark:  " + event.getMark());
-	Debug.println("*************************\n");
-    }
-
-    public void playItemReached(PlaybackPlayItemEvent event) {
-// @@ We get this at the end of the video loop
-// @@ Need to transition to the right state, like the main menu
-	Debug.println("\n*************************");
-	Debug.println("" + event);
-	Debug.println(" PlayItem:  " + event.getPlayItem());
-	Debug.println("*************************\n");
-    }
 }

@@ -123,5 +123,10 @@ public class GenericExtensionsParser implements ExtensionsParser {
 
     public void finishBuilding(Show show) throws IOException {
     }
+
+    public void takeMosaicHint(String name, int width, int height, 
+                               String[] images)
+    {
+    }
     
 }

@@ -67,11 +67,6 @@ import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.AssetFinder;
 
-import java.util.Hashtable;
-import java.util.HashMap;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.Iterator;
 import java.awt.AlphaComposite;
 import java.awt.Frame;
 import java.awt.Component;
@@ -89,6 +84,13 @@ import java.io.DataOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.Iterator;
+import java.util.Comparator;
 import javax.imageio.ImageIO;
 
 
@@ -102,8 +104,11 @@ import javax.imageio.ImageIO;
     private String[] assetPath;
     private Show[] showTrees;
 
+    private ArrayList images = new ArrayList();
     private LinkedList mosaics = new LinkedList();
     private HashMap partsByName = new HashMap();
+    private HashMap mosaicHint = new HashMap();  // file name to mosaic name
+    private HashMap specialMosaics = new HashMap(); // mosaic name to Mosaic
     Graphics2D frameG;
 
     public MosaicMaker(String[] shows, String[] assetPath, File outputDir) {
@@ -119,7 +124,16 @@ import javax.imageio.ImageIO;
         for (int i = 0; i < shows.length; i++) {
             Director director = new Director() {
                 public ExtensionsParser getExtensionsParser() {
-                    return new GenericExtensionsParser();
+                    return new GenericExtensionsParser() {
+			public void takeMosaicHint(String name, int width, 
+						   int height, String[] images) 
+			{
+			    for (int i = 0; i < images.length; i++) {
+				mosaicHint.put(images[i], name);
+			    }
+			    specialMosaics.put(name, new Mosaic(width, height));
+			}
+		    };
                 }
 		public ChapterManager getChapterManager(String name) {
 		    synchronized(getShow()) {
@@ -171,8 +185,30 @@ import javax.imageio.ImageIO;
 	g.drawString("Making mosaics...", 30, 16);
     }
 
-    private void addImage(ManagedImage mi) throws IOException {
+    private void addImage(ManagedImage mi) {
 	mi.prepare(this);
+	images.add(mi);
+	mi.draw(frameG, 0, 30, null);
+    }
+
+    private void addAllToMosaic() throws IOException {
+	// Sort by tallest first.  I think this probably helps pack
+	// images a little better.
+	Collections.sort(images, new Comparator() {
+	    public int compare(Object o1, Object o2) {
+		int h1 = ((ManagedImage) o1).getHeight();
+		int h2 = ((ManagedImage) o2).getHeight();
+		return h2 - h1;
+	    }
+	});
+
+
+	for (int i = 0; i < images.size(); i++) {
+	    addToMosaic((ManagedImage) images.get(i));
+	}
+    }
+
+    private void addToMosaic(ManagedImage mi) throws IOException {
 	String name = mi.getName();
 	MosaicPart part = (MosaicPart) partsByName.get(name);
 	BufferedImage imAdded = null;
@@ -180,6 +216,19 @@ import javax.imageio.ImageIO;
 	    imAdded = ImageIO.read(AssetFinder.getURL(mi.getName()));
 	}
 	boolean already = part != null;
+	if (part == null) {
+	    String special = (String) mosaicHint.get(mi.getName());
+	    if (special != null) {
+		Mosaic m = (Mosaic) specialMosaics.get(special);
+		assert m != null;
+		part = m.putImage(mi, imAdded);  // null if doesn't fit
+		if (part == null) {
+		    System.out.println("***  Warning:  " + mi.getName()
+		    		       + " did not fit in mosaic " + special
+				       + ".");
+		}
+	    }
+	}
 	for (Iterator it = mosaics.iterator(); part == null && it.hasNext(); ) {
 	    Mosaic m = (Mosaic) it.next();
 	    part = m.putImage(mi, imAdded);
@@ -194,9 +243,9 @@ import javax.imageio.ImageIO;
 	}
 	if (imAdded != null) {
 	    partsByName.put(name, part);
-	    BufferedImage im = part.getMosaic().getBuffer();
-	    frameG.drawImage(im, 0, 30, 960, 540, 
-			      0, 0, Mosaic.bufferWidth, Mosaic.bufferHeight,
+	    Mosaic m = part.getMosaic();
+	    frameG.drawImage(m.getBuffer(), 0, 30, 960, 540, 
+			      0, 0, m.getWidth(), m.getHeight(),
                               null);
 	    Toolkit.getDefaultToolkit().sync();
 	}
@@ -221,6 +270,8 @@ import javax.imageio.ImageIO;
 		}
 	    }
 	}
+	addAllToMosaic();
+	mosaics.addAll(specialMosaics.values());
 	System.out.println(mosaics.size() + " mosaics created.");
         Iterator it = mosaics.iterator();
 	File mapFile = new File(outputDir, "images.map");

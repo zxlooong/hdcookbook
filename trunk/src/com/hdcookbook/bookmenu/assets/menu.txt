@@ -1590,6 +1590,7 @@ segment S:Loading
 	set_visual_rc H:MainMenu state play selected ;
 	activate_part F:MenuInactive.CloseOrNothing nothing ;
  	activate_segment S:MenuRollout ;
+	BOOK:NotifyLoaded ;
 	BOOK:PlayVideo menu ;
     }
 ;
@@ -1868,21 +1869,21 @@ rc_handler visual H:MainMenu
 	} 
 	activate { 
 	    play	play.activated		{ 
-				BOOK:PlaySound activate ;
-	    			activate_segment S:MainMenuRollIn ; 
-				BOOK:PlayVideo movie ;
+			    BOOK:PlaySound activate ;
+			    activate_segment S:MainMenuRollIn ; 
+			    BOOK:PlayVideo movie ;
 			}
 	    setup	setup.activated {
-				set_visual_rc H:SetupMenu state dts_51 selected ;
-	    			activate_segment  S:SetupShowing <push> ;
+			    set_visual_rc H:SetupMenu state dts_51 selected ;
+			    activate_segment  S:SetupShowing <push> ;
 			}
 	    scenes	scenes.activated {
-				activate_segment  S:ScenesShowing <push> ;
-				set_visual_rc H:ScenesMenu state 1 selected ;
+			    activate_segment  S:ScenesShowing <push> ;
+			    set_visual_rc H:ScenesMenu state 1 selected ;
 			}
 	    bonus	bonus.activated {
-				activate_part F:BonusMenu.Assembly game ;
-				activate_segment  S:BonusShowing <push> ;
+			    activate_part F:BonusMenu.Assembly game ;
+			    activate_segment  S:BonusShowing <push> ;
 			}
 	}
 	mouse {
@@ -1906,24 +1907,24 @@ rc_handler visual H:VideoMenu
 	}
 	activate { 
 	    play	play.activated		{ 
-				activate_segment S:VideoMenuRollBack ;
-				BOOK:PlayVideo movie ;
-				BOOK:PlaySound activate ;
+			    activate_segment S:VideoMenuRollBack ;
+			    BOOK:PlayVideo movie ;
+			    BOOK:PlaySound activate ;
 			}
 	    setup	setup.activated {
-				set_visual_rc H:SetupMenu state dts_51 selected ;
-	    			activate_segment  S:SetupShowing <push> ;
+			    set_visual_rc H:SetupMenu state dts_51 selected ;
+			    activate_segment  S:SetupShowing <push> ;
 			}
 	    scenes	scenes.activated {
-				activate_segment  S:ScenesShowing <push> ;
-				set_visual_rc H:ScenesMenu state 1 selected ;
+			    activate_segment  S:ScenesShowing <push> ;
+			    set_visual_rc H:ScenesMenu state 1 selected ;
 			}
 	    bonus	bonus.activated {
-				activate_part F:BonusMenu.Assembly game ;
-				activate_segment  S:BonusShowing <push> ;
+			    activate_part F:BonusMenu.Assembly game ;
+			    activate_segment  S:BonusShowing <push> ;
 			}
 	    close	close.activated 	{
-	    			activate_segment S:VideoMenuRollBack ;
+			    activate_segment S:VideoMenuRollBack ;
 			}
 	}
 	mouse {
@@ -1964,14 +1965,18 @@ rc_handler visual H:SetupMenu
     activate {
     	dts_51 		{ 
 			    BOOK:SelectAudio  1 ;	# DTS 5.1
-			    set_visual_rc H:SetupMenu state english_st selected ;
+			    set_visual_rc H:SetupMenu state 
+			    			english_st selected ;
 			}
 	dts_71		{
 			    BOOK:SelectAudio 2 ;	# DTS 7.1
-			    set_visual_rc H:SetupMenu state english_st selected ;
+			    set_visual_rc H:SetupMenu state 
+			    			english_st selected ;
 			}
 	english_st	{
 			    BOOK:SelectSubtitles 1 ;   # English
+			    set_visual_rc H:MainMenu state setup selected ;
+			    set_visual_rc H:VideoMenu state setup selected ;
 			    activate_segment <pop> ;
 			}
 	spanish_st	{
@@ -2248,8 +2253,8 @@ rc_handler visual H:UserInput
 	close	close.activated		{
 		set_visual_rc H:MainMenu state bonus selected ;
 		set_visual_rc H:VideoMenu state bonus selected ;
-		BOOK:PlayVideo last ;
-		activate_segment <pop> ;
+		BOOK:PlayVideo menu ;
+		activate_segment S:MenuShowing ;
 	}
     }
     mouse {
@@ -2306,6 +2311,33 @@ rc_handler visual H:Bio.NotAvailable
 	    close	(   0   0 1919 1279 )
 	}
 ;
+
+
+#
+#
+#  Finally, we group related images into mosaics.  In our case, we just
+#  make sure that the images we need for the loading image are all
+#  grouped together in one mosaic.
+#
+
+mosaic_hint loading 600 600 {
+	Graphics/Menu/Load_0000.png
+	Graphics/Menu/Load_0001.png
+	Graphics/Menu/Load_0002.png
+	Graphics/Menu/Load_0003.png
+	Graphics/Menu/Load_0004.png
+	Graphics/Menu/Load_0005.png
+	Graphics/Menu/Load_0006.png
+	Graphics/Menu/Load_0007.png
+	Graphics/Menu/Load_0008.png
+	Graphics/Menu/Load_0009.png
+	Graphics/Menu/Load_0010.png
+	Graphics/Menu/Load_0011.png
+	Graphics/Menu/Load_0012.png
+	Graphics/Menu/Load_0013.png
+	Graphics/Menu/Load_0014.png
+	Graphics/Menu/Load_0015.png
+} ;
 
 #
 # =====================

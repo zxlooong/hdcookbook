@@ -109,10 +109,12 @@ public class Show {
     private Queue pendingCommands = new Queue(32);
     private int currentFrame = -1;	// The current frame number
 
-    //
-    // @@ TODO:  Should we allow a null Director?  I think probably
-    // @@        not, but then the documentation needs to be updated.
-    //
+    /** 
+     * Create a new show.
+     *
+     * @director  A Director helper class for the xlet to control the
+     *		  show.  May be null.
+     **/
     public Show(Director director) {
 	this.director = director;
 	director.setShow(this);
@@ -244,7 +246,10 @@ public class Show {
     }
 
     /**
-     * @return segment, or null if not found
+     * Look up a segment.  This is done without taking out the show lock.
+     *
+     * @return segment, or null if not found.  
+     * 	
      **/
     public Segment getSegment(String name) {
 	return (Segment) segments.get(name);
@@ -263,7 +268,8 @@ public class Show {
      * controls what is being displayed on the screen.  The new segment
      * will become current when we advance to the next frame.
      * <p>
-     * This can be called from any thread.  If the show has been destroyed, 
+     * This can be called from any thread; it does not take out the show
+     * lock or any other global locks.  If the show has been destroyed, 
      * calling this method has no effect.
      * <p>
      * @param   seg  The segment to activate, or null to pop the
@@ -300,8 +306,11 @@ public class Show {
 
     /**
      * Run the given command when we advance to the next frame.
-     * If the show has been destroyed, this has no effect.  This
-     * can safely be called from any thread.
+     * If the show has been destroyed, this has no effect. 
+     * <p>
+     * This can be called from any thread; it does not take out the show
+     * lock or any other global locks.  If the show has been destroyed, 
+     * calling this method has no effect.
      **/
     public void runCommand(Command cmd) {
 	pendingCommands.add(cmd);

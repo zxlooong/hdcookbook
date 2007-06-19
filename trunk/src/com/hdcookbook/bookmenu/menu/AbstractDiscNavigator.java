@@ -67,6 +67,8 @@ import javax.media.Time;
 import javax.media.Manager;
 import javax.media.ControllerListener;
 import javax.media.ControllerEvent;
+import javax.media.RateChangeEvent;
+import javax.media.StopEvent;
 import javax.media.protocol.DataSource;
 import javax.tv.locator.InvalidLocatorException;
 import javax.tv.service.SIManager;
@@ -94,6 +96,8 @@ import org.bluray.media.PlaybackControl;
 import org.bluray.media.PlaybackListener;
 import org.bluray.media.PlaybackMarkEvent;
 import org.bluray.media.PlaybackPlayItemEvent;
+import org.bluray.media.PrimaryAudioControl;
+import org.bluray.media.PrimaryGainControl;
 import org.bluray.media.StreamNotAvailableException;
 import org.bluray.media.SubtitlingControl;
 import org.bluray.ti.Title;
@@ -123,14 +127,25 @@ public abstract class AbstractDiscNavigator
      * The player for the main A/V content.  This will be set
      * as soon as we navigate to our first  playlist.
      **/
-    protected Player mainPlayer;
+    private Player mainPlayer;
+    private boolean weAreControlling = false;	// true while we control player
+    private float currentRate = 1.0f;	// Play rate that we expect
     private PlayListChangeControl playlistControl;
     private MediaTimePositionControl timePositionControl;
     private PlaybackControl playbackControl;
     private SubtitlingControl subtitlingControl;
+    private PrimaryAudioControl audioControl;
+    private PrimaryGainControl gainControl;
     private TitleContext titleContext;
 
     private static SIManager siManager;
+
+    /**
+     * The playlist ID of the video that's currently playing.  We
+     * rely on video not auto-starting, and instead being launched
+     * by BD-J.  It's -1 if video hasn't been selected yet.
+     **/
+    protected int currentPlaylistID = -1;
 
     protected AbstractDiscNavigator(XletContext xletContext) {
 	this.xletContext = xletContext;
@@ -211,76 +226,132 @@ public abstract class AbstractDiscNavigator
 	titleContext.start(title, false);
     }
 
-    public synchronized void gotoPlaylistInCurrentTitle(BDLocator loc) {
-	if (mainPlayer == null) {
-	    try {
-		MediaLocator ml = new MediaLocator(loc);
-		mainPlayer  = Manager.createPlayer(ml);
-	    } catch (Exception ignored) {
-		ignored.printStackTrace();
-		if (Debug.ASSERT) {
-		    Debug.assertFail();
-		}
-	    }
-	    mainPlayer.addControllerListener(this);
-	    mainPlayer.prefetch();
-	    Control[] controls = mainPlayer.getControls();
-	    for (int i = 0; i < controls.length; i++) {
-		if (controls[i] instanceof PlayListChangeControl) {
-		    playlistControl = (PlayListChangeControl) controls[i];
-		} else if (controls[i] instanceof PlaybackControl) {
-		    playbackControl = (PlaybackControl) controls[i];
-		} else if (controls[i] instanceof SubtitlingControl) {
-		    subtitlingControl = (SubtitlingControl) controls[i];
-		} else if (controls[i] instanceof MediaTimePositionControl) {
-		    timePositionControl = (MediaTimePositionControl)controls[i];
-		}
-	    }
-	    if (Debug.LEVEL > 1) {
-		Debug.println("Playback control:  " + playbackControl);
-		Debug.println("Playlist control:  " + playlistControl);
-		Debug.println("Subtitling control:  " + subtitlingControl);
-	    }
-	    if (Debug.ASSERT && 
-		 (playbackControl == null || playlistControl == null
-		  || subtitlingControl == null || timePositionControl == null))
-	    {
-		Debug.assertFail();
-	    }
-	    playbackControl.addPlaybackControlListener(this);
-	} else {
-	    // We had already created the player, so we can use
-	    // org.bluray.media.PlayListChangeControl
-	    mainPlayer.stop();
-	    try {
-		playlistControl.selectPlayList(loc);
-	    } catch (Exception ignored) {
-		ignored.printStackTrace();
-	    }
-	}
+    protected synchronized void gotoPlaylistInCurrentTitle(BDLocator loc) {
+	boolean oldWeAreControlling = weAreControlling;
 	if (Debug.LEVEL > 0) {
-	    Debug.println("*** Changing playlist to " + loc + " ***");
+	    if (weAreControlling) {
+		Thread.dumpStack();
+		Debug.println();
+		Debug.println("***  WARNING:  Simultaneous player control.");
+		Debug.println();
+	    } else {
+		Debug.println("Start controlling player.");
+	    }
 	}
-	mainPlayer.start();
-	setupVideoForPlaylist(loc);
+	weAreControlling = true;
+	try {
+	    if (mainPlayer == null) {
+		try {
+		    MediaLocator ml = new MediaLocator(loc);
+		    mainPlayer  = Manager.createPlayer(ml);
+		} catch (Exception ignored) {
+		    ignored.printStackTrace();
+		    if (Debug.ASSERT) {
+			Debug.assertFail("Error creating player");
+		    }
+		}
+		mainPlayer.addControllerListener(this);
+		mainPlayer.prefetch();
+		Control[] controls = mainPlayer.getControls();
+		for (int i = 0; i < controls.length; i++) {
+		    if (controls[i] instanceof PlayListChangeControl) {
+			playlistControl = (PlayListChangeControl) controls[i];
+		    } else if (controls[i] instanceof PlaybackControl) {
+			playbackControl = (PlaybackControl) controls[i];
+		    } else if (controls[i] instanceof SubtitlingControl) {
+			subtitlingControl = (SubtitlingControl) controls[i];
+		    } else if (controls[i] instanceof PrimaryAudioControl) {
+			audioControl = (PrimaryAudioControl) controls[i];
+		    } else if (controls[i] instanceof PrimaryGainControl) {
+			gainControl = (PrimaryGainControl) controls[i];
+		    } else if (controls[i] instanceof MediaTimePositionControl){
+			timePositionControl = 
+				(MediaTimePositionControl)controls[i];
+		    }
+		}
+		if (Debug.LEVEL > 1) {
+		    Debug.println("Playback control:  " + playbackControl);
+		    Debug.println("Playlist control:  " + playlistControl);
+		    Debug.println("Subtitling control:  " + subtitlingControl);
+		    Debug.println("Audio control:  " + audioControl);
+		    Debug.println("Gain control:  " + gainControl);
+		}
+		if (Debug.ASSERT && 
+		     (playbackControl == null || playlistControl == null
+		      || audioControl == null || gainControl == null
+		      || subtitlingControl == null 
+		      || timePositionControl == null))
+		{
+		    Debug.assertFail("Missing control");
+		}
+		playbackControl.addPlaybackControlListener(this);
+	    } else {
+		// We had already created the player, so we can use
+		// org.bluray.media.PlayListChangeControl
+		mainPlayer.stop();
+		waitForStarted(false, 2000);
+		try {
+		    playlistControl.selectPlayList(loc);
+		} catch (Exception ignored) {
+		    ignored.printStackTrace();
+		}
+	    }
+	    if (Debug.LEVEL > 0) {
+		Debug.println("*** Changing playlist to " + loc + " ***");
+	    }
+	    mainPlayer.start();
+	    currentPlaylistID = loc.getPlayListId();
+		// I'm not sure, but I think that selecting different streams
+		// might not work if the player isn't started...
+		//
+		// Also, it's crucial that we release our lock for long
+		// enough for the player state events to come in.
+	    waitForStarted(true, 2000);
+	    notifyAVStarted();
+	} finally {
+	    weAreControlling = oldWeAreControlling;
+	    if (Debug.LEVEL > 0) {
+		if (weAreControlling) {
+		    Thread.dumpStack();
+		    Debug.println();
+		    Debug.println("***  WARNING:  End of simultaneous player "
+				   + "control ***");
+		    Debug.println();
+		} else {
+		    Debug.println("Done controlling player.");
+		}
+	    }
+	}
     }
 
 
     /**
      * After a playlist is selected, this method is called to let
      * the subclass do any other setup, like subtitles or audio
-     * stream.
+     * stream.  When it is called, the player will already be
+     * started, and the data member currentPlaylistID will be set.
+     * <p>
+     * This is called with the navigator lock held, so applications
+     * should not do anything in this method that might cause deadlock.
+     *
+     * @see #currentPlaylistID
      **/
-    protected abstract void setupVideoForPlaylist(BDLocator loc);
+    protected abstract void notifyAVStarted();
+
+    /**
+     * Pause or un-pause the video.
+     **/
+    public synchronized void pause(boolean paused) {
+	currentRate = paused ? 0f : 1f;
+	mainPlayer.setRate(currentRate);
+    }
 
     /**
      * Navigate to the given time in the video determined by the playlist
      **/
     public synchronized void gotoMediaTime(BDLocator playlist, long mediaTime) {
 	gotoPlaylistInCurrentTitle(playlist);
-	if (waitForStarted(2000)) {
-	    timePositionControl.setMediaTimePosition(new Time(mediaTime));
-	}
+	timePositionControl.setMediaTimePosition(new Time(mediaTime));
     }
 
     public synchronized void selectSubtitles(boolean on, int streamNum) {
@@ -299,6 +370,33 @@ public abstract class AbstractDiscNavigator
 		    }
 		}
 	    }
+	}
+    }
+
+    /** 
+     * Select the given audio stream.  Audio streams are numbered from 1
+     * on a disc.  A value of 0 will mute the audio without changing
+     * the stream.
+     **/
+    public synchronized void selectAudio(int streamNum) {
+	if (gainControl != null && audioControl != null) {  
+			// They're set at same time
+	    if (Debug.LEVEL > 0) {
+		Debug.println("Audio set to " + streamNum);
+	    }
+	    if (streamNum == 0) {
+		gainControl.setMute(true);
+	    } else {
+		try {
+		    audioControl.selectStreamNumber(streamNum);
+		} catch (StreamNotAvailableException ignored) {
+		    if (Debug.LEVEL > 0) {
+			Debug.println("*** Audio stream " + streamNum 
+				      + " not available.");
+		    }
+		}
+		gainControl.setMute(false);
+	    } 
 	}
     }
 
@@ -328,25 +426,76 @@ public abstract class AbstractDiscNavigator
     }
 
     /**
+     * From PlaybackListener
+     **/
+    public void markReached(PlaybackMarkEvent event) {
+    }
+
+    /**
+     * From PlaybackListener
+     **/
+    public void playItemReached(PlaybackPlayItemEvent event) {
+    }
+
+    /**
      * From ControllerListener
      **/
     public synchronized void controllerUpdate(ControllerEvent event) {
+	if (!weAreControlling) {
+	    if (event instanceof StopEvent) {
+		if (Debug.LEVEL > 0) {
+		    Debug.println("*** StopEvent");
+		}
+		if (mainPlayer.getState() != Player.Started) {
+		    notifyStop();
+		} else if (Debug.LEVEL > 0) {
+		    Debug.println("***   However, the player is now started.");
+		}
+	    } else if (event instanceof RateChangeEvent) {
+		float rateNow = mainPlayer.getRate();  
+			// more reliable than event
+		if (rateNow != currentRate) {
+		    if (rateNow == 0f) {
+			if (Debug.LEVEL > 0) {
+			    Debug.println("*** RateChangeEvent to 0");
+			}
+			notifyStop();
+		    }
+		}
+	    }
+	}
 	notifyAll();
-	// Rather than parse the controllerEvent, we just 
-	// poll the player status in a wait loop.  See waitForStarted(),
-	// for example.
+	// We don't detect start event, because we have to check the player's
+	// state anyway to avoid a race condition.  See usese of
+	// waitForStarted(), for example.
     }
 
+    /**
+     * Called to notify the xlet when the video spontaneously stops.
+     * This is not called when the
+     * <p>
+     * This is called with the navigator lock held, so applications
+     * should not do anything in this method that might cause deadlock.
+     *
+     * @see #currentPlaylistID
+     **/
+    public abstract void notifyStop();
+
+
     //
-    // Wait until the state of our player is "started".
+    // Wait until the state of our player is the indicated state
     //
-    private synchronized boolean waitForStarted(long timeout) {
+    private synchronized boolean waitForStarted(boolean wantStarted, 
+    					        long timeout) {
 	long tm = 0;
 	if (timeout > 0) {
 	    tm = System.currentTimeMillis();
 	}
 	for (;;) {
-	    if (mainPlayer.getState() == Player.Started) {
+	    if (wantStarted && mainPlayer.getState() == Player.Started) {
+		return true;
+	    }
+	    if (!wantStarted && mainPlayer.getState() != Player.Started) {
 		return true;
 	    }
 	    if (!waitWithTimeout(tm, timeout)) {

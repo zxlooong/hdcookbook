@@ -79,6 +79,7 @@ import com.hdcookbook.bookmenu.menu.commands.PlayVideoCommand;
 import com.hdcookbook.bookmenu.menu.commands.PlaySoundCommand;
 import com.hdcookbook.bookmenu.menu.commands.SetTextCommand;
 import com.hdcookbook.bookmenu.menu.commands.PlayGameCommand;
+import com.hdcookbook.bookmenu.menu.commands.NotifyLoadedCommand;
 import com.hdcookbook.bookmenu.menu.commands.ActivateBioCommand;
 import com.hdcookbook.bookmenu.menu.commands.DownloadBioCommand;
 import com.hdcookbook.bookmenu.menu.commands.MakeBookmarkCommand;
@@ -121,7 +122,6 @@ public class MenuExtensionsParser implements ExtensionsParser {
 	if ("BOOK:PlayVideo".equals(typeName)) {
 	    String tok = lexer.getString();
 	    BDLocator loc = null;
-	    boolean playLast = false;
 	    if ("menu".equals(tok)) {
 		loc = xlet.navigator.menuVideoStartPL;
 	    } else if ("movie".equals(tok)) {
@@ -138,12 +138,9 @@ public class MenuExtensionsParser implements ExtensionsParser {
 		loc = xlet.navigator.sceneVideoStartPL[4];
 	    } else if ("nothing".equals(tok)) {
 		loc = null;
-	    } else if ("last".equals(tok)) {
-		loc = null;
-		playLast = true;
-	    } 
+	    }
 	    parser.parseExpected(";");
-	    return new PlayVideoCommand(xlet, loc, playLast);
+	    return new PlayVideoCommand(xlet, loc);
 	} else if ("BOOK:SetText".equals(typeName)) {
 	    String text = lexer.getString();
 	    parser.parseExpected(";");
@@ -192,6 +189,9 @@ public class MenuExtensionsParser implements ExtensionsParser {
 	    int streamNumber = lexer.getInt();
 	    parser.parseExpected(";");
 	    return new SelectSubtitlesCommand(xlet, streamNumber);
+	} else if ("BOOK:NotifyLoaded".equals(typeName)) {
+	    parser.parseExpected(";");
+	    return new NotifyLoadedCommand(xlet);
 	}
 	lexer.reportError("Unrecognized command type  \"" + typeName + "\"");
 	return null;
@@ -199,5 +199,11 @@ public class MenuExtensionsParser implements ExtensionsParser {
 
     public void finishBuilding(Show s) throws IOException {
     }
+
+    public void takeMosaicHint(String name, int width, int height, 
+                               String[] images)
+    {
+    }
+
 
 }

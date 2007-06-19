@@ -73,7 +73,6 @@ public class SetupManager implements Runnable {
     }
 
     public void start() {
-            // @@ TODO:  Make it one thread for all setup managers
 	synchronized(monitor) {
 	    worker = new Thread(this, "SetupManager");
 	    worker.setDaemon(true);

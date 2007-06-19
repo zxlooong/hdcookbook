@@ -131,7 +131,8 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 </p>
 <pre>
 @@ TODO:  For the image types, add an option to set SRC_OVER mode.
-    show ::= "show" (segment | feature | rc_handler | setting ) * "end_show"
+    show ::= "show" (segment | feature | rc_handler | setting | mosaic_hint)* 
+    	     "end_show"
 
     setting ::= "setting" segment_stack_depth_setting ";"
 
@@ -303,6 +304,8 @@ a Show is created.  Here's BNF describing the syntax of a show file:
     					# inside rectangle
 
     color_value ::= "{" red_int green_int blue_int alpha_int "}"
+
+    mosaic_hint ::= "mosaic_hint" name width height "{" file_name * "}" ";"
 
     segment_name ::= string
     feature_name ::= string

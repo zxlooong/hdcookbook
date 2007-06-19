@@ -76,12 +76,8 @@ import javax.imageio.ImageIO;
 
 /**
  **/
- // @@ TODO:  Consider trying to make the mosaic a power of two.
 
 public class Mosaic {
-
-    public final static int bufferWidth = 1920;
-    public final static int bufferHeight = 1080;
 
     private LinkedList parts = new LinkedList();
 
@@ -90,31 +86,44 @@ public class Mosaic {
     private String outputName;
     private int position;
 
-    private BufferedImage buffer 
-	= new BufferedImage(bufferWidth, bufferHeight, 
-			    BufferedImage.TYPE_INT_ARGB);
+    private BufferedImage buffer;
     private Graphics2D graphics;	// into buffer
 
     public Mosaic() {
+	this(2048, 1024);
+    }
+
+    public Mosaic(int width, int height) {
+	buffer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 	graphics  = (Graphics2D)  buffer.getGraphics();
 	graphics.setComposite(AlphaComposite.Src);
 	graphics.setColor(Color.yellow);
-	graphics.fillRect(0, 0, bufferWidth, bufferHeight);
+	graphics.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
     }
+
 
     public BufferedImage getBuffer() {
 	return buffer;
     }
 
+    public int getHeight() {
+	return buffer.getHeight();
+    }
+
+    public int getWidth() {
+	return buffer.getWidth();
+    }
+
     /**
-     * Put the image into the mosaic.
+     * Put the image represented by mi and im into the mosaic buffer,
+     * if possible.  Otherwise return null.
      **/
     public MosaicPart putImage(ManagedImage mi, BufferedImage im) {
 	// Use a fairly simple brute-force first-fit algorithm.
 
 	Rectangle placement = new Rectangle(im.getWidth(), im.getHeight());
-	int nextY = bufferHeight;
-	while (placement.y + placement.height < bufferHeight) {
+	int nextY = buffer.getHeight();
+	while (placement.y + placement.height < buffer.getHeight()) {
 	    boolean found = true;
 	    for (Iterator it = parts.iterator(); found && it.hasNext(); ) {
 		MosaicPart part = (MosaicPart) it.next();
@@ -125,13 +134,13 @@ public class Mosaic {
 		    if (y < nextY) {
 			nextY = y;
 		    }
-		    if (placement.x + placement.width >= bufferWidth) {
+		    if (placement.x + placement.width >= buffer.getWidth()) {
 			placement.x = 0;
 			if (Debug.ASSERT && placement.y >= nextY) {
 			    Debug.assertFail();
 			}
 			placement.y = nextY;
-                        nextY = bufferHeight;
+                        nextY = buffer.getHeight();
                     }
 		}
 	    }

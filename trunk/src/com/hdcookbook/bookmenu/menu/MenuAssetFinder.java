@@ -89,7 +89,7 @@ public class MenuAssetFinder extends AssetFinder {
 	} catch (Throwable ignored) {
 	    ignored.printStackTrace();
 	}
-	xlet.navigator.pushVideo(null);
+	xlet.navigator.startVideoAt(null);
     }
 
     protected Font getFontHelper(String fontName, int style, int size) {

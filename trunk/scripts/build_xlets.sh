@@ -2,7 +2,7 @@
 
 source vars.sh
 
-MOSAIC=no # Set to "yes" for a slower build and faster xlet load
+MOSAIC=yes # Set to "yes" for a slower build and faster xlet load
 
 mkdir -p $HDC_DISC_BDMV/JAR
 mkdir -p $HDC_DISC_BDMV/AUXDATA

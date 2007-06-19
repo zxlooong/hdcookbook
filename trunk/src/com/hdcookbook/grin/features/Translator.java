@@ -218,6 +218,4 @@ public class Translator extends Feature {
 	gr.translate(-dx, -dy);
     }
 
-    // @@ TODO:  Handle mouse
-
 }
