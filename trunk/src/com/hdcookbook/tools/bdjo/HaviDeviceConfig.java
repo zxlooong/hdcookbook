@@ -53,7 +53,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
- package com.hdcookbook.tools.bdjo;
+package com.hdcookbook.tools.bdjo;
 
 
 /**

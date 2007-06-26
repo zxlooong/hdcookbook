@@ -33,7 +33,7 @@ if [[ $? != 0 ]] ; then
 fi
 cp com/hdcookbook/tools/bdjo/jaxb.index $DEST/com/hdcookbook/tools/bdjo
 
-$JAVA -cp $DEST com.hdcookbook.tools.bdjo.BDJOReader \
+$JAVA -cp $DEST com.hdcookbook.tools.bdjo.Converter \
 	com/hdcookbook/bookmenu/bdjo/main_bdjo.xml  \
 	$HDC_DISC_BDMV/BDJO/00000.bdjo
 echo "Wrote $HDC_DISC_BDMV/BDJO/00000.bdjo"

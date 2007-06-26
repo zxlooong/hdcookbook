@@ -365,10 +365,6 @@ public final class BDJOReader {
             int iconLength = dis.readUnsignedByte();
             appDesc.setIconLocator(readISO646String(dis, iconLength));
             
-            // FIXME: there is another for-loop here for word align!!
-            // length is 1 byte field. If length value is even, then we
-            // have 1 byte for length + even bytes for string => we need
-            // skip one more byte to make it even again. 
             if ((iconLength & 0x1) == 0) {
                 dis.skipBytes(1);
             }
@@ -411,7 +407,6 @@ public final class BDJOReader {
                 appDesc.setParameters(paramsArr);
             }
             
-            // FIXME: there is another for-loop here for word align!! 
             if ((totalParamBytes & 0x1) == 0) {
                dis.skipBytes(1);
             }
@@ -472,52 +467,5 @@ public final class BDJOReader {
         bdjo.setFileAccessInfo(readISO646String(dis, dirPathsLength));
         
         return bdjo;
-    }
-
-    public static void usage() {
-	System.out.println();
-	System.out.println("Usage:  java com.hdcookbook.tools.bdjo.BDJOReader <input> <output>");
-	System.out.println("    <file>.bdjo for a binary BDJO file");
-	System.out.println("    <file>.fx for a JavaFX object literal");
-	System.out.println("    <file>  (any other extension) for an XML file");
-	System.out.println();
-	System.out.println("If no output file specifed, XML will be output to stdout.");
-	System.out.println();
-	System.exit(1);
-    }
-    
-    public static void main(String[] args) throws Exception {
-	String outFile = null;
-	String inFile = null;
-	if (args.length == 2) {
-	    inFile = args[0];
-	    outFile = args[1];
-	} else if (args.length == 1) {
-	    inFile = args[0];
-	} else {
-	    usage();
-	}
-        BDJO bdjo;
-        if (inFile.endsWith(".fx")) {
-            BufferedReader reader = new BufferedReader(new FileReader(inFile));
-            bdjo = readFX(reader);
-        } else if (inFile.endsWith(".bdjo")) {
-            bdjo = readBDJO(new BufferedInputStream(new FileInputStream(inFile)));
-        } else {
-            BufferedReader reader = new BufferedReader(new FileReader(inFile));
-            bdjo = readXML(reader);
-        }
-	if (outFile == null) {
-	    BDJOWriter.writeXML(bdjo, new PrintWriter(System.out));
-	} else if (outFile.endsWith(".fx")) {
-	    BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
-	    BDJOWriter.writeFX(bdjo, writer);
-	} else if (outFile.endsWith(".bdjo")) {
-	    BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(outFile));
-	    BDJOWriter.writeBDJO(bdjo, os);
-	} else {
-	    BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
-	    BDJOWriter.writeXML(bdjo, writer);
-	}
     }
 }

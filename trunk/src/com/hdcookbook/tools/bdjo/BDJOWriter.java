@@ -53,8 +53,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
- package com.hdcookbook.tools.bdjo;
-
+package com.hdcookbook.tools.bdjo;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -75,6 +74,7 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.bind.helpers.DefaultValidationEventHandler;
 
 /**
@@ -168,7 +168,6 @@ public final class BDJOWriter {
                 for (PropertyDescriptor pd : props) {
                     Class c = pd.getPropertyType();
                     Method readMethod = pd.getReadMethod();
-                    boolean isHex = readMethod.getAnnotation(HexFormat.class) != null;
                     Object value = readMethod.invoke(obj, (Object[])null);
                     String name = pd.getName();
                     if (name.equals("class")) {
@@ -182,19 +181,22 @@ public final class BDJOWriter {
                     }
                     pw.print(name);
                     pw.print(" : ");
-                    if (isHex) {
-                        if (value instanceof Long) {
-                            pw.print("0x" + Long.toHexString(((Long)value).longValue()));
-                        } else {
-                            int val = 0;
-                            if (value instanceof Byte) {
-                                val = 0x0FF & ((Byte)value).intValue();
-                            } else if (value instanceof Short) {
-                                val = 0x0FFFF & ((Short)value).intValue();
-                            } else if (value instanceof Integer) {
-                                val = ((Integer)value).intValue();
-                            }
+                    XmlJavaTypeAdapter typeAdapter = 
+                            readMethod.getAnnotation(XmlJavaTypeAdapter.class);
+                    if (typeAdapter != null) {
+                        Class type = typeAdapter.value();                 
+                        int val = 0;
+                        if (type == HexStringByteAdapter.class) {
+                            val = 0x0FF & ((Byte)value).intValue();
                             pw.print("0x" + Integer.toHexString(val));
+                        } else if (type == HexStringShortAdapter.class) {
+                            val = 0x0FFFF & ((Short)value).intValue();
+                            pw.print("0x" + Integer.toHexString(val));
+                        } else if (type == HexStringIntegerAdapter.class) {
+                            val = ((Integer)value).intValue();
+                            pw.print("0x" + Integer.toHexString(val));
+                        } else {
+                            writeValue(intend, value, pw);
                         }
                     } else {
                         writeValue(intend, value, pw);
@@ -520,7 +522,7 @@ public final class BDJOWriter {
         dos.writeShort(totalNameLen);
         
         for (AppName an : names) {
-            String lang = an.getName();
+            String lang = an.getLanguage();
             if (lang == null) {
                 lang = BDJO.LANGUAGE_CODE_ENGLISH;
             }
@@ -724,14 +726,5 @@ public final class BDJOWriter {
             dos.writeByte(0);
         }
         dos.flush();
-    }
-    
-    public static void main(String[] args) throws Exception {
-        BDJO b = new BDJO();
-        b.setTerminalInfo(new TerminalInfo());
-        ApplicationManagementTable amt = new ApplicationManagementTable();
-        amt.setApplications(new AppInfo[0]);
-        b.setApplicationManagementTable(amt);
-        writeFX(b, new PrintWriter(System.out));
     }
 }

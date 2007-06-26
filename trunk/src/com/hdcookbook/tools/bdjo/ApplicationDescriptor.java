@@ -53,8 +53,9 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
- package com.hdcookbook.tools.bdjo;
+package com.hdcookbook.tools.bdjo;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -146,7 +147,7 @@ public class ApplicationDescriptor {
         this.iconLocator = iconLocator;
     }
 
-    @HexFormat
+    @XmlJavaTypeAdapter(HexStringShortAdapter.class)    
     public short getIconFlags() {
         return iconFlags;
     }

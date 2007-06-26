@@ -53,8 +53,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
- package com.hdcookbook.tools.bdjo;
-
+package com.hdcookbook.tools.bdjo;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -140,7 +139,7 @@ public final class Converter {
     
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
-            System.err.println("Usage: com.sun.bluray.bdjo.Converter <file-1> <file-2>");
+            System.err.printf("Usage: %s <file-1> <file-2>", Converter.class.getName());
             System.exit(1);
         }
         String in = args[0];

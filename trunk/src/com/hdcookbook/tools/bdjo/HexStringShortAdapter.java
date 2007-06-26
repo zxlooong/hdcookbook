@@ -55,71 +55,26 @@
 
 package com.hdcookbook.tools.bdjo;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * ApplicationManagementTable syntax - section 10.2.5.2
+ * This class is to support custom marshalling of hex string to
+ * Java short.
+ *
  * @author A. Sundararajan
  */
-public class AppInfo {
-    // Table 10.5 - Application Types
-    public static final byte MAX_APPLICATION_TYPE = 0xF;
-    // Table 10.5 - BD-J application 
-    public static final byte APPLICATION_TYPE_BD_J = 0x1;
-    // Table 10.6 - BD-J application control codes
-    public static final byte CONTROL_CODE_AUTOSTART = 0x1;
-    public static final byte CONTROL_CODE_PRESENT = 0x2;
-    
-    private byte controlCode;
-    private byte type;
-    private int organizationId;
-    private short applicationId;
-    private ApplicationDescriptor applicationDescriptor;
-
-    @XmlJavaTypeAdapter(HexStringByteAdapter.class)    
-    public byte getControlCode() {
-        return controlCode;
-    }
-
-    public void setControlCode(byte controlCode) {
-        this.controlCode = controlCode;
-    }
-    
-    @XmlJavaTypeAdapter(HexStringByteAdapter.class)    
-    public byte getType() {
-        return type;
-    }
-
-    public void setType(byte type) {
-        if (type < 0 || type > MAX_APPLICATION_TYPE) {
-            throw new IllegalArgumentException("invalid type : " + type);
+public class HexStringShortAdapter extends XmlAdapter<String, Short> {     
+    public Short unmarshal(String str) throws Exception {
+        // handle non-hex input as well.
+        if (str.startsWith("0x") || str.startsWith("0X")) {
+            return (short)Integer.parseInt(str.substring(2), 16);
+        } else {
+            return (short)Integer.parseInt(str);
         }
-        this.type = type;
     }
-
-    @XmlJavaTypeAdapter(HexStringIntegerAdapter.class)
-    public int getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(int organizationId) {
-        this.organizationId = organizationId;
-    }
-
-    @XmlJavaTypeAdapter(HexStringShortAdapter.class)
-    public short getApplicationId() {
-        return applicationId;
-    }
-
-    public void setApplicationId(short applicationId) {
-        this.applicationId = applicationId;
-    }
-
-    public ApplicationDescriptor getApplicationDescriptor() {
-        return applicationDescriptor;
-    }
-
-    public void setApplicationDescriptor(ApplicationDescriptor applicationDescriptor) {
-        this.applicationDescriptor = applicationDescriptor;
+    
+    // we always marshal as hex string
+    public String marshal(Short value) throws Exception {
+        return "0x" + Integer.toHexString(value);
     }
 }

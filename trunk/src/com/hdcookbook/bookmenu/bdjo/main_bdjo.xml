@@ -50,9 +50,9 @@
                 </profiles>
                 <visibility>V_11</visibility>
             </applicationDescriptor>
-            <applicationId>16385</applicationId>
+            <applicationId>0x4001</applicationId>
             <controlCode>1</controlCode>
-            <organizationId>1450744508</organizationId>
+            <organizationId>0x56789abc</organizationId>
             <type>1</type>
         </applications>
         <applications>
@@ -78,9 +78,9 @@
                 </profiles>
                 <visibility>V_11</visibility>
             </applicationDescriptor>
-            <applicationId>16386</applicationId>
+            <applicationId>0x4002</applicationId>
             <controlCode>1</controlCode>
-            <organizationId>1450744508</organizationId>
+            <organizationId>0x56789abc</organizationId>
             <type>1</type>
         </applications>
         <applications>
@@ -106,9 +106,9 @@
                 </profiles>
                 <visibility>V_11</visibility>
             </applicationDescriptor>
-            <applicationId>16387</applicationId>
+            <applicationId>0x4003</applicationId>
             <controlCode>2</controlCode>
-            <organizationId>1450744508</organizationId>
+            <organizationId>0x56789abc</organizationId>
             <type>1</type>
         </applications>
     </applicationManagementTable>

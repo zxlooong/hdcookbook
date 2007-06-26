@@ -53,11 +53,11 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
- package com.hdcookbook.tools.bdjo;
-
+package com.hdcookbook.tools.bdjo;
 
 import java.io.UnsupportedEncodingException;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * xxxxx.bdjo syntax - section 10.2.1.2
@@ -154,7 +154,7 @@ public class BDJO {
         this.applicationManagementTable = applicationManagementTable;
     }
     
-    @HexFormat
+    @XmlJavaTypeAdapter(HexStringIntegerAdapter.class)
     public int getKeyInterestTable() {
         return keyInterestTable;
     }
@@ -162,7 +162,7 @@ public class BDJO {
     public void setKeyInterestTable(int keyInterestTable) {
         this.keyInterestTable = keyInterestTable;
     }
-
+    
     public String getFileAccessInfo() {
         return fileAccessInfo;
     }
