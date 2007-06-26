@@ -73,6 +73,12 @@ import java.io.IOException;
 
 import java.net.URL;
 
+/**
+ * This class manages updating the Gun Bunny bio image by
+ * reading it from the Internet.  It runs in its own thread.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class BioUpdater implements Runnable {
 
     private MenuXlet xlet;
@@ -90,10 +96,18 @@ public class BioUpdater implements Runnable {
     private boolean downloadImage = false;
     private InputStream currentInputStream = null;
 
+    /**
+     * Create the BioUpdater
+     **/
     public BioUpdater(MenuXlet xlet) {
 	this.xlet = xlet;
     }
 
+    /** 
+     * Start the bio updater.  This hooks us into the GRIN show, and
+     * starts up a thread that checks for a new bio image on the
+     * Internet.
+     **/
     public void start() {
 	bioAvailableSegment = xlet.show.getSegment("S:Bio.Available");
 	bioNotAvailableSegment = xlet.show.getSegment("S:Bio.NotAvailable");
@@ -109,7 +123,11 @@ public class BioUpdater implements Runnable {
 	startThread();
     }
 
-    public synchronized void startThread() {
+    //
+    // Start our thread up, or re-start it if it's waiting on a
+    // condition variable
+    //
+    private synchronized void startThread() {
 	if (destroyed || running) {
 	    notifyAll();	// Starts thread if it was waiting
 	    return;
@@ -120,6 +138,11 @@ public class BioUpdater implements Runnable {
 	t.start();
     }
 
+    /**
+     * Destroy this BioUpdater.  This should be called on xlet
+     * termination, to make sure the BioUpdater thread is killed,
+     * even if it's in the middle of trying to read from the Internet.
+     **/
     public synchronized void destroy() {
 	if (currentInputStream != null) {
 	    try {
@@ -131,6 +154,10 @@ public class BioUpdater implements Runnable {
 	notifyAll();
     }
 
+    /**
+     * Make the UI state agree with the our state:  Either a new
+     * bio is available for download, or one isn't.
+     **/
     public synchronized void activateRightSegment() {
 	if (currentBioVersion < availableBioVersion) {
 	    xlet.show.activateSegment(bioAvailableSegment);
@@ -139,6 +166,9 @@ public class BioUpdater implements Runnable {
 	}
     }
 
+    /** 
+     * Start the process of asynchronously downloading a new biography.
+     **/
     public void downloadBio() {
 	synchronized(this) {
 	    downloadImage = true;
@@ -147,9 +177,13 @@ public class BioUpdater implements Runnable {
     }
 
     /**
-     * This runs the bio updating thread
+     * This is the bio updating thread man loop.
      **/
     public void run() {
+	    // This thread should probably terminate and re-start,
+	    // rather than waiting until the user elects to download.
+	    // This would be an optimization you'd want to do in a
+	    // commercial title.
 	for (;;) {
 	    boolean doCheck;
 	    boolean doDownload;
@@ -223,7 +257,9 @@ public class BioUpdater implements Runnable {
 		doCheckVersion(is);
 	    }
 	} catch (IOException ex) {
-	    ex.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		ex.printStackTrace();
+	    }
 	} finally {
 	    synchronized(this) {
 		currentInputStream = null;
@@ -244,7 +280,9 @@ public class BioUpdater implements Runnable {
 	try {
 	    version = Integer.parseInt(line);
 	} catch (NumberFormatException ex) {
-	    ex.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		ex.printStackTrace();
+	    }
 	    return;
 	}
 	boolean changeUI = false;
@@ -310,5 +348,4 @@ public class BioUpdater implements Runnable {
 	    }
 	}
     }
-
 }

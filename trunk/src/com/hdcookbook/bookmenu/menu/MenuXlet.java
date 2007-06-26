@@ -93,6 +93,8 @@ import com.hdcookbook.bookmenu.MonitorIXCInterface;
 
 /**
  * Xlet for the main menu/controller in the HD Cookbook disc
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class MenuXlet implements Xlet, UserEventListener, 
 				 MouseListener, MouseMotionListener,
@@ -105,8 +107,8 @@ public class MenuXlet implements Xlet, UserEventListener,
     public MenuWorker worker;
     public MenuDirector director;
     public Show show;
-    private MenuUI ui;
 
+    private MenuUI ui;
     private boolean running = false;
     private boolean destroyed = false;
     private boolean isPresenting = false;	// Set by service context event
@@ -145,6 +147,9 @@ public class MenuXlet implements Xlet, UserEventListener,
 	worker.waitUntilStarted();
     }
 
+    /**
+     * Callback from system via ServiceContextListener.
+     **/
     public void receiveServiceContextEvent(ServiceContextEvent e)  {
 	if (e instanceof NormalContentEvent) {
 	    synchronized(this) {
@@ -181,7 +186,10 @@ public class MenuXlet implements Xlet, UserEventListener,
 	}
     }
 
-
+    /**
+     * Get the remote IXC object that we use to communicate with the
+     * monitor xlet.
+     **/
     public synchronized MonitorIXCInterface getMonitorXlet() {
 	int tries = 0;
 	while (monitorXlet == null) {
@@ -192,7 +200,9 @@ public class MenuXlet implements Xlet, UserEventListener,
 		try {
 		    appIDint =  Integer.parseInt(appID, 16);
 		} catch (Exception ignored) {
-		    ignored.printStackTrace();
+		    if (Debug.LEVEL > 0) {
+			ignored.printStackTrace();
+		    }
 		}
 		String name = "/" + orgID + 
 		              "/" + Integer.toHexString(appIDint - 1) +
@@ -204,8 +214,10 @@ public class MenuXlet implements Xlet, UserEventListener,
 		}
 		// The monitor app's app ID is one less than ours.
 	    } catch (RemoteException ignored) {
-		ignored.printStackTrace();
-		// Must be a bug
+		if (Debug.LEVEL > 0) {
+		    ignored.printStackTrace();
+		    // Must be a bug
+		}
 	    } catch (NotBoundException ex) {
 		// Maybe the monitor xlet hasn't had time to start yet
 		// Give it two seconds
@@ -227,7 +239,8 @@ public class MenuXlet implements Xlet, UserEventListener,
 		if (Debug.LEVEL > 0) {
 		    Debug.println();
 		    Debug.println("***  Monitor xlet not found!  ***");
-		    Debug.println("This is a serious bug; all monitor app functionality won't be available.");
+		    Debug.println("This is a serious bug; all monitor app "
+		    	 	  + "functionality won't be available.");
 		    Debug.println();
 		}
 		monitorXlet = new MonitorIXCInterface() {
@@ -241,11 +254,18 @@ public class MenuXlet implements Xlet, UserEventListener,
 	return monitorXlet;
     }
 
+    /**
+     * Stop running the menu (that is, us), and start running the
+     * Gun Bunny game.  This just passes the request on to the
+     * monitor xlet.
+     **/
     public void startGame() {
 	try {
 	    getMonitorXlet().startGame("");
 	} catch (RemoteException ignored) {
-	    ignored.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		ignored.printStackTrace();
+	    }
 	}
     }
 
@@ -256,9 +276,9 @@ public class MenuXlet implements Xlet, UserEventListener,
 	waitForServiceContextPresenting();
 	scene = HSceneFactory.getInstance().getDefaultHScene();
 	scene.setLayout(null);
-	scene.setBounds(0, 0, 1920, 1280);
+	scene.setBounds(0, 0, 1920, 1080);
 	ui = new MenuUI(this);
-	ui.setBounds(0, 0, 1920, 1280);
+	ui.setBounds(0, 0, 1920, 1080);
 	scene.add(ui);
 	ui.setVisible(true);
 	scene.setVisible(true);
@@ -269,8 +289,10 @@ public class MenuXlet implements Xlet, UserEventListener,
 	    BDLocator loc = new BDLocator("bd://JAR:00004");
 	    assetsJar.attach(loc);
 	} catch (Exception ex) {
-	    // If this happens, it's a bug.
-	    ex.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		// If this happens, it's a bug.
+		ex.printStackTrace();
+	    }
 	}
 	File[] path = { assetsJar.getMountPoint() } ;
 	AssetFinder.setHelper(new MenuAssetFinder(this));
@@ -285,10 +307,6 @@ public class MenuXlet implements Xlet, UserEventListener,
 	}
 
 	navigator.init();
-	navigator.startVideoAt(null);
-	// Video will be started by the show, via a command.  However,
-	// it's a good idea to have some video there, so we pause
-	// blank video to get to a known state.
 
 	director = new MenuDirector(this);
 	director.init();
@@ -310,6 +328,7 @@ public class MenuXlet implements Xlet, UserEventListener,
 	scene.requestFocus();
 
 	worker.runShow(show);
+	    // The show starts the video once its assets have loaded
     }
 
     public void pauseXlet() {
@@ -343,7 +362,9 @@ public class MenuXlet implements Xlet, UserEventListener,
 	    try {
 		assetsJar.detach();
 	    } catch (Exception ex) {
-		ex.printStackTrace();
+		if (Debug.LEVEL > 0) {
+		    ex.printStackTrace();
+		}
 	    }
 	}
 	if (ourServiceContext != null) {
@@ -363,7 +384,7 @@ public class MenuXlet implements Xlet, UserEventListener,
     }
 
     /**
-     * Mouse motion callback
+     * Mouse motion callback (when a button is down)
      **/
     public void mouseDragged(MouseEvent e) {
 	show.handleMouseMoved(e.getX(), e.getY());
@@ -376,13 +397,29 @@ public class MenuXlet implements Xlet, UserEventListener,
 	show.handleMouseClicked(e.getX(), e.getY());
     }
 
+    /**
+     * Mouse pressed callback
+     **/
     public void mousePressed(MouseEvent e) { }
+
+    /**
+     * Mouse released callback
+     **/
     public void mouseReleased(MouseEvent e) { }
+
+    /**
+     * Mouse entered callback
+     **/
     public void mouseEntered(MouseEvent e) { }
+
+    /**
+     * Mouse exited callback
+     **/
     public void mouseExited(MouseEvent e) { }
 
     /**
-     * A remote control event comes in via org.dvb.event.UserEventListener
+     * A remote control event that is coming in via
+     * org.dvb.event.UserEventListener
      **/
     public void userEventReceived(UserEvent e) {
 	if (e.getType() == HRcEvent.KEY_PRESSED) {

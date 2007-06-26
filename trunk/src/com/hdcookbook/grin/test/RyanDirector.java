@@ -73,6 +73,9 @@ import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
 /**
+ * This is part of the "Ryan's life" test show.  It's mostly of
+ * historical interest; it still works, but some of the ways of
+ * structuring and using a show are passe.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -169,7 +172,7 @@ public abstract class RyanDirector extends Director {
 	    System.out.println();
 	    System.out.println("Error trying to parse " + showName);
             System.out.println("    URL:  " + source);
-	    System.exit(1);
+	    Debug.assertFail();
 	} finally {
 	    if (rdr != null) {
 		try {

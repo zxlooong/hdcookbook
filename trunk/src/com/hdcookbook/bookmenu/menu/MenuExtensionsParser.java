@@ -88,7 +88,13 @@ import com.hdcookbook.bookmenu.menu.commands.BookmarkUICommand;
 import com.hdcookbook.bookmenu.menu.commands.SelectAudioCommand;
 import com.hdcookbook.bookmenu.menu.commands.SelectSubtitlesCommand;
 
-
+/** 
+ * This class parses small extensions to the GRIN syntax added
+ * for our xlet.  It's how the "BOOK:" commands and feature get
+ * parsed.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class MenuExtensionsParser implements ExtensionsParser {
 
     private MenuXlet xlet;
@@ -97,6 +103,10 @@ public class MenuExtensionsParser implements ExtensionsParser {
 	this.xlet = xlet;
     }
 
+    /** 
+     * Called by the GRIN parser to parse an extension feature 
+     * that's not a modifier
+     **/
     public Feature getFeature(Show show, String typeName, 
     			      String name, String arg)
 		   throws IOException
@@ -104,6 +114,9 @@ public class MenuExtensionsParser implements ExtensionsParser {
 	return null;
     }
 
+    /**
+     * Called by the GRIN parser to parse a feature that is a modifier
+     **/
     public Modifier getModifier(Show show, String typeName, 
     			        String name, String arg)
 		   throws IOException
@@ -115,6 +128,9 @@ public class MenuExtensionsParser implements ExtensionsParser {
 	}
     }
 
+    /**
+     * Called by the GRIN parser to parse an extension command.
+     **/
     public Command parseCommand(Show show, String typeName, Lexer lexer,
 				ShowParser parser) 
 		    throws IOException
@@ -197,13 +213,21 @@ public class MenuExtensionsParser implements ExtensionsParser {
 	return null;
     }
 
+    /**
+     * Called by the GRIN parser when parsing is done, to do
+     * any other work to finish up a show.
+     **/
     public void finishBuilding(Show s) throws IOException {
     }
 
+    /**
+     * Called by the GRIN parser when it encounters an optimization
+     * hint about images it would be good to include in their own
+     * mosaic.  This is used at compile time.
+     **/
     public void takeMosaicHint(String name, int width, int height, 
                                String[] images)
     {
     }
-
 
 }

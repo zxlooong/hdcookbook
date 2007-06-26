@@ -64,7 +64,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * A Translator wraps another feature, and adds movement taken from a
+ * A Translator wraps other features, and adds movement taken from a
  * Translation to it.  The upper-left hand corner of the subfeature is
  * made to follow the path of the translation.
  *
@@ -105,36 +105,55 @@ public class Translator extends Feature {
 	}
     }
 
+    /**
+     * Get our child features
+     **/
     public Feature[] getFeatures() {
 	return features;
     }
 
+    /**
+     * Get the translation that moves us
+     **/
     public Translation getTranslation() {
 	return translation;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartX() {
 	return translation.getTranslatorStartX();
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartY() {
 	return translation.getTranslatorStartY();
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void initialize() {
 	// The show will initialize our sub-feature, so we don't
 	// need to do anything here.
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void destroy() {
 	// The show will destroy our sub-features, so we don't
 	// need to do anything here.
     }
 
-    //
-    // This is synchronized to only occur within model updates.
-    //
+    /**
+     * See superclass definition.
+     **/
     protected void setActivateMode(boolean mode) {
+	// This is synchronized to only occur within model updates.
 	isActivated = mode;
 	if (mode) {
 	    for (int i = 0; i < features.length; i++) {
@@ -147,6 +166,9 @@ public class Translator extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setSetupMode(boolean mode) {
 	if (mode) {
 	    for (int i = 0; i < features.length; i++) {
@@ -159,6 +181,9 @@ public class Translator extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void doSomeSetup() {
 	for (int i = 0; i < features.length; i++) {
 	    if (features[i].needsMoreSetup()) {
@@ -168,6 +193,9 @@ public class Translator extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean needsMoreSetup() {
 	for (int i = 0; i < features.length; i++) {
 	    if (features[i].needsMoreSetup()) {
@@ -177,6 +205,9 @@ public class Translator extends Feature {
 	return false;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
 	if (Debug.ASSERT && !translation.getIsActivated()) {
 	    Debug.assertFail();
@@ -186,6 +217,9 @@ public class Translator extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void  addDisplayArea(Rectangle area) {
 	if (!isActivated) {
 	    return;
@@ -205,6 +239,9 @@ public class Translator extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {
 	    return;

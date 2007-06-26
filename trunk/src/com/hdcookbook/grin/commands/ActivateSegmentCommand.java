@@ -62,6 +62,7 @@ import com.hdcookbook.grin.util.Debug;
 import java.io.IOException;
 
 /**
+ * A command to make a new segment be the active one within a show.
  *
  * @author Bill Foote (http://jovial.com)
  */

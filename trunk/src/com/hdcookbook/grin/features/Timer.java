@@ -67,6 +67,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
+ * A timer is a feature that triggers a set of commands a given number
+ * of frames after it's activated.  A timer has no visual representation.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -90,15 +92,24 @@ public class Timer extends Feature {
 	this.endCommands = endCommands;
     }
 
+    /**
+     * Get the commands that are triggered when the timer goes off.
+     **/
     public Command[] getEndCommands() {
 	return endCommands;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartX() {
 	// This only matters to translate in determining upper-left corner
 	return Integer.MAX_VALUE;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartY() {
 	// This only matters to translate in determining upper-left corner
 	return Integer.MAX_VALUE;
@@ -125,6 +136,9 @@ public class Timer extends Feature {
     public void destroy() {
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
 	if (mode) {
@@ -133,16 +147,28 @@ public class Timer extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setSetupMode(boolean mode) {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void doSomeSetup() {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean needsMoreSetup() {
         return false;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
 	if (Debug.ASSERT && !isActivated) {
 	    Debug.assertFail("Advancing inactive sequence");
@@ -164,9 +190,15 @@ public class Timer extends Feature {
         }
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void  addDisplayArea(Rectangle area) {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
     }
 

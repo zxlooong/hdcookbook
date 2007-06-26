@@ -93,6 +93,14 @@ import java.awt.Rectangle;
 
 import java.util.Vector;
 
+/**
+ * The parser of a show file.  This is a really simple-minded
+ * parser.  For example, all tokens are just strings, so, for example,
+ * you have to write "( 0 3 )" and not "(0 3)", since the first has four
+ * tokens and the second only two.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class ShowParser {
 
     private Show show;
@@ -154,6 +162,9 @@ public class ShowParser {
 	builder.init(this, show);
     }
 
+    /**
+     * Parse the current show file.
+     **/
     public void parse() throws IOException {
 	String tok = lexer.getString();
 	if (!"show".equals(tok)) {
@@ -1124,17 +1135,15 @@ public class ShowParser {
 	return mask;
     }
 
-    /** 
-     * Parse a list of commands.  In the first pass, this will
-     * return an empty array.  In the second pass, it will
-     * create an array filled with the proper Command instances.
-     **/
-    public Command[] parseCommands() throws IOException {
+    //
+    // Parse a list of commands
+    //
+    private Command[] parseCommands() throws IOException {
 	parseExpected("{");
 	return parseCommandsNoOpenBrace();
     }
 
-    public Command[] parseCommandsNoOpenBrace() throws IOException {
+    private Command[] parseCommandsNoOpenBrace() throws IOException {
         Vector v = new Vector();
 	for (;;) {
 	    String tok = lexer.getString();
@@ -1488,11 +1497,20 @@ public class ShowParser {
 	}
     }
 
+    /**
+     * Parse a color representation ("{ r g b a }")
+     **/
     public Color parseColor() throws IOException {
 	parseExpected("{");
 	return parseColorNoOpenBrace();
     }
 
+    /**
+     * Parse a color representation when the opening brace has already
+     * been read.
+     *
+     * @see #parseColor()
+     **/
     public Color parseColorNoOpenBrace() throws IOException {
 	int r = lexer.getInt();
 	int g = lexer.getInt();

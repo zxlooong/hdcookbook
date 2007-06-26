@@ -66,6 +66,8 @@ import java.awt.Rectangle;
 
 /**
  * Abstract base class for features that modify a single child feature.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public abstract class Modifier extends Feature {
 
@@ -76,22 +78,35 @@ public abstract class Modifier extends Feature {
 	super(show, name);
     }
 
+    /**
+     * Called from the parser.
+     **/
     public void setup(Feature part) { 
 	this.part = part;
     }
 
+    /**
+     * Get our child feature
+     **/
     public Feature getPart() {
 	return part;
     }
 
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartX() {
 	return part.getStartX();
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartY() {
 	return part.getStartY();
     }
+
     /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
@@ -117,10 +132,11 @@ public abstract class Modifier extends Feature {
 	// need to do anything here.
     }
 
-    //
-    // This is synchronized to only occur within model updates.
-    //
+    /**
+     * See superclass definition.
+     **/
     protected void setActivateMode(boolean mode) {
+	// This is synchronized to only occur within model updates.
 	activated = mode;
 	if (mode) {
 	    part.activate();
@@ -129,6 +145,9 @@ public abstract class Modifier extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setSetupMode(boolean mode) {
 	if (mode) {
 	    part.setup();
@@ -137,6 +156,9 @@ public abstract class Modifier extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void doSomeSetup() {
 	if (part.needsMoreSetup()) {
 	    part.doSomeSetup();
@@ -145,6 +167,9 @@ public abstract class Modifier extends Feature {
 	// None needed
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean needsMoreSetup() {
 	if (part.needsMoreSetup()) {
 	    return true;
@@ -152,14 +177,23 @@ public abstract class Modifier extends Feature {
 	return false;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D g) {
 	part.paintFrame(g);
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void  addDisplayArea(Rectangle area) {
 	part.addDisplayArea(area);
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
 	part.advanceToFrame(newFrame);
     }

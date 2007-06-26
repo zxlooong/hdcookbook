@@ -65,6 +65,16 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.io.IOException;
 
+/**
+ * A segment within a show.  A show is composed of segments, and at all
+ * times exactly one segment is active.  When a segment is active, its
+ * features are showing, and its remote control handlers receive events.
+ * When a new feature is activated, any features that are active in both
+ * segments are not re-initialized, so that animations will just continue,
+ * for example.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class Segment {
 
     String name;
@@ -119,14 +129,31 @@ public class Segment {
 	return settingUpFeatures;
     }
 
+    /**
+     * Do we trigger the commands in our next clause when all of the
+     * features in our setup clause have finished loading? 
+     *
+     * @return the answer to that question.
+     **/
+
     public boolean getNextOnSetupDone() {
 	return nextOnSetupDone;
     }
 
+    /**
+     * Give the commands in our next clause.  This can be triggered
+     * by setup being done, or by a segment_done command.
+     *
+     * @see #getNextOnSetupDone()
+     * @see com.hdcookbook.grin.commands.SegmentDoneCommand
+     **/
     public Command[] getNextCommands() {
 	return nextCommands;
     }
 
+    /**
+     * Give the set of remote control handlers for this segment
+     **/
     public RCHandler[] getRCHandlers() {
 	return rcHandlers;
     }

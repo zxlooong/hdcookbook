@@ -70,6 +70,8 @@ import java.awt.Font;
 import java.awt.Color;
 
 /**
+ * A helper class for parsing a show.  Clients of the parser can
+ * subclass this to intercept items as there's encountered.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -86,26 +88,43 @@ public class ShowBuilder {
 	this.show = show;
     }
 
+    /** 
+     * Called when a new feature is encountered.
+     **/
     public void addFeature(String name, int line, Feature f) throws IOException
     {
 	show.addFeature(name, f);
     }
 
+    /**
+     * Called when a new segment is encountered.
+     **/
     public void addSegment(String name, int line, Segment s) throws IOException
     {
 	show.addSegment(name, s);
     }
 
+    /**
+     * Called when a new command is encountered.
+     **/
     public void addCommand(Command command, int line) {
-	// For runtime, commands are just part of other things
+	// At xlet runtime, commands are just part of other things, so we
+	// don't need to record them.
     }
 
+    /**
+     * Called when a new remote control handler is encountered.
+     **/
     public void addRCHandler(String name, int line, RCHandler hand) 
 			throws IOException
     {
 	show.addRCHandler(name, hand);
     }
 
+    /**
+     * Called when the show has finished parsing and all forward references
+     * have been resolved.
+     **/
     public void finishBuilding() throws IOException {
     }
     

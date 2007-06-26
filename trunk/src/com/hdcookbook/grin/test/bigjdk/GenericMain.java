@@ -97,6 +97,11 @@ import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ImageWaiter;
 
 /**
+ * This is a generic test program for exercising a show file.  It
+ * accepts commands to boss the show around on stdin.  Probably
+ * more interesting is the subclass of this, GuiGenericMain.
+ * This command-line version came first, but I pretty quickly got
+ * tired of it and made the GUI instead.
  *
  * @author Bill Foote (http://jovial.com)
  */

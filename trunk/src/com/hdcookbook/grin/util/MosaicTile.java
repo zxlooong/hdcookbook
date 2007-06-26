@@ -60,6 +60,8 @@ import java.awt.Rectangle;
 /**
  * This is a data holder used by ImageManager to record an entry
  * in the imagemap of mosaic tiles.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 class MosaicTile {
 

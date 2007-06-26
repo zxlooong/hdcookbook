@@ -67,6 +67,8 @@ import java.awt.Rectangle;
  * Represents a feature.  A feature is a thing that presents some sort
  * of UI.  A phase presents some number of features, and features can
  * be shared between phases.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public abstract class Feature implements SetupClient {
 
@@ -83,10 +85,16 @@ public abstract class Feature implements SetupClient {
 	this.name = name;
     }
 
+    /**
+     * @return the name of this feature
+     **/
     public String getName() {
 	return name;
     }
 
+    /** 
+     * @return a developer-friendly description of this feature, for debugging
+     **/
     public String toString() {
 	String nm = getClass().getName();
 	int i = nm.lastIndexOf('.');
@@ -159,7 +167,13 @@ public abstract class Feature implements SetupClient {
     abstract public boolean needsMoreSetup();
 
     /**
-     * returns true if this started setup being done
+     * Called by the show when it's time to begin setting up this
+     * feature.  This can be called multiple times; each call will
+     * eventually be matched by a call to unsetup().
+     *
+     * @see #unsetup()
+     *
+     * @return true if this call started setup being done
      **/
     public boolean setup() {
 	setupCount++;
@@ -171,6 +185,14 @@ public abstract class Feature implements SetupClient {
 	}
     }
 
+    /**
+     * Called by the show when this feature is no longer needed
+     * by whatever contains it.  When the last call to setup() has been
+     * matched by a call to unsetup(), it's time to unload this feature's
+     * assets.
+     *
+     * @see #setup()
+     **/
     public void unsetup() {
 	setupCount--;
 	if (setupCount == 0) {
@@ -178,6 +200,15 @@ public abstract class Feature implements SetupClient {
 	}
     }
 
+    /**
+     * Called by the show when this feature becomes activated, that is,
+     * when it starts presenting.  These nest, so this can be called
+     * mutliple times.  When the last call to activate() is undone by
+     * a call to deactivate(), that means this feature is no longer
+     * being shown.
+     *
+     * @see #deactivate()
+     **/
     final public void activate() {
 	activateCount++;
 	if (activateCount == 1) {
@@ -185,6 +216,12 @@ public abstract class Feature implements SetupClient {
 	}
     }
 
+    /**
+     * Called by the show when this feature is no longer being presented
+     * by whatever contains it.
+     *
+     * @see #activate()
+     **/
     final public void deactivate() {
 	activateCount--;
 	if (activateCount == 0) {
@@ -214,12 +251,27 @@ public abstract class Feature implements SetupClient {
 	    // we can wait.
     }
 
+    /**
+     * Request to add the visible area of this feature to the given
+     * rectantle.  
+     *
+     * @param  area The current area, or a rectangle with a width of 0
+     *	       	     to mean "nothing visible so far".
+     **/
     public abstract void  addDisplayArea(Rectangle area);
 
+    /**
+     * Paint the current state of this feature to gr
+     *
+     * @param gr  The place to paint to.
+     **/
     public abstract void paintFrame(Graphics2D gr);
 
     /**
-     * Called from Segment with the Show lock held.
+     * Called from Segment with the Show lock held, to advance us to
+     * the state we should be in for the given frame.
+     *
+     * @param newFrame	The frame number we're up to in our presentation.
      **/
     public abstract void advanceToFrame(int newFrame);
 }

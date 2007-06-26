@@ -60,6 +60,11 @@ import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
+/**
+ * This represents an image that has been packed into a mosaic.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class ManagedSubImage extends ManagedImage {
 
     private String name;
@@ -99,14 +104,23 @@ public class ManagedSubImage extends ManagedImage {
 	return numReferences > 0;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void prepare(Component comp) {
 	mosaic.prepare(comp);
     }
 
+    /**
+     * See superclass definition.
+     **/
     public synchronized void unprepare() {
 	mosaic.unprepare();
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void draw(Graphics2D gr, int x, int y, Component comp) {
 	Rectangle p = placement;
 	gr.drawImage(mosaic.image, x, y, x+p.width, y+p.height,

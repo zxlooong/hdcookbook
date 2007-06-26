@@ -78,13 +78,22 @@ import java.io.IOException;
  * It is composed of a number of segments.  A show progresses by moving
  * through segments; a show has exactly one active segment while it is
  * running.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class Show {
 
-    public boolean keepAllImages = false;
-
     private Director director;
+
+    /**
+     * Our helper that calls into us to load images and such
+     **/
     public SetupManager setupManager;
+
+    /**
+     * The component we're presented within.  This can be needed
+     * for things like loading images via Component.prepareImage().
+     **/
     public Component component;
 
     /**
@@ -107,13 +116,14 @@ public class Show {
     private boolean destroyed = false;
 
     private Queue pendingCommands = new Queue(32);
+    private boolean deferringPendingCommands = false;
     private int currentFrame = -1;	// The current frame number
 
     /** 
      * Create a new show.
      *
-     * @director  A Director helper class for the xlet to control the
-     *		  show.  May be null.
+     * @param director  A Director helper class the xlet can use to control
+     *			the show.
      **/
     public Show(Director director) {
 	this.director = director;
@@ -128,19 +138,6 @@ public class Show {
     public Director getDirector() {
 	return director;
     }
-
-    /**
-     * Called before initialization.  If set true, this show
-     * will greedily grab all images upon show initialization,
-     * and keep them forever.
-     **/
-    public synchronized void setKeepAllImages(boolean val) {
-	if (Debug.ASSERT && initialized) {
-	    Debug.assertFail("Show initialized, can't set keepAllImages");
-	}
-	keepAllImages = val;
-    }
-
 
     /**
      * This should be called after the show has been built.
@@ -215,12 +212,17 @@ public class Show {
     }
 
     /**
+     * Look up the given feature.
+     *
      * @return feature, or null if not found
      **/
     public Feature getFeature(String name) {
 	return (Feature) features.get(name);
     }
-    
+   
+    /** 
+     * Get all of the features in this show
+     **/
     public Enumeration getFeatures() {
         return features.elements();
     }
@@ -284,7 +286,7 @@ public class Show {
     }
 
     /**
-     * Used by the activate segment command
+     * Used by the activate segment command.
      **/
     public synchronized void pushCurrentSegment() {
 	segmentStack[segmentStackPos] = currentSegment;
@@ -317,6 +319,19 @@ public class Show {
     }
 
     /**
+     * An xlet can call this method just before calling advanceToFrame if
+     * the animation loop is caught up.  From time to time, pending commands
+     * will be deferred until animation has caught up.  GRIN knows we've
+     * caught up when we paint a frame, but calling this method can let
+     * it know one frame earlier.
+     *
+     * @see #advanceToFrame(int)
+     **/
+    public synchronized void setCaughtUp() {
+	deferringPendingCommands = false;
+    }
+
+    /**
      * Advance the state of the show to the given frame.  Frame numbers
      * monotonically increase; in the presence of trick play, they
      * do not track the media time of the underlying video.
@@ -330,6 +345,8 @@ public class Show {
      *
      * @throws 	IllegalArgumentException if newFrame < getCurrentFrame()
      * @throws	InterruptedException	if the show has been destroyed
+     *
+     * @see #setCaughtUp()
      **/
     public synchronized void advanceToFrame(int newFrame) 
     	throws InterruptedException 
@@ -385,14 +402,21 @@ public class Show {
     }
 
     synchronized void runPendingCommands() {
-	while (!pendingCommands.isEmpty()) {
+	while (!deferringPendingCommands && !pendingCommands.isEmpty()) {
 	    Command c = (Command) pendingCommands.remove();
 	    if (c != null) {
 		c.execute();
+		deferringPendingCommands 
+		    = deferringPendingCommands || c.deferNextCommands();
 	    }
 	}
     }
 
+    /**
+     * Get the current frame number of our underlying mode.
+     *
+     * @see #advanceToFrame(int)
+     **/
     public synchronized int getCurrentFrame() {
 	return currentFrame;
     }
@@ -402,8 +426,8 @@ public class Show {
      * This is called from ActivateSegmentCommand, and should not be
      * called from anywhere else.
      **/
-    // We know the lock is being held, and a command is being executed
     public void doActivateSegment(Segment newS) {
+	// We know the lock is being held, and a command is being executed
 	Segment old = currentSegment;
 	currentSegment = newS;
 	currentSegment.activate(old);
@@ -506,6 +530,12 @@ public class Show {
 	}
     }
 
+    /**
+     * Paint the current state of the enhancement.  This should be
+     * called by the xlet.  This way, the xlet can decide to use
+     * whatever animation style it wants:  direct draw, repaint
+     * draw, SFAA, or anything else.
+     **/
     public synchronized void paintFrame(Graphics2D gr)
     	throws InterruptedException 
     {
@@ -515,9 +545,13 @@ public class Show {
 	if (currentSegment != null) {
 	    currentSegment.paintFrame(gr);
 	}
+	deferringPendingCommands = false; 	
+	    // If we've paint a frame, we're definitely caught up.
     }
 
     /**
+     * Called by the xlet when a keypress is received.
+     *
      * @return true	If the keypress is handled
      **/
     public synchronized boolean handleKeyPressed(int vkCode) {
@@ -534,6 +568,10 @@ public class Show {
 	return currentSegment.handleRCEvent(re);
     }
 
+    /**
+     * Called by the xlet when the mouse moves.  This should be called
+     * when a mouse moved event or a mouse dragged event is received.
+     **/
     public synchronized void handleMouseMoved(int x, int y) {
 	boolean used = false;
         if (currentSegment != null) {
@@ -545,7 +583,10 @@ public class Show {
 	    component.setCursor(c);
 	}
     }
-    
+   
+    /**
+     * Called by the xlet when the mouse is clicked.
+     **/
     public synchronized void handleMouseClicked(int x, int y) {
         if (currentSegment != null) {
             currentSegment.handleMouse(x, y, true);

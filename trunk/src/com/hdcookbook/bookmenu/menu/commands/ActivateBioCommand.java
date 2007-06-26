@@ -59,6 +59,12 @@ package com.hdcookbook.bookmenu.menu.commands;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.bookmenu.menu.MenuXlet;
 
+/**
+ * A command that starts up the process of checking the Internet
+ * for an updated GunBunny bio image.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class ActivateBioCommand extends Command {
 
     private MenuXlet xlet;

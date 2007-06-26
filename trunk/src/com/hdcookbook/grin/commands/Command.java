@@ -58,17 +58,46 @@ package com.hdcookbook.grin.commands;
 import java.io.IOException;
 
 /**
+ * Common base class of all GRIN commands.  GRIN defers anything that
+ * can change the state of a show to a command.  In this way, the
+ * synchronization model is kept very simple.  Commands are executed
+ * from within Show.advanceToFrame, with the show lock held.
+ *
+ * @see com.hdcookbook.grin.Show#advanceToFrame(int)
  *
  * @author Bill Foote (http://jovial.com)
  */
 public abstract class Command {
     
-    /** Creates a new instance of Command */
+    /** 
+     * Creates a new instance of Command 
+     **/
     protected Command() {
     }
-    
+ 
+    /**
+     * Execute the command.  This causes the command to take
+     * whatever action it was created to do.
+     **/
     public abstract void execute();
 
+    /**
+     * Should the commands that follow this one be deferred unti after
+     * the frame pump has caught up?  If the command is time-consuming,
+     * like one that starts video presentation, then it could be a good
+     * idea to return true here.  This should be pretty rare.
+     *
+     * @return true if the commands after this one should be deferred
+     *              until after the animation frame pump has caught up.
+     **/
+    public boolean deferNextCommands() {
+	return false;
+    }
+
+    /**
+     * Return a user-friendly string for this command for debugging
+     * purposes.
+     **/
     public String toString() {
 	String nm = getClass().getName();
 	int i = nm.lastIndexOf('.');

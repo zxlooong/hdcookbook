@@ -4,7 +4,7 @@
   P.pagebreak {page-break-before: always}
 </style>
 <h2><center>GRIN - an extensible Java animation framework for TV</center></h2>
-<h3><center>Version 0.9.0, June 18, 2007</h3></center>
+<h3><center>Version 0.9.1, June 25, 2007</h3></center>
 <p><center>
 <img src="grin_bear.jpg">
 </center></p>
@@ -73,8 +73,8 @@ An application can be structured like this:
        Rectangle thisArea = new Rectangle();
        Rectangle lastArea = new Rectangle();
        for (int frame = 0; !done; frame++) {
-  	   s.advanceToFrame(frame);
            ...  wait until it's time to display frame
+  	   s.advanceToFrame(frame);
            Graphics2D g = ...  get a Graphics of an image buffer;
 	   synchronized(show) {
 	       s.setDisplayArea(thisArea, lastArea);
@@ -130,7 +130,6 @@ A show can be assembled from a simple show file that's parsed when
 a Show is created.  Here's BNF describing the syntax of a show file:
 </p>
 <pre>
-@@ TODO:  For the image types, add an option to set SRC_OVER mode.
     show ::= "show" (segment | feature | rc_handler | setting | mosaic_hint)* 
     	     "end_show"
 
@@ -166,8 +165,6 @@ a Show is created.  Here's BNF describing the syntax of a show file:
     assembly ::= "feature" "assembly" name "{" assembly_part * "}" ";"
 
     assembly_part ::= name feature_name
-
-    sound ::= @@ TODO
 
     text ::= "feature" "text" name x y text_strings font_spec color_spec 
     		[ "background" color_entry ] ";"
@@ -207,14 +204,6 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     translator ::= "feature" "translator" name translation_name 
     			"{" feature_name "}" ";"
-
-    @@ TODO:  Add a way of specifying SRC_OVER for images
-
-    @@ TODO:  Specify order of drawing
-
-    @@ TODO:  Use a timer to drive image counter for image_sequence, instead
-              of the weird master/slave thing.  This will make it the same
-	      model al translator/translation.
 
     extension_feature ::= "feature" "extension" namespace:type_name 
     				name string ";"
@@ -386,38 +375,71 @@ easily.
 </p>
 <h2>Synchronization</h2>
 <p>
-@@ TODO <br>
-Need to write some text about the synchronization model.  The main
-thing is that if the engine is in an unsafe state, actions are deferred.
-Indeed, this is one of the motivations for using commands - a command
-can be deferred for later execution, thus avoiding the deadlock problems
-inherent in synchronization.<br>
-I still have to work out what the synchronization model around remote
-control requests are.  I'm not sure, but I think it will be that
-they're held until the engine is at a safe state.  So, I'm thinking
-of a basic synchronization model of:
+GRIN has a very simple synchronization model.  The most important
+external lock is the lock on the show object.  Everything that might
+need to synchronize on the show lock needs to synchronize on it first.
+</p><p>
+Any change to a show's state (or the "show model" if you prefer that
+term out of MVC theory) needs to be synchronized on the show.  Further,
+changes other than purely visual changes need to be synchronized into the
+"frame pump" loop, which is basically:
+</p>
 <pre>
-    for (;;) {
-        If there are any pending commands {
-	    execute them, deferring any generated commands
-	} else If there's a keypress {
-	    process it, deferring any generated commands
-	} else if a component is ready to have a frame displayed into it
-	    display it, deferring any generated commands
-	}
-    }
+          for frame 1 to to infinity
+	      wait until it's time to display frame
+	      update model
+	      render show to screen
+	  rof
 </pre>
-Importantly, the <b>only</b> way to move a show to a different segment
-is with a command
-	    process it
+<p>
+This is facilitated with a command model.  At any time, you can
+always call <code>show.runCommand(Command)</code>, from any thread.  This does
+not require the show lock; it only synchronizes on the internal lock
+used for a queue, so this is very thread-safe and simple.  When you
+call <code>runCommand()</code>, it queues the command for later execution,
+at the right point in the frame pump loop.
+The queue class it uses was even designed so that it will almost never
+need to allocate a Java heap object, so don't worry about generating
+garbage by using it.
+</p><p>
+As an example of the reliance on commands, consider the method
+used to move a show to a new segment, 
+<code>show.activateSegment(Segment)</code>.  This works by queueing
+up a command to activate the given segment when the frame pump is in
+the right state.  By the way, it doesn't allocate a new command object
+to do this - again, we're careful about generating heap traffic.
 </p>
 <h2>Memory Management and GC</h2>
 <p>
-@@ TODO <br>
-Basically, say that we try to avoid object creation whenever possible,
-including for the queue of deferred commands.  Maybe try to say something
-about opportunistic calls to System.GC().  Maybe some sort of support
-for this belongs in the framework?  This needs thought.
+As was alluded to above, the GRIN framework tries very hard to avoid
+creating unnecessary heap objects.  This should avoid the possibility
+of objectionable pauses due to GC.  As is usually the case in any
+xlet, it's a good idea to call <code>System.gc()</code> after
+initialization, because initialization code tends to generate a lot
+of garbage, and if you're going to pause for a bit, initialization is
+the time to do it.  For a show, this point comes after parsing the show
+file.
+</p>
+<h2>Animation Loop</h2>
+<p>
+The xlet that includes GRIN needs to define the overall animation
+loop that implements the pseudocode shown earlier in this document.
+This is a bit of boilerplate code you'll probably use over
+and over.  It's best that this be outside of GRIN proper, because
+making little changes to that loop (like drawing something before
+or after GRIN does its drawing) is a really powerful technique.
+</p>
+<p>
+The menu xlet in <b>com.hdcookbook.bookmenu.menu</b> does this,
+and even has a flag to switch between direct draw and repaint draw.
+The Gun Bunny game xlet in <b>com.hdcookbook.gunbunny</b> doesn't
+use GRIN, but it has the same kind of frame pump.  Gun Bunny even
+lets you switch dynamically between direct draw, repaint draw and
+SFAA.  With all three, it maintains time-based animation, dropping
+frames if it falls behind.  I'd recommend using the Gun Bunny animator
+class.  I actually would have used it in the menu xlet if I hadn't
+done the menu xlet first, and if it weren't too close to the book
+deadline to switch it over.
 </p>
 <h2>Building Notes</h2>
 <p>
@@ -428,12 +450,10 @@ program in com.hdcookbook.grin.test, be sure to include
 </p>
 <h2>Future Ideas</h2>
 <ul>
-  <li>end_commands should exist for text and maybe others.
-  <li>Some kind of repeat count for image_sequence
   <li>What about an animation within an animation?  The outer
       animation would define a "universe" - think of a star that
       moves, and a planet that rotates around it.
-  <li>Image scaling is a bit challenging, but needed.
+  <li>Image scaling is a bit challenging, but useful.
   <li>Animation (or loading) priority?  The idea is to throttle back
       the features in a semantically meaningful way.  Maybe we could do
       this by authoring the full thing, then having a seperate structure
@@ -445,12 +465,6 @@ program in com.hdcookbook.grin.test, be sure to include
       improve startup time.  If there's ever a reasonable set of show
       files that take over half a second to parse, then this would
       be worth doing.
-  <li>It might be nice to package up the four different animation
-      styles, and make it so an app can switch between them dynamically.
-      This would mean apps could easily switch between direct draw (i.e.
-      Component.getGraphics()), Blu-Ray's SFAA, MHP 1.2's 
-      BufferedAnimation, and repaint draw.  This probably belongs 
-      outside of GRIN proper.
 </ul>
 <h2>License</h2>
 <p>
@@ -464,6 +478,10 @@ A test program for the GRIN framework is provided in the package
 <b>com.hdcookbook.grin.test</b>.  Please consult the package documentation
 for details.  You can launch GRIN using Java SE - this is documented in
 the package documentation for <b>com.hdcookbook.grin.test.bigjdk</b>.
+The <code>GuiGenericMain</code> class there is a nice little tool for
+browsing around a show file, and seeing what different segments look
+like.  Finally, you can see a pretty complete demonstration of using
+GRIN in the xlet in <b>com.hdcookbook.bookmenu.menu</b>.
 </p>
 
 <h2>Change Log</h2>
@@ -520,6 +538,33 @@ the package documentation for <b>com.hdcookbook.grin.test.bigjdk</b>.
       DVD.  Update coming soon with documentation, but I'm putting this
       one out now to restore hdcookbook.dev.java.net, which just
       changed from CVS to SVN.
+  <li><b>Version 0.9.1, June 25 2007</b>  Fleshed out the javadoc
+      comments.  Here are some of the major new features introduced
+      in version 0.9:
+      <ul>
+        <li> An automatic image mosaic creator, to speed xlet load times.
+	<li> A new "visual" remote control handler that's very powerful
+	     and general.
+	<li> A feature for fade in/fade out effects, a feature for
+	     SRC_OVER graphics-to-graphics blending of features, and
+	     one for clipping.
+	<li> Good support for xlet feature extensions that modify the
+	     behavior of other features.  This is a very powerful
+	     technique.
+	<li> Some nice additions to "GuiGenereicMain," the show
+	     script browser for  big JDK.  It now lets you see
+	     the UI composited over a background image when you
+	     stop the frame pump, or you take a snapshot.  This is
+	     really useful for generating "screenshots" if you're
+	     writing a book :-)
+	<li> Added <code>Command.deferNextCommands()</code> so that
+	     the frame pump can be allowed to catch up after a
+	     time-consuming command.
+	<li> Many cleanups and documentation improvements
+      </ul>
+      Version 0.9.1 is very close to what will be on the DVD in the book.
+      I know this to be true, because the deadline for getting the disc
+      image out is this Friday, in four days.
 </ul>
 </p>
 </body></html>

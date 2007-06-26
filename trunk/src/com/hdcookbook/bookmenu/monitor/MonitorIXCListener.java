@@ -61,16 +61,46 @@ import java.rmi.RemoteException;
 
 import org.dvb.application.AppProxy;
 import org.dvb.application.AppsDatabase;
+import org.dvb.application.AppStateChangeEvent;
+import org.dvb.application.AppStateChangeEventListener;
 import org.dvb.application.AppID;
 
 import com.hdcookbook.bookmenu.MonitorIXCInterface;
 import com.hdcookbook.grin.util.Debug;
 
-public class MonitorIXCListener implements MonitorIXCInterface {
+/**
+ * This class is the object we export via inter-xlet communication.
+ * When another xlet asks us to do something via this interface, we do
+ * it.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
+public class MonitorIXCListener 
+	implements MonitorIXCInterface, AppStateChangeEventListener {
+
+    /**
+     * The org ID for all of our xlets
+     **/
+    public final static int ORG_ID = 0x56789abc;
+
+    /**
+     * The App ID for the menu app.  This must be the same as the ID
+     * in the bdjo file.
+     **/
+    public final static int MENU_APP_ID = 0x4002;
+
+    /**
+     * The App ID for the game app.  This must be the same as the ID
+     * in the bdjo file.
+     **/
+    public final static int GAME_APP_ID = 0x4003;
 
     private MonitorXlet xlet;
-    private AppProxy menuXlet;
-    private AppProxy gameXlet;
+    private AppProxy gameXlet;	// Set while we're playing game
+
+    public MonitorIXCListener(MonitorXlet xlet) {
+	this.xlet = xlet;
+    }
 
     private AppProxy getAppProxy(int orgID, int appID) {
 	AppsDatabase db = AppsDatabase.getAppsDatabase();
@@ -78,23 +108,23 @@ public class MonitorIXCListener implements MonitorIXCInterface {
     }
 
     public void init() {
-	menuXlet = getAppProxy(0x56789abc, 2);
-	gameXlet = getAppProxy(0x56789abc, 3);
-    }
-    public MonitorIXCListener(MonitorXlet xlet) {
-	this.xlet = xlet;
     }
 
+    /** 
+     * Called by the menu xlet to start the game.
+     **/
     public void startGame(String s) throws RemoteException {
 	if (Debug.LEVEL > 0) {
 	    Debug.println("****  Monitor xlet to start game ***");
 	}
+	gameXlet = getAppProxy(ORG_ID, GAME_APP_ID);
+	gameXlet.addAppStateChangeEventListener(this);
 	try {
-	    menuXlet.stop(false);
+	    getAppProxy(ORG_ID, MENU_APP_ID).stop(false);
 	    gameXlet.start();
 	} catch (Throwable ignored) {
-	    ignored.printStackTrace();
 	    if (Debug.LEVEL > 0) {
+		ignored.printStackTrace();
 		Debug.println();
 		Debug.println("***  Failed to start game.  For this to work, the monitor xlet must");
 		Debug.println("***  be signed.  Perhaps it wasn't signed correctly?");
@@ -103,21 +133,60 @@ public class MonitorIXCListener implements MonitorIXCInterface {
 	}
     }
 
+    /**
+     * This could be called by another xlet to start the menu.  Gun Bunny
+     * doesn't use this, though.  Instead, the monitor xlet monitors the
+     * state of Gun Bunny, and when the Gun Bunny xlet is destroyed, it
+     * automatically launches the menu xlet.
+     **/
     public void startMenu(String s) throws RemoteException {
+	doStartMenu();
+    }
+
+    private void doStartMenu() {
 	if (Debug.LEVEL > 0) {
 	    Debug.println("****  Monitor xlet to start menu  ***");
 	}
 	try {
+	    gameXlet.removeAppStateChangeEventListener(this);
 	    gameXlet.stop(false);
-	    menuXlet.start();
 	} catch (Throwable ignored) {
-	    ignored.printStackTrace();
 	    if (Debug.LEVEL > 0) {
+		ignored.printStackTrace();
 		Debug.println();
 		Debug.println("***  Failed to start menu.  For this to work, the monitor xlet must");
 		Debug.println("***  be signed.  Perhaps it wasn't signed correctly?");
 		Debug.println();
 	    }
+	}
+	try {
+	    gameXlet = null;
+	    getAppProxy(ORG_ID, MENU_APP_ID).start();
+	} catch (Throwable ignored) {
+	    if (Debug.LEVEL > 0) {
+		ignored.printStackTrace();
+		Debug.println();
+	    }
+	}
+    }
+
+    /**
+     * Callback from system via AppStateChangeEventListener
+     **/
+    public void stateChange(AppStateChangeEvent event) {
+	// Automatically re-launch the menu when the game puts itself
+	// in the destroyed state
+	if (!event.hasFailed() && event.getAppID().getAID() == GAME_APP_ID) {
+	    if (event.getToState() == AppProxy.DESTROYED) {
+		doStartMenu();
+	    }
+	}
+    }
+
+    public void destroy() {
+	AppProxy g = gameXlet;
+	if (g != null) {
+	    g.removeAppStateChangeEventListener(this);
 	}
     }
 }

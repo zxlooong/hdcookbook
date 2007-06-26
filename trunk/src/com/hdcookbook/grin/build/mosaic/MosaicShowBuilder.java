@@ -90,6 +90,9 @@ import java.io.File;
 
 
 /**
+ * This is a helper class that hooks us into the GRIN parser.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 
  public class MosaicShowBuilder extends ShowBuilder {

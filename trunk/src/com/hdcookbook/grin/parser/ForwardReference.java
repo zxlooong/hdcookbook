@@ -58,6 +58,9 @@ package com.hdcookbook.grin.parser;
 import java.io.IOException;
 
 /**
+ * Used by the parser when it encounters something that might be a forward
+ * reference.  It's used to defer some computation in parsing until the
+ * reference is resolved.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -66,7 +69,6 @@ abstract class ForwardReference {
     private int lineNumber;
     private Lexer lexer;
     
-    /** Creates a new instance of ForwardReference */
     ForwardReference(Lexer lexer) {
         this.lineNumber = lexer.getLineNumber();
 	this.lexer = lexer;
@@ -81,6 +83,10 @@ abstract class ForwardReference {
     
     abstract void resolve() throws IOException;
 
+    /**
+     * Convenience method for reporting an error.  The error message
+     * gives the line number where the construct we represent was read.
+     **/
     void reportError(String msg) throws IOException {
         throw new IOException(msg + " on line " + lineNumber + ".");
     }

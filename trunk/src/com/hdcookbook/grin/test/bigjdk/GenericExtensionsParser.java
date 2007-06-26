@@ -67,6 +67,8 @@ import com.hdcookbook.grin.input.RCHandler;
 import java.io.IOException;
 
 /**
+ * This is an extensions parser that makes a fake version of any
+ * GRIN extension it encounters.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -78,12 +80,20 @@ public class GenericExtensionsParser implements ExtensionsParser {
 	this.director = director;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public Feature getFeature(Show show, String typeName, 
     			      String name, String arg)
     {
+	// Not implemented.  If we do this, we'll have to figure out
+	// some syntactical contstraints on an extension feature.
         return null;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public Modifier getModifier(Show show, final String typeName, 
     			        String name, String arg)
     {
@@ -95,7 +105,8 @@ public class GenericExtensionsParser implements ExtensionsParser {
     }
 
     /**
-     * Assume that all commands end with a semicolon, and have no
+     * See superclass definition.
+     * This version assumes that all commands end with a semicolon, and have no
      * semicolons embedded in them.
      **/
     public Command parseCommand(Show show, String typeName, Lexer lex,
@@ -121,9 +132,15 @@ public class GenericExtensionsParser implements ExtensionsParser {
 	};
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void finishBuilding(Show show) throws IOException {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void takeMosaicHint(String name, int width, int height, 
                                String[] images)
     {

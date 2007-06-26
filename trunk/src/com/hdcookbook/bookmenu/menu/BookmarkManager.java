@@ -74,6 +74,13 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+/**
+ * This class manages all of the state associated with the
+ * user-settable bookmarks, and it updates the UI to reflect
+ * that state.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class BookmarkManager {
 
     private MenuXlet xlet;
@@ -95,10 +102,16 @@ public class BookmarkManager {
     private int currBookmark;      // Currently selected bookmark, 0 is "none"
     private boolean bookmarksChanged = false;
 
+    /**
+     * Create the bookmark manager.
+     **/
     public BookmarkManager(MenuXlet xlet) {
 	this.xlet = xlet;
     }
 
+    /**
+     * Initialize the bookmark manager.  Called on xlet startup.
+     **/
     public void init() {
 	Assembly a;
 	a = (Assembly) getFeature("F:BookmarksMenu.DeleteHelpMessage.State");
@@ -254,6 +267,7 @@ public class BookmarkManager {
 		}
 	    }
 	}
+	bookmarksChanged = false;
     }
 
 
@@ -382,7 +396,17 @@ public class BookmarkManager {
 	}
     }
 
+    /**
+     * Destroy the bookmark manager.  This is called on xlet
+     * destruction.  We wait to write the bookmarks out until
+     * the xlet is destroyed, because it's antisocial to write
+     * to persistent storage too often.  Persistent storage
+     * is often implemented as flash memory, which supports a
+     * finite number of writes.
+     **/
     public synchronized void destroy() {
-	writeBookmarks();
+	if (bookmarksChanged) {
+	    writeBookmarks();
+	}
     }
 }

@@ -75,6 +75,9 @@ import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
 /**
+ * This is a subclass of the GRIN director class that fakes out
+ * GRIN to accept any extensions of the GRIN syntax.  The extensions
+ * are ignored, with default behavior put in.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -84,10 +87,16 @@ public class GenericDirector extends Director {
 
     public GenericDirector(String showName) {
 	this.showName = showName;
-	ChapterManager[] chapters = { }
+	ChapterManager[] chapters = { new ChapterManager("init") };
 	setup(0, chapters);
     }
     
+    /**
+     * See superclass definition.  The first time we're asked for a given
+     * chapter manager, we just create it.  A real xlet might have named
+     * chapter managers of different types, if it chooses to use the
+     * state pattern.
+     **/
     public ChapterManager getChapterManager(String name) {
         synchronized(getShow()) {
             ChapterManager result = super.getChapterManager(name);
@@ -99,10 +108,18 @@ public class GenericDirector extends Director {
         }
     }
 
+    /**
+     * See superclass definition.  This extensions parser will just
+     * make a fake implementation of each extension.
+     **/
     public ExtensionsParser getExtensionsParser() {
 	return new GenericExtensionsParser(this);
     }
 
+    /**
+     * Create a show.  This is called by the main control class of
+     * this debug tool.
+     **/
     public Show createShow(ShowBuilder builder) {
 	Show show = new Show(this);
 	URL source = null;

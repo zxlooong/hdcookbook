@@ -60,12 +60,14 @@ import com.hdcookbook.grin.input.VisualRCHandler;
 import java.io.IOException;
 
 /**
+ * This command is used to set the state of a visual RC handler.  It's
+ * useful when going into a segment that contains such a handler, to
+ * put things into a known state.
  *
  * @author Bill Foote (http://jovial.com)
  */
 public class SetVisualRCStateCommand extends Command {
     
-   
     private boolean activated;
     private int state;
     private VisualRCHandler handler;

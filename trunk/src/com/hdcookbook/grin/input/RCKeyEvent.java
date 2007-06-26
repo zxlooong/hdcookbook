@@ -95,28 +95,28 @@ public class RCKeyEvent {
     /**
      * The red color key.
      *
-     * @see com.hdcookbook.util.AssetFinder#getColorKeyCode(java.awt.Color)
+     * @see com.hdcookbook.grin.util.AssetFinder#getColorKeyCode(java.awt.Color)
      **/
     public static RCKeyEvent KEY_RED;
 
     /**
      * The green color key.
      *
-     * @see com.hdcookbook.util.AssetFinder#getColorKeyCode(java.awt.Color)
+     * @see com.hdcookbook.grin.util.AssetFinder#getColorKeyCode(java.awt.Color)
      **/
     public static RCKeyEvent KEY_GREEN;
 
     /**
      * The yellow color key.
      *
-     * @see com.hdcookbook.util.AssetFinder#getColorKeyCode(java.awt.Color)
+     * @see com.hdcookbook.grin.util.AssetFinder#getColorKeyCode(java.awt.Color)
      **/
     public static RCKeyEvent KEY_YELLOW;
 
     /**
      * The blue color key.
      *
-     * @see com.hdcookbook.util.AssetFinder#getColorKeyCode(java.awt.Color)
+     * @see com.hdcookbook.grin.util.AssetFinder#getColorKeyCode(java.awt.Color)
      **/
     public static RCKeyEvent KEY_BLUE;
 
@@ -177,6 +177,10 @@ public class RCKeyEvent {
         keyByName.put(name, this);
     }
 
+    /**
+     * Get a developer-friendly name of this key event.
+     * Used for debugging.
+     **/
     public String getName() {
 	return name;
     }

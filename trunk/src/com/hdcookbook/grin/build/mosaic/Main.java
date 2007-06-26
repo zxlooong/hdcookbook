@@ -66,8 +66,9 @@ import java.util.LinkedList;
  * This class has the main program for building the assets of a show
  * out to a mosaic.  Please see <a href="package.html">The package
  * documentation</a> for more details about this program.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
-
  public class Main {
 
     private static void usage() {

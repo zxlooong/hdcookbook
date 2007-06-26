@@ -66,6 +66,9 @@ import com.hdcookbook.grin.input.RCHandler;
 import java.io.IOException;
 
 /**
+ * This is a pretend command that does nothing.  It's here so that
+ * the mosaic builder can create something when it encounters an
+ * extension command in a GRIN show file.
  *
  * @author Bill Foote (http://jovial.com)
  */

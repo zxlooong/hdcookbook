@@ -67,6 +67,8 @@ import java.awt.Rectangle;
 /**
  * Represents a clipped version of another feature.  When painting, a
  * clipping rectangle is set.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class Clipped extends Modifier {
 
@@ -78,6 +80,9 @@ public class Clipped extends Modifier {
 	this.clipRegion = clipRegion;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
 	// This is synchronized by Show.paintFrame, so we don't
 	// have to worry about concurrent calls.

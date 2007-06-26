@@ -56,9 +56,18 @@
 
 package com.hdcookbook.grin.util;
 
+/**
+ * This interface is implemented by things in GRIN that want to
+ * get called by the setup manager thread, to do things like load
+ * images.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public interface SetupClient {
 
-
+    /**
+     * Do some (or all) of the setup work needed for this client.
+     **/
     public void doSomeSetup();
 
     /** 

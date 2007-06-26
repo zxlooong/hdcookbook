@@ -67,8 +67,10 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * Cases its children to be painted in SRC_OVER mode, that is, with
+ * Causes its child to be painted in SRC_OVER mode, that is, with
  * graphic-to-graphics alpha blending.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class SrcOver extends Modifier {
 
@@ -79,6 +81,9 @@ public class SrcOver extends Modifier {
 	super(show, name);
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
 	Composite old = gr.getComposite();
 	gr.setComposite(AlphaComposite.SrcOver);

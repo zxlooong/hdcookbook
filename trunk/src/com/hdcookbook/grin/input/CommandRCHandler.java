@@ -59,6 +59,8 @@ import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.commands.Command;
 
 /**
+ * This remote control handler will trigger a set of commands
+ * whenever one of a set of keys is pressed.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -72,6 +74,9 @@ public class CommandRCHandler extends RCHandler {
 	this.commands = commands;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean handleRCEvent(RCKeyEvent ke) {
 	if ((ke.getBitMask() & mask) != 0) {
 	    for (int i = 0; i < commands.length; i++) {
@@ -83,13 +88,22 @@ public class CommandRCHandler extends RCHandler {
 	}
     }
     
+    /**
+     * See superclass definition.
+     **/
     public boolean handleMouse(int x, int y, boolean activate) {
 	return false;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void activate(Segment s) {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int frameNumber) {
     }
 }

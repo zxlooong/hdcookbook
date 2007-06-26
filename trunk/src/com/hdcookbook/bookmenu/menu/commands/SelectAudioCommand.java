@@ -59,6 +59,11 @@ package com.hdcookbook.bookmenu.menu.commands;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.bookmenu.menu.MenuXlet;
 
+/**
+ * Command that selects the audio stream
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class SelectAudioCommand extends Command {
 
     private MenuXlet xlet;

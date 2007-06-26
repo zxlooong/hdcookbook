@@ -56,6 +56,16 @@
 
 package com.hdcookbook.grin.util;
 
+/**
+ * A SetupManager manages a low-priority thread that's used to set up
+ * GRIN features, by doing things like loading images.  This way, image
+ * loading and other setup work can proceed in the background, while
+ * other features (that are already set up) animate or are otherwise
+ * active.  Features that are supposed to be active but that haven't
+ * been set up yet are given priority.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class SetupManager implements Runnable {
 
     private SetupClient[] settingUp;

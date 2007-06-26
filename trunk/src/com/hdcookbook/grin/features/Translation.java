@@ -114,10 +114,16 @@ public class Translation extends Feature {
 	currY = ys[0];
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartX() {
 	return 0;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartY() {
 	return 0;
     }
@@ -138,6 +144,10 @@ public class Translation extends Feature {
 	return currY;
     }
 
+    /**
+     * Return the list of commands that are executed at the end
+     * of doing our translation.
+     **/
     public Command[] getEndCommands() {
 	return endCommands;
     }
@@ -154,6 +164,9 @@ public class Translation extends Feature {
     public void initialize() {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void destroy() {
     }
 
@@ -175,13 +188,22 @@ public class Translation extends Feature {
     protected void setSetupMode(boolean mode) {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void doSomeSetup() {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean needsMoreSetup() {
 	return false;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
 	if (Debug.ASSERT && !isActivated) {
 	    Debug.assertFail("Translation " + getName() + " not activated");
@@ -211,9 +233,15 @@ public class Translation extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void  addDisplayArea(Rectangle area) {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
     }
 }

@@ -75,6 +75,8 @@ import java.io.DataInputStream;
  * by first querying the helper.  This way, an Xlet can make decisions
  * about where to look for stuff.  For example, a signed BD-Live xlet
  * could set up a search path on the BUDA.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class AssetFinder  {
     
@@ -141,7 +143,9 @@ public class AssetFinder  {
 	    ImageManager.readImageMap(dis);
 	    // dis.close is in the finally block
 	} catch (IOException ex) {
-	    ex.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		ex.printStackTrace();
+	    }
 	    if (Debug.ASSERT) {
 		Debug.assertFail();
 	    }
@@ -212,7 +216,9 @@ public class AssetFinder  {
 			return f.toURL();
 		    } catch (Exception ex) {
 			// This should never happen
-			ex.printStackTrace();
+			if (Debug.LEVEL > 0) {
+			    ex.printStackTrace();
+			}
 		    }
 		}
 	    }
@@ -271,7 +277,9 @@ public class AssetFinder  {
     }
     
     /**
-     * @param path should be an absolute path within the classpath.
+     * Load an image from the given path.
+     *
+     * @param path should be an absolute path within asset finder's path.
      **/
     public static Image loadImage(String path) {
 	if (helper != null) {
@@ -300,7 +308,9 @@ public class AssetFinder  {
     }
 
     /**
-     * Get the key code for the given color key.
+     * Get the key code for the given color key.  The HD Cookbook has
+     * an algorithm that an xlet might choose to use, if it wants
+     * to assign the color keys in a way that works on most players.
      *
      * @param c		A color that is == to one of the standard
      *			constants Color.red, Color.green, Color.yellow
@@ -359,6 +369,12 @@ public class AssetFinder  {
 	throw new RuntimeException("ABORT");
     }
 
+    /**
+     * Called when the disc playback should abort.  This should only
+     * be called when there's a fatal error, like an assertion failure.
+     * The expected behavior is immediate termination - like
+     * System.exit(1) on big JDK, or ejecting the disc on a player.
+     **/
     protected void abortHelper() {
     }
 }

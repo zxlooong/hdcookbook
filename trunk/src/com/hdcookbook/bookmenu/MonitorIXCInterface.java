@@ -59,11 +59,26 @@ package com.hdcookbook.bookmenu;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-
+/**
+ * This interface defines the methods that are exported by the
+ * monitor xlet via inter-xlet communication.  Other xlets can 
+ * call these methods to get the monitor xlet to do something.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public interface MonitorIXCInterface extends Remote {
 
+    /** 
+     * Called by the menu xlet to start the game.
+     **/
     public void startGame(String s) throws RemoteException;
 
+    /** 
+     * This could be called by another xlet to start the menu.  Gun Bunny
+     * doesn't use this, though.  Instead, the monitor xlet monitors the
+     * state of Gun Bunny, and when the Gun Bunny xlet is destroyed, it
+     * automatically launches the menu xlet.
+     **/
     public void startMenu(String s) throws RemoteException;
 
 }

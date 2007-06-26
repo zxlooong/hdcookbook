@@ -59,6 +59,15 @@ package com.hdcookbook.bookmenu.menu.commands;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.bookmenu.menu.MenuXlet;
 
+/**
+ * A command that's called when a bookmark is selected or activated
+ * in the bookmark UI.  There are five bookmark slots, but not all
+ * of them will be filled.  This command tells the xlet what was just
+ * selected, but the xlet might or might not go there, depending on
+ * whether or not there's really a bookmark there.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class BookmarkUICommand extends Command {
 
     private MenuXlet xlet;

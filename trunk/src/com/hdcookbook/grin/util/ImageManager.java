@@ -69,6 +69,8 @@ import com.hdcookbook.grin.Show;
 
 /**
  * This class manages a set of images.  It loads and flushes them as needed.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class ImageManager {
 
@@ -80,6 +82,13 @@ public class ImageManager {
     private ImageManager() {
     }
 
+    /**
+     * Get an image.  Each call to getImage should be balanced
+     * by a call to ungetImage when you no longer need the image.
+     * Image instances are shared, so this class does reference counting.
+     *
+     * @see #ungetImage(com.hdcookbook.grin.util.ManagedImage)
+     **/
     public static ManagedImage getImage(String name) {
 	synchronized(lock) {
 	    ManagedImage im = (ManagedImage) images.get(name);
@@ -101,6 +110,11 @@ public class ImageManager {
 	}
     }
 
+    /**
+     * Called when an image acquired with getImage is no longer needed.
+     *
+     * @see #getImage(java.lang.String)
+     **/
     public static void ungetImage(ManagedImage im) {
 	synchronized(lock) {
 	    im.removeReference();
@@ -114,6 +128,8 @@ public class ImageManager {
     static void readImageMap(DataInputStream is) throws IOException {
 	// Reads the file written by 
 	// com.hdcookbook.grin.build.mosaic.MosaicMaker.makeMosaics()
+	// This maps the original image file name to the name of a
+	// mosaic image, and the position within that mosaic.
 
 	synchronized(lock) {
 	    if (Debug.ASSERT && imageMap != null) {

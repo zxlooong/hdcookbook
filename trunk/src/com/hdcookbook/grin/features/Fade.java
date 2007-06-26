@@ -70,7 +70,12 @@ import java.awt.Rectangle;
 import java.awt.AlphaComposite;
 
 /**
- * Represents a clipped version of another feature that draws in SRC_OVER mode.
+ * Modifies a child feature by applying an alpha value when drawing in
+ * it.  This lets you animate a fade-in and fade-out effect.  It works
+ * by specifying alpha values at a few keyframes, and doing linear
+ * interpolation between those keyframes.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class Fade extends Modifier {
 
@@ -113,6 +118,9 @@ public class Fade extends Modifier {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setActivateMode(boolean mode) {
 	super.setActivateMode(mode);
 	if (mode) {
@@ -121,6 +129,9 @@ public class Fade extends Modifier {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
 	super.advanceToFrame(newFrame);
 	alphaIndex = newFrame - startAnimationFrame;
@@ -131,6 +142,9 @@ public class Fade extends Modifier {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
 	if (alphaIndex < alphas.length) {
 	    Composite old = gr.getComposite();

@@ -64,6 +64,15 @@ import java.awt.Image;
 
 import com.hdcookbook.grin.util.Debug;
 
+/**
+ * This component is used to cover the space where the menu UI lives.
+ * It just catches repaint requests, and redirects them to
+ * the show.  I guess you could think of the show as being "in"
+ * the "widget," but the model is really based more around direct draw,
+ * so that doesn't mean very much.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class MenuUI extends Component {
 
     private MenuXlet xlet;

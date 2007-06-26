@@ -63,6 +63,11 @@ import com.hdcookbook.bookmenu.menu.MenuXlet;
 
 import org.havi.ui.HSound;
 
+/**
+ * Command that plays a sound.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class PlaySoundCommand extends Command {
 
     private MenuXlet xlet;
@@ -83,6 +88,7 @@ public class PlaySoundCommand extends Command {
 	    this.sound = null;
 	} else {
 	    throw new IOException("No sound named \"" + soundName + "\".");
+	    	// This causes a parse error, which is the right thing to do
 	}
     }
 

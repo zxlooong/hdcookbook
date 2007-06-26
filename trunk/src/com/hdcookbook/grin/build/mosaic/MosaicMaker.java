@@ -95,8 +95,16 @@ import javax.imageio.ImageIO;
 
 
 /**
+ * This class has the main logic for making a set of image
+ * mosaics for one or more GRIN show files.  An image mosaic is a bunch of
+ * little images that are stuck together into one big image, plus
+ * data about where each little image was put in the mosaic.  By
+ * packaging images as a mosaic, the startup time of an xlet can
+ * be dramatically improved, since many image decoders have
+ * a substantial fixed latency that doesn't vary much with image size.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
-
  public class MosaicMaker extends Frame {
 
     private String[] shows;
@@ -111,6 +119,15 @@ import javax.imageio.ImageIO;
     private HashMap specialMosaics = new HashMap(); // mosaic name to Mosaic
     Graphics2D frameG;
 
+    /**
+     * Create a mosaic maker
+     *
+     * @param shows	The GRIN shows these mosaics are for
+     * @param assetPath The search path for images and other assets,
+     *			like the show files.  Class.getResource(String)
+     *			is used to load assets.
+     * @param outputDir Where to write the mosaics
+     **/
     public MosaicMaker(String[] shows, String[] assetPath, File outputDir) {
 	this.shows = shows;
 	this.outputDir = outputDir;
@@ -181,6 +198,12 @@ import javax.imageio.ImageIO;
 	frameG.setComposite(AlphaComposite.Src);
     }
 
+    /**
+     * Paint a little image.  We don't really show our state
+     * here, because our frame is really just a bit of eye candy
+     * so you can see what's going on.  The interesting stuff is
+     * just blasted to the framebufer using direct draw.
+     **/
     public void paint(Graphics g) {
 	g.drawString("Making mosaics...", 30, 16);
     }
@@ -251,6 +274,10 @@ import javax.imageio.ImageIO;
 	}
     }
 
+    /**
+     * The main loop that reads all the shows, adds all the
+     * images to mosaics, then writes the mosaics out.
+     **/
     public void makeMosaics() throws IOException {
 	for (int i = 0; i < showTrees.length; i++) {
 	    Show show = showTrees[i];
@@ -305,7 +332,5 @@ import javax.imageio.ImageIO;
 	}
 	mapOS.close();
 	System.out.println("Wrote " + mapFile);
-
     }
-
  }

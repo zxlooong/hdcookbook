@@ -69,17 +69,36 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.util.Debug;
 
 
+/**
+ * This is an extension GRIN feature introduced by our xlet.
+ * It's designed to be the parent of a fixed image feature.  The
+ * xlet can set a new image for us; when this is done it replaces
+ * our child feature.
+ * <p>
+ * It might seem a little strange at first to do it this way, rather than
+ * just have one feature and replace the image.  There's a reason, though.
+ * For debugging, it's nice to have something reasonable happen in the
+ * big JDK tool for displaying show files.  That tool doesn't know about
+ * extension features, but when it encounters a modifier it can just show
+ * the underlying feature instead.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class BioImageFeature extends Modifier {
 
     private Image replacementImage = null;
     private int width;
     private int height;
 
+    /**
+     * Create a new instance of this feature.  This is called from
+     * our xlet's extension parser.
+     **/
     public BioImageFeature(Show show, String name) {
 	super(show, name);
     }
 
-    // called with the Show lock held
+    // called with the Show lock held, by the xlet's BioUpdate
     void setImage(Image newImage) {
 	if (replacementImage != null) {
 	    replacementImage.flush();
@@ -89,8 +108,15 @@ public class BioImageFeature extends Modifier {
 	height = newImage.getHeight(null);
     }
 
-    // called with the Show lock held
+
+    /**
+     * Called by the GRIN framework with the show lock held to
+     * paint our representation
+     *
+     * @param g		The place we paint to
+     **/
     public void paintFrame(Graphics2D g) {
+	// called with the Show lock held
 	if (replacementImage == null) {
 	    super.paintFrame(g);
 	} else {
@@ -98,7 +124,10 @@ public class BioImageFeature extends Modifier {
 	}
     }
 
-    // called with the Show lock held
+    /**
+     * Called by the GRIN framework to figure out the extent of the
+     * area we paint to.  This is called with the show lock held.
+     **/
     public void  addDisplayArea(Rectangle area) {
 	if (replacementImage == null) {
 	    super.addDisplayArea(area);

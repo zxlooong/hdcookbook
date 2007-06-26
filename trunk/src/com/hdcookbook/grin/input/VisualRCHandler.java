@@ -102,6 +102,7 @@ import java.awt.Rectangle;
  *
  * @author Bill Foote (http://jovial.com)
  */
+
 public class VisualRCHandler extends RCHandler {
  
     /**
@@ -169,6 +170,9 @@ public class VisualRCHandler extends RCHandler {
 	}
     }
 
+    /**
+     * Called from the parser
+     **/
     public void setup(Assembly assembly, Feature[] selectFeatures, 
     		      Feature[] activateFeatures)
     {
@@ -179,6 +183,10 @@ public class VisualRCHandler extends RCHandler {
 	// activating this handler can change its state
     }
 
+    /**
+     * Give a developer-friendly string describing this handler.
+     * Useful for development.
+     **/
     public String toString() {
 	return super.toString() + "(" + name + ")";
     }
@@ -226,6 +234,9 @@ public class VisualRCHandler extends RCHandler {
 	return -1;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean handleRCEvent(RCKeyEvent ke) {
 	if ((ke.getBitMask() & MASK) == 0) {
 	    return false;
@@ -266,6 +277,9 @@ public class VisualRCHandler extends RCHandler {
 	}
     }
     
+    /**
+     * See superclass definition.
+     **/
     public boolean handleMouse(int x, int y, boolean activate) {
         if (mouseRects == null) {
             return false;
@@ -367,6 +381,9 @@ public class VisualRCHandler extends RCHandler {
 	} // end synchronized
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void activate(Segment s) {
 	timedOut = timeout <= -1;
 	startFrame = s.getShow().getCurrentFrame();
@@ -403,6 +420,9 @@ public class VisualRCHandler extends RCHandler {
 	return -1;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int frameNumber) {
     	if (!timedOut && frameNumber > startFrame + timeout) {
 	    timedOut = true;

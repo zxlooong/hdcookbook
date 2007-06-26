@@ -92,10 +92,16 @@ public class Box extends Feature {
 	this.fillColor = fillColor;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartX() {
 	return placement.x;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartY() {
 	return placement.y;
     }
@@ -108,30 +114,51 @@ public class Box extends Feature {
     public void initialize() {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void destroy() {
     }
 
 
-    //
-    // This is synchronized to only occur within model updates.
-    //
+    /**
+     * See superclass definition.
+     **/
     protected void setActivateMode(boolean mode) {
+	//
+	// This is synchronized to only occur within model updates.
+	//
 	isActivated = mode;
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setSetupMode(boolean mode) {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void doSomeSetup() {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean needsMoreSetup() {
 	return false;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void  addDisplayArea(Rectangle area) {
 	if (!isActivated) {
 	    return;
@@ -146,6 +173,9 @@ public class Box extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {
 	    return;

@@ -67,6 +67,12 @@ import com.hdcookbook.grin.util.AssetFinder;
 
 import org.dvb.ui.FontFactory;
 
+/**
+ * This class lets us hook in "under" GRIN, to tell GRIN where
+ * to find assets, and do other xlet-specific things.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class MenuAssetFinder extends AssetFinder {
 
     private FontFactory factory;
@@ -87,7 +93,9 @@ public class MenuAssetFinder extends AssetFinder {
 	try {
 	    xlet.destroyXlet(true);
 	} catch (Throwable ignored) {
-	    ignored.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		ignored.printStackTrace();
+	    }
 	}
 	xlet.navigator.startVideoAt(null);
     }

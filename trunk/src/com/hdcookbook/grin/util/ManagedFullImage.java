@@ -59,6 +59,12 @@ import java.awt.Image;
 import java.awt.Component;
 import java.awt.Graphics2D;
 
+/**
+ * A managed image that's loaded from its own image file (and not
+ * as a part of a mosaic).
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class ManagedFullImage extends ManagedImage {
 
     private String name;
@@ -103,6 +109,13 @@ public class ManagedFullImage extends ManagedImage {
 	return numReferences > 0;
     }
 
+    /**
+     * Prepare this image for display in the given component, or any
+     * other component for the same graphics device.  This class reference
+     * counts, so there can be multiple calls to prepare.
+     *
+     * @see #unprepare()
+     **/
     public void prepare(Component comp) {
 	int num;
 	synchronized(this) {
@@ -132,6 +145,12 @@ public class ManagedFullImage extends ManagedImage {
 	}
     }
 
+    /** 
+     * Undo a prepare.  We do reference counting; when the number of
+     * active prepares hits zero, we flush the image.
+     *
+     * @see #prepare(java.awt.Component)
+     **/
     public synchronized void unprepare() {
 	numPrepares--;
 	if (numPrepares == 0) {
@@ -143,6 +162,9 @@ public class ManagedFullImage extends ManagedImage {
 	}
     }
 
+    /**
+     * Draw this image into the given graphics context
+     **/
     public void draw(Graphics2D gr, int x, int y, Component comp) {
         gr.drawImage(image, x, y, comp);
     }

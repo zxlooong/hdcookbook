@@ -61,8 +61,12 @@ import com.hdcookbook.bookmenu.menu.MenuXlet;
 
 import java.io.IOException;
 
-
-
+/**
+ * A command that notifies the xlet that the show has finished
+ * loading its assets.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class NotifyLoadedCommand extends Command {
 
     private MenuXlet xlet;

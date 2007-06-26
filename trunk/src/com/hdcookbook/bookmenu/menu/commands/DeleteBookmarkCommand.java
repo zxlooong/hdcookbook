@@ -59,6 +59,12 @@ package com.hdcookbook.bookmenu.menu.commands;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.bookmenu.menu.MenuXlet;
 
+/**
+ * A command to delete the bookmark that's currently selected in
+ * the bookmark UI.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class DeleteBookmarkCommand extends Command {
 
     private MenuXlet xlet;

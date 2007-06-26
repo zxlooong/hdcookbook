@@ -80,8 +80,11 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 /**
+ * This is the UI frame that holds the control screen of GuiGenericMain
  *
- * @author  billf
+ * @see GuiGenericMain
+ *
+ *   @author     Bill Foote (http://jovial.com)
  */
 public class GuiGenericMainScreen extends javax.swing.JFrame {
 

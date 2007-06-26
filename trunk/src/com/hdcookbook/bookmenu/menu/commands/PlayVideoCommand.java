@@ -63,7 +63,11 @@ import java.io.IOException;
 
 import org.bluray.net.BDLocator;
 
-
+/**
+ * Command that starts playing a playlist
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class PlayVideoCommand extends Command {
 
     private MenuXlet xlet;
@@ -76,5 +80,14 @@ public class PlayVideoCommand extends Command {
 
     public void execute() {
 	xlet.navigator.startVideoAt(playlist);
+    }
+
+    /**
+     * Playing video takes some time to execute, so we want to
+     * defer any following commands (like one to move to the next
+     * segment) until we're caught up.
+     **/
+    public boolean deferNextCommands() {
+	return true;
     }
 }

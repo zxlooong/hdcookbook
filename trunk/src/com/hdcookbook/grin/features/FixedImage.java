@@ -68,6 +68,8 @@ import java.awt.Rectangle;
 
 /**
  * Represents a fixed image.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class FixedImage extends Feature {
 
@@ -99,19 +101,25 @@ public class FixedImage extends Feature {
      **/
     public void initialize() {
 	image = ImageManager.getImage(fileName);
-	if (show.keepAllImages) {
-	    image.prepare(show.component);
-	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartX() {
 	return x;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartY() {
 	return y;
     }
 
+    /**
+     * Get the underlying image that we display.
+     **/
     public ManagedImage getImage() {
 	return image;
     }
@@ -127,17 +135,20 @@ public class FixedImage extends Feature {
      * too!).
      **/
     public void destroy() {
-	if (show.keepAllImages) {
-	    image.unprepare();
-	}
 	ImageManager.ungetImage(image);
     }
 
 
+    /**
+     * See superclass definition.
+     **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setSetupMode(boolean mode) {
 	synchronized(setupMonitor) {
 	    setupMode = mode;
@@ -150,6 +161,9 @@ public class FixedImage extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void doSomeSetup() {
 	synchronized(setupMonitor) {
 	    if (!setupMode) {
@@ -169,12 +183,18 @@ public class FixedImage extends Feature {
 	sendFeatureSetup();
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean needsMoreSetup() {
 	synchronized (setupMonitor) {
 	    return setupMode && (!imageSetup);
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {
 	    return;
@@ -182,6 +202,9 @@ public class FixedImage extends Feature {
 	image.draw(gr, x, y, show.component);
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void addDisplayArea(Rectangle area) {
 	if (area.width == 0) {
 	    area.setBounds(x, y, width, height);
@@ -194,6 +217,10 @@ public class FixedImage extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
+	// do nothing
     }
 }

@@ -104,10 +104,16 @@ public class Text extends Feature {
 	this.background = background;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartX() {
 	return x;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartY() {
 	return y;
     }
@@ -132,11 +138,15 @@ public class Text extends Feature {
 		 + strings.length * (ascent + descent + 1);
     }
 
+    /**
+     * Get the text that's being displayed.
+     **/
     public String[] getText() {
 	return strings;
     }
 
     /** 
+     * Change the text to display.
      * This should only be called with the show lock held, at an
      * appropriate time in the frame pump loop.  A good time to call
      * this is from within a command.
@@ -151,11 +161,11 @@ public class Text extends Feature {
     public void destroy() {
     }
 
-
-    //
-    // This is synchronized to only occur within model updates.
-    //
+    /**
+     * See superclass definition.
+     **/
     protected void setActivateMode(boolean mode) {
+	// This is synchronized to only occur within model updates.
 	isActivated = mode;
 	if (mode) {
 	    startAnimationFrame = show.getCurrentFrame();
@@ -163,16 +173,28 @@ public class Text extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setSetupMode(boolean mode) {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void doSomeSetup() {
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean needsMoreSetup() {
 	return false;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
 	colorIndex = newFrame - startAnimationFrame;
 	if (colorIndex >= colors.length) {
@@ -180,6 +202,9 @@ public class Text extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void  addDisplayArea(Rectangle area) {
 	if (!isActivated) {
 	    return;
@@ -192,6 +217,9 @@ public class Text extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {
 	    return;
@@ -207,6 +235,5 @@ public class Text extends Feature {
             gr.drawString(strings[i], x, y2);
             y2 += ascent + descent + vspace;
         }
-	// For testing:  gr.drawRect(x, y, width-1, ascent + descent);
     }
 }

@@ -75,7 +75,8 @@ import com.hdcookbook.grin.util.Debug;
  *    getString()
  * </ul>
  * <p>
- * @author Bill Foote, bill.foote@sun.com
+ *
+ *   @author     Bill Foote (http://jovial.com)
  */
 public class Lexer {
 
@@ -116,18 +117,32 @@ public class Lexer {
 	putbackChar = ch;
     }
 
+    /**
+     * Report a nice error message with the current line number.
+     **/
     public void reportError(String msg) throws IOException {
 	throw new IOException(msg + " on line " + lineNum);
     }
 
+    /**
+     * Give a warning with the current line number
+     **/
     public void reportWarning(String msg) {
 	System.err.println(msg + " on line " + lineNum);
     }
 
+    /**
+     * Get the current line number.
+     **/
     public int getLineNumber() {
 	return lineNum;
     }
 
+    /**
+     * Set the current line number.  This is done by ForwardReference
+     * so that error messages come out with the right line number, rather
+     * than the last line in the show file.
+     **/
     void setLineNumber(int num) {
 	this.lineNum = num;
     }

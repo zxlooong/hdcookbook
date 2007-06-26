@@ -97,5 +97,9 @@ public abstract class RCHandler {
      **/
     abstract public void activate(Segment s);
 
+    /**
+     * Called by the show to let us know as the model progresses through
+     * time.  This can be useful for things like timeouts.
+     **/
     abstract public void advanceToFrame(int frameNumber);
 }

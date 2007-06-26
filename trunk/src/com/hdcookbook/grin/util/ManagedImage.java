@@ -59,6 +59,14 @@ import java.awt.Image;
 import java.awt.Component;
 import java.awt.Graphics2D;
 
+/**
+ * An image that is managed by the GRIN utilities.  Managed images
+ * have reference counts, and a count of how many clients have asked
+ * it to be prepared.  This is used to flush images once they're
+ * no longer needed.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 abstract public class ManagedImage {
 
     ManagedImage() {
@@ -80,8 +88,21 @@ abstract public class ManagedImage {
 
     abstract public boolean isReferenced();
 
+    /**
+     * Prepare this image for display in the given component, or any
+     * other component for the same graphics device.  This class reference
+     * counts, so there can be multiple calls to prepare.
+     *
+     * @see #unprepare()
+     **/
     abstract public void prepare(Component comp);
 
+    /** 
+     * Undo a prepare.  We do reference counting; when the number of
+     * active prepares hits zero, we flush the image.
+     *
+     * @see #prepare(java.awt.Component)
+     **/
     abstract public void unprepare();
 
     public boolean equals(Object other) {
@@ -89,6 +110,9 @@ abstract public class ManagedImage {
 	// ImageManager canonicalizes ManagedImage instances
     }
     
+    /**
+     * Draw this image into the given graphics context
+     **/
     abstract public void draw(Graphics2D gr, int x, int y, Component comp);
 
     abstract void destroy();

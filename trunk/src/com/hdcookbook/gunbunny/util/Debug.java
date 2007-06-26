@@ -58,7 +58,9 @@ package com.hdcookbook.gunbunny.util;
 import javax.tv.xlet.Xlet;
 
 /**
- * Debugging support
+ * Debugging support.  Before shipping a disc, be sure to change
+ * the constants in this class to turn off debugging, and re-compile
+ * everything.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -79,12 +81,12 @@ public class Debug {
      * Note that JDK 1.4's assertion facility can't be used
      * for Blu-Ray, since PBP 1.0 is based on JDK 1.3.
      **/
-    public final static boolean ASSERT = true;
+    public final static boolean ASSERT = false;
 
     /**
      * Debug level.  2 = noisy, 1 = some debug, 0 = none.
      **/
-    public final static int LEVEL = 2;
+    public final static int LEVEL = 0;
 
     private static Xlet theXlet = null;
     

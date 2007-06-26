@@ -1589,9 +1589,12 @@ segment S:Loading
     setup_done {
 	set_visual_rc H:MainMenu state play selected ;
 	activate_part F:MenuInactive.CloseOrNothing nothing ;
- 	activate_segment S:MenuRollout ;
 	BOOK:NotifyLoaded ;
 	BOOK:PlayVideo menu ;
+		# We can't start playing the menu video until our assets
+		# are loaded, because we can't read from the disc while
+		# video is playing.
+ 	activate_segment S:MenuRollout ;
     }
 ;
 
@@ -1633,7 +1636,7 @@ segment S:MainMenuRollIn
 	F:Everything
     }
     rc_handlers {
-	H:PopupListen
+	H:PopupListener
     }
     next {
 	activate_segment S:VideoPlaying ;
@@ -1653,8 +1656,8 @@ segment S:VideoPlaying
 	F:Everything
     }
     rc_handlers {
-	H:PopupListen
-	H:MakeBookmarkListen
+	H:PopupListener
+	H:MakeBookmarkListener
     }
 ;
 
@@ -1668,7 +1671,7 @@ segment S:VideoMenuRollout
     } 
     rc_handlers {
 	H:VideoMenu
-	H:MakeBookmarkListen
+	H:MakeBookmarkListener
     }
     next {
 	activate_segment S:VideoMenuShowing ;
@@ -1685,7 +1688,7 @@ segment S:VideoMenuShowing
     }
     rc_handlers {
 	H:VideoMenu
-	H:MakeBookmarkListen
+	H:MakeBookmarkListener
     }
 ;
 
@@ -1698,8 +1701,8 @@ segment S:VideoMenuRollBack
 	F:Everything
     } 
     rc_handlers {
-	H:PopupListen
-	H:MakeBookmarkListen
+	H:PopupListener
+	H:MakeBookmarkListener
     }
     next {
 	activate_segment S:VideoPlaying ;
@@ -1716,7 +1719,7 @@ segment S:StartBonusVideo
 	F:Everything
     } 
     rc_handlers {
-	H:PopupListen
+	H:PopupListener
     }
     next {
 	activate_segment S:VideoBonusPlaying ;
@@ -1730,7 +1733,7 @@ segment S:VideoBonusPlaying
 	F:Everything
     }
     rc_handlers {
-	H:PopupListen
+	H:PopupListener
     }
 ;
 
@@ -1807,8 +1810,8 @@ segment S:BookmarkSnap
 	F:Everything
     }
     rc_handlers {
-	H:PopupListen
-	H:MakeBookmarkListen
+	H:PopupListener
+	H:MakeBookmarkListener
     }
     next {
 	activate_segment S:VideoPlaying ;
@@ -2150,7 +2153,7 @@ rc_handler key_pressed H:BookmarksMenu.Color
 	}
 ;
 
-rc_handler key_pressed H:PopupListen
+rc_handler key_pressed H:PopupListener
 	{ popup_menu }
 	execute {
 	    set_visual_rc H:VideoMenu state play selected ;
@@ -2159,7 +2162,7 @@ rc_handler key_pressed H:PopupListen
 	}
 ;
 
-rc_handler key_pressed H:MakeBookmarkListen
+rc_handler key_pressed H:MakeBookmarkListener
 	{ red green yellow blue }
 	execute {
 	    BOOK:MakeBookmark ;
@@ -2192,8 +2195,9 @@ rc_handler visual H:BonusMenu
 			}
 	bio		{
 				BOOK:PlaySound activate ;
+				BOOK:PlayVideo nothing ;
 				BOOK:ActivateBio ;  
-				  # Activates S:Bio.Available or S:Bio.NotAvailable
+			       # Activates S:Bio.Available or S:Bio.NotAvailable
 			}
 	bonus1  	{ 
 				BOOK:PlaySound activate ;
@@ -2283,7 +2287,8 @@ rc_handler visual H:Bio.Available
 	    close	{
 			    set_visual_rc H:VideoMenu state bonus selected ;
 			    set_visual_rc H:MainMenu state bonus selected ;
-			    activate_segment <pop> ; 
+			    BOOK:PlayVideo menu ;
+			    activate_segment S:MenuShowing ;
 			}
 	    download	{
 			    BOOK:PlaySound activate ;
@@ -2304,7 +2309,8 @@ rc_handler visual H:Bio.NotAvailable
 	    close	{
 			    set_visual_rc H:VideoMenu state bonus selected ;
 			    set_visual_rc H:MainMenu state bonus selected ;
-			    activate_segment <pop> ; 
+			    BOOK:PlayVideo menu ;
+			    activate_segment S:MenuShowing ;
 			}
 	}
 	mouse {

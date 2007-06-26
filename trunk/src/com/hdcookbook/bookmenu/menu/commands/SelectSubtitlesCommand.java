@@ -59,6 +59,12 @@ package com.hdcookbook.bookmenu.menu.commands;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.bookmenu.menu.MenuXlet;
 
+/**
+ * Command that selects one of the subtitle streams, or no
+ * subtitles ("stream 0")
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class SelectSubtitlesCommand extends Command {
 
     private MenuXlet xlet;

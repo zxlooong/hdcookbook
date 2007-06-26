@@ -66,11 +66,19 @@ import javax.tv.xlet.XletStateChangeException;
 
 import com.hdcookbook.grin.util.Debug;
 
+/**
+ * This is the main xlet class for the monitor xlet.  The monitor
+ * xlet is a very small xlet that launches and terminates other
+ * xlets.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class MonitorXlet implements Xlet {
 
     public XletContext xletContext;
 
     private boolean running = false;
+    private MonitorIXCListener listener;
 
     public void initXlet(XletContext ctx) throws XletStateChangeException {
 	this.xletContext = ctx;
@@ -87,12 +95,14 @@ public class MonitorXlet implements Xlet {
 	    return;
 	}
 	running = true;
-	MonitorIXCListener listener = new MonitorIXCListener(this);
+	listener = new MonitorIXCListener(this);
 	listener.init();
 	try {
 	    IxcRegistry.bind(xletContext, "Monitor", listener);
 	} catch (AlreadyBoundException ignored) {
-	    ignored.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		ignored.printStackTrace();
+	    }
 	}
     }
 
@@ -108,10 +118,15 @@ public class MonitorXlet implements Xlet {
 	if (Debug.LEVEL > 0) {
 	    Debug.println("MonitorXlet in destroyXlet");
 	}
+	if (listener != null) {
+	    listener.destroy();
+	}
 	try {
 	    IxcRegistry.unbind(xletContext, "Monitor");
 	} catch (NotBoundException ignored) {
-	    ignored.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		ignored.printStackTrace();
+	    }
 	}
     }
 

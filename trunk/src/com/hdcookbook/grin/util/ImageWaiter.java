@@ -70,12 +70,20 @@ package com.hdcookbook.grin.util;
  *    }
  *
  * </pre>
+ * <p>
+ * To be honest, this does the same thing as java.awt.MediaTracker.  I just
+ * always forget that MediaTracker exists.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 
 public class ImageWaiter implements java.awt.image.ImageObserver {
 
     private boolean done = false;
 
+    /**
+     * Create a new ImageWaiter
+     **/
     public ImageWaiter(java.awt.Image img) {
 	// img isn't needed, but it helps remind users that
 	// ImageWaiter instances are not to be re-used.
@@ -94,6 +102,9 @@ public class ImageWaiter implements java.awt.image.ImageObserver {
 	return !done;
     }
 
+    /**
+     * Wait until the given image has finished loading.
+     **/
     public synchronized void waitForComplete() {
 	for (;;) {
 	    if (done) {

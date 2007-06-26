@@ -75,8 +75,11 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 
 /**
+ * Represents a single mosaic image, composed of a number of
+ * parts, or tiles.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
-
 public class Mosaic {
 
     private LinkedList parts = new LinkedList();
@@ -93,6 +96,9 @@ public class Mosaic {
 	this(2048, 1024);
     }
 
+    /** 
+     * Create a new mosaic, with the given maximum dimensions.
+     **/
     public Mosaic(int width, int height) {
 	buffer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 	graphics  = (Graphics2D)  buffer.getGraphics();
@@ -102,6 +108,9 @@ public class Mosaic {
     }
 
 
+    /**
+     * Get the image buffer we use to store our contents.
+     **/
     public BufferedImage getBuffer() {
 	return buffer;
     }
@@ -160,22 +169,39 @@ public class Mosaic {
 	return null;
     }
 
+    /**
+     * Set the name of the file we'll be written to.
+     **/
     public void setOutputName(String outputName) {
 	this.outputName = outputName;
     }
 
+    /**
+     * Get the name of the file we'll be written to.
+     **/
     public String getOutputName() {
 	return outputName;
     }
 
+    /**
+     * Set our position within the binary list of mosaics that's
+     * written out for GRIN to consult at runtime.
+     **/
     public void setPosition(int position) {
 	this.position = position;
     }
 
+    /**
+     * Get our position within the binary list of mosaics that's
+     * written out for GRIN to consult at runtime.
+     **/
     public int getPosition() {
 	return position;
     }
 
+    /**
+     * Write out our image buffer as a PNG image.
+     **/
     public void writeBuffer(File out) throws IOException {
 	BufferedImage used = buffer.getSubimage(0, 0, width, height);
 	boolean ok = ImageIO.write(used, "PNG", out);

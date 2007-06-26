@@ -59,6 +59,7 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
 
 /**
+ * A GRIN command to activate a part within an assembly.
  *
  * @author Bill Foote (http://jovial.com)
  */

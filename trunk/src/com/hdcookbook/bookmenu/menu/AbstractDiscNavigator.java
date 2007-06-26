@@ -116,6 +116,8 @@ import org.bluray.ti.selection.TitleContext;
  * has been created and is managing playback.  Title selection using
  * a ServiceContext can take that control away from our Player, so
  * going to a playlist ensures that it's restored.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 
 
@@ -151,6 +153,10 @@ public abstract class AbstractDiscNavigator
 	this.xletContext = xletContext;
     }
 
+    /**
+     * Convenience method to create a BD locator.  Returns
+     * null on error.
+     **/
     protected static BDLocator makeBDLocator(String ls) {
 	if (Debug.LEVEL > 1) {
 	    Debug.println("Making BD locator " + ls);
@@ -158,15 +164,23 @@ public abstract class AbstractDiscNavigator
 	try {
 	    return new BDLocator(ls);
 	} catch (Exception ex) {
-	    ex.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		ex.printStackTrace();
+	    }
 	    return null;
 	}
     }
 
+    /**
+     * Convenience method to make a MediaLocator, given a BD locator string
+     **/
     protected static MediaLocator makeMediaLocator(String ls) {
 	return new MediaLocator(makeBDLocator(ls));
     }
 
+    /**
+     * Convenience method to make an HSound, given a BD locator string
+     **/
     protected static HSound makeSound(String ls) {
 	try {
 	    MediaLocator ml = makeMediaLocator(ls);
@@ -174,8 +188,8 @@ public abstract class AbstractDiscNavigator
 	    hs.load(ml.getURL());
 	    return hs;
 	} catch (Throwable t) {
-	    t.printStackTrace();
 	    if (Debug.LEVEL > 0) {
+		t.printStackTrace();
 		Debug.println();
 		Debug.println("****  Failed to load sound " + ls + "  *****");
 		Debug.println(t);
@@ -185,6 +199,9 @@ public abstract class AbstractDiscNavigator
 	}
     }
 
+    /**
+     * Convenience method to make Title, given a BD locator string
+     **/
     protected static Title makeTitle(String ls) {
 	BDLocator loc = makeBDLocator(ls);
 	try {
@@ -193,11 +210,13 @@ public abstract class AbstractDiscNavigator
 	    }
 	    return (Title) siManager.getService(loc);
 	} catch (InvalidLocatorException ignored) {
-	    ignored.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		ignored.printStackTrace();
+	    }
 	    return null;
 	} catch (SecurityException ex) {
-	    ex.printStackTrace();
 	    if (Debug.LEVEL > 0) {
+		ex.printStackTrace();
 		Debug.println();
 		Debug.println("*** Permission denied for creating Title "+loc);
 		Debug.println("*** Only signed xlets can do this.");
@@ -208,13 +227,23 @@ public abstract class AbstractDiscNavigator
     }
 
 
+    /**
+     * Select a title.  Once this is done, you should select a playlist
+     * in that title.  If, instead, the title has autostart video,
+     * then we won't have a JMF player monitoring that playback, so we
+     * won't receive events.
+     *
+     * @see #gotoPlaylistInCurrentTitle(org.bluray.net.BDLocator)
+     **/
     public synchronized void selectTitle(Title title) {
 	if (titleContext == null) {
 	    try {
 		ServiceContextFactory scf = ServiceContextFactory.getInstance();
 		titleContext = (TitleContext)scf.getServiceContext(xletContext);
 	    } catch (ServiceContextException ignored) {
-		ignored.printStackTrace();
+		if (Debug.LEVEL > 0) {
+		    ignored.printStackTrace();
+		}
 		if (Debug.ASSERT) {
 		    Debug.assertFail();
 		}
@@ -226,13 +255,20 @@ public abstract class AbstractDiscNavigator
 	titleContext.start(title, false);
     }
 
+    /**
+     * Start playing a playlist.  This also establishes a JMF player
+     * (if one hasn't been establised already), and starts listening
+     * for various events.  This should be done shortly after
+     * any title selection (including the initial, automatic title
+     * selection).
+     **/
     protected synchronized void gotoPlaylistInCurrentTitle(BDLocator loc) {
 	boolean oldWeAreControlling = weAreControlling;
 	if (Debug.LEVEL > 0) {
 	    if (weAreControlling) {
 		Thread.dumpStack();
 		Debug.println();
-		Debug.println("***  WARNING:  Simultaneous player control.");
+		Debug.println("***  WARNING:  Recursive player control.");
 		Debug.println();
 	    } else {
 		Debug.println("Start controlling player.");
@@ -245,7 +281,9 @@ public abstract class AbstractDiscNavigator
 		    MediaLocator ml = new MediaLocator(loc);
 		    mainPlayer  = Manager.createPlayer(ml);
 		} catch (Exception ignored) {
-		    ignored.printStackTrace();
+		    if (Debug.LEVEL > 0) {
+			ignored.printStackTrace();
+		    }
 		    if (Debug.ASSERT) {
 			Debug.assertFail("Error creating player");
 		    }
@@ -289,11 +327,13 @@ public abstract class AbstractDiscNavigator
 		// We had already created the player, so we can use
 		// org.bluray.media.PlayListChangeControl
 		mainPlayer.stop();
-		waitForStarted(false, 2000);
+		waitForStarted(false, 3000);
 		try {
 		    playlistControl.selectPlayList(loc);
 		} catch (Exception ignored) {
-		    ignored.printStackTrace();
+		    if (Debug.LEVEL > 0) {
+			ignored.printStackTrace();
+		    }
 		}
 	    }
 	    if (Debug.LEVEL > 0) {
@@ -306,15 +346,17 @@ public abstract class AbstractDiscNavigator
 		//
 		// Also, it's crucial that we release our lock for long
 		// enough for the player state events to come in.
-	    waitForStarted(true, 2000);
+	    if (Debug.LEVEL > 1) {
+		Debug.println("Waiting for player to enter started state...");
+	    }
+	    waitForStarted(true, 3000);
 	    notifyAVStarted();
 	} finally {
 	    weAreControlling = oldWeAreControlling;
 	    if (Debug.LEVEL > 0) {
 		if (weAreControlling) {
-		    Thread.dumpStack();
 		    Debug.println();
-		    Debug.println("***  WARNING:  End of simultaneous player "
+		    Debug.println("***  WARNING:  End of recursive player "
 				   + "control ***");
 		    Debug.println();
 		} else {
@@ -340,6 +382,9 @@ public abstract class AbstractDiscNavigator
 
     /**
      * Pause or un-pause the video.
+     * This can only be done after a playlist has been started.
+     *
+     * @see #gotoPlaylistInCurrentTitle(org.bluray.net.BDLocator)
      **/
     public synchronized void pause(boolean paused) {
 	currentRate = paused ? 0f : 1f;
@@ -348,12 +393,21 @@ public abstract class AbstractDiscNavigator
 
     /**
      * Navigate to the given time in the video determined by the playlist
+     * This can only be done after a playlist has been started.
+     *
+     * @see #gotoPlaylistInCurrentTitle(org.bluray.net.BDLocator)
      **/
     public synchronized void gotoMediaTime(BDLocator playlist, long mediaTime) {
 	gotoPlaylistInCurrentTitle(playlist);
 	timePositionControl.setMediaTimePosition(new Time(mediaTime));
     }
 
+    /**
+     * Select a subtitle stream.  This can only be done once a playlist
+     * has been started.
+     *
+     * @see #gotoPlaylistInCurrentTitle(org.bluray.net.BDLocator)
+     **/
     public synchronized void selectSubtitles(boolean on, int streamNum) {
 	if (subtitlingControl != null) {
 	    if (Debug.LEVEL > 0) {
@@ -375,8 +429,7 @@ public abstract class AbstractDiscNavigator
 
     /** 
      * Select the given audio stream.  Audio streams are numbered from 1
-     * on a disc.  A value of 0 will mute the audio without changing
-     * the stream.
+     * on a disc.  
      **/
     public synchronized void selectAudio(int streamNum) {
 	if (gainControl != null && audioControl != null) {  
@@ -385,8 +438,11 @@ public abstract class AbstractDiscNavigator
 		Debug.println("Audio set to " + streamNum);
 	    }
 	    if (streamNum == 0) {
-		gainControl.setMute(true);
+		// We could call gainControl.setMute(true);
+		// However, this turns out to not be necessary with our
+		// video, and it seems to trigger a player bug.
 	    } else {
+		// Could undo mute with gainControl.setMute(false);
 		try {
 		    audioControl.selectStreamNumber(streamNum);
 		} catch (StreamNotAvailableException ignored) {
@@ -395,14 +451,18 @@ public abstract class AbstractDiscNavigator
 				      + " not available.");
 		    }
 		}
-		gainControl.setMute(false);
 	    } 
 	}
     }
 
     /**
+     * Get the current media time.
+     * This can only be done after a playlist has been started.
+     *
      * @return the current media time, or Long.MIN_VALUE if it can't
      *         be determined.
+     *
+     * @see #gotoPlaylistInCurrentTitle(org.bluray.net.BDLocator)
      **/
     public synchronized long getMediaTime() {
 	if (timePositionControl == null) {
@@ -416,40 +476,55 @@ public abstract class AbstractDiscNavigator
 	return t.getNanoseconds();
     }
 
+    /**
+     * Destroy this disc navigator.  This should be called on
+     * xlet termination.
+     **/
     public synchronized void destroy() {
 	if (playbackControl != null) {
 	    playbackControl.removePlaybackControlListener(this);
 	}
 	if (mainPlayer != null) {
 	    mainPlayer.removeControllerListener(this);
+	    mainPlayer.stop();		// MHP 11.7.1.2
 	}
     }
 
     /**
-     * From PlaybackListener
+     * Callback from PlaybackListener
      **/
     public void markReached(PlaybackMarkEvent event) {
+	// We're not currently doing anything with these events
     }
 
     /**
-     * From PlaybackListener
+     * Callback from PlaybackListener
      **/
     public void playItemReached(PlaybackPlayItemEvent event) {
+	// We're not currently doing anything with these events
     }
 
     /**
-     * From ControllerListener
+     * Callback from ControllerListener
      **/
-    public synchronized void controllerUpdate(ControllerEvent event) {
-	if (!weAreControlling) {
+    public void controllerUpdate(ControllerEvent event) {
+	synchronized(this) {
+	    this.notifyAll();
+	    // We don't detect start event, because we have to check the 
+	    // player's state anyway to avoid a race condition.  See uses of
+	    // waitForStarted(), for example.
+	}
+
+	boolean doNotifyStop = false;
+	synchronized(this) {
+	    if (weAreControlling) {
+		return;
+	    }
 	    if (event instanceof StopEvent) {
+		doNotifyStop = mainPlayer.getState() != Player.Started;
 		if (Debug.LEVEL > 0) {
-		    Debug.println("*** StopEvent");
-		}
-		if (mainPlayer.getState() != Player.Started) {
-		    notifyStop();
-		} else if (Debug.LEVEL > 0) {
-		    Debug.println("***   However, the player is now started.");
+		    Debug.println("*** StopEvent.  Player stopped:  " 
+				   + doNotifyStop);
 		}
 	    } else if (event instanceof RateChangeEvent) {
 		float rateNow = mainPlayer.getRate();  
@@ -459,23 +534,19 @@ public abstract class AbstractDiscNavigator
 			if (Debug.LEVEL > 0) {
 			    Debug.println("*** RateChangeEvent to 0");
 			}
-			notifyStop();
+			doNotifyStop = true;
 		    }
 		}
 	    }
 	}
-	notifyAll();
-	// We don't detect start event, because we have to check the player's
-	// state anyway to avoid a race condition.  See usese of
-	// waitForStarted(), for example.
+	if (doNotifyStop) {
+	    notifyStop();	// With no locks held
+	}
     }
 
     /**
      * Called to notify the xlet when the video spontaneously stops.
-     * This is not called when the
-     * <p>
-     * This is called with the navigator lock held, so applications
-     * should not do anything in this method that might cause deadlock.
+     * This is not called when the video is stopped because we stop it.
      *
      * @see #currentPlaylistID
      **/
@@ -483,41 +554,53 @@ public abstract class AbstractDiscNavigator
 
 
     //
-    // Wait until the state of our player is the indicated state
+    // Wait until the state of our player is the indicated state.
+    // Return true if all went well, false if we time out.
     //
-    private synchronized boolean waitForStarted(boolean wantStarted, 
-    					        long timeout) {
+    private boolean waitForStarted(boolean wantStarted, long timeout) {
 	long tm = 0;
 	if (timeout > 0) {
 	    tm = System.currentTimeMillis();
 	}
 	for (;;) {
-	    if (wantStarted && mainPlayer.getState() == Player.Started) {
-		return true;
-	    }
-	    if (!wantStarted && mainPlayer.getState() != Player.Started) {
-		return true;
-	    }
-	    if (!waitWithTimeout(tm, timeout)) {
-		return false;
+	    synchronized(this) {
+		if (wantStarted && mainPlayer.getState() == Player.Started) {
+		    return true;
+		}
+		if (!wantStarted && mainPlayer.getState() != Player.Started) {
+		    return true;
+		}
+		if (!waitWithTimeout(this, tm, timeout)) {
+		    if (Debug.LEVEL > 0) {
+			Thread.currentThread().dumpStack();
+			Debug.println();
+			Debug.println("***  WARNING:  Timed out waiting "
+			              + "for player started " + wantStarted);
+			Debug.println();
+		    }
+		    return false;
+		}
 	    }
 	}
     }
 
     //
     // Wait a bit.  Return true if we got notified, false if we timed out
-    // or were interrupted.
-    private boolean waitWithTimeout(long startTime, long timeout) {
+    // or were interrupted.  The monitor must already be held when this
+    // method is called.
+    //
+    private boolean waitWithTimeout(Object monitor,long startTime, long timeout)
+    {
 	try {
 	    if (timeout <= 0) {
-		wait();
+		monitor.wait();
 		return true;
 	    } else {
 		long t = timeout - (System.currentTimeMillis() - startTime);
 		if (t <= 0) {
-		    return true;
+		    return false;
 		}
-		wait(t);
+		monitor.wait(t);
 		t = timeout - (System.currentTimeMillis() - startTime);
 		return t > 0;
 	    }

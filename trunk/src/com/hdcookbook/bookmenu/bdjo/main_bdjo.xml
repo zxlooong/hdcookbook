@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <bdjo>
+    <tableOfAccessiblePlayLists>
+        <accessToAllFlag>1</accessToAllFlag>
+        <autostartFirstPlayListFlag>0</autostartFirstPlayListFlag>
+    </tableOfAccessiblePlayLists>
     <appCacheInfo>
         <entries>
             <language>*.*</language>
@@ -102,7 +106,7 @@
                 </profiles>
                 <visibility>V_11</visibility>
             </applicationDescriptor>
-            <applicationId>3</applicationId>
+            <applicationId>16387</applicationId>
             <controlCode>2</controlCode>
             <organizationId>1450744508</organizationId>
             <type>1</type>
@@ -122,4 +126,3 @@
     </terminalInfo>
     <version>V_0200</version>
 </bdjo>
-

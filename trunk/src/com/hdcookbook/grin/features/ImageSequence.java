@@ -70,6 +70,12 @@ import java.awt.Image;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
+/**
+ * An image sequence does "cell" animation.  It consists of a number
+ * of images that are displayed one after another.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class ImageSequence extends Feature {
 
     private int x;
@@ -110,6 +116,10 @@ public class ImageSequence extends Feature {
 	this.endCommands = endCommands;
     }
 
+    /**
+     * Called by the parser.  Animations can be linked, so that they
+     * progress together, even when one is invisible.
+     **/
     public void setLinkedTo(ImageSequence linkedTo) throws IOException {
 	this.linkedTo = linkedTo;
 	if (linkedTo.middle.length != middle.length) {
@@ -117,14 +127,23 @@ public class ImageSequence extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartX() {
 	return x;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartY() {
 	return y;
     }
 
+    /**
+     * Get the underlying images in this sequence.
+     **/
     public ManagedImage[] getImages() {
 	return images;
     }
@@ -144,13 +163,6 @@ public class ImageSequence extends Feature {
 		images[i] = ImageManager.getImage(nm);
 	    }
 	}
-	if (show.keepAllImages) {
-	    for (int i = 0; i < images.length; i++) {
-		if (images[i] != null) {
-		    images[i].prepare(show.component);
-		}
-	    }
-	}
     }
 
     /**
@@ -164,13 +176,6 @@ public class ImageSequence extends Feature {
      * too!).
      **/
     public void destroy() {
-	if (show.keepAllImages) {
-	    for (int i = 0; i < images.length; i++) {
-		if (images[i] != null) {
-		    images[i].unprepare();
-		}
-	    }
-	}
 	for (int i = 0; i < images.length; i++) {
 	    if (images[i] != null) {
 		ImageManager.ungetImage(images[i]);
@@ -178,6 +183,9 @@ public class ImageSequence extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
 	if (linkedTo != null) {
@@ -198,6 +206,9 @@ public class ImageSequence extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setSetupMode(boolean mode) {
 	synchronized(setupMonitor) {
 	    setupMode = mode;
@@ -214,6 +225,9 @@ public class ImageSequence extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void doSomeSetup() {
 	ManagedImage im;
 	synchronized(setupMonitor) {
@@ -249,6 +263,9 @@ public class ImageSequence extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean needsMoreSetup() {
 	synchronized (setupMonitor) {
 	    return setupMode && (imagesSetup < images.length);
@@ -263,6 +280,9 @@ public class ImageSequence extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
 	if (Debug.LEVEL > 0 && !isActivated) {
 	    Debug.println("\n*** WARNING:  Advancing inactive sequence " 
@@ -277,6 +297,9 @@ public class ImageSequence extends Feature {
         }
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void  addDisplayArea(Rectangle area) {
 	if (!isActivated) {
 	    return;
@@ -297,6 +320,9 @@ public class ImageSequence extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {
 	    return;

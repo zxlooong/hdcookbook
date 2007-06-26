@@ -56,7 +56,8 @@
 package com.hdcookbook.grin.util;
 
 /**
- * Debugging support
+ * Debugging support.  Before shipping a final disc, you should modify the
+ * constant values in this class and re-compile.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -77,12 +78,12 @@ public class Debug {
      * Note that JDK 1.4's assertion facility can't be used
      * for Blu-Ray, since PBP 1.0 is based on JDK 1.3.
      **/
-    public final static boolean ASSERT = true;
+    public final static boolean ASSERT = false;
 
     /**
      * Debug level.  2 = noisy, 1 = some debug, 0 = none.
      **/
-    public final static int LEVEL = 2;
+    public final static int LEVEL = 0;
     
     private Debug() {
     }
@@ -99,6 +100,13 @@ public class Debug {
 	}
     }
 
+    /**
+     * Called on assertion failure.  This is a useful during development:  When
+     * you detect a condition that should be impossible, you can trigger an
+     * assertion failure.  That means you've found a bug.  When an assertion
+     * failure is detected, you basically want to shut everything down,
+     * so that the developer notices immediately, and sees the message.
+     **/
     public static void assertFail(String msg) {
 	if (ASSERT) {
 	    Thread.dumpStack();
@@ -107,6 +115,13 @@ public class Debug {
 	}
     }
 
+    /**
+     * Called on assertion failure.  This is a useful during development:  When
+     * you detect a condition that should be impossible, you can trigger an
+     * assertion failure.  That means you've found a bug.  When an assertion
+     * failure is detected, you basically want to shut everything down,
+     * so that the developer notices immediately, and sees the message.
+     **/
     public static void assertFail() {
 	if (ASSERT) {
 	    assertFail("");

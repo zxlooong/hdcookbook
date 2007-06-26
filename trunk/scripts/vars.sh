@@ -14,3 +14,4 @@ if [ "$HDC_NOCHECK_MOUNT" != "yes" ] ; then
 	    exit 1
     fi
 fi
+

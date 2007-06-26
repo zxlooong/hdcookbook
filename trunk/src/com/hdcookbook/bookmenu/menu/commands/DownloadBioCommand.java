@@ -59,6 +59,12 @@ package com.hdcookbook.bookmenu.menu.commands;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.bookmenu.menu.MenuXlet;
 
+/**
+ * A command that's triggered to start downloading an updated Gun Bunny
+ * bio from the Internet.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class DownloadBioCommand extends Command {
 
     private MenuXlet xlet;

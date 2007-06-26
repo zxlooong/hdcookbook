@@ -67,6 +67,19 @@ import java.awt.event.KeyEvent;
  * putting the state related to a chapter in its ChapterManager.  This
  * provides a simple state machine that applications can use to track
  * the coarse-grained state of presentation to the user.
+ * <p>
+ * One way this can be used, if you're interested, is with the GoF state
+ * pattern.  If you do this, you'd have a different subclass for each state.
+ * Various behaviors of your xlet could be declared abstract on the common
+ * ChapterManager superclass, and you could pass them through the current
+ * chapter manager.  In this way, you could hook into the state transition
+ * that a show gives you.
+ * <p>
+ * Many xlets will be to simple to really benefit from this kind of state
+ * pattern.  In that case, just have one default chapter manager, and never
+ * mention a chapter in your show file, and you'll be fine.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class ChapterManager {
 
@@ -81,6 +94,9 @@ public class ChapterManager {
 	this.director = director;
     }
 
+    /**
+     * @return the name of this chapter
+     **/
     public String getName() {
 	return name;
     }

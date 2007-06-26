@@ -59,6 +59,9 @@ import com.hdcookbook.grin.test.RyanDirector;
 import com.hdcookbook.grin.Segment;
 
 /**
+ * This is part of the "Ryan's life" test show.  It's mostly of
+ * historical interest; it still works, but some of the ways of
+ * structuring and using a show are passe.
  *
  * @author Bill Foote (http://jovial.com)
  */

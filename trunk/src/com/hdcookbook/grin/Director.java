@@ -76,6 +76,8 @@ import java.awt.event.KeyEvent;
  * <p>
  * See also the Facade pattern (GoF page 185) and the State pattern
  * (GoF page 305).
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 
 public abstract class Director {
@@ -94,10 +96,11 @@ public abstract class Director {
     }
     
     /**
+     * Initialize this director.
      * 
      * @param initialState	The initial state of the show
-     * @param states		All states of the show (including the
-     *				initial state)
+     * @param states		All states of the show known at initialization
+     *			        time (must include the initial state)
      **/
     protected void setup(int initialState, ChapterManager[] states) {
 	this.initialState = states[initialState];
@@ -107,7 +110,12 @@ public abstract class Director {
 	    this.states.put(states[i].getName(), states[i]);
 	}
     }
-    
+   
+    /**
+     * Add a new state (called a "chapter") to the set of states managed
+     * by this director.  This extends the set passed into the setup
+     * method.
+     **/
     protected void addState(ChapterManager state) {
         state.setDirector(this);
         states.put(state.getName(), state);
@@ -120,6 +128,9 @@ public abstract class Director {
 	this.show = show;
     }
 
+    /**
+     * Get the show we're managing.
+     **/
     public Show getShow() {
 	return show;
     }

@@ -61,6 +61,11 @@ import com.hdcookbook.grin.util.ManagedImage;
 import java.awt.Rectangle;
 
 /**
+ * A part of a mosaic.  When a small image is put into a mosaic, it
+ * is represented as a part.  A part knows the name of the original
+ * image, it's placement on the mosaic, and the mosaic it's placed in.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class MosaicPart {
 
@@ -74,14 +79,23 @@ public class MosaicPart {
 	this.placement = placement;
     }
 
+    /** 
+     * Get the name of the original image for this part
+     **/
     public String getName() {
 	return name;
     }
 
+    /**
+     * Get the area where the original image was placed within the mosaic.
+     **/
     public Rectangle getPlacement() {
 	return placement;
     }
 
+    /**
+     * Return true iff this part intersects with other
+     **/
     public boolean intersects(Rectangle other) {
 	return placement.intersects(other);
     }
@@ -104,6 +118,9 @@ public class MosaicPart {
 	return placement.y + placement.height;
     }
 
+    /**
+     * Get the mosaic we're contained within.
+     **/
     public Mosaic getMosaic() {
 	return mosaic;
     }

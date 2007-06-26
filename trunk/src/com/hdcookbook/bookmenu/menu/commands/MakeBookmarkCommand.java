@@ -59,6 +59,12 @@ package com.hdcookbook.bookmenu.menu.commands;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.bookmenu.menu.MenuXlet;
 
+/**
+ * A command that creates a new bookmark at the current position
+ * within the feature.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class MakeBookmarkCommand extends Command {
 
     private MenuXlet xlet;

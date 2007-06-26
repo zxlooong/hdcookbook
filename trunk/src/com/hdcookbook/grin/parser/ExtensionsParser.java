@@ -64,16 +64,11 @@ import com.hdcookbook.grin.Show;
 import java.io.IOException;
 
 /**
+ * This class is used by an xlet to add new commands and features
+ * to the syntax of its GRIN show file(s).
  * A Director can expand the set of features and commands
  * recognized in a show file.  It does this by providing an
  * implementation of ExtensionsParser to handle any extensions.
- * <p>
- * The show file parser is a two-pass parser.  That means that it
- * reads and parses the file twice.  In the first pass, all of the
- * features, segments and RC handlers are created.  In the second pass,
- * items that can refer to features, segments and RC handlers are created.
- * For example, commands are created in the second pass, because they
- * need to be able to refer to things that happen later in the file.
  *
  * @author @author Bill Foote (http://jovial.com)
  */

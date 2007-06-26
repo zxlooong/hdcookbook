@@ -70,8 +70,9 @@ import java.awt.image.BufferedImage;
 /**
  * Singleton worker object.  This is the main control thread for the
  * xlet.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
-
 public class MenuWorker implements Runnable {
 
     //
@@ -106,6 +107,9 @@ public class MenuWorker implements Runnable {
 	this.xlet = xlet;
     }
 
+    /**
+     * Main control loop of the xlet.
+     **/
     public void run() {
 	try {
 	    setState(STATE_RUNNING);
@@ -117,7 +121,8 @@ public class MenuWorker implements Runnable {
 			if (state != STATE_RUNNING) {
 			    return;	// Does finally action
 			} 
-			long nextFrameTime = firstFrameTime + ((frame*1000L) / FPS);
+			long nextFrameTime 
+				= firstFrameTime + ((frame*1000L) / FPS);
 			currTime = System.currentTimeMillis();
 			long delta = nextFrameTime - currTime;
 			if (delta <= 0) {
@@ -133,10 +138,23 @@ public class MenuWorker implements Runnable {
 	    // Player is trying to terminate us or show has been destroyed
 	    Thread.currentThread().interrupt();
 	} finally {
+	    // Make sure the screen gets erased when the xlet terminates
+	    try {
+		if (frameGr != null) {
+		    frameGr.setColor(transparent);
+		    frameGr.fillRect(0, 0, 1920, 1080);
+		    Toolkit.getDefaultToolkit().sync();
+		}
+	    } catch (Throwable ignored) {
+	    }
 	    setState(STATE_STOPPED);
 	}
     }
 
+    /**
+     * Called by the xlet when it's ready for us to start running
+     * the show.
+     **/
     public synchronized void runShow(Show show) {
 	this.show = show;
 	frame = 0;
@@ -144,24 +162,24 @@ public class MenuWorker implements Runnable {
 	thisArea = new Rectangle();
 	lastArea = new Rectangle();
 	lastClip = new Rectangle();
-	showClip = new Rectangle(0, 0, 1920, 1280);
+	showClip = new Rectangle(0, 0, 1920, 1080);
 	frameGr = (Graphics2D) xlet.scene.getGraphics();
 
 	if (REPAINT_DRAW_ENABLED && xlet.scene.isDoubleBuffered()) {
 	    xlet.scene.repaint();
 	} else {
 	    buffer = xlet.scene.getGraphicsConfiguration()
-			 .createCompatibleImage(1920, 1280);
+			 .createCompatibleImage(1920, 1080);
 	    bufGr = buffer.createGraphics();
 	    frameGr.setColor(transparent);
-	    frameGr.fillRect(0, 0, 1920, 1280);
+	    frameGr.fillRect(0, 0, 1920, 1080);
 	    Toolkit.getDefaultToolkit().sync();
 	}
 	notifyAll();
     }
 
     private void advanceShow(long currTime) throws InterruptedException {
-	int nextFrame = (int) ((currTime - firstFrameTime) * (long) FPS / 1000L);
+	int nextFrame = (int)((currTime - firstFrameTime) * (long) FPS / 1000L);
 	if (nextFrame < frame) {
 	    if (Debug.LEVEL > 0) {
 		Debug.println("*** Frame pump:  frame got ahead of time!");
@@ -172,6 +190,9 @@ public class MenuWorker implements Runnable {
 	    skippedFrames += (nextFrame - frame);
 	}
 	while (nextFrame >= frame) {
+	    if (nextFrame == frame) {
+		show.setCaughtUp();
+	    }
 	    show.advanceToFrame(frame);
 	    frame++;
 	    if (Debug.LEVEL > 0 && frame % 100 == 0) {
@@ -235,6 +256,9 @@ public class MenuWorker implements Runnable {
 	}
     }
 
+    /**
+     * Wait until the show has reached the started state.
+     **/
     public synchronized void waitUntilStarted() {
 	if (Debug.ASSERT && state != STATE_RUNNING
 		&& state != STATE_NOT_STARTED) 
@@ -251,6 +275,10 @@ public class MenuWorker implements Runnable {
 	}
     }
 
+    /**
+     * Terminate the thread that's running us, and wait until it
+     * has terminated.
+     **/
     public synchronized void destroy() {
 	if (state != STATE_STOPPED) {
 	    if (Debug.ASSERT && state != STATE_RUNNING) {
@@ -262,6 +290,8 @@ public class MenuWorker implements Runnable {
 	try {
 	    while (state != STATE_STOPPED) {
 		wait();
+		// We could use Thread.join() instead.  It's really the
+		// same thing.
 	    }
 	} catch (InterruptedException ex) {
 	    Thread.currentThread().interrupt();

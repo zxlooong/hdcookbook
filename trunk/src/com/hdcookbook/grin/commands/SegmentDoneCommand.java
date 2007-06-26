@@ -60,6 +60,11 @@ import com.hdcookbook.grin.Show;
 import java.io.IOException;
 
 /**
+ * Command to indicate that the current segment is done.  This causes
+ * the segement to execute the commands from its next clause, which
+ * will typically contain a command to move to a different segment.
+ * This is useful for things like reacting when a set of assets finishes
+ * loading.
  *
  * @author Bill Foote (http://jovial.com)
  */

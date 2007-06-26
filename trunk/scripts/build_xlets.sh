@@ -82,7 +82,7 @@ mv sound.bdmv $HDC_DISC_BDMV/AUXDATA/
 if [[ $? != 0 ]] ; then
     exit 1
 fi
-mv Font/Lisa.ttf $HDC_DISC_BDMV/AUXDATA/00001.otf
+mv Font/Lisa.ttf $HDC_DISC_BDMV/AUXDATA/00000.otf
 if [[ $? != 0 ]] ; then
     exit 1
 fi

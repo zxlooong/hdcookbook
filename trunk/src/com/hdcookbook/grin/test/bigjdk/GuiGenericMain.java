@@ -70,7 +70,7 @@ import javax.swing.SwingUtilities;
 /**
  * This is like GenericMain, and also includes a GUI to browse the
  * Show file and control show execution.  The GUI is equivalent to the
- * CLI provided by GenericMain.
+ * command line interface provided by GenericMain.
  *
  * @author Bill Foote (http://jovial.com)
  */

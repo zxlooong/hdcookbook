@@ -87,10 +87,11 @@ import org.bluray.media.InvalidPlayListException;
 /**
  * Navigate the disc.  This singleton is used by the xlet
  * to seek to different parts of the disc, change subtitles,
- * and stuff like that.  Basically, anything involving a locator.
+ * and stuff like that.  Basically, anything involving a locator
+ * goes through here.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
-
-
 public class MenuDiscNavigator extends AbstractDiscNavigator {
 
     private MenuXlet xlet;
@@ -125,7 +126,8 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
      * The playlist entry for blank video
      **/
     public BDLocator blankVideo
-    	= makeBDLocator("bd://0.PLAYLIST:00002.MARK:00000"); // @@ s/b 4
+    	= makeBDLocator("bd://0.PLAYLIST:00004.MARK:00000");
+    private int blankVideoPL_ID = blankVideo.getPlayListId();
 
     /**
      * PL for the scenes
@@ -153,9 +155,15 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
 	this.xlet = xlet;
     }
 
+    /**
+     * Initialize this navigator.  Called on xlet startup.
+     **/
     public void init() {
     }
 
+    /**
+     * Start playing a playlist, or a playlist mark
+     **/
     public void startVideoAt(BDLocator playlist) {
 	if (playlist == null) {
 	    gotoPlaylistInCurrentTitle(blankVideo);
@@ -168,11 +176,15 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
 
     /**
      * Called to notify the xlet when the video spontaneously stops.
-     * This is not called when the
-     * video is stopped because we stop it.
-     * <p>
-     * This is called with the navigator lock held, so applications
-     * should not do anything in this method that might cause deadlock.
+     * This is not called when the video is stopped because we stop it.
+     * If we're in a place where video is supposed to loop, this will
+     * re-start it.  Note, however, that for seamless looping, it works
+     * better to just repeat the video segment over and over in the
+     * playlist, up to a length of an hour or more.  That way, the xlet
+     * only has to loop the video once an hour, rather than once every
+     * 30 seconds (for example).  When the xlet does the loop, it has
+     * to stop and re-start the video no mattter what, which leads
+     * to an objectionable pause on some players.
      **/
     public void notifyStop() {
 	synchronized(this) {
@@ -182,6 +194,9 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
 	}
 	if (currentPlaylistID == menuVideoPL_ID) {
 	    gotoPlaylistInCurrentTitle(menuVideoStartPL);
+	} else if (currentPlaylistID == blankVideoPL_ID) {
+	    gotoPlaylistInCurrentTitle(blankVideo);
+	    pause(true);
 	} else {
 	    // In all other cases, we go back to the main menu state.  Note
 	    // that show.getSegment and show.activateSegment
@@ -230,6 +245,9 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
 	}
     }
 
+    /**
+     * Select an audio stream in the main video.
+     **/
     public void selectAudioStream(int streamNumber) {
 	currentAudioStream = streamNumber;
 	selectAudio(streamNumber);
@@ -237,6 +255,8 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
 
 
     /** 
+     * Select a subtitle stream in the main video.
+     *
      * @param	streamNumber   The stream number, or 0 for no subtitles
      **/
     public void selectSubtitleStream(int streamNumber) {
@@ -245,6 +265,9 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
 	selectSubtitles(on, streamNumber);
     }
 
+    /**
+     * Play a sound-effects sound
+     **/
     public void playSound(HSound sound) {
 	if (sound == null) {
 	    if (Debug.LEVEL > 0) {
@@ -253,6 +276,15 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
 	    return;
 	}
 	sound.play();
+    }
+
+    /**
+     * Destroy this navigator.  Called on xlet termination.
+     **/
+    public synchronized void destroy() {
+	super.destroy();
+	selectSound.dispose();
+	activateSound.dispose();
     }
 
 }

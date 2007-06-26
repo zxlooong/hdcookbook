@@ -60,6 +60,12 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.Segment;
 
+/** 
+ * This class manages the user input from the alphabet grid that's
+ * used to unlock the "BONUS 1" feature.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class UserInputManager {
 
     private MenuXlet xlet;
@@ -91,6 +97,8 @@ public class UserInputManager {
     }
 
     /**
+     * Called when a button is pressed in the alphabet grid UI.
+     *
      * @param text  The uppercase letter to add, or one of the special 
      *		    values "-enter-" or "-init-".
      **/

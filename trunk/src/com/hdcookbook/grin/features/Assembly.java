@@ -63,6 +63,15 @@ import java.io.IOException;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
+/**
+ * An assembly is a feature composed of other features.  It's a bit
+ * like a switch statement:  Only one child of an assembly can be
+ * active at a time.  This can be used to compose a menu that can
+ * be in one of several visual states.  Often the parts of an assembly
+ * are groups.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class Assembly extends Feature {
 
     private String[] partNames;
@@ -83,10 +92,16 @@ public class Assembly extends Feature {
 	currentFeature = parts[0];
     }
 
+    /**
+     * Get the names of our parts.
+     **/
     public String[] getPartNames() {
 	return partNames;
     }
 
+    /**
+     * Get our parts, that is, our child features.
+     **/
     public Feature[] getParts() {
 	return parts;
     }
@@ -101,6 +116,9 @@ public class Assembly extends Feature {
 	// need to do anything here.
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartX() {
 	int x = Integer.MAX_VALUE;
 	for (int i = 0; i < parts.length; i++) {
@@ -112,6 +130,9 @@ public class Assembly extends Feature {
 	return x;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartY() {
 	int y = Integer.MAX_VALUE;
 	for (int i = 0; i < parts.length; i++) {
@@ -169,6 +190,9 @@ public class Assembly extends Feature {
 	currentFeature = feature;
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setSetupMode(boolean mode) {
 	if (mode) {
 	    for (int i = 0; i < parts.length; i++) {
@@ -181,6 +205,9 @@ public class Assembly extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void doSomeSetup() {
 	for (int i = 0; i < parts.length; i++) {
 	    if (parts[i].needsMoreSetup()) {
@@ -191,6 +218,9 @@ public class Assembly extends Feature {
 	// None needed
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean needsMoreSetup() {
 	for (int i = 0; i < parts.length; i++) {
 	    if (parts[i].needsMoreSetup()) {
@@ -200,6 +230,10 @@ public class Assembly extends Feature {
 	return false;
     }
 
+    /**
+     * Find the part of the given name in this assembly, or
+     * null if it can't be found.
+     **/
     public Feature findPart(String name) {
 	for (int i = 0; i < parts.length; i++) {
 	    if (partNames[i].equals(name)) {
@@ -209,18 +243,30 @@ public class Assembly extends Feature {
         return null;
     }
 
+    /** 
+     * Get the currently active part within this assembly.
+     **/
     public Feature getCurrentPart() {
 	return currentFeature;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void  addDisplayArea(Rectangle area) {
 	currentFeature.addDisplayArea(area);
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
 	currentFeature.paintFrame(gr);
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
 	currentFeature.advanceToFrame(newFrame);
     }

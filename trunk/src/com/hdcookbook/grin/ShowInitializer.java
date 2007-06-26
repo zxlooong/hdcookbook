@@ -62,9 +62,14 @@ import java.awt.AlphaComposite;
  * This is a small data holder used for a Show.  It's used to hold
  * data structures used only during initialization of a show.  After
  * initialization is finished, a show nulls out its ShowInitializer.
- * This is useful for things like canonicalizing object instances.
+ * This helper is used for things like canonicalizing object instances.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class ShowInitializer {
+
+    public ShowInitializer() {
+    }
 
     /**
      * Used to canonicalize AlphaComposite objects for SRC mode drawing
@@ -79,9 +84,6 @@ public class ShowInitializer {
      * Indexed by Integer value (0-255)
      **/
     private Hashtable srcOverAlphas = new Hashtable();
-
-    public ShowInitializer() {
-    }
 
     /**
      * Get an AlphaComposite object for drawing with an alpha
@@ -99,4 +101,7 @@ public class ShowInitializer {
 	}
 	return result;
     }
+
+    // We could choose to do the same thing with fonts and colors,
+    // and maybe other things.
 }

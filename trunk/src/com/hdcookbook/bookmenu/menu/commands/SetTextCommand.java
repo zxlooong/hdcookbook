@@ -59,6 +59,12 @@ package com.hdcookbook.bookmenu.menu.commands;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.bookmenu.menu.MenuXlet;
 
+/**
+ * A command triggered when the viewer selects something in the
+ * bonus text entry screen.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class SetTextCommand extends Command {
 
     private MenuXlet xlet;

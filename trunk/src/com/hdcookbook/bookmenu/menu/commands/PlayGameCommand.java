@@ -59,6 +59,11 @@ package com.hdcookbook.bookmenu.menu.commands;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.bookmenu.menu.MenuXlet;
 
+/**
+ * Command triggered when the viewer elects to play the Gun Bunny game.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class PlayGameCommand extends Command {
 
     private MenuXlet xlet;

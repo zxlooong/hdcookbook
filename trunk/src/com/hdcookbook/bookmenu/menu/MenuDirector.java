@@ -74,6 +74,12 @@ import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
 
+/**
+ * This is a helper class that integrates GRIN into our xlet.
+ * It includes some control logic for the overall xlet, as well.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
 public class MenuDirector extends Director {
 
     private MenuXlet xlet;
@@ -86,16 +92,27 @@ public class MenuDirector extends Director {
 	this.xlet = xlet;
     }
 
+    /**
+     * Initialize this MenuDirector.  Called on xlet startup.
+     **/
     public void init() {
 	ChapterManager nullCM = new ChapterManager("");
 	ChapterManager[] chapters = { nullCM };
 	setup(0, chapters);
     }
 
+    /**
+     * Called by GRIN when it parses a show.  This is how we hook
+     * in our extensions to the GRIN syntax.
+     **/
     public ExtensionsParser getExtensionsParser() {
 	return new MenuExtensionsParser(xlet);
     }
 
+    /**
+     * Called by the xlet, this creates the GRIN show file that defines
+     * most of our menu UI.
+     **/
     public Show createShow() {
 	Show show = new Show(this);
 	String showName = "menu.txt";
@@ -130,6 +147,10 @@ public class MenuDirector extends Director {
 	return bioUpdater;
     }
 
+    /**
+     * Called from the show via ActivateBioCommand, this sets up the UI
+     * in the right state when the bio screen is activated.
+     **/
     public void activateBio() {
 	BioUpdater bu = getBioUpdater();
 	if (bu != null) {
@@ -137,6 +158,10 @@ public class MenuDirector extends Director {
 	}
     }
 
+    /**
+     * Called from the show via a DownloadBioCommand, this starts the
+     * process of downloading a new bio image from the Internet.
+     **/
     public void downloadBio() {
 	BioUpdater bu = getBioUpdater();
 	if (bu != null) {
@@ -167,6 +192,10 @@ public class MenuDirector extends Director {
 	}
     }
 
+    /** 
+     * Called from the show via a command, this creates a new
+     * bookmark at the current position in the  main video.
+     **/
     public void makeBookmark() {
 	BookmarkManager mgr = getBookmarkManager();
 	if (mgr != null) {
@@ -174,6 +203,10 @@ public class MenuDirector extends Director {
 	}
     }
 
+    /**
+     * Called from the show via a command, this deletes the bookmark
+     * that's currently selected in the UI.
+     **/
     public void deleteCurrentBookmark() {
 	BookmarkManager mgr = getBookmarkManager();
 	if (mgr != null) {
@@ -200,7 +233,9 @@ public class MenuDirector extends Director {
 	}
     }
 
-
+    /**
+     * Destroy this director.  Called on xlet termination.
+     **/
     public void destroy() {
 	synchronized(this) {
 	    destroyed = true;

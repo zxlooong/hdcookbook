@@ -65,9 +65,12 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * Represents a group of features.  It's useful to group features
+ * Represents a group of features that are all activated at the same
+ * time.  It's useful to group features
  * together so that they can be turned on and off as a unit within
  * an assembly.
+ *
+ *   @author     Bill Foote (http://jovial.com)
  **/
 public class Group extends Feature {
 
@@ -78,15 +81,23 @@ public class Group extends Feature {
 	super(show, name);
     }
 
+    /**
+     * Called from the parser
+     **/
     public void setup(Feature[] parts) { 
 	this.parts = parts;
     }
 
+    /**
+     * Get the parts that make up this group.
+     **/
     public Feature[] getParts() {
 	return parts;
     }
 
-
+    /**
+     * See superclass definition.
+     **/
     public int getStartX() {
 	int x = Integer.MAX_VALUE;
 	for (int i = 0; i < parts.length; i++) {
@@ -98,6 +109,9 @@ public class Group extends Feature {
 	return x;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public int getStartY() {
 	int y = Integer.MAX_VALUE;
 	for (int i = 0; i < parts.length; i++) {
@@ -133,10 +147,11 @@ public class Group extends Feature {
 	// need to do anything here.
     }
 
-    //
-    // This is synchronized to only occur within model updates.
-    //
+    /**
+     * See superclass definition.
+     **/
     protected void setActivateMode(boolean mode) {
+	// This is synchronized to only occur within model updates.
 	activated = mode;
 	if (mode) {
 	    for (int i = 0; i < parts.length; i++) {
@@ -149,6 +164,9 @@ public class Group extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     protected void setSetupMode(boolean mode) {
 	if (mode) {
 	    for (int i = 0; i < parts.length; i++) {
@@ -161,6 +179,9 @@ public class Group extends Feature {
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void doSomeSetup() {
 	for (int i = 0; i < parts.length; i++) {
 	    if (parts[i].needsMoreSetup()) {
@@ -171,6 +192,9 @@ public class Group extends Feature {
 	// None needed
     }
 
+    /**
+     * See superclass definition.
+     **/
     public boolean needsMoreSetup() {
 	for (int i = 0; i < parts.length; i++) {
 	    if (parts[i].needsMoreSetup()) {
@@ -180,18 +204,27 @@ public class Group extends Feature {
 	return false;
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void  addDisplayArea(Rectangle area) {
 	for (int i = 0; i < parts.length; i++) {
 	    parts[i].addDisplayArea(area);
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void paintFrame(Graphics2D gr) {
 	for (int i = 0; i < parts.length; i++) {
 	    parts[i].paintFrame(gr);
 	}
     }
 
+    /**
+     * See superclass definition.
+     **/
     public void advanceToFrame(int newFrame) {
 	for (int i = 0; i < parts.length; i++) {
 	    parts[i].advanceToFrame(newFrame);
