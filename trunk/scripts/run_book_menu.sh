@@ -2,7 +2,7 @@
 HDC_NOCHECK_MOUNT="yes"
 source vars.sh
 DEST=$HDC_BUILD_DIR/grin_tester
-COMPILE=yes	# Set to "yes" to compile before running each time
+COMPILE=no	# Set to "yes" to compile before running each time
 
 if [[ $COMPILE == yes ]] ; then
     ./build_book_menu.sh

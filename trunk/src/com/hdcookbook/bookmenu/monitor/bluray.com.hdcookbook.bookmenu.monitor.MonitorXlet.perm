@@ -4,7 +4,6 @@
     <applifecyclecontrol value="true"></applifecyclecontrol>
     <servicesel value="true"></servicesel>
     <userpreferences read="true" write="false"></userpreferences>
-    <applifecyclecontrol value="true"></applifecyclecontrol>
     <network>
 	<host action="connect">hdcookbook.com</host>
     </network>

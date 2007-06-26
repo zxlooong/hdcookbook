@@ -99,8 +99,6 @@ rm -f $HDC_DISC_BDMV/JAR/00004.jar
 jar cf $HDC_DISC_BDMV/JAR/00004.jar * 
 cd ..
 echo "Created $HDC_DISC_BDMV/JAR/00004.jar";
-# exit 0 # @@
-
 
 echo ""
 echo "*************  Monitor xlet  *****************"
