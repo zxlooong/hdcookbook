@@ -40,4 +40,6 @@ echo "Wrote $HDC_DISC_BDMV/BDJO/00000.bdjo"
 if [[ $? != 0 ]] ; then
     exit 1;
 fi
+rm -f $HDC_DISC_BDMV/BACKUP/BDJO/00000.bdjo
+# just in case
 

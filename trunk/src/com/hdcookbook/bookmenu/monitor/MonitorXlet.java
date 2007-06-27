@@ -98,7 +98,17 @@ public class MonitorXlet implements Xlet {
 	listener = new MonitorIXCListener(this);
 	listener.init();
 	try {
+	    if (Debug.LEVEL > 0) {
+		Debug.println("*** Monitor xlet exporting IXC object.");
+		Debug.println("      Org ID:  " 
+				+ xletContext.getXletProperty("dvb.org.id"));
+		Debug.println("      App ID:  " 
+				+ xletContext.getXletProperty("dvb.app.id"));
+	    }
 	    IxcRegistry.bind(xletContext, "Monitor", listener);
+	    if (Debug.LEVEL > 0) {
+		Debug.println("*** Monitor xlet export succeeded.");
+	    }
 	} catch (AlreadyBoundException ignored) {
 	    if (Debug.LEVEL > 0) {
 		ignored.printStackTrace();

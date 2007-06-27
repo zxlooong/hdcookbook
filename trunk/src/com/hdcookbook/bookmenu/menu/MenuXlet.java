@@ -192,35 +192,48 @@ public class MenuXlet implements Xlet, UserEventListener,
      **/
     public synchronized MonitorIXCInterface getMonitorXlet() {
 	int tries = 0;
-	while (monitorXlet == null) {
+	while (monitorXlet == null) {		// See continue in loop body
+	    boolean notBound = false;
+	    String orgID = (String) context.getXletProperty("dvb.org.id");
+	    String appID = (String) context.getXletProperty("dvb.app.id");
+	    int appIDint = -1;
 	    try {
-		String orgID = (String) context.getXletProperty("dvb.org.id");
-		String appID = (String) context.getXletProperty("dvb.app.id");
-		int appIDint = -1;
-		try {
-		    appIDint =  Integer.parseInt(appID, 16);
-		} catch (Exception ignored) {
-		    if (Debug.LEVEL > 0) {
-			ignored.printStackTrace();
-		    }
-		}
-		String name = "/" + orgID + 
-		              "/" + Integer.toHexString(appIDint - 1) +
-			      "/Monitor";
-		monitorXlet = (MonitorIXCInterface) 
-					IxcRegistry.lookup(context, name);
-		if (Debug.LEVEL > 0) {
-		    Debug.println("Connected to IXC object at " + name);
-		}
-		// The monitor app's app ID is one less than ours.
-	    } catch (RemoteException ignored) {
+		appIDint =  Integer.parseInt(appID, 16);
+	    } catch (Exception ignored) {
 		if (Debug.LEVEL > 0) {
 		    ignored.printStackTrace();
-		    // Must be a bug
 		}
+	    }
+	    String name = "/" + orgID + 
+			  "/" + Integer.toHexString(appIDint - 1) +
+			  "/Monitor";
+	    // The monitor app's app ID is one less than ours.
+	    try {
+		monitorXlet = tryIXCRegistry(name);
 	    } catch (NotBoundException ex) {
-		// Maybe the monitor xlet hasn't had time to start yet
-		// Give it two seconds
+		notBound = true;
+	    }
+
+	    if (monitorXlet == null) {
+		int orgIDint = (int) Long.parseLong(orgID, 16);
+		if (orgIDint < 0) {
+		    // There was a spec bug in MHP/GEM that suggested
+		    // a very strange negative hex number as the org ID.
+		    // That bug was fixed after players shipped, so it's
+		    // a good idea to try under the other name, too.
+		    orgIDint = -orgIDint;
+		    name = "/-" + Integer.toHexString(orgIDint) + 
+			   "/" + Integer.toHexString(appIDint - 1) +
+			   "/Monitor";
+		    try {
+			monitorXlet = tryIXCRegistry(name);
+		    } catch (NotBoundException ex) {
+			notBound = true;
+		    }
+		}
+	    }
+	    if (monitorXlet == null) {
+		// Keep trying for two seconds...
 		try {
 		    tries++;
 		    if (tries < 21) {
@@ -230,8 +243,6 @@ public class MenuXlet implements Xlet, UserEventListener,
 		} catch (InterruptedException ex2) {
 		    Thread.currentThread().interrupt();
 		}
-	    }
-	    if (monitorXlet == null) {
 	    	// Give up, but provide a stub so at least we don't
 		// get null pointer exceptions.  If we get here, then
 		// there's  some kind of bug; this just adds a little bit
@@ -252,6 +263,40 @@ public class MenuXlet implements Xlet, UserEventListener,
 	    }
 	}
 	return monitorXlet;
+    }
+
+    //
+    // Try looking up the monitor xlet at the given name.  
+    // Throws NotBoundException if there's no error, but it doesn't
+    // find the mnitor xlet.
+    //
+    private MonitorIXCInterface tryIXCRegistry(String name) 
+    		throws NotBoundException 
+    {
+	NotBoundException notBound = null;
+	try {
+	    try {
+		if (Debug.LEVEL > 0) {
+		    Debug.println("Connecting to IXC object at " + name);
+		}
+		return (MonitorIXCInterface) IxcRegistry.lookup(context, name);
+	    } catch (RemoteException ignored) {
+		if (Debug.LEVEL > 0) {
+		    ignored.printStackTrace();
+		    // Must be a bug
+		}
+	    } catch (NotBoundException ex) {
+		// Maybe the monitor xlet hasn't had time to start yet
+		notBound = ex;
+	    }
+	} catch (Throwable ignored) {
+	    // Player bug:  sometimes a player will throw the wrong kind of
+	    // exception.
+	}
+	if (notBound != null) {
+	    throw notBound;
+	}
+	return null;
     }
 
     /**

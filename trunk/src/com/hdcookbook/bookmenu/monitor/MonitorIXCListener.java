@@ -93,7 +93,7 @@ public class MonitorIXCListener
      * The App ID for the game app.  This must be the same as the ID
      * in the bdjo file.
      **/
-    public final static int GAME_APP_ID = 0x4003;
+    public final static int GAME_APP_ID = 0x0003;
 
     private MonitorXlet xlet;
     private AppProxy gameXlet;	// Set while we're playing game
