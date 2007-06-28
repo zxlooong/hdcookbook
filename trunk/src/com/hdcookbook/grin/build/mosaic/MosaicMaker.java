@@ -124,8 +124,7 @@ import javax.imageio.ImageIO;
      *
      * @param shows	The GRIN shows these mosaics are for
      * @param assetPath The search path for images and other assets,
-     *			like the show files.  Class.getResource(String)
-     *			is used to load assets.
+     *			like the show files.  The assets are read from a file.
      * @param outputDir Where to write the mosaics
      **/
     public MosaicMaker(String[] shows, String[] assetPath, File outputDir) {
@@ -136,7 +135,11 @@ import javax.imageio.ImageIO;
 
     public void init() throws IOException {
 	MosaicShowBuilder builder = new MosaicShowBuilder(this);
-	AssetFinder.setSearchPath(assetPath, null);
+	File [] fPath = new File[assetPath.length];
+	for (int i = 0; i < fPath.length; i++) {
+	    fPath[i] = new File(assetPath[i]);
+	}
+	AssetFinder.setSearchPath(null, fPath);
 	showTrees = new Show[shows.length];
         for (int i = 0; i < shows.length; i++) {
             Director director = new Director() {

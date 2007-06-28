@@ -21,16 +21,19 @@ if [ ! -f $JAVA ] ; then
     JAVADOC=javadoc
 fi
 
-cd $HDC_REPOSITORY/src
-SRCS=`find com/hdcookbook/tools/bdjo  \
-	-name '*.java' -print`
 rm -rf $DEST
 mkdir -p $DEST
+SCRATCH=$HDC_BUILD_DIR/tmp_file
+rm -f $SCRATCH
+
+cd $HDC_REPOSITORY/src
+echo com/hdcookbook/tools/bdjo/*.java > $SCRATCH
 echo "Running javac..."
-$JAVAC -d $DEST $SRCS
+$JAVAC -d $DEST @$SCRATCH
 if [[ $? != 0 ]] ; then
     exit 1;
 fi
+rm -f $SCRATCH
 cp com/hdcookbook/tools/bdjo/jaxb.index $DEST/com/hdcookbook/tools/bdjo
 
 $JAVA -cp $DEST com.hdcookbook.tools.bdjo.Converter \

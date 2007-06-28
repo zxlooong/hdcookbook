@@ -2,21 +2,23 @@
 
 source vars.sh
 
-MOSAIC=yes # Set to "yes" for a slower build and faster xlet load
+MOSAIC=yes   # Set to "yes" for a slower build and faster xlet load
 
 mkdir -p $HDC_DISC_BDMV/JAR
 mkdir -p $HDC_DISC_BDMV/AUXDATA
+SCRATCH=$HDC_BUILD_DIR/tmp_file
+rm -f $SCRATCH
+mkdir -p $HDC_BUILD_DIR
 
 if [[ $MOSAIC == yes ]] ; then
     echo ""
     echo "**********  Mosaic Builder  *************"
     cd $HDC_REPOSITORY/src
     DEST=$HDC_BUILD_DIR/mosaic_builder
-    SRCS="com/hdcookbook/grin/build/mosaic/*.java"
     rm -rf $DEST
     mkdir -p $DEST
     echo "Running javac..."
-    javac -d $DEST $SRCS
+    javac -d $DEST com/hdcookbook/grin/build/mosaic/*.java
     if [[ $? != 0 ]] ; then
 	exit 1;
     fi
@@ -27,20 +29,26 @@ echo ""
 echo "*************  Menu xlet  *****************"
 DEST=$HDC_BUILD_DIR/menuxlet
 cd $HDC_REPOSITORY/src
-SRCS=`find com/hdcookbook/grin com/hdcookbook/bookmenu/menu \
-	-path 'com/hdcookbook/grin/test/*' -prune -o \
-	-path 'com/hdcookbook/grin/build/*' -prune -o \
-	-path 'org/*' -prune -o \
-	-name '*.java' -print`
-SRCS="$SRCS com/hdcookbook/bookmenu/*.java"
+echo com/hdcookbook/grin/*.java > $SCRATCH
+echo com/hdcookbook/grin/commands/*.java >> $SCRATCH
+echo com/hdcookbook/grin/features/*.java >> $SCRATCH
+echo com/hdcookbook/grin/input/*.java >> $SCRATCH
+echo com/hdcookbook/grin/parser/*.java >> $SCRATCH
+echo com/hdcookbook/grin/util/*.java >> $SCRATCH
+echo com/hdcookbook/bookmenu/*.java >> $SCRATCH
+echo com/hdcookbook/bookmenu/MonitorIXCInterface.java >> $SCRATCH
+echo com/hdcookbook/bookmenu/menu/*.java >> $SCRATCH
+echo com/hdcookbook/bookmenu/menu/commands/*.java >> $SCRATCH
+
 rm -rf $DEST
 mkdir -p $DEST/classes
 echo "Running javac..."
 javac -source 1.3 -target 1.3 -bootclasspath $HDC_BDJ_PLATFORM_CLASSES \
-	-d $DEST/classes $SRCS
+	-d $DEST/classes @$SCRATCH
 if [[ $? != 0 ]] ; then
     exit 1;
 fi
+rm -f $SCRATCH
 cp com/hdcookbook/bookmenu/menu/*.perm $DEST/classes/com/hdcookbook/bookmenu/menu
 if [[ $? != 0 ]] ; then
     exit 1;
@@ -65,11 +73,14 @@ ASSETS="com/hdcookbook/bookmenu/assets"
 
 if [[ $MOSAIC == yes ]] ; then
     echo "Making mosaic"
-    java -Xmx512m -cp $MOSAIC_CP:$DEST \
+    java -Xmx512m -cp $MOSAIC_CP \
     	    com.hdcookbook.grin.build.mosaic.Main \
 	    -show menu.txt \
-	    -assets / \
+	    -assets $DEST \
 	    -out $DEST/
+    if [[ $? != 0 ]] ; then
+	exit 1;
+    fi
     rm -rf $DEST/Graphics
 fi
 cd $DEST
@@ -78,7 +89,7 @@ if [[ $? != 0 ]] ; then
 fi
 find . -name .DS_Store -exec rm {} ";"
 rm $HDC_DISC_BDMV/AUXDATA/*
-mv sound.bdmv $HDC_DISC_BDMV/AUXDATA/
+mv sound.bdmv $HDC_DISC_BDMV/AUXDATA
 if [[ $? != 0 ]] ; then
     exit 1
 fi
@@ -86,7 +97,7 @@ mv Font/Lisa.ttf $HDC_DISC_BDMV/AUXDATA/00000.otf
 if [[ $? != 0 ]] ; then
     exit 1
 fi
-mv Font/dvb.fontindex $HDC_DISC_BDMV/AUXDATA/
+mv Font/dvb.fontindex $HDC_DISC_BDMV/AUXDATA
 if [[ $? != 0 ]] ; then
     exit 1
 fi
@@ -106,18 +117,19 @@ echo "*************  Monitor xlet  *****************"
 DEST=$HDC_BUILD_DIR/monitorxlet
 
 cd $HDC_REPOSITORY/src
-SRCS="com/hdcookbook/bookmenu/monitor/*.java   \
-      com/hdcookbook/bookmenu/*.java           \
-      com/hdcookbook/grin/util/Debug.java"
+echo com/hdcookbook/grin/util/Debug.java  > $SCRATCH
+echo com/hdcookbook/bookmenu/monitor/*.java >> $SCRATCH
+echo com/hdcookbook/bookmenu/MonitorIXCInterface.java >> $SCRATCH
 
 rm -rf $DEST
 mkdir -p $DEST/classes
 echo "Running javac..."
 javac -source 1.3 -target 1.3 -bootclasspath $HDC_BDJ_PLATFORM_CLASSES \
-	-d $DEST/classes $SRCS
+	-d $DEST/classes @$SCRATCH
 if [[ $? != 0 ]] ; then
     exit 1;
 fi
+rm -f $SCRATCH
 cp com/hdcookbook/bookmenu/monitor/*.perm $DEST/classes/com/hdcookbook/bookmenu/monitor
 if [[ $? != 0 ]] ; then
     exit 1;
@@ -138,17 +150,19 @@ echo "*************  Game xlet  *****************"
 DEST=$HDC_BUILD_DIR/gamexlet
 
 cd $HDC_REPOSITORY/src
-SRCS="com/hdcookbook/gunbunny/*.java com/hdcookbook/gunbunny/util/*.java \
-      com/hdcookbook/grin/util/Debug.java "
+echo com/hdcookbook/grin/util/Debug.java > $SCRATCH
+echo com/hdcookbook/gunbunny/*.java >> $SCRATCH
+echo com/hdcookbook/gunbunny/util/*.java >> $SCRATCH
 
 rm -rf $DEST
 mkdir -p $DEST/classes
 echo "Running javac..."
 javac -source 1.3 -target 1.3 -bootclasspath $HDC_BDJ_PLATFORM_CLASSES \
-	-d $DEST/classes $SRCS
+	-d $DEST/classes @$SCRATCH
 if [[ $? != 0 ]] ; then
     exit 1;
 fi
+rm -f $SCRATCH
 
 echo "Copying assets..."
 ASSETS="com/hdcookbook/gunbunny/assets"
