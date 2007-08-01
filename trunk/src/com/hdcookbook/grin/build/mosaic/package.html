@@ -5,8 +5,12 @@ This package contains a program that reads a show file, and
 transforms all image assets to a mosaic.  It does this using a
 fairly brute-force "first fit" algorithm that's almost certainly
 non-optimal, but is sufficient at least to demonstrate the concept
-of a mosaic.  When run, this program produces a modified show file, 
-and a modified set of assets to be used by that show file.
+of a mosaic.  When run, this program produces a modified set of assets 
+to be used with the show file.  The show file itself doesn't need to
+be modified, because a "map" file is produced that maps the filename
+of the original image to a set of coordinates within a matrix file.  Just
+package up the map file and the matrixes, and leave out the original
+images in the disc image.
 </p><p>
 This is a build-time tool that runs with the JDK.  It requires parts
 of the GRIN library to run, so you should probably just build the
