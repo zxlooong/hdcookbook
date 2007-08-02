@@ -89,6 +89,8 @@ public class ImageSequence extends Feature {
     private Command[] endCommands;
 
     private ManagedImage[] images;
+    	// The images in this sequence.  A null image is simply not
+	// painted, thus leaving the previous image in place.
     private boolean setupMode = false;
     private int imagesSetup = 0;
     private Object setupMonitor = new Object();
@@ -142,7 +144,8 @@ public class ImageSequence extends Feature {
     }
 
     /**
-     * Get the underlying images in this sequence.
+     * Get the underlying images in this sequence.  Some of them might be
+     * null.
      **/
     public ManagedImage[] getImages() {
 	return images;

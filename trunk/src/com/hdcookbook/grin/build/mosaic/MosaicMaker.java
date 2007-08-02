@@ -295,7 +295,9 @@ import javax.imageio.ImageIO;
 		    ImageSequence is = (ImageSequence) f;
 		    ManagedImage[] ims = is.getImages();
 		    for (int j = 0; j < ims.length; j++) {
-			addImage(ims[j]);
+			if (ims[j] != null) {
+			    addImage(ims[j]);
+			}
 		    }
 		}
 	    }
