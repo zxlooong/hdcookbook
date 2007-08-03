@@ -98,6 +98,8 @@ public class ImageManager {
 		    if (t != null) {
 			im = new ManagedSubImage(name, t.mosaicName, 
 						 t.placement);
+		    } else if (Debug.LEVEL > 0) {
+			Debug.println(name + " not found in image map.");
 		    }
 		}
 		if (im == null) {
