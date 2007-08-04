@@ -206,7 +206,6 @@ public class Mosaic {
      * Write out our image buffer as a PNG image.
      **/
     public void writeBuffer(File out) throws IOException {
-System.out.println(width + ", " + height + "     " + buffer.getWidth() + ", " + buffer.getHeight());
 	BufferedImage used = buffer.getSubimage(0, 0, width, height);
 	boolean ok = ImageIO.write(used, "PNG", out);
 	if (!ok) {
