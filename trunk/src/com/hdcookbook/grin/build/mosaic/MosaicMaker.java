@@ -263,6 +263,11 @@ import javax.imageio.ImageIO;
 	    Mosaic m = new Mosaic();
 	    part = m.putImage(mi, imAdded);
 	    if (part == null) {
+		System.out.println();
+		System.out.println("Unable to add an image.  Perhaps it's too big?");
+		System.out.println("It has a width of " + mi.getWidth() + " and a height of " + mi.getHeight() + ".");
+		System.out.println("You might want to make a mosaic_hint for it.");
+		System.out.println();
 		throw new IOException("Unable to add image " + mi);
 	    }
             mosaics.add(m);

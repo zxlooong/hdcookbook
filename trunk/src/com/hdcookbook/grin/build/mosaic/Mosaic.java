@@ -131,8 +131,11 @@ public class Mosaic {
 	// Use a fairly simple brute-force first-fit algorithm.
 
 	Rectangle placement = new Rectangle(im.getWidth(), im.getHeight());
+	if (placement.width > buffer.getWidth()) {
+	    return null;	// It can't fit
+	}
 	int nextY = buffer.getHeight();
-	while (placement.y + placement.height < buffer.getHeight()) {
+	while (placement.y + placement.height <= buffer.getHeight()) {
 	    boolean found = true;
 	    for (Iterator it = parts.iterator(); found && it.hasNext(); ) {
 		MosaicPart part = (MosaicPart) it.next();
@@ -143,7 +146,7 @@ public class Mosaic {
 		    if (y < nextY) {
 			nextY = y;
 		    }
-		    if (placement.x + placement.width >= buffer.getWidth()) {
+		    if (placement.x + placement.width > buffer.getWidth()) {
 			placement.x = 0;
 			if (Debug.ASSERT && placement.y >= nextY) {
 			    Debug.assertFail();
@@ -203,6 +206,7 @@ public class Mosaic {
      * Write out our image buffer as a PNG image.
      **/
     public void writeBuffer(File out) throws IOException {
+System.out.println(width + ", " + height + "     " + buffer.getWidth() + ", " + buffer.getHeight());
 	BufferedImage used = buffer.getSubimage(0, 0, width, height);
 	boolean ok = ImageIO.write(used, "PNG", out);
 	if (!ok) {
