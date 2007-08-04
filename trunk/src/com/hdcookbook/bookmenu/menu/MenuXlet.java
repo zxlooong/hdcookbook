@@ -348,7 +348,7 @@ public class MenuXlet implements Xlet, UserEventListener,
 	    }
 	    AssetFinder.setImageMap("images.map");
 	} else if (Debug.LEVEL > 0) {
-		Debug.println("No images.map, not using mosaic.");
+	    Debug.println("No images.map, not using mosaic.");
 	}
 
 	navigator.init();
