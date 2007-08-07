@@ -317,6 +317,7 @@ import javax.imageio.ImageIO;
 	DataOutputStream mapOS  = new DataOutputStream(new BufferedOutputStream(
 				  new FileOutputStream(mapFile)));
 	mapOS.writeInt(mosaics.size());
+	int totalPixels = 0;
 	for (int i = 0; it.hasNext(); i++) {
 	    Mosaic m = (Mosaic) it.next();
 	    String name = "im" + i + ".png";
@@ -324,6 +325,7 @@ import javax.imageio.ImageIO;
 	    m.setPosition(i);
 	    File out = new File(outputDir, "im" + i + ".png");
 	    m.writeBuffer(out);
+	    totalPixels += m.getWidthUsed() * m.getHeightUsed();
 	    System.out.println("    Wrote " + out);
 	    mapOS.writeUTF(name);
 	}
@@ -342,5 +344,7 @@ import javax.imageio.ImageIO;
 	}
 	mapOS.close();
 	System.out.println("Wrote " + mapFile);
+	System.out.printf("Mosaics occupy a total of %,d pixels.\n",
+			   totalPixels);
     }
  }

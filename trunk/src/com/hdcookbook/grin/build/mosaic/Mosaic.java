@@ -123,6 +123,14 @@ public class Mosaic {
 	return buffer.getWidth();
     }
 
+    public int getHeightUsed() {
+	return height;
+    }
+
+    public int getWidthUsed() {
+	return width;
+    }
+
     /**
      * Put the image represented by mi and im into the mosaic buffer,
      * if possible.  Otherwise return null.

@@ -379,7 +379,7 @@ feature fixed_image F_commentary_director_6
 feature text F_test_text 100 100 
         { "This is a test" "of multi-line" "text" }
         vspace 8
-	fake_font.otf  Braggadocio plain 30 {
+	Braggadocio plain 30 {
 	    { 255 0 0   0 }
 	    { 255 0 0   5 }
 	    { 255 0 0  10 }
