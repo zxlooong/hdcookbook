@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="hdcookbook" default="deploy" basedir=".">
+
+  <property name="antscript_home" value="grin/scripts/ant"/>
+  
+  <import file="${antscript_home}/build_xlets.xml"/>
+  <import file="${antscript_home}/build_bdjo.xml"/>	
+
+</project>
