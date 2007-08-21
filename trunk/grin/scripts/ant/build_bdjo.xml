@@ -25,19 +25,29 @@ information or have any questions.
 
 <project name="Generate a bdjo file" basedir=".">
 
-<target name="generate-bdjo">
-	
-	<available file="${HDC_BDJO_CONVERTER}/dist/bdjo.jar" type="file"
-	    property="bdjoconverter.ok"/>
-	
-	<fail unless="bdjoconverter.ok" message="Coud not find the bdjoconverter tool at ${HDC_BDJO_CONVERTER}"/>
+<target name="generate-bdjo" depends="check-bdjoconverter">    
+	<fail unless="bdjoconverter.ok" message="Could not find the bdjoconverter tool at ${HDC_BDJO_CONVERTER}"/>
 	
 	<java classpath="${HDC_BDJO_CONVERTER}/dist/bdjo.jar"  
 	      fork="true"
-	      classname="com.hdcookbook.tools.bdjo.Converter">
+	      classname="net.java.bd.tools.bdjo.Converter">
 		<arg line="${HDC_REPOSITORY}/grin/src/com/hdcookbook/bookmenu/bdjo/main_bdjo.xml 
 			${HDC_DISC_BDMV}/BDJO/00001.bdjo"/>
 	</java>	
 </target>	
+
+<target name="check-bdjoconverter" depends="check-exists-bdjoconverter, compile-bdjoconverter">
+</target>
+
+<target name="check-exists-bdjoconverter">
+	<available file="${HDC_BDJO_CONVERTER}/dist/bdjo.jar" type="file"
+	    property="bdjoconverter.ok"/>
+</target>
+
+<target name="compile-bdjoconverter" unless="bdjoconverter.ok">	
+   <antcall target="bdjo-dist"/>   
+   <available file="${HDC_BDJO_CONVERTER}/dist/bdjo.jar" type="file"
+	    property="bdjoconverter.ok"/>
+</target>
 
 </project>

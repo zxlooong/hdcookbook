@@ -6,5 +6,10 @@
   
   <import file="${antscript_home}/build_xlets.xml"/>
   <import file="${antscript_home}/build_bdjo.xml"/>	
-
+  <import file="tools/bdjo/build.xml"/>
+  
+  
+  <target name="deploy" depends="grin-deploy"/>
+  <target name="clean" depends="grin-clean, bdjo-clean"/>
+  
 </project>

@@ -37,14 +37,14 @@ information or have any questions.
 
 <property name="use_mosaic_builder" value="true"/>
 
-<target name="clean">
+<target name="grin-clean">
        <delete dir="${HDC_BUILD_DIR}"/>
        <delete dir="${HDC_DISC_BDMV}/JAR"/>
 </target>
  
-<target name="deploy" depends="init, build"/>
+<target name="grin-deploy" depends="grin-init, grin-build"/>
 
-<target name="init">
+<target name="grin-init">
 	<mkdir dir="${HDC_DISC_BDMV}/JAR"/>
 	<mkdir dir="${HDC_BUILD_DIR}"/>	
 	
@@ -55,8 +55,8 @@ information or have any questions.
        message="${HDC_MOUNT_POINT} does not exist"/ -->     
 </target>
 
-<target name="build" depends="compile-mosaic-builder, build-menu, 
-                              build-monitor-xlet, build-game-xlet, sign-xlets"/>
+<target name="grin-build" depends="compile-mosaic-builder, build-menu, 
+                              build-monitor-xlet, build-game-xlet, sign-xlets,  generate-bdjo"/>
 
 			      
 <target name="compile-mosaic-builder" if="use_mosaic_builder">
