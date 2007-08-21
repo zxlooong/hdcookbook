@@ -1,6 +1,6 @@
-// Generated on Wed Jun 27 13:47:22 GMT+05:30 2007
+// Generated on Tue Aug 21 08:48:43 IST 2007
 
-import com.hdcookbook.tools.bdjo.*;
+import net.java.bd.tools.bdjo.*;
 
 BDJO {
     appCacheInfo : {
@@ -17,7 +17,7 @@ BDJO {
             {
                 applicationDescriptor : {
                     baseDirectory : "00000",
-                    binding : TITLE_BOUND_DISC_BOUND:<<com.hdcookbook.tools.bdjo.Binding>>,
+                    binding : TITLE_BOUND_DISC_BOUND:<<net.java.bd.tools.bdjo.Binding>>,
                     classpathExtension : "/00000",
                     iconFlags : 0x0,
                     iconLocator : "",
@@ -31,7 +31,7 @@ BDJO {
                             profile : 1,
                         }, 
                     ],
-                    visibility : V_11:<<com.hdcookbook.tools.bdjo.Visibility>>,
+                    visibility : V_11:<<net.java.bd.tools.bdjo.Visibility>>,
                 },
                 applicationId : 0x4000,
                 controlCode : 0x1,
@@ -51,9 +51,9 @@ BDJO {
     },
     terminalInfo : {
         defaultFontFile : "*****",
-        initialHaviConfig : HD_1920_1080:<<com.hdcookbook.tools.bdjo.HaviDeviceConfig>>,
+        initialHaviConfig : HD_1920_1080:<<net.java.bd.tools.bdjo.HaviDeviceConfig>>,
         menuCallMask : false,
         titleSearchMask : false,
     },
-    version : V_0200:<<com.hdcookbook.tools.bdjo.Version>>,
+    version : V_0200:<<net.java.bd.tools.bdjo.Version>>,
 }
