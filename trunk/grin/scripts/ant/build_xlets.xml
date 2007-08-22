@@ -190,9 +190,9 @@ information or have any questions.
 		
 </target>
 
-<target name = "sign-xlets" depends="bdsigner.check">
-
-	<java classname="bdsigner.BDSigner" fork="true">
+<target name = "sign-xlets" depends="check-bdsigner">
+	<fail unless="bdsigner.ok" message="Could not find the bdsigner tool at ${HDC_BDJ_SIGNER}"/>
+	<java classname="net.java.bd.tools.bdsigner.BDSigner" fork="true">
 		<arg line="56789abc ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar ${HDC_DISC_BDMV}/JAR/00004.jar"/>
 		<classpath> 
 			<pathelement location="${HDC_BDJ_SIGNER}/build/bdsigner.jar"/>
@@ -204,14 +204,20 @@ information or have any questions.
 	<move file="app.discroot.crt" todir="${HDC_DISC_BDMV}/../CERTIFICATE/"/>
 
 </target>
-	
-<target name="bdsigner.check">
+
+<target name="check-bdsigner" depends="check-exists-bdsigner, compile-bdsigner">
+</target>
+
+<target name="check-exists-bdsigner">
 	<available file="${HDC_BDJ_SIGNER}/build/bdsigner.jar" type="file"
-			   property="bdsigner.ok"/>
-		
-	<fail unless="bdsigner.ok"
-		      message="Could not find the signing tool at ${HDC_BDJ_SIGNER}"/>
-		
-</target>       
+	    property="bdsigner.ok"/>
+</target>
+
+<target name="compile-bdsigner" unless="bdsigner.ok">	
+   <ant dir="${HDC_BDJ_SIGNER}/make"/>
+
+   <available file="${HDC_BDJ_SIGNER}/build/bdsigner.jar" type="file"
+	    property="bdsigner.ok"/>
+</target>
 
 </project>
