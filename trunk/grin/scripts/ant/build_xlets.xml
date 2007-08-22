@@ -25,15 +25,17 @@ information or have any questions.
 
 <project name="build xlets" basedir=".">
 
-<property file="${antscript_home}/user.vars.properties"/>	
-<property file="${antscript_home}/vars.properties"/>	
+<property file="user.vars.properties"/>	
+<property file="vars.properties"/>	
 
-<property name="HDC_BUILD_DIR" value="grin/build"/>
+<property name="HDC_BUILD_DIR" value="build"/>
 <property name="MOSAIC_DEST" value="${HDC_BUILD_DIR}/mosaic_builder"/>
 <property name="MENUXLET_DEST" value="${HDC_BUILD_DIR}/menuxlet"/>
 <property name="MENUASSETS_DEST" value="${HDC_BUILD_DIR}/menuassets"/>
 <property name="MONITORXLET_DEST" value="${HDC_BUILD_DIR}/monitorxlet"/>
 <property name="GAMEXLET_DEST" value="${HDC_BUILD_DIR}/gamexlet"/>
+
+<import file="build_bdjo.xml"/>
 
 <property name="use_mosaic_builder" value="true"/>
 
@@ -65,7 +67,7 @@ information or have any questions.
 	<property name="MOSAIC_DEST" value="${HDC_BUILD_DIR}/mosaic_builder"/>
 	<delete dir="${MOSAIC_DEST}"/>
 	<mkdir dir="${MOSAIC_DEST}"/>
-	<javac srcdir="${HDC_REPOSITORY}/grin/src"
+	<javac srcdir="src"
 	       destdir="${MOSAIC_DEST}"
 	       debug="on" deprecation="on">
 	       <include name="com/hdcookbook/grin/build/mosaic/*.java"/>
@@ -80,7 +82,7 @@ information or have any questions.
 		<echo message="*************  Menu xlet  *****************"/>
 		<mkdir dir="${MENUXLET_DEST}/classes"/>
 		
-		<javac srcdir="${HDC_REPOSITORY}/grin/src"
+		<javac srcdir="src"
 		destdir="${MENUXLET_DEST}/classes"
 		source="1.3" target="1.3"
 		bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
@@ -96,7 +98,7 @@ information or have any questions.
 		</javac>
 		
 		<copy todir="${MENUXLET_DEST}/classes/com/hdcookbook/bookmenu/menu">
-			<fileset dir="${HDC_REPOSITORY}/grin/src/com/hdcookbook/bookmenu/menu" includes="*.perm"/>
+			<fileset dir="src/com/hdcookbook/bookmenu/menu" includes="*.perm"/>
 		</copy>
 		
 		<jar basedir="${MENUXLET_DEST}/classes" destfile="${MENUXLET_DEST}/00002.jar"/>
@@ -123,7 +125,7 @@ information or have any questions.
 	
 	<target name="init-menu-assets">
 		<copy todir="${MENUASSETS_DEST}">
-			<fileset dir="${HDC_REPOSITORY}/grin/src/com/hdcookbook/bookmenu/assets" excludes="**/*.svn"/>
+			<fileset dir="src/com/hdcookbook/bookmenu/assets" excludes="**/*.svn"/>
 		</copy>	
 	</target>
 	
@@ -139,7 +141,7 @@ information or have any questions.
 	<echo message="*************  Monitor xlet  *****************"/>
 	<mkdir dir="${MONITORXLET_DEST}/classes"/>
 		
-	<javac srcdir="${HDC_REPOSITORY}/grin/src"
+	<javac srcdir="src"
 	 destdir="${MONITORXLET_DEST}/classes"
 	 source="1.3" target="1.3"
 	 bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
@@ -150,7 +152,7 @@ information or have any questions.
 	</javac>
 		
 	<copy todir="${MONITORXLET_DEST}/classes/com/hdcookbook/bookmenu/monitor">
-		<fileset dir="${HDC_REPOSITORY}/grin/src/com/hdcookbook/bookmenu/monitor" includes="*.perm"/>
+		<fileset dir="src/com/hdcookbook/bookmenu/monitor" includes="*.perm"/>
 	</copy>
 		
 	<jar basedir="${MONITORXLET_DEST}/classes" destfile="${MONITORXLET_DEST}/00001.jar"/>
@@ -166,7 +168,7 @@ information or have any questions.
 	<echo message="*************  game xlet  *****************"/>
 	<mkdir dir="${GAMEXLET_DEST}/classes"/>
 		
-	<javac srcdir="${HDC_REPOSITORY}/grin/src"
+	<javac srcdir="src"
 	 destdir="${GAMEXLET_DEST}/classes"
 	 source="1.3" target="1.3"
 	 bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
@@ -177,7 +179,7 @@ information or have any questions.
 	</javac>
 		
 	<copy todir="${GAMEXLET_DEST}/classes">
-		<fileset dir="${HDC_REPOSITORY}/grin/src/com/hdcookbook/gunbunny/assets" excludes="**/*.svn" />
+		<fileset dir="src/com/hdcookbook/gunbunny/assets" excludes="**/*.svn" />
 	</copy>
 		
 	<jar basedir="${GAMEXLET_DEST}/classes" destfile="${GAMEXLET_DEST}/00003.jar"/>
@@ -208,7 +210,7 @@ information or have any questions.
 			   property="bdsigner.ok"/>
 		
 	<fail unless="bdsigner.ok"
-		      message="Coud not find the signing tool at ${HDC_BDJ_SIGNER}"/>
+		      message="Could not find the signing tool at ${HDC_BDJ_SIGNER}"/>
 		
 </target>       
 

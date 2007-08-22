@@ -2,12 +2,11 @@
     <description>
         Build a tool that converts .bdjo file to a human readable form and back
     </description>
+    
   <!-- set global properties for this build -->
-  
-  <property name="HDC_REPOSITORY" value="../.."/>
-  <property name="bdjo-src" location="${HDC_REPOSITORY}/tools/bdjo/src"/>
-  <property name="bdjo-build" location="${HDC_REPOSITORY}/tools/bdjo/build"/>
-  <property name="bdjo-dist"  location="${HDC_REPOSITORY}/tools/bdjo/dist"/>
+  <property name="bdjo-src" location="src"/>
+  <property name="bdjo-build" location="build"/>
+  <property name="bdjo-dist"  location="dist"/>
   <property name="main.class"  value="net.java.bd.tools.bdjo.Converter"/>
 
   <target name="bdjo-init">

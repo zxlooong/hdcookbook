@@ -31,7 +31,7 @@ information or have any questions.
 	<java classpath="${HDC_BDJO_CONVERTER}/dist/bdjo.jar"  
 	      fork="true"
 	      classname="net.java.bd.tools.bdjo.Converter">
-		<arg line="${HDC_REPOSITORY}/grin/src/com/hdcookbook/bookmenu/bdjo/main_bdjo.xml 
+		<arg line="src/com/hdcookbook/bookmenu/bdjo/main_bdjo.xml 
 			${HDC_DISC_BDMV}/BDJO/00001.bdjo"/>
 	</java>	
 </target>	
@@ -45,7 +45,8 @@ information or have any questions.
 </target>
 
 <target name="compile-bdjoconverter" unless="bdjoconverter.ok">	
-   <antcall target="bdjo-dist"/>   
+   <ant dir="${HDC_BDJO_CONVERTER}"/>
+
    <available file="${HDC_BDJO_CONVERTER}/dist/bdjo.jar" type="file"
 	    property="bdjoconverter.ok"/>
 </target>

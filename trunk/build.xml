@@ -2,14 +2,13 @@
 
 <project name="hdcookbook" default="deploy" basedir=".">
 
-  <property name="antscript_home" value="grin/scripts/ant"/>
+  <target name="deploy"> 
+	 <ant dir="grin" antfile="scripts/ant/build_xlets.xml" target="grin-deploy"/>
+  </target>
   
-  <import file="${antscript_home}/build_xlets.xml"/>
-  <import file="${antscript_home}/build_bdjo.xml"/>	
-  <import file="tools/bdjo/build.xml"/>
-  
-  
-  <target name="deploy" depends="grin-deploy"/>
-  <target name="clean" depends="grin-clean, bdjo-clean"/>
+  <target name="clean"> 	  
+	  <ant dir="tools/bdjo" target="bdjo-clean"/>
+	  <ant dir="grin" antfile="scripts/ant/build_xlets.xml" target="grin-clean"/>
+  </target>
   
 </project>
