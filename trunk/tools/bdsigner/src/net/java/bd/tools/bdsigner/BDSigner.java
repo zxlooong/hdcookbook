@@ -22,9 +22,9 @@ import sun.security.tools.JarSigner;
  * 6) Sign the jar using the app certificate after (5).
  * 7) Export the root certificate as "app.discroot.crt". 
  * 
- * BJSigner syntax is : BDSigner [-debug] jar-file 8-digit-hex-organization-ID BDSigner 
+ * BJSigner syntax is : BDSigner [-debug] jar-file 8-digit-hex-organization-ID  
  * 
- * Example: java -cp $BDSIGNER_HOME/build/bdsigner.jar:$JDK_HOME/lib/tools.jar:$BDSIGNER_HOME/resource/bcprov-jdk15-137.jar bdsigner.BDSigner 00000.jar 56789abc
+ * Example: java -cp $BDSIGNER_HOME/build/bdsigner.jar:$JDK_HOME/lib/tools.jar:$BDSIGNER_HOME/resource/bcprov-jdk15-137.jar net.java.bd.tools.bdsigner.BDSigner 00000.jar 56789abc
  * 
  * Make sure to put bdsigner.jar before tools.jar in the jdk distribution for the jre 
  * classpath so that the modified version of the sun.security.* classes in BDSigner this respository
@@ -185,8 +185,8 @@ public class BDSigner {
 	 System.out.println("\n==============================\n");
 	 System.out.println("This is a tool to sign a jar file according to the bd-j specification.\n");
 	 System.out.println("BDSigner Syntax:");
-	 System.out.println("BDSigner [-debug] jar-file 8-digit-hex-organization-ID");
-	 System.out.println("Example: java -cp bdsigner.jar:tools.jar:bcprov-jdk15-137.jar bdsigner.BDSigner 00000.jar 56789abc\n");
+	 System.out.println("net.java.bd.tools.bdsigner.BDSigner [-debug] jar-file 8-digit-hex-organization-ID");
+	 System.out.println("Example: java -cp bdsigner.jar:tools.jar:bcprov-jdk15-137.jar net.java.bd.tools.bdsigner.BDSigner 00000.jar 56789abc\n");
 	 System.out.println("\n==============================\n");
     }
 }

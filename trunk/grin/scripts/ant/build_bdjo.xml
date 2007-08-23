@@ -32,7 +32,7 @@ information or have any questions.
 	      fork="true"
 	      classname="net.java.bd.tools.bdjo.Converter">
 		<arg line="src/com/hdcookbook/bookmenu/bdjo/main_bdjo.xml 
-			${HDC_DISC_BDMV}/BDJO/00001.bdjo"/>
+			${HDC_DISC_BDMV}/BDJO/00000.bdjo"/>
 	</java>	
 </target>	
 
