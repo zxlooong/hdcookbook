@@ -49,12 +49,6 @@ information or have any questions.
 <target name="grin-init">
 	<mkdir dir="${HDC_DISC_BDMV}/JAR"/>
 	<mkdir dir="${HDC_BUILD_DIR}"/>	
-	
-   <available file="${HDC_MOUNT_POINT}" type="dir"
-              property="mountpoint.ok"/>
-	      
-   <!-- fail unless="mountpoint.ok"
-       message="${HDC_MOUNT_POINT} does not exist"/ -->     
 </target>
 
 <target name="grin-build" depends="compile-mosaic-builder, build-menu, 
