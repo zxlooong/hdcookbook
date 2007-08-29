@@ -1963,7 +1963,6 @@ class SignatureFile {
 	    if (keyAlgorithm.equalsIgnoreCase("DSA") ||
 	    		keyAlgorithm.equalsIgnoreCase("RSA")) {
 		digestAlgorithm = "SHA1";
-		System.out.println("Using SHA1 Digest Algorithm");
 	    }
 	    else {
 		throw new RuntimeException("private key is not a DSA or "
