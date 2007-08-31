@@ -61,10 +61,11 @@ information or have any questions.
 	<property name="MOSAIC_DEST" value="${HDC_BUILD_DIR}/mosaic_builder"/>
 	<delete dir="${MOSAIC_DEST}"/>
 	<mkdir dir="${MOSAIC_DEST}"/>
-	<javac srcdir="src"
-	       destdir="${MOSAIC_DEST}"
+	<javac destdir="${MOSAIC_DEST}"
 	       debug="on" deprecation="on">
-	       <include name="com/hdcookbook/grin/build/mosaic/*.java"/>
+	       <include name="com/hdcookbook/grin/build/mosaic/*.java" />
+	    <src path="library/src" />
+	    <src path="jdktools/mosaic/src" />
 	</javac>
 	<property name="MOSAIC_CP" value="${MOSAIC_DEST}"/>
 	
@@ -76,23 +77,17 @@ information or have any questions.
 		<echo message="*************  Menu xlet  *****************"/>
 		<mkdir dir="${MENUXLET_DEST}/classes"/>
 		
-		<javac srcdir="src"
-		destdir="${MENUXLET_DEST}/classes"
+		<javac destdir="${MENUXLET_DEST}/classes"
 		source="1.3" target="1.3"
 		bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
 		debug="on" deprecation="on">
-			<include name="com/hdcookbook/grin/*.java"/>
-			<include name="com/hdcookbook/grin/commands/*.java"/>
-			<include name="com/hdcookbook/grin/input/*.java"/>
-			<include name="com/hdcookbook/grin/parser/*.java"/>
-			<include name="com/hdcookbook/grin/util/*.java"/>
-			<include name="com/hdcookbook/bookmenu/*.java"/>
-			<include name="com/hdcookbook/bookmenu/menu/*.java"/>
-			<include name="com/hdcookbook/bookmenu/menu/commands/*.java"/>	       
+		    <src path="library/src" />
+		    <src path="xlets/bookmenu/src" />
+		    <exclude name="com/hdcookbook/bookmenu/monitor/**" />
 		</javac>
 		
 		<copy todir="${MENUXLET_DEST}/classes/com/hdcookbook/bookmenu/menu">
-			<fileset dir="src/com/hdcookbook/bookmenu/menu" includes="*.perm"/>
+			<fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/menu" includes="*.perm"/>
 		</copy>
 		
 		<jar basedir="${MENUXLET_DEST}/classes" destfile="${MENUXLET_DEST}/00002.jar"/>
@@ -119,7 +114,7 @@ information or have any questions.
 	
 	<target name="init-menu-assets">
 		<copy todir="${MENUASSETS_DEST}">
-			<fileset dir="src/com/hdcookbook/bookmenu/assets" excludes="**/*.svn"/>
+			<fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/assets" excludes="**/*.svn"/>
 		</copy>	
 	</target>
 	
@@ -135,18 +130,19 @@ information or have any questions.
 	<echo message="*************  Monitor xlet  *****************"/>
 	<mkdir dir="${MONITORXLET_DEST}/classes"/>
 		
-	<javac srcdir="src"
-	 destdir="${MONITORXLET_DEST}/classes"
+	<javac destdir="${MONITORXLET_DEST}/classes"
 	 source="1.3" target="1.3"
 	 bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
 	 debug="on" deprecation="on">
+	    <src path="library/src" />
+	    <src path="xlets/bookmenu/src" />
 		<include name="com/hdcookbook/grin/util/Debug.java"/>
 		<include name="com/hdcookbook/bookmenu/monitor/*.java"/>
 		<include name="com/hdcookbook/bookmenu/MonitorIXCInterface.java"/>
 	</javac>
 		
 	<copy todir="${MONITORXLET_DEST}/classes/com/hdcookbook/bookmenu/monitor">
-		<fileset dir="src/com/hdcookbook/bookmenu/monitor" includes="*.perm"/>
+		<fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/monitor" includes="*.perm"/>
 	</copy>
 		
 	<jar basedir="${MONITORXLET_DEST}/classes" destfile="${MONITORXLET_DEST}/00001.jar"/>
@@ -162,18 +158,19 @@ information or have any questions.
 	<echo message="*************  game xlet  *****************"/>
 	<mkdir dir="${GAMEXLET_DEST}/classes"/>
 		
-	<javac srcdir="src"
-	 destdir="${GAMEXLET_DEST}/classes"
+	<javac destdir="${GAMEXLET_DEST}/classes"
 	 source="1.3" target="1.3"
 	 bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
 	 debug="on" deprecation="on">
+	    <src path="library/src" />
+	    <src path="xlets/gunbunny/src" />
 		<include name="com/hdcookbook/grin/util/Debug.java"/>
 		<include name="com/hdcookbook/gunbunny/*.java"/>
 		<include name="com/hdcookbook/gunbunny/util/*.java "/>
 	</javac>
 		
 	<copy todir="${GAMEXLET_DEST}/classes">
-		<fileset dir="src/com/hdcookbook/gunbunny/assets" excludes="**/*.svn" />
+		<fileset dir="xlets/gunbunny/src/com/hdcookbook/gunbunny/assets" excludes="**/*.svn" />
 	</copy>
 		
 	<jar basedir="${GAMEXLET_DEST}/classes" destfile="${GAMEXLET_DEST}/00003.jar"/>
