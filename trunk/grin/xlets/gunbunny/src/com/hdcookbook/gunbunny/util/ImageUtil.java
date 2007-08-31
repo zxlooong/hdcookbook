@@ -85,7 +85,11 @@ public class ImageUtil {
      * Load the given image.
      **/
     public static Image getImage(String path, MediaTracker tracker) {
-        URL url = theClass.getResource("../" + path);
+        URL url = theClass.getResource("/" + path);
+	if (Debug.LEVEL > 1) {
+	    Debug.println("Loading image " + url);
+	    Debug.println("    path:  " + path);
+	}
         Image img = Toolkit.getDefaultToolkit().createImage(url);
         if(tracker != null){
             tracker.addImage(img, 0);

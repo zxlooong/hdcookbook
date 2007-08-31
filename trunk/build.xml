@@ -6,17 +6,27 @@
   <target name="deploy"> 
 	 <ant dir="grin" antfile="scripts/ant/build_xlets.xml" target="grin-deploy"/>
   </target>
+
+  <!-- A target for everything -->
+  <target name="all" depends="deploy, build-grinview">
+  </target>
   
   <!-- Build just the tools, and not the xlets in grin directory -->
   <target name="build-tools">
 	  <ant dir="tools/bdjo"/> 
 	  <ant dir="tools/bdsigner/make"/> 
   </target>
+
+  <!-- Build the GRIN script viewer -->
+  <target name="build-grinview">
+	    <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="compile-grin-viewer"/>
+  </target>
   
   <target name="clean"> 	  
 	  <ant dir="tools/bdjo" target="bdjo-clean"/>
 	  <ant dir="tools/bdsigner/make" target="clean"/>
 	  <ant dir="grin" antfile="scripts/ant/build_xlets.xml" target="grin-clean"/>
+	  <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="clean"/>
   </target>
   
 </project>

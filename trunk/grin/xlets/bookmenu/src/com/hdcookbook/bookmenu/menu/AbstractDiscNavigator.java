@@ -278,6 +278,7 @@ public abstract class AbstractDiscNavigator
 	try {
 	    if (mainPlayer == null) {
 		try {
+System.out.println("@@ " + loc.toString());
 		    MediaLocator ml = new MediaLocator(loc);
 		    mainPlayer  = Manager.createPlayer(ml);
 		} catch (Exception ignored) {

@@ -103,30 +103,26 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
      * The playlist entry for the background video that is shown during
      * the main menu.  This video loops automatically.
      **/
-    public BDLocator menuVideoStartPL
-    	= makeBDLocator("bd://0.PLAYLIST:00000.MARK:00000");
+    public BDLocator menuVideoStartPL = makeBDLocator("bd://0.PLAYLIST:00000");
 
     private int menuVideoPL_ID = menuVideoStartPL.getPlayListId();
 
     /**
      * The playlist entry for the main feature video.
      **/
-    public BDLocator movieVideoStartPL
-    	= makeBDLocator("bd://0.PLAYLIST:00001.MARK:00000");
+    public BDLocator movieVideoStartPL = makeBDLocator("bd://0.PLAYLIST:00001");
 
     private int movieVideoPL_ID = movieVideoStartPL.getPlayListId();
 
     /**
      * The playlist entry for the bonus feature video.
      **/
-    public BDLocator bonusVideoStartPL
-    	= makeBDLocator("bd://0.PLAYLIST:00002.MARK:00000");
+    public BDLocator bonusVideoStartPL = makeBDLocator("bd://0.PLAYLIST:00002");
 
     /**
      * The playlist entry for blank video
      **/
-    public BDLocator blankVideo
-    	= makeBDLocator("bd://0.PLAYLIST:00004.MARK:00000");
+    public BDLocator blankVideo = makeBDLocator("bd://0.PLAYLIST:00004");
     private int blankVideoPL_ID = blankVideo.getPlayListId();
 
     /**

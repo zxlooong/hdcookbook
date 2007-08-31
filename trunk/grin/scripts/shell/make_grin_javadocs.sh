@@ -1,6 +1,5 @@
-#!/bin/sh
+#!/bin/sh -x
 
-HDC_NOCHECK_MOUNT="yes"
 source vars.sh
 
 DEST=$HDC_BUILD_DIR/javadocs/grin
@@ -9,7 +8,7 @@ SCRATCH=$HDC_BUILD_DIR/tmp_file
 rm -rf $DEST
 mkdir -p $DEST
 
-cd $HDC_REPOSITORY/src
+cd $HDC_REPOSITORY/grin/library/src
 find com/hdcookbook/grin -name '*.java' -print > $SCRATCH
 javadoc -d $DEST -classpath $HDC_BDJ_PLATFORM_CLASSES @$SCRATCH
 if [[ $? != 0 ]] ; then

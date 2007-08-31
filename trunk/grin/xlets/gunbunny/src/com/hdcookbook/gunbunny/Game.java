@@ -112,21 +112,21 @@ public class Game {
 	}
 	MediaTracker tracker = new MediaTracker(xlet);
 	Image turtleSaucerBlam = ImageUtil.getImage(
-			"assets/images/turtle_saucer_blam.png", tracker);
+			"images/turtle_saucer_blam.png", tracker);
 	Image turtleSaucer = ImageUtil.getImage(
-			"assets/images/turtle_saucer.png", tracker);
+			"images/turtle_saucer.png", tracker);
 	Image turtleTrooper = ImageUtil.getImage(
-			"assets/images/turtle_trooper.png", tracker);
+			"images/turtle_trooper.png", tracker);
 	Image turtleTrooperBlam = ImageUtil.getImage(
-			"assets/images/turtle_trooper_blam.png", tracker);
+			"images/turtle_trooper_blam.png", tracker);
 	Image bunnyImg = ImageUtil.getImage(
-			"assets/images/bunny_00.png", tracker);
+			"images/bunny_00.png", tracker);
 	Image carrotBullet = ImageUtil.getImage(
-			"assets/images/carrot_bullet_01.png", tracker);
+			"images/carrot_bullet_01.png", tracker);
 	Image gameTitleImg = ImageUtil.getImage(
-			"assets/images/text_title.png", tracker);
+			"images/text_title.png", tracker);
 	Image gameOverTitleImg = ImageUtil.getImage(
-			"assets/images/text_title_gameover.png", tracker);
+			"images/text_title_gameover.png", tracker);
 	tracker.waitForAll();	// Might throw InterruptedException
 	if (Debug.LEVEL > 0) {
 	    Debug.println("Assets loaded.");

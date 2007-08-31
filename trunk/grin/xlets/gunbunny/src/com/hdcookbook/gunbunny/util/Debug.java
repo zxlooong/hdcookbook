@@ -81,12 +81,12 @@ public class Debug {
      * Note that JDK 1.4's assertion facility can't be used
      * for Blu-Ray, since PBP 1.0 is based on JDK 1.3.
      **/
-    public final static boolean ASSERT = false;
+    public final static boolean ASSERT = true;
 
     /**
      * Debug level.  2 = noisy, 1 = some debug, 0 = none.
      **/
-    public final static int LEVEL = 0;
+    public final static int LEVEL = 2;
 
     private static Xlet theXlet = null;
     

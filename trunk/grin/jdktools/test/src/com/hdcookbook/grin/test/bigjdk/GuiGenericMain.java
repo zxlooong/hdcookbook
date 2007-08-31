@@ -59,10 +59,12 @@ import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.Segment;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.IdentityHashMap;
 
 import javax.swing.SwingUtilities;
@@ -176,17 +178,19 @@ public class GuiGenericMain extends GenericMain {
 	System.out.println();
 	System.out.println("Usage:  java com.hdcookbook.grin.test.bigjdk.GuiGenericMain \\");
 	System.out.println("        -fps <number>");
-        System.out.println("        -assets <asset_dir>");
+        System.out.println("        -assets <asset path in jar file>");
+        System.out.println("        -asset_dir <directory in filesystem>");
         System.out.println("        -imagemap <mapfile>");
         System.out.println("        -background <image>");
         System.out.println("");
-        System.out.println("    -assets may be repeated");
+        System.out.println("    -assets and -assets_dir may be repeated");
 	System.out.println();
 	System.exit(1);
     }
 
     public static void main(String[] args) {
         LinkedList assetPathLL = new LinkedList();
+        LinkedList assetDirsLL = new LinkedList();
         String imageMap = null;
 	String background = null;
 	int argsUsed = 0;
@@ -214,6 +218,11 @@ public class GuiGenericMain extends GenericMain {
                 }
 		assetPathLL.add(path);
 		argsUsed++;
+	    } else if ("-asset_dir".equals(args[argsUsed])) {
+		argsUsed++;
+                String path = args[argsUsed];
+		assetDirsLL.add(path);
+		argsUsed++;
 	    } else if ("-imagemap".equals(args[argsUsed])) {
                 if (imageMap != null) {
                     usage();
@@ -229,9 +238,20 @@ public class GuiGenericMain extends GenericMain {
             usage();
         }
 	String showFile = args[argsUsed++];
-        String[] assetPath;
+        String[] assetPath = null;
+        File[] assetDirs = null;
+	if (assetDirsLL.size() > 0) {
+	    assetDirs = new File[assetDirsLL.size()];
+	    int i = 0;
+	    for (Iterator it = assetDirsLL.iterator(); it.hasNext(); ) {
+		File f = new File((String) it.next());
+		assetDirs[i++] = f;
+	    }
+	}
         if (assetPathLL.size() == 0) {
-            assetPath = new String[] { "../test/assets/" };
+	    if (assetDirs == null) {
+		assetPath = new String[] { "../test/assets/" };
+	    }
         } else {
             assetPath = (String[]) 
                         assetPathLL.toArray(new String[assetPathLL.size()]);
@@ -241,7 +261,7 @@ public class GuiGenericMain extends GenericMain {
 		System.exit(1);
 	    }
 	});
-       	AssetFinder.setSearchPath(assetPath, null);
+       	AssetFinder.setSearchPath(assetPath, assetDirs);
         if (imageMap != null) {
             AssetFinder.setImageMap(imageMap);
         }
