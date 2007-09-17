@@ -26,7 +26,7 @@
 	  <ant dir="tools/bdjo" target="bdjo-clean"/>
 	  <ant dir="tools/bdsigner/make" target="clean"/>
 	  <ant dir="grin" antfile="scripts/ant/build_xlets.xml" target="grin-clean"/>
-	  <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="clean"/>
+	  <!-- ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="clean"/ -->
   </target>
   
 </project>

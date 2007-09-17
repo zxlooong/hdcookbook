@@ -64,6 +64,7 @@ import javax.tv.xlet.Xlet;
 import javax.tv.xlet.XletContext;
 import javax.tv.xlet.XletStateChangeException;
 
+import com.hdcookbook.grin.util.Debug;
 
 /**
  * This is the main xlet class for the monitor xlet.  The monitor

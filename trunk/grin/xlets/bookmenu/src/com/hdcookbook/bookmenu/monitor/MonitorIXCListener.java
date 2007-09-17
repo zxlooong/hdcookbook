@@ -66,6 +66,7 @@ import org.dvb.application.AppStateChangeEventListener;
 import org.dvb.application.AppID;
 
 import com.hdcookbook.bookmenu.MonitorIXCInterface;
+import com.hdcookbook.grin.util.Debug;
 
 /**
  * This class is the object we export via inter-xlet communication.

@@ -137,8 +137,10 @@ information or have any questions.
 	 bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
 	 debug="on" deprecation="on">
 	    <src path="xlets/bookmenu/src" />
+	    <src path="library/src"/>
 		<include name="com/hdcookbook/bookmenu/monitor/*.java"/>
 		<include name="com/hdcookbook/bookmenu/MonitorIXCInterface.java"/>
+		<include name="com/hdcookbook/grin/util/*.java"/>
 	</javac>
 		
 	<copy todir="${MONITORXLET_DEST}/classes/com/hdcookbook/bookmenu/monitor">
@@ -183,7 +185,7 @@ information or have any questions.
 <target name = "sign-xlets" depends="check-bdsigner">
 	<fail unless="bdsigner.ok" message="Could not find the bdsigner tool at ${HDC_BDJ_SIGNER}"/>
 	<java classname="net.java.bd.tools.bdsigner.BDSigner" fork="true">
-		<arg line="56789abc ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar"/>
+		<arg line="56789abc ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar ${HDC_DISC_BDMV}/JAR/00004.jar"/>
 		<classpath>
 			<pathelement location="${HDC_BDJ_SIGNER}/build/bdsigner.jar"/>
 			<pathelement location="${HDC_BDJ_SIGNER}/resource/bcprov-jdk15-137.jar"/>
