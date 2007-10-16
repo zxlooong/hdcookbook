@@ -2,6 +2,22 @@
 This project contains the modification to the jdk JarSigner.   It is meant for generating certificates and signing xlets.  
 
 ========================
+
+How to use this tool:
+
+ * BJSigner syntax is : BDSigner [-debug] 8-digit-hex-organization-ID jarfile1 jarfile2 ...
+ * 
+ * Example: java -cp $BDSIGNER_HOME/build/bdsigner.jar:$JDK_HOME/lib/tools.jar:$BDSIGNER_HOME/resource/bcprov-jdk15-137.jar net.java.bd.tools.bdsigner.BDSigner 56789abc 00000.jar 
+ * 
+ * Make sure to put bdsigner.jar before tools.jar in your jdk installation directory   
+ * so that the modified version of the sun.security.* classes in this BDSigner repository
+ * are used during the run.  bdprov-jdk15-137.jar is a bouncycastle distribution; a copy can be found in the "resource" dir.
+
+This tool also generates a corresponding root certificate file after signing the xlets.
+Place the generated file, app.discroot.crt, in the BDMV's CERTIFICATE directory.
+
+========================
+
 This is "bdsigner" tool to sign BD-J jar files. Why can't we
 just use the standard "jarsigner" tool in Java SE?
 
