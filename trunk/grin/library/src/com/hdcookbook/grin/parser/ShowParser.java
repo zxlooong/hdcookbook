@@ -1340,7 +1340,10 @@ public class ShowParser {
 		fw.resolveAtLine();
 	    }
 	}
-	extParser.finishBuilding(show);
+	
+	if (extParser != null) {
+	   extParser.finishBuilding(show);
+	}
 	builder.finishBuilding();
     }
 

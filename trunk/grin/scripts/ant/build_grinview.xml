@@ -23,15 +23,15 @@ Clara, CA 95054 or visit www.sun.com if you need additional
 information or have any questions.
 -->
 
-<project name="Build the GRIN script viewer for Java SE" basedir=".">
+<project name="Build and run the GRIN script viewer for Java SE" basedir="../.." default="compile-grin-viewer">
 
 <property file="user.vars.properties"/>	
 <property file="vars.properties"/>	
 
 <property name="HDC_BUILD_DIR" value="build"/>
+<property name="GRIN_VIEWER_DEST" value="${HDC_BUILD_DIR}/grin_viewer"/>
 
 <target name="compile-grin-viewer">
-	<property name="GRIN_VIEWER_DEST" value="${HDC_BUILD_DIR}/grin_viewer"/>
 	<mkdir dir="${GRIN_VIEWER_DEST}"/>
 	<javac sourcepath=""
 	       destdir="${GRIN_VIEWER_DEST}"
@@ -47,10 +47,23 @@ information or have any questions.
 	    <include name="com/hdcookbook/grin/test/*.java"/>
 	    <include name="com/hdcookbook/grin/test/bigjdk/*.java"/>
 	</javac>
+	
+	<copy todir="${GRIN_VIEWER_DEST}/assets">
+		<fileset dir="jdktools/test/src/com/hdcookbook/grin/test/assets">	
+			<exclude name="**/.svn"/>
+		</fileset>   
+	</copy>    
 </target>	
 
+<target name="run_grinview">
+        <java fork="true" classpath="${GRIN_VIEWER_DEST}"
+	classname="com.hdcookbook.grin.test.bigjdk.GuiGenericMain">
+		<arg line="-asset_dir ${GRIN_VIEWER_DEST}/assets ryan_show.txt"/>
+	</java>
+</target>
+
 <target name="clean">
-       <delete dir="${HDC_BUILD_DIR}/grin_viewer"/>
+       <delete dir="${GRIN_VIEWER_DEST}"/>
 </target>
 
 </project>

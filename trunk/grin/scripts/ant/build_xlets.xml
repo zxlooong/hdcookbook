@@ -61,7 +61,7 @@ information or have any questions.
 	<property name="MOSAIC_DEST" value="${HDC_BUILD_DIR}/mosaic_builder"/>
 	<delete dir="${MOSAIC_DEST}"/>
 	<mkdir dir="${MOSAIC_DEST}"/>
-	<javac sourcepath=""
+	<javac 
 	       destdir="${MOSAIC_DEST}"
 	       debug="on" deprecation="on">
 	    <src path="library/src" />
