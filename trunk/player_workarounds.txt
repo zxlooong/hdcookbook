@@ -26,7 +26,7 @@ don't work around player bugs in this image.
 	  The player is looking for the class that implements the
 	  IXC interface on the server side.  It shouldn't be.
 
-8/30/07:  One player has a bug where a signed xlet can only mount
+8/30/07:  One player had a bug where a signed xlet can only mount
           a signed asset file.  The workaround is to sign the
 	  book menu's assets file (00004.jar), by adding it to
 	  the arg line under the sign-xlets target in
@@ -34,3 +34,9 @@ don't work around player bugs in this image.
 
 	  A signed xlet is allowed to mount an unsigned jar.
 	  Indeed, this practice is recomended.
+
+	  Since the report of this bug, we've received a pre-release
+	  version of the player in question that fixes this bug, so this
+	  workaround will soon be obsolete.  Please remember that signing
+	  an asset file is generally not recommended, because it increases
+	  launch time.
