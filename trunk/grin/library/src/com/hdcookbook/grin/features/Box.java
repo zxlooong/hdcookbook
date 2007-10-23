@@ -168,8 +168,8 @@ public class Box extends Feature {
 	    		   placement.width, placement.height);
 	} else {
 	    area.add(placement.x, placement.y);
-	    area.add(placement.x + placement.width - 1, 
-	    	     placement.y + placement.height - 1);
+	    area.add(placement.x + placement.width, 
+	    	     placement.y + placement.height); // Issue #3
 	}
     }
 
@@ -194,10 +194,11 @@ public class Box extends Feature {
 	    gr.fillArc(x1, y2-t2, t2, t2, 180, 90); 	// lower-left
 	    gr.fillArc(x2-t2, y2-t2, t2, t2, 270, 90); // lower-right
 	    gr.fillArc(x2-t2, y1, t2, t2, 0, 90);	// upper-right
-	    gr.fillRect(x1, y1+t, t, h - t2);	        // left
-	    gr.fillRect(x1+t, y2-t+1, w-t2, t);        // bottom
-	    gr.fillRect(x2-t+1, y1+t, t, h-t2);      // right
-	    gr.fillRect(x1+t, y1, w-t2, t);            // top
+	    // Issue #4 - subtract the right and bottom most pixels by one
+	    gr.fillRect(x1, y1+t, t, h-t2-1);	        // left
+	    gr.fillRect(x1+t, y2-t+1, w-t2-1, t);        // bottom
+	    gr.fillRect(x2-t+1, y1+t, t, h-t2-1);      // right
+	    gr.fillRect(x1+t, y1, w-t2-1, t);            // top
 	    x1 += t;
 	    y1 += t;
 	    w -= t2;
@@ -205,7 +206,7 @@ public class Box extends Feature {
 	}
 	if (fillColor != null) {
 	    gr.setColor(fillColor);
-	    gr.fillRect(x1, y1, w, h);
+	    gr.fillRect(x1, y1, w, h); 
 	}
     }
 }
