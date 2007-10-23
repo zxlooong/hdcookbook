@@ -213,7 +213,7 @@ public class Text extends Feature {
 	    area.setBounds(x, y, width, height);
 	} else {
 	    area.add(x, y);
-	    area.add(x + width - 1, y + height - 1);
+	    area.add(x + width, y + height);
 	}
     }
 
