@@ -108,9 +108,6 @@ import com.hdcookbook.grin.util.ImageWaiter;
 public class GenericMain extends Frame implements Runnable {
     
     static int FRAME_CHEAT = 16;
-    static int SCALE_DIVISOR = 2;
-    static int SCREEN_WIDTH = 1920 / SCALE_DIVISOR;
-    static int SCREEN_HEIGHT = 1080 / SCALE_DIVISOR;
     static int BUF_WIDTH = 1920;
     static int BUF_HEIGHT = 1080;
 
@@ -130,6 +127,10 @@ public class GenericMain extends Frame implements Runnable {
     private long lastFrameTime;
     private Image background = null;
     
+    private int scaleDivisor = 2;
+    private int screenWidth= 1920 / scaleDivisor;
+    private int screenHeight = 1080 / scaleDivisor;
+    
     public GenericMain() {
     }
 
@@ -141,6 +142,19 @@ public class GenericMain extends Frame implements Runnable {
 	    w.waitForComplete();
 	}
     }
+    
+    protected void adjustScreenSize(String scale) {
+        try {
+	   scaleDivisor = Integer.parseInt(scale);	
+	} catch (NumberFormatException e) {
+	   System.out.println("Could not reset the scaling factor " + scale);
+	   return;
+	}
+
+        screenWidth= 1920 / scaleDivisor;
+        screenHeight = 1080 / scaleDivisor;
+    }
+    
     
     protected void init(String showName, ShowBuilder builder) {
 
@@ -157,7 +171,7 @@ public class GenericMain extends Frame implements Runnable {
 
         setBackground(Color.black);
         setLayout(null);
-        setSize(SCREEN_WIDTH, SCREEN_HEIGHT + FRAME_CHEAT + sbHeight);  
+        setSize(screenWidth, screenHeight + FRAME_CHEAT + sbHeight);  
 	// 720x576 is SD in Europe
         
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -197,16 +211,16 @@ public class GenericMain extends Frame implements Runnable {
         }
                 MouseAdapter mouseL = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-		int x = e.getX() * SCALE_DIVISOR;
-		int y = (e.getY() - FRAME_CHEAT) * SCALE_DIVISOR;
+		int x = e.getX() * scaleDivisor;
+		int y = (e.getY() - FRAME_CHEAT) * scaleDivisor;
                 show.handleMouseClicked(x, y);
             }
         };
         addMouseListener(mouseL);
         MouseMotionAdapter mouseM = new MouseMotionAdapter() {
             public void mouseMoved(MouseEvent e) {
-		int x = e.getX() * SCALE_DIVISOR;
-		int y = (e.getY() - FRAME_CHEAT) * SCALE_DIVISOR;
+		int x = e.getX() * scaleDivisor;
+		int y = (e.getY() - FRAME_CHEAT) * scaleDivisor;
                 show.handleMouseMoved(x, y);
             }
         };
@@ -380,8 +394,8 @@ public class GenericMain extends Frame implements Runnable {
 	System.out.println("Starting frame pump...");
 	GraphicsConfiguration con = getGraphicsConfiguration();
 	if (con.getColorModel().getTransparency() != Transparency.TRANSLUCENT) {
-	    nonTranslucentFix = con.createCompatibleImage(SCREEN_WIDTH, 
-						    FRAME_CHEAT+SCREEN_HEIGHT);
+	    nonTranslucentFix = con.createCompatibleImage(screenWidth, 
+						    FRAME_CHEAT+screenHeight);
 	}
 	Graphics2D frameGr = (Graphics2D) getGraphics();
 	BufferedImage sb = new BufferedImage(BUF_WIDTH, BUF_HEIGHT, 
@@ -391,7 +405,7 @@ public class GenericMain extends Frame implements Runnable {
 	bufGr.setColor(transparentColor);
 	bufGr.fillRect(0,0,BUF_WIDTH, BUF_HEIGHT);
 	frameGr.drawImage(showBuffer, 0, FRAME_CHEAT, 
-			  SCREEN_WIDTH, FRAME_CHEAT + SCREEN_HEIGHT,
+			  screenWidth, FRAME_CHEAT + screenHeight,
 			  0, 0, BUF_WIDTH, BUF_HEIGHT, this);
 	Rectangle thisArea = new Rectangle();
 	Rectangle lastArea = new Rectangle();
@@ -482,8 +496,8 @@ public class GenericMain extends Frame implements Runnable {
 	} else {
 	    if (paintBuffer == null) {
 		paintBuffer = getGraphicsConfiguration()
-				.createCompatibleImage(SCREEN_WIDTH, 
-					    FRAME_CHEAT+SCREEN_HEIGHT);
+				.createCompatibleImage(screenWidth, 
+					    FRAME_CHEAT+screenHeight);
 	    }
 	    synchronized(monitor) {
 		if (frameGraphics == null) {
@@ -528,12 +542,12 @@ public class GenericMain extends Frame implements Runnable {
 	    } else {
 		g.setComposite(AlphaComposite.Src);
 		g.drawImage(background, 0, FRAME_CHEAT, 
-				     SCREEN_WIDTH, FRAME_CHEAT+SCREEN_HEIGHT,
+				     screenWidth, FRAME_CHEAT+screenHeight,
 				     0, 0, BUF_WIDTH, BUF_HEIGHT, this);
 		g.setComposite(AlphaComposite.SrcOver);
 	    }
 	    g.drawImage(showBuffer, 0, FRAME_CHEAT, 
-				 SCREEN_WIDTH, FRAME_CHEAT+SCREEN_HEIGHT,
+				 screenWidth, FRAME_CHEAT+screenHeight,
 				 0, 0, BUF_WIDTH, BUF_HEIGHT, this);
 	    if (fixG != null)  {
 		g.dispose();

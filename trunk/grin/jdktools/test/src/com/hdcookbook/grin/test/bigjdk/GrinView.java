@@ -182,6 +182,8 @@ public class GrinView extends GenericMain {
         System.out.println("        -asset_dir <directory in filesystem>");
         System.out.println("        -imagemap <mapfile>");
         System.out.println("        -background <image>");
+        System.out.println("        -scale <number>");
+        System.out.println("        -segment <segment name to activate>");
         System.out.println("");
         System.out.println("    -assets and -assets_dir may be repeated");
 	System.out.println();
@@ -195,6 +197,8 @@ public class GrinView extends GenericMain {
 	String background = null;
 	int argsUsed = 0;
 	String fps = null;
+	String segment = null;
+	String scaleDivisor = null;
 	while (argsUsed < args.length - 1) {
 	    if ("-fps".equals(args[argsUsed])) {
 		argsUsed++;
@@ -230,6 +234,20 @@ public class GrinView extends GenericMain {
 		argsUsed++;
 		imageMap = args[argsUsed];
 		argsUsed++;
+	    } else if ("-segment".equals(args[argsUsed])) {
+		argsUsed++;
+		if (segment != null) {
+			usage();
+		}
+		segment = args[argsUsed];
+		argsUsed++;
+	    } else if ("-scale".equals(args[argsUsed])) {
+		argsUsed++;
+                if (scaleDivisor != null) {
+                    usage();
+                }
+		scaleDivisor = args[argsUsed];
+		argsUsed++;		
 	    } else {
 		break;
 	    }
@@ -269,12 +287,19 @@ public class GrinView extends GenericMain {
 	if (background != null) {
 	    m.setBackground(background);
 	}
+	
+	if (scaleDivisor != null) {
+	    m.adjustScreenSize(scaleDivisor);
+	}
 	GuiShowBuilder builder = new GuiShowBuilder(m);
         m.init(showFile, builder);
 
 	m.buildControlGUI(builder, showFile);
 	if (fps != null) {
-	    m.doKeyboardCommand("f " + fps); // set fps
+	    m.doKeyboardCommand("f " + fps); // set fps	 
+	}
+	if (segment != null) {
+	    m.doKeyboardCommand("s " + segment); // activate segment
 	}
 
 	m.inputLoop();
