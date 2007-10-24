@@ -80,15 +80,15 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 /**
- * This is the UI frame that holds the control screen of GuiGenericMain
+ * This is the UI frame that holds the control screen of GrinView
  *
- * @see GuiGenericMain
+ * @see GrinView
  *
  *   @author     Bill Foote (http://jovial.com)
  */
-public class GuiGenericMainScreen extends javax.swing.JFrame {
+public class GrinViewScreen extends javax.swing.JFrame {
 
-    private GuiGenericMain main;
+    private GrinView main;
     private int[] showTextPos;
 
     private JTextField commandText;
@@ -107,7 +107,7 @@ public class GuiGenericMainScreen extends javax.swing.JFrame {
     private JTree showTree;
     private JSlider fontSlider;
     
-    public GuiGenericMainScreen(GuiGenericMain main, TreeNode tree) {
+    public GrinViewScreen(GrinView main, TreeNode tree) {
 	this.main = main;
         initComponents(tree);
     }

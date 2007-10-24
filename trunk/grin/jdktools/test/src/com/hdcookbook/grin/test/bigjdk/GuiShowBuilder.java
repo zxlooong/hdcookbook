@@ -92,18 +92,18 @@ import javax.swing.tree.TreeNode;
 
 /**
  * This is a ShowBuilder that decorates the Show with 
- * tree-browsing classes for GuiGenericMain
+ * tree-browsing classes for GrinView
  *
- * @see GuiGenericMain
+ * @see GrinView
  *
  * @author Bill Foote (http://jovial.com)
  */
 public class GuiShowBuilder extends ShowBuilder {
    
-    private GuiGenericMain gui;
+    private GrinView gui;
     private ArrayList segments = new ArrayList();	// <Node>
 
-    public GuiShowBuilder(GuiGenericMain gui) {
+    public GuiShowBuilder(GrinView gui) {
 	this.gui = gui;
     }
 

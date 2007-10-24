@@ -76,16 +76,16 @@ import javax.swing.SwingUtilities;
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class GuiGenericMain extends GenericMain {
+public class GrinView extends GenericMain {
 
     private IdentityHashMap lineNumberMap = new IdentityHashMap();
-    private GuiGenericMainScreen screen;
+    private GrinViewScreen screen;
     
-    public GuiGenericMain() {
+    public GrinView() {
     }
 
     private void buildControlGUI(GuiShowBuilder builder, String showName) {
-	screen = new GuiGenericMainScreen(this, builder.getShowTree(showName));
+	screen = new GrinViewScreen(this, builder.getShowTree(showName));
 	screen.setNameText("GRIN show viewer:  " + showName);
 	screen.setResultText("Double-click in the tree to activate a segment.");
 
@@ -176,7 +176,7 @@ public class GuiGenericMain extends GenericMain {
 
     private static void usage() {
 	System.out.println();
-	System.out.println("Usage:  java com.hdcookbook.grin.test.bigjdk.GuiGenericMain \\");
+	System.out.println("Usage:  java com.hdcookbook.grin.test.bigjdk.GrinView \\");
 	System.out.println("        -fps <number>");
         System.out.println("        -assets <asset path in jar file>");
         System.out.println("        -asset_dir <directory in filesystem>");
@@ -265,7 +265,7 @@ public class GuiGenericMain extends GenericMain {
         if (imageMap != null) {
             AssetFinder.setImageMap(imageMap);
         }
-	GuiGenericMain m = new GuiGenericMain();
+	GrinView m = new GrinView();
 	if (background != null) {
 	    m.setBackground(background);
 	}
