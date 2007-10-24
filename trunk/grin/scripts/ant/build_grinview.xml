@@ -35,7 +35,8 @@ information or have any questions.
 	<mkdir dir="${GRIN_VIEWER_DEST}"/>
 	<javac sourcepath=""
 	       destdir="${GRIN_VIEWER_DEST}"
-	       debug="on" deprecation="on">
+	        source="1.5" target="1.5"
+	       debug="on" deprecation="off">
 	    <src path="library/src" />
 	    <src path="jdktools/test/src" />
 	    <include name="com/hdcookbook/grin/*.java"/>
