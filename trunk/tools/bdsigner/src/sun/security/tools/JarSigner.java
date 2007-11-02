@@ -38,6 +38,9 @@ import sun.security.pkcs.*;
 import sun.security.util.*;
 import sun.misc.BASE64Encoder;
 
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+
 /**
  * <p>The jarsigner utility.
  *
@@ -389,10 +392,11 @@ public class JarSigner {
 	}
     }
 	    
-    // BLU-RAY SPECIFIC: javaca specific
+    // BLU-RAY SPECIFIC: 
     // Bouncy castle API requires CSR file in DER format. CSR
     // PKCS#10 files are normally BASE64 encoded. We remove
     // header, footer lines and decode BASE64.
+    //
     static byte[] readCSRFile(String file) throws IOException {
         StringBuffer buf = new StringBuffer();
         BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -856,16 +860,16 @@ public class JarSigner {
 	// BD-J mandates using SHA1WithRSA as a signature Algorithm
         cg.setSignatureAlgorithm("SHA1WITHRSA"); 
         cg.addExtension(X509Extensions.KeyUsage.getId(), true,
-        		new X509KeyUsage(X509KeyUsage.keyCertSign
-			 | X509KeyUsage.digitalSignature));
+        		new X509KeyUsage(X509KeyUsage.digitalSignature));
 
-/*    
-        GeneralName gn = new GeneralName(new DERIA5String(e), 1);
-        DERConstructedSequence seq = new DERConstructedSequence();
-        seq.addObject(gn);
+	String email = getEmailAddress(subject);
         cg.addExtension(X509Extensions.SubjectAlternativeName.getId(), false,
-            new GeneralNames(seq));
-        
+            	getRfc822Name(email));
+
+	String issuerEmail = getEmailAddress(userCert.getSubjectDN().getName());
+        cg.addExtension(X509Extensions.IssuerAlternativeName.getId(), false,
+            	getRfc822Name(issuerEmail));
+       /* 
         Collection issuerNames = userCert.getSubjectAlternativeNames();
         if (issuerNames != null) {
             Iterator iter = issuerNames.iterator();
@@ -888,16 +892,35 @@ public class JarSigner {
                     break; //while (iter.hasNext())
                 }
             }
-        }
-  */     
+        } */
+
         X509Certificate cert = cg.generate(privateKey);
 
         // Now, write leaf certificate
         System.out.println("Writing cert to " + certfile + ".");
         FileOutputStream str = new FileOutputStream(certfile);
         str.write(cert.getEncoded());
-        
 	str.close(); 
+    }
+
+    GeneralNames getRfc822Name(String name) {
+        GeneralName gn = new GeneralName(GeneralName.rfc822Name,
+		 new DERIA5String(name));
+        DERConstructedSequence seq = new DERConstructedSequence();
+        seq.addObject(gn);
+	return new GeneralNames(seq);
+    }
+
+    String getEmailAddress(String name) throws Exception  {
+	LdapName dn = new LdapName(name);
+	List<Rdn> rdns = dn.getRdns();
+	for (Rdn r : rdns) {
+	    if (r.getType().equals("EMAILADDRESS") ||
+		r.getType().equals("E"))
+		return (String) r.getValue();
+	}		
+	throw new Exception("No email address present in the name:" +
+		name);
     }
 
     void signJar(String jarName, String alias, String[] args) throws Exception {
