@@ -40,6 +40,7 @@ information or have any questions.
 	    <src path="library/src" />
 	    <src path="jdktools/test/src" />
 	    <include name="com/hdcookbook/grin/*.java"/>
+	    <include name="com/hdcookbook/grin/animator/*.java"/>
 	    <include name="com/hdcookbook/grin/commands/*.java"/>
 	    <include name="com/hdcookbook/grin/features/*.java"/>
 	    <include name="com/hdcookbook/grin/input/*.java"/>

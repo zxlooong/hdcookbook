@@ -89,6 +89,11 @@ import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.ChapterManager;
+import com.hdcookbook.grin.animator.AnimationClient;
+import com.hdcookbook.grin.animator.AnimationEngine;
+import com.hdcookbook.grin.animator.AnimationContext;
+import com.hdcookbook.grin.animator.DirectDrawEngine;
+import com.hdcookbook.grin.animator.RepaintDrawEngine;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.test.RyanDirector;
 import com.hdcookbook.grin.parser.ShowBuilder;
@@ -105,27 +110,21 @@ import com.hdcookbook.grin.util.ImageWaiter;
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class GenericMain extends Frame implements Runnable {
+public class GenericMain extends Frame implements AnimationContext {
     
     static int FRAME_CHEAT = 16;
     static int BUF_WIDTH = 1920;
     static int BUF_HEIGHT = 1080;
 
     protected Show show;
-    private Scrollbar scrollbar;
     private GenericDirector director;
     
-    private float fps = 24;	// Run at 24p by default
-    private BufferedImage showBuffer = null;
-    private Graphics2D showBufferGraphics = null;
-    private BufferedImage paintBuffer = null;
-    private BufferedImage nonTranslucentFix = null;
     private Graphics2D frameGraphics;
     private int frame;		// Current frame we're on
-    private int skipToFrame = 0; // Frame to skip to as a result of user input
-    private Object monitor = new Object();
-    private long lastFrameTime;
+    private float fps = 24.0f;
     private Image background = null;
+
+    private ScalingDirectDrawEngine engine;
     
     private int scaleDivisor = 2;
     private int screenWidth= 1920 / scaleDivisor;
@@ -142,7 +141,11 @@ public class GenericMain extends Frame implements Runnable {
 	    w.waitForComplete();
 	}
     }
-    
+   
+    /**
+     * Adjust the scaling factor used to display the show.
+     * This can only be called before init()
+     **/
     protected void adjustScreenSize(String scale) {
         try {
 	   scaleDivisor = Integer.parseInt(scale);	
@@ -151,7 +154,7 @@ public class GenericMain extends Frame implements Runnable {
 	   return;
 	}
 
-        screenWidth= 1920 / scaleDivisor;
+        screenWidth = 1920 / scaleDivisor;
         screenHeight = 1080 / scaleDivisor;
     }
     
@@ -160,19 +163,10 @@ public class GenericMain extends Frame implements Runnable {
 
 	director = new GenericDirector(showName);
 	show = director.createShow(builder);
-        show.initialize(this);
-
-        int sbHeight = 0;
-        scrollbar = new Scrollbar(Scrollbar.HORIZONTAL, 0, 10000, 0, 90000);
-        sbHeight = scrollbar.getPreferredSize().height;
-        if (sbHeight <= 0) {
-            sbHeight = 14;
-        }
 
         setBackground(Color.black);
         setLayout(null);
-        setSize(screenWidth, screenHeight + FRAME_CHEAT + sbHeight);  
-	// 720x576 is SD in Europe
+        setSize(screenWidth, screenHeight + FRAME_CHEAT);  
         
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -206,10 +200,7 @@ public class GenericMain extends Frame implements Runnable {
         addKeyListener(listener);
 	System.out.println("F1..F4 will generate red/green/yellow/blue, "
 			   + "F5 popup_menu");
-        if (scrollbar != null) {
-            scrollbar.addKeyListener(listener);
-        }
-                MouseAdapter mouseL = new MouseAdapter() {
+	MouseAdapter mouseL = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
 		int x = e.getX() * scaleDivisor;
 		int y = (e.getY() - FRAME_CHEAT) * scaleDivisor;
@@ -229,9 +220,7 @@ public class GenericMain extends Frame implements Runnable {
     }
 
     protected float getFps() {
-	synchronized(monitor) {
-	    return fps;
-	}
+	return fps;
     }
 
     private void printHelpMessage() {
@@ -249,10 +238,13 @@ public class GenericMain extends Frame implements Runnable {
 
     protected void inputLoop() {
 	try {
-	    show.advanceToFrame(0);
+	    engine = new ScalingDirectDrawEngine(scaleDivisor, FRAME_CHEAT);
+	    setFps(fps);
+	    engine.initialize(this);	// Calls animationInitialize() and
+	    				// animationFinishInitialiation()
+	    engine.start();
 	    BufferedReader in 
 		= new BufferedReader(new InputStreamReader(System.in));
-	    (new Thread(this)).start();
 	    printHelpMessage();
 	    for (;;) {
 		String msg = null;
@@ -265,9 +257,6 @@ public class GenericMain extends Frame implements Runnable {
 		    System.out.println(msg);
 		}
 	    }
-	} catch (InterruptedException ex) {
-	    ex.printStackTrace();
-	    System.exit(1);
 	} catch (IOException ex) {
 	    ex.printStackTrace();
 	    System.exit(1);
@@ -276,19 +265,28 @@ public class GenericMain extends Frame implements Runnable {
 
     public void snapshot() {
 	BufferedImage snapshot;
-	synchronized(monitor) {
-	    snapshot = new BufferedImage(BUF_WIDTH, BUF_HEIGHT, 
-				             BufferedImage.TYPE_INT_ARGB);
-	    Graphics2D g = snapshot.createGraphics();
-	    if (background == null) {
-		g.setComposite(AlphaComposite.Src);
-	    } else {
-		g.setComposite(AlphaComposite.Src);
-		g.drawImage(background, 0, 0, null);
-		g.setComposite(AlphaComposite.SrcOver);
-	    }
-	    g.drawImage(showBuffer, 0, 0, null);
+	BufferedImage framebuffer;
+	snapshot = new BufferedImage(BUF_WIDTH, BUF_HEIGHT, 
+					 BufferedImage.TYPE_INT_ARGB);
+	framebuffer = new BufferedImage(BUF_WIDTH, BUF_HEIGHT, 
+					 BufferedImage.TYPE_INT_ARGB);
+	Graphics2D g = framebuffer.createGraphics();
+	try {
+	    engine.repaintFrame(g);
+	} catch (InterruptedException ignored) {
 	}
+	g.dispose();
+	g = snapshot.createGraphics();
+	g.setComposite(AlphaComposite.Src);
+	if (background == null) {
+	    g.setColor(new Color(0,0,0,0));
+	    g.fillRect(0, 0, BUF_WIDTH, BUF_HEIGHT);
+	} else {
+	    g.drawImage(background, 0, 0, null, null);
+	}
+	g.setComposite(AlphaComposite.SrcOver);
+	g.drawImage(framebuffer, 0, 0, null, null);
+	g.dispose();
 	final BufferedImage snapshotF = snapshot;
 	new Thread(new Runnable() {
 	    public void run() {
@@ -365,196 +363,55 @@ public class GenericMain extends Frame implements Runnable {
     }
     
     protected String advanceFrames(int num) {
-	synchronized(monitor) {
-	    skipToFrame = frame - 1 + num;
-	    monitor.notifyAll();
-	    return "    Go from frame " + (frame-1) + " to " + skipToFrame;
+	try {
+	    engine.skipFrames(num);
+	} catch (InterruptedException ignored) {
 	}
+	return "    Skipped " + num + " frames.";
     }
     
     protected String setFps(float newFps) {
-	synchronized(monitor) {
-	    fps = newFps;
-	    lastFrameTime = System.currentTimeMillis();
-	    monitor.notifyAll();
-	    return "    Set fps from " + fps + " to " + newFps;
-	}
-    }
-    
-    public void run() {
-        try {
-            doRun();
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-            System.exit(1);
-        }
-    }
-
-    private void doRun() throws InterruptedException {
-	System.out.println("Starting frame pump...");
-	GraphicsConfiguration con = getGraphicsConfiguration();
-	if (con.getColorModel().getTransparency() != Transparency.TRANSLUCENT) {
-	    nonTranslucentFix = con.createCompatibleImage(screenWidth, 
-						    FRAME_CHEAT+screenHeight);
-	}
-	Graphics2D frameGr = (Graphics2D) getGraphics();
-	BufferedImage sb = new BufferedImage(BUF_WIDTH, BUF_HEIGHT, 
-					     BufferedImage.TYPE_INT_ARGB);
-	Graphics2D bufGr = sb.createGraphics();
-	Color transparentColor = new Color(0,0,0,0);
-	bufGr.setColor(transparentColor);
-	bufGr.fillRect(0,0,BUF_WIDTH, BUF_HEIGHT);
-	frameGr.drawImage(showBuffer, 0, FRAME_CHEAT, 
-			  screenWidth, FRAME_CHEAT + screenHeight,
-			  0, 0, BUF_WIDTH, BUF_HEIGHT, this);
-	Rectangle thisArea = new Rectangle();
-	Rectangle lastArea = new Rectangle();
-	Rectangle lastClip = new Rectangle();
-	Rectangle showClip = new Rectangle(0, 0, BUF_WIDTH, BUF_HEIGHT);
-	Font frameFont = Font.decode("Arial-BOLD-24");
-	lastFrameTime = System.currentTimeMillis();
-	frame = 0;
-	int skippedFrames = 0;
-	synchronized(monitor) {
-	    showBuffer = sb;
-	    showBufferGraphics = bufGr;
-	    frameGraphics = frameGr;
-	}
-	for (;;) {
-	    synchronized(monitor) {
-		frame++;
-		for (;;) {
-		    if (Debug.LEVEL > 1 && frame % 100 == 0) {
-			Debug.println(frame + " frames, " + skippedFrames
-				      + " skipped.");
-		    }
-		    if (skipToFrame >= frame) {
-			frame = skipToFrame;
-			lastFrameTime = System.currentTimeMillis();
-			break;
-		    }
-		    if (fps <= 0.0) {
-			doRepaint();
-			    // We do a repaint, in case fps was just
-			    // set to 0.0.  Sometimes this will be
-			    // gratituous, but we double-buffer
-			    // so it'll look OK, and an extra repaint
-			    // when we're stopped anyway is fine.
-			monitor.wait();
-		    } else {
-			int msPerFrame = ((int) (0.5 + 1000.0 / fps));
-			long delta = System.currentTimeMillis();
-			delta = delta - lastFrameTime - msPerFrame;
-			if (delta < 0) {
-			    monitor.wait(-delta);
-			    delta = System.currentTimeMillis();
-			    delta = delta - lastFrameTime - msPerFrame;
-			    if (delta >= 0) {
-				lastFrameTime += msPerFrame;
-				break;
-			    }
-			} else if (delta > msPerFrame) {
-			    // We've fallen behind, skip a frame
-			    skippedFrames++;
-			    frame++;
-			    lastFrameTime += msPerFrame;
-			} else {
-			    break;
-			}
-		    }
+	fps = newFps;
+	if (engine != null) {
+	    if (newFps <= 0) {
+		if (background != null) {
+		    engine.setBackground(background);
 		}
-		show.advanceToFrame(frame);
-		synchronized(show) {
-		    show.setDisplayArea(thisArea, lastArea, showClip);
-		    if (thisArea.width > 0) {
-			lastClip.setBounds(showClip);
-			bufGr.getClipBounds(lastClip);
-			bufGr.setClip(thisArea);
-			bufGr.setComposite(AlphaComposite.Src);
-			bufGr.setColor(transparentColor);
-			bufGr.fillRect(thisArea.x, thisArea.y, 
-				       thisArea.width, thisArea.height);
-			bufGr.setComposite(AlphaComposite.SrcOver);	
-			show.paintFrame(bufGr);
-			bufGr.setClip(lastClip);
-		    }
-		}
-		if (fps > 0.0) {
-		    paint(frameGr);
-		    // if fps is 0, doRepaint() will be called, above.
-		}
-		// This doesn't optimize drawing only the changed part
-		// That's hard to do with scaling, and performance
-		// isn't critical here anyway.!
-	    }
-	}
-    }
-
-    private void doRepaint() {
-	if (isDoubleBuffered()) {
-	    repaint();
-	} else {
-	    if (paintBuffer == null) {
-		paintBuffer = getGraphicsConfiguration()
-				.createCompatibleImage(screenWidth, 
-					    FRAME_CHEAT+screenHeight);
-	    }
-	    synchronized(monitor) {
-		if (frameGraphics == null) {
-		    return;
-		}
-		Graphics2D g = paintBuffer.createGraphics();
-		g.setComposite(AlphaComposite.Src);
-		paint(g);
-		g.dispose();
-		frameGraphics.setComposite(AlphaComposite.Src);
-		frameGraphics.drawImage(paintBuffer, 0, 0, this);
-		Toolkit.getDefaultToolkit().sync();
-	    }
-	}
-    }
-    
-    public void paint(Graphics gArg) {
-	Graphics2D g = (Graphics2D) gArg;
-	Graphics2D fixG = null;
-	synchronized(monitor) {
-	    if (showBuffer == null) {
-		return;
-	    }
-	    if (background == null || fps > 0.0) {
-		if (nonTranslucentFix == null) {
-		    g.setComposite(AlphaComposite.Src);
-		} else {
-			// On windows, the graphics device doesn't
-			// natively support a translucent color model.
-			// This means that alpha-blended colors don't
-			// show up properly, unless we SrcOver draw them
-			// over a background.  That burns another
-			// framebuffer:  nonTranslucentFix.
-		    fixG = g;
-		    g = nonTranslucentFix.createGraphics();
-		    g.setComposite(AlphaComposite.Src);
-		    g.setColor(Color.black);
-		    g.fillRect(0, 0, nonTranslucentFix.getWidth(),
-		    		     nonTranslucentFix.getHeight());
-		    g.setComposite(AlphaComposite.SrcOver);
+		try {
+		    engine.pause();
+		    engine.skipFrames(1);  // Output one more, with background.
+		} catch (InterruptedException ignored) {
 		}
 	    } else {
-		g.setComposite(AlphaComposite.Src);
-		g.drawImage(background, 0, FRAME_CHEAT, 
-				     screenWidth, FRAME_CHEAT+screenHeight,
-				     0, 0, BUF_WIDTH, BUF_HEIGHT, this);
-		g.setComposite(AlphaComposite.SrcOver);
-	    }
-	    g.drawImage(showBuffer, 0, FRAME_CHEAT, 
-				 screenWidth, FRAME_CHEAT+screenHeight,
-				 0, 0, BUF_WIDTH, BUF_HEIGHT, this);
-	    if (fixG != null)  {
-		g.dispose();
-		g = fixG;
-		g.drawImage(nonTranslucentFix, 0, 0, null);
+		if (background != null) {
+		    engine.setBackground(null);
+		}
+		engine.setFps((int) (newFps * 1001));
+		engine.start();
 	    }
 	}
+	return "    Set fps to " + newFps;
+    }
+    
+    public void animationInitialize() throws InterruptedException {
+	engine.initNumTargets(1);  // @@ TODO:  Take from show
+	AnimationClient[] clients = { show };
+	engine.initClients(clients);
+	GraphicsConfiguration con = getGraphicsConfiguration();
+	if (con.getColorModel().getTransparency() != Transparency.TRANSLUCENT) {
+	    // On windows, alpha blending to a background image requires
+	    // special handling.  See the comments in paint(Graphics).
+	    BufferedImage im = con.createCompatibleImage(screenWidth, 
+						    FRAME_CHEAT+screenHeight);
+	    engine.setNonTranslucentFix(im);
+	}
+	Rectangle ourBounds = new Rectangle(0, FRAME_CHEAT, 1920, 1080);
+	engine.initContainer(this, ourBounds);
+    }
+
+    public void animationFinishInitialization() throws InterruptedException {
+	System.out.println("Starting frame pump...");
+	// Can call Show.activateSegment here.
     }
     
     public static void main(String[] args) {

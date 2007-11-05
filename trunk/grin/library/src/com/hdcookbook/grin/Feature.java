@@ -257,7 +257,11 @@ public abstract class Feature implements SetupClient {
      *
      * @param  area The current area, or a rectangle with a width of 0
      *	       	     to mean "nothing visible so far".
+     *
+     * @deprecated	This will probably go away once transition to
+     *			the animation framework is complete
      **/
+    // @@ TODO:  Make this go away
     public abstract void  addDisplayArea(Rectangle area);
 
     /**

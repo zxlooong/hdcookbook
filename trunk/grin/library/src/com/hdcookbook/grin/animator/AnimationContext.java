@@ -53,41 +53,61 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.bookmenu.menu;
-
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Image;
+package com.hdcookbook.grin.animator;
 
 import com.hdcookbook.grin.util.Debug;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 /**
- * This component is used to cover the space where the menu UI lives.
- * It just catches repaint requests, and redirects them to
- * the show.  I guess you could think of the show as being "in"
- * the "widget," but the model is really based more around direct draw,
- * so that doesn't mean very much.
+ * Interface to be implemented by an xlet or other app that uses the
+ * animation framework.  This interface provides state change hooks,
+ * including initialization.
  *
- *   @author     Bill Foote (http://jovial.com)
+ * @see AnimationEngine
  **/
-public class MenuUI extends Component {
 
-    private MenuXlet xlet;
+public interface AnimationContext {
 
-    public MenuUI(MenuXlet xlet) {
-	this.xlet = xlet;
-    }
+    /**
+     * Run the first part of initialization.  By the time this
+     * is done, all of the initXXX methods of the animation
+     * framework that need to be called should be.  Notably,
+     * the animation framework should be provided with a component.
+     * This method is called as the first step in the animation thread.
+     * <p>
+     * If this initialization is time-consuming, it should poll
+     * AnimationEngine.destroyRequested() from time to time, and bail
+     * out if needed.  A good way to do this is by calling checkDestroy().
+     *
+     * @see com.hdcookbook.grin.animator.AnimationEngine#destroyRequested()
+     * @see com.hdcookbook.grin.animator.AnimationEngine#checkDestroy()
+     **/
+    public void animationInitialize() throws InterruptedException;
 
-    public void paint(Graphics g) {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Menu paint called");
-	}
-	try {
-	    xlet.worker.paintShow((Graphics2D) g);
-	} catch (InterruptedException ignored) {
-	}
-    }
+    /**
+     * Run the last part of initialization.  This is called by the
+     * animation thread after all of the animation clients are
+     * initialized.  This is the last initialization step before
+     * running the actual animation loop.  It's a good place
+     * to set the state of the UI, e.g. by calling a GRIN
+     * Show object's activateSegment() command.  It might also be
+     * a reasonable place to call System.gc(), since initialization
+     * normally creates a lot of garbage, and the normal running of
+     * an xlet hopefully doesn't.
+     * <p>
+     * If this initialization is time-consuming, it should poll
+     * AnimationEngine.destroyRequested() from time to time, and bail
+     * out if needed.  A good way to do this is by calling checkDestroy().
+     *
+     * @see com.hdcookbook.grin.animator.AnimationEngine#destroyRequested()
+     * @see com.hdcookbook.grin.Show#activateSegment(com.hdcookbook.grin.Segment)
+     **/
+    public void animationFinishInitialization() throws InterruptedException;
+
+
 }

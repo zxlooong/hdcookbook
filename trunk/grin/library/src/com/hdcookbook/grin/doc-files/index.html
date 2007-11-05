@@ -4,7 +4,7 @@
   P.pagebreak {page-break-before: always}
 </style>
 <h2><center>GRIN - an extensible Java animation framework for TV</center></h2>
-<h3><center>Version 1.0, June 27, 2007</h3></center>
+<h3><center>Version 1.1.0, November 4, 2007</h3></center>
 <p><center>
 <img src="grin_bear.jpg">
 </center></p>
@@ -422,25 +422,106 @@ file.
 </p>
 <h2>Animation Loop</h2>
 <p>
-The xlet that includes GRIN needs to define the overall animation
-loop that implements the pseudocode shown earlier in this document.
-This is a bit of boilerplate code you'll probably use over
-and over.  It's best that this be outside of GRIN proper, because
-making little changes to that loop (like drawing something before
-or after GRIN does its drawing) is a really powerful technique.
+GRIN includes an animation framework that manages displaying
+frames of animation on a regular basis.  It supports different
+drawing modes, like repaint draw and direct draw.  
+It allows you to define your own code-based animations
+by implementing an AnimationClient interface.  These custom animations
+can be painted above or below GRIN's Show-based painting.  Of course, 
+you can also define new GRIN features that do their own painting, and
+make them part of a Show.  Here's a UML diagram illustrating the
+animation framework:
 </p>
 <p>
-The menu xlet in <b>com.hdcookbook.bookmenu.menu</b> does this,
-and even has a flag to switch between direct draw and repaint draw.
+<center><img src="animator_classes.jpg"></center>
+</p>
+<p>
+The menu xlet in <b>com.hdcookbook.bookmenu.menu</b> uses the GRIN
+animation framework.
 The Gun Bunny game xlet in <b>com.hdcookbook.gunbunny</b> doesn't
 use GRIN, but it has the same kind of frame pump.  Gun Bunny even
-lets you switch dynamically between direct draw, repaint draw and
+lets you switch <i>dynamically</i> between direct draw, repaint draw and
 SFAA.  With all three, it maintains time-based animation, dropping
-frames if it falls behind.  I'd recommend using the Gun Bunny animator
-class.  I actually would have used it in the menu xlet if I hadn't
-done the menu xlet first, and if it weren't too close to the book
-deadline to switch it over.
+frames if it falls behind.
 </p>
+<p>
+To use the animation framework, you'll need a bit of boilerplate code
+that looks like this:
+</p>
+<pre>
+
+    import com.hdcookbook.grin.animator.AnimationClient; 
+    import com.hdcookbook.grin.animator.AnimationEngine;
+    import com.hdcookbook.grin.animator.AnimationContext;
+    import com.hdcookbook.grin.animator.DirectDrawEngine;
+    import com.hdcookbook.grin.animator.RepaintDrawEngine;
+    import com.hdcookbook.grin.Show;
+
+    ...
+
+    public class MyXlet implements Xlet, Runnable, AnimationContext {
+
+	private XletContext context;
+	private AnimationEngine engine;
+	private Show show;
+
+	...
+
+	public void initXlet(XletContext ctx) throws XletStateChangeException {
+	    this.context = ctx;
+	    DirectDrawEngine dde = new DirectDrawEngine();
+	    	// or repaint draw, ...
+	    dde.setFps(24000);
+	    engine = dde;
+	    engine.initialize(this);
+	}
+
+	public void startXlet() throws XletStateChangeException {
+	    engine.start();
+	}
+
+	public void pauseXlet() {
+	    engine.pause();
+	}
+
+	public void destroyXlet(boolean unconditional)
+		throws XletStateChangeException
+	{
+	    engine.destroy();	// Doesn't return until thread is stopped
+
+	    ... destroy HScene ...
+	}
+
+	    // This is called from the animation manager as the xletInit
+	    // action.  It's run in the animation frame, so it's OK to
+	    // do time-consuming things, l
+	public void animationInitialize() throws InterruptedException {
+	    ...
+
+	    show = ... a new Show instance ...;
+	    ...  initialize show ...;
+	    engine.checkDestroy();
+
+	    engine.initNumTargets(... the number you need ...);
+	    AnimationClient[] clients = ... your clients (Show is a client) ...;
+	    engine.initClients(clients);
+	    Rectangle bounds = ... 1920x1080, or a smaller bounds ...;
+	    Container c = ... the container, probably just the HScene ...;
+	    engine.initContainer(c, bounds);
+	}
+
+	public void animationFinishInitialization() throws InterruptedException
+	{
+	    show.activateSegment(show.getSegment("S:Initialize"));
+	    	// Or whatever the initial segment's name is
+	}
+</pre>
+<p>
+This creates an Animator worker thread that will display the show,
+by default 23.976 times per second.
+</p>
+
+
 <h2>Building Notes</h2>
 <p>
 When you build the javadocs, be sure to copy the directory
@@ -449,23 +530,10 @@ program in com.hdcookbook.grin.test, be sure to include
 <code>com/hdcookbook/grin/test/assets</code> in the JAR file.
 </p>
 <h2>Future Ideas</h2>
-<ul>
-  <li>What about an animation within an animation?  The outer
-      animation would define a "universe" - think of a star that
-      moves, and a planet that rotates around it.
-  <li>Image scaling is a bit challenging, but useful.
-  <li>Animation (or loading) priority?  The idea is to throttle back
-      the features in a semantically meaningful way.  Maybe we could do
-      this by authoring the full thing, then having a seperate structure
-      that says what to turn off?
-  <li>Maybe an AWTVideoSizeControl feature, which would let you manipulate
-      the BD-J PiP video (and the primary video) like a feature.
-  <li>Pre-parsing, or at least pre-lexing might be useful.  This would
-      mean "compiling" a show file into some sort of binary format, to
-      improve startup time.  If there's ever a reasonable set of show
-      files that take over half a second to parse, then this would
-      be worth doing.
-</ul>
+<p>
+Please see the issues database associated with the
+hdcookbook.dev.java.net repository.
+
 <h2>License</h2>
 <p>
 The contents of hdcookbook.dev.java.net are covered
@@ -576,7 +644,7 @@ please consult the source code repository.
       Version 0.9.1 is very close to what will be on the DVD in the book.
       I know this to be true, because the deadline for getting the disc
       image out is this Friday, in four days.
-  <li> <b>Version 1,0, June 27 2007</b>  
+  <li> <b>Version 1.0, June 27 2007</b>  
        <ul>
          <li>Fixed up some bugs in the BDJO
 	   and such that were caught for us by a disc verifier.  This is
@@ -587,6 +655,9 @@ please consult the source code repository.
 	 <li>Build scripts now work on Windows (using the Unix utils
 	     from <a href="http://unxutils.sourceforge.net/">http://unxutils.sourceforge.net/</a>).
       </ul>
+  <li> <b>Version 1.1.0, November 4, 2007</b>
+      Added the animation framework.  Subsequent putbacks will make Show
+      take advantage of the optimized drawing that this framework helps enable.
 </ul>
 </p>
 </body></html>

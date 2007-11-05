@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/sh -x
 
 GRIN_BASE=`dirname $0`/../..
-CLASSES=$GRIN_BASE/build/grin_viewer
+CLASSES=$GRIN_BASE/build/grin_viewer/classes
 HD_SRC=$GRIN_BASE/xlets/bookmenu/src
 ASSETS=$HD_SRC/com/hdcookbook/bookmenu/assets
 BG_IMG=$HD_SRC/com/hdcookbook/bookmenu/menu/test_assets/MenuScreenBG_gray.png

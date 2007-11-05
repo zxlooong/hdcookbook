@@ -55,6 +55,8 @@
 
 package com.hdcookbook.grin;
 
+import com.hdcookbook.grin.animator.AnimationClient;
+import com.hdcookbook.grin.animator.RenderArea;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.ImageManager;
@@ -81,7 +83,7 @@ import java.io.IOException;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class Show {
+public class Show implements AnimationClient {
 
     private Director director;
 
@@ -347,6 +349,10 @@ public class Show {
      * @throws	InterruptedException	if the show has been destroyed
      *
      * @see #setCaughtUp()
+     *
+     * @deprecated  With the new animation framework, this is being
+     *		    replaced by nextFrame().  The method advanceToFrame()
+     *		    will soon be removed from Show.
      **/
     public synchronized void advanceToFrame(int newFrame) 
     	throws InterruptedException 
@@ -375,6 +381,20 @@ public class Show {
 	}
     }
 
+    // Inherited from AnimationClient
+    /**
+     * @inheritDoc
+     **/
+    public synchronized void nextFrame() throws InterruptedException {
+	// @@ TODO:  Eliminate the old, deprecated method entirely.  When
+	//	     doing this, also change the Feature API to get the
+	//	     int frame number out of the calls - it's misleading,
+	//	     given that each feature is called once per frame anyway...
+	//	     the frame number is just confusing, and it wraps to
+	//	     a negative value in only 2.8 years at 24 fps.
+	advanceToFrame(currentFrame + 1);
+    }
+
     /**
      * This is useful for an animation that wants to synchronize on
      * certain frames in a show, using this pattern:
@@ -386,7 +406,10 @@ public class Show {
      *          ...  make stateful changes to the show;
      *      }
      * </pre>
+     *
+     * @deprecated	Cute, but not useful.  Use a command instead
      **/
+    // @@ TODO:  Eliminate this.
     public synchronized void waitForFrame(int wanted) 
     		throws InterruptedException 
     {
@@ -416,7 +439,11 @@ public class Show {
      * Get the current frame number of our underlying mode.
      *
      * @see #advanceToFrame(int)
+     *
+     * @deprecated   Really only useful for features, with the old
+     *		     frame number-based way of keeping track of state
      **/
+    // @@ TODO:  Get rid of this
     public synchronized int getCurrentFrame() {
 	return currentFrame;
     }
@@ -486,7 +513,11 @@ public class Show {
      *			is set to is clipped to these bounds.
      *
      * @throws	InterruptedException	if the show has been destroyed
+     *
+     * @deprecated	This was an incremental step toward what the
+     *			animation framework can do better.
      **/
+    // @@ TODO:  Get rid of this with transition to animation framework
     public synchronized void setDisplayArea(Rectangle thisArea, 
     					    Rectangle lastArea,
 					    Rectangle clip)
@@ -530,12 +561,32 @@ public class Show {
 	}
     }
 
+    // @@ Some temporary adaptation of the new animation f/w to the
+    // @@ older, less-optimized way of drawing.  This will go away
+    // @@ within a week.
+    private Rectangle tempThisArea = new Rectangle();
+    private Rectangle tempLastArea = new Rectangle();
+    private Rectangle tempShowClip = new Rectangle();
+
+    public void addDisplayAreas(RenderArea[] targets) 
+    	    throws InterruptedException 
+    {
+    	// @@ TODO:  Make an optimized version of this that works with
+	//  @@	     the features.
+	tempShowClip.width = component.getWidth();
+	tempShowClip.height = component.getHeight();
+	setDisplayArea(tempThisArea, tempLastArea, tempShowClip);
+	targets[0].clearAndAddArea(tempThisArea);
+	targets[0].addArea(tempLastArea);
+    }
+
     /**
      * Paint the current state of the enhancement.  This should be
      * called by the xlet.  This way, the xlet can decide to use
      * whatever animation style it wants:  direct draw, repaint
      * draw, SFAA, or anything else.
      **/
+    // @@ TODO:  Think about checking clip rect in features
     public synchronized void paintFrame(Graphics2D gr)
     	throws InterruptedException 
     {
