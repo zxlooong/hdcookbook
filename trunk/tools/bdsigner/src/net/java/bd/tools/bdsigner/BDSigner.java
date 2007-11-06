@@ -33,26 +33,30 @@ import sun.security.tools.JarSigner;
  */
 public class BDSigner {
  
-    String appcertalias = "appcert";
     String rootcertalias = "rootcert";
+    static String appcertalias = "appcert";
     static String[] jarfiles;
     static String orgId;
     
     // Intermediate files to create, will be deleted at the tool exit time
     String appcsrfile = "appcert.csr";
     String appcertfile = "appcert.cer";
-    String keystorefile = "keystore.store";
+    static String keystorefile = "keystore.store";
 
+    static String appcertpass = "appcertpassword";
+    static String storepass =   "keystorepassword";
+
+    static boolean genCert = true; // by default generate new certificates
     static boolean debug = false;
     
     public static void main(String[] args) {
 	    
 	    // Parse the argments
-	    if (args == null || args.length < 2) {
+	    if (args == null || args.length < 2 ||
+			args.length > 6) {
 		   printUsage("Wrong set of arguments.");
 		   return;
-	    } 
-
+	    }
 	    int index = 0;
 
 	    if (args[index].startsWith("-")) {
@@ -65,8 +69,20 @@ public class BDSigner {
 		    printUsage("Bad OrgID " + orgId + ", please provide an 8 digit hex.");
 		    return;
 	    }
-	    
-	    jarfiles = new String[args.length-index];
+
+	    if (args.length > 2) {
+		if (args.length < 6) {
+		   printUsage("Wrong set of arguments.");
+		   return;
+		}
+		keystorefile = args[index++];
+		storepass = args[index++];
+		appcertalias = args[index++];
+		appcertpass = args[index++];
+		genCert = false;
+	    }
+
+	    jarfiles = new String[args.length - index];
 	    for (int i = 0; index < args.length; i++) {
 	       jarfiles[i] = args[index++];
 	       if (!new File(jarfiles[i]).exists()) {
@@ -81,21 +97,20 @@ public class BDSigner {
     }
     
     private BDSigner() {
-	    cleanup();  // Get rid of any previous key aliases first.
-	     
 	    try {
-		    
-		generateCertificates(); 
-		generateCSR();
-		generateCSRResponse();
-		importCSRResponse();
+		if (genCert) {	    
+	    	    cleanup();  // Get rid of any previous key aliases first.
+		    generateCertificates(); 
+		    generateCSR();
+		    generateCSRResponse();
+		    importCSRResponse();
+		    exportRootCertificate();
+		}
 		signJarFile();
-		exportRootCertificate();
-		
 	    } catch (Exception e) {
 	       e.printStackTrace();
 	    } finally {
-	       if (!debug) 
+	       if (!debug && genCert) 
 			cleanup();
 	    }
     }
@@ -103,24 +118,24 @@ public class BDSigner {
     
     private void generateCertificates() throws Exception {
 	    
-       String[] appCertCreateArgs = {"-genkey", "-keyalg", "RSA", "-sigAlg", "SHA1WithRSA", "-alias", appcertalias, "-keypass", "appcertpassword", "-dname", 
+       String[] appCertCreateArgs = {"-genkey", "-keyalg", "RSA", "-sigAlg", "SHA1WithRSA", "-alias", appcertalias, "-keypass", appcertpass, "-dname", 
                                      "EMAILADDRESS=email@email.com, CN=Producer, OU=Codesigning Department, O=BDJCompany."+orgId+", L=Santa Clara, S=California, C=US", 
                                      "-validity", "100000", "-debug", 
-				     "-keystore", keystorefile, "-storepass", "keystorepassword"};
+				     "-keystore", keystorefile, "-storepass", storepass};
     
        KeyTool.main(appCertCreateArgs);
        
        String[] rootCertCreateArgs = {"-genkey", "-keyalg", "RSA", "-sigAlg", "SHA1WithRSA", "-alias", rootcertalias, "-keypass", "rootcertpassword", "-dname", 
                                      "EMAILADDRESS=email@email.com, CN=Studio, OU=Codesigning Department, O=BDJCompany."+orgId+", L=Santa Clara, S=California, C=US", 
                                      "-validity", "100000", "-debug", 
-				     "-keystore", keystorefile, "-storepass", "keystorepassword"};
+				     "-keystore", keystorefile, "-storepass", storepass};
        
        KeyTool.main(rootCertCreateArgs);
     }
 
     private void generateCSR() throws Exception {
-       String[] appCSRRequestArgs = {"-certreq", "-alias", appcertalias, "-keypass", "appcertpassword", 
-                                   "-keystore", keystorefile, "-storepass", "keystorepassword", 
+       String[] appCSRRequestArgs = {"-certreq", "-alias", appcertalias, "-keypass", appcertpass, 
+                                   "-keystore", keystorefile, "-storepass", storepass, 
 				   "-debug", "-file", appcsrfile};
        
        KeyTool.main(appCSRRequestArgs);	    
@@ -128,7 +143,7 @@ public class BDSigner {
     
     private void generateCSRResponse() throws Exception {
 
-       String[] appCSRRequestArgs = {"-keystore", keystorefile, "-storepass", "keystorepassword",
+       String[] appCSRRequestArgs = {"-keystore", keystorefile, "-storepass", storepass,
                                      "-keypass", "rootcertpassword", "-debug", 
 				     "-issuecert", appcsrfile, appcertfile, rootcertalias};
        
@@ -136,16 +151,16 @@ public class BDSigner {
     }
     
     private void importCSRResponse() throws Exception {
-       String[] responseImportArgs = {"-import", "-alias", appcertalias, "-keypass", "appcertpassword", 
-                                      "-keystore", keystorefile, "-storepass", "keystorepassword",
+       String[] responseImportArgs = {"-import", "-alias", appcertalias, "-keypass", appcertpass, 
+                                      "-keystore", keystorefile, "-storepass", storepass,
                                       "-debug", "-file", appcertfile}; 
        KeyTool.main(responseImportArgs);
     }
     
     private void signJarFile() throws Exception {
        for (int i = 0; i < jarfiles.length; i++) {
-          String[] jarSigningArgs = {"-sigFile", "SIG-BD00", "-keypass", "appcertpassword", 
-                                  "-keystore", keystorefile, "-storepass", "keystorepassword",
+          String[] jarSigningArgs = {"-sigFile", "SIG-BD00", "-keypass", appcertpass, 
+                                  "-keystore", keystorefile, "-storepass", storepass,
                                   "-debug", jarfiles[i], appcertalias};
        
           JarSigner.main(jarSigningArgs);
@@ -155,7 +170,7 @@ public class BDSigner {
     private void exportRootCertificate() throws Exception {
 	String[] exportRootCertificateArgs = {
 		"-export", "-alias", rootcertalias, "-keypass", "rootcertpassword", 
-		"-keystore", keystorefile, "-storepass", "keystorepassword",
+		"-keystore", keystorefile, "-storepass", storepass,
 		"-debug", "-file", "app.discroot.crt" };
 	
 	KeyTool.main(exportRootCertificateArgs);
@@ -168,7 +183,7 @@ public class BDSigner {
 		 KeyTool.main(new String[]{"-delete", "-alias", appcertalias, "-keystore", keystorefile, "-storepass", "keystorepassword"});
 	    } catch (Exception e) { e.printStackTrace(); }
 	    try {
-		 KeyTool.main(new String[]{"-delete", "-alias", rootcertalias, "-keystore", keystorefile, "-storepass", "keystorepassword"});
+		 KeyTool.main(new String[]{"-delete", "-alias", rootcertalias, "-keystore", keystorefile, "-storepass", storepass});
 	    } catch (Exception e) { e.printStackTrace(); }
 	    
 	    keystore.delete();
@@ -183,9 +198,10 @@ public class BDSigner {
 	 System.out.println("\n==============================\n");
 	 System.out.println("Failed: " + reason);
 	 System.out.println("\n==============================\n");
-	 System.out.println("This is a tool to sign jar files according to the bd-j specification.\n");
+	 System.out.println("This is a tool to sign jar files according to the bd-j specification.\n" +
+	    "The signing is done either by generating a new certificate or using the specified certificate\n");
 	 System.out.println("BDSigner Syntax:");
-	 System.out.println("net.java.bd.tools.bdsigner.BDSigner [-debug] 8-digit-hex-organization-ID jar-files");
+	 System.out.println("net.java.bd.tools.bdsigner.BDSigner [-debug] 8-digit-hex-organization-ID [keystore] [storepass] [alias] [keypass] jar-files");
 	 System.out.println("Example: java -cp bdsigner.jar:tools.jar:bcprov-jdk15-137.jar net.java.bd.tools.bdsigner.BDSigner 56789abc 00000.jar\n");
 	 System.out.println("\n==============================\n");
     }
