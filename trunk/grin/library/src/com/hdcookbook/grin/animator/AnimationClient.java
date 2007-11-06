@@ -78,6 +78,13 @@ public interface AnimationClient {
     public void initialize(Component component)
 	throws InterruptedException;
 
+
+    /**
+     * Destroy this animatin client.  This is called from the animation
+     * worker thread before ending the animation loop.
+     **/
+    public void destroy() throws InterruptedException;
+
     /**
      * Advance the state of the show to the next frame.  This is
      * called once per frame; the first time it is called can be

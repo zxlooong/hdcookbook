@@ -142,6 +142,8 @@ public class Show implements AnimationClient {
     }
 
     /**
+     * @inheritDoc
+     * <p>
      * This should be called after the show has been built.
      *
      * @param  component The component this show will eventually be displayed
@@ -169,6 +171,8 @@ public class Show implements AnimationClient {
     }
 
     /**
+     * @inheritDoc
+     * <p>
      * Destroy a show.  This should be called when the Xlet is done with
      * this show.
      **/
@@ -321,13 +325,15 @@ public class Show implements AnimationClient {
     }
 
     /**
+     * @inheritDoc
+     * <p>
      * An xlet can call this method just before calling advanceToFrame if
      * the animation loop is caught up.  From time to time, pending commands
      * will be deferred until animation has caught up.  GRIN knows we've
      * caught up when we paint a frame, but calling this method can let
      * it know one frame earlier.
      *
-     * @see #advanceToFrame(int)
+     * @see #nextFrame()
      **/
     public synchronized void setCaughtUp() {
 	deferringPendingCommands = false;
@@ -568,6 +574,9 @@ public class Show implements AnimationClient {
     private Rectangle tempLastArea = new Rectangle();
     private Rectangle tempShowClip = new Rectangle();
 
+    /**
+     * @inheritDoc
+     **/
     public void addDisplayAreas(RenderArea[] targets) 
     	    throws InterruptedException 
     {
@@ -581,6 +590,8 @@ public class Show implements AnimationClient {
     }
 
     /**
+     * @inheritDoc
+     * <p>
      * Paint the current state of the enhancement.  This should be
      * called by the xlet.  This way, the xlet can decide to use
      * whatever animation style it wants:  direct draw, repaint

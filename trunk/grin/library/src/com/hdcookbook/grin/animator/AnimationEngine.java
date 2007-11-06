@@ -440,6 +440,18 @@ public abstract class AnimationEngine implements Runnable {
 	    // Player is trying to terminate us 
 	    Thread.currentThread().interrupt();
 	} finally {
+	    AnimationClient[] c = clients;
+	    if (c != null) {
+		for (int i = 0; i < c.length; i++) {
+		    try {
+			c[i].destroy();
+		    } catch (Throwable t) {
+			if (Debug.LEVEL > 1) {
+			    Debug.println("****  Exception in destroy:  " + t);
+			}
+		    }
+		}
+	    }
 	    terminatingEraseScreen();
 	}
 	setState(STATE_STOPPED);  // Allows the call to destroy() to return

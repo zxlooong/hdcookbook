@@ -160,7 +160,6 @@ public class MenuXlet implements Xlet, UserEventListener,
 	}
 	engine.destroy();
 	director.destroy();
-	show.destroy();
 	if (navigator != null) {
 	    navigator.destroy();
 	}
