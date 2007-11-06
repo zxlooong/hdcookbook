@@ -55,6 +55,7 @@
 import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.parser.ShowParser;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -68,70 +69,69 @@ import java.awt.Container;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.animator.AnimationClient; 
+import com.hdcookbook.grin.animator.AnimationEngine;
+import com.hdcookbook.grin.animator.AnimationContext;
+import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.parser.ExtensionsParser;
 	
 /** 
- * An xlet example that displays GRIN script helloworld.txt
- * content at the startup.
+ * An xlet example that displays GRIN script.
  */
 
-public class HelloGrinWorld implements Xlet, Runnable {
+public class HelloGrinWorld implements Xlet, AnimationContext {
 	
 	public Show show;
 	Container rootContainer;
-	String grinScriptName = "helloworld.txt";
-	boolean running = false;
+	DirectDrawEngine animationEngine;
+	XletContext context;
+	String grinScriptName = "tumblingduke.txt";
+	boolean initialized = false;
 	
 	public void initXlet(XletContext context) {
 		
+	   this.context = context;
+	   
 	   rootContainer = TVContainer.getRootContainer(context);			
 	   rootContainer.setSize(1920, 1080);
 	   
-	   SimpleDirector director = new SimpleDirector();
-	   show = director.createShow();
-	   show.initialize(rootContainer);
+	   animationEngine = new DirectDrawEngine();
+	   animationEngine.setFps(24000);
+	   animationEngine.initialize(this);
+	   
 	}
 	
 	public void startXlet() {
-	   rootContainer.setVisible(true);	
-	   show.activateSegment(show.getSegment("S:Initialize"));
-	   running = true;
-	   
-	   new Thread(this).start();
+	   rootContainer.setVisible(true);
+	   animationEngine.start(); 	   
 	}
 	
 	public void pauseXlet() {
-	   running = false;
-	   rootContainer.setVisible(false);	
+	   rootContainer.setVisible(false);
+	   animationEngine.pause();
 	}
 	
 	public void destroyXlet(boolean unconditional) {
-	   running = false;
 	   rootContainer = null;
-	   show.destroy();
+	   //show.destroy();
+	   animationEngine.destroy();
 	}
 	
-	// The actual display sequence.
-	public void run() {
-			   
-	   //int i = 0;
-	   try {
-	      show.advanceToFrame(1);
-	   } catch (InterruptedException e) { return; }
+	public void animationInitialize() throws InterruptedException {
+
+	   SimpleDirector director = new SimpleDirector();
+	   show = director.createShow();
+
+	   animationEngine.checkDestroy();
+	   animationEngine.initNumTargets(1);
+	   animationEngine.initClients(new AnimationClient[]{show});
+	   animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
 	   
-	   while (running) {
-	      try {
-		 Thread.currentThread().sleep(1000);
-		 
-	         //show.advanceToFrame(i++);
-	         show.paintFrame((Graphics2D)rootContainer.getGraphics());
-	         Toolkit.getDefaultToolkit().sync();
-	      } catch (InterruptedException e) { 
-		 e.printStackTrace(); 
-		 running = false;
-	      }
-	   }
+	} 
+	
+	public void animationFinishInitialization() {
+	   show.activateSegment(show.getSegment("S:Initialize"));		
 	}
 	
 	class SimpleDirector extends Director {
@@ -141,7 +141,7 @@ public class HelloGrinWorld implements Xlet, Runnable {
 	   }
 	   
 	   public Show createShow() {
-	      
+		   
 	      setup(0, new ChapterManager[]{new ChapterManager("")});
 	      
 	      Show show = new Show(this);

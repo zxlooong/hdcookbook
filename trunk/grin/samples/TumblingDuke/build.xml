@@ -25,7 +25,7 @@
 	<target name="jar" depends="compile" description="Creates a jar file">
 		<jar destfile="${builddir}/00000.jar">	     
                    <fileset dir="${builddir}"/>	
-		   <fileset dir="." includes="helloduke.gif, helloworld.txt"/>
+		   <fileset dir="." includes="images/**, tumblingduke.txt"/>
 		</jar>
 	   
 	    <ant antfile="generate-bdjo-desc.xml"/>   
@@ -33,12 +33,14 @@
 	
 	<target name="run_grinview" depends="grinview_check, compile_grinview">
 		<java fork="true" jar="${grin.classes}">
-			<arg line="-asset_dir . helloworld.txt"/>
+			<arg line="-asset_dir . tumblingduke.txt"/>
 		</java>
 	</target>
 	
 	<target name="debug_grinview" depends="grinview_check, compile_grinview">
-                <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket"/>
+                <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
+			<classpath path="${grin.classes}"/>
+		</nbjpdastart>	
 	        <java fork="true" jar="${grin.classes}">
 			<arg line="-asset_dir . helloworld.txt"/>
 			<jvmarg value="-Xdebug"/>
