@@ -30,6 +30,7 @@ information or have any questions.
 
 <property name="HDC_BUILD_DIR" value="build"/>
 <property name="GRIN_JAVADOC_DEST" value="${HDC_BUILD_DIR}/grin_javadoc"/>
+<property name="GRIN_JAVADOC_PUBLIC" value="../www/javadocs/grin"/>
 
 <target name="generate-grin-javadoc">
 	<mkdir dir="${GRIN_JAVADOC_DEST}"/>
@@ -39,6 +40,13 @@ information or have any questions.
 		  <sourcepath location="library/src"/>
 		  <sourcepath location="jdktools/test/src"/>
 	</javadoc>	       
+</target>
+
+<target name="deploy" depends="generate-grin-javadoc">
+	<copy todir="${GRIN_JAVADOC_PUBLIC}">
+            <fileset dir="${GRIN_JAVADOC_DEST}"/>
+	</copy>
+
 </target>
 
 <target name="clean">

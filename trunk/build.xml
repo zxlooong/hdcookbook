@@ -26,6 +26,11 @@
   <target name="build-grin-javadoc">
 	    <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml"/>
   </target>
+
+    <!-- Update GRIN javadoc in the trunk/www directory -->
+  <target name="deploy-grin-javadoc"> 
+	    <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml" target="deploy"/>
+  </target>
   
   <target name="clean"> 	  
 	  <ant dir="tools/bdjo" target="bdjo-clean"/>
