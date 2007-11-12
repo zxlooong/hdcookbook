@@ -73,6 +73,14 @@ public class CommandRCHandler extends RCHandler {
 	this.mask = mask;
 	this.commands = commands;
     }
+    
+    public int getMask() {
+        return mask;
+    }
+    
+    public Command[] getCommands() {
+        return commands;
+    }
 
     /**
      * See superclass definition.

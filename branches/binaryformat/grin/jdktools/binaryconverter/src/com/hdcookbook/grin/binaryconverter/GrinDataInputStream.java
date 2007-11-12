@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Just a convenience DataInputStream subclass that knows how to handle certain classes
+ * Just a convenience DataInputStream subclass to handle certain Objects.
  */
 public class GrinDataInputStream extends DataInputStream {
    

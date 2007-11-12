@@ -2,6 +2,7 @@
 package com.hdcookbook.grin.binaryconverter;
 
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
@@ -21,6 +22,9 @@ import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Timer;
 import com.hdcookbook.grin.features.Translation;
 import com.hdcookbook.grin.features.Translator;
+import com.hdcookbook.grin.input.CommandRCHandler;
+import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.input.VisualRCHandler;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -36,8 +40,11 @@ public class GrinBinaryWriter {
 
     private Show show;
     private ArrayList featuresList;
+    private ArrayList rcHandlersList;
+    private ArrayList segmentsList;
     
     public GrinBinaryWriter(Show show) {
+        
         this.show = show;
        
         Feature[] features = show.getFeaturesAsArray();
@@ -45,6 +52,18 @@ public class GrinBinaryWriter {
         for (int i = 0; i < features.length; i++) {
             featuresList.add(features[i]);
         }  
+        
+        RCHandler[] rcHandlers = show.getRCHandlersAsArray();
+        rcHandlersList = new ArrayList(rcHandlers.length);
+        for (int i = 0; i < rcHandlers.length; i++) {
+            rcHandlersList.add(rcHandlers[i]);
+        }     
+        
+        Segment[] segments = show.getSegmentsAsArray();
+        segmentsList = new ArrayList(segments.length);
+        for (int i = 0; i < segments.length; i++) {
+            segmentsList.add(segments[i]);
+        }         
     }
 
     protected static void writeScriptIdentifier(DataOutputStream out) throws IOException {
@@ -53,7 +72,14 @@ public class GrinBinaryWriter {
     }
  
     protected void writeShow(DataOutputStream out) throws IOException {
-        writeFeatures(out, (Feature[])featuresList.toArray(new Feature[]{}));        
+        
+        out.writeInt(featuresList.size());
+        out.writeInt(rcHandlersList.size());
+        out.writeInt(segmentsList.size());
+        
+        writeFeatures(out, (Feature[])featuresList.toArray(new Feature[]{}));   
+        writeRCHandlers(out, (RCHandler[])rcHandlersList.toArray(new RCHandler[]{}));
+        writeSegments(out, (Segment[])segmentsList.toArray(new Segment[]{}));
     }
     
     protected void writeFeatures(DataOutputStream out, Feature[] features) 
@@ -61,9 +87,8 @@ public class GrinBinaryWriter {
 	
         if (features == null || features.length == 0) 
             return;
-        
-	// First, write out two integers - identifier and number of elements.
-        out.writeInt(Constants.FEATURE_IDENTIFIER);
+ 
+        out.writeInt(Constants.FEATURE_IDENTIFIER);   
         out.writeInt(features.length);
 		
         for (int i = 0; i < features.length; i++) {
@@ -99,8 +124,39 @@ public class GrinBinaryWriter {
             }
 	    
         }
-   }
-       
+    }
+
+    private void writeRCHandlers(DataOutputStream out, RCHandler[] rcHandlers) throws IOException {
+        if (rcHandlers == null || rcHandlers.length == 0) 
+            return;
+        
+        out.writeInt(Constants.RCHANDLER_IDENTIFIER);
+        out.writeInt(rcHandlers.length);
+        
+        for (int i = 0; i < rcHandlers.length; i++) {
+            RCHandler handler = rcHandlers[i];
+            if (handler instanceof CommandRCHandler) {
+                writeCommandRCHandler(out, (CommandRCHandler)handler);
+            } else if (handler instanceof VisualRCHandler) {
+                writeVisualRCHandler(out, (VisualRCHandler) handler);
+            } else {
+                throw new IOException("Unknown RCHandler " + handler);
+            }
+        }
+    }
+
+    private void writeSegments(DataOutputStream out, Segment[] segments) throws IOException {        
+        if (segments == null || segments.length == 0) 
+            return;
+        
+        out.writeInt(Constants.SEGMENT_IDENTIFIER);
+        out.writeInt(segments.length);
+        
+        for (int i = 0; i < segments.length; i++) {
+            writeSegment(out, segments[i]);
+        }
+    }
+    
     public void writeAssembly(DataOutputStream out, Assembly assembly) throws IOException {
         
         out.writeByte((int)Constants.ASSEMBLY_IDENTIFIER);
@@ -428,7 +484,8 @@ public class GrinBinaryWriter {
         
         dos.writeBoolean(setVisualRCStateCommand.getActivated());
         dos.writeInt(setVisualRCStateCommand.getState());
-        /* TODO: write RCHandler here */
+        VisualRCHandler handler = setVisualRCStateCommand.getVisualRCHandler();
+        dos.writeInt(rcHandlersList.indexOf(handler));
         dos.writeBoolean(setVisualRCStateCommand.getRunCommands());
         
         out.writeInt(baos.size());
@@ -465,8 +522,8 @@ public class GrinBinaryWriter {
         
         dos.writeBoolean(activateSegmentCommand.getPush());
         dos.writeBoolean(activateSegmentCommand.getPop());
-        
-        // TODO: write out segment index!!
+        Segment segment = activateSegmentCommand.getSegment();
+        dos.writeInt(segmentsList.indexOf(segment));
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -482,7 +539,7 @@ public class GrinBinaryWriter {
        // nothing to record for this command.  Return.
    }
 
-   private void writeUserCmd(DataOutputStream out, Command command) 
+    private void writeUserCmd(DataOutputStream out, Command command) 
        throws IOException {
        
         out.writeByte((int)Constants.USER_CMD_IDENTIFIER);
@@ -496,7 +553,62 @@ public class GrinBinaryWriter {
         baos.writeTo(out);
         dos.close();                 
        
-       
-   }
-   
+    }
+
+    private void writeCommandRCHandler(DataOutputStream out, CommandRCHandler commandRCHandler) throws IOException {
+        out.writeByte((int)Constants.COMMAND_RCHANDLER_IDENTIFIER);
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);    
+        
+        dos.writeInt(commandRCHandler.getMask());
+        writeCommands(dos, commandRCHandler.getCommands());
+        
+        out.writeInt(baos.size());
+        baos.writeTo(out);
+        dos.close();                 
+    }
+
+    private void writeVisualRCHandler(DataOutputStream out, VisualRCHandler visualRCHandler) throws IOException {
+        out.writeByte((int)Constants.VISUAL_RCHANDLER_IDENTIFIER);
+        
+        // TODO.
+    }
+
+    private void writeSegment(DataOutputStream out, Segment segment) throws IOException {
+        
+        out.writeByte((int)Constants.SEGMENT_IDENTIFIER);
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);    
+        
+        dos.writeUTF(segment.getName());
+        
+        Feature[] active = segment.getActiveFeatures();
+        dos.writeInt(active.length);
+        for (int i = 0; i < active.length; i++) {
+            dos.writeInt(featuresList.indexOf(active[i]));
+        }
+        
+        Feature[] setup = segment.getSetupFeatures();
+        dos.writeInt(setup.length);
+        for (int i = 0; i < setup.length; i++) {
+            dos.writeInt(featuresList.indexOf(setup[i]));
+        }        
+
+        RCHandler[] rcHandlers = segment.getRCHandlers();
+        dos.writeInt(rcHandlers.length);
+        for (int i = 0; i < rcHandlers.length; i++) {
+            dos.writeInt(rcHandlersList.indexOf(rcHandlers[i]));
+        }
+        
+        dos.writeBoolean(segment.getNextOnSetupDone());
+        
+        writeCommands(dos, segment.getNextCommands());
+        
+        out.writeInt(baos.size());
+        baos.writeTo(out);
+        dos.close();                 
+    }
+    
 }

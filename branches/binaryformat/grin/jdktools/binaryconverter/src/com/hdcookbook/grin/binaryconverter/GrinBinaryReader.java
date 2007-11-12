@@ -2,6 +2,7 @@
 package com.hdcookbook.grin.binaryconverter;
 
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
@@ -21,6 +22,9 @@ import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Timer;
 import com.hdcookbook.grin.features.Translation;
 import com.hdcookbook.grin.features.Translator;
+import com.hdcookbook.grin.input.CommandRCHandler;
+import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.input.VisualRCHandler;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -35,27 +39,46 @@ class GrinBinaryReader {
 
     private Show show;
     private Feature[] features;
+    private RCHandler[] rcHandlers;
+    private Segment[] segments;
     
     public GrinBinaryReader(Show show) {
        this.show = show;
     }
 
-    void checkValue(int x, int y, String message) throws IOException {
+    private void checkValue(int x, int y, String message) throws IOException {
         if (x != y)
             throw new IOException("Mismatch: " + message);
     }
+    
     void readScriptIdentifier(DataInputStream in) throws IOException {
        checkValue(in.readInt(), Constants.GRINSCRIPT_IDENTIFIER, "Script identifier");
        checkValue(in.readInt(), Constants.GRINSCRIPT_VERSION, "Script version");
     }
     
-    Feature[] readFeatures(DataInputStream in) 
+    protected Show readShow(DataInputStream in) throws IOException {
+        
+        features = new Feature[in.readInt()];
+        rcHandlers = new RCHandler[in.readInt()];
+        segments = new Segment[in.readInt()];
+            
+        readFeatures(in);
+        readRCHandlers(in);
+        readSegments(in);
+        
+        // TODO
+        return null;
+    }
+    
+    protected void readFeatures(DataInputStream in) 
        throws IOException {
-	// First, read out two integers - identifier and number of elements.
+        
+        if (features.length == 0)
+            return;
+        
         checkValue(in.readInt(), Constants.FEATURE_IDENTIFIER, "Feature array identifier");
         
         int count = in.readInt();
-        features = new Feature[count];
         
         for (int i = 0; i < features.length; i++) {
             int identifier = in.readByte();
@@ -103,11 +126,46 @@ class GrinBinaryReader {
                     throw new IOException("Unknown feature identifier " + identifier);
             }       
         }
-        
-        return features;
-   
     }
-       
+
+    protected void readRCHandlers(DataInputStream in) throws IOException {
+        
+        if (rcHandlers.length == 0)
+            return;
+        
+        checkValue(in.readInt(), Constants.RCHANDLER_IDENTIFIER, "RCHandler array identifier");
+        
+        int count = in.readInt();
+
+        for (int i = 0; i < rcHandlers.length; i++) {
+            int identifier = in.readByte();
+            switch (identifier) {     
+                case Constants.COMMAND_RCHANDLER_IDENTIFIER :
+                    rcHandlers[i] = readCommandRCHandler(in);
+                    break;
+                case Constants.VISUAL_RCHANDLER_IDENTIFIER :
+                    rcHandlers[i] = readVisualRCHandler(in);
+                    break;
+                default :
+                    throw new IOException("Unknown RCHandler type " + identifier);
+            }              
+        }     
+    }    
+
+    protected void readSegments(DataInputStream in) throws IOException {
+        if (segments.length == 0)
+            return;
+        
+        checkValue(in.readInt(), Constants.SEGMENT_IDENTIFIER, "Segment array identifier");
+        
+        int count = in.readInt();
+        
+        for (int i = 0; i < segments.length; i++) {
+            in.readByte(); // SEGMENT_IDENTIFIER;
+            segments[i] = readSegment(in);
+        }
+    } 
+    
     protected Assembly readAssembly(DataInputStream in) throws IOException {
         
         int length = in.readInt();
@@ -495,8 +553,7 @@ class GrinBinaryReader {
         
         boolean activated = dis.readBoolean();
         int state = dis.readInt();
-        /* TODO: read RCHandler here 
-         VisualRCHandler hander = dis.readHandler(); */
+        VisualRCHandler handler = (VisualRCHandler) rcHandlers[dis.readInt()];
         boolean runCommands = dis.readBoolean();
         
         dis.close();
@@ -525,7 +582,7 @@ class GrinBinaryReader {
         dis.close();
         
         ActivatePartCommand command = new ActivatePartCommand();
-        //command.setup(assemblhy, part);
+        //command.setup(assembly, part);
      
         return command;
     }
@@ -543,8 +600,7 @@ class GrinBinaryReader {
         
         boolean push = dis.readBoolean();
         boolean pop = dis.readBoolean();
-        
-        // read segment.
+        Segment segment = segments[dis.readInt()];
         
         dis.close();
         
@@ -580,5 +636,62 @@ class GrinBinaryReader {
        // return show.getDirector().getExtensionsParser().parseCommand();
        
         return null;
+    }
+
+    private RCHandler readCommandRCHandler(DataInputStream in) throws IOException {
+        int length = in.readInt();
+        byte[] buffer = new byte[length];
+        in.read(buffer, 0, length);
+       
+        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+        GrinDataInputStream dis = new GrinDataInputStream(bais);  
+        
+        int mask = dis.readInt();
+        Command[] commands = readCommands(dis);
+        
+        dis.close();
+        
+        CommandRCHandler command = new CommandRCHandler(mask, commands);
+        
+        return command;        
+    }
+
+    private RCHandler readVisualRCHandler(DataInputStream in) {
+        return null;
+    }
+
+    private Segment readSegment(DataInputStream in) throws IOException {
+        
+        int length = in.readInt();
+        byte[] buffer = new byte[length];
+        in.read(buffer, 0, length);
+       
+        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+        GrinDataInputStream dis = new GrinDataInputStream(bais);          
+
+        String name = dis.readUTF();
+        length = dis.readInt();
+        Feature[] active = new Feature[length];
+        for (int i = 0; i < active.length; i++) {
+            active[i] = features[dis.readInt()];
+        } 
+        length = dis.readInt();
+        Feature[] setup = new Feature[length];
+        for (int i = 0; i < setup.length; i++) {
+            setup[i] = features[dis.readInt()];
+        }
+        length = dis.readInt();
+        RCHandler[] handlers = new RCHandler[length];
+        for (int i = 0; i < handlers.length; i++) {
+            handlers[i] = rcHandlers[dis.readInt()];
+        }
+        boolean nextOnSetupDone = dis.readBoolean();
+        Command[] commands = readCommands(dis);
+        
+        dis.close();
+
+        // TODO: what about ChapterManager?
+        return new Segment(name, active, setup, null, rcHandlers, nextOnSetupDone, commands);
+        
     }
 }

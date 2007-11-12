@@ -257,6 +257,13 @@ public class Show implements AnimationClient {
     public RCHandler getRCHandler(String name) {
 	return (RCHandler) rcHandlers.get(name);
     }
+    
+    /**
+     * Used by the binary file generator
+     **/
+    public RCHandler[] getRCHandlersAsArray() {
+        return (RCHandler[]) rcHandlers.values().toArray(new RCHandler[]{});       
+    } 
 
     /**
      * Look up a segment.  This is done without taking out the show lock.
@@ -276,6 +283,14 @@ public class Show implements AnimationClient {
 	segments.put(name, f);
     }
 
+    /**
+     * @return an array of segments
+     **/
+    
+    public Segment[] getSegmentsAsArray() {
+        return (Segment[]) segments.values().toArray(new Segment[]{});       
+    } 
+    
     /**
      * Set the current segment.  This is the main way an application
      * controls what is being displayed on the screen.  The new segment

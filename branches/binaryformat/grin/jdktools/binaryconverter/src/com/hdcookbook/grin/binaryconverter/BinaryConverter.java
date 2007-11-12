@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+/* Just a test driver */
+
 public class BinaryConverter {
 	
    public static final String showfile = "menu";
@@ -55,11 +57,7 @@ public class BinaryConverter {
             DataInputStream dis = new DataInputStream(new FileInputStream(filename));
             GrinBinaryReader reader = new GrinBinaryReader(show);
             reader.readScriptIdentifier(dis);
-            Feature[] retrieved = reader.readFeatures(dis);
-            
-            for (int i = 0; i < retrieved.length; i++) {
-                System.out.println(i + " : " + retrieved[i]);
-            }
+            reader.readShow(dis);
             
             dis.close();
             

@@ -12,6 +12,7 @@ public class Constants {
 	public static final int FEATURE_IDENTIFIER= 0x00000fea;
 	public static final int SEGMENT_IDENTIFIER= 0x00000ce6;
 	public static final int COMMAND_IDENTIFIER= 0x00000c3d;
+        public static final int RCHANDLER_IDENTIFIER=0x000008ee;
 	
 	public static final byte ASSEMBLY_IDENTIFIER= 0x01;
 	public static final byte BOX_IDENTIFIER = 0x02;
@@ -32,7 +33,10 @@ public class Constants {
         public static final byte SEGMENTDONE_CMD_IDENTIFIER = 0x12;
         public static final byte SETVISUALRCSTATE_CMD_IDENTIFIER = 0x13;
         public static final byte USER_CMD_IDENTIFIER = 0x14; 
-
+        
+        public static final byte COMMAND_RCHANDLER_IDENTIFIER = 0x20;
+        public static final byte VISUAL_RCHANDLER_IDENTIFIER = 0x21;
+        public static final byte USER_RCHANDLER_IDENTIFIER = 0x22;
         
         public static final byte NULL = (byte) 0xff;
         public static final byte NON_NULL = (byte) 0xee;

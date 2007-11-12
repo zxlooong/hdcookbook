@@ -12,11 +12,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Just a convenience DataOutputStream subclass that knows how to handle certain classes
+ * Just a convenience DataOutputStream subclass that can handle certain Objects.
  */
 public class GrinDataOutputStream extends DataOutputStream {
    
-   /** Creates a new instance of GrinObjectOutputStream */
    public GrinDataOutputStream(OutputStream out) {
       super(out);
    }
