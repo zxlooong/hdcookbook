@@ -53,55 +53,104 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.commands;
+package com.hdcookbook.grin.binaryconverter;
 
+
+import java.net.URL;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.parser.ShowParser;
+import com.hdcookbook.grin.parser.ShowBuilder;
+import com.hdcookbook.grin.ChapterManager;
+import com.hdcookbook.grin.parser.ExtensionsParser;
+import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.util.Debug;
 
 /**
- * A GRIN command to activate a part within an assembly.
+ * This is a subclass of the GRIN director class that fakes out
+ * GRIN to accept any extensions of the GRIN syntax.  The extensions
+ * are ignored, with default behavior put in.
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class ActivatePartCommand extends Command {
-
-    private Assembly assembly;
-    private Feature part;
-
-    /**
-     * Constructor for use by xlets that want to change the state
-     * of an assembly
-     **/
-    public ActivatePartCommand(Assembly assembly, Feature part) {
-	this.assembly = assembly;
-	this.part = part;
-    }
-
-    public ActivatePartCommand() {
-    }
-    
-    public Assembly getAssembly() {
-        return assembly;
-    };
-    
-    public Feature getPart() {
-        return part;
-    }
+public class GenericDirector extends Director {
    
-    /**
-     * Called from parser
-     **/
-    public void setup(Assembly assembly, Feature part) {
-	this.assembly = assembly;
-	this.part = part;
-    }
+    private String showName;
 
-    public void execute() {
-	assembly.setCurrentFeature(part);
-    }
-
-    public String toString() {
-	return super.toString() + " : " + assembly + " part " + part;
+    public GenericDirector(String showName) {
+	this.showName = showName;
+	ChapterManager[] chapters = { new ChapterManager("init") };
+	setup(0, chapters);
     }
     
+    /**
+     * See superclass definition.  The first time we're asked for a given
+     * chapter manager, we just create it.  A real xlet might have named
+     * chapter managers of different types, if it chooses to use the
+     * state pattern.
+     **/
+    public ChapterManager getChapterManager(String name) {
+        synchronized(getShow()) {
+            ChapterManager result = super.getChapterManager(name);
+            if (result == null) {
+                result = new ChapterManager(name);
+                addState(result);
+            }
+            return result;
+        }
+    }
+
+    /**
+     * See superclass definition.  This extensions parser will just
+     * make a fake implementation of each extension.
+     **/
+    public ExtensionsParser getExtensionsParser() {
+	return new GenericExtensionsParser(this);
+    }
+
+    /**
+     * Create a show.  This is called by the main control class of
+     * this debug tool.
+     **/
+    public Show createShow(ShowBuilder builder) {
+	Show show = new Show(this);
+	URL source = null;
+	BufferedReader rdr = null;
+	try {
+	    source = AssetFinder.getURL(showName);
+	    if (source == null) {
+		throw new IOException("Can't find resource " + showName);
+	    }
+	    rdr = new BufferedReader(
+			new InputStreamReader(source.openStream(), "UTF-8"));
+	    ShowParser p = new ShowParser(rdr, showName, show, builder);
+	    p.parse();
+	    rdr.close();
+	} catch (IOException ex) {
+	    ex.printStackTrace();
+	    System.out.println();
+	    System.out.println(ex.getMessage());
+	    System.out.println();
+	    System.out.println("Error trying to parse " + showName);
+            System.out.println("    URL:  " + source);
+	    System.exit(1);
+	} finally {
+	    if (rdr != null) {
+		try {
+		    rdr.close();
+		} catch (IOException ex) {
+		}
+	    }
+	}
+        return show;
+    }
+
 }

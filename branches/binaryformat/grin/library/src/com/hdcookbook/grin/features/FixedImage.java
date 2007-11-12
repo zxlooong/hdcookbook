@@ -117,6 +117,13 @@ public class FixedImage extends Feature {
 	return y;
     }
 
+    /* 
+     * Internal use only 
+     */
+    public String getFileName() {
+        return fileName;
+    }
+    
     /**
      * Get the underlying image that we display.
      **/

@@ -79,6 +79,10 @@ public class Clipped extends Modifier {
 	super(show, name);
 	this.clipRegion = clipRegion;
     }
+    
+    public Rectangle getClipRegion() {
+        return clipRegion;
+    }
 
     /**
      * See superclass definition.

@@ -103,6 +103,27 @@ public class Text extends Feature {
 	this.colors = colors;
 	this.background = background;
     }
+    
+    public String[] getStrings() {
+        return strings;
+    }
+    
+    public int getVspace() {
+        return vspace;
+    }
+    
+    public Font getFont() {
+        return font;
+    }
+    
+    public Color[] getColors() {
+        return colors;
+    }
+    
+    public Color getBackground() {
+        return background;
+    }
+   
 
     /**
      * See superclass definition.

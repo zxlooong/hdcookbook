@@ -107,7 +107,6 @@ public class Show implements AnimationClient {
     private Hashtable features = new Hashtable();
     private Hashtable rcHandlers = new Hashtable();
     private Hashtable segments = new Hashtable();
-    private Hashtable controllers = new Hashtable();
 
     private Segment currentSegment = null;
     private Segment[] segmentStack = new Segment[0];  // For push/pop
@@ -233,7 +232,13 @@ public class Show implements AnimationClient {
         return features.elements();
     }
 
-
+    /** 
+     * Get all of the features in this show as an array
+     **/
+    public Feature[] getFeaturesAsArray() {
+        return (Feature[]) features.values().toArray(new Feature[]{});
+    }
+    
     /**
      * Used by the parser
      **/

@@ -106,6 +106,21 @@ public class Box extends Feature {
 	return placement.y;
     }
 
+    public Rectangle getPlacement() {
+       return placement;
+    }
+    
+    public int getOutlineWidth() {
+       return outlineWidth;
+    }
+    
+    public Color getOutlineColor() {
+       return outlineColor;
+    }
+    
+    public Color getFillColor() {
+       return fillColor;
+    }
     /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes

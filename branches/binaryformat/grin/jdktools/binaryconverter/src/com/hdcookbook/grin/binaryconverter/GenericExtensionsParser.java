@@ -53,146 +53,100 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
+package com.hdcookbook.grin.binaryconverter;
 
-
-package com.hdcookbook.grin.features;
-
-import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.parser.Lexer;
+import com.hdcookbook.grin.parser.ShowParser;
+import com.hdcookbook.grin.parser.ExtensionsParser;
+import com.hdcookbook.grin.input.RCHandler;
 
 import java.io.IOException;
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.AlphaComposite;
 
 /**
- * Modifies a child feature by applying an alpha value when drawing in
- * it.  This lets you animate a fade-in and fade-out effect.  It works
- * by specifying alpha values at a few keyframes, and doing linear
- * interpolation between those keyframes.
+ * This is an extensions parser that makes a fake version of any
+ * GRIN extension it encounters.
  *
- *   @author     Bill Foote (http://jovial.com)
- **/
-public class Fade extends Modifier {
+ * @author Bill Foote (http://jovial.com)
+ */
+public class GenericExtensionsParser implements ExtensionsParser {
+   
+    private GenericDirector director;
 
-    private AlphaComposite[] alphas;
-    private int[] keyframes;
-    private int[] keyAlphas;
-    private boolean srcOver;
-    private boolean isActivated = false;
-    private int startAnimationFrame;
-    private int alphaIndex;
-    private Command[] endCommands;
+    public GenericExtensionsParser(GenericDirector director) {
+	this.director = director;
+    }
 
-    public Fade(Show show, String name, boolean srcOver, 
-    		int[] keyframes, int[] keyAlphas, Command[] endCommands) 
+    /**
+     * See superclass definition.
+     **/
+    public Feature getFeature(Show show, String typeName, 
+    			      String name, String arg)
     {
-	super(show, name);
-	this.endCommands = endCommands;
-        this.keyframes = keyframes;
-        this.keyAlphas = keyAlphas;
-        this.srcOver = srcOver;
+	// Not implemented.  If we do this, we'll have to figure out
+	// some syntactical contstraints on an extension feature.
+        return null;
     }
-    
-    /* 
-     * Internal use only 
-     */
-    public int[] getKeyframes() {
-       return keyframes;
-    }
-    
-    /* 
-     * Internal use only 
-     */
-    public int[] getKeyAlphas() {
-       return keyAlphas;
-    }
-    
-    /* 
-     * Internal use only 
-     */
-    public boolean getSrcOver() {
-       return srcOver;
-    }
-    
-    /* 
-     * Internal use only 
-     */    
-    public Command[] getEndCommands() {
-       return endCommands;
-    }
-    
+
     /**
      * See superclass definition.
      **/
-    public void initialize() {
-	if (keyframes.length == 1) {
-	    AlphaComposite ac = show.initializer.getAlpha(srcOver,keyAlphas[0]);
-	    alphas = new AlphaComposite[] { ac };
-	} else {
-	    alphas = new AlphaComposite[keyframes[keyframes.length-1]+1];
-	    int i = 0;		// keyframes[i] <= f < keyframes[i+1]
-	    for (int f = 0; f < alphas.length; f++) {
-		// Restore invariant on i
-		while ((i+1) < keyframes.length && f >= keyframes[i+1]) {
-		    i++;
-		}
-		int alpha;
-		if (f == keyframes[i]) {
-		    alpha = keyAlphas[i];
-		} else {
-		    int dist = keyframes[i+1] - keyframes[i];
-		    int distNext = keyframes[i+1] - f;
-		    int distLast = f - keyframes[i];
-		    if (Debug.ASSERT && (distNext < 0 || distLast < 0)) {
-			Debug.assertFail();
-		    }
-		    alpha = (keyAlphas[i+1]*distLast + keyAlphas[i]*distNext + dist/2) / dist;
-		}
-		alphas[f] = show.initializer.getAlpha(srcOver, alpha);
+    public Modifier getModifier(Show show, final String typeName, 
+    			        String name, String arg)
+    {
+	return new Modifier(show, name) {
+	    public String toString() {
+		return typeName;
+	    }
+	};
+    }
+
+    /**
+     * See superclass definition.
+     * This version assumes that all commands end with a semicolon, and have no
+     * semicolons embedded in them.
+     **/
+    public Command parseCommand(Show show, String typeName, Lexer lex,
+    			        ShowParser parser) 
+			throws IOException
+    {
+	String args = "";
+	for (;;) {
+	    String tok = lex.getString();
+	    if (tok == null) {
+		parser.parseExpected(";");
+	    } else if (";".equals(tok)) {
+		break;
+	    } else {
+		args = args + " " + tok;
 	    }
 	}
-    }
-
-    /**
-     * See superclass definition.
-     **/
-    protected void setActivateMode(boolean mode) {
-	super.setActivateMode(mode);
-	if (mode) {
-	    startAnimationFrame = show.getCurrentFrame();
-	    alphaIndex = 0;
-	}
-    }
-
-    /**
-     * See superclass definition.
-     **/
-    public void advanceToFrame(int newFrame) {
-	super.advanceToFrame(newFrame);
-	alphaIndex = newFrame - startAnimationFrame;
-	if (alphaIndex == alphas.length) {
-	    for (int i = 0; i < endCommands.length; i++) {
-		show.runCommand(endCommands[i]);
+	final String name = typeName + args;
+	return new Command() {
+	    public void execute() {
+		System.out.println("Executing " + name);
 	    }
-	}
+            public String toString() {
+                return name;
+            }
+	};
     }
 
     /**
      * See superclass definition.
      **/
-    public void paintFrame(Graphics2D gr) {
-	if (alphaIndex < alphas.length) {
-	    Composite old = gr.getComposite();
-	    gr.setComposite(alphas[alphaIndex]);
-	    part.paintFrame(gr);
-	    gr.setComposite(old);
-	} else {
-	    part.paintFrame(gr);
-	}
+    public void finishBuilding(Show show) throws IOException {
     }
+
+    /**
+     * See superclass definition.
+     **/
+    public void takeMosaicHint(String name, int width, int height, 
+                               String[] images)
+    {
+    }
+    
 }
