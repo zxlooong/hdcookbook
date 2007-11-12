@@ -1,0 +1,214 @@
+<?xml version="1.0"?>
+<!--
+Copyright  1990-2006 Sun Microsystems, Inc. All Rights Reserved.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version
+2 only, as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License version 2 for more details (a copy is
+included at /legal/license.txt).
+
+You should have received a copy of the GNU General Public License
+version 2 along with this work; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+02110-1301 USA
+
+Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
+Clara, CA 95054 or visit www.sun.com if you need additional
+information or have any questions.
+-->
+
+<project name="build xlets" basedir=".">
+
+<property file="user.vars.properties"/>	
+<property file="vars.properties"/>	
+
+<property name="HDC_BUILD_DIR" value="build"/>
+<property name="MOSAIC_DEST" value="${HDC_BUILD_DIR}/mosaic_builder"/>
+<property name="MENUXLET_DEST" value="${HDC_BUILD_DIR}/menuxlet"/>
+<property name="MENUASSETS_DEST" value="${HDC_BUILD_DIR}/menuassets"/>
+<property name="MONITORXLET_DEST" value="${HDC_BUILD_DIR}/monitorxlet"/>
+<property name="GAMEXLET_DEST" value="${HDC_BUILD_DIR}/gamexlet"/>
+
+<import file="build_bdjo.xml"/>
+
+<property name="use_mosaic_builder" value="true"/>
+
+<target name="grin-clean">
+       <delete dir="${HDC_BUILD_DIR}"/>
+       <delete dir="${HDC_DISC_BDMV}/JAR"/>
+</target>
+ 
+<target name="grin-deploy" depends="grin-init, grin-build"/>
+
+<target name="grin-init">
+	<mkdir dir="${HDC_DISC_BDMV}/JAR"/>
+	<mkdir dir="${HDC_BUILD_DIR}"/>	
+</target>
+
+<target name="grin-build" depends="compile-mosaic-builder, build-menu, 
+                              build-monitor-xlet, build-game-xlet, sign-xlets,  generate-bdjo"/>
+
+			      
+<target name="compile-mosaic-builder" if="use_mosaic_builder">
+	
+	<echo message="**********  Mosaic Builder  *************"/>
+	<property name="MOSAIC_DEST" value="${HDC_BUILD_DIR}/mosaic_builder"/>
+	<mkdir dir="${MOSAIC_DEST}"/>
+	<javac 
+	       destdir="${MOSAIC_DEST}"
+	       debug="on" deprecation="on">
+	    <src path="library/src" />
+	    <src path="jdktools/mosaic/src" />
+	</javac>
+	<property name="MOSAIC_CP" value="${MOSAIC_DEST}"/>
+	
+</target>    
+
+<target name="build-menu" depends="build-menu-xlet, build-menu-assets"/>
+
+	<target name="build-menu-xlet">
+		<echo message="*************  Menu xlet  *****************"/>
+		<mkdir dir="${MENUXLET_DEST}/classes"/>
+	
+		<javac sourcepath=""
+		destdir="${MENUXLET_DEST}/classes"
+		source="1.3" target="1.3"
+		bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
+		debug="on" deprecation="on">
+		    <src path="library/src" />
+		    <src path="xlets/bookmenu/src" />
+		    <exclude name="com/hdcookbook/bookmenu/monitor/**" />
+		</javac>
+		
+		<copy todir="${MENUXLET_DEST}/classes/com/hdcookbook/bookmenu/menu">
+			<fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/menu" includes="*.perm"/>
+		</copy>
+		
+		<jar basedir="${MENUXLET_DEST}/classes" destfile="${MENUXLET_DEST}/00002.jar"/>
+		
+		<copy file="${MENUXLET_DEST}/00002.jar" todir="${HDC_DISC_BDMV}/JAR"/>	
+		
+		<echo message="Created ${MENUXLET_DEST}/00002.jar and copied to ${HDC_DISC_BDMV}/JAR"/>
+		
+	</target>
+	
+	<target name="build-menu-assets" depends="init-menu-assets, run-mosaic-builder">
+
+		<delete file="${HDC_DISC_BDMV}/AUXDATA/*"/>
+		
+		<move todir="${HDC_DISC_BDMV}/AUXDATA" file="${MENUASSETS_DEST}/sound.bdmv"/>
+		<move tofile="${HDC_DISC_BDMV}/AUXDATA/00000.otf" file="${MENUASSETS_DEST}/Font/Lisa.ttf"/>
+		<move todir="${HDC_DISC_BDMV}/AUXDATA" file="${MENUASSETS_DEST}/Font/dvb.fontindex"/>
+		
+		<delete dir="${MENUASSETS_DEST}/Font"/>
+		<delete dir="${MENUASSETS_DEST}/Graphics"/>
+		
+		<jar basedir="${MENUASSETS_DEST}" destfile="${HDC_DISC_BDMV}/JAR/00004.jar"/>		
+	</target>	
+	
+	<target name="init-menu-assets">
+		<copy todir="${MENUASSETS_DEST}">
+			<fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/assets" excludes="**/*.svn"/>
+		</copy>	
+	</target>
+	
+	<target name="run-mosaic-builder" if="use_mosaic_builder">
+		<java fork="true" classpath="${MOSAIC_DEST}:${MENUASSETS_DEST}" maxmemory="512m"
+			classname="com.hdcookbook.grin.build.mosaic.Main">
+			<arg line="-show menu.txt -assets ${MENUASSETS_DEST} -out ${MENUASSETS_DEST}"/>
+		</java>			
+	</target>
+
+<target name="build-monitor-xlet">
+
+	<echo message="*************  Monitor xlet  *****************"/>
+	<mkdir dir="${MONITORXLET_DEST}/classes"/>
+		
+	<javac sourcepath=""
+	 destdir="${MONITORXLET_DEST}/classes"
+	 source="1.3" target="1.3"
+	 bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
+	 debug="on" deprecation="on">
+	    <src path="xlets/bookmenu/src" />
+	    <src path="library/src"/>
+		<include name="com/hdcookbook/bookmenu/monitor/*.java"/>
+		<include name="com/hdcookbook/bookmenu/MonitorIXCInterface.java"/>
+		<include name="com/hdcookbook/grin/util/*.java"/>
+	</javac>
+		
+	<copy todir="${MONITORXLET_DEST}/classes/com/hdcookbook/bookmenu/monitor">
+		<fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/monitor" includes="*.perm"/>
+	</copy>
+		
+	<jar basedir="${MONITORXLET_DEST}/classes" destfile="${MONITORXLET_DEST}/00001.jar"/>
+		
+	<copy file="${MONITORXLET_DEST}/00001.jar" todir="${HDC_DISC_BDMV}/JAR"/>	
+		
+	<echo message="Created ${MONITORXLET_DEST}/00001.jar and copied to ${HDC_DISC_BDMV}/JAR"/>
+		
+</target>
+
+<target name="build-game-xlet">
+
+	<echo message="*************  game xlet  *****************"/>
+	<mkdir dir="${GAMEXLET_DEST}/classes"/>
+		
+	<javac sourcepath=""
+	 destdir="${GAMEXLET_DEST}/classes"
+	 source="1.3" target="1.3"
+	 bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
+	 debug="on" deprecation="on">
+	    <src path="xlets/gunbunny/src" />
+	    <include name="com/hdcookbook/gunbunny/*.java" />
+	    <include name="com/hdcookbook/gunbunny/util/*.java" />
+	</javac>
+		
+	<copy todir="${GAMEXLET_DEST}/classes">
+		<fileset dir="xlets/gunbunny/src/com/hdcookbook/gunbunny/assets" excludes="**/*.svn" />
+	</copy>
+		
+	<jar basedir="${GAMEXLET_DEST}/classes" destfile="${GAMEXLET_DEST}/00003.jar"/>
+		
+	<copy file="${GAMEXLET_DEST}/00003.jar" todir="${HDC_DISC_BDMV}/JAR"/>	
+		
+	<echo message="Created ${GAMEXLET_DEST}/00003.jar and copied to ${HDC_DISC_BDMV}/JAR"/>
+		
+</target>
+
+<target name = "sign-xlets" depends="check-bdsigner">
+	<fail unless="bdsigner.ok" message="Could not find the bdsigner tool at ${HDC_BDJ_SIGNER}"/>
+	<java classname="net.java.bd.tools.bdsigner.BDSigner" fork="true">
+		<arg line="56789abc ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar"/>
+		<classpath>
+			<pathelement location="${HDC_BDJ_SIGNER}/build/bdsigner.jar"/>
+			<pathelement location="${HDC_BDJ_SIGNER}/resource/bcprov-jdk15-137.jar"/>
+			<pathelement location="${java.home}/../lib/tools.jar"/>   
+		</classpath>	   
+	</java>	
+
+	<move file="app.discroot.crt" todir="${HDC_DISC_BDMV}/../CERTIFICATE/"/>
+
+</target>
+
+<target name="check-bdsigner" depends="check-exists-bdsigner, compile-bdsigner">
+</target>
+
+<target name="check-exists-bdsigner">
+	<available file="${HDC_BDJ_SIGNER}/build/bdsigner.jar" type="file"
+	    property="bdsigner.ok"/>
+</target>
+
+<target name="compile-bdsigner" unless="bdsigner.ok">	
+   <ant dir="${HDC_BDJ_SIGNER}/make"/>
+
+   <available file="${HDC_BDJ_SIGNER}/build/bdsigner.jar" type="file"
+	    property="bdsigner.ok"/>
+</target>
+
+</project>
