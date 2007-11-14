@@ -169,6 +169,52 @@ public class VisualRCHandler extends RCHandler {
 	    }
 	}
     }
+    
+    /* used by the binaryconverter */
+    public String getName() {
+        return name;
+    }
+    
+    /* used by the binaryconverter */  
+    public int[][] getGrid() {
+        return grid;
+    }
+
+    /* used by the binaryconverter */  
+    public String[] getStateNames() {
+        return stateNames;
+    }
+    
+    /* used by the binaryconverter */  
+    public Command[][] getSelectCommands() {
+        return selectCommands;
+    }
+    
+    /* used by the binaryconverter */  
+    public Command[][] getActivateCommands() {
+        return activateCommands;
+    }
+
+    /* used by the binaryconverter */  
+    public Rectangle[] getMouseRects() {
+        return mouseRects;
+    }
+    
+    /* used by the binaryconverter */  
+    public int[] getMouseRectStates() {
+        return mouseRectStates;
+    }
+    
+    /* used by the binaryconverter */  
+    public int getTimeout() {
+        return timeout;
+    }
+    
+    /* used by the binaryconverter */  
+    public Command[] getTimeoutCommands() {
+        return timeoutCommands;
+    }
+    
 
     /**
      * Called from the parser
@@ -183,6 +229,21 @@ public class VisualRCHandler extends RCHandler {
 	// activating this handler can change its state
     }
 
+    /* used by the binaryconverter */  
+    public Assembly getAssembly() {
+        return assembly;
+    }
+
+    /* used by the binaryconverter */      
+    public Feature[] getSelectFeatures() {
+        return selectFeatures;
+    }
+    
+    /* used by the binaryconverter */  
+    public Feature[] getActivateFeatures() {
+        return activateFeatures;
+    }
+    
     /**
      * Give a developer-friendly string describing this handler.
      * Useful for development.

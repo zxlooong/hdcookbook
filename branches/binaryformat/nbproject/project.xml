@@ -32,6 +32,26 @@
                     <type>java</type>
                     <location>grin/jdktools/binaryconverter/src</location>
                 </source-folder>
+                <source-folder>
+                    <label>grin\xlets\bookmenu\src</label>
+                    <type>java</type>
+                    <location>grin/xlets/bookmenu/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>grin\xlets\gunbunny\src</label>
+                    <type>java</type>
+                    <location>grin/xlets/gunbunny/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>grin\jdktools\mosaic\src</label>
+                    <type>java</type>
+                    <location>grin/jdktools/mosaic/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>grin\jdktools\grinviewer</label>
+                    <type>java</type>
+                    <location>grin/jdktools/grinviewer</location>
+                </source-folder>
             </folders>
             <ide-actions>
                 <action name="build">
@@ -67,6 +87,22 @@
                         <label>grin\jdktools\binaryconverter\src</label>
                         <location>grin/jdktools/binaryconverter/src</location>
                     </source-folder>
+                    <source-folder style="packages">
+                        <label>grin\xlets\bookmenu\src</label>
+                        <location>grin/xlets/bookmenu/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin\xlets\gunbunny\src</label>
+                        <location>grin/xlets/gunbunny/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin\jdktools\mosaic\src</label>
+                        <location>grin/jdktools/mosaic/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin\jdktools\grinviewer</label>
+                        <location>grin/jdktools/grinviewer</location>
+                    </source-folder>
                     <source-file>
                         <location>build.xml</location>
                     </source-file>
@@ -86,6 +122,10 @@
                 <package-root>grin/samples/TumblingDuke</package-root>
                 <package-root>grin/library/src</package-root>
                 <package-root>grin/jdktools/binaryconverter/src</package-root>
+                <package-root>grin/xlets/bookmenu/src</package-root>
+                <package-root>grin/xlets/gunbunny/src</package-root>
+                <package-root>grin/jdktools/mosaic/src</package-root>
+                <package-root>grin/jdktools/grinviewer</package-root>
                 <classpath mode="compile">../../bd-j/references/bdj_stubs/classes/enhanced/classes.zip</classpath>
                 <source-level>1.4</source-level>
             </compilation-unit>

@@ -38,7 +38,7 @@ information or have any questions.
 	        source="1.5" target="1.5"
 	       debug="on" deprecation="off">
 	    <src path="library/src" />
-	    <src path="jdktools/test/src" />
+	    <src path="jdktools/grinviewer/src" />
 	    <include name="com/hdcookbook/grin/*.java"/>
 	    <include name="com/hdcookbook/grin/animator/*.java"/>
 	    <include name="com/hdcookbook/grin/commands/*.java"/>
@@ -95,7 +95,7 @@ information or have any questions.
 
 <target name="run_grinview">
 	<copy todir="${GRIN_VIEWER_DEST}/assets">
-		<fileset dir="jdktools/test/src/com/hdcookbook/grin/test/assets">	
+		<fileset dir="jdktools/grinviewer/src/com/hdcookbook/grin/test/assets">	
 			<exclude name="**/.svn"/>
 		</fileset>   
 	</copy>    

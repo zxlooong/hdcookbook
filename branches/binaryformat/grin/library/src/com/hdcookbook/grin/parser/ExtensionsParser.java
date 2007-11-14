@@ -142,9 +142,25 @@ public interface ExtensionsParser {
      * @throws      IOException if there's any parsing error.  This can be
      *              generated with Lexer.reportError(String).     
      */    
-    public Command parseCommand(Show show, String typeName, Lexer lex, 
-    				ShowParser parser) 
-			throws IOException;
+    //public Command parseCommand(Show show, String typeName, Lexer lex, 
+    //				ShowParser parser) 
+    //			throws IOException;
+    
+     /**
+     * Get a modifier command of the given type.  
+     * <p>
+     *
+     * @param show      The show being parsed
+     * @param typeName  The name of the commands's type.  This will always
+     *                  contain a ":".
+     * @param args	The argument strings on the command
+     *
+     * @throws      IOException if there's an error.
+     *
+     * @return	    A command if one of the given type is known, null otherwise
+     */
+    public Command getCommand(Show show, String typeName, String[] args)
+		       throws IOException;   
 
     /**
      * Called after parsing is done, and all of the built-in objects

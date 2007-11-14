@@ -93,42 +93,40 @@ public class RyanExtensionsParser implements ExtensionsParser {
         return null;
     }
 
-    public Command parseCommand(Show show, String typeName, Lexer lex,
-    			        ShowParser parser) 
+    //public Command parseCommand(Show show, String typeName, Lexer lex,
+    //			        ShowParser parser) 
+    
+    public Command getCommand(Show show, String typeName, String[] args)
 			throws IOException
     {
 	Command result = null;
 	if ("ryan:start_video".equals(typeName)) {
-	    parser.parseExpected(";");
 	    result = new Command() {
 	       public void execute() { 
 		    director.startVideo();
 	       }
 	    };
 	} else if ("ryan:play_mode_interactive".equals(typeName)) {
-	    final boolean val = lex.getBoolean();
-	    parser.parseExpected(";");
+	    final boolean val = Boolean.parseBoolean(args[0]);
 	    result = new Command() {
 	       public void execute() { 
 		    director.setInteractiveMode(val);
 	       }
 	    };
 	} else if ("ryan:toggle_commentary".equals(typeName)) {
-	    parser.parseExpected(";");
 	    result = new Command() {
 	       public void execute() { 
 		    director.toggleCommentary();
 	       }
 	    };
 	} else if ("ryan:commentary_start".equals(typeName)) {
-	    parser.parseExpected(";");
 	    result = new Command() {
 	       public void execute() { 
 		    director.startCommentary();
 	       }
 	    };
 	} else {
-	    lex.reportError("Unrecognized command type \"" + typeName + "\"");
+	    throw new IOException("Unrecognized command type \"" + typeName + "\"");
 	}
 	return result;
     }

@@ -56,4 +56,46 @@ public class GrinDataInputStream extends DataInputStream {
        return new Font(name, style, size);
    }  
    
+   
+   public int[] readIntArray() throws IOException {
+       byte b = readByte();
+       if (b == Constants.NULL) {
+           return null;
+       }
+       
+       int[] array = new int[readInt()];
+       for (int i = 0; i < array.length; i++) {
+           array[i] = readInt();
+       }
+       return array;
+   }   
+
+      
+   public String[] readStringArray() throws IOException {
+       byte b = readByte();
+       if (b == Constants.NULL) {
+           return null;
+       }
+       
+       String[] array = new String[readInt()];
+       for (int i = 0; i < array.length; i++) {
+           array[i] = readUTF();
+       }
+       return array;
+   }
+   
+   
+   public int[][] readInt2Array() throws IOException {
+       byte b = readByte();
+       if (b == Constants.NULL) {
+           return null;
+       }
+ 
+       int[][] array = new int[readInt()][];
+       
+       for (int i = 0; i < array.length; i++) {
+           array[i] = readIntArray();
+       }
+       return array;
+   }   
 }

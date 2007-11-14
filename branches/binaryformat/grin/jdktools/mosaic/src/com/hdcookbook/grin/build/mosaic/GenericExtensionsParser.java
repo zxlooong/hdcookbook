@@ -57,6 +57,7 @@ package com.hdcookbook.grin.build.mosaic;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.parser.Lexer;
@@ -99,23 +100,12 @@ public class GenericExtensionsParser implements ExtensionsParser {
      * This assumes that all commands end with a semicolon, and have no
      * semicolons embedded in them.
      **/
-    public Command parseCommand(Show show, String typeName, Lexer lex,
-    			        ShowParser parser) 
+    //public Command parseCommand(Show show, String typeName, Lexer lex,
+    //			        ShowParser parser) 
+    public Command getCommand(Show show, String typeName, String[] args) 
 			throws IOException
     {
-	LinkedList body = new LinkedList();
-	for (;;) {
-	    String tok = lex.getString();
-	    if (tok == null) {
-		parser.parseExpected(";");
-	    } else if (";".equals(tok)) {
-		break;
-	    } else {
-		body.add(tok);
-	    }
-	}
-	String[] bodyA = (String[]) body.toArray(new String[body.size()]);
-	return new GenericExtensionCommand(typeName, bodyA);
+	return new GenericExtensionCommand(typeName, args);
     }
 
     /** 

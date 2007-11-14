@@ -55,4 +55,41 @@ public class GrinDataOutputStream extends DataOutputStream {
        }    
    }  
    
+   public void writeIntArray(int[] array) throws IOException {
+       if (array == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);
+           writeInt(array.length);
+           for (int i = 0; i < array.length; i++) {
+               writeInt(array[i]);
+           }    
+       }
+   }   
+   
+   public void writeStringArray(String[] array) throws IOException {
+       if (array == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);
+           writeInt(array.length);
+           for (int i = 0; i < array.length; i++) {
+               writeUTF(array[i]);
+           }
+       }
+   }
+   
+   public void writeInt2Array(int[][] array) throws IOException {
+       if (array == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);
+           int length = array.length;
+           writeInt(length);
+           for (int i = 0; i < length; i++) {
+               writeIntArray(array[i]);
+           }
+       }
+   }
+   
 }

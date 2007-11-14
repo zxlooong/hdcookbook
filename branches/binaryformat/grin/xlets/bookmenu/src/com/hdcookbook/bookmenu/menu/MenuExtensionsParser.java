@@ -131,12 +131,15 @@ public class MenuExtensionsParser implements ExtensionsParser {
     /**
      * Called by the GRIN parser to parse an extension command.
      **/
-    public Command parseCommand(Show show, String typeName, Lexer lexer,
-				ShowParser parser) 
-		    throws IOException
-    {
+    public Command getCommand(Show show, String typeName, String[] args)
+		       throws IOException {
+    
+    //public Command parseCommand(Show show, String typeName, Lexer lexer,
+	//			ShowParser parser) 
+	//	    throws IOException
+    //{
 	if ("BOOK:PlayVideo".equals(typeName)) {
-	    String tok = lexer.getString();
+	    String tok = args[0];
 	    BDLocator loc = null;
 	    if ("menu".equals(tok)) {
 		loc = xlet.navigator.menuVideoStartPL;
@@ -155,62 +158,49 @@ public class MenuExtensionsParser implements ExtensionsParser {
 	    } else if ("nothing".equals(tok)) {
 		loc = null;
 	    }
-	    parser.parseExpected(";");
 	    return new PlayVideoCommand(xlet, loc);
 	} else if ("BOOK:SetText".equals(typeName)) {
-	    String text = lexer.getString();
-	    parser.parseExpected(";");
+	    String text = args[0];
 	    return new SetTextCommand(xlet, text);
 	} else if ("BOOK:PlayGame".equals(typeName)) {
-	    parser.parseExpected(";");
 	    return new PlayGameCommand(xlet);
 	} else if ("BOOK:ActivateBio".equals(typeName)) {
-	    parser.parseExpected(";");
 	    return new ActivateBioCommand(xlet);
 	} else if ("BOOK:DownloadBio".equals(typeName)) {
-	    parser.parseExpected(";");
 	    return new DownloadBioCommand(xlet);
 	} else if ("BOOK:PlaySound".equals(typeName)) {
-	    String text = lexer.getString();
-	    parser.parseExpected(";");
+	    String text = args[0];
 	    return new PlaySoundCommand(xlet, text);
 	} else if ("BOOK:MakeBookmark".equals(typeName)) {
-	    parser.parseExpected(";");
 	    return new MakeBookmarkCommand(xlet);
 	} else if ("BOOK:DeleteBookmark".equals(typeName)) {
-	    parser.parseExpected(";");
 	    return new DeleteBookmarkCommand(xlet);
 	} else if ("BOOK:BookmarkUI".equals(typeName)) {
-	    String tok = lexer.getString();
+	    String tok = args[0];
 	    boolean activate = false;
 	    if ("select".equals(tok)) {
 		activate = false;
 	    } else if ("activate".equals(tok)) {
 		activate = true;
 	    } else {
-		lexer.reportError("\"select\" or \"activate\" expected, \""
+		throw new IOException("\"select\" or \"activate\" expected, \""
 				  + tok + "\" seen.");
 	    }
-	    int num = lexer.getInt();
+	    int num = Integer.parseInt(args[1]);
 	    if (num < -1 || num > 5) {
-		lexer.reportError("" + num + " is an illegal scene number.");
+		throw new IOException("" + num + " is an illegal scene number.");
 	    }
-	    parser.parseExpected(";");
 	    return new BookmarkUICommand(xlet, activate, num);
 	} else if ("BOOK:SelectAudio".equals(typeName)) {
-	    int streamNumber = lexer.getInt();
-	    parser.parseExpected(";");
+	    int streamNumber = Integer.parseInt(args[0]);
 	    return new SelectAudioCommand(xlet, streamNumber);
 	} else if ("BOOK:SelectSubtitles".equals(typeName)) {
-	    int streamNumber = lexer.getInt();
-	    parser.parseExpected(";");
+	    int streamNumber = Integer.parseInt(args[0]);
 	    return new SelectSubtitlesCommand(xlet, streamNumber);
 	} else if ("BOOK:NotifyLoaded".equals(typeName)) {
-	    parser.parseExpected(";");
 	    return new NotifyLoadedCommand(xlet);
 	}
-	lexer.reportError("Unrecognized command type  \"" + typeName + "\"");
-	return null;
+	throw new IOException("Unrecognized command type  \"" + typeName + "\"");
     }
 
     /**

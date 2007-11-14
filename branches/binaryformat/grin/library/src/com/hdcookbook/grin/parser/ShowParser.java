@@ -90,6 +90,7 @@ import java.io.IOException;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 
 import java.util.Vector;
 
@@ -1175,7 +1176,18 @@ public class ShowParser {
 		lexer.reportError("command expected, " + tok + " seen");
 	    } else {
 		String typeName = tok;
-		Command c = extParser.parseCommand(show, typeName, lexer, this);
+ 	        ArrayList args =new ArrayList();
+	        for (;;) {
+	           tok = lexer.getString();
+	           if (tok == null) {
+		      parseExpected(";");
+	           } else if (";".equals(tok)) {
+		      break;
+	           } else {
+		      args.add(tok);
+	           }
+	        }               
+		Command c = extParser.getCommand(show, typeName, (String[])args.toArray(new String[]{}));
 		v.addElement(c);
 		builder.addCommand(c, lineStart);
 	    }
