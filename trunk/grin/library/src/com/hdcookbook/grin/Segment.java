@@ -89,7 +89,8 @@ public class Segment {
     private boolean active = false;
     private boolean nextCommandSent;
 
-    ActivateSegmentCommand cmdToActivate;
+    private ActivateSegmentCommand cmdToActivate;
+    private ActivateSegmentCommand cmdToActivatePush;
 
     public Segment(String name, Feature[] active, Feature[] setup,
     		 ChapterManager chapterManager, RCHandler[] rcHandlers,
@@ -165,10 +166,34 @@ public class Segment {
      **/
     public void initialize(Show show) {
 	this.show = show;
+    }
 
-	// For use by Show.activateSegment()
-	cmdToActivate = new ActivateSegmentCommand(show);
-	cmdToActivate.setup(this);
+    //
+    // For use by Show.activateSegment().  We create it lazily, but
+    // if we ever create a command we keep it, to avoid creating
+    // garbage.  The same command is pretty likely to be used multiple
+    // times.
+    //
+    // This is synchronized, but Segment is an internal object that is
+    // only locked for bried periods of time, without making external
+    // calls, so this is safe.  It's intentionally not synchronized on
+    // show.
+    //
+    synchronized Command getCommandToActivate(boolean push) {
+	if (push) {
+	    if (cmdToActivatePush == null) {
+		cmdToActivatePush 
+			= new ActivateSegmentCommand(show, true, false);
+		cmdToActivatePush.setup(this);
+	    }
+	    return cmdToActivatePush;
+	} else {
+	    if (cmdToActivate == null) {
+		cmdToActivate = new ActivateSegmentCommand(show);
+		cmdToActivate.setup(this);
+	    }
+	    return cmdToActivate;
+	}
     }
 
     /**

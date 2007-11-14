@@ -280,14 +280,34 @@ public class Show implements AnimationClient {
      * lock or any other global locks.  If the show has been destroyed, 
      * calling this method has no effect.
      * <p>
+     * The current segment is not pushed onto the segment activation stack.
+     *
      * @param   seg  The segment to activate, or null to pop the
      *               segment activation stack;
      **/
     public void activateSegment(Segment seg) {
+	activateSegment(seg, false);
+    }
+
+    /**
+     * Set the current segment.  This is the main way an application
+     * controls what is being displayed on the screen.  The new segment
+     * will become current when we advance to the next frame.
+     * <p>
+     * This can be called from any thread; it does not take out the show
+     * lock or any other global locks.  If the show has been destroyed, 
+     * calling this method has no effect.
+     *
+     * @param   seg  The segment to activate, or null to pop the
+     *               segment activation stack.
+     * @param   push If true, the current segment will be pushed onto the
+     *		     segment activation stack.
+     **/
+    public void activateSegment(Segment seg, boolean push) {
 	if (seg == null) {
 	    runCommand(popSegmentCommand);
 	} else {
-	    runCommand(seg.cmdToActivate);
+	    runCommand(seg.getCommandToActivate(push));
 	}
     }
 
