@@ -22,6 +22,6 @@ echo "Built javadocs for all source files in the repository."
 echo "in $DEST"
 echo ""
 echo "By the way, before a putback to hdcookbook on dev.java.net, I do:"
-echo "    cp -r $DEST/* ../../www/javadocs/grin"
+echo "    cp -r $DEST/* ../../../www/javadocs/grin"
 echo ""
 

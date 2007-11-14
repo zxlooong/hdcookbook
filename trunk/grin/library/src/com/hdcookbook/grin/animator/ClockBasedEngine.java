@@ -123,7 +123,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
      *
      * @throws IllegalArgumentException  if fps < 0.
      *
-     * @see skipFrames(int)
+     * @see #skipFrames(int)
      **/
     public synchronized void setFps(int fps) {
 	if (fps <= 0) {

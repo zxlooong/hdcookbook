@@ -300,8 +300,11 @@ public class Show implements AnimationClient {
      *
      * @param   seg  The segment to activate, or null to pop the
      *               segment activation stack.
-     * @param   push If true, the current segment will be pushed onto the
-     *		     segment activation stack.
+     *
+     * @param   push When true and when the segment is non-null, the 
+     *               current segment will be pushed onto the
+     *		     segment activation stack as the show transitions to
+     *		     the new segment.
      **/
     public void activateSegment(Segment seg, boolean push) {
 	if (seg == null) {

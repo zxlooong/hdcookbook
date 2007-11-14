@@ -123,7 +123,7 @@ public abstract class AnimationEngine implements Runnable {
      *
      * @param clients		The animation clients we'll support
      *
-     * @see com.hdcookbook.grin.animator.AnimationInitializer#animationInitialize()
+     * @see com.hdcookbook.grin.animator.AnimationContext#animationInitialize()
      **/
     public synchronized void initClients(AnimationClient[] clients) {
 	this.clients = clients;
@@ -169,8 +169,8 @@ public abstract class AnimationEngine implements Runnable {
      * in (and therefore the double buffer).  The container must be
      * visible when this is called.
      *
-     * @see start(java.lang.Runnable)
-     * @see com.hdcookbook.grin.animator.AnimationInitializer#animationInitialize()
+     * @see #initialize(com.hdcookbook.grin.animator.AnimationContext)
+     * @see com.hdcookbook.grin.animator.AnimationContext#animationInitialize()
      **/
     public abstract void initContainer(Container container, Rectangle bounds);
 
@@ -227,8 +227,8 @@ public abstract class AnimationEngine implements Runnable {
      *
      * @return	the component, or null if initContainer hasn't been called yet.
      *
-     * @see start(java.lang.Runnable)
-     * @see com.hdcookbook.grin.animator.AnimationInitializer#animationInitialize()
+     * @see #initialize(com.hdcookbook.grin.animator.AnimationContext)
+     * @see com.hdcookbook.grin.animator.AnimationContext#animationInitialize()
      **/
     public abstract Component getComponent();
 
@@ -478,7 +478,7 @@ public abstract class AnimationEngine implements Runnable {
      * @see #destroyRequested()
      * @see #advanceModel()
      * @see #showFrame()
-     * @ssee #callPaintFrame()
+     * @see #callPaintFrame(int)
      **/
     abstract protected void runAnimationLoop() throws InterruptedException;
     
@@ -494,7 +494,7 @@ public abstract class AnimationEngine implements Runnable {
      * Tell the model we're caught up, and show the current frame.  This
      * calls callPaintFrame.
      *
-     * @see #callPaintFrame()
+     * @see #callPaintFrame(int)
      **/
     protected final void showFrame() throws InterruptedException {
 	for (int i = 0; i < clients.length; i++) {
