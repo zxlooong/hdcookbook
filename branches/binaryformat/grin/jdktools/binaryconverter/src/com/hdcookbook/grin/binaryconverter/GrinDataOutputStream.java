@@ -44,6 +44,18 @@ public class GrinDataOutputStream extends DataOutputStream {
        }
    }
    
+   public void writeRectangleArray(Rectangle[] array) throws IOException {
+       if (array == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);
+           writeInt(array.length);
+           for (int i = 0; i < array.length; i++) {
+               writeRectangle(array[i]);
+           }    
+       }       
+   }
+   
    public void writeFont(Font font) throws IOException {
        if (font == null) {
            writeByte(Constants.NULL);
@@ -90,6 +102,5 @@ public class GrinDataOutputStream extends DataOutputStream {
                writeIntArray(array[i]);
            }
        }
-   }
-   
+   }   
 }

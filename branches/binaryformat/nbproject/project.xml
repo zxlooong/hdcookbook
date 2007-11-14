@@ -48,9 +48,14 @@
                     <location>grin/jdktools/mosaic/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin\jdktools\grinviewer</label>
+                    <label>grin\jdktools\grinviewer\src</label>
                     <type>java</type>
-                    <location>grin/jdktools/grinviewer</location>
+                    <location>grin/jdktools/grinviewer/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>grin\samples</label>
+                    <type>java</type>
+                    <location>grin/samples</location>
                 </source-folder>
             </folders>
             <ide-actions>
@@ -100,8 +105,12 @@
                         <location>grin/jdktools/mosaic/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin\jdktools\grinviewer</label>
-                        <location>grin/jdktools/grinviewer</location>
+                        <label>grin\jdktools\grinviewer\src</label>
+                        <location>grin/jdktools/grinviewer/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin\samples</label>
+                        <location>grin/samples</location>
                     </source-folder>
                     <source-file>
                         <location>build.xml</location>
@@ -125,7 +134,8 @@
                 <package-root>grin/xlets/bookmenu/src</package-root>
                 <package-root>grin/xlets/gunbunny/src</package-root>
                 <package-root>grin/jdktools/mosaic/src</package-root>
-                <package-root>grin/jdktools/grinviewer</package-root>
+                <package-root>grin/jdktools/grinviewer/src</package-root>
+                <package-root>grin/samples</package-root>
                 <classpath mode="compile">../../bd-j/references/bdj_stubs/classes/enhanced/classes.zip</classpath>
                 <source-level>1.4</source-level>
             </compilation-unit>

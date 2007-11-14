@@ -31,35 +31,37 @@ import java.net.URL;
 /* Just a test driver */
 
 public class BinaryConverter {
-	
-   public static final String showfile = "menu";
    
    public static void main(String[] args) {
-        GenericDirector director = new GenericDirector(showfile + ".txt");
-	AssetFinder.setSearchPath(new String[]{""}, null);
+       
+        if (args == null || args.length == 0) {
+            System.out.println("Missing argument - need grin script to parse");
+            return;
+        }
+        
+        String filename = args[0];
+        
+        GenericDirector director = new GenericDirector(filename);
+	AssetFinder.setSearchPath(new String[]{""}, new File[]{new File("."), new File("")});
+  
         Show show = director.createShow(null);
-        new BinaryConverter(show, showfile);
+        if (filename.indexOf('.') != -1) {
+           filename = filename.substring(0, filename.indexOf('.'));
+        }   
+        new BinaryConverter(show, filename + ".grin");
    }
 
-   public BinaryConverter(Show show, String name) {
-        String filename = name + ".grin";
+   public BinaryConverter(Show show, String filename) {
         try {
             DataOutputStream dos = new DataOutputStream(new FileOutputStream(filename));
             GrinBinaryWriter out = new GrinBinaryWriter(show);
-            
-            Feature[] original = show.getFeaturesAsArray();
-            
-	    out.writeScriptIdentifier(dos);
 	    out.writeShow(dos);
             dos.close();
             
-            Show recreatedShow = new Show(new GenericDirector(""));
-            DataInputStream dis = new DataInputStream(new FileInputStream(filename));
-            GrinBinaryReader reader = new GrinBinaryReader(show);
-            reader.readScriptIdentifier(dis);
-            reader.readShow(dis);
+            return;
             
-            dis.close();
+            //GrinBinaryReader reader = new GrinBinaryReader(new GenericDirector(""), filename);
+            //Show recreatedShow = reader.readShow();            
             
         } catch (IOException e) { 
             e.printStackTrace();
@@ -70,5 +72,4 @@ public class BinaryConverter {
             new File(filename).delete();
         } catch (Exception e) {/* Oh well */}
    }
-
 }     

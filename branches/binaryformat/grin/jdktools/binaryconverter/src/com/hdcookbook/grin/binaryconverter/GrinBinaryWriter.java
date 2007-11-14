@@ -48,10 +48,7 @@ public class GrinBinaryWriter {
         this.show = show;
        
         Feature[] features = show.getFeaturesAsArray();
-        featuresList = new ArrayList(features.length);
-        for (int i = 0; i < features.length; i++) {
-            featuresList.add(features[i]);
-        }  
+        featuresList = createFeaturesArrayList(features);
         
         RCHandler[] rcHandlers = show.getRCHandlersAsArray();
         rcHandlersList = new ArrayList(rcHandlers.length);
@@ -66,26 +63,28 @@ public class GrinBinaryWriter {
         }         
     }
 
-    protected static void writeScriptIdentifier(DataOutputStream out) throws IOException {
+    private static void writeScriptIdentifier(DataOutputStream out) throws IOException {
         out.writeInt(Constants.GRINSCRIPT_IDENTIFIER);
         out.writeInt(Constants.GRINSCRIPT_VERSION);
     }
  
-    protected void writeShow(DataOutputStream out) throws IOException {
+    public void writeShow(DataOutputStream out) throws IOException {
+        
+        writeScriptIdentifier(out);
         
         out.writeInt(featuresList.size());
         out.writeInt(rcHandlersList.size());
         out.writeInt(segmentsList.size());
         
         writeFeatures(out, (Feature[])featuresList.toArray(new Feature[]{}));   
-        writeRCHandlers(out, (RCHandler[])rcHandlersList.toArray(new RCHandler[]{}));
         writeSegments(out, (Segment[])segmentsList.toArray(new Segment[]{}));
+        writeRCHandlers(out, (RCHandler[])rcHandlersList.toArray(new RCHandler[]{}));
     }
     
     protected void writeFeatures(DataOutputStream out, Feature[] features) 
        throws IOException {
 	
-        if (features == null || features.length == 0) 
+        if (features == null) 
             return;
  
         out.writeInt(Constants.FEATURE_IDENTIFIER);   
@@ -127,7 +126,7 @@ public class GrinBinaryWriter {
     }
 
     private void writeRCHandlers(DataOutputStream out, RCHandler[] rcHandlers) throws IOException {
-        if (rcHandlers == null || rcHandlers.length == 0) 
+        if (rcHandlers == null) 
             return;
         
         out.writeInt(Constants.RCHANDLER_IDENTIFIER);
@@ -146,7 +145,7 @@ public class GrinBinaryWriter {
     }
 
     private void writeSegments(DataOutputStream out, Segment[] segments) throws IOException {        
-        if (segments == null || segments.length == 0) 
+        if (segments == null) 
             return;
         
         out.writeInt(Constants.SEGMENT_IDENTIFIER);
@@ -204,6 +203,7 @@ public class GrinBinaryWriter {
        Rectangle rect = clipped.getClipRegion();      
        dos.writeUTF(clipped.getName());
        dos.writeRectangle(rect);
+       dos.writeInt(featuresList.indexOf(clipped.getPart()));
        
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -225,6 +225,7 @@ public class GrinBinaryWriter {
        dos.writeIntArray(keyAlphas);
        Command[] endCommands = fade.getEndCommands();
        writeCommands(dos, endCommands);
+       dos.writeInt(featuresList.indexOf(fade.getPart()));
        
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -296,7 +297,8 @@ public class GrinBinaryWriter {
        DataOutputStream dos = new DataOutputStream(baos);
        
        dos.writeUTF(srcOver.getName());
-       
+       dos.writeInt(featuresList.indexOf(srcOver.getPart()));
+      
        out.writeInt(baos.size());
        baos.writeTo(out);      
        dos.close();
@@ -394,6 +396,7 @@ public class GrinBinaryWriter {
         DataOutputStream dos = new DataOutputStream(baos);
 
         dos.writeUTF(modifier.getName());
+        dos.writeInt(featuresList.indexOf(modifier.getPart()));
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -564,12 +567,7 @@ public class GrinBinaryWriter {
             }
         }
         
-        Rectangle[] rect = visualRCHandler.getMouseRects();
-        dos.writeInt(rect.length);
-        for (int i = 0; i < rect.length; i++) {
-            dos.writeRectangle(rect[i]);
-        }
-        
+        dos.writeRectangleArray(visualRCHandler.getMouseRects());
         dos.writeIntArray(visualRCHandler.getMouseRectStates());
         dos.writeInt(visualRCHandler.getTimeout());
         writeCommands(dos, visualRCHandler.getTimeoutCommands());
@@ -632,6 +630,84 @@ public class GrinBinaryWriter {
                 out.writeInt(featuresList.indexOf(features[i]));
             }
         }   
+    }
+
+    public ArrayList getFeaturesList() {
+        return featuresList;
+    }
+
+    /**
+     * Move Features that could possibly have forward references
+     * to the end of the list - Assembly, Group, Modifier and Translator.  
+     */
+    private ArrayList createFeaturesArrayList(Feature[] features) {
+        ArrayList common = new ArrayList();
+        ArrayList deferred = new ArrayList();
+        
+        for (int i = 0; i < features.length; i++) {
+            if (features[i] instanceof Assembly || 
+                features[i] instanceof Group ||
+                features[i] instanceof Modifier ||
+                features[i] instanceof Translator ) {
+                   deferred.add(features[i]);
+            } else {    
+                common.add(features[i]);
+            }          
+        }
+        
+        // Sort the deferred list to ensure that items contain no forward references in them.
+        ArrayList sorted = new ArrayList();
+        Feature feature;
+        while (!deferred.isEmpty()) {
+            
+            for (int i = 0; i < deferred.size(); i++ ) {
+                feature = (Feature) deferred.get(i);
+                if (!containsReference(deferred, feature)) {
+                    sorted.add(feature);
+                }    
+            }
+            deferred.removeAll(sorted);
+        }
+        
+        common.addAll(sorted);
+        
+        return common;
+    }
+    
+    private boolean containsReference(ArrayList list, Feature feature) {
+        if (feature instanceof Assembly) {
+            Feature[] parts = ((Assembly)feature).getParts();
+            for (int i = 0; i < parts.length; i++) {
+                if (list.contains(parts[i])) {
+                    return true;
+                }   
+            }    
+            return false;
+        } else if (feature instanceof Group) {
+            Feature[] parts = ((Group)feature).getParts();
+            for (int i = 0; i < parts.length; i++) {
+                if (list.contains(parts[i])) {
+                    return true;
+                }
+            }
+            return false;
+        } else if (feature instanceof Modifier) {
+            Feature part = ((Modifier)feature).getPart();
+            if (list.contains(part)) {
+                return true;
+            }
+            return false;
+        } else if (feature instanceof Translator) {
+            Feature[] parts = ((Translator)feature).getFeatures();
+            for (int i = 0; i < parts.length; i++) {
+                if (list.contains(parts[i])) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            throw new RuntimeException("Unexpected instance " + feature);
+        }
     }
     
 }

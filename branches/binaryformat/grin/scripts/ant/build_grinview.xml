@@ -63,12 +63,11 @@ information or have any questions.
 	destdir="${GRIN_VIEWER_DEST}/classes"
 	source="1.5" target="1.5"
 	debug="on" deprecation="off">
+	        <src path="library/src" />
 		<src path="jdktools/binaryconverter/src" />
 		<include name="com/hdcookbook/grin/binaryconverter/*.java"/>
 	</javac> 
-	<copy todir="${GRIN_VIEWER_DEST}/classes">
-		<fileset file="jdktools/binaryconverter/menu.txt"/>	
-	</copy>  
+        
 	<jar jarfile="${GRIN_VIEWER_DEST}/converter.jar" basedir="${GRIN_VIEWER_DEST}/classes">
 		  <manifest>
 			  <attribute name="Main-Class" value="com.hdcookbook.grin.binaryconverter.BinaryConverter"/>
@@ -76,12 +75,18 @@ information or have any questions.
         </jar>
 </target>
 
-<target name="run_converter" depends="compile-binary-converter">
-        <java fork="true" jar="${GRIN_VIEWER_DEST}/converter.jar"/>
+<target name="run-binary-converter" depends="compile-binary-converter">
+    <copy todir="${GRIN_VIEWER_DEST}">
+        <fileset file = "jdktools/grinviewer/src/com/hdcookbook/grin/test/assets/ryan_show.txt"/>
+    </copy>
+    <java fork="true" jar="${GRIN_VIEWER_DEST}/converter.jar">
+        <arg line="${GRIN_VIEWER_DEST}/ryan_show.txt"/>
+    </java>    
+
 </target>
 
 	
-	<target name="debug_converter" depends="compile-binary-converter">
+<target name="debug-binary-converter" depends="compile-binary-converter">
                 <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
 			<classpath path="${GRIN_VIEWER_DEST}/converter.jar"/>
 		</nbjpdastart>	
@@ -91,9 +96,9 @@ information or have any questions.
 			<jvmarg value="-Djava.compiler=none"/>
 			<jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
 		</java>	
-	</target>
+</target>
 
-<target name="run_grinview">
+<target name="run-grin-viewer">
 	<copy todir="${GRIN_VIEWER_DEST}/assets">
 		<fileset dir="jdktools/grinviewer/src/com/hdcookbook/grin/test/assets">	
 			<exclude name="**/.svn"/>

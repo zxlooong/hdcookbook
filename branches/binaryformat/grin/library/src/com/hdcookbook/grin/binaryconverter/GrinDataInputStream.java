@@ -4,6 +4,7 @@
 
 package com.hdcookbook.grin.binaryconverter;
 
+import com.hdcookbook.grin.binaryconverter.*;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -43,6 +44,19 @@ public class GrinDataInputStream extends DataInputStream {
        double w = readDouble();
        double h = readDouble();
        return new Rectangle((int)x,(int)y,(int)w,(int)h);
+   }
+   
+   public Rectangle[] readRectangleArray() throws IOException {
+       byte b = readByte();
+       if (b == Constants.NULL) {
+           return null;
+       }
+       
+       Rectangle[] array = new Rectangle[readInt()];
+       for (int i = 0; i < array.length; i++) {
+           array[i] = readRectangle();
+       }
+       return array;       
    }
    
    public Font readFont() throws IOException {

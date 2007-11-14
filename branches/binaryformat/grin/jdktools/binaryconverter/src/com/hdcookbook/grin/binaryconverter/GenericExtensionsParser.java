@@ -97,7 +97,7 @@ public class GenericExtensionsParser implements ExtensionsParser {
     public Modifier getModifier(Show show, final String typeName, 
     			        String name, String arg)
     {
-	return new Modifier(show, name) {
+	return new Modifier(show, typeName) {
 	    public String toString() {
 		return typeName;
 	    }

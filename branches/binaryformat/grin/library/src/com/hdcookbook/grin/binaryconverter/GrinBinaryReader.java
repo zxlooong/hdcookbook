@@ -1,9 +1,11 @@
 
 package com.hdcookbook.grin.binaryconverter;
 
+import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.binaryconverter.*;
 import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
@@ -35,17 +37,25 @@ import java.io.InputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.print.attribute.Size2DSyntax;
 
-class GrinBinaryReader {
+public class GrinBinaryReader {
 
     private Show show;
+    private Director director;
     private Feature[] features;
     private RCHandler[] rcHandlers;
     private Segment[] segments;
+    private String filename;
+    private DataInputStream filereader;
     
-    public GrinBinaryReader(Show show) {
-       this.show = show;
+    private ArrayList deferred = new ArrayList();
+        
+    public GrinBinaryReader(Director director, String filename) {
+        
+       this.director = director;
+       this.filename = filename;
+       
+       show = new Show(director);
     }
 
     private void checkValue(int x, int y, String message) throws IOException {
@@ -53,40 +63,48 @@ class GrinBinaryReader {
             throw new IOException("Mismatch: " + message);
     }
     
-    void readScriptIdentifier(DataInputStream in) throws IOException {
+    private void checkScriptIdentifier(DataInputStream in) throws IOException {
        checkValue(in.readInt(), Constants.GRINSCRIPT_IDENTIFIER, "Script identifier");
        checkValue(in.readInt(), Constants.GRINSCRIPT_VERSION, "Script version");
     }
     
-    protected Show readShow(DataInputStream in) throws IOException {
+    public Show readShow() throws IOException {
+ 
+        DataInputStream in = new DataInputStream(new FileInputStream(filename));       
+        checkScriptIdentifier(in);
         
         features = new Feature[in.readInt()];
         rcHandlers = new RCHandler[in.readInt()];
         segments = new Segment[in.readInt()];
             
         readFeatures(in);
-        readRCHandlers(in);
         readSegments(in);
+        readRCHandlers(in);
         
-        System.out.println("Features");
+        for (int i = 0; i < deferred.size(); i++) {
+            CommandSetup setup = (CommandSetup) deferred.get(i);
+            setup.setup();
+        }
+        deferred.clear();
+        
         for (int i = 0; i < features.length; i++) {
-            System.out.println(i + " " + features[i]);
+            show.addFeature(features[i].getName(), features[i]);
         }
-        System.out.println("RCHandlers");
-        for (int i = 0; i < rcHandlers.length; i++) {
-            System.out.println(i + " " + rcHandlers[i]);
-        }
-        System.out.println("Segments");
         for (int i = 0; i < segments.length; i++) {
-            System.out.println(i + " " + segments[i]);
+            show.addSegment(segments[i].getName(), segments[i]);
+        }
+        for (int i = 0; i < rcHandlers.length; i++) {
+            if (rcHandlers[i] instanceof VisualRCHandler) {
+                show.addRCHandler(((VisualRCHandler)rcHandlers[i]).getName(), rcHandlers[i]);
+            } else {
+                show.addRCHandler(""+i, rcHandlers[i]);
+            }   
         }
         
-        
-        // TODO
-        return null;
+        return show;
     }
     
-    protected void readFeatures(DataInputStream in) 
+    private void readFeatures(DataInputStream in) 
        throws IOException {
         
         checkValue(in.readInt(), Constants.FEATURE_IDENTIFIER, "Feature array identifier");
@@ -143,7 +161,7 @@ class GrinBinaryReader {
         }
     }
 
-    protected void readRCHandlers(DataInputStream in) throws IOException {
+    private void readRCHandlers(DataInputStream in) throws IOException {
         
         checkValue(in.readInt(), Constants.RCHANDLER_IDENTIFIER, "RCHandler array identifier");
         
@@ -168,7 +186,7 @@ class GrinBinaryReader {
         }     
     }    
 
-    protected void readSegments(DataInputStream in) throws IOException {
+    private void readSegments(DataInputStream in) throws IOException {
 
         checkValue(in.readInt(), Constants.SEGMENT_IDENTIFIER, "Segment array identifier");
         
@@ -182,7 +200,7 @@ class GrinBinaryReader {
         }
     } 
     
-    protected Assembly readAssembly(DataInputStream in) throws IOException {
+    private Assembly readAssembly(DataInputStream in) throws IOException {
         
         int length = in.readInt();
         byte[] buffer = new byte[length];
@@ -198,12 +216,13 @@ class GrinBinaryReader {
         dis.close();
         
         Assembly assembly = new Assembly(show, name);
-        //assembly.setParts(partNames, parts);
+        
+        assembly.setParts(partNames, parts);
         
         return assembly;
     }
 
-    protected Box readBox(DataInputStream in) throws IOException {
+    private Box readBox(DataInputStream in) throws IOException {
         
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -223,7 +242,7 @@ class GrinBinaryReader {
        return new Box(show, name, placement, outlineWidth, outline, fill);
     }
     
-    protected Clipped readClipped(DataInputStream in) throws IOException {
+    private Clipped readClipped(DataInputStream in) throws IOException {
        
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -234,14 +253,17 @@ class GrinBinaryReader {
        
        String name = dis.readUTF();
        Rectangle clipRegion = dis.readRectangle();
+       Feature part = features[dis.readInt()];
        
        dis.close();
        
-       return new Clipped(show, name, clipRegion);
+       Clipped clipped = new Clipped(show, name, clipRegion);
+       clipped.setup(part);
        
+       return clipped;
     }
     
-    protected Fade readFade(DataInputStream in) throws IOException {
+    private Fade readFade(DataInputStream in) throws IOException {
        
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -255,14 +277,17 @@ class GrinBinaryReader {
        int[] keyframes = dis.readIntArray();
        int[] keyAlphas = dis.readIntArray();
        Command[] endCommands = readCommands(dis);
+       Feature part = features[dis.readInt()];
        
        dis.close();
    
-       return new Fade(show, name, srcOver, keyframes, keyAlphas, endCommands);
-      
+       Fade fade = new Fade(show, name, srcOver, keyframes, keyAlphas, endCommands);
+       fade.setup(part);
+       
+       return fade;
     }
 
-    protected FixedImage readFixedImage(DataInputStream in) throws IOException {
+    private FixedImage readFixedImage(DataInputStream in) throws IOException {
        
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -282,7 +307,7 @@ class GrinBinaryReader {
        
     }
 
-    protected Group readGroup(DataInputStream in) throws IOException {
+    private Group readGroup(DataInputStream in) throws IOException {
 
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -297,12 +322,13 @@ class GrinBinaryReader {
        dis.close();
        
        Group group = new Group(show, name);
-       //group.setup(parts);
+      
+       group.setup(parts);
        
        return group;
     }
 
-    protected ImageSequence readImageSequence(DataInputStream in) throws IOException {
+    private ImageSequence readImageSequence(DataInputStream in) throws IOException {
        
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -326,7 +352,7 @@ class GrinBinaryReader {
     }
 
     
-    protected SrcOver readSrcOver(DataInputStream in) throws IOException {
+    private SrcOver readSrcOver(DataInputStream in) throws IOException {
        
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -336,14 +362,18 @@ class GrinBinaryReader {
        GrinDataInputStream dis = new GrinDataInputStream(bais);  
        
        String name = dis.readUTF();
+       Feature part = features[dis.readInt()];
        
        dis.close();
        
-       return new SrcOver(show, name);
+       SrcOver srcOver = new SrcOver(show, name);
+       srcOver.setup(part);
+       
+       return srcOver;
     }
     
 
-    protected Text readText(DataInputStream in) throws IOException {
+    private Text readText(DataInputStream in) throws IOException {
        
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -372,7 +402,7 @@ class GrinBinaryReader {
  
     }
 
-    protected Timer readTimer(DataInputStream in) throws IOException {
+    private Timer readTimer(DataInputStream in) throws IOException {
   
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -392,7 +422,7 @@ class GrinBinaryReader {
        return new Timer(show, name, numFrames, repeat, endCommands);
     }
 
-    protected Translation readTranslation(DataInputStream in) throws IOException {
+    private Translation readTranslation(DataInputStream in) throws IOException {
         
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -414,7 +444,7 @@ class GrinBinaryReader {
   
     }
 
-    protected Translator readTranslator(DataInputStream in) throws IOException {
+    private Translator readTranslator(DataInputStream in) throws IOException {
 
        int length = in.readInt();
        byte[] buffer = new byte[length];
@@ -432,7 +462,8 @@ class GrinBinaryReader {
        dis.close();
        
        Translator translator = new Translator(show, name);
-       //translator.setup(translation, parts);
+       
+       translator.setup(translation, parts);
        
        return translator;
     }
@@ -446,10 +477,13 @@ class GrinBinaryReader {
        GrinDataInputStream dis = new GrinDataInputStream(bais);   
         
        String name = dis.readUTF();
-
+       Feature parts = features[dis.readInt()];
        dis.close();
        
-       return show.getDirector().getExtensionsParser().getModifier(show, name, null, null);
+       Modifier modifier = director.getExtensionsParser().getModifier(show, name, null, null);
+       modifier.setup(parts);
+       
+       return modifier;
     }
     
     public Command[] readCommands(DataInputStream in) 
@@ -487,7 +521,7 @@ class GrinBinaryReader {
        return commands;
     }
 
-    protected SetVisualRCStateCommand readSetVisualRCStateCmd(DataInputStream in) throws IOException {
+    private SetVisualRCStateCommand readSetVisualRCStateCmd(DataInputStream in) throws IOException {
 
         int length = in.readInt();
         byte[] buffer = new byte[length];
@@ -496,22 +530,28 @@ class GrinBinaryReader {
         ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
         GrinDataInputStream dis = new GrinDataInputStream(bais);  
         
-        boolean activated = dis.readBoolean();
-        int state = dis.readInt();
-        VisualRCHandler handler = (VisualRCHandler) rcHandlers[dis.readInt()];
+        final boolean activated = dis.readBoolean();
+        final int state = dis.readInt();
+        final int handlerIndex = dis.readInt();
         boolean runCommands = dis.readBoolean();
         
         dis.close();
         
-        SetVisualRCStateCommand command = new SetVisualRCStateCommand();
+        final SetVisualRCStateCommand command = new SetVisualRCStateCommand();
         
-        // command.setup(activated, state, handler); 
-        
+        if (rcHandlers[handlerIndex] != null) {
+            command.setup(activated, state, (VisualRCHandler)rcHandlers[handlerIndex]);
+        } else {
+            deferred.add(new CommandSetup() {
+               public void setup() {
+                  command.setup(activated, state, (VisualRCHandler)rcHandlers[handlerIndex]);
+               } 
+            });
+        }    
         return command;
     }
-
     
-    protected ActivatePartCommand readActivatePartCmd(DataInputStream in) 
+    private ActivatePartCommand readActivatePartCmd(DataInputStream in) 
         throws IOException {
         
         int length = in.readInt();
@@ -521,19 +561,26 @@ class GrinBinaryReader {
         ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
         GrinDataInputStream dis = new GrinDataInputStream(bais);  
         
-        Assembly assembly = (Assembly) features[dis.readInt()];
-        Feature part = (Feature) features[dis.readInt()];
+        final int assemblyIndex = dis.readInt();
+        final int partIndex = dis.readInt();
         
         dis.close();
         
-        ActivatePartCommand command = new ActivatePartCommand();
-        //command.setup(assembly, part);
-     
+        final ActivatePartCommand command = new ActivatePartCommand();
+        
+        if (features[assemblyIndex] != null && features[partIndex] != null) {
+            command.setup((Assembly)features[assemblyIndex], (Feature) features[partIndex]);
+        } else {
+            deferred.add(new CommandSetup() {
+                public void setup() {
+                    command.setup((Assembly)features[assemblyIndex], (Feature)features[partIndex]);
+                } 
+            });
+        }    
         return command;
     }
-    
 
-    protected ActivateSegmentCommand readActivateSegmentCmd(DataInputStream in) 
+    private ActivateSegmentCommand readActivateSegmentCmd(DataInputStream in) 
         throws IOException {
 
         int length = in.readInt();
@@ -546,22 +593,25 @@ class GrinBinaryReader {
         boolean push = dis.readBoolean();
         boolean pop = dis.readBoolean();
         Segment segment = null;
-        int segmentIndex = dis.readInt();
-        if (segmentIndex != -1) {
-            segment = segments[segmentIndex];
-        } 
+        final int segmentIndex = dis.readInt();
         
         dis.close();
         
-        ActivateSegmentCommand command = new ActivateSegmentCommand(show, push, pop);
-        //command.setup(segment);
+        final ActivateSegmentCommand command = new ActivateSegmentCommand(show, push, pop);
+        if (segments[segmentIndex] != null) {
+            command.setup((Segment)segments[segmentIndex]);
+        } else {
+            deferred.add(new CommandSetup() {
+               public void setup() {
+                   command.setup((Segment)segments[segmentIndex]);
+               } 
+            });
+        }    
         
         return command;
-    }    
+    } 
 
-
-
-    protected SegmentDoneCommand readSegmentDoneCmd(DataInputStream in) 
+    private SegmentDoneCommand readSegmentDoneCmd(DataInputStream in) 
         throws IOException {
        
         return new SegmentDoneCommand(show);
@@ -585,10 +635,8 @@ class GrinBinaryReader {
 
         dis.close();
        
-       // TODO
-       // return show.getDirector().getExtensionsParser().parseCommand();
+        return show.getDirector().getExtensionsParser().getCommand(show, name, new String[0]);
        
-        return null;
     }
 
     private RCHandler readCommandRCHandler(DataInputStream in) throws IOException {
@@ -641,11 +689,7 @@ class GrinBinaryReader {
             }
         }
         
-        Rectangle[] mouseRects = new Rectangle[dis.readInt()];
-        for (int i = 0; i < mouseRects.length; i++) {
-            mouseRects[i] = dis.readRectangle();
-        }
-        
+        Rectangle[] mouseRects = dis.readRectangleArray();
         int[] mouseRectStates = dis.readIntArray();
         int timeout = dis.readInt();
         Command[] timeoutCommands = readCommands(dis);
@@ -718,5 +762,8 @@ class GrinBinaryReader {
         
         return f;
     }
-   
+    
+    abstract class CommandSetup {
+        abstract void setup(); 
+    }    
 }
