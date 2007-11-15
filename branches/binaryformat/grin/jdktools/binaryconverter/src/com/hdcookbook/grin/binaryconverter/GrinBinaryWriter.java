@@ -1,5 +1,65 @@
+/*  
+ * Copyright (c) 2007, Sun Microsystems, Inc.
+ * 
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 
+ *  * Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *  * Neither the name of Sun Microsystems nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ *  Note:  In order to comply with the binary form redistribution 
+ *         requirement in the above license, the licensee may include 
+ *         a URL reference to a copy of the required copyright notice, 
+ *         the list of conditions and the disclaimer in a human readable 
+ *         file with the binary form of the code that is subject to the
+ *         above license.  For example, such file could be put on a 
+ *         Blu-ray disc containing the binary form of the code or could 
+ *         be put in a JAR file that is broadcast via a digital television 
+ *         broadcast medium.  In any event, you must include in any end 
+ *         user licenses governing any code that includes the code subject 
+ *         to the above license (in source and/or binary form) a disclaimer 
+ *         that is at least as protective of Sun as the disclaimers in the 
+ *         above license.
+ * 
+ *         A copy of the required copyright notice, the list of conditions and
+ *         the disclaimer will be maintained at 
+ *         https://hdcookbook.dev.java.net/misc/license.html .
+ *         Thus, licensees may comply with the binary form redistribution
+ *         requirement with a text file that contains the following text:
+ * 
+ *             A copy of the license(s) governing this code is located
+ *             at https://hdcookbook.dev.java.net/misc/license.html
+ */
 
 package com.hdcookbook.grin.binaryconverter;
+
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
@@ -25,24 +85,108 @@ import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Rectangle;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 
-import java.io.OutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 
+/**
+ * The main class to write out the Show object to a binary file format.
+ */
+
+/*
+ * The array of features are sorted to eliminate forward references
+ * before writing out to the file.
+ *
+ * This class works with a binary file reader, GrinBinaryReader, which contains
+ * read(...) versions of the methods defined in this class.
+ * If you change one file, make sure to update the other file as well.
+ *
+ * The syntax of a Show's binary file is as follows:
+ * 
+ *  --------------------------------
+ *  xxxxx.grin {
+ *      script_identifier                  integer
+ *      version_number                     integer
+ *      FeatureArray_info()
+ *      RCHandlerArray_info()
+ *      SegmentArray_info()
+ *      Show_Setup_info()
+ *  }
+ *
+ *  FeatureArray_info() {
+ *      feature_identifier                 integer
+ *      features_length                    integer
+ *      for (i = 0; i < features_length; i++) {
+ *          Feature_info();                 
+ *      }
+ *  }
+ * 
+ *  RCHandlerArray_info() {
+ *      rcHandler_identifier               integer
+ *      rcHandlers_length                    integer
+ *      for (i = 0; i < rcHandlers_length; i++) {
+ *          RCHandler_info();                 
+ *      }
+ *  }
+ *
+ *  SegmentArray_info() {
+ *      segment_identifier                 integer
+ *      segments_length                    integer
+ *      for (int i = 0; i < segments_length; i++ ) {
+ *          Segment_info();
+ *      }
+ *  }
+ *  
+ *  Show_setup_info() {
+ *      show_segment_stack_depth           integer
+ *      // could be more data in the future
+ *  }
+ *
+ *  Feature_info() {
+ *      feature_type                    byte
+ *      feature_length                  integer
+ *      ... List of data in this Feature subclass indicated by "feature_type" ... 
+ *  }
+ *  
+ *  RCHandler_info() {
+ *      rcHandler_type                    byte
+ *      rcHandler_length                  integer
+ *      ... List of data in this RCHandler subclass indicated by "rcHandler_type" ... 
+ *  }
+ *
+ *  Segment_info() {
+ *      segment_identifier                 byte
+ *      segment_length                     integer
+ *      ... List of data in this Segment class ... 
+ *  }   
+ *
+ *  --------------------------------      
+ */
 public class GrinBinaryWriter {
 
+    /**
+     * Show file to write out 
+     */
     private Show show;
+    /**
+     * List of Feature in the show.
+     */
     private ArrayList featuresList;
+    
+    /**
+     * List of RCHandler in the show.
+     */
     private ArrayList rcHandlersList;
+    
+    /** 
+     * List of Segment in the show.
+     */
     private ArrayList segmentsList;
     
+    /**
+     * Constructs GrinBinaryWriter.
+     * 
+     * @param show The show object which this GrinBinaryWriter makes into a binary format.
+     *
+     **/
     public GrinBinaryWriter(Show show) {
         
         this.show = show;
@@ -63,11 +207,21 @@ public class GrinBinaryWriter {
         }         
     }
 
+    /**
+     * Writes out the script identifier and the script version to the DataOutputStream.
+     *
+     */
     private static void writeScriptIdentifier(DataOutputStream out) throws IOException {
         out.writeInt(Constants.GRINSCRIPT_IDENTIFIER);
         out.writeInt(Constants.GRINSCRIPT_VERSION);
     }
  
+    /**
+     * Writes out the show object for this GrinBinaryWriter.
+     *
+     * @param out The DataOutputStream to write out show's binary data to.
+     * @throws IOException if writing to the DataOutputStream fails.
+     */
     public void writeShow(DataOutputStream out) throws IOException {
         
         writeScriptIdentifier(out);
@@ -81,9 +235,10 @@ public class GrinBinaryWriter {
         writeSegments(out, (Segment[])segmentsList.toArray(new Segment[]{}));
         
         out.writeInt(show.getSegmentStackDepth());
+        
     }
     
-    protected void writeFeatures(DataOutputStream out, Feature[] features) 
+    private void writeFeatures(DataOutputStream out, Feature[] features) 
        throws IOException {
 	
         if (features == null) 
@@ -158,7 +313,7 @@ public class GrinBinaryWriter {
         }
     }
     
-    public void writeAssembly(DataOutputStream out, Assembly assembly) throws IOException {
+    private void writeAssembly(DataOutputStream out, Assembly assembly) throws IOException {
         
         out.writeByte((int)Constants.ASSEMBLY_IDENTIFIER);
 
@@ -177,7 +332,7 @@ public class GrinBinaryWriter {
         dos.close();
     }
 
-    public void writeBox(DataOutputStream out, Box box) throws IOException {
+    private void writeBox(DataOutputStream out, Box box) throws IOException {
  
        out.writeByte((int)Constants.BOX_IDENTIFIER);
              
@@ -195,7 +350,7 @@ public class GrinBinaryWriter {
        dos.close();
     }
     
-    public void writeClipped(DataOutputStream out, Clipped clipped) throws IOException {
+    private void writeClipped(DataOutputStream out, Clipped clipped) throws IOException {
        
        out.writeByte((int)Constants.CLIPPED_IDENTIFIER);
        
@@ -212,7 +367,7 @@ public class GrinBinaryWriter {
        dos.close();
     }
     
-    public void writeFade(DataOutputStream out, Fade fade) throws IOException {
+    private void writeFade(DataOutputStream out, Fade fade) throws IOException {
        
        out.writeByte((int)Constants.FADE_IDENTIFIER);
       
@@ -235,7 +390,7 @@ public class GrinBinaryWriter {
        
     }
 
-    public void writeFixedImage(DataOutputStream out, FixedImage image) throws IOException {
+    private void writeFixedImage(DataOutputStream out, FixedImage image) throws IOException {
        
        out.writeByte((int)Constants.FIXEDIMAGE_IDENTIFIER);
        
@@ -252,7 +407,7 @@ public class GrinBinaryWriter {
        dos.close();
     }
 
-    public void writeGroup(DataOutputStream out, Group group) throws IOException {
+    private void writeGroup(DataOutputStream out, Group group) throws IOException {
 
        out.writeByte((int)Constants.GROUP_IDENTIFIER);
 
@@ -268,7 +423,7 @@ public class GrinBinaryWriter {
  
     }
 
-    public void writeImageSequence(DataOutputStream out, ImageSequence imageSequence) throws IOException {
+    private void writeImageSequence(DataOutputStream out, ImageSequence imageSequence) throws IOException {
        
        out.writeByte((int)Constants.IMAGESEQUENCE_IDENTIFIER);
 
@@ -291,7 +446,7 @@ public class GrinBinaryWriter {
     }
 
     
-    public void writeSrcOver(DataOutputStream out, SrcOver srcOver) throws IOException {
+    private void writeSrcOver(DataOutputStream out, SrcOver srcOver) throws IOException {
        
        out.writeByte((int)Constants.SRCOVER_IDENTIFIER);
 
@@ -307,7 +462,7 @@ public class GrinBinaryWriter {
        
     }
 
-    public void writeText(DataOutputStream out, Text text) throws IOException {
+    private void writeText(DataOutputStream out, Text text) throws IOException {
        
        out.writeByte(Constants.TEXT_IDENTIFIER);
 
@@ -335,7 +490,7 @@ public class GrinBinaryWriter {
   
     }
 
-    public void writeTimer(DataOutputStream out, Timer timer) throws IOException {
+    private void writeTimer(DataOutputStream out, Timer timer) throws IOException {
         
        out.writeByte(Constants.TIMER_IDENTIFIER);
 
@@ -354,7 +509,7 @@ public class GrinBinaryWriter {
        
     }
 
-    public void writeTranslation(DataOutputStream out, Translation translation) throws IOException {
+    private void writeTranslation(DataOutputStream out, Translation translation) throws IOException {
         out.writeByte((int)Constants.TRANSLATION_IDENTIFIER);
       
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -373,7 +528,7 @@ public class GrinBinaryWriter {
   
     }
 
-    public void writeTranslator(DataOutputStream out, Translator translator) throws IOException {
+    private void writeTranslator(DataOutputStream out, Translator translator) throws IOException {
         out.writeByte((int)Constants.TRANSLATOR_IDENTIFIER);
  
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -391,7 +546,7 @@ public class GrinBinaryWriter {
         dos.close();             
     }
     
-    public void writeUserModifier(DataOutputStream out, UserModifier modifier) throws IOException {
+    private void writeUserModifier(DataOutputStream out, UserModifier modifier) throws IOException {
         out.writeByte((int)Constants.USER_MODIFIER_IDENTIFIER);
          
         if (modifier == null) {
@@ -414,7 +569,7 @@ public class GrinBinaryWriter {
         dos.close();           
     }
     
-    public void writeCommands(DataOutputStream out, Command[] commands) 
+    private void writeCommands(DataOutputStream out, Command[] commands) 
         throws IOException {
  
        if (commands == null) {
@@ -645,19 +800,16 @@ public class GrinBinaryWriter {
         }   
     }
 
-    public ArrayList getFeaturesList() {
-        return featuresList;
-    }
-
     /**
-     * Move Features that could possibly have forward references
-     * to the end of the list - Assembly, Group, Modifier and Translator.  
+     * Sort the array to eliminates forward references within this array of Features.
+     * Note that the references from the Command objects within a Feature is ignored.
      */
     private ArrayList createFeaturesArrayList(Feature[] features) {
         ArrayList common = new ArrayList();
         ArrayList deferred = new ArrayList();
         
         for (int i = 0; i < features.length; i++) {
+            /* 4 types of Features that could have forward references.  */
             if (features[i] instanceof Assembly || 
                 features[i] instanceof Group ||
                 features[i] instanceof Modifier ||

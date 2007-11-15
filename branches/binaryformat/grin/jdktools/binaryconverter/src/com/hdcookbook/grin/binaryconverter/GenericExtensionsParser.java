@@ -59,20 +59,16 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.parser.Lexer;
-import com.hdcookbook.grin.parser.ShowParser;
 import com.hdcookbook.grin.parser.ExtensionsParser;
-import com.hdcookbook.grin.input.RCHandler;
 
 import java.io.IOException;
 
 /**
  * This is an extensions parser that makes a fake version of any
- * GRIN extension it encounters.
- *
- * @author Bill Foote (http://jovial.com)
+ * GRIN extension it encounters.  
  */
-public class GenericExtensionsParser implements ExtensionsParser {
+
+class GenericExtensionsParser implements ExtensionsParser {
    
     private GenericDirector director;
 

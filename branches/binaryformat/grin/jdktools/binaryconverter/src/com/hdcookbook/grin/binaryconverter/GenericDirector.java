@@ -55,33 +55,24 @@
 
 package com.hdcookbook.grin.binaryconverter;
 
-
 import java.net.URL;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.parser.ShowParser;
 import com.hdcookbook.grin.parser.ShowBuilder;
-import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.parser.ExtensionsParser;
 import com.hdcookbook.grin.util.AssetFinder;
-import com.hdcookbook.grin.util.Debug;
 
 /**
- * This is a subclass of the GRIN director class that fakes out
- * GRIN to accept any extensions of the GRIN syntax.  The extensions
- * are ignored, with default behavior put in.
- *
- * @author Bill Foote (http://jovial.com)
+ * This is a subclass of the GRIN director class which is
+ * used by the BinaryConverter tool.
  */
-public class GenericDirector extends Director {
+class GenericDirector extends Director {
    
     private String showName;
     private ExtensionsParser parser;
