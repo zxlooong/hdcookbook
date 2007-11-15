@@ -126,26 +126,6 @@ public interface ExtensionsParser {
     			        String name, String arg)
 		       throws IOException;
 
-    /**
-     * Parse a command of the given type.  
-     * <p>
-     * Commands are supposed to end with a ";" token.  This should be the
-     * last token read by this method.
-     *
-     * @param show      The show being parsed
-     * @param typeName  The name of the commands's type.  This will always
-     *                  contain a ":".
-     * @param lex       The lexer that's reading the input file
-     * @param parser	The current parser.  We can use this to pass
-     *			a list of commands if needed.
-     *
-     * @throws      IOException if there's any parsing error.  This can be
-     *              generated with Lexer.reportError(String).     
-     */    
-    //public Command parseCommand(Show show, String typeName, Lexer lex, 
-    //				ShowParser parser) 
-    //			throws IOException;
-    
      /**
      * Get a modifier command of the given type.  
      * <p>

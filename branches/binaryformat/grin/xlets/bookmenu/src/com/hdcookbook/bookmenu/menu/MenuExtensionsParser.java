@@ -133,11 +133,7 @@ public class MenuExtensionsParser implements ExtensionsParser {
      **/
     public Command getCommand(Show show, String typeName, String[] args)
 		       throws IOException {
-    
-    //public Command parseCommand(Show show, String typeName, Lexer lexer,
-	//			ShowParser parser) 
-	//	    throws IOException
-    //{
+        
 	if ("BOOK:PlayVideo".equals(typeName)) {
 	    String tok = args[0];
 	    BDLocator loc = null;

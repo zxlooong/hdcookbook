@@ -259,7 +259,7 @@ public class Show implements AnimationClient {
     }
     
     /**
-     * Used by the binary file generator
+     * Get all of the RCHandlers in this show as an array
      **/
     public RCHandler[] getRCHandlersAsArray() {
         return (RCHandler[]) rcHandlers.values().toArray(new RCHandler[]{});       
@@ -284,7 +284,7 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * @return an array of segments
+     * Get all of the segments in this show as an array
      **/
     
     public Segment[] getSegmentsAsArray() {
