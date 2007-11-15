@@ -84,9 +84,12 @@ import com.hdcookbook.grin.util.Debug;
 public class GenericDirector extends Director {
    
     private String showName;
-
-    public GenericDirector(String showName) {
+    private ExtensionsParser parser;
+    
+    public GenericDirector(String showName, ExtensionsParser parser) {
 	this.showName = showName;
+        this.parser = parser;
+        
 	ChapterManager[] chapters = { new ChapterManager("init") };
 	setup(0, chapters);
     }
@@ -113,7 +116,10 @@ public class GenericDirector extends Director {
      * make a fake implementation of each extension.
      **/
     public ExtensionsParser getExtensionsParser() {
-	return new GenericExtensionsParser(this);
+        if (parser == null) 
+            parser = new GenericExtensionsParser(this);
+        
+        return parser;
     }
 
     /**

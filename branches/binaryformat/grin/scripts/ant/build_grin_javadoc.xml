@@ -38,7 +38,7 @@ information or have any questions.
 	  packagenames="com.hdcookbook.grin.*"
 	  destdir="${GRIN_JAVADOC_DEST}">
 		  <sourcepath location="library/src"/>
-		  <sourcepath location="jdktools/test/src"/>
+		  <sourcepath location="jdktools/grinviewer/src"/>
 	</javadoc>	       
 </target>
 

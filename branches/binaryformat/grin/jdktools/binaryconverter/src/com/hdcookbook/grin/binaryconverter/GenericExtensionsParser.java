@@ -97,11 +97,7 @@ public class GenericExtensionsParser implements ExtensionsParser {
     public Modifier getModifier(Show show, final String typeName, 
     			        String name, String arg)
     {
-	return new Modifier(show, typeName) {
-	    public String toString() {
-		return typeName;
-	    }
-	};
+	return new UserModifier(show, typeName, name, arg);
     }
 
     /**
@@ -109,24 +105,10 @@ public class GenericExtensionsParser implements ExtensionsParser {
      * This version assumes that all commands end with a semicolon, and have no
      * semicolons embedded in them.
      **/
-    public Command getCommand(Show show, String typeName, String[] args)
+    public Command getCommand(Show show, final String typeName, String[] args)
 		       throws IOException
     {
-        String name = typeName + " " + ((args.length > 0) ? args[0] : null);
-        for (int i = 1; i < args.length; i++) {
-            name.concat(" " + args[i]);
-	}
-        
-        final String fname = name;
-        
-	return new Command() {
-	    public void execute() {
-		System.out.println("Executing " + fname);
-	    }
-            public String toString() {
-                return fname;
-            }
-	};
+	return new UserCommand(typeName, args);
     }
 
     /**

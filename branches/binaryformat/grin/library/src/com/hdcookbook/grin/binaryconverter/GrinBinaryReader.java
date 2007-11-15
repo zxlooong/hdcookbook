@@ -46,14 +46,14 @@ public class GrinBinaryReader {
     private RCHandler[] rcHandlers;
     private Segment[] segments;
     private String filename;
-    private DataInputStream filereader;
+    private InputStream stream;
     
     private ArrayList deferred = new ArrayList();
         
-    public GrinBinaryReader(Director director, String filename) {
+    public GrinBinaryReader(Director director, InputStream stream) {
         
        this.director = director;
-       this.filename = filename;
+       this.stream = stream;
        
        show = new Show(director);
     }
@@ -70,7 +70,7 @@ public class GrinBinaryReader {
     
     public Show readShow() throws IOException {
  
-        DataInputStream in = new DataInputStream(new FileInputStream(filename));       
+        DataInputStream in = new DataInputStream(stream);       
         checkScriptIdentifier(in);
         
         features = new Feature[in.readInt()];
@@ -78,8 +78,10 @@ public class GrinBinaryReader {
         segments = new Segment[in.readInt()];
             
         readFeatures(in);
-        readSegments(in);
         readRCHandlers(in);
+        readSegments(in);
+        
+        int stackDepth = in.readInt();
         
         for (int i = 0; i < deferred.size(); i++) {
             CommandSetup setup = (CommandSetup) deferred.get(i);
@@ -100,6 +102,8 @@ public class GrinBinaryReader {
                 show.addRCHandler(""+i, rcHandlers[i]);
             }   
         }
+        
+        show.setSegmentStackDepth(stackDepth);
         
         return show;
     }
@@ -469,18 +473,25 @@ public class GrinBinaryReader {
     }
     
     protected Modifier readUserModifier(DataInputStream in) throws IOException {
+       
+       if (in.readByte() == Constants.NULL) {
+           return null;
+       }
+       
        int length = in.readInt();
        byte[] buffer = new byte[length];
        in.read(buffer, 0, length);
        
        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
        GrinDataInputStream dis = new GrinDataInputStream(bais);   
-        
+
        String name = dis.readUTF();
+       String typeName = dis.readUTF();
+       String arg = dis.readUTF();
        Feature parts = features[dis.readInt()];
        dis.close();
        
-       Modifier modifier = director.getExtensionsParser().getModifier(show, name, null, null);
+       Modifier modifier = director.getExtensionsParser().getModifier(show, name, typeName, arg);
        modifier.setup(parts);
        
        return modifier;
@@ -598,14 +609,16 @@ public class GrinBinaryReader {
         dis.close();
         
         final ActivateSegmentCommand command = new ActivateSegmentCommand(show, push, pop);
-        if (segments[segmentIndex] != null) {
-            command.setup((Segment)segments[segmentIndex]);
-        } else {
-            deferred.add(new CommandSetup() {
-               public void setup() {
-                   command.setup((Segment)segments[segmentIndex]);
-               } 
-            });
+        if (segmentIndex != -1) {
+            if (segments[segmentIndex] != null) {
+                command.setup((Segment)segments[segmentIndex]);
+            } else {
+                deferred.add(new CommandSetup() {
+                    public void setup() {
+                        command.setup((Segment)segments[segmentIndex]);
+                    } 
+                });
+            }    
         }    
         
         return command;
@@ -632,10 +645,10 @@ public class GrinBinaryReader {
         GrinDataInputStream dis = new GrinDataInputStream(bais);   
         
         String name = dis.readUTF();
-
+        String[] args = dis.readStringArray();
         dis.close();
        
-        return show.getDirector().getExtensionsParser().getCommand(show, name, new String[0]);
+        return show.getDirector().getExtensionsParser().getCommand(show, name, args);
        
     }
 

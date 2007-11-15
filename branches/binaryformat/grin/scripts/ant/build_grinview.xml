@@ -78,9 +78,10 @@ information or have any questions.
 <target name="run-binary-converter" depends="compile-binary-converter">
     <copy todir="${GRIN_VIEWER_DEST}">
         <fileset file = "jdktools/grinviewer/src/com/hdcookbook/grin/test/assets/ryan_show.txt"/>
+        <fileset file = "xlets/bookmenu/src/com/hdcookbook/bookmenu/assets/menu.txt"/>
     </copy>
     <java fork="true" jar="${GRIN_VIEWER_DEST}/converter.jar">
-        <arg line="${GRIN_VIEWER_DEST}/ryan_show.txt"/>
+        <arg line="${GRIN_VIEWER_DEST}/menu.txt"/>
     </java>    
 
 </target>

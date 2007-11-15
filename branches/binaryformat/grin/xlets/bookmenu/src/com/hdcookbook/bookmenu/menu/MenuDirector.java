@@ -56,6 +56,7 @@
 
 package com.hdcookbook.bookmenu.menu;
 
+import com.hdcookbook.grin.binaryconverter.GrinBinaryReader;
 import java.net.URL;
 import java.io.IOException;
 import java.io.Reader;
@@ -114,6 +115,29 @@ public class MenuDirector extends Director {
      * most of our menu UI.
      **/
     public Show createShow() {
+        
+        Show show = new Show(this);
+        
+        try {
+            
+            String showName = "menu.grin";
+	    URL u = AssetFinder.getURL(showName);
+ 	    GrinBinaryReader reader = new GrinBinaryReader(this, u.openStream());
+            show = reader.readShow();
+            
+	} catch (IOException ex) {
+	    if (Debug.LEVEL > 0) {
+		ex.printStackTrace();
+		Debug.println();
+		Debug.println("***  Fatal error:  Failed to parse show.");
+		Debug.println("***  " + ex);
+		Debug.println();
+		AssetFinder.abort();
+	    }
+	}        
+        
+        
+        /**
 	Show show = new Show(this);
 	String showName = "menu.txt";
 	try {
@@ -136,6 +160,7 @@ public class MenuDirector extends Director {
 		AssetFinder.abort();
 	    }
 	}
+         **/
 	return show;
     }
 

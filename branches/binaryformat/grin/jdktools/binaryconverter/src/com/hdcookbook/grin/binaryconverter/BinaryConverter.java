@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-/* Just a test driver */
-
 public class BinaryConverter {
    
    public static void main(String[] args) {
@@ -41,7 +39,7 @@ public class BinaryConverter {
         
         String filename = args[0];
         
-        GenericDirector director = new GenericDirector(filename);
+        GenericDirector director = new GenericDirector(filename, null);
 	AssetFinder.setSearchPath(new String[]{""}, new File[]{new File("."), new File("")});
   
         Show show = director.createShow(null);
@@ -53,23 +51,22 @@ public class BinaryConverter {
 
    public BinaryConverter(Show show, String filename) {
         try {
+            
             DataOutputStream dos = new DataOutputStream(new FileOutputStream(filename));
             GrinBinaryWriter out = new GrinBinaryWriter(show);
 	    out.writeShow(dos);
             dos.close();
             
-            return;
-            
-            //GrinBinaryReader reader = new GrinBinaryReader(new GenericDirector(""), filename);
+            //GrinBinaryReader reader = new GrinBinaryReader(
+            //    new GenericDirector("", new MenuExtensionParser()), new FileInputStream(filename));
             //Show recreatedShow = reader.readShow();            
             
         } catch (IOException e) { 
             e.printStackTrace();
-
+            // failed on writing, delete file
+            try {
+                new File(filename).delete();
+             } catch (Exception ex) {/* Oh well */}
         } 
-        // failed on writing, delete file
-        try {
-            new File(filename).delete();
-        } catch (Exception e) {/* Oh well */}
    }
 }     

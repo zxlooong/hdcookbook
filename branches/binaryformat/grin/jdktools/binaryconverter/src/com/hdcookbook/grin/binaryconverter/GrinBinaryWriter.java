@@ -77,8 +77,10 @@ public class GrinBinaryWriter {
         out.writeInt(segmentsList.size());
         
         writeFeatures(out, (Feature[])featuresList.toArray(new Feature[]{}));   
-        writeSegments(out, (Segment[])segmentsList.toArray(new Segment[]{}));
         writeRCHandlers(out, (RCHandler[])rcHandlersList.toArray(new RCHandler[]{}));
+        writeSegments(out, (Segment[])segmentsList.toArray(new Segment[]{}));
+        
+        out.writeInt(show.getSegmentStackDepth());
     }
     
     protected void writeFeatures(DataOutputStream out, Feature[] features) 
@@ -117,7 +119,7 @@ public class GrinBinaryWriter {
             } else if (feature instanceof SrcOver) {
                 writeSrcOver(out, (SrcOver)feature);
             } else if (feature instanceof Modifier) {
-                writeUserModifier(out, (Modifier)feature);
+                writeUserModifier(out, (UserModifier)feature);
             } else {
                 throw new IOException("Unknown feature " + feature);
             }
@@ -389,13 +391,22 @@ public class GrinBinaryWriter {
         dos.close();             
     }
     
-    public void writeUserModifier(DataOutputStream out, Modifier modifier) throws IOException {
+    public void writeUserModifier(DataOutputStream out, UserModifier modifier) throws IOException {
         out.writeByte((int)Constants.USER_MODIFIER_IDENTIFIER);
+         
+        if (modifier == null) {
+            out.writeByte(Constants.NULL);
+            return;
+        } 
+        
+        out.writeByte(Constants.NON_NULL);      
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
 
         dos.writeUTF(modifier.getName());
+        dos.writeUTF(modifier.getTypeName());
+        dos.writeUTF(modifier.getArg());
         dos.writeInt(featuresList.indexOf(modifier.getPart()));
         
         out.writeInt(baos.size());
@@ -428,7 +439,7 @@ public class GrinBinaryWriter {
           } else if (command instanceof SetVisualRCStateCommand) {
              writeSetVisualRCStateCmd(dos, (SetVisualRCStateCommand) command);
           } else {    /* user-defined or null */
-             writeUserCmd(dos, command);
+             writeUserCmd(dos, (UserCommand)command);
           }
        }
        
@@ -501,21 +512,23 @@ public class GrinBinaryWriter {
        // nothing to record for this command.  Return.
    }
 
-    private void writeUserCmd(DataOutputStream out, Command command) 
+    private void writeUserCmd(DataOutputStream out, UserCommand command) 
        throws IOException {
        
         out.writeByte((int)Constants.USER_CMD_IDENTIFIER);
         
         if (command == null) {
             out.writeByte(Constants.NULL);
-        } else {
-            out.writeByte(Constants.NON_NULL);
-        }
+            return;
+        } 
+        
+        out.writeByte(Constants.NON_NULL);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos);
 
-        dos.writeUTF(command.toString());
+        dos.writeUTF(command.getTypeName());
+        dos.writeStringArray(command.getArgs());
         
         out.writeInt(baos.size());
         baos.writeTo(out);
