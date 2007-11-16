@@ -53,42 +53,90 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.parser;
+package com.hdcookbook.grin.test;
+
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.text.Lexer;
+import com.hdcookbook.grin.io.text.ShowParser;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.input.RCHandler;
 
 import java.io.IOException;
 
 /**
- * Used by the parser when it encounters something that might be a forward
- * reference.  It's used to defer some computation in parsing until the
- * reference is resolved.
+ * This is part of the "Ryan's life" test show.  It's mostly of
+ * historical interest; it still works, but some of the ways of
+ * structuring and using a show are passe.
  *
  * @author Bill Foote (http://jovial.com)
  */
-abstract class ForwardReference {
-    
-    private int lineNumber;
-    private Lexer lexer;
-    
-    ForwardReference(Lexer lexer) {
-        this.lineNumber = lexer.getLineNumber();
-	this.lexer = lexer;
+public class RyanExtensionsBuilder implements ExtensionsBuilder {
+   
+    RyanDirector director;
+
+    public RyanExtensionsBuilder(RyanDirector director) {
+	this.director = director;
     }
 
-    void resolveAtLine() throws IOException {
-	int n = lexer.getLineNumber();
-	lexer.setLineNumber(lineNumber);
-	resolve();
-	lexer.setLineNumber(n);
+    public Feature getFeature(Show show, String typeName, 
+    			      String name, String arg)
+    {
+        return null;
     }
-    
-    abstract void resolve() throws IOException;
 
-    /**
-     * Convenience method for reporting an error.  The error message
-     * gives the line number where the construct we represent was read.
-     **/
-    void reportError(String msg) throws IOException {
-        throw new IOException(msg + " on line " + lineNumber + ".");
+    public Modifier getModifier(Show show, String typeName, 
+    			        String name, String arg)
+    {
+        return null;
     }
+
+    //public Command parseCommand(Show show, String typeName, Lexer lex,
+    //			        ShowParser parser) 
     
+    public Command getCommand(Show show, String typeName, String[] args)
+			throws IOException
+    {
+	Command result = null;
+	if ("ryan:start_video".equals(typeName)) {
+	    result = new Command() {
+	       public void execute() { 
+		    director.startVideo();
+	       }
+	    };
+	} else if ("ryan:play_mode_interactive".equals(typeName)) {
+	    final boolean val = Boolean.parseBoolean(args[0]);
+	    result = new Command() {
+	       public void execute() { 
+		    director.setInteractiveMode(val);
+	       }
+	    };
+	} else if ("ryan:toggle_commentary".equals(typeName)) {
+	    result = new Command() {
+	       public void execute() { 
+		    director.toggleCommentary();
+	       }
+	    };
+	} else if ("ryan:commentary_start".equals(typeName)) {
+	    result = new Command() {
+	       public void execute() { 
+		    director.startCommentary();
+	       }
+	    };
+	} else {
+	    throw new IOException("Unrecognized command type \"" + typeName + "\"");
+	}
+	return result;
+    }
+
+    public void finishBuilding(Show show) throws IOException {
+    }
+
+    public void takeMosaicHint(String name, int width, int height, 
+                               String[] images)
+    {
+    }
+
 }

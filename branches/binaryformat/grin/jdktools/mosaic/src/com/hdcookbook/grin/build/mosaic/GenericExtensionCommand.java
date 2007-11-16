@@ -58,9 +58,9 @@ package com.hdcookbook.grin.build.mosaic;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.parser.Lexer;
-import com.hdcookbook.grin.parser.ShowParser;
-import com.hdcookbook.grin.parser.ExtensionsParser;
+import com.hdcookbook.grin.io.text.Lexer;
+import com.hdcookbook.grin.io.text.ShowParser;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.input.RCHandler;
 
 import java.io.IOException;

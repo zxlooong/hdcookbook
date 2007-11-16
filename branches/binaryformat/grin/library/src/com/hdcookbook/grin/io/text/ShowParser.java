@@ -53,7 +53,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.parser;
+package com.hdcookbook.grin.io.text;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
@@ -82,6 +82,7 @@ import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.VisualRCHandler;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.AssetFinder;
 
@@ -106,7 +107,7 @@ public class ShowParser {
 
     private Show show;
     private Lexer lexer;
-    private ExtensionsParser extParser;
+    private ExtensionsBuilder extBuilder;
     private Vector[] deferred = { new Vector(), new Vector() };  
     	// Array of Vector<ForwardReference>
 
@@ -152,9 +153,9 @@ public class ShowParser {
 	Director d = show.getDirector();
 	this.lexer = new Lexer(reader, showName);
 	if (d == null) {
-	    this.extParser = null;
+	    this.extBuilder = null;
 	} else {
-	    this.extParser = d.getExtensionsParser();
+	    this.extBuilder = d.getExtensionsBuilder();
 	}
 	if (builder == null) {
 	    builder = new ShowBuilder();
@@ -214,7 +215,7 @@ public class ShowParser {
 		    parseTranslator(lineStart);
 		} else if ("text".equals(tok)) {
 		    parseText(lineStart);
-		} else if (extParser == null || tok == null) {
+		} else if (extBuilder == null || tok == null) {
 		    lexer.reportError("Unrecognized feature \"" + tok + "\"");
 		} else if ("extension".equals(tok) || "modifier".equals(tok)) {
 		    String typeName = lexer.getString();
@@ -230,9 +231,9 @@ public class ShowParser {
 			lexer.reportError(typeName + " doesn't contain \":\"");
 		    }
 		    if (subName == null) {
-			f = extParser.getFeature(show, typeName, name, arg);
+			f = extBuilder.getFeature(show, typeName, name, arg);
 		    } else {
-			Modifier m = extParser.getModifier(show, typeName,
+			Modifier m = extBuilder.getModifier(show, typeName,
 							   name, arg);
 			f = m;
 			if (m != null) {
@@ -261,8 +262,8 @@ public class ShowParser {
 		int height = lexer.getInt();
 		String[] files = parseStrings();
 		parseExpected(";");
-		if (extParser != null) {
-		    extParser.takeMosaicHint(name, width, height, files);
+		if (extBuilder != null) {
+		    extBuilder.takeMosaicHint(name, width, height, files);
 		}
 	    } else {
 		lexer.reportError("Unrecognized token \"" + tok + "\"");
@@ -1110,7 +1111,7 @@ public class ShowParser {
 	Command[] commands = parseCommands();
 	parseExpected(";");
 	builder.addRCHandler(handlerName, lineStart,
-			     new CommandRCHandler(mask, commands));
+			     new CommandRCHandler(handlerName, mask, commands));
     }
 
     //
@@ -1171,7 +1172,7 @@ public class ShowParser {
 		Command c = parseVisualRC();
 		v.addElement(c);
 		builder.addCommand(c, lineStart);
-	    } else if (extParser == null || tok == null || tok.indexOf(':') < 0) 
+	    } else if (extBuilder == null || tok == null || tok.indexOf(':') < 0) 
 	    {
 		lexer.reportError("command expected, " + tok + " seen");
 	    } else {
@@ -1187,7 +1188,7 @@ public class ShowParser {
 		      args.add(tok);
 	           }
 	        }               
-		Command c = extParser.getCommand(show, typeName, (String[])args.toArray(new String[]{}));
+		Command c = extBuilder.getCommand(show, typeName, (String[])args.toArray(new String[]{}));
 		v.addElement(c);
 		builder.addCommand(c, lineStart);
 	    }
@@ -1353,8 +1354,8 @@ public class ShowParser {
 	    }
 	}
 	
-	if (extParser != null) {
-	   extParser.finishBuilding(show);
+	if (extBuilder != null) {
+	   extBuilder.finishBuilding(show);
 	}
 	builder.finishBuilding();
     }

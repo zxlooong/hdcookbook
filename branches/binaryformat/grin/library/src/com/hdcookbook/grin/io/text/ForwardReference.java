@@ -53,79 +53,42 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.parser;
+package com.hdcookbook.grin.io.text;
 
-
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.util.Debug;
-
-import java.io.Reader;
 import java.io.IOException;
-import java.awt.Font;
-import java.awt.Color;
 
 /**
- * A helper class for parsing a show.  Clients of the parser can
- * subclass this to intercept items as there's encountered.
+ * Used by the parser when it encounters something that might be a forward
+ * reference.  It's used to defer some computation in parsing until the
+ * reference is resolved.
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class ShowBuilder {
-   
-    protected ShowParser parser;
-    protected Show show;
-
-    public ShowBuilder() {
+abstract class ForwardReference {
+    
+    private int lineNumber;
+    private Lexer lexer;
+    
+    ForwardReference(Lexer lexer) {
+        this.lineNumber = lexer.getLineNumber();
+	this.lexer = lexer;
     }
 
-    void init(ShowParser parser, Show show) {
-	this.parser = parser;
-	this.show = show;
+    void resolveAtLine() throws IOException {
+	int n = lexer.getLineNumber();
+	lexer.setLineNumber(lineNumber);
+	resolve();
+	lexer.setLineNumber(n);
     }
-
-    /** 
-     * Called when a new feature is encountered.
-     **/
-    public void addFeature(String name, int line, Feature f) throws IOException
-    {
-	show.addFeature(name, f);
-    }
+    
+    abstract void resolve() throws IOException;
 
     /**
-     * Called when a new segment is encountered.
+     * Convenience method for reporting an error.  The error message
+     * gives the line number where the construct we represent was read.
      **/
-    public void addSegment(String name, int line, Segment s) throws IOException
-    {
-	show.addSegment(name, s);
-    }
-
-    /**
-     * Called when a new command is encountered.
-     **/
-    public void addCommand(Command command, int line) {
-	// At xlet runtime, commands are just part of other things, so we
-	// don't need to record them.
-    }
-
-    /**
-     * Called when a new remote control handler is encountered.
-     **/
-    public void addRCHandler(String name, int line, RCHandler hand) 
-			throws IOException
-    {
-	show.addRCHandler(name, hand);
-    }
-
-    /**
-     * Called when the show has finished parsing and all forward references
-     * have been resolved.
-     **/
-    public void finishBuilding() throws IOException {
+    void reportError(String msg) throws IOException {
+        throw new IOException(msg + " on line " + lineNumber + ".");
     }
     
 }

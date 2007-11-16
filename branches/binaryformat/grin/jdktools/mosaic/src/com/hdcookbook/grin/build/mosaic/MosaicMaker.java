@@ -61,8 +61,8 @@ import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.parser.ShowParser;
-import com.hdcookbook.grin.parser.ExtensionsParser;
+import com.hdcookbook.grin.io.text.ShowParser;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.AssetFinder;
@@ -143,8 +143,8 @@ import javax.imageio.ImageIO;
 	showTrees = new Show[shows.length];
         for (int i = 0; i < shows.length; i++) {
             Director director = new Director() {
-                public ExtensionsParser getExtensionsParser() {
-                    return new GenericExtensionsParser() {
+                public ExtensionsBuilder getExtensionsBuilder() {
+                    return new GenericExtensionsBuilder() {
 			public void takeMosaicHint(String name, int width, 
 						   int height, String[] images) 
 			{

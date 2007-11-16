@@ -53,107 +53,91 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.parser;
+package com.hdcookbook.grin.test.bigjdk;
 
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.parser.Lexer;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.io.text.Lexer;
+import com.hdcookbook.grin.io.text.ShowParser;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.input.RCHandler;
 
 import java.io.IOException;
 
 /**
- * This class is used by an xlet to add new commands and features
- * to the syntax of its GRIN show file(s).
- * A Director can expand the set of features and commands
- * recognized in a show file.  It does this by providing an
- * implementation of ExtensionsParser to handle any extensions.
+ * This is an extensions parser that makes a fake version of any
+ * GRIN extension it encounters.
  *
- * @author @author Bill Foote (http://jovial.com)
+ * @author Bill Foote (http://jovial.com)
  */
-public interface ExtensionsParser {
+public class GenericExtensionsBuilder implements ExtensionsBuilder {
+   
+    private GenericDirector director;
+
+    public GenericExtensionsBuilder(GenericDirector director) {
+	this.director = director;
+    }
 
     /**
-     * Get a feature of the given type.  The type name will have a
-     * colon in it.
-     * <p>
-     * The syntax of an extension feature is fixed at
-     * <pre>
-     *     "feature" "extension" namespace:type_name name string ";"
-     * </pre>
-     * where feature_name is given iff the feature is a Modifier.
-     *
-     * @param show      The show being parsed
-     * @param typeName  The name of the feature's type.  This will always
-     *                  contain a ":".
-     * @param name      The name of this instance of feature
-     *			a list of commands if needed.
-     * @param arg	The argument string on the feature
-     *
-     * @throws      IOException if there's an error.
-     *
-     * @return	    A feature if one of the given type is known, null otherwise
-     */
+     * See superclass definition.
+     **/
     public Feature getFeature(Show show, String typeName, 
     			      String name, String arg)
-		       throws IOException;
-
-
-    /**
-     * Get a modifier feature of the given type.  The type name will have a
-     * colon in it.  The sub-feature will automatically be set up for
-     * you.
-     * <p>
-     * The syntax of an extension feature is fixed at
-     * <pre>
-     *     "feature" "modifier" namespace:type_name name feature_name string ";"
-     * </pre>
-     * where feature_name is given iff the feature is a Modifier.
-     *
-     * @param show      The show being parsed
-     * @param typeName  The name of the feature's type.  This will always
-     *                  contain a ":".
-     * @param name      The name of this instance of feature
-     *			a list of commands if needed.
-     * @param arg	The argument string on the feature
-     *
-     * @throws      IOException if there's an error.
-     *
-     * @return	    A feature if one of the given type is known, null otherwise
-     */
-    public Modifier getModifier(Show show, String typeName, 
-    			        String name, String arg)
-		       throws IOException;
-
-     /**
-     * Get a modifier command of the given type.  
-     * <p>
-     *
-     * @param show      The show being parsed
-     * @param typeName  The name of the commands's type.  This will always
-     *                  contain a ":".
-     * @param args	The argument strings on the command
-     *
-     * @throws      IOException if there's an error.
-     *
-     * @return	    A command if one of the given type is known, null otherwise
-     */
-    public Command getCommand(Show show, String typeName, String[] args)
-		       throws IOException;   
+    {
+	// Not implemented.  If we do this, we'll have to figure out
+	// some syntactical contstraints on an extension feature.
+        return null;
+    }
 
     /**
-     * Called after parsing is done, and all of the built-in objects
-     * have been resolved.  This allows any final
-     * initialization to be performed.  Note that GRIN's built-in
-     * parser automatically calls Command.resolve() for all commands
-     * in the show, including extension commands.
+     * See superclass definition.
      **/
-    public void finishBuilding(Show s) throws IOException;
-    
+    public Modifier getModifier(Show show, final String typeName, 
+    			        String name, String arg)
+    {
+	return new Modifier(show, name) {
+	    public String toString() {
+		return typeName;
+	    }
+	};
+    }
+
     /**
-     * Give a hint how an optimal mosaic could be built.
+     * See superclass definition.
+     * This version assumes that all commands end with a semicolon, and have no
+     * semicolons embedded in them.
+     **/
+    public Command getCommand(Show show, String typeName, String[] args)
+		       throws IOException
+    {
+        String name = typeName + " " + ((args.length > 0) ? args[0] : null);
+        for (int i = 1; i < args.length; i++) {
+            name.concat(" " + args[i]);
+	}
+        
+        final String fname = name;
+        
+	return new Command() {
+	    public void execute() {
+		System.out.println("Executing " + fname);
+	    }
+	};
+    }
+
+    /**
+     * See superclass definition.
+     **/
+    public void finishBuilding(Show show) throws IOException {
+    }
+
+    /**
+     * See superclass definition.
      **/
     public void takeMosaicHint(String name, int width, int height, 
-    			       String[] images);
+                               String[] images)
+    {
+    }
+    
 }

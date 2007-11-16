@@ -67,10 +67,10 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
-import com.hdcookbook.grin.parser.ShowParser;
-import com.hdcookbook.grin.parser.ShowBuilder;
+import com.hdcookbook.grin.io.text.ShowParser;
+import com.hdcookbook.grin.io.text.ShowBuilder;
 import com.hdcookbook.grin.ChapterManager;
-import com.hdcookbook.grin.parser.ExtensionsParser;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
@@ -112,8 +112,8 @@ public class GenericDirector extends Director {
      * See superclass definition.  This extensions parser will just
      * make a fake implementation of each extension.
      **/
-    public ExtensionsParser getExtensionsParser() {
-	return new GenericExtensionsParser(this);
+    public ExtensionsBuilder getExtensionsBuilder() {
+	return new GenericExtensionsBuilder(this);
     }
 
     /**

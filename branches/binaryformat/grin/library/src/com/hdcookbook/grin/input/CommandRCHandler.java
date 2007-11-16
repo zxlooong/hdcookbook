@@ -69,11 +69,13 @@ public class CommandRCHandler extends RCHandler {
     int mask;
     Command[] commands;
 
-    public CommandRCHandler(int mask, Command[] commands) {
+    public CommandRCHandler(String name, int mask, Command[] commands) {
+        super(name);
+        
 	this.mask = mask;
 	this.commands = commands;
     }
-    
+        
     public int getMask() {
         return mask;
     }

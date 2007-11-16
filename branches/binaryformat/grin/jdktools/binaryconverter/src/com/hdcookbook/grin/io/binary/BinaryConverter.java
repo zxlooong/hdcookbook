@@ -52,12 +52,15 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.binaryconverter;
+package com.hdcookbook.grin.io.binary;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.util.Debug;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,7 +82,7 @@ public class BinaryConverter {
        
         if (args == null || args.length == 0) {
             System.out.println("Missing an argument - need a grin script to parse");
-            System.out.println("Syntax: com.hdcookbook.grin.binaryconverter text-based-grin-file [name-of-the-binary-file-to-create]");       
+            System.out.println("Syntax: com.hdcookbook.grin.io.binary.BinaryConverter text-based-grin-file [name-of-the-binary-file-to-create]");       
             return;
         }
         
@@ -91,7 +94,11 @@ public class BinaryConverter {
             binaryFile = null;
         }
         
-        BinaryConverter.convert(textFile, binaryFile);
+        try {
+           BinaryConverter.convert(textFile, binaryFile);
+        } catch (IOException e) {           
+            e.printStackTrace();
+        }    
    }
 
    /**
@@ -103,7 +110,7 @@ public class BinaryConverter {
     *  If binaryScriptName is null or empty String, then the binary file will be named as 
     *  the textScriptName plus the ".grin" extension.
     */
-   public static void convert(String textScriptName, String binaryScriptName) {
+   public static void convert(String textScriptName, String binaryScriptName) throws IOException {
        
        String fileName = null;
        
@@ -129,16 +136,17 @@ public class BinaryConverter {
 	    out.writeShow(dos);
             dos.close();
             
-            //GrinBinaryReader reader = new GrinBinaryReader(
-            //    new GenericDirector("", new MenuExtensionParser()), new FileInputStream(filename));
-            //Show recreatedShow = reader.readShow();            
+            if (Debug.ASSERT) {
+               // A simple assertion test - check that the reader can read back
+               // the binary file that just got generated without any error.
+               DataInputStream in = new DataInputStream(new FileInputStream(fileName));
+               GrinBinaryReader reader = new GrinBinaryReader(director, in);
+               Show recreatedShow = reader.readShow();            
+            }
             
             return;
             
         } catch (IOException e) { 
-            
-            e.printStackTrace();
-
             // failed on writing, delete the binary file
             if (fileName != null) {
                 File file = new File(fileName);
@@ -146,6 +154,8 @@ public class BinaryConverter {
                    file.delete();
                 }   
             }
+            
+            throw e;
         }
    }
 }     

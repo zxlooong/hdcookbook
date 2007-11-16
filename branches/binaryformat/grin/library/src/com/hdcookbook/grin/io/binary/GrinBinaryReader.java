@@ -52,7 +52,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.binaryconverter;
+package com.hdcookbook.grin.io.binary;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -187,8 +187,9 @@ public class GrinBinaryReader {
     }
 
     private void checkValue(int x, int y, String message) throws IOException {
-        if (x != y)
+        if (x != y) {
             throw new IOException("Mismatch: " + message);
+        }
     }
     
     private void checkScriptHeader(DataInputStream in) throws IOException {
@@ -232,12 +233,9 @@ public class GrinBinaryReader {
         for (int i = 0; i < segments.length; i++) {
             show.addSegment(segments[i].getName(), segments[i]);
         }
+        
         for (int i = 0; i < rcHandlers.length; i++) {
-            if (rcHandlers[i] instanceof VisualRCHandler) {
-                show.addRCHandler(((VisualRCHandler)rcHandlers[i]).getName(), rcHandlers[i]);
-            } else {
-                show.addRCHandler(""+i, rcHandlers[i]);
-            }   
+            show.addRCHandler(rcHandlers[i].getName(), rcHandlers[i]); 
         }
         
         show.setSegmentStackDepth(stackDepth);
@@ -628,7 +626,7 @@ public class GrinBinaryReader {
        Feature parts = features[dis.readInt()];
        dis.close();
        
-       Modifier modifier = director.getExtensionsParser().getModifier(show, typeName, name, arg);
+       Modifier modifier = director.getExtensionsBuilder().getModifier(show, typeName, name, arg);
        modifier.setup(parts);
        
        return modifier;
@@ -785,7 +783,7 @@ public class GrinBinaryReader {
         String[] args = dis.readStringArray();
         dis.close();
        
-        return show.getDirector().getExtensionsParser().getCommand(show, name, args);
+        return show.getDirector().getExtensionsBuilder().getCommand(show, name, args);
        
     }
 
@@ -797,13 +795,13 @@ public class GrinBinaryReader {
         ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
         GrinDataInputStream dis = new GrinDataInputStream(bais);  
         
-        int mask = dis.readInt();
-        
+        String name = dis.readUTF();
+        int mask = dis.readInt();     
         Command[] commands = readCommands(dis);
         
         dis.close();
         
-        CommandRCHandler command = new CommandRCHandler(mask, commands);
+        CommandRCHandler command = new CommandRCHandler(name, mask, commands);
         
         return command;        
     }

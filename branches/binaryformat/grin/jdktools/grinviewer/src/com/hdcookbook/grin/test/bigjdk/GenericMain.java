@@ -96,7 +96,7 @@ import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.animator.RepaintDrawEngine;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.test.RyanDirector;
-import com.hdcookbook.grin.parser.ShowBuilder;
+import com.hdcookbook.grin.io.text.ShowBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ImageWaiter;

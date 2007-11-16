@@ -54,7 +54,7 @@
  */
 
 
-package com.hdcookbook.grin.parser;
+package com.hdcookbook.grin.io.text;
 
 import java.io.Reader;
 import java.io.IOException;

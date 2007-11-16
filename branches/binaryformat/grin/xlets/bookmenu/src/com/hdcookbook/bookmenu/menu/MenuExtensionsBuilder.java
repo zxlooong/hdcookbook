@@ -68,10 +68,10 @@ import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.input.RCKeyEvent;
-import com.hdcookbook.grin.parser.ExtensionsParser;
-import com.hdcookbook.grin.parser.ShowBuilder;
-import com.hdcookbook.grin.parser.ShowParser;
-import com.hdcookbook.grin.parser.Lexer;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.io.text.ShowBuilder;
+import com.hdcookbook.grin.io.text.ShowParser;
+import com.hdcookbook.grin.io.text.Lexer;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
@@ -95,11 +95,11 @@ import com.hdcookbook.bookmenu.menu.commands.SelectSubtitlesCommand;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class MenuExtensionsParser implements ExtensionsParser {
+public class MenuExtensionsBuilder implements ExtensionsBuilder {
 
     private MenuXlet xlet;
 
-    public MenuExtensionsParser(MenuXlet xlet) {
+    public MenuExtensionsBuilder(MenuXlet xlet) {
 	this.xlet = xlet;
     }
 

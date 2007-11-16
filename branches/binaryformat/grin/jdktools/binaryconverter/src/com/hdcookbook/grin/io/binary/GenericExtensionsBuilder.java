@@ -53,101 +53,69 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.binaryconverter;
+package com.hdcookbook.grin.io.binary;
 
-import java.net.URL;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
-import com.hdcookbook.grin.ChapterManager;
-import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.parser.ShowParser;
-import com.hdcookbook.grin.parser.ShowBuilder;
-import com.hdcookbook.grin.parser.ExtensionsParser;
-import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
+
+import java.io.IOException;
 
 /**
- * This is a subclass of the GRIN director class which is
- * used by the BinaryConverter tool.
+ * This is an extensions builder that makes a fake version of any
+ * GRIN extension it encounters.  
  */
-class GenericDirector extends Director {
+class GenericExtensionsBuilder implements ExtensionsBuilder {
    
-    private String showName;
-    private ExtensionsParser parser;
-    
-    public GenericDirector(String showName, ExtensionsParser parser) {
-	this.showName = showName;
-        this.parser = parser;
-        
-	ChapterManager[] chapters = { new ChapterManager("init") };
-	setup(0, chapters);
+    private GenericDirector director;
+
+    public GenericExtensionsBuilder(GenericDirector director) {
+	this.director = director;
     }
     
     /**
-     * See superclass definition.  The first time we're asked for a given
-     * chapter manager, we just create it.  A real xlet might have named
-     * chapter managers of different types, if it chooses to use the
-     * state pattern.
+     * Returns null.
      **/
-    public ChapterManager getChapterManager(String name) {
-        synchronized(getShow()) {
-            ChapterManager result = super.getChapterManager(name);
-            if (result == null) {
-                result = new ChapterManager(name);
-                addState(result);
-            }
-            return result;
-        }
+    public Feature getFeature(Show show, String typeName, 
+    			      String name, String arg)
+    {
+	// Not implemented.  If we do this, we'll have to figure out
+	// some syntactical contstraints on an extension feature.
+        return null;
     }
 
     /**
-     * See superclass definition.  This extensions parser will just
-     * make a fake implementation of each extension.
+     * Returns an instance of a UserModifier.
      **/
-    public ExtensionsParser getExtensionsParser() {
-        if (parser == null) 
-            parser = new GenericExtensionsParser(this);
-        
-        return parser;
+    public Modifier getModifier(Show show, final String typeName, 
+    			        String name, String arg)
+    {
+	return new UserModifier(show, typeName, name, arg);
     }
 
     /**
-     * Create a show.  This is called by the main control class of
-     * this debug tool.
+     * Returns an instance of UserCommand.
      **/
-    public Show createShow(ShowBuilder builder) {
-	Show show = new Show(this);
-	URL source = null;
-	BufferedReader rdr = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-	    rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
-	    ShowParser p = new ShowParser(rdr, showName, show, builder);
-	    p.parse();
-	    rdr.close();
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
-            System.out.println("    URL:  " + source);
-	    System.exit(1);
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }
-	}
-        return show;
+    public Command getCommand(Show show, final String typeName, String[] args)
+		       throws IOException
+    {
+	return new UserCommand(typeName, args);
     }
 
+    /**
+     * @inheritDoc
+     **/
+    public void finishBuilding(Show show) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void takeMosaicHint(String name, int width, int height, 
+                               String[] images)
+    {
+    }
+    
 }

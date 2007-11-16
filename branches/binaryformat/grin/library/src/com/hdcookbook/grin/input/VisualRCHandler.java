@@ -147,7 +147,8 @@ public class VisualRCHandler extends RCHandler {
 			   Rectangle[] mouseRects, int[] mouseRectStates,
 			   int timeout, Command[] timeoutCommands) 
     {
-	this.name = name;
+	super(name);
+        
 	this.grid = grid;
 	this.stateNames = stateNames;
 	this.selectCommands = selectCommands;
@@ -168,11 +169,6 @@ public class VisualRCHandler extends RCHandler {
 		}
 	    }
 	}
-    }
-    
-    /* used by the binaryconverter */
-    public String getName() {
-        return name;
     }
     
     /* used by the binaryconverter */  

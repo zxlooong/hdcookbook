@@ -53,62 +53,88 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.input;
+package com.hdcookbook.grin.build.mosaic;
 
-import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.text.Lexer;
+import com.hdcookbook.grin.io.text.ShowParser;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.input.RCHandler;
+
+import java.io.IOException;
+import java.util.LinkedList;
 
 /**
+ * This is an extensions parser for a GRIN show file.  Since we
+ * don't know about any xlet-specific extensions, we just fake
+ * them out:  We parse all the tokens, but we fill in generic
+ * results rather than xlet-specific ones.  For building an image
+ * mosaic, this works fine.
  *
  * @author Bill Foote (http://jovial.com)
  */
-public abstract class RCHandler {
-
-    protected Show show;
-    private String name;
-
-    public RCHandler(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Called from Show
-     **/
-    public void setShow(Show show) {
-	this.show = show;
-    }
-
-    public String toString() {
-	String nm = getClass().getName();
-	int i = nm.lastIndexOf('.');
-	if (i >= 0) {
-	    nm = nm.substring(i+1, nm.length());
-	}
-	return nm;
-    }
-
-    /**
-     * Returns the name of this RCHandler
-     */
-     public String getName() {
-         return name;
-     }
-    
-    abstract public boolean handleRCEvent(RCKeyEvent ke);
+public class GenericExtensionsBuilder implements ExtensionsBuilder {
    
+
+    public GenericExtensionsBuilder() {
+    }
+
     /** 
-     * Returns true if something is done with the mouse
+     * Parse an extension feature that's not a modifier.
      **/
-    abstract public boolean handleMouse(int x, int y, boolean activate);
+    public Feature getFeature(Show show, String typeName,
+                              String name, String arg)
+    {
+	// Some rules need to be set about the syntax of an extension
+	// feature before we can deal with this.
+        return null;
+    }
+
 
     /**
-     * Called for handlers in s when s is activated
+     * Parse an extension command.
+     * This assumes that all commands end with a semicolon, and have no
+     * semicolons embedded in them.
      **/
-    abstract public void activate(Segment s);
+    //public Command parseCommand(Show show, String typeName, Lexer lex,
+    //			        ShowParser parser) 
+    public Command getCommand(Show show, String typeName, String[] args) 
+			throws IOException
+    {
+	return new GenericExtensionCommand(typeName, args);
+    }
+
+    /** 
+     * Parse an extension feature that is a modifer.  Modifiers have
+     * a fixed syntax, so we don't get passed the lexer or the parser.
+     **/
+    public Modifier getModifier(Show show, final String typeName, 
+                                String name, String arg)
+    { 
+        return new Modifier(show, name) {
+            public String toString() {
+                return typeName;
+            } 
+        };
+    }
+
+    /** 
+     * Called by the GRIN parser after the show is parsed
+     **/
+    public void finishBuilding(Show show) throws IOException {
+    }
 
     /**
-     * Called by the show to let us know as the model progresses through
-     * time.  This can be useful for things like timeouts.
+     * Called by the GRIN parser when it encounters a mosaic hint.
+     * This gets overridden in an anonymous subclass in MosaicMaker.
      **/
-    abstract public void advanceToFrame(int frameNumber);
+    public void takeMosaicHint(String name, int width, int height, 
+                               String[] images)
+    {
+    }
+    
 }

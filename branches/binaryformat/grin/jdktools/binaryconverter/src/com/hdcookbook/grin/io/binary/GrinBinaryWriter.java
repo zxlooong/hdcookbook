@@ -52,7 +52,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.binaryconverter;
+package com.hdcookbook.grin.io.binary;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -230,9 +230,9 @@ public class GrinBinaryWriter {
         out.writeInt(rcHandlersList.size());
         out.writeInt(segmentsList.size());
         
-        writeFeatures(out, (Feature[])featuresList.toArray(new Feature[]{}));   
-        writeRCHandlers(out, (RCHandler[])rcHandlersList.toArray(new RCHandler[]{}));
-        writeSegments(out, (Segment[])segmentsList.toArray(new Segment[]{}));
+        writeFeatures(out, (Feature[])featuresList.toArray(new Feature[featuresList.size()]));   
+        writeRCHandlers(out, (RCHandler[])rcHandlersList.toArray(new RCHandler[rcHandlersList.size()]));
+        writeSegments(out, (Segment[])segmentsList.toArray(new Segment[segmentsList.size()]));
         
         out.writeInt(show.getSegmentStackDepth());
         
@@ -697,6 +697,7 @@ public class GrinBinaryWriter {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);    
 
+        dos.writeUTF(commandRCHandler.getName());
         dos.writeInt(commandRCHandler.getMask());
         writeCommands(dos, commandRCHandler.getCommands());   
         

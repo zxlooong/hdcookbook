@@ -55,7 +55,7 @@
 
 package com.hdcookbook.grin;
 
-import com.hdcookbook.grin.parser.ExtensionsParser;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
 
 import java.util.Hashtable;
 import java.awt.event.KeyEvent;
@@ -145,12 +145,13 @@ public abstract class Director {
     }
 
     /**
-     * Give the ExtensionsParser that will parse any new
+     * Give the ExtensionsBuilder that will build any new
      * features or commands we've extended the framework with.
      * If no extensions are returned, it's OK to return null.
-     *
-     * @return The extensions parser
-     **/
-    abstract public ExtensionsParser getExtensionsParser();
+     * 
+     * 
+     * @return The extensions builder
+     */
+    abstract public ExtensionsBuilder getExtensionsBuilder();
 
 }

@@ -53,90 +53,79 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test;
+package com.hdcookbook.grin.io.text;
+
 
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.parser.Lexer;
-import com.hdcookbook.grin.parser.ShowParser;
-import com.hdcookbook.grin.parser.ExtensionsParser;
 import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.util.Debug;
 
+import java.io.Reader;
 import java.io.IOException;
+import java.awt.Font;
+import java.awt.Color;
 
 /**
- * This is part of the "Ryan's life" test show.  It's mostly of
- * historical interest; it still works, but some of the ways of
- * structuring and using a show are passe.
+ * A helper class for parsing a show.  Clients of the parser can
+ * subclass this to intercept items as there's encountered.
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class RyanExtensionsParser implements ExtensionsParser {
+public class ShowBuilder {
    
-    RyanDirector director;
+    protected ShowParser parser;
+    protected Show show;
 
-    public RyanExtensionsParser(RyanDirector director) {
-	this.director = director;
+    public ShowBuilder() {
     }
 
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
+    void init(ShowParser parser, Show show) {
+	this.parser = parser;
+	this.show = show;
+    }
+
+    /** 
+     * Called when a new feature is encountered.
+     **/
+    public void addFeature(String name, int line, Feature f) throws IOException
     {
-        return null;
+	show.addFeature(name, f);
     }
 
-    public Modifier getModifier(Show show, String typeName, 
-    			        String name, String arg)
+    /**
+     * Called when a new segment is encountered.
+     **/
+    public void addSegment(String name, int line, Segment s) throws IOException
     {
-        return null;
+	show.addSegment(name, s);
     }
 
-    //public Command parseCommand(Show show, String typeName, Lexer lex,
-    //			        ShowParser parser) 
-    
-    public Command getCommand(Show show, String typeName, String[] args)
+    /**
+     * Called when a new command is encountered.
+     **/
+    public void addCommand(Command command, int line) {
+	// At xlet runtime, commands are just part of other things, so we
+	// don't need to record them.
+    }
+
+    /**
+     * Called when a new remote control handler is encountered.
+     **/
+    public void addRCHandler(String name, int line, RCHandler hand) 
 			throws IOException
     {
-	Command result = null;
-	if ("ryan:start_video".equals(typeName)) {
-	    result = new Command() {
-	       public void execute() { 
-		    director.startVideo();
-	       }
-	    };
-	} else if ("ryan:play_mode_interactive".equals(typeName)) {
-	    final boolean val = Boolean.parseBoolean(args[0]);
-	    result = new Command() {
-	       public void execute() { 
-		    director.setInteractiveMode(val);
-	       }
-	    };
-	} else if ("ryan:toggle_commentary".equals(typeName)) {
-	    result = new Command() {
-	       public void execute() { 
-		    director.toggleCommentary();
-	       }
-	    };
-	} else if ("ryan:commentary_start".equals(typeName)) {
-	    result = new Command() {
-	       public void execute() { 
-		    director.startCommentary();
-	       }
-	    };
-	} else {
-	    throw new IOException("Unrecognized command type \"" + typeName + "\"");
-	}
-	return result;
+	show.addRCHandler(name, hand);
     }
 
-    public void finishBuilding(Show show) throws IOException {
+    /**
+     * Called when the show has finished parsing and all forward references
+     * have been resolved.
+     **/
+    public void finishBuilding() throws IOException {
     }
-
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
-    }
-
+    
 }

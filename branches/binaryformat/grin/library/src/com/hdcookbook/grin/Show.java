@@ -236,7 +236,7 @@ public class Show implements AnimationClient {
      * Get all of the features in this show as an array
      **/
     public Feature[] getFeaturesAsArray() {
-        return (Feature[]) features.values().toArray(new Feature[]{});
+        return (Feature[]) features.values().toArray(new Feature[features.size()]);
     }
     
     /**
@@ -262,7 +262,7 @@ public class Show implements AnimationClient {
      * Get all of the RCHandlers in this show as an array
      **/
     public RCHandler[] getRCHandlersAsArray() {
-        return (RCHandler[]) rcHandlers.values().toArray(new RCHandler[]{});       
+        return (RCHandler[]) rcHandlers.values().toArray(new RCHandler[rcHandlers.size()]);       
     } 
 
     /**
@@ -288,7 +288,7 @@ public class Show implements AnimationClient {
      **/
     
     public Segment[] getSegmentsAsArray() {
-        return (Segment[]) segments.values().toArray(new Segment[]{});       
+        return (Segment[]) segments.values().toArray(new Segment[segments.size()]);       
     } 
     
     /**

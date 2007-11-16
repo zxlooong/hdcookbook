@@ -52,114 +52,106 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.binaryconverter;
+package com.hdcookbook.grin.io.binary;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
-import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * A convenience DatInputStream subclass that can handle certain Objects and 
+ * A convenience DataOutputStream subclass that can handle certain Objects and 
  * Object arrays, including null.
  */
-class GrinDataInputStream extends DataInputStream {
+class GrinDataOutputStream extends DataOutputStream {
    
-   public GrinDataInputStream(InputStream in) {
-       super(in);
+   public GrinDataOutputStream(OutputStream out) {
+      super(out);
    }
    
-   public Color readColor() throws IOException {
-       byte b = readByte();
-       if (b == Constants.NULL) {
-           return null;
-       }
-       
-       int red = readInt();
-       int green = readInt();
-       int blue = readInt();
-       int alpha = readInt();
-       return new Color(red, green, blue, alpha);
+   public void writeColor(Color color) throws IOException {
+       if (color == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);
+           writeInt(color.getRed());
+           writeInt(color.getGreen());
+           writeInt(color.getBlue());
+           writeInt(color.getAlpha()); 
+       }    
    }
    
-   public Rectangle readRectangle() throws IOException {
-       byte b = readByte();
-       if (b == Constants.NULL) {
-           return null;
+   public void writeRectangle(Rectangle rect) throws IOException {
+       if (rect == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);   
+           writeDouble(rect.getX());
+           writeDouble(rect.getY());
+           writeDouble(rect.getWidth());
+           writeDouble(rect.getHeight());
        }
-       double x = readDouble();
-       double y = readDouble();
-       double w = readDouble();
-       double h = readDouble();
-       return new Rectangle((int)x,(int)y,(int)w,(int)h);
    }
    
-   public Rectangle[] readRectangleArray() throws IOException {
-       byte b = readByte();
-       if (b == Constants.NULL) {
-           return null;
-       }
-       
-       Rectangle[] array = new Rectangle[readInt()];
-       for (int i = 0; i < array.length; i++) {
-           array[i] = readRectangle();
-       }
-       return array;       
+   public void writeRectangleArray(Rectangle[] array) throws IOException {
+       if (array == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);
+           writeInt(array.length);
+           for (int i = 0; i < array.length; i++) {
+               writeRectangle(array[i]);
+           }    
+       }       
    }
    
-   public Font readFont() throws IOException {
-       byte b = readByte();
-       if (b == Constants.NULL) {
-           return null;
-       }
-       String name = readUTF();
-       int style = readInt();
-       int size = readInt();
-       return new Font(name, style, size);
+   public void writeFont(Font font) throws IOException {
+       if (font == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);
+           writeUTF(font.getName());
+           writeInt(font.getStyle());
+           writeInt(font.getSize());   
+       }    
    }  
    
-   
-   public int[] readIntArray() throws IOException {
-       byte b = readByte();
-       if (b == Constants.NULL) {
-           return null;
+   public void writeIntArray(int[] array) throws IOException {
+       if (array == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);
+           writeInt(array.length);
+           for (int i = 0; i < array.length; i++) {
+               writeInt(array[i]);
+           }    
        }
-       
-       int[] array = new int[readInt()];
-       for (int i = 0; i < array.length; i++) {
-           array[i] = readInt();
-       }
-       return array;
    }   
-
-      
-   public String[] readStringArray() throws IOException {
-       byte b = readByte();
-       if (b == Constants.NULL) {
-           return null;
+   
+   public void writeStringArray(String[] array) throws IOException {
+       if (array == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);
+           writeInt(array.length);
+           for (int i = 0; i < array.length; i++) {
+               writeUTF(array[i]);
+           }
        }
-       
-       String[] array = new String[readInt()];
-       for (int i = 0; i < array.length; i++) {
-           array[i] = readUTF();
-       }
-       return array;
    }
    
-   
-   public int[][] readInt2Array() throws IOException {
-       byte b = readByte();
-       if (b == Constants.NULL) {
-           return null;
+   public void writeInt2Array(int[][] array) throws IOException {
+       if (array == null) {
+           writeByte(Constants.NULL);
+       } else {
+           writeByte(Constants.NON_NULL);
+           int length = array.length;
+           writeInt(length);
+           for (int i = 0; i < length; i++) {
+               writeIntArray(array[i]);
+           }
        }
- 
-       int[][] array = new int[readInt()][];
-       
-       for (int i = 0; i < array.length; i++) {
-           array[i] = readIntArray();
-       }
-       return array;
    }   
 }
