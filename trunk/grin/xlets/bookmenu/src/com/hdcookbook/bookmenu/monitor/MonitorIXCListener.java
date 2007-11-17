@@ -176,6 +176,13 @@ public class MonitorIXCListener
     public void stateChange(AppStateChangeEvent event) {
 	// Automatically re-launch the menu when the game puts itself
 	// in the destroyed state
+	if (Debug.LEVEL > 0) {
+	    Debug.println();
+	    Debug.println("*** Monitor gets AppStateChangeEvent");
+	    Debug.println("    " + event);
+	    Debug.println("    App ID:  " + event.getAppID().getAID());
+	    Debug.println();
+	}
 	if (!event.hasFailed() && event.getAppID().getAID() == GAME_APP_ID) {
 	    if (event.getToState() == AppProxy.DESTROYED) {
 		doStartMenu();

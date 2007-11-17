@@ -179,9 +179,19 @@ public class GunBunnyXlet extends BaseXlet {
      * the menu xlet.
      **/
     public void destroySelf() {
+	if (Debug.LEVEL > 0) {
+	    Debug.println();
+	    Debug.println("*******************************");
+	    Debug.println("*    GUN BUNNY BIDS ADIEU     *");
+	    Debug.println("*******************************");
+	    Debug.println();
+	}
 	try {
 	    destroyXlet(true);
 	} catch (XletStateChangeException ignored) {
+	}
+	if (Debug.LEVEL > 0) {
+	    Debug.println("Calling notifyDestroyed...");
 	}
 	xletContext.notifyDestroyed();
     }
