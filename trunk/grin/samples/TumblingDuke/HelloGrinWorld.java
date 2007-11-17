@@ -53,7 +53,7 @@
  */
 
 import com.hdcookbook.grin.ChapterManager;
-import com.hdcookbook.grin.parser.ShowParser;
+import com.hdcookbook.grin.reader.text.text.ShowParser;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -74,7 +74,7 @@ import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.util.AssetFinder;
-import com.hdcookbook.grin.parser.ExtensionsParser;
+imcom.hdcookbook.grin.reader.texteader.text.ExtensionsBuilder;
 	
 /** 
  * An xlet example that displays GRIN script.
@@ -136,7 +136,7 @@ public class HelloGrinWorld implements Xlet, AnimationContext {
 	
 	class SimpleDirector extends Director {
 		
-	   public ExtensionsParser getExtensionsParser() {
+	   public ExtensionsBuilder getExtensionsBuilder() {
 		     return null;
 	   }
 	   

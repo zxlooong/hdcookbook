@@ -92,6 +92,14 @@ public class Timer extends Feature {
 	this.endCommands = endCommands;
     }
 
+    public int getNumFrames() {
+        return numFrames;
+    }
+    
+    public boolean getRepeat() {
+        return repeat;
+    }
+    
     /**
      * Get the commands that are triggered when the timer goes off.
      **/

@@ -79,6 +79,14 @@ public class ActivatePartCommand extends Command {
 
     public ActivatePartCommand() {
     }
+    
+    public Assembly getAssembly() {
+        return assembly;
+    };
+    
+    public Feature getPart() {
+        return part;
+    }
    
     /**
      * Called from parser

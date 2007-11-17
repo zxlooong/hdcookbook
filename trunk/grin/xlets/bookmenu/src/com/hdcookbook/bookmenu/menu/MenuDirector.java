@@ -56,6 +56,7 @@
 
 package com.hdcookbook.bookmenu.menu;
 
+import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import java.net.URL;
 import java.io.IOException;
 import java.io.Reader;
@@ -67,9 +68,9 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.input.RCKeyEvent;
-import com.hdcookbook.grin.parser.ExtensionsParser;
-import com.hdcookbook.grin.parser.ShowBuilder;
-import com.hdcookbook.grin.parser.ShowParser;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.io.text.ShowBuilder;
+import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
@@ -105,8 +106,8 @@ public class MenuDirector extends Director {
      * Called by GRIN when it parses a show.  This is how we hook
      * in our extensions to the GRIN syntax.
      **/
-    public ExtensionsParser getExtensionsParser() {
-	return new MenuExtensionsParser(xlet);
+    public ExtensionsBuilder getExtensionsBuilder() {
+	return new MenuExtensionsBuilder(xlet);
     }
 
     /**
@@ -114,18 +115,25 @@ public class MenuDirector extends Director {
      * most of our menu UI.
      **/
     public Show createShow() {
-	Show show = new Show(this);
-	String showName = "menu.txt";
-	try {
+        
+        Show show = new Show(this);
+        
+        try {
+            
+            String showName = "menu.grin";
 	    URL u = AssetFinder.getURL(showName);
-	    if (u == null) {
-		throw new IOException("Can't find menu.txt in assets");
-	    }
-	    BufferedReader rdr = new BufferedReader(
-			    new InputStreamReader(u.openStream(), "UTF-8"));
-	    ShowParser p = new ShowParser(rdr, showName, show);
-	    p.parse();
-	    rdr.close();
+            
+            // The two lines below are equivalent of the 4 lines of code against the text based ShowParser
+            // ====START-CODE====
+            // BufferedReader rdr = new BufferedReader(new InputStreamReader(u.openStream(), "UTF-8"));
+	    // ShowParser p = new ShowParser(rdr, showName, show);
+	    // p.parse();
+	    // rdr.close();
+            // ====END-CODE====
+            
+ 	    GrinBinaryReader reader = new GrinBinaryReader(this, u.openStream());
+            show = reader.readShow();
+            
 	} catch (IOException ex) {
 	    if (Debug.LEVEL > 0) {
 		ex.printStackTrace();
@@ -135,7 +143,8 @@ public class MenuDirector extends Director {
 		Debug.println();
 		AssetFinder.abort();
 	    }
-	}
+	}        
+        
 	return show;
     }
 

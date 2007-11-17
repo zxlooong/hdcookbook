@@ -80,6 +80,9 @@ import java.awt.AlphaComposite;
 public class Fade extends Modifier {
 
     private AlphaComposite[] alphas;
+    private int[] keyframes;
+    private int[] keyAlphas;
+    private boolean srcOver;
     private boolean isActivated = false;
     private int startAnimationFrame;
     private int alphaIndex;
@@ -90,6 +93,43 @@ public class Fade extends Modifier {
     {
 	super(show, name);
 	this.endCommands = endCommands;
+        this.keyframes = keyframes;
+        this.keyAlphas = keyAlphas;
+        this.srcOver = srcOver;
+    }
+    
+    /* 
+     * Internal use only 
+     */
+    public int[] getKeyframes() {
+       return keyframes;
+    }
+    
+    /* 
+     * Internal use only 
+     */
+    public int[] getKeyAlphas() {
+       return keyAlphas;
+    }
+    
+    /* 
+     * Internal use only 
+     */
+    public boolean getSrcOver() {
+       return srcOver;
+    }
+    
+    /* 
+     * Internal use only 
+     */    
+    public Command[] getEndCommands() {
+       return endCommands;
+    }
+    
+    /**
+     * See superclass definition.
+     **/
+    public void initialize() {
 	if (keyframes.length == 1) {
 	    AlphaComposite ac = show.initializer.getAlpha(srcOver,keyAlphas[0]);
 	    alphas = new AlphaComposite[] { ac };

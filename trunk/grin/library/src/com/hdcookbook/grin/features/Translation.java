@@ -114,6 +114,22 @@ public class Translation extends Feature {
 	currY = ys[0];
     }
 
+    public int[] getFrames() {
+        return frames;
+    }
+    
+    public int[] getXs() {
+        return xs;
+    }
+    
+    public int[] getYs() {
+        return ys;
+    }
+    
+    public int getRepeatFrame() {
+        return repeatFrame;
+    }
+    
     /**
      * See superclass definition.
      **/

@@ -107,7 +107,6 @@ public class Show implements AnimationClient {
     private Hashtable features = new Hashtable();
     private Hashtable rcHandlers = new Hashtable();
     private Hashtable segments = new Hashtable();
-    private Hashtable controllers = new Hashtable();
 
     private Segment currentSegment = null;
     private Segment[] segmentStack = new Segment[0];  // For push/pop
@@ -233,7 +232,13 @@ public class Show implements AnimationClient {
         return features.elements();
     }
 
-
+    /** 
+     * Get all of the features in this show as an array
+     **/
+    public Feature[] getFeaturesAsArray() {
+        return (Feature[]) features.values().toArray(new Feature[features.size()]);
+    }
+    
     /**
      * Used by the parser
      **/
@@ -252,6 +257,13 @@ public class Show implements AnimationClient {
     public RCHandler getRCHandler(String name) {
 	return (RCHandler) rcHandlers.get(name);
     }
+    
+    /**
+     * Get all of the RCHandlers in this show as an array
+     **/
+    public RCHandler[] getRCHandlersAsArray() {
+        return (RCHandler[]) rcHandlers.values().toArray(new RCHandler[rcHandlers.size()]);       
+    } 
 
     /**
      * Look up a segment.  This is done without taking out the show lock.
@@ -271,6 +283,14 @@ public class Show implements AnimationClient {
 	segments.put(name, f);
     }
 
+    /**
+     * Get all of the segments in this show as an array
+     **/
+    
+    public Segment[] getSegmentsAsArray() {
+        return (Segment[]) segments.values().toArray(new Segment[segments.size()]);       
+    } 
+    
     /**
      * Set the current segment.  This is the main way an application
      * controls what is being displayed on the screen.  The new segment

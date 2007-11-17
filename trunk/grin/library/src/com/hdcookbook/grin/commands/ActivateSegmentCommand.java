@@ -82,6 +82,18 @@ public class ActivateSegmentCommand extends Command {
     public ActivateSegmentCommand(Show show) {
 	this(show, false, false);
     }
+    
+    public boolean getPush() {
+        return push;
+    }
+    
+    public boolean getPop() {
+        return pop;
+    }
+    
+    public Segment getSegment() {
+        return segment;
+    }
 
     /**
      * Called by the parser

@@ -98,7 +98,7 @@ information or have any questions.
 		
 	</target>
 	
-	<target name="build-menu-assets" depends="init-menu-assets, run-mosaic-builder">
+	<target name="build-menu-assets" depends="init-menu-assets, run-mosaic-builder, generate-binary-script">
 
 		<delete file="${HDC_DISC_BDMV}/AUXDATA/*"/>
 		
@@ -124,6 +124,13 @@ information or have any questions.
 			<arg line="-show menu.txt -assets ${MENUASSETS_DEST} -out ${MENUASSETS_DEST}"/>
 		</java>			
 	</target>
+        
+ 	<target name="generate-binary-script"> 
+	    <ant antfile="scripts/ant/build_grinview.xml" target="compile-binary-converter"/>
+            <java fork="true" jar="${HDC_BUILD_DIR}/grin_viewer/converter.jar">
+                <arg line="${MENUASSETS_DEST}/menu.txt"/>
+            </java>		
+	</target>       
 
 <target name="build-monitor-xlet">
 

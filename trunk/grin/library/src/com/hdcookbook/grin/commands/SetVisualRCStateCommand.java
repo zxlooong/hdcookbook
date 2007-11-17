@@ -90,7 +90,22 @@ public class SetVisualRCStateCommand extends Command {
 	this.runCommands = runCommands;
     }
 
-
+    public boolean getActivated() {
+        return activated;
+    }
+    
+    public int getState() {
+        return state;
+    }
+    
+    public VisualRCHandler getVisualRCHandler() {
+        return handler;
+    }
+    
+    public boolean getRunCommands() {
+        return runCommands;
+    }
+    
     /**
      * Called from parser 
      *

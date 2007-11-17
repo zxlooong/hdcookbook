@@ -117,6 +117,26 @@ public class ImageSequence extends Feature {
 	this.linkedTo = null;
 	this.endCommands = endCommands;
     }
+    
+    public String getFileName() {
+       return fileName;
+    }
+    
+    public String[] getMiddle() {
+       return middle;
+    }
+    
+    public String getExtension() {
+       return extension;
+    }
+    
+    public boolean getRepeat() {
+       return repeat;
+    }
+    
+    public Command[] getEndCommands() {
+       return endCommands;
+    }
 
     /**
      * Called by the parser.  Animations can be linked, so that they

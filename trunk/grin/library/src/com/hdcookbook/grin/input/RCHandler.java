@@ -65,8 +65,10 @@ import com.hdcookbook.grin.Show;
 public abstract class RCHandler {
 
     protected Show show;
+    private String name;
 
-    public RCHandler() {
+    public RCHandler(String name) {
+        this.name = name;
     }
 
     /**
@@ -85,6 +87,13 @@ public abstract class RCHandler {
 	return nm;
     }
 
+    /**
+     * Returns the name of this RCHandler
+     */
+     public String getName() {
+         return name;
+     }
+    
     abstract public boolean handleRCEvent(RCKeyEvent ke);
    
     /** 
