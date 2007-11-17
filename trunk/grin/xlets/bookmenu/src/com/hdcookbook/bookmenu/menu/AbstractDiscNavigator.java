@@ -67,7 +67,8 @@ import javax.media.Time;
 import javax.media.Manager;
 import javax.media.ControllerListener;
 import javax.media.ControllerEvent;
-import javax.media.RateChangeEvent;
+import javax.media.RestartingEvent;
+import javax.media.StartEvent;
 import javax.media.StopEvent;
 import javax.media.protocol.DataSource;
 import javax.tv.locator.InvalidLocatorException;
@@ -131,7 +132,8 @@ public abstract class AbstractDiscNavigator
      **/
     private Player mainPlayer;
     private boolean weAreControlling = false;	// true while we control player
-    private float currentRate = 1.0f;	// Play rate that we expect
+    private boolean playerIsStarted = false;	// Shadows player state
+    private boolean waitingForStarted = false;	// handshake to avoid deadlock
     private PlayListChangeControl playlistControl;
     private MediaTimePositionControl timePositionControl;
     private PlaybackControl playbackControl;
@@ -263,22 +265,34 @@ public abstract class AbstractDiscNavigator
      * selection).
      **/
     protected synchronized void gotoPlaylistInCurrentTitle(BDLocator loc) {
-	boolean oldWeAreControlling = weAreControlling;
-	if (Debug.LEVEL > 0) {
-	    if (weAreControlling) {
-		Thread.dumpStack();
-		Debug.println();
-		Debug.println("***  WARNING:  Recursive player control.");
-		Debug.println();
-	    } else {
-		Debug.println("Start controlling player.");
+
+	    //
+	    // Guard against an attempt to control player from two
+	    // threads simultaneously
+	    //
+	while (weAreControlling) {
+	    if (Debug.LEVEL > 0) {
+		Debug.println("Waiting for other thread to control player");
 	    }
+	    try {
+		wait();
+	    } catch (InterruptedException ex) {
+		Thread.currentThread().interrupt();
+		return;
+	    }
+	}
+
+	if (Debug.LEVEL > 0) {
+	    Debug.println("Start controlling player at "
+				+ System.currentTimeMillis());
+	}
+	if (Debug.LEVEL > 0) {
+	    Debug.println("*** Changing playlist to " + loc + " ***");
 	}
 	weAreControlling = true;
 	try {
 	    if (mainPlayer == null) {
 		try {
-System.out.println("@@ " + loc.toString());
 		    MediaLocator ml = new MediaLocator(loc);
 		    mainPlayer  = Manager.createPlayer(ml);
 		} catch (Exception ignored) {
@@ -337,9 +351,6 @@ System.out.println("@@ " + loc.toString());
 		    }
 		}
 	    }
-	    if (Debug.LEVEL > 0) {
-		Debug.println("*** Changing playlist to " + loc + " ***");
-	    }
 	    mainPlayer.start();
 	    currentPlaylistID = loc.getPlayListId();
 		// I'm not sure, but I think that selecting different streams
@@ -353,16 +364,11 @@ System.out.println("@@ " + loc.toString());
 	    waitForStarted(true, 3000);
 	    notifyAVStarted();
 	} finally {
-	    weAreControlling = oldWeAreControlling;
+	    weAreControlling = false;
+	    notifyAll();
 	    if (Debug.LEVEL > 0) {
-		if (weAreControlling) {
-		    Debug.println();
-		    Debug.println("***  WARNING:  End of recursive player "
-				   + "control ***");
-		    Debug.println();
-		} else {
-		    Debug.println("Done controlling player.");
-		}
+		Debug.println("Done controlling player at " 
+				+ System.currentTimeMillis());
 	    }
 	}
     }
@@ -381,16 +387,6 @@ System.out.println("@@ " + loc.toString());
      **/
     protected abstract void notifyAVStarted();
 
-    /**
-     * Pause or un-pause the video.
-     * This can only be done after a playlist has been started.
-     *
-     * @see #gotoPlaylistInCurrentTitle(org.bluray.net.BDLocator)
-     **/
-    public synchronized void pause(boolean paused) {
-	currentRate = paused ? 0f : 1f;
-	mainPlayer.setRate(currentRate);
-    }
 
     /**
      * Navigate to the given time in the video determined by the playlist
@@ -509,33 +505,55 @@ System.out.println("@@ " + loc.toString());
      * Callback from ControllerListener
      **/
     public void controllerUpdate(ControllerEvent event) {
-	synchronized(this) {
-	    this.notifyAll();
-	    // We don't detect start event, because we have to check the 
-	    // player's state anyway to avoid a race condition.  See uses of
-	    // waitForStarted(), for example.
-	}
-
 	boolean doNotifyStop = false;
+	if (Debug.LEVEL > 1) {
+	    Debug.println("Received controller event " + event);
+	}
 	synchronized(this) {
-	    if (weAreControlling) {
-		return;
-	    }
-	    if (event instanceof StopEvent) {
-		doNotifyStop = mainPlayer.getState() != Player.Started;
-		if (Debug.LEVEL > 0) {
-		    Debug.println("*** StopEvent.  Player stopped:  " 
-				   + doNotifyStop);
+	    boolean oldPlayerState = playerIsStarted;
+
+	    if (event instanceof RestartingEvent) {
+		// Restarting event is a subtype of StopEvent, and can
+		// be generated for things like a rate change.  It's not
+		// a StopEvent that we care about, because the player
+		// is just going to Start again automatically, so we ignore
+		// it.
+		if (Debug.LEVEL > 1) {
+		    Debug.println("Ignoring RestartingEvent");
 		}
-	    } else if (event instanceof RateChangeEvent) {
-		float rateNow = mainPlayer.getRate();  
-			// more reliable than event
-		if (rateNow != currentRate) {
-		    if (rateNow == 0f) {
-			if (Debug.LEVEL > 0) {
-			    Debug.println("*** RateChangeEvent to 0");
-			}
-			doNotifyStop = true;
+	    } else if (event instanceof StartEvent) {
+		if (Debug.LEVEL > 0) {
+		    Debug.println("*** StartEvent at media time "
+			  + ((StartEvent) event).getMediaTime().getSeconds());
+		}
+		playerIsStarted = true;
+	    } else if (event instanceof StopEvent) {
+		if (Debug.LEVEL > 0) {
+		    Debug.println("*** StopEvent at media time "
+			  + ((StopEvent) event).getMediaTime().getSeconds());
+		}
+		playerIsStarted = false;
+	    }
+
+	    if (playerIsStarted != oldPlayerState) {
+		doNotifyStop = !playerIsStarted && !weAreControlling;
+		notifyAll();
+
+		if (Debug.LEVEL > 0) {
+		    Debug.println("*** Player is now " 
+		    		   + (playerIsStarted ? "started" : "stopped"));
+		}
+
+		//
+		// Handshake with waitForStarted(), in case our video
+		// is so short that it could stop almost immediately.
+		//
+		while (playerIsStarted && waitingForStarted) {
+		    try {
+			wait();
+		    } catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+			break;
 		    }
 		}
 	    }
@@ -565,21 +583,27 @@ System.out.println("@@ " + loc.toString());
 	}
 	for (;;) {
 	    synchronized(this) {
-		if (wantStarted && mainPlayer.getState() == Player.Started) {
-		    return true;
-		}
-		if (!wantStarted && mainPlayer.getState() != Player.Started) {
-		    return true;
-		}
-		if (!waitWithTimeout(this, tm, timeout)) {
-		    if (Debug.LEVEL > 0) {
-			Thread.currentThread().dumpStack();
-			Debug.println();
-			Debug.println("***  WARNING:  Timed out waiting "
-			              + "for player started " + wantStarted);
-			Debug.println();
+		waitingForStarted = wantStarted;	// matched in finally
+		try {
+		    if (wantStarted == playerIsStarted) {
+			return true;
 		    }
-		    return false;
+		    if (!waitWithTimeout(this, tm, timeout)) {
+			if (Debug.LEVEL > 0) {
+			    Thread.currentThread().dumpStack();
+			    Debug.println();
+			    Debug.println("***  WARNING:  Timed out waiting "
+					  + timeout + " ms "
+					  + "for player started " +wantStarted);
+			    Debug.println();
+			}
+			return false;
+		    }
+		} finally {
+		    if (waitingForStarted) {
+			waitingForStarted = false;
+			notifyAll();
+		    }
 		}
 	    }
 	}

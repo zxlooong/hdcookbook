@@ -103,37 +103,37 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
      * The playlist entry for the background video that is shown during
      * the main menu.  This video loops automatically.
      **/
-    public BDLocator menuVideoStartPL = makeBDLocator("bd://0.PLAYLIST:00000");
+    public BDLocator menuVideoStartPL = makeBDLocator("bd://1.PLAYLIST:00000");
 
     private int menuVideoPL_ID = menuVideoStartPL.getPlayListId();
 
     /**
      * The playlist entry for the main feature video.
      **/
-    public BDLocator movieVideoStartPL = makeBDLocator("bd://0.PLAYLIST:00001");
+    public BDLocator movieVideoStartPL = makeBDLocator("bd://1.PLAYLIST:00001");
 
     private int movieVideoPL_ID = movieVideoStartPL.getPlayListId();
 
     /**
      * The playlist entry for the bonus feature video.
      **/
-    public BDLocator bonusVideoStartPL = makeBDLocator("bd://0.PLAYLIST:00002");
+    public BDLocator bonusVideoStartPL = makeBDLocator("bd://1.PLAYLIST:00002");
 
     /**
      * The playlist entry for blank video
      **/
-    public BDLocator blankVideo = makeBDLocator("bd://0.PLAYLIST:00004");
+    public BDLocator blankVideo = makeBDLocator("bd://1.PLAYLIST:00004");
     private int blankVideoPL_ID = blankVideo.getPlayListId();
 
     /**
      * PL for the scenes
      **/
     public BDLocator[] sceneVideoStartPL = new BDLocator[] {
-	    makeBDLocator("bd://0.PLAYLIST:00001.MARK:00002"),
-	    makeBDLocator("bd://0.PLAYLIST:00001.MARK:00003"),
-	    makeBDLocator("bd://0.PLAYLIST:00001.MARK:00004"),
-	    makeBDLocator("bd://0.PLAYLIST:00001.MARK:00005"),
-	    makeBDLocator("bd://0.PLAYLIST:00001.MARK:00006")
+	    makeBDLocator("bd://1.PLAYLIST:00001.MARK:00002"),
+	    makeBDLocator("bd://1.PLAYLIST:00001.MARK:00003"),
+	    makeBDLocator("bd://1.PLAYLIST:00001.MARK:00004"),
+	    makeBDLocator("bd://1.PLAYLIST:00001.MARK:00005"),
+	    makeBDLocator("bd://1.PLAYLIST:00001.MARK:00006")
     };
 
     /**
@@ -162,11 +162,9 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
      **/
     public void startVideoAt(BDLocator playlist) {
 	if (playlist == null) {
-	    gotoPlaylistInCurrentTitle(blankVideo);
-	    pause(true);
+	    gotoPlaylistInCurrentTitle(blankVideo);  // this clip is very short
 	} else {
 	    gotoPlaylistInCurrentTitle(playlist);
-	    pause(false);
 	}
     }
 
@@ -188,11 +186,14 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
 		return;		// Show will bring us to video soon
 	    }
 	}
+	if (Debug.LEVEL > 0) { 
+	    Debug.println("notifyStop, currentPlaylistID is " 
+			    + currentPlaylistID);
+	}
 	if (currentPlaylistID == menuVideoPL_ID) {
 	    gotoPlaylistInCurrentTitle(menuVideoStartPL);
 	} else if (currentPlaylistID == blankVideoPL_ID) {
-	    gotoPlaylistInCurrentTitle(blankVideo);
-	    pause(true);
+	    // Do nothing - let it stay stopped
 	} else {
 	    // In all other cases, we go back to the main menu state.  Note
 	    // that show.getSegment and show.activateSegment
