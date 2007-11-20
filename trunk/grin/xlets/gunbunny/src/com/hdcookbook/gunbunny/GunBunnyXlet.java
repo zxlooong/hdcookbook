@@ -210,7 +210,11 @@ public class GunBunnyXlet extends BaseXlet {
 	    setAnimator(new SFAAAnimator());
 	} else if (value == 3 && !(animator instanceof RepaintDrawAnimator)) {
 	    setAnimator(new RepaintDrawAnimator());
-	}
+	} else if (value == 0) {
+            if (game != null) {
+               game.handleEnd();
+            }
+        }
     }
     
     /**

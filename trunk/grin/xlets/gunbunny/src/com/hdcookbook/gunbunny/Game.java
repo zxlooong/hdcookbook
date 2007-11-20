@@ -226,7 +226,15 @@ public class Game {
     private void resetGameTime(int currFrame) {
 	gameStartFrame = currFrame;
     }
-   
+
+    /**
+     * Called by the xlet to end the game
+     **/
+    
+    public synchronized void handleEnd() {
+        state = STATE_GAME_OVER;
+    }
+    
     /**
      * Called by the xlet when the enter/OK key is pressed
      **/
