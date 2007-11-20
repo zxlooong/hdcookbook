@@ -88,6 +88,7 @@ import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
+import com.hdcookbook.grin.util.Debug;
 
 /**
  * The main class to read in a Show object from a binary file format.
@@ -176,12 +177,18 @@ public class GrinBinaryReader {
      * Constructs a GrinBinaryReader instance.
      *
      * @param director A Director for the show instance this Reader will create.
-     * @param stream    An InputStream to the grin binary format data.
+     * @param stream    An InputStream to the grin binary format data.  It is recommended to be
+     *                  an instance of BufferedInputStream for a performance improvement.
      */
     public GrinBinaryReader(Director director, InputStream stream) {
         
        this.director = director;
-       this.stream = stream;
+       
+       if (Debug.ASSERT) {
+           this.stream = new DebugInputStream(stream);
+       } else {
+          this.stream = stream;
+       }
        
        show = new Show(director);
     }
@@ -208,25 +215,27 @@ public class GrinBinaryReader {
     
     public Show readShow() throws IOException {
  
-        DataInputStream in = new DataInputStream(stream);       
+        GrinDataInputStream in = new GrinDataInputStream(stream);       
         checkScriptHeader(in);
         
         features = new Feature[in.readInt()];
         rcHandlers = new RCHandler[in.readInt()];
         segments = new Segment[in.readInt()];
             
+        // Read in the show file
         readFeatures(in);
         readRCHandlers(in);
-        readSegments(in);
+        readSegments(in);      
+        int showSegmentStackDepth = in.readInt();
         
-        int stackDepth = in.readInt();
-        
+        // Resolve forward references 
         for (int i = 0; i < deferred.size(); i++) {
             CommandSetup setup = (CommandSetup) deferred.get(i);
             setup.setup();
         }
         deferred.clear();
         
+        // Recreate an show object based on what's been read
         for (int i = 0; i < features.length; i++) {
             show.addFeature(features[i].getName(), features[i]);
         }
@@ -238,12 +247,12 @@ public class GrinBinaryReader {
             show.addRCHandler(rcHandlers[i].getName(), rcHandlers[i]); 
         }
         
-        show.setSegmentStackDepth(stackDepth);
+        show.setSegmentStackDepth(showSegmentStackDepth);
         
         return show;
     }
     
-    private void readFeatures(DataInputStream in) 
+    private void readFeatures(GrinDataInputStream in) 
        throws IOException {
         
         checkValue(in.readInt(), Constants.FEATURE_IDENTIFIER, "Feature array identifier");
@@ -252,7 +261,8 @@ public class GrinBinaryReader {
         Feature feature = null;  
         
         for (int i = 0; i < count; i++) {
-            int identifier = in.readByte();
+            int identifier = in.readByte();           
+            
             switch (identifier) {
                 case Constants.ASSEMBLY_IDENTIFIER :
                     feature = readAssembly(in);
@@ -296,20 +306,21 @@ public class GrinBinaryReader {
                 default:
                     throw new IOException("Unknown feature identifier " + identifier);
             }
+            
             features[i] = feature;
         }
     }
 
-    private void readRCHandlers(DataInputStream in) throws IOException {
+    private void readRCHandlers(GrinDataInputStream in) throws IOException {
         
         checkValue(in.readInt(), Constants.RCHANDLER_IDENTIFIER, "RCHandler array identifier");
-        
+                    
         int count = in.readInt();
         RCHandler rcHandler = null;
             
         for (int i = 0; i < count; i++) {
             int identifier = in.readByte();
-            
+
             switch (identifier) {     
                 case Constants.COMMAND_RCHANDLER_IDENTIFIER :
                     rcHandler = readCommandRCHandler(in);
@@ -319,13 +330,12 @@ public class GrinBinaryReader {
                     break;
                 default :
                     throw new IOException("Unknown RCHandler type " + identifier);
-            }
-            
+            }          
             rcHandlers[i] = rcHandler;
         }     
     }    
 
-    private void readSegments(DataInputStream in) throws IOException {
+    private void readSegments(GrinDataInputStream in) throws IOException {
 
         checkValue(in.readInt(), Constants.SEGMENT_IDENTIFIER, "Segment array identifier");
         
@@ -339,312 +349,270 @@ public class GrinBinaryReader {
         }
     } 
     
-    private Assembly readAssembly(DataInputStream in) throws IOException {
+    private Assembly readAssembly(GrinDataInputStream dis) throws IOException {
         
-        int length = in.readInt();
-        byte[] buffer = new byte[length];
-        in.read(buffer, 0, length);
-       
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        GrinDataInputStream dis = new GrinDataInputStream(bais);
-       
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }
+               
         String name = dis.readUTF();
         String[] partNames = dis.readStringArray();
         Feature[] parts = readFeaturesIndex(dis);
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }
         
-        dis.close();
-        
-        Assembly assembly = new Assembly(show, name);
-        
+        Assembly assembly = new Assembly(show, name);        
         assembly.setParts(partNames, parts);
-        
+
         return assembly;
     }
 
-    private Box readBox(DataInputStream in) throws IOException {
+    private Box readBox(GrinDataInputStream dis) throws IOException {
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }       
+        String name = dis.readUTF();
+        Rectangle placement = dis.readRectangle();
+        int outlineWidth = dis.readInt();
+        Color outline = dis.readColor();
+        Color fill = dis.readColor();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
+        return new Box(show, name, placement, outlineWidth, outline, fill);
+    }
+    
+    private Clipped readClipped(GrinDataInputStream dis) throws IOException {
+
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }
+        String name = dis.readUTF();
+        Rectangle clipRegion = dis.readRectangle();
+        Feature part = features[dis.readInt()];
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
+        Clipped clipped = new Clipped(show, name, clipRegion);
+        clipped.setup(part);
+       
+        return clipped;
+    }
+    
+    private Fade readFade(GrinDataInputStream dis) throws IOException {
+ 
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }
         
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
+        String name = dis.readUTF();
+        boolean srcOver = dis.readBoolean();
+        int[] keyframes = dis.readIntArray();
+        int[] keyAlphas = dis.readIntArray();
+        Command[] endCommands = readCommands(dis);
+        Feature part = features[dis.readInt()];
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }
        
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais);
+        Fade fade = new Fade(show, name, srcOver, keyframes, keyAlphas, endCommands);
+        fade.setup(part);
        
-       String name = dis.readUTF();
-       Rectangle placement = dis.readRectangle();
-       int outlineWidth = dis.readInt();
-       Color outline = dis.readColor();
-       Color fill = dis.readColor();
-       
-       dis.close();
-       
-       return new Box(show, name, placement, outlineWidth, outline, fill);
-    }
-    
-    private Clipped readClipped(DataInputStream in) throws IOException {
-       
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
-       
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais);
-       
-       String name = dis.readUTF();
-       Rectangle clipRegion = dis.readRectangle();
-       Feature part = features[dis.readInt()];
-       
-       dis.close();
-       
-       Clipped clipped = new Clipped(show, name, clipRegion);
-       clipped.setup(part);
-       
-       return clipped;
-    }
-    
-    private Fade readFade(DataInputStream in) throws IOException {
-       
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
-       
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais);
-       
-       String name = dis.readUTF();
-       boolean srcOver = dis.readBoolean();
-       int[] keyframes = dis.readIntArray();
-       int[] keyAlphas = dis.readIntArray();
-       Command[] endCommands = readCommands(dis);
-       Feature part = features[dis.readInt()];
-       
-       dis.close();
-   
-       Fade fade = new Fade(show, name, srcOver, keyframes, keyAlphas, endCommands);
-       fade.setup(part);
-       
-       return fade;
+        return fade;
     }
 
-    private FixedImage readFixedImage(DataInputStream in) throws IOException {
+    private FixedImage readFixedImage(GrinDataInputStream dis) throws IOException {
+
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }
        
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
+        String name = dis.readUTF();
+        int startX = dis.readInt();
+        int startY = dis.readInt();
+        String filename = dis.readUTF();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }
+        
+        return new FixedImage(show, name, startX, startY, filename);       
+    } 
+
+    private Group readGroup(GrinDataInputStream dis) throws IOException {
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }
+        String name = dis.readUTF();
+        Feature[] parts = readFeaturesIndex(dis);
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }
+        
+        Group group = new Group(show, name);      
+        group.setup(parts);
        
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais);      
-       
-       String name = dis.readUTF();
-       int startX = dis.readInt();
-       int startY = dis.readInt();
-       String filename = dis.readUTF();
-       
-       dis.close();
-       
-       return new FixedImage(show, name, startX, startY, filename);
-       
+        return group;
     }
 
-    private Group readGroup(DataInputStream in) throws IOException {
-
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
-       
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais);   
-       
-       String name = dis.readUTF();
-       Feature[] parts = readFeaturesIndex(dis);
-       
-       dis.close();
-       
-       Group group = new Group(show, name);
+    private ImageSequence readImageSequence(GrinDataInputStream dis) throws IOException {
       
-       group.setup(parts);
-       
-       return group;
-    }
-
-    private ImageSequence readImageSequence(DataInputStream in) throws IOException {
-       
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
-       
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais);  
-       
-       String name = dis.readUTF();
-       int startX = dis.readInt();
-       int startY = dis.readInt();
-       String filename = dis.readUTF();
-       String[] middle = dis.readStringArray();       
-       String extension = dis.readUTF();
-       boolean repeat = dis.readBoolean();
-       Command[] endCommands = readCommands(dis);
-       
-       dis.close();
-       
-       return new ImageSequence(show, name, startX, startY, filename, middle, extension, repeat, endCommands);
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }
+        String name = dis.readUTF();
+        int startX = dis.readInt();
+        int startY = dis.readInt();
+        String filename = dis.readUTF();
+        String[] middle = dis.readStringArray();       
+        String extension = dis.readUTF();
+        boolean repeat = dis.readBoolean();
+        Command[] endCommands = readCommands(dis);
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
+        return new ImageSequence(show, name, startX, startY, filename, middle, extension, repeat, endCommands);
     }
 
     
-    private SrcOver readSrcOver(DataInputStream in) throws IOException {
+    private SrcOver readSrcOver(GrinDataInputStream dis) throws IOException {
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }   
+        String name = dis.readUTF();
+        Feature part = features[dis.readInt()];
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
+        SrcOver srcOver = new SrcOver(show, name);
+        srcOver.setup(part);
        
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
-       
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais);  
-       
-       String name = dis.readUTF();
-       Feature part = features[dis.readInt()];
-       
-       dis.close();
-       
-       SrcOver srcOver = new SrcOver(show, name);
-       srcOver.setup(part);
-       
-       return srcOver;
+        return srcOver;
     }
     
 
-    private Text readText(DataInputStream in) throws IOException {
-       
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
-       
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais); 
-       
-       String name = dis.readUTF();
-       int x = dis.readInt();
-       int y = dis.readInt();
-       String[] strings = dis.readStringArray();
-       int vspace = dis.readInt();
-       Font font = dis.readFont();
-       length = dis.readInt();
-       Color[] colors = new Color[length];
-       for (int i = 0; i < colors.length; i++) {
-           colors[i] = dis.readColor();
-       }
+    private Text readText(GrinDataInputStream dis) throws IOException {
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }
+        String name = dis.readUTF();
+        int x = dis.readInt();
+        int y = dis.readInt();
+        String[] strings = dis.readStringArray();
+        int vspace = dis.readInt();
+        Font font = dis.readFont();
+        length = dis.readInt();
+        Color[] colors = new Color[length];
+        for (int i = 0; i < colors.length; i++) {
+            colors[i] = dis.readColor();
+        }
 
-       Color background = dis.readColor();
-
-       dis.close();
-     
-       return new Text(show, name, x, y, strings, vspace, font, colors, background);
+        Color background = dis.readColor();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }     
+        return new Text(show, name, x, y, strings, vspace, font, colors, background);
  
     }
 
-    private Timer readTimer(DataInputStream in) throws IOException {
-  
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
+    private Timer readTimer(GrinDataInputStream dis) throws IOException {
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }
+        String name = dis.readUTF();
+        int numFrames = dis.readInt();
+        boolean repeat = dis.readBoolean();
        
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais); 
-             
-       String name = dis.readUTF();
-       int numFrames = dis.readInt();
-       boolean repeat = dis.readBoolean();
-       
-       Command[] endCommands = readCommands(dis);
-       
-       dis.close();
-      
-       return new Timer(show, name, numFrames, repeat, endCommands);
+        Command[] endCommands = readCommands(dis);
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }      
+        return new Timer(show, name, numFrames, repeat, endCommands);
     }
 
-    private Translation readTranslation(DataInputStream in) throws IOException {
-        
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
-       
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais);   
-        
-       String name = dis.readUTF();  
-       int[] frames = dis.readIntArray();
-       int[] xs = dis.readIntArray();
-       int[] ys = dis.readIntArray();
-       int repeatFrame = dis.readInt();
-       Command[] endCommands = readCommands(dis);
-       
-       dis.close();
-       
-       return new Translation(show, name, frames, xs, ys, repeatFrame, endCommands);
+    private Translation readTranslation(GrinDataInputStream dis) throws IOException {  
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }        
+        String name = dis.readUTF();  
+        int[] frames = dis.readIntArray();
+        int[] xs = dis.readIntArray();
+        int[] ys = dis.readIntArray();
+        int repeatFrame = dis.readInt();
+        Command[] endCommands = readCommands(dis);
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
+        return new Translation(show, name, frames, xs, ys, repeatFrame, endCommands);
   
     }
 
-    private Translator readTranslator(DataInputStream in) throws IOException {
-
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
+    private Translator readTranslator(GrinDataInputStream dis) throws IOException {
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }        
+        String name = dis.readUTF();
        
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais);   
+        int index = dis.readInt();
+        Translation translation = (Translation) features[index];
+        Feature[] parts = readFeaturesIndex(dis);
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }              
         
-       String name = dis.readUTF();
+        Translator translator = new Translator(show, name);
+        translator.setup(translation, parts);
        
-       int index = dis.readInt();
-       Translation translation = (Translation) features[index];
-       Feature[] parts = readFeaturesIndex(dis);
-       
-       dis.close();
-       
-       Translator translator = new Translator(show, name);
-       
-       translator.setup(translation, parts);
-       
-       return translator;
+        return translator;
     }
     
-    private Modifier readUserModifier(DataInputStream in) throws IOException {
+    private Modifier readUserModifier(GrinDataInputStream dis) throws IOException {
+        if (dis.readByte() == Constants.NULL) {
+            return null;
+        }
+        
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }  
+        String name = dis.readUTF();
+        String typeName = dis.readUTF();
+        String arg = dis.readUTF();
+        Feature parts = features[dis.readInt()];
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
+        Modifier modifier = director.getExtensionsBuilder().getModifier(show, typeName, name, arg);
+        modifier.setup(parts);
        
-       if (in.readByte() == Constants.NULL) {
-           return null;
-       }
-       
-       int length = in.readInt();
-       byte[] buffer = new byte[length];
-       in.read(buffer, 0, length);
-       
-       ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-       GrinDataInputStream dis = new GrinDataInputStream(bais);   
-
-       String name = dis.readUTF();
-       String typeName = dis.readUTF();
-       String arg = dis.readUTF();
-       Feature parts = features[dis.readInt()];
-       dis.close();
-       
-       Modifier modifier = director.getExtensionsBuilder().getModifier(show, typeName, name, arg);
-       modifier.setup(parts);
-       
-       return modifier;
+        return modifier;
     }
     
-    private Command[] readCommands(DataInputStream in) 
+    private Command[] readCommands(GrinDataInputStream in) 
         throws IOException {
  
-       if (in.readByte() == Constants.NULL) {
+        if (in.readByte() == Constants.NULL) {
            return null;
-       }
+        }
 
-       int count = in.readInt(); 
+        int count = in.readInt(); 
    
-       Command[] commands = new Command[count];
+        Command[] commands = new Command[count];
        
-       for (int i = 0; i < count; i++) {
-           byte identifier = in.readByte();
+        for (int i = 0; i < count; i++) {
+           byte identifier = in.readByte();           
            switch (identifier) {
                case Constants.ACTIVATEPART_CMD_IDENTIFIER:
                    commands[i] = readActivatePartCmd(in);
@@ -667,22 +635,20 @@ public class GrinBinaryReader {
        return commands;
     }
 
-    private SetVisualRCStateCommand readSetVisualRCStateCmd(DataInputStream in) throws IOException {
+    private SetVisualRCStateCommand readSetVisualRCStateCmd(GrinDataInputStream dis) throws IOException {
 
-        int length = in.readInt();
-        byte[] buffer = new byte[length];
-        in.read(buffer, 0, length);
-       
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        GrinDataInputStream dis = new GrinDataInputStream(bais);  
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }  
         
         final boolean activated = dis.readBoolean();
         final int state = dis.readInt();
         final int handlerIndex = dis.readInt();
         boolean runCommands = dis.readBoolean();
-        
-        dis.close();
-        
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }        
         final SetVisualRCStateCommand command = new SetVisualRCStateCommand();
         
         if (rcHandlers[handlerIndex] != null) {
@@ -697,20 +663,18 @@ public class GrinBinaryReader {
         return command;
     }
     
-    private ActivatePartCommand readActivatePartCmd(DataInputStream in) 
+    private ActivatePartCommand readActivatePartCmd(GrinDataInputStream dis) 
         throws IOException {
         
-        int length = in.readInt();
-        byte[] buffer = new byte[length];
-        in.read(buffer, 0, length);
-       
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        GrinDataInputStream dis = new GrinDataInputStream(bais);  
-        
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }    
         final int assemblyIndex = dis.readInt();
         final int partIndex = dis.readInt();
-        
-        dis.close();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }        
         
         final ActivatePartCommand command = new ActivatePartCommand();
         
@@ -726,23 +690,21 @@ public class GrinBinaryReader {
         return command;
     }
 
-    private ActivateSegmentCommand readActivateSegmentCmd(DataInputStream in) 
+    private ActivateSegmentCommand readActivateSegmentCmd(GrinDataInputStream dis) 
         throws IOException {
 
-        int length = in.readInt();
-        byte[] buffer = new byte[length];
-        in.read(buffer, 0, length);
-       
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        GrinDataInputStream dis = new GrinDataInputStream(bais);  
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }  
         
         boolean push = dis.readBoolean();
         boolean pop = dis.readBoolean();
         Segment segment = null;
         final int segmentIndex = dis.readInt();
-        
-        dis.close();
-        
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }        
         final ActivateSegmentCommand command = new ActivateSegmentCommand(show, push, pop);
         if (segmentIndex != -1) {
             if (segments[segmentIndex] != null) {
@@ -759,62 +721,56 @@ public class GrinBinaryReader {
         return command;
     } 
 
-    private SegmentDoneCommand readSegmentDoneCmd(DataInputStream in) 
+    private SegmentDoneCommand readSegmentDoneCmd(GrinDataInputStream dis) 
         throws IOException {
        
         return new SegmentDoneCommand(show);
     }
 
-    private Command readUserCmd(DataInputStream in) 
+    private Command readUserCmd(GrinDataInputStream dis) 
         throws IOException {
         
-        if (in.readByte() == Constants.NULL) {
+        if (dis.readByte() == Constants.NULL) {
             return null;
         }
         
-        int length = in.readInt();
-        byte[] buffer = new byte[length];
-        in.read(buffer, 0, length);
-       
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        GrinDataInputStream dis = new GrinDataInputStream(bais);   
-        
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }   
         String name = dis.readUTF();
         String[] args = dis.readStringArray();
-        dis.close();
-       
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
         return show.getDirector().getExtensionsBuilder().getCommand(show, name, args);
        
     }
 
-    private RCHandler readCommandRCHandler(DataInputStream in) throws IOException {
-        int length = in.readInt();
-        byte[] buffer = new byte[length];
-        in.read(buffer, 0, length);
-       
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        GrinDataInputStream dis = new GrinDataInputStream(bais);  
+    private RCHandler readCommandRCHandler(GrinDataInputStream dis) throws IOException {
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }  
         
         String name = dis.readUTF();
         int mask = dis.readInt();     
         Command[] commands = readCommands(dis);
-        
-        dis.close();
-        
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }        
         CommandRCHandler command = new CommandRCHandler(name, mask, commands);
         
         return command;        
     }
 
-    private VisualRCHandler readVisualRCHandler(DataInputStream in) throws IOException {
+    private VisualRCHandler readVisualRCHandler(GrinDataInputStream dis) throws IOException {
         
-        int length = in.readInt();
-        byte[] buffer = new byte[length];
-        in.read(buffer, 0, length);
-       
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        GrinDataInputStream dis = new GrinDataInputStream(bais);          
-   
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }  
+        
         String name = dis.readUTF();
         int[][] grid = dis.readInt2Array();
         String[] stateNames = dis.readStringArray();
@@ -851,8 +807,9 @@ public class GrinBinaryReader {
         }    
         Feature[] selectFeatures = readFeaturesIndex(dis);
         Feature[] activateFeatures = readFeaturesIndex(dis);
-        
-        dis.close();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }        
                            
         VisualRCHandler visualRCHandler = new VisualRCHandler(name, grid,
             stateNames, selectCommands, activateCommands, mouseRects, mouseRectStates,
@@ -863,15 +820,13 @@ public class GrinBinaryReader {
         return visualRCHandler;
     }
 
-    private Segment readSegment(DataInputStream in) throws IOException {
+    private Segment readSegment(GrinDataInputStream dis) throws IOException {
         
-        int length = in.readInt();
-        byte[] buffer = new byte[length];
-        in.read(buffer, 0, length);
-       
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-        GrinDataInputStream dis = new GrinDataInputStream(bais);          
-
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }  
+        
         String name = dis.readUTF();
         Feature[] active = readFeaturesIndex(dis);
         Feature[] setup = readFeaturesIndex(dis);
@@ -884,8 +839,9 @@ public class GrinBinaryReader {
         
         boolean nextOnSetupDone = dis.readBoolean();
         Command[] commands = readCommands(dis);
-        
-        dis.close();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }        
 
         // TODO: what about ChapterManager?
         return new Segment(name, active, setup, null, handlers, nextOnSetupDone, commands);

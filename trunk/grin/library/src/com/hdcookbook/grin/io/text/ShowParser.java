@@ -120,7 +120,8 @@ public class ShowParser {
      * Create a parser to parse a show at the given location.
      *
      * @param reader    Where to read the show from.  We read it up to the
-     *		    	end_show token.
+     *		    	end_show token.  It is recommended to be a BufferedReader
+     *                  instance for a performance improvement.
      *
      * @param showName	The name of the show, for error messages.
      *
@@ -135,7 +136,8 @@ public class ShowParser {
      * Create a parser to parse a show at the given location.
      *
      * @param reader    Where to read the show from.  We read it up to the
-     *		    	end_show token.
+     *		    	end_show token. It is recommended to be a BufferedReader
+     *                  instance for a performance improvement.
      *
      * @param showName	The name of the show, for error messages.
      *

@@ -57,6 +57,7 @@
 package com.hdcookbook.bookmenu.menu;
 
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
+import java.io.BufferedInputStream;
 import java.net.URL;
 import java.io.IOException;
 import java.io.Reader;
@@ -123,7 +124,7 @@ public class MenuDirector extends Director {
             String showName = "menu.grin";
 	    URL u = AssetFinder.getURL(showName);
             
-            // The two lines below are equivalent of the 4 lines of code against the text based ShowParser
+            // The four lines below are equivalent of the 4 lines of code against the text based ShowParser
             // ====START-CODE====
             // BufferedReader rdr = new BufferedReader(new InputStreamReader(u.openStream(), "UTF-8"));
 	    // ShowParser p = new ShowParser(rdr, showName, show);
@@ -131,8 +132,10 @@ public class MenuDirector extends Director {
 	    // rdr.close();
             // ====END-CODE====
             
- 	    GrinBinaryReader reader = new GrinBinaryReader(this, u.openStream());
+            BufferedInputStream bis = new BufferedInputStream(u.openStream());
+ 	    GrinBinaryReader reader = new GrinBinaryReader(this, bis);
             show = reader.readShow();
+            bis.close();
             
 	} catch (IOException ex) {
 	    if (Debug.LEVEL > 0) {
