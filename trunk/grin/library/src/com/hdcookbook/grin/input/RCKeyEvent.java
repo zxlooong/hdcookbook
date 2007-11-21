@@ -88,6 +88,17 @@ public class RCKeyEvent {
     public static RCKeyEvent KEY_DOWN;
     public static RCKeyEvent KEY_ENTER;
     public static RCKeyEvent KEY_POPUP_MENU;
+    public static RCKeyEvent KEY_PLAY;
+    public static RCKeyEvent KEY_STOP;
+    public static RCKeyEvent KEY_STILL_OFF;
+    public static RCKeyEvent KEY_TRACK_NEXT;
+    public static RCKeyEvent KEY_TRACK_PREV;
+    public static RCKeyEvent KEY_FAST_FWD;
+    public static RCKeyEvent KEY_REWIND;
+    public static RCKeyEvent KEY_PAUSE;
+    public static RCKeyEvent KEY_SECONDARY_VIDEO_ENABLE_DISABLE;
+    public static RCKeyEvent KEY_SECONDARY_AUDIO_ENABLE_DISABLE;
+    public static RCKeyEvent KEY_PG_TEXTST_ENABLE_DISABLE;
 
     //  NOTE:  If you add a new key, check the note at the end of
     //         generatePerfectHashOfEventCodes().
@@ -125,44 +136,75 @@ public class RCKeyEvent {
 
     static {
 	keyByName = new Hashtable();
-	KEY_0 = new RCKeyEvent("0", KeyEvent.VK_0, 0x00001);
-	KEY_1 = new RCKeyEvent("1", KeyEvent.VK_1, 0x00002);
-	KEY_2 = new RCKeyEvent("2", KeyEvent.VK_2, 0x00004);
-	KEY_3 = new RCKeyEvent("3", KeyEvent.VK_3, 0x00008);
-	KEY_4 = new RCKeyEvent("4", KeyEvent.VK_4, 0x00010);
-	KEY_5 = new RCKeyEvent("5", KeyEvent.VK_5, 0x00020);
-	KEY_6 = new RCKeyEvent("6", KeyEvent.VK_6, 0x00040);
-	KEY_7 = new RCKeyEvent("7", KeyEvent.VK_7, 0x00080);
-	KEY_8 = new RCKeyEvent("8", KeyEvent.VK_8, 0x00100);
-	KEY_9 = new RCKeyEvent("9", KeyEvent.VK_9, 0x00200);
-	KEY_RIGHT = new RCKeyEvent("right", KeyEvent.VK_RIGHT, 0x00400);
-	KEY_LEFT = new RCKeyEvent("left", KeyEvent.VK_LEFT, 0x00800);
-	KEY_UP = new RCKeyEvent("up", KeyEvent.VK_UP, 0x01000);
-	KEY_DOWN = new RCKeyEvent("down", KeyEvent.VK_DOWN, 0x02000);
-	KEY_ENTER = new RCKeyEvent("enter", KeyEvent.VK_ENTER, 0x04000);
+	KEY_0 = new RCKeyEvent("0", KeyEvent.VK_0, 0x00000001);
+	KEY_1 = new RCKeyEvent("1", KeyEvent.VK_1, 0x00000002);
+	KEY_2 = new RCKeyEvent("2", KeyEvent.VK_2, 0x00000004);
+	KEY_3 = new RCKeyEvent("3", KeyEvent.VK_3, 0x00000008);
+	KEY_4 = new RCKeyEvent("4", KeyEvent.VK_4, 0x00000010);
+	KEY_5 = new RCKeyEvent("5", KeyEvent.VK_5, 0x00000020);
+	KEY_6 = new RCKeyEvent("6", KeyEvent.VK_6, 0x00000040);
+	KEY_7 = new RCKeyEvent("7", KeyEvent.VK_7, 0x00000080);
+	KEY_8 = new RCKeyEvent("8", KeyEvent.VK_8, 0x00000100);
+	KEY_9 = new RCKeyEvent("9", KeyEvent.VK_9, 0x00000200);
+	KEY_RIGHT = new RCKeyEvent("right", KeyEvent.VK_RIGHT, 0x00000400);
+	KEY_LEFT = new RCKeyEvent("left", KeyEvent.VK_LEFT,    0x00000800);
+	KEY_UP = new RCKeyEvent("up", KeyEvent.VK_UP,          0x00001000);
+	KEY_DOWN = new RCKeyEvent("down", KeyEvent.VK_DOWN,    0x00002000);
+	KEY_ENTER = new RCKeyEvent("enter", KeyEvent.VK_ENTER, 0x00004000);
 
 	// For the color keys, I just lifted the constants out of the
 	// HAVi stubs.  This avoids a compilation dependency on HAVi.
 	KEY_RED = new RCKeyEvent("red", 
-			AssetFinder.getColorKeyCode(Color.red), 0x08000);
+			AssetFinder.getColorKeyCode(Color.red),   0x00008000);
 	KEY_GREEN = new RCKeyEvent("green", 
-			AssetFinder.getColorKeyCode(Color.green), 0x10000);
+			AssetFinder.getColorKeyCode(Color.green), 0x00010000);
 	KEY_YELLOW = new RCKeyEvent("yellow", 
-			AssetFinder.getColorKeyCode(Color.yellow), 0x20000);
+			AssetFinder.getColorKeyCode(Color.yellow),0x00020000);
 	KEY_BLUE = new RCKeyEvent("blue", 
-			AssetFinder.getColorKeyCode(Color.blue), 0x40000);
+			AssetFinder.getColorKeyCode(Color.blue),  0x00040000);
 
-	// For the popup key, just use the integer value, rather than introduce
-	// a compile-time AI dependency.
-	KEY_POPUP_MENU = new RCKeyEvent("popup_menu", 461, 0x80000);
+	// For the popup key and other BD-specific keys, I just use the 
+	// integer value, rather than introduce
+	// a compile-time AI dependency.  The values are documented in
+	// the DAVIC and Blu-ray specifications -- look for the VK_
+	// key constants.
+	KEY_POPUP_MENU = new RCKeyEvent("popup_menu", 461, 0x00080000);
+	KEY_PLAY       = new RCKeyEvent("play",       415, 0x00100000);
+	KEY_STOP       = new RCKeyEvent("stop",       413, 0x00200000);
+	KEY_STILL_OFF  = new RCKeyEvent("still_off",  462, 0x00400000);
+	KEY_TRACK_NEXT = new RCKeyEvent("track_next", 425, 0x00800000);
+	KEY_TRACK_PREV = new RCKeyEvent("track_prev", 424, 0x01000000);
+	KEY_FAST_FWD   = new RCKeyEvent("fast_fwd",   417, 0x02000000);
+	KEY_REWIND     = new RCKeyEvent("rewind",     412, 0x04000000);
+	KEY_PAUSE      = new RCKeyEvent("pause",       19, 0x08000000);
+	KEY_SECONDARY_VIDEO_ENABLE_DISABLE 
+		       = new RCKeyEvent("secondary_video_enable_disable",
+		       				      464, 0x10000000);
+	KEY_SECONDARY_AUDIO_ENABLE_DISABLE 
+		       = new RCKeyEvent("secondary_audio_enable_disable",
+		       				      463, 0x20000000);
+	KEY_PG_TEXTST_ENABLE_DISABLE
+		       = new RCKeyEvent("pg_textst_enable_disable",
+		       				      465, 0x40000000);
 
 	RCKeyEvent[] keys = new RCKeyEvent[] {
 	    KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, 
 	    KEY_5, KEY_6, KEY_7, KEY_8, KEY_9,
 	    KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN,
 	    KEY_ENTER, KEY_RED, KEY_GREEN, KEY_YELLOW, KEY_BLUE,
-	    KEY_POPUP_MENU
+	    KEY_POPUP_MENU, KEY_PLAY, KEY_STOP, KEY_STILL_OFF,
+	    KEY_TRACK_NEXT, KEY_TRACK_PREV, KEY_FAST_FWD, KEY_REWIND,
+	    KEY_PAUSE, KEY_SECONDARY_VIDEO_ENABLE_DISABLE,
+	    KEY_SECONDARY_AUDIO_ENABLE_DISABLE,
+	    KEY_PG_TEXTST_ENABLE_DISABLE
 	};
+	//
+	// IMPORTANT NOTE:  If a key is added to this table, then
+	// you need to go into generatePerfectHashOfEventCodes()
+	// and make sure it still produces a reasonable result.  I recommend
+	// starting the algorithm off at what you know to be the right
+	// answer, to save startup time.
+	//
 	keyByEventCode = generatePerfectHashOfEventCodes(keys);
     }
     
@@ -233,7 +275,25 @@ public class RCKeyEvent {
     private static RCKeyEvent[] 
             generatePerfectHashOfEventCodes(RCKeyEvent[] keys) 
     {
-	int remainder = keys.length;
+	//
+	// This is a time-consuming consistency check, so I disable it
+	// even when assertions are enabled.  It only needs to be re-run
+	// when a key is added to the table of keys.
+	//
+	if (false && Debug.ASSERT) {
+	    for (int i = 0; i < keys.length-1; i++) {
+		for (int j = i+1; j < keys.length; j++) {
+		    if (keys[i].getKeyCode() == keys[j].getKeyCode()
+		        || keys[i].getBitMask() == keys[j].getBitMask())
+		    {
+		    System.out.println(i + ", " + j);
+			Debug.assertFail(keys[i].getName() + " key is same as "
+			                 + keys[j].getName());
+		    }
+		}
+	    }
+	}
+	int remainder = 78;	// At 31 keys, algorithm terminates there.
 	for (;;) {
 	    boolean ok = true;
 	    RCKeyEvent[] result = new RCKeyEvent[remainder];
@@ -256,7 +316,7 @@ public class RCKeyEvent {
 		// http://www.onjava.com/pub/a/onjava/2001/01/25/hash_functions.html ,
 		// this is a safe thing to do.  Still, if a key is added,
 		// it wouldn't hurt to check that this terminates quickly.
-	    if (Debug.ASSERT && remainder > 40) {
+	    if (Debug.ASSERT && remainder > 120) {
 		Debug.assertFail("Find a better algorithm!");
 	    }
 	}
