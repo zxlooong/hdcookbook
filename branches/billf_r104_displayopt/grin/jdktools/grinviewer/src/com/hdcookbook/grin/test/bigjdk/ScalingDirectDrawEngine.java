@@ -103,8 +103,25 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
      * @inheritDoc
      **/
     public void initContainer(Container container, Rectangle bounds) {
-	buffer = container.getGraphicsConfiguration()
-			.createCompatibleImage(bounds.width, bounds.height);
+	try {
+	    ourInitContainer(container, bounds);
+	} catch (Throwable t) {
+	    t.printStackTrace();
+	    System.exit(1);
+	    // If we don't do this, then the finally clause in
+	    // AnimationEngine.run() swallows the error message,
+	    // and often generates an assertion failure on Show.destroy()
+	    // that hides the real problem.
+	}
+    }
+
+    private void ourInitContainer(Container container, Rectangle bounds) {
+	buffer = new BufferedImage(bounds.width, bounds.height,
+				   BufferedImage.TYPE_4BYTE_ABGR);
+	    // For GrinView, we specifically want TYPE_4BYTE_ABGR,
+	    // and not GrahicsConfiguration.createCompatibleImage().
+	    // This is a big JDK program, so the color model is not
+	    // defined like it is in BD-J.
 	bufferG = buffer.createGraphics();
 	bufferG.setComposite(AlphaComposite.Src);
 	bufferG.setColor(transparent);
@@ -117,7 +134,9 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 		    Debug.println("repainting...");
 		}
 		paintNextFrameFully();
-		    // This will happen the next time a frame is displayed
+		    // This will happen the next time a frame is displayed.
+		    // That's not really what you'd want in professional
+		    // content, but it's good enough for a debug tool.
 	    }
 	};
 	ddComponent.setBounds(bounds);
@@ -201,6 +220,22 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     /**
      * @inheritDoc
      **/
+    protected void runAnimationLoop() throws InterruptedException {
+	try {
+	    super.runAnimationLoop();
+	} catch (Throwable t) {
+	    t.printStackTrace();
+	    System.exit(1);
+	    // If we don't do this, then the finally clause in
+	    // AnimationEngine.run() swallows the error message,
+	    // and often generates an assertion failure on Show.destroy()
+	    // that hides the real problem.
+	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
     protected void finishedFrame() {
 	//
 	//  This method gets a little complex.  It's here where we apply
@@ -212,7 +247,8 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	Graphics2D g = componentG;
 	Graphics2D fixG = null;
 	if (nonTranslucentFix != null && bg == null) {
-		// On windows, the graphics device doesn't
+		// On windows and Mac/Leopard/Intel (at least), 
+		// the graphics device doesn't
 		// natively support a translucent color model.
 		// This means that alpha-blended colors don't
 		// show up properly, unless we SrcOver draw them
@@ -251,7 +287,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    if (fixG != null)  {
 		g.dispose();
 		g = fixG;
-		g.setComposite(AlphaComposite.Src);
+		g.setComposite(AlphaComposite.SrcOver);
 		g.drawImage(nonTranslucentFix, 0, 0, null);
 	    }
 	    Toolkit.getDefaultToolkit().sync();

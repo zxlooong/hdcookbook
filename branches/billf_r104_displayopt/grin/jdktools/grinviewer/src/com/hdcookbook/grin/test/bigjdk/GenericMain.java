@@ -399,7 +399,8 @@ public class GenericMain extends Frame implements AnimationContext {
 	engine.initClients(clients);
 	GraphicsConfiguration con = getGraphicsConfiguration();
 	if (con.getColorModel().getTransparency() != Transparency.TRANSLUCENT) {
-	    // On windows, alpha blending to a background image requires
+	    // On windows and Mac/Intel/Leopard (at least), alpha blending to a 
+	    // background image requires
 	    // special handling.  See the comments in paint(Graphics).
 	    BufferedImage im = con.createCompatibleImage(screenWidth, 
 						    FRAME_CHEAT+screenHeight);
