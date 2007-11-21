@@ -265,8 +265,6 @@ public final class CertAndKeyGen {
 
             CertificateValidity interval =
                                    new CertificateValidity(firstDate,lastDate);
-
-            System.out.println("CertificateValidity " + interval);
                 
             X509CertInfo info = new X509CertInfo();
             // Add all mandatory attributes
