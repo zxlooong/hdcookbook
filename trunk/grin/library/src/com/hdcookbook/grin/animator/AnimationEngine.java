@@ -655,7 +655,7 @@ public abstract class AnimationEngine implements Runnable {
 	}
 
 	// At this point, targets[0..n] represents an optimal set of
-	// the areas we need to display.  Add one to get the lenght of
+	// the areas we need to display.  Add one to get the length of
 	// the list of targets.
 
 	return n+1;
