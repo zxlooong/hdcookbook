@@ -104,15 +104,15 @@ public class BDSigner {
     private void generateCertificates() throws Exception {
 	    
        String[] appCertCreateArgs = {"-genkey", "-keyalg", "RSA", "-sigAlg", "SHA1WithRSA", "-alias", appcertalias, "-keypass", "appcertpassword", "-dname", 
-                                     "EMAILADDRESS=email@email.com, CN=Producer, OU=Codesigning Department, O=BDJCompany."+orgId+", L=Santa Clara, S=California, C=US", 
-                                     "-validity", "100000", "-debug", 
+                                     "CN=Producer, OU=Codesigning Department, O=BDJCompany."+orgId+", L=Santa Clara, S=California, C=US", 
+                                     "-debug", 
 				     "-keystore", keystorefile, "-storepass", "keystorepassword"};
     
        KeyTool.main(appCertCreateArgs);
        
        String[] rootCertCreateArgs = {"-genkey", "-keyalg", "RSA", "-sigAlg", "SHA1WithRSA", "-alias", rootcertalias, "-keypass", "rootcertpassword", "-dname", 
-                                     "EMAILADDRESS=email@email.com, CN=Studio, OU=Codesigning Department, O=BDJCompany."+orgId+", L=Santa Clara, S=California, C=US", 
-                                     "-validity", "100000", "-debug", 
+                                     "CN=Studio, OU=Codesigning Department, O=BDJCompany."+orgId+", L=Santa Clara, S=California, C=US", 
+                                     "-debug", 
 				     "-keystore", keystorefile, "-storepass", "keystorepassword"};
        
        KeyTool.main(rootCertCreateArgs);

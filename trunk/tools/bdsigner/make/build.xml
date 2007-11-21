@@ -8,6 +8,7 @@
   <property name="src.dir"  value="../src"/>
   <property name="build.dir"  value="../build"/>
   <property name="dist.jar" value="${build.dir}/${app.name}.jar"/>
+  <property name="keytool.jar" value="${build.dir}/${app.name}-bootclasspath.jar"/>
   <property name="classes.dir"  value="${build.dir}/classes"/>
 
   <property name="bouncycastle.classes"  value="../resource/bcprov-jdk15-137.jar"/>
@@ -32,7 +33,12 @@
   <target name="deploy"
     depends="compile" description="Creates a deployment bundle">
     <jar jarfile="${dist.jar}"
-         basedir="${classes.dir}"/>
+         basedir="${classes.dir}"
+         excludes="sun/security/x509/**"/> 
+        
+    <jar jarfile="${keytool.jar}"
+        basedir="${classes.dir}"
+        includes="sun/security/x509/**"/> 
   </target>
 
   <target name="all" depends="deploy"
