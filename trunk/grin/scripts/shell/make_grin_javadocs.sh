@@ -1,21 +1,14 @@
-#!/bin/sh -x
+#!/bin/sh
 
 source vars.sh
+DEST=$HDC_BUILD_DIR/grin_javadoc
 
-DEST=$HDC_BUILD_DIR/javadocs/grin
-SCRATCH=$HDC_BUILD_DIR/tmp_file
-
-rm -rf $DEST
-mkdir -p $DEST
-
-cd $HDC_REPOSITORY/grin/library/src
-find com/hdcookbook/grin -name '*.java' -print > $SCRATCH
-javadoc -d $DEST -classpath $HDC_BDJ_PLATFORM_CLASSES @$SCRATCH
+cd $HDC_REPOSITORY
+ant build-grin-javadoc
 if [[ $? != 0 ]] ; then
-    echo "Error creating javadocs."
     exit 1;
 fi
-rm -f $SCRATCH
+
 
 echo ""
 echo "Built javadocs for all source files in the repository."

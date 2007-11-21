@@ -74,8 +74,8 @@ public class BinaryConverter {
    /**
     * A driver method for the BinaryConverter.convert(String, String).
     * 
-    * @param args[0] A file name the text-based GRIN script to read.
-    * @param args[1] An optional file name for the binary-based GRIN script to write out.
+    * @param args  Arguments.  args[0] is  file name the text-based GRIN script to read.
+    * 		    args[1] An optional file name for the binary-based GRIN script to write out.
     * @see #convert(String, String)
     **/
    public static void main(String[] args) {

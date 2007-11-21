@@ -1,6 +1,6 @@
-#!/bin/sh -x
+#!/bin/sh
 
-HOME=~
+hm=~
 if [ "$windir" != "" ] ; then
     hm=c:
 fi
