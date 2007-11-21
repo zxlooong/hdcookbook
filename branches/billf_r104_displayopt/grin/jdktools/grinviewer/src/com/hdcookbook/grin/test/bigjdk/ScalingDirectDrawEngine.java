@@ -67,6 +67,8 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
+import java.util.Iterator;
 
 /**
  * A double-buffered animation engine that uses direct draw, and
@@ -89,7 +91,11 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     private final int frameCheat;
     private Image background;
     private BufferedImage nonTranslucentFix;
-
+    private boolean debugDraw = false;
+    private LinkedList<Rectangle> eraseAreas = new LinkedList<Rectangle>();
+    private boolean debugWaiting = false;
+    private Object debugWaitingMonitor = new Object();
+    
     /**
      * Create a new ScalingDirectDrawEngine.  It needs to be initialized with
      * the various initXXX methods (including the inherited ones).
@@ -187,13 +193,23 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	nonTranslucentFix = buf;
     }
 
+    //
+    // Tell is if we should step through each frame showing
+    // erase, paint areas, then painted result
+    //
+    void setDebugDraw(boolean debugDraw) {
+	this.debugDraw = debugDraw;
+    }
+
 
 
     /**
      * @inheritDoc
      **/
     protected void clearArea(int x, int y, int width, int height) {
-	int s = scaleDivisor;
+	if (debugDraw) {
+	    eraseAreas.add(new Rectangle(x, y, width, height));
+	} 
 	bufferG.setColor(transparent);
 	bufferG.fillRect(x, y, width, height);
     }
@@ -212,6 +228,29 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
      * @inheritDoc
      **/
     protected void callPaintFrame(int numTargets) throws InterruptedException {
+	if (debugDraw) {
+	    int s = scaleDivisor;
+	    componentG.setColor(new Color(255, 0, 0, 127));
+	    componentG.setComposite(AlphaComposite.SrcOver);
+	    for (Iterator<Rectangle> i = eraseAreas.iterator(); i.hasNext(); ) {
+		Rectangle a = i.next();
+		componentG.fillRect(a.x/s, a.y/s + frameCheat, 
+				    a.width/s, a.height/s);
+	    }
+	    Toolkit.getDefaultToolkit().sync();
+	    waitForUser("To be erased areas shown with red overlay");
+
+	    componentG.setColor(new Color(0, 255, 0, 127));
+	    for (int i = 0; i < numTargets; i++) {
+		Rectangle a = targets[i].getBounds();
+		componentG.fillRect(a.x/s, a.y/s + frameCheat, 
+				    a.width/s, a.height/s);
+	    }
+	    Toolkit.getDefaultToolkit().sync();
+	    waitForUser("To be drawn areas shown with green overlay");
+	    componentG.setComposite(AlphaComposite.Src);
+	}
+	eraseAreas.clear();
 	this.numTargets = numTargets;
 	paintFrame(bufferG, numTargets);
 	bufferG.setComposite(AlphaComposite.Src);	// Add some robustness
@@ -242,7 +281,6 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	//  the scaling, and it's here where we simulate the BD model
 	//  of BD-J graphics over the video plane.
 	//
-	int s = scaleDivisor;
 	Image bg = background;
 	Graphics2D g = componentG;
 	Graphics2D fixG = null;
@@ -269,20 +307,10 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 		Rectangle a = targets[i].getBounds();
 		if (bg != null) {
 		    g.setComposite(AlphaComposite.Src);
-		    g.drawImage(bg, a.x/s, frameCheat + (a.y/s), 
-				    (a.x+a.width)/s, 
-				    frameCheat + ((a.y+a.height)/s),
-				    a.x, a.y,
-				    a.x+a.width, a.y+a.height,
-				    null);
+		    drawScaledImage(g, bg, a);
 		    g.setComposite(AlphaComposite.SrcOver);
 		}
-		g.drawImage(buffer, a.x/s, frameCheat + a.y/s, 
-				    (a.x+a.width)/s, 
-				    frameCheat + (a.y+a.height)/s,
-				    a.x, a.y,
-				    a.x+a.width, a.y+a.height,
-				    null);
+		drawScaledImage(g, buffer, a);
 	    }
 	    if (fixG != null)  {
 		g.dispose();
@@ -292,6 +320,19 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	}
+	if (debugDraw) {
+	    waitForUser("Frame drawn");
+	}
+    }
+
+    private void drawScaledImage(Graphics2D dest, Image src, Rectangle a) {
+	int s = scaleDivisor;
+	dest.drawImage(src, a.x/s, frameCheat + a.y/s, 
+			    (a.x+a.width)/s, 
+			    frameCheat + (a.y+a.height)/s,
+			    a.x, a.y,
+			    a.x+a.width, a.y+a.height,
+			    null);
     }
 
     /**
@@ -302,5 +343,34 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	componentG.setColor(transparent);
 	componentG.fillRect(0, 0, buffer.getWidth()/s, buffer.getHeight()/s);
 	Toolkit.getDefaultToolkit().sync();
+    }
+
+    private void waitForUser(String msg) {
+	synchronized(debugWaitingMonitor) {
+	    debugWaiting = true;
+	    System.out.print("==>  " + msg + "; hit enter to advance...  ");
+	    System.out.flush();
+	    while (debugWaiting) {
+		try { 
+		    debugWaitingMonitor.wait();
+		} catch (InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		    break;
+		}
+	    }
+	}
+    }
+
+    //
+    // Called from GenericMain; returns true if an enter was being waited for.
+    //
+    boolean userHitsEnter() {
+	boolean wasWaiting;
+	synchronized(debugWaitingMonitor) {
+	    wasWaiting = debugWaiting;
+	    debugWaiting = false;
+	    debugWaitingMonitor.notifyAll();
+	}
+	return wasWaiting;
     }
 }

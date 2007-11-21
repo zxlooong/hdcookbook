@@ -129,7 +129,7 @@ public class GenericMain extends Frame implements AnimationContext {
     private int scaleDivisor = 2;
     private int screenWidth= 1920 / scaleDivisor;
     private int screenHeight = 1080 / scaleDivisor;
-    
+
     public GenericMain() {
     }
 
@@ -249,8 +249,12 @@ public class GenericMain extends Frame implements AnimationContext {
 	    for (;;) {
 		String msg = null;
 		String s = in.readLine();
-		if (s == null) {
+		if (s == null) {	// EOF
 		    break;
+		}
+		if ("".equals(s) && engine.userHitsEnter()) {
+		    continue;
+		    // Do nothing, we were waiting for enter
 		}
 		msg = doKeyboardCommand(s);
 		if (msg != null) {
@@ -368,6 +372,10 @@ public class GenericMain extends Frame implements AnimationContext {
 	} catch (InterruptedException ignored) {
 	}
 	return "    Skipped " + num + " frames.";
+    }
+
+    public void setDebugDraw(boolean doDebugDraw) {
+	engine.setDebugDraw(doDebugDraw);
     }
     
     protected String setFps(float newFps) {
