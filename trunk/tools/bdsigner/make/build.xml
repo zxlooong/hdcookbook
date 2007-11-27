@@ -24,9 +24,11 @@
   <target name="compile"
     depends="prepare" description="Compiles the sources">
     <javac srcdir="${src.dir}"
-           classpath="${bouncycastle.classes}"
            destdir="${classes.dir}"
            debug="on" deprecation="on">
+     <classpath> 
+        <pathelement location="${bouncycastle.classes}"/>
+    </classpath>
     </javac>
   </target>
 
@@ -34,11 +36,11 @@
     depends="compile" description="Creates a deployment bundle">
     <jar jarfile="${dist.jar}"
          basedir="${classes.dir}"
-         excludes="sun/security/x509/**"/> 
+         excludes="sun/security/x509/**, sun/security/util/**"/> 
         
     <jar jarfile="${keytool.jar}"
         basedir="${classes.dir}"
-        includes="sun/security/x509/**"/> 
+        includes="sun/security/x509/**, sun/security/util/**"/> 
   </target>
 
   <target name="all" depends="deploy"

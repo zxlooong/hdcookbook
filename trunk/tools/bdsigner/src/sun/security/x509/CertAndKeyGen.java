@@ -289,8 +289,9 @@ public final class CertAndKeyGen {
             // since the leaf cert will be replaced with a Certificate response importing 
             // later on, with KeyUsageExtension.DIGITAL_SIGNATURE turned on.
             keyUsage.set(KeyUsageExtension.KEY_CERTSIGN, Boolean.TRUE);
-            
+      
             extensions.set(KeyUsageExtension.NAME, keyUsage);
+            
             GeneralName name1 = new GeneralName(new RFC822Name("email" + (count++) + "@abc.com"));
             GeneralNames names1 = new GeneralNames();
             names1.add(name1);
@@ -302,6 +303,10 @@ public final class CertAndKeyGen {
             names2.add(name2);
             SubjectAlternativeNameExtension subName = new SubjectAlternativeNameExtension(names2);
             extensions.set(SubjectAlternativeNameExtension.NAME, subName);
+            
+            // MHP 12.11.2.10
+            BasicConstraintsExtension bce = new BasicConstraintsExtension(true, Integer.MAX_VALUE);
+            extensions.set(BasicConstraintsExtension.NAME, bce);
             
             info.set(X509CertInfo.EXTENSIONS, extensions);
             // End BD-J specific

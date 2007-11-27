@@ -69,6 +69,7 @@ import org.bouncycastle.jce.X509KeyUsage;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
+import net.java.bd.tools.bdsigner.X509BDJEntryConverter;
 
 public class JarSigner {
 
@@ -850,8 +851,9 @@ public class JarSigner {
 
         X509Certificate userCert
 		= (X509Certificate)store.getCertificate(alias);
-        cg.setIssuerDN(new X509Name(true, userCert.getSubjectDN().getName()));
-        cg.setSubjectDN(new X509Name(subject));
+        
+        cg.setIssuerDN(new X509Name(true, userCert.getSubjectDN().getName(), new X509BDJEntryConverter()));
+        cg.setSubjectDN(new X509Name(subject, new X509BDJEntryConverter()));
         cg.setNotBefore(userCert.getNotBefore());
         cg.setNotAfter(userCert.getNotAfter());
         
