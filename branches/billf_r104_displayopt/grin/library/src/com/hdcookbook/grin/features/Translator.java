@@ -57,6 +57,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
 
 import java.io.IOException;
@@ -80,6 +81,53 @@ public class Translator extends Feature {
 
     private int fx;		// Feature's start position
     private int fy;
+
+    private int currDx;		// delta-x and y for current frame
+    private int currDy;
+
+    private int lastDx;		// For last frame shown
+    private int lastDy;
+
+	//
+	// Here, we make an inner class of RenderContext.  We
+	// pass this instance to our child; it modifies calls to the
+	// parent RenderContext from our child.
+	//
+    private ChildContext childContext = new ChildContext();
+    
+    class ChildContext extends RenderContext {
+	RenderContext	parent;
+	int dx;
+	int dy;
+
+	public void addArea(Rectangle area) {
+	    addArea(area.x, area.y, area.width, area.height);
+	}
+
+	public void addArea(int x, int y, int width, int height) {
+	    parent.addArea(x + dx, y + dy, width, height);
+	}
+
+	public void clearAndAddArea(Rectangle area) {
+	    clearAndAddArea(area.x, area.y, area.width, area.height);
+	}
+
+	public void clearAndAddArea(int x, int y, int width, int height) {
+	    parent.clearAndAddArea(x + dx, y + dy, width, height);
+	}
+
+	public void guaranteeAreaFilled(Rectangle area) {
+	    guaranteeAreaFilled(area.x, area.y, area.width, area.height);
+	}
+
+	public void guaranteeAreaFilled(int x, int y, int width, int height) {
+	    parent.guaranteeAreaFilled(x+dx, y+dy, width, height);
+	}
+
+	public int setTarget(int target) {
+	    return parent.setTarget(target);
+	}
+    };	// End of RenderContext anonymous inner class
 
     public Translator(Show show, String name) {
 	super(show, name);
@@ -120,21 +168,21 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public int getStartX() {
 	return translation.getTranslatorStartX();
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public int getStartY() {
 	return translation.getTranslatorStartY();
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void initialize() {
 	// The show will initialize our sub-feature, so we don't
@@ -142,7 +190,7 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void destroy() {
 	// The show will destroy our sub-features, so we don't
@@ -150,7 +198,7 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	// This is synchronized to only occur within model updates.
@@ -159,6 +207,7 @@ public class Translator extends Feature {
 	    for (int i = 0; i < features.length; i++) {
 		features[i].activate();
 	    }
+	    lastDx = Integer.MIN_VALUE;
 	} else {
 	    for (int i = 0; i < features.length; i++) {
 		features[i].deactivate();
@@ -167,7 +216,7 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
 	if (mode) {
@@ -182,7 +231,7 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
 	for (int i = 0; i < features.length; i++) {
@@ -194,7 +243,7 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
 	for (int i = 0; i < features.length; i++) {
@@ -206,38 +255,61 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
+    public void nextFrame() {
 	if (Debug.ASSERT && !translation.getIsActivated()) {
 	    Debug.assertFail();
 	}
 	for (int i = 0; i < features.length; i++) {
-	    features[i].advanceToFrame(newFrame);
+	    features[i].nextFrame();
+	}
+	currDx = translation.getX() - fx;
+	currDy = translation.getY() - fy;
+    }
+
+
+    /**
+     * @inheritDoc
+     **/
+    public void addEraseAreas(RenderContext context, boolean srcOver,
+    			      boolean envChanged) 
+    {
+	if (lastDx != Integer.MIN_VALUE) {
+	    if (!isActivated || lastDx != currDx || lastDy != currDy) {
+		childContext.dx = lastDx;
+		childContext.dy = lastDy;
+		childContext.parent = context;
+		for (int i = 0; i < features.length; i++) {
+		    features[i].addEraseAreas(childContext, srcOver, true);
+		}
+	    }
+	}
+	childContext.dx = currDx;
+	childContext.dy = currDy;
+	childContext.parent = context;
+	for (int i = 0; i < features.length; i++) {
+	    features[i].addEraseAreas(childContext, srcOver, envChanged);
 	}
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void  addDisplayArea(Rectangle area) {
-	if (!isActivated) {
-	    return;
+    public void addDrawAreas(RenderContext context, boolean envChanged) {
+	if (lastDx != currDx || lastDy != currDy) {
+	    envChanged = true;
 	}
-	int dx = translation.getX() - fx;
-	int dy = translation.getY() - fy;
-	if (area.width != 0) {
-	    area.x -= dx;
-	    area.y -= dy;
-	}
+	childContext.dx = currDx;
+	childContext.dy = currDy;
+	childContext.parent = context;
 	for (int i = 0; i < features.length; i++) {
-	    features[i].addDisplayArea(area);
+	    features[i].addDrawAreas(childContext, envChanged);
 	}
-	if (area.width != 0) {
-	    area.x += dx;
-	    area.y += dy;
-	}
+	lastDx = currDx;
+	lastDy = currDy;
     }
+
 
     /**
      * See superclass definition.

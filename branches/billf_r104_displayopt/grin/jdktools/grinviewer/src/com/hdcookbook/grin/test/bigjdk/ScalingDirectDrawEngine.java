@@ -86,23 +86,23 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     private BufferedImage buffer;
     private Graphics2D bufferG;
     private Graphics2D componentG;
-    private int numTargets;
     private final int scaleDivisor;
     private final int frameCheat;
     private Image background;
     private BufferedImage nonTranslucentFix;
     private boolean debugDraw = false;
-    private LinkedList<Rectangle> eraseAreas = new LinkedList<Rectangle>();
-    private boolean debugWaiting = false;
-    private Object debugWaitingMonitor = new Object();
+    private GenericMain main;
     
     /**
      * Create a new ScalingDirectDrawEngine.  It needs to be initialized with
      * the various initXXX methods (including the inherited ones).
      **/
-    public ScalingDirectDrawEngine(int scaleDivisor, int frameCheat) {
+    public ScalingDirectDrawEngine(int scaleDivisor, int frameCheat, 
+    				   GenericMain main) 
+    {
 	this.scaleDivisor = scaleDivisor;
 	this.frameCheat = frameCheat;
+	this.main = main;
     }
 
     /**
@@ -207,9 +207,6 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
      * @inheritDoc
      **/
     protected void clearArea(int x, int y, int width, int height) {
-	if (debugDraw) {
-	    eraseAreas.add(new Rectangle(x, y, width, height));
-	} 
 	bufferG.setColor(transparent);
 	bufferG.fillRect(x, y, width, height);
     }
@@ -227,32 +224,30 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     /**
      * @inheritDoc
      **/
-    protected void callPaintFrame(int numTargets) throws InterruptedException {
+    protected void callPaintTargets() throws InterruptedException {
 	if (debugDraw) {
 	    int s = scaleDivisor;
 	    componentG.setColor(new Color(255, 0, 0, 127));
 	    componentG.setComposite(AlphaComposite.SrcOver);
-	    for (Iterator<Rectangle> i = eraseAreas.iterator(); i.hasNext(); ) {
-		Rectangle a = i.next();
+	    for (int i = 0; i < getNumEraseTargets(); i++) {
+		Rectangle a = getEraseTargets()[i];
 		componentG.fillRect(a.x/s, a.y/s + frameCheat, 
 				    a.width/s, a.height/s);
 	    }
 	    Toolkit.getDefaultToolkit().sync();
-	    waitForUser("To be erased areas shown with red overlay");
+	    main.waitForUser("To be erased areas shown with red overlay");
 
 	    componentG.setColor(new Color(0, 255, 0, 127));
-	    for (int i = 0; i < numTargets; i++) {
-		Rectangle a = targets[i].getBounds();
+	    for (int i = 0; i < getNumDrawTargets(); i++) {
+		Rectangle a = getDrawTargets()[i];
 		componentG.fillRect(a.x/s, a.y/s + frameCheat, 
 				    a.width/s, a.height/s);
 	    }
 	    Toolkit.getDefaultToolkit().sync();
-	    waitForUser("To be drawn areas shown with green overlay");
+	    main.waitForUser("To be drawn areas shown with green overlay");
 	    componentG.setComposite(AlphaComposite.Src);
 	}
-	eraseAreas.clear();
-	this.numTargets = numTargets;
-	paintFrame(bufferG, numTargets);
+	paintFrame(bufferG);
 	bufferG.setComposite(AlphaComposite.Src);	// Add some robustness
     }
 
@@ -302,9 +297,9 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	} else {
 	    g.setComposite(AlphaComposite.Src);
 	}
-	if (numTargets > 0) {
-	    for (int i = 0; i < numTargets; i++) {
-		Rectangle a = targets[i].getBounds();
+	if (getNumDrawTargets() > 0) {
+	    for (int i = 0; i < getNumDrawTargets(); i++) {
+		Rectangle a = getDrawTargets()[i];
 		if (bg != null) {
 		    g.setComposite(AlphaComposite.Src);
 		    drawScaledImage(g, bg, a);
@@ -321,7 +316,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    Toolkit.getDefaultToolkit().sync();
 	}
 	if (debugDraw) {
-	    waitForUser("Frame drawn");
+	    main.waitForUser("Frame drawn");
 	}
     }
 
@@ -343,34 +338,5 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	componentG.setColor(transparent);
 	componentG.fillRect(0, 0, buffer.getWidth()/s, buffer.getHeight()/s);
 	Toolkit.getDefaultToolkit().sync();
-    }
-
-    private void waitForUser(String msg) {
-	synchronized(debugWaitingMonitor) {
-	    debugWaiting = true;
-	    System.out.print("==>  " + msg + "; hit enter to advance...  ");
-	    System.out.flush();
-	    while (debugWaiting) {
-		try { 
-		    debugWaitingMonitor.wait();
-		} catch (InterruptedException ex) {
-		    Thread.currentThread().interrupt();
-		    break;
-		}
-	    }
-	}
-    }
-
-    //
-    // Called from GenericMain; returns true if an enter was being waited for.
-    //
-    boolean userHitsEnter() {
-	boolean wasWaiting;
-	synchronized(debugWaitingMonitor) {
-	    wasWaiting = debugWaiting;
-	    debugWaiting = false;
-	    debugWaitingMonitor.notifyAll();
-	}
-	return wasWaiting;
     }
 }

@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
@@ -204,12 +205,24 @@ public class Group extends Feature {
 	return false;
     }
 
+
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void  addDisplayArea(Rectangle area) {
+    public void addEraseAreas(RenderContext context, boolean srcOver,
+    			      boolean envChanged) 
+    {
 	for (int i = 0; i < parts.length; i++) {
-	    parts[i].addDisplayArea(area);
+	    parts[i].addEraseAreas(context, srcOver, envChanged);
+	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addDrawAreas(RenderContext context, boolean envChanged) {
+	for (int i = 0; i < parts.length; i++) {
+	    parts[i].addDrawAreas(context, envChanged);
 	}
     }
 
@@ -225,9 +238,9 @@ public class Group extends Feature {
     /**
      * See superclass definition.
      **/
-    public void advanceToFrame(int newFrame) {
+    public void nextFrame() {
 	for (int i = 0; i < parts.length; i++) {
-	    parts[i].advanceToFrame(newFrame);
+	    parts[i].nextFrame();
 	}
     }
 }

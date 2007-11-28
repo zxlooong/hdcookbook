@@ -61,9 +61,9 @@ import java.io.IOException;
  * Common base class of all GRIN commands.  GRIN defers anything that
  * can change the state of a show to a command.  In this way, the
  * synchronization model is kept very simple.  Commands are executed
- * from within Show.advanceToFrame, with the show lock held.
+ * from within Show.nextFrame, with the show lock held.
  *
- * @see com.hdcookbook.grin.Show#advanceToFrame(int)
+ * @see com.hdcookbook.grin.Show#nextFrame()
  *
  * @author Bill Foote (http://jovial.com)
  */

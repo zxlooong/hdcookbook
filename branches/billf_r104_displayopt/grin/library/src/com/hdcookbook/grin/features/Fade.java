@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.Debug;
 
@@ -84,9 +85,10 @@ public class Fade extends Modifier {
     private int[] keyAlphas;
     private boolean srcOver;
     private boolean isActivated = false;
-    private int startAnimationFrame;
     private int alphaIndex;
     private Command[] endCommands;
+    private AlphaComposite currAlpha;
+    private AlphaComposite lastAlpha;
 
     public Fade(Show show, String name, boolean srcOver, 
     		int[] keyframes, int[] keyAlphas, Command[] endCommands) 
@@ -127,7 +129,7 @@ public class Fade extends Modifier {
     }
     
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void initialize() {
 	if (keyframes.length == 1) {
@@ -159,36 +161,65 @@ public class Fade extends Modifier {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	super.setActivateMode(mode);
 	if (mode) {
-	    startAnimationFrame = show.getCurrentFrame();
 	    alphaIndex = 0;
+	    lastAlpha = null;
+	    currAlpha = alphas[alphaIndex];
 	}
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
-	super.advanceToFrame(newFrame);
-	alphaIndex = newFrame - startAnimationFrame;
+    public void nextFrame() {
+	super.nextFrame();
+	alphaIndex++;
 	if (alphaIndex == alphas.length) {
 	    for (int i = 0; i < endCommands.length; i++) {
 		show.runCommand(endCommands[i]);
 	    }
 	}
+	if (alphaIndex < alphas.length) {
+	    currAlpha = alphas[alphaIndex];
+	} else {
+	    currAlpha = null;
+	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addEraseAreas(RenderContext context, boolean srcOver,
+    			      boolean envChanged) 
+    {
+	if (currAlpha != lastAlpha) {
+	    envChanged = true;
+	}
+	super.addEraseAreas(context, true, envChanged);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addDrawAreas(RenderContext context, boolean envChanged) {
+	if (currAlpha != lastAlpha) {
+	    envChanged = true;
+	}
+	super.addDrawAreas(context, envChanged);
+	lastAlpha = currAlpha;
     }
 
     /**
      * See superclass definition.
      **/
     public void paintFrame(Graphics2D gr) {
-	if (alphaIndex < alphas.length) {
+	if (currAlpha != null) {
 	    Composite old = gr.getComposite();
-	    gr.setComposite(alphas[alphaIndex]);
+	    gr.setComposite(currAlpha);
 	    part.paintFrame(gr);
 	    gr.setComposite(old);
 	} else {

@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
@@ -75,6 +76,88 @@ public class Clipped extends Modifier {
     private Rectangle clipRegion;
     private Rectangle lastClipRegion = new Rectangle();
 
+	//
+	// Here, we make an inner class of RenderContext.  We
+	// pass this instance to our child; it modifies calls to the
+	// parent RenderContext from our child.
+	//
+    private ChildContext childContext = new ChildContext();
+    
+    class ChildContext extends RenderContext {
+	RenderContext	parent;
+	private int x;
+	private int y;
+	private int width;
+	private int height;
+
+	public void addArea(Rectangle area) {
+	    addArea(area.x, area.y, area.width, area.height);
+	}
+
+	public void addArea(int x, int y, int width, int height) {
+	    this.x = x;
+	    this.y = y;
+	    this.width = width;
+	    this.height = height;
+	    clipArea();
+	    if (this.width >= 0 && this.height >= 0) {
+		parent.addArea(this.x, this.y, this.width, this.height);
+	    }
+	}
+
+	public void clearAndAddArea(Rectangle area) {
+	    clearAndAddArea(area.x, area.y, area.width, area.height);
+	}
+
+	public void clearAndAddArea(int x, int y, int width, int height) {
+	    this.x = x;
+	    this.y = y;
+	    this.width = width;
+	    this.height = height;
+	    clipArea();
+	    if (this.width >= 0 && this.height >= 0) {
+		parent.clearAndAddArea(this.x, this.y, this.width, this.height);
+	    }
+	}
+
+	public void guaranteeAreaFilled(Rectangle area) {
+	    guaranteeAreaFilled(area.x, area.y, area.width, area.height);
+	}
+
+	public void guaranteeAreaFilled(int x, int y, int width, int height) {
+	    this.x = x;
+	    this.y = y;
+	    this.width = width;
+	    this.height = height;
+	    clipArea();
+	    if (this.width >= 0 && this.height >= 0) {
+		parent.guaranteeAreaFilled(this.x, this.y, 
+					   this.width, this.height);
+	    }
+	}
+
+	public int setTarget(int target) {
+	    return parent.setTarget(target);
+	}
+
+	private void clipArea() {
+	    if (x < clipRegion.x) {
+		width -= clipRegion.x - x;
+		x = clipRegion.x;
+	    }
+	    if (y < clipRegion.y) {
+		height -= clipRegion.y - y;
+		y = clipRegion.y;
+	    }
+	    if (x + width > clipRegion.x + clipRegion.width) {
+		width = clipRegion.x + clipRegion.width - x;
+	    }
+	    if (y + height > clipRegion.y + clipRegion.height) {
+		height = clipRegion.y + clipRegion.height - y;
+	    }
+	}
+    };	// End of RenderContext anonymous inner class
+
     public Clipped(Show show, String name, Rectangle clipRegion) {
 	super(show, name);
 	this.clipRegion = clipRegion;
@@ -83,6 +166,26 @@ public class Clipped extends Modifier {
     public Rectangle getClipRegion() {
         return clipRegion;
     }
+
+
+    /**
+     * @inheritDoc
+     **/
+    public void addEraseAreas(RenderContext context, boolean srcOver,
+    			      boolean envChanged) 
+    {
+	childContext.parent = context;
+	super.addEraseAreas(childContext, srcOver, envChanged);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addDrawAreas(RenderContext context, boolean envChanged) {
+	childContext.parent = context;
+	super.addDrawAreas(childContext, envChanged);
+    }
+
 
     /**
      * See superclass definition.

@@ -217,21 +217,31 @@ public class RepaintDrawEngine extends ClockBasedEngine {
     /**
      * @inheritDoc
      **/
-    protected void callPaintFrame(int numTargets) throws InterruptedException {
-	if (numTargets == 0) {
+    protected void callPaintTargets() throws InterruptedException {
+	if (renderContext.numDrawTargets == 0) {
+		// Remember that the draw targets will always have
+		// the erase targets contained within them
 	    return;	// Nothing changed, so do nothing
 	}
-	damageArea.setBounds(targets[0].bounds);
-	for (int i = 1; i < numTargets; i++) {
-	    damageArea.add(targets[i].bounds);
+	damageArea.setBounds(renderContext.drawTargets[0]);
+	for (int i = 1; i < renderContext.numDrawTargets; i++) {
+	    damageArea.add(renderContext.drawTargets[i]);
 	}
+	//
+	// With repaint draw, we have to collapse it all into one big
+	// damage area, because tehre's no AWT repaint() call taking
+	// multiple damage rectangles.  It's not safe to call repaint()
+	// a bunch of times in succession, because that might result
+	// in multiple paints, which would be slow and would result
+	// in user-visible partial screen
+	//
 	Rectangle a = damageArea;
 	synchronized (repaintMonitor) {
 	    if (buffer == null) {
 		// rdRepaintFrame() will call paintFrame(Graphics2D) for us
 	    } else {
 		bufferG.setClip(damageArea);
-		paintFrame(bufferG, numTargets);
+		paintTargets(bufferG);
 		bufferG.setClip(null);
 	    }
 	    repaintPending = true;

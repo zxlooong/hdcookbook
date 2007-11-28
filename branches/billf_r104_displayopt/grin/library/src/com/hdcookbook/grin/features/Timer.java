@@ -58,6 +58,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.Debug;
 
@@ -76,11 +77,11 @@ public class Timer extends Feature {
     
     private Command[] endCommands;
     private int numFrames;	// # of frames
+    private int currFrame;
     private boolean repeat;
 
     private boolean isActivated = false;
 
-    private int startAnimationFrame;	// First frame we animate
     private boolean triggered;
 
     public Timer(Show show, String name, int numFrames, boolean repeat,
@@ -145,50 +146,47 @@ public class Timer extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
 	if (mode) {
-	    startAnimationFrame = show.getCurrentFrame();
+	    currFrame = 0;
 	    triggered = false;
 	}
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
         return false;
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
+    public void nextFrame() {
 	if (Debug.ASSERT && !isActivated) {
 	    Debug.assertFail("Advancing inactive sequence");
 	}
-        int curr = newFrame - startAnimationFrame;
-        if (curr > numFrames && !triggered) {
+	currFrame++;
+        if (currFrame == numFrames && !triggered) {
 	    if (repeat) {
 		// Don't set triggered
-		while (curr > numFrames) {
-		    startAnimationFrame += numFrames;
-		    curr = newFrame - startAnimationFrame;
-		}
+		currFrame = 0;
 	    } else {
 		triggered = true;
 	    }
@@ -198,10 +196,19 @@ public class Timer extends Feature {
         }
     }
 
+
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void  addDisplayArea(Rectangle area) {
+    public void addEraseAreas(RenderContext context, boolean srcOver,
+    			      boolean envChanged)
+    {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addDrawAreas(RenderContext context, boolean envChanged) {
     }
 
     /**

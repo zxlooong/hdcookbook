@@ -173,6 +173,24 @@ public class GrinView extends GenericMain {
 	return result;
     }
 
+    /**
+     * @inheritDoc
+     **/
+    protected void waitForUser(String msg) {
+	screen.setNextDrawButtonVisible(true);
+	screen.setResultText(msg);
+	doWaitForUser();
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    protected boolean userWaitingDone() {
+	screen.setNextDrawButtonVisible(false);
+	screen.setResultText("");
+	return super.userWaitingDone();
+    }
+
 
     private static void usage() {
 	System.out.println();

@@ -95,6 +95,7 @@ public class GrinViewScreen extends javax.swing.JFrame {
     private JTextField commandText;
     private JTextField fpsText;
     private JCheckBox debugDrawCB;
+    private JButton nextDrawButton;
     private JButton stopButton;
     private JButton snapshotButton;
     private JButton frameButton;
@@ -127,6 +128,7 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	showText.setFocusable(false);
 	showText.setLineWrap(false);
 	debugDrawCB = new JCheckBox();
+	nextDrawButton = new JButton();
         stopButton = new JButton();
         snapshotButton = new JButton();
         frameButton = new JButton();
@@ -155,6 +157,8 @@ public class GrinViewScreen extends javax.swing.JFrame {
         jSplitPane1.setRightComponent(showTextScrollPane);
 
 	debugDrawCB.setLabel("Watch drawing");
+	nextDrawButton.setText("next");
+	nextDrawButton.setVisible(false);
         stopButton.setText("Stop");
         snapshotButton.setText("Snapshot");
         frameButton.setText("+frame");
@@ -188,6 +192,12 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	debugDrawCB.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
 		debugDrawCBItemChanged(evt);
+            }
+        });
+
+	nextDrawButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nextDrawnButtonActionPerformed(evt);
             }
         });
 
@@ -231,6 +241,7 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	m.add(fpsLabel);
 	m.add(fpsText);
 	m.add(debugDrawCB);
+	m.add(nextDrawButton);
 	m.add(stopButton);
 	m.add(snapshotButton);
 	m.add(frameButton);
@@ -252,7 +263,9 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	layout.putConstraint(e, snapshotButton, -10, e, m);
 	layout.putConstraint(e, stopButton, -10, w, snapshotButton);
 	layout.putConstraint(e, debugDrawCB, -2, w, stopButton);
-	layout.putConstraint(n, frameButton, 10, s, commandText);
+	layout.putConstraint(w, nextDrawButton, 20, w, debugDrawCB);
+	layout.putConstraint(n, nextDrawButton, 0, s, debugDrawCB);
+	layout.putConstraint(n, frameButton, 20, s, commandText);
 	layout.putConstraint(s, m, 10, s, frameButton);
 	layout.putConstraint(w, commandLabel, 10, w, m);
 	layout.putConstraint(s, commandLabel, -3, s, commandText);
@@ -294,6 +307,9 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	main.setDebugDraw(evt.getStateChange() == evt.SELECTED);
     }
 
+    private void nextDrawnButtonActionPerformed(java.awt.event.ActionEvent evt){
+	main.userWaitingDone();
+    }
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {
 	commandText.setText("f 0");
@@ -399,6 +415,11 @@ public class GrinViewScreen extends javax.swing.JFrame {
     public void setFpsText(String s) {
 	fpsText.setText(s);
     }
+
+    void setNextDrawButtonVisible(boolean visible) {
+	nextDrawButton.setVisible(visible);
+    }
+
 
     public void setShowTree(javax.swing.tree.TreeNode tree) {
 	showTree.setModel(new javax.swing.tree.DefaultTreeModel(tree));

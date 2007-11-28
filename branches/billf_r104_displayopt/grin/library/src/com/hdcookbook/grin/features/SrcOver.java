@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
 import java.awt.AlphaComposite;
@@ -80,6 +81,19 @@ public class SrcOver extends Modifier {
     public SrcOver(Show show, String name) {
 	super(show, name);
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addEraseAreas(RenderContext context, boolean srcOver,
+    			      boolean envChanged)
+    {
+	super.addEraseAreas(context, true, envChanged);
+    }
+
+    // We inherit addDrawAreas() 
+
+
 
     /**
      * See superclass definition.

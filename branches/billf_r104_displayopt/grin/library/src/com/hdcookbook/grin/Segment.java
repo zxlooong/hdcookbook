@@ -55,6 +55,7 @@
 
 package com.hdcookbook.grin;
 
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.RCHandler;
@@ -88,6 +89,7 @@ public class Segment {
     private RCHandler[] rcHandlers;
     private boolean active = false;
     private boolean nextCommandSent;
+    private boolean justActivated = false;
 
     private ActivateSegmentCommand cmdToActivate;
     private ActivateSegmentCommand cmdToActivatePush;
@@ -226,6 +228,7 @@ public class Segment {
 	    return;
 	}
 	active = true;
+	justActivated = true;
 	nextCommandSent = false;
 	for (int i = 0; i < activeFeatures.length; i++) {
 	    boolean wasNeeded = activeFeatures[i].setup();
@@ -334,24 +337,39 @@ public class Segment {
     }
 
     //
-    // Called from Show with the Show lock held
+    // Called from Show with the Show lock held.  This is called
+    // on a segment that is active or was active when the last segment
+    // was painted.
     //
-    void  addDisplayArea(Rectangle area) {
+    void addEraseAreas(RenderContext context) {
+	boolean envChanged = justActivated || !active;
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    activeFeatures[i].addDisplayArea(area);
+	    activeFeatures[i].addEraseAreas(context, false, envChanged);
 	}
+    }
+
+    //
+    // Called from Show with the Show lock held.  This adds all the
+    // areas that have changed since the last frame, erasing as
+    // needed.
+    //
+    void addDrawAreas(RenderContext context) {
+	for (int i = 0; i < activeFeatures.length; i++) {
+	    activeFeatures[i].addDrawAreas(context, justActivated);
+	}
+	justActivated = false;
     }
 
     //
     // Called from Show with the Show lock held
     //
-    void advanceToFrame(int newFrame) {
+    void nextFrame() {
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    activeFeatures[i].advanceToFrame(newFrame);
+	    activeFeatures[i].nextFrame();
 	}
 	if (rcHandlers != null) {
 	    for (int i = 0; i < rcHandlers.length; i++) {
-		rcHandlers[i].advanceToFrame(newFrame);
+		rcHandlers[i].nextFrame();
 	    }
 	}
     }

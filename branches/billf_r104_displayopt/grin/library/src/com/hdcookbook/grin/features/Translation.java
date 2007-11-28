@@ -57,6 +57,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.Debug;
 
@@ -86,7 +87,6 @@ public class Translation extends Feature {
     private boolean isActivated = false;
     private int currFrame;      // Current frame in cycle
     private int currIndex;      // frames[index] <= currFrame < frames[index+1]
-    private int currAnimationFrame;  // Current frame in show
     private int repeatIndex;	// Index when currFrame is repeatFrame-1
     private int currX;
     private int currY;
@@ -195,7 +195,6 @@ public class Translation extends Feature {
 	if (mode) {
 	    currFrame = 0;
 	    currIndex = 0;
-	    currAnimationFrame = show.getCurrentFrame();
 	    currX = xs[0];
 	    currY = ys[0];
 	}
@@ -205,54 +204,60 @@ public class Translation extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
 	return false;
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
+    public void nextFrame() {
 	if (Debug.ASSERT && !isActivated) {
 	    Debug.assertFail("Translation " + getName() + " not activated");
 	}
-	while (currAnimationFrame < newFrame) {	// Normally only one iteration
-	    currAnimationFrame++;
-	    currFrame++;
-	    int nextIndex  = currIndex + 1;
-	    int dist = frames[nextIndex] - frames[currIndex];
-	    int distNext = frames[nextIndex] - currFrame;
-	    int distLast = currFrame - frames[currIndex];
-	    if (Debug.ASSERT && (distNext < 0 || distLast < 0)) {
-		Debug.assertFail();
-	    }
-	    currX = (xs[nextIndex] * distLast + xs[currIndex] * distNext) /dist;
-	    currY = (ys[nextIndex] * distLast + ys[currIndex] * distNext) /dist;
-	    if (distNext <= 0) {
-		currIndex = nextIndex;
-		if (currIndex+1 >= frames.length) {
-		    currFrame = repeatFrame - 1;
-		    currIndex = repeatIndex;
-		    for (int i = 0; i < endCommands.length; i++) {
-			show.runCommand(endCommands[i]);
-		    }
+	currFrame++;
+	int nextIndex  = currIndex + 1;
+	int dist = frames[nextIndex] - frames[currIndex];
+	int distNext = frames[nextIndex] - currFrame;
+	int distLast = currFrame - frames[currIndex];
+	if (Debug.ASSERT && (distNext < 0 || distLast < 0)) {
+	    Debug.assertFail();
+	}
+	currX = (xs[nextIndex] * distLast + xs[currIndex] * distNext) /dist;
+	currY = (ys[nextIndex] * distLast + ys[currIndex] * distNext) /dist;
+	if (distNext <= 0) {
+	    currIndex = nextIndex;
+	    if (currIndex+1 >= frames.length) {
+		currFrame = repeatFrame - 1;
+		currIndex = repeatIndex;
+		for (int i = 0; i < endCommands.length; i++) {
+		    show.runCommand(endCommands[i]);
 		}
 	    }
 	}
     }
 
+
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void  addDisplayArea(Rectangle area) {
+    public void addEraseAreas(RenderContext context, boolean srcOver,
+    			      boolean envChanged)
+    {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addDrawAreas(RenderContext context, boolean envChanged) {
     }
 
     /**

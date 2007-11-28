@@ -78,7 +78,7 @@ public class SegmentDoneCommand extends Command {
     
     public void execute() {
 	// This command only makes sense inside a show, so
-	// we are being called within Show.advanceToFrame(),
+	// we are being called within Show.nextFrame(),
 	// with the show lock held.  That means we don't have to
 	// worry about a race condition with the show moving to
 	// a different segment before this gets executed.

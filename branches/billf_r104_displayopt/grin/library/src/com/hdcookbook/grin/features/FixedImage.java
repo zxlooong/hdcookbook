@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 
@@ -84,6 +85,7 @@ public class FixedImage extends Feature {
     private Object setupMonitor = new Object();
     private boolean imageSetup = false;
     private boolean isActivated = false;
+    private boolean wasActivated = false;
 
     public FixedImage(Show show, String name, int x, int y, String fileName) 
     		throws IOException 
@@ -150,6 +152,7 @@ public class FixedImage extends Feature {
      * See superclass definition.
      **/
     protected void setActivateMode(boolean mode) {
+	wasActivated = isActivated;
 	isActivated = mode;
     }
 
@@ -210,24 +213,32 @@ public class FixedImage extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void addDisplayArea(Rectangle area) {
-	if (area.width == 0) {
-	    area.setBounds(x, y, width, height);
-	} else {
-	    area.add(x, y);
-	    area.add(x+width, y+height);
-	    	// This is correct.  Rectangle.add() (and AWT in general)
-		// believes that the lower-right hand coordinate is "outside"
-		// of a rectangle.
+    public void addEraseAreas(RenderContext context, boolean srcOver,
+    			      boolean envChanged) 
+    {
+	if (!isActivated || envChanged
+	    || (srcOver && (isActivated && !wasActivated)))
+	{
+	    context.clearAndAddArea(x, y, width, height);
 	}
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
+    public void addDrawAreas(RenderContext context, boolean envChanged) {
+	if (envChanged || (isActivated && !wasActivated)) {
+	    context.addArea(x, y, width, height);
+	}
+	wasActivated = isActivated;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void nextFrame() {
 	// do nothing
     }
 }

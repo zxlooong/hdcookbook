@@ -130,6 +130,9 @@ public class GenericMain extends Frame implements AnimationContext {
     private int screenWidth= 1920 / scaleDivisor;
     private int screenHeight = 1080 / scaleDivisor;
 
+    private boolean debugWaiting = false;
+    private Object debugWaitingMonitor = new Object();
+
     public GenericMain() {
     }
 
@@ -238,7 +241,7 @@ public class GenericMain extends Frame implements AnimationContext {
 
     protected void inputLoop() {
 	try {
-	    engine = new ScalingDirectDrawEngine(scaleDivisor, FRAME_CHEAT);
+	    engine = new ScalingDirectDrawEngine(scaleDivisor,FRAME_CHEAT,this);
 	    setFps(fps);
 	    engine.initialize(this);	// Calls animationInitialize() and
 	    				// animationFinishInitialiation()
@@ -252,7 +255,7 @@ public class GenericMain extends Frame implements AnimationContext {
 		if (s == null) {	// EOF
 		    break;
 		}
-		if ("".equals(s) && engine.userHitsEnter()) {
+		if ("".equals(s) && userWaitingDone()) {
 		    continue;
 		    // Do nothing, we were waiting for enter
 		}
@@ -265,6 +268,49 @@ public class GenericMain extends Frame implements AnimationContext {
 	    ex.printStackTrace();
 	    System.exit(1);
 	}
+    }
+
+    /**
+     * When debugging frame-by-frame, this waits for the user to do
+     * something, like hit enter or press a button.
+     **/
+    protected void waitForUser(String msg) {
+	System.out.print("==>  " + msg + "; hit enter to advance...  ");
+	System.out.flush();
+	doWaitForUser();
+    }
+
+    /**
+     * Do the actual waiting on the monitor for waitForUser
+     **/
+    protected final void doWaitForUser() {
+	synchronized(debugWaitingMonitor) {
+	    debugWaiting = true;
+	    while (debugWaiting) {
+		try { 
+		    debugWaitingMonitor.wait();
+		} catch (InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		    break;
+		}
+	    }
+	}
+    }
+
+
+    /**
+     * This should be called when the wait of waitForUser() is done
+     *
+     * @return true  if we were waiting
+     **/
+    protected boolean userWaitingDone() {
+	boolean wasWaiting;
+	synchronized(debugWaitingMonitor) {
+	    wasWaiting = debugWaiting;
+	    debugWaiting = false;
+	    debugWaitingMonitor.notifyAll();
+	}
+	return wasWaiting;
     }
 
     public void snapshot() {

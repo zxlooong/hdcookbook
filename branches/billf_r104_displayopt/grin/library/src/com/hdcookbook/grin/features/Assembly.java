@@ -58,6 +58,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
@@ -77,6 +78,7 @@ public class Assembly extends Feature {
     private String[] partNames;
     private Feature[] parts;
     private Feature currentFeature = null;
+    private Feature lastFeatureDisplayed = null;
     private boolean activated = false;
 
     public Assembly(Show show, String name) throws IOException {
@@ -166,6 +168,7 @@ public class Assembly extends Feature {
 	activated = mode;
 	if (mode) {
 	    currentFeature.activate();
+	    lastFeatureDisplayed = null;
 	} else {
 	    currentFeature.deactivate();
 	}
@@ -250,24 +253,44 @@ public class Assembly extends Feature {
 	return currentFeature;
     }
 
+
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void  addDisplayArea(Rectangle area) {
-	currentFeature.addDisplayArea(area);
+    public void addEraseAreas(RenderContext context, boolean srcOver,
+    			      boolean envChanged) 
+    {
+	if (lastFeatureDisplayed != currentFeature) {
+	    envChanged = true;
+	}
+	if (lastFeatureDisplayed != null && envChanged) {
+	    lastFeatureDisplayed.addEraseAreas(context, srcOver, true);
+	}
+	currentFeature.addEraseAreas(context, srcOver, envChanged);
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
+     **/
+    public void addDrawAreas(RenderContext context, boolean envChanged) {
+	if (lastFeatureDisplayed != currentFeature) {
+	    envChanged = true;
+	}
+	currentFeature.addDrawAreas(context, envChanged);
+	lastFeatureDisplayed = currentFeature;
+    }
+
+    /**
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
 	currentFeature.paintFrame(gr);
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
-	currentFeature.advanceToFrame(newFrame);
+    public void nextFrame() {
+	currentFeature.nextFrame();
     }
 }
