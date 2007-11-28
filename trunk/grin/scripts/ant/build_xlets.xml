@@ -191,7 +191,6 @@ information or have any questions.
 <target name = "sign-xlets" depends="check-bdsigner">
 	<fail unless="bdsigner.ok" message="Could not find the bdsigner tool at ${HDC_BDJ_SIGNER}"/>
 	<java classname="net.java.bd.tools.bdsigner.BDSigner" fork="true">
-                <jvmarg line="-Xbootclasspath/p:${HDC_BDJ_SIGNER}/build/bdsigner-bootclasspath.jar"/>
 		<arg line="56789abc ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar"/>
 		<classpath>
 			<pathelement location="${HDC_BDJ_SIGNER}/build/bdsigner.jar"/>
