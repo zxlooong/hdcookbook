@@ -8,13 +8,12 @@ How to use this tool:
 
  * BJSigner syntax is : BDSigner [-debug] 8-digit-hex-organization-ID jarfile1 jarfile2 ...
  * 
- * Example: java -Xbootclasspath/p:bdsigner-bootclasspath.jar -cp $BDSIGNER_HOME/build/bdsigner.jar:$JDK_HOME/lib/tools.jar:$BDSIGNER_HOME/resource/bcprov-jdk15-137.jar net.java.bd.tools.bdsigner.BDSigner 56789abc 00000.jar 
+ * Example: java -cp $BDSIGNER_HOME/build/bdsigner.jar:$JDK_HOME/lib/tools.jar:$BDSIGNER_HOME/resource/bcprov-jdk15-137.jar net.java.bd.tools.bdsigner.BDSigner 56789abc 00000.jar 
  * 
  * Make sure to put bdsigner.jar before tools.jar in the jdk distribution for the jre 
- * classpath, and to prepend bdsigner-bootclasspath.jar to the jre bootclasspath, so that 
- * the modified version of the sun.security.* classes in this BDSigner respository
+ * classpath so that the modified version of the sun.security.* classes in this BDSigner respository
  * are used during the run.  bdprov-jdk15-137.jar is a bouncycastle distribution; a copy can be bound at "resources" dir.
-
+ 
 This tool also generates a corresponding root certificate file after signing the xlets.
 Place the generated file, app.discroot.crt, in the BDMV's CERTIFICATE directory.
 
