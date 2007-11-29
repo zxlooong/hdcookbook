@@ -177,20 +177,28 @@ public class GrinView extends GenericMain {
      * @inheritDoc
      **/
     protected void waitForUser(String msg) {
-	screen.setNextDrawButtonVisible(true);
-	screen.setResultText(msg);
-	doWaitForUser();
+	    // Make sure that there's no race condition where a button
+	    // press happens after we set the button visible but before
+	    // we get down into doWaitForUser
+	synchronized(debugWaitingMonitor) {
+	    screen.forceNextDrawButtonVisible(true);
+	    screen.setResultText(msg);
+	    doWaitForUser();
+	}
     }
 
     /**
      * @inheritDoc
      **/
-    protected boolean userWaitingDone() {
-	screen.setNextDrawButtonVisible(false);
-	screen.setResultText("");
-	return super.userWaitingDone();
+    public void debugDrawFrameDone() {
+	if (getFps() == 0f) {
+	    SwingUtilities.invokeLater(new Runnable() {
+		public void run() {
+		    advanceFrames(1);
+		}
+	    });
+	}
     }
-
 
     private static void usage() {
 	System.out.println();

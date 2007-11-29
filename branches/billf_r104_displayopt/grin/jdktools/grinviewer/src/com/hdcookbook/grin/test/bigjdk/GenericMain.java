@@ -122,6 +122,7 @@ public class GenericMain extends Frame implements AnimationContext {
     private Graphics2D frameGraphics;
     private int frame;		// Current frame we're on
     private float fps = 24.0f;
+
     private Image background = null;
 
     private ScalingDirectDrawEngine engine;
@@ -131,7 +132,12 @@ public class GenericMain extends Frame implements AnimationContext {
     private int screenHeight = 1080 / scaleDivisor;
 
     private boolean debugWaiting = false;
-    private Object debugWaitingMonitor = new Object();
+
+    /**
+     * Monitor to be held while coordinating a pause in the animation
+     * for debug.
+     **/
+    protected Object debugWaitingMonitor = new Object();
 
     public GenericMain() {
     }
@@ -278,6 +284,14 @@ public class GenericMain extends Frame implements AnimationContext {
 	System.out.print("==>  " + msg + "; hit enter to advance...  ");
 	System.out.flush();
 	doWaitForUser();
+    }
+
+    /**
+     * When debugging frame-by-frame, this is called when a complete
+     * frame has just finished.
+     **/
+    public void debugDrawFrameDone() {
+	// Overridden in GUI subclass
     }
 
     /**

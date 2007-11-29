@@ -317,6 +317,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	}
 	if (debugDraw) {
 	    main.waitForUser("Frame drawn");
+	    main.debugDrawFrameDone();
 	}
     }
 

@@ -91,6 +91,7 @@ public class GrinViewScreen extends javax.swing.JFrame {
 
     private GrinView main;
     private int[] showTextPos;
+    private boolean debugDraw = false;
 
     private JTextField commandText;
     private JTextField fpsText;
@@ -197,7 +198,7 @@ public class GrinViewScreen extends javax.swing.JFrame {
 
 	nextDrawButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nextDrawnButtonActionPerformed(evt);
+                nextDrawButtonActionPerformed(evt);
             }
         });
 
@@ -304,11 +305,15 @@ public class GrinViewScreen extends javax.swing.JFrame {
     }
 
     private void debugDrawCBItemChanged(java.awt.event.ItemEvent evt) {
-	main.setDebugDraw(evt.getStateChange() == evt.SELECTED);
+	debugDraw = evt.getStateChange() == evt.SELECTED;
+	main.setDebugDraw(debugDraw);
+
     }
 
-    private void nextDrawnButtonActionPerformed(java.awt.event.ActionEvent evt){
+    private void nextDrawButtonActionPerformed(java.awt.event.ActionEvent evt){
+	forceNextDrawButtonVisible(false);
 	main.userWaitingDone();
+	setResultText("");
     }
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -416,8 +421,14 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	fpsText.setText(s);
     }
 
-    void setNextDrawButtonVisible(boolean visible) {
+    void forceNextDrawButtonVisible(boolean visible) {
+	visible = visible || debugDraw;
 	nextDrawButton.setVisible(visible);
+	stopButton.setVisible(!visible);
+	snapshotButton.setVisible(!visible);
+	frameButton.setVisible(!visible);
+	commandText.setVisible(!visible);
+	fpsText.setVisible(!visible);
     }
 
 
