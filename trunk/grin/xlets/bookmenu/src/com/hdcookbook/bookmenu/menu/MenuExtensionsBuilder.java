@@ -69,7 +69,7 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.io.text.ShowBuilder;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.io.text.Lexer;
 import com.hdcookbook.grin.util.AssetFinder;

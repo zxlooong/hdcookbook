@@ -83,6 +83,7 @@ import com.hdcookbook.grin.input.VisualRCHandler;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.AssetFinder;
 
@@ -159,11 +160,13 @@ public class ShowParser {
 	} else {
 	    this.extBuilder = d.getExtensionsBuilder();
 	}
+        
 	if (builder == null) {
 	    builder = new ShowBuilder();
 	}
+        
 	this.builder = builder;
-	builder.init(this, show);
+	builder.init(show);
     }
 
     /**

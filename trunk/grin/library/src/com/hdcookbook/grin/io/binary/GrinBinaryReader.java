@@ -57,7 +57,6 @@ package com.hdcookbook.grin.io.binary;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -88,6 +87,7 @@ import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.util.Debug;
 
 /**
@@ -190,7 +190,6 @@ public class GrinBinaryReader {
           this.stream = stream;
        }
        
-       show = new Show(director);
     }
 
     private void checkValue(int x, int y, String message) throws IOException {
@@ -213,8 +212,10 @@ public class GrinBinaryReader {
      * @throws IOException if binary data parsing fails.
      */
     
-    public Show readShow() throws IOException {
- 
+    public Show readShow(ShowBuilder builder) throws IOException {
+
+        this.show = new Show(director);
+        
         GrinDataInputStream in = new GrinDataInputStream(stream);       
         checkScriptHeader(in);
         
@@ -233,21 +234,26 @@ public class GrinBinaryReader {
             CommandSetup setup = (CommandSetup) deferred.get(i);
             setup.setup();
         }
-        deferred.clear();
+        deferred.clear(); 
+        
+        builder.init(show);
+        
+        show.setSegmentStackDepth(showSegmentStackDepth);
         
         // Recreate an show object based on what's been read
         for (int i = 0; i < features.length; i++) {
-            show.addFeature(features[i].getName(), features[i]);
+            builder.addFeature(features[i].getName(), 0, features[i]);
         }
+        
         for (int i = 0; i < segments.length; i++) {
-            show.addSegment(segments[i].getName(), segments[i]);
+            builder.addSegment(segments[i].getName(),  0, segments[i]);
         }
         
         for (int i = 0; i < rcHandlers.length; i++) {
-            show.addRCHandler(rcHandlers[i].getName(), rcHandlers[i]); 
+            builder.addRCHandler(rcHandlers[i].getName(), 0, rcHandlers[i]); 
         }
         
-        show.setSegmentStackDepth(showSegmentStackDepth);
+        builder.finishBuilding();
         
         return show;
     }

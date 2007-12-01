@@ -75,7 +75,7 @@ import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.io.text.ShowBuilder;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.AssetFinder;
 
