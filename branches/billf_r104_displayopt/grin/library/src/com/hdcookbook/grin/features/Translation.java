@@ -245,19 +245,10 @@ public class Translation extends Feature {
 	}
     }
 
-
     /**
      * @inheritDoc
      **/
-    public void addEraseAreas(RenderContext context, boolean srcOver,
-    			      boolean envChanged)
-    {
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void addDrawAreas(RenderContext context, boolean envChanged) {
+    public void addDisplayAreas(RenderContext context) {
     }
 
     /**

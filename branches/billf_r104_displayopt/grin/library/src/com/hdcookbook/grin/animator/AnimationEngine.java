@@ -79,7 +79,8 @@ public abstract class AnimationEngine implements Runnable {
 
     /** 
      * The list of erase and drawing areas that were updated in 
-     * the current frame of animation.
+     * the current frame of animation, and records of what happened
+     * in the last.
      **/
     protected RenderContextBase renderContext;
 
@@ -392,8 +393,10 @@ public abstract class AnimationEngine implements Runnable {
 
 
     /**
-     * Called from RenderArea to cause an area to be cleared in the
+     * Called from showFrame() to cause an area to be cleared in the
      * current frame.
+     *
+     * @see #showFrame()
      **/
     protected abstract void clearArea(int x, int y, int width, int height);
 
@@ -532,7 +535,7 @@ public abstract class AnimationEngine implements Runnable {
 	    needsFullPaint = false;
 	}
 	if (fullPaint) {
-	    renderContext.addArea(0, 0, getWidth(), getHeight());
+	    renderContext.setFullPaint(0, 0, getWidth(), getHeight());
 	    // We still add the display areas, because that's also where
 	    // the client does any necessary erasing, and tracks state
 	    // from frame to frame.  The contract of AnimationClient
@@ -543,6 +546,8 @@ public abstract class AnimationEngine implements Runnable {
 	    clients[i].addDisplayAreas(renderContext);	
 	    	// renderContext contains targets
 	}
+	renderContext.processLastFrameRecords();
+	renderContext.processGuarantees();
 	renderContext.collapseTargets();
 	for (int i = 0; i < renderContext.numEraseTargets; i++) {
 	    Rectangle a = renderContext.eraseTargets[i];

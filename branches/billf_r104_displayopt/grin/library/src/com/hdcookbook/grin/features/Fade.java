@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.Debug;
@@ -89,6 +90,42 @@ public class Fade extends Modifier {
     private Command[] endCommands;
     private AlphaComposite currAlpha;
     private AlphaComposite lastAlpha;
+
+	//
+	// Here, we make an inner class of RenderContext.  We
+	// pass this instance to our child; it modifies calls to the
+	// parent RenderContext from our child.
+	//
+    private ChildContext childContext = new ChildContext();
+    
+    class ChildContext extends RenderContext {
+	RenderContext	parent;
+	private int x;
+	private int y;
+	private int width;
+	private int height;
+
+	public void addArea(DrawRecord r) {
+	    if (srcOver) {
+		r.setSemiTransparent();
+	    }
+	    if (currAlpha != lastAlpha) {
+		r.setChanged();
+	    }
+	    parent.addArea(r);
+	}
+
+	public void guaranteeAreaFilled(DrawRecord r) {
+	    if (!srcOver) {
+		parent.guaranteeAreaFilled(r);
+	    }
+	}
+
+	public int setTarget(int target) {
+	    return parent.setTarget(target);
+	}
+
+    };	// End of RenderContext anonymous inner class
 
     public Fade(Show show, String name, boolean srcOver, 
     		int[] keyframes, int[] keyAlphas, Command[] endCommands) 
@@ -190,26 +227,13 @@ public class Fade extends Modifier {
 	}
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public void addEraseAreas(RenderContext context, boolean srcOver,
-    			      boolean envChanged) 
-    {
-	if (currAlpha != lastAlpha) {
-	    envChanged = true;
-	}
-	super.addEraseAreas(context, true, envChanged);
-    }
 
     /**
      * @inheritDoc
      **/
-    public void addDrawAreas(RenderContext context, boolean envChanged) {
-	if (currAlpha != lastAlpha) {
-	    envChanged = true;
-	}
-	super.addDrawAreas(context, envChanged);
+    public void addDisplayAreas(RenderContext context) {
+	childContext.parent = context;
+	super.addDisplayAreas(childContext);
 	lastAlpha = currAlpha;
     }
 

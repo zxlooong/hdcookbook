@@ -87,10 +87,32 @@ public class RenderContextBase extends RenderContext {
     private Rectangle collapsed = new Rectangle(); 
     	// see collapseTargets(Rectangle[])
 
+    private DrawRecord thisFrameList = null;
+	// A list of DrawRecord instances used to addArea() in this
+	// frame of animation.  It's a singly-linked list kept as a
+	// stack (that is, LIFO).
+
+    private DrawRecord guaranteeList = null;
+	// A list of DrawRecord instances used in guaranteeAreaFilled.
+	// A singly-linked list, kept in order of insertion (that
+	// is, FIFO).
+
+    private DrawRecord guaranteeListLast = null;
+	// The last record on guaranteeList.
+
+    private DrawRecord lastFrameList = new DrawRecord();
+	// A list of the DrawRecord instances used to addArea() in
+	// the last frame of animation.  It's kept as a doubly-linked
+	// list with a dummy node at the head.  It's in the same order 
+	// as thisFrameList, and nodes are taken off of lastFrameList
+	// as they are added to thisFrameList.
+
     RenderContextBase(int numTargets) {
 	this.currTarget = 0;
 	this.drawTargets = newRectArray(numTargets);
 	this.eraseTargets = newRectArray(numTargets);
+	lastFrameList.prev = lastFrameList;
+	lastFrameList.next = lastFrameList;
     }
 
     private Rectangle[] newRectArray(int n) {
@@ -104,108 +126,40 @@ public class RenderContextBase extends RenderContext {
     /**
      * @inheritDoc
      **/
-    public void addArea(Rectangle area) {
-	addArea(area.x, area.y, area.width, area.height);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void clearAndAddArea(Rectangle area) {
-	clearAndAddArea(area.x, area.y, area.width, area.height);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void guaranteeAreaFilled(Rectangle area) {
-	guaranteeAreaFilled(area.x, area.y, area.width, area.height);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void addArea(int x, int y, int width, int height) {
-	addAreaTo(drawTargets[currTarget], x, y, width, height);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void clearAndAddArea(int x, int y, int width, int height) {
-	addAreaTo(drawTargets[currTarget], x, y, width, height);
-	addAreaTo(eraseTargets[currTarget], x, y, width, height);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void guaranteeAreaFilled(int x1, int y1, int width, int height) {
-	Rectangle area = eraseTargets[currTarget];
-	if (isEmpty(area)) {
-	    return;
+    public void addArea(DrawRecord r) {
+	r.target = currTarget;
+	r.addAreaTo(drawTargets[currTarget], eraseTargets[currTarget]);
+	// Remove from lastFrameList, if on it.
+	if (r.prev != null) {
+	    r.prev.next = r.next;
+	    r.next.prev = r.prev;
 	}
-	int x2 = x1 + width;
-	int y2 = y1 + height;
-	int ax1 = area.x;
-	int ay1 = area.y;
-	int ax2 = ax1 + area.width;
-	int ay2 = ay1 + area.height;
+	// Add to this frame's list
+	r.next = thisFrameList;
+	thisFrameList = r;
+	r.prev = null;
+    }
 
-	// First, try moving sides in.  We can only do this if
-	// the guaranteed area completely covers the erase area vertically.
-	//
-	if (y1 <= ay1 && y2 >= ay2) {
+    /**
+     * @inheritDoc
+     **/
+    public void guaranteeAreaFilled(DrawRecord filled) {
+	filled.target = currTarget;
 
-	    // Try moving left side to the right
-	    if (x1 <= ax1 && x2 > ax1) {
-		int d = x2 - ax1;
-		area.x += d;
-		area.width -= d;
-		if (area.width <= 0) {
-		    setEmpty(area);
-		    return;
-		}
-	    }
-
-	    // Try moving right side to the left
-	    if (x2 >= ax2 && x1 < ax2) {
-		int d = ax2 - x1;
-		area.width -= d;
-		if (area.width <= 0) {
-		    setEmpty(area);
-		    return;
-		}
-	    }
+	// Remove from lastFrameList, if on it.
+	if (filled.prev != null) {
+	    filled.prev.next = filled.next;
+	    filled.next.prev = filled.prev;
 	}
-
-	// Next, try squeezing the top and bottom.  WE can ondly do this
-	// if the guaranteed area completely covers the erase area
-	// horizontally.
-	//
-	if (x1 <= ax1 && x2 >= ax2) {
-
-	    // Try moving the top down
-	    if (y1 <= ay1 && y2 > ay1) {
-		int d = y2 - ay1;
-		area.y += d;
-		area.height -= d;
-		if (area.height <= 0) {
-		    setEmpty(area);
-		    return;
-		}
-	    }
-
-	    // Try moving the bottom up
-	    if (y2 >= ay2 && y1 < ay2) {
-		int d = ay2 - y1;
-		area.height -= d;
-		if (area.height <= 0) {
-		    setEmpty(area);
-		    return;
-		}
-	    }
+	// add to guaranteeList
+	if (guaranteeList == null) {
+	    guaranteeList = filled;
+	} else {
+	    guaranteeListLast.next = filled;
 	}
+	guaranteeListLast = filled;
+	filled.next = null;
+	filled.prev = null;
     }
 
     /**
@@ -228,56 +182,74 @@ public class RenderContextBase extends RenderContext {
 	}
     }
 
-    private void setEmpty(Rectangle r) {
+    //
+    // Sets the initial area that needs to be drawn.  This can be called
+    // just after setEmpty(), but at no other time.
+    //
+    void setFullPaint(int x, int y, int width, int height) {
+	drawTargets[0].setBounds(x, y, width, height);
+    }
+
+    //
+    // Process any DrawRecord instances that were used in the previous
+    // frame of animation, but that aren't used in this frame.  This is
+    // done after AnimationClient.addDisplayAreas()
+    //
+    void processLastFrameRecords() {
+	//
+	// First, run through the list in reverse order, which gets us
+	// the original order of calls to addArea()
+	//
+	DrawRecord n = lastFrameList.prev;
+	while (n != lastFrameList) {
+	    n.eraseLastFrame(drawTargets[n.target], eraseTargets[n.target]);
+	    DrawRecord tmp = n;
+	    n = n.prev;
+	    tmp.prev = null;	
+	    	// Nodes not on a list need to have a prev set to null,
+		// since we use prev to know to take a node off lastFrameList
+		// in other methods of this class.
+	}
+	//
+	// Now, set lastFrameList to thisFrameList, and set up the
+	// backwards links, in preparation for the next frame.
+	// thisFrameList becomes empty.
+	//
+	lastFrameList.next = thisFrameList;  // head is dummy node
+	thisFrameList = null;
+	n = lastFrameList.next;
+	DrawRecord prev = lastFrameList;
+	while (n != null) {
+	    n.prev = prev;
+	    prev = n;
+	    n = n.next;
+	}
+	prev.next = lastFrameList;  // make it circular
+	lastFrameList.prev = prev;
+    }
+
+    //
+    // Called by the animation engine just before collapsing targets,
+    // this process the areas that are guaranteed to be painted, in an
+    // effort to minimize erasing.
+    //
+    void processGuarantees() {
+	while (guaranteeList != null) {
+	    Rectangle area = eraseTargets[guaranteeList.target];
+	    if (!isEmpty(area)) {
+		guaranteeList.applyGuarantee(area);
+	    }
+	    guaranteeList = guaranteeList.next;
+	}
+	guaranteeListLast = null;
+    }
+
+    static void setEmpty(Rectangle r) {
 	r.width = -1;
     }
 
-    private boolean isEmpty(Rectangle r) {
+    static boolean isEmpty(Rectangle r) {
 	return r.width < 0;
-    }
-
-    //
-    // Add the given area to the given rectangle.
-    //
-    private void addAreaTo(Rectangle r, int x, int y, int width, int height) {
-	if (width <= 0 || height <= 0) {
-	    return;
-	}
-	if (isEmpty(r)) {
-	    r.setBounds(x, y, width, height);
-	} else {
-	    r.add(x, y);
-	    r.add(x+width, y+height);
-                // This is correct.  Rectangle.add() (and AWT in general)
-		// believes that the lower-right hand coordinate 
-		// at x+width, y+height is "outside" of a rectangle, and that
-		// adding a coordinate that pushes the lower-right boundary
-		// adds the point in question just _outside_ of the rectangle.
-		// In other words, this:
-		//
-		//         Rectangle r = new Rectangle(2, 2, 0, 0);
-		//         System.out.println(r.contains(2,2));
-		//         System.out.println(r.width + " x " + r.height);
-		//         r.add(2, 2);
-		//         System.out.println(r.width + " x " + r.height);
-		//         r.add(4, 4);
-		//         System.out.println(r.width + " x " + r.height);
-		//         System.out.println(r.contains(1,1) + ", " 
-		//                            + r.contains(2,2) + ", "
-		//                            + r.contains(3,3) + ", " 
-		//			      + r.contains(4,4));
-		// yields this:
-		//
-		//     false
-		//     0 x 0
-		//     0 x 0
-		//     2 x 2
-		//     false, true, true, false
-		//
-		// Node that after the call to r.add(4, 4), 
-		// r.contains(4,4) is false.
-
-	}
     }
 
 

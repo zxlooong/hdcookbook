@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.ImageManager;
@@ -110,6 +111,7 @@ public class ImageSequence extends Feature {
 
     private ManagedImage lastImage = null;
     private ManagedImage currImage = null;
+    private DrawRecord drawRecord = new DrawRecord();
 
     public ImageSequence(Show show, String name, int x, int y, String fileName,
     			 String[] middle, String extension, boolean repeat,
@@ -236,6 +238,7 @@ public class ImageSequence extends Feature {
 	if (mode) {
 	    lastImage = null;
 	    currImage = images[getStateHolder().currFrame];
+	    drawRecord.activate();
 	}
     }
 
@@ -345,23 +348,12 @@ public class ImageSequence extends Feature {
     /**
      * @inheritDoc
      **/
-    public void addEraseAreas(RenderContext context, boolean srcOver, 
-    			      boolean envChanged) 
-    {
-	if (!isActivated || envChanged
-	    || (isActivated && srcOver && lastImage != currImage)) 
-	{
-	    context.clearAndAddArea(x, y, width, height);
+    public void addDisplayAreas(RenderContext context) {
+	drawRecord.setArea(x, y, width, height);
+	if (currImage != lastImage) {
+	    drawRecord.setChanged();
 	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void addDrawAreas(RenderContext context, boolean envChanged) {
-	if (envChanged || currImage != lastImage) {
-	    context.addArea(x, y, width, height);
-	}
+	context.addArea(drawRecord);
 	lastImage = currImage;
     }
 

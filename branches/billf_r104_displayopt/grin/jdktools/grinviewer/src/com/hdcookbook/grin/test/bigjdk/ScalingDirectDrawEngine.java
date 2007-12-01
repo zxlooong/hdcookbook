@@ -247,7 +247,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    main.waitForUser("To be drawn areas shown with green overlay");
 	    componentG.setComposite(AlphaComposite.Src);
 	}
-	paintFrame(bufferG);
+	paintTargets(bufferG);
 	bufferG.setComposite(AlphaComposite.Src);	// Add some robustness
     }
 
@@ -311,7 +311,19 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 		g.dispose();
 		g = fixG;
 		g.setComposite(AlphaComposite.SrcOver);
-		g.drawImage(nonTranslucentFix, 0, 0, null);
+		for (int i = 0; i < getNumDrawTargets(); i++) {
+		    Rectangle a = getDrawTargets()[i];
+		    int s = scaleDivisor;
+		    // @@ g.drawImage(nonTranslucentFix, 0, 0, null);
+		    g.drawImage(nonTranslucentFix,
+		    			a.x/s, frameCheat + a.y/s, 
+					(a.x+a.width)/s, 
+					frameCheat + (a.y+a.height)/s,
+		    			a.x/s, frameCheat + a.y/s, 
+					(a.x+a.width)/s, 
+					frameCheat + (a.y+a.height)/s,
+					null);
+		}
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	}

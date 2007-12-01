@@ -109,7 +109,6 @@ public class Show implements AnimationClient {
     private Hashtable segments = new Hashtable();
 
     private Segment currentSegment = null;
-    private Segment lastSegmentDisplayed = null;
     private Segment[] segmentStack = new Segment[0];  // For push/pop
     private int segmentStackPos = 0;
     private ActivateSegmentCommand popSegmentCommand;
@@ -445,17 +444,9 @@ public class Show implements AnimationClient {
     public synchronized void addDisplayAreas(RenderContext context) 
 				throws InterruptedException 
     {
-	if (lastSegmentDisplayed != currentSegment
-	    && lastSegmentDisplayed != null) 
-	{
-	    lastSegmentDisplayed.addEraseAreas(context);
-	}
 	if (currentSegment != null) {
-	    currentSegment.addEraseAreas(context);
-	    currentSegment.addDrawAreas(context);
+	    currentSegment.addDisplayAreas(context);
 	}
-	lastSegmentDisplayed = currentSegment;
-    	// @@ TODO:  get rid of legacy method
     }
 
     /**

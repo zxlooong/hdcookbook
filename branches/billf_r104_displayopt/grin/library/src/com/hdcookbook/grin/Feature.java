@@ -253,41 +253,19 @@ public abstract class Feature implements SetupClient {
     }
 
     /**
-     * Add areas that need to be erased for the frame that's about
-     * to be drawn.  If this feature is inactive, add the area that 
-     * it painted to the
-     * last time it was displayed.  In either case, add to the erase 
-     * set of one of the render areas passed in the context.
+     * Add all of the areas that are displayed for this feature with the
+     * current frame.  This will be called exactly once per frame
+     * displayed on each activated feature.
      * <p>
-     * This method might be called more than once for a given
-     * frame of animation (e.g. in a Translator, once for the 
-     * previous position, and once for the new position).
+     * A feature that displays something needs to maintain a record
+     * of it in a DrawRecord.  The animation framework uses this to
+     * track what needs to be erased and drawn from frame to frame.
      * 
      * @param	context	The context for tracking rendering state
-     * @param	srcOver	true if the feature is drawn in SrcOver mode,
-     *			as opposed to Src.
-     * @param   envChanged  True if the drawing environment changed,
-     *			    e.g. the feature moved or was faded.
+     *
+     * @see com.hdcookbook.grin.animator.DrawRecord;
      **/
-    abstract public void addEraseAreas(RenderContext context, boolean srcOver,
-    			  	       boolean envChanged);
-
-    /**
-     * Add all of the areas that need to be painted with the current
-     * frame.  Only areas that changed since the last frame
-     * need to be drawn.
-     * <p>
-     * This will be called exactly once per frame displayed.  Thus,
-     * it's a good place to track state, like what's displayed
-     * in this frame for reference when we get to the next frame.
-     * 
-     * @param	context	The context for tracking rendering state
-     * @param   envChanged  True if the drawing environment changed,
-     *			    e.g. the feature moved or was faded.
-     **/
-    abstract public void addDrawAreas(RenderContext context,
-    			  	       boolean envChanged);
-
+    abstract public void addDisplayAreas(RenderContext context);
 
 
     /**

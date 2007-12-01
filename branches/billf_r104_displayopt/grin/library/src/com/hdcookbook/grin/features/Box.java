@@ -57,6 +57,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
 
@@ -82,7 +83,7 @@ public class Box extends Feature {
     private Color fillColor;
 
     private boolean isActivated;
-    private boolean wasActivated = false;
+    private DrawRecord drawRecord = new DrawRecord();
 
     public Box(Show show, String name, Rectangle placement,
     	       int outlineWidth, Color outlineColor, Color fillColor)
@@ -145,8 +146,10 @@ public class Box extends Feature {
 	//
 	// This is synchronized to only occur within model updates.
 	//
-	wasActivated = isActivated;
 	isActivated = mode;
+	if (mode) {
+	    drawRecord.activate();
+	}
     }
 
     /**
@@ -177,22 +180,11 @@ public class Box extends Feature {
     /**
      * @inheritDoc
      **/
-    public void addEraseAreas(RenderContext context, boolean srcOver,
-    			      boolean envChanged) {
-	if (isActivated != wasActivated || envChanged) {
-	    context.clearAndAddArea(placement);
-	    // Because of our rounded corners and empty middle, there
-	    // are many pixels that show through us even in Src drawing
-	    // mode, so we always have to clear entire area on a change.
-	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void addDrawAreas(RenderContext context, boolean envChanged) {
-	// addEraseArea already added our area for any drawn-to zone
-	wasActivated = isActivated;
+    public void addDisplayAreas(RenderContext context) {
+	drawRecord.setArea(placement.x, placement.y, 
+			   placement.width, placement.height);
+	drawRecord.setSemiTransparent();
+	context.addArea(drawRecord);
     }
 
     /**

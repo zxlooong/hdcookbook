@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
@@ -75,6 +76,7 @@ public class Clipped extends Modifier {
 
     private Rectangle clipRegion;
     private Rectangle lastClipRegion = new Rectangle();
+    private Rectangle tmpI = null;
 
 	//
 	// Here, we make an inner class of RenderContext.  We
@@ -90,72 +92,22 @@ public class Clipped extends Modifier {
 	private int width;
 	private int height;
 
-	public void addArea(Rectangle area) {
-	    addArea(area.x, area.y, area.width, area.height);
+	public void addArea(DrawRecord r) {
+	    r.addClip(clipRegion.x, clipRegion.y, 
+	    	      clipRegion.width, clipRegion.height);
+	    parent.addArea(r);
 	}
 
-	public void addArea(int x, int y, int width, int height) {
-	    this.x = x;
-	    this.y = y;
-	    this.width = width;
-	    this.height = height;
-	    clipArea();
-	    if (this.width >= 0 && this.height >= 0) {
-		parent.addArea(this.x, this.y, this.width, this.height);
-	    }
-	}
-
-	public void clearAndAddArea(Rectangle area) {
-	    clearAndAddArea(area.x, area.y, area.width, area.height);
-	}
-
-	public void clearAndAddArea(int x, int y, int width, int height) {
-	    this.x = x;
-	    this.y = y;
-	    this.width = width;
-	    this.height = height;
-	    clipArea();
-	    if (this.width >= 0 && this.height >= 0) {
-		parent.clearAndAddArea(this.x, this.y, this.width, this.height);
-	    }
-	}
-
-	public void guaranteeAreaFilled(Rectangle area) {
-	    guaranteeAreaFilled(area.x, area.y, area.width, area.height);
-	}
-
-	public void guaranteeAreaFilled(int x, int y, int width, int height) {
-	    this.x = x;
-	    this.y = y;
-	    this.width = width;
-	    this.height = height;
-	    clipArea();
-	    if (this.width >= 0 && this.height >= 0) {
-		parent.guaranteeAreaFilled(this.x, this.y, 
-					   this.width, this.height);
-	    }
+	public void guaranteeAreaFilled(DrawRecord r) {
+	    r.addClip(clipRegion.x, clipRegion.y, 
+	    	      clipRegion.width, clipRegion.height);
+	    parent.guaranteeAreaFilled(r);
 	}
 
 	public int setTarget(int target) {
 	    return parent.setTarget(target);
 	}
 
-	private void clipArea() {
-	    if (x < clipRegion.x) {
-		width -= clipRegion.x - x;
-		x = clipRegion.x;
-	    }
-	    if (y < clipRegion.y) {
-		height -= clipRegion.y - y;
-		y = clipRegion.y;
-	    }
-	    if (x + width > clipRegion.x + clipRegion.width) {
-		width = clipRegion.x + clipRegion.width - x;
-	    }
-	    if (y + height > clipRegion.y + clipRegion.height) {
-		height = clipRegion.y + clipRegion.height - y;
-	    }
-	}
     };	// End of RenderContext anonymous inner class
 
     public Clipped(Show show, String name, Rectangle clipRegion) {
@@ -171,19 +123,9 @@ public class Clipped extends Modifier {
     /**
      * @inheritDoc
      **/
-    public void addEraseAreas(RenderContext context, boolean srcOver,
-    			      boolean envChanged) 
-    {
+    public void addDisplayAreas(RenderContext context) {
 	childContext.parent = context;
-	super.addEraseAreas(childContext, srcOver, envChanged);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void addDrawAreas(RenderContext context, boolean envChanged) {
-	childContext.parent = context;
-	super.addDrawAreas(childContext, envChanged);
+	super.addDisplayAreas(childContext);
     }
 
 
@@ -195,12 +137,34 @@ public class Clipped extends Modifier {
 	// have to worry about concurrent calls.
 	lastClipRegion.x = Integer.MIN_VALUE;
 	gr.getClipBounds(lastClipRegion);
-	gr.setClip(clipRegion);
-	part.paintFrame(gr);
 	if (lastClipRegion.x == Integer.MIN_VALUE) {
+	    gr.setClip(clipRegion);
+	    part.paintFrame(gr);
 	    gr.setClip(null);
 	} else {
-	    gr.setClip(lastClipRegion);
+	    if (tmpI == null) {
+		tmpI = new Rectangle();		// Holds intersection
+	    }
+	    tmpI.setBounds(lastClipRegion);
+	    if (tmpI.x < clipRegion.x) {
+		tmpI.width -= clipRegion.x - tmpI.x;
+		tmpI.x = clipRegion.x;
+	    }
+	    if (tmpI.y < clipRegion.y) {
+		tmpI.height -= clipRegion.y - tmpI.y;
+		tmpI.y = clipRegion.y;
+	    }
+	    if (tmpI.x + tmpI.width > clipRegion.x + clipRegion.width) {
+		tmpI.width = clipRegion.x + clipRegion.width - tmpI.x;
+	    }
+	    if (tmpI.y + tmpI.height > clipRegion.y + clipRegion.height) {
+		tmpI.height = clipRegion.y + clipRegion.height - tmpI.y;
+	    }
+	    if (tmpI.width > 0 && tmpI.height > 0) {
+		gr.setClip(tmpI);
+		part.paintFrame(gr);
+		gr.setClip(lastClipRegion);
+	    }
 	}
     }
 }

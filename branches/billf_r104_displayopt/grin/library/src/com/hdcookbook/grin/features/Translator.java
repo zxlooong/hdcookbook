@@ -57,6 +57,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
 
@@ -88,6 +89,8 @@ public class Translator extends Feature {
     private int lastDx;		// For last frame shown
     private int lastDy;
 
+    private DrawRecord drawRecord = new DrawRecord();
+
 	//
 	// Here, we make an inner class of RenderContext.  We
 	// pass this instance to our child; it modifies calls to the
@@ -97,31 +100,18 @@ public class Translator extends Feature {
     
     class ChildContext extends RenderContext {
 	RenderContext	parent;
-	int dx;
-	int dy;
 
-	public void addArea(Rectangle area) {
-	    addArea(area.x, area.y, area.width, area.height);
+	public void addArea(DrawRecord r) {
+	    r.applyTranslation(currDx, currDy);
+	    if (currDx != lastDx || currDy != lastDy) {
+		r.setChanged();
+	    }
+	    parent.addArea(r);
 	}
 
-	public void addArea(int x, int y, int width, int height) {
-	    parent.addArea(x + dx, y + dy, width, height);
-	}
-
-	public void clearAndAddArea(Rectangle area) {
-	    clearAndAddArea(area.x, area.y, area.width, area.height);
-	}
-
-	public void clearAndAddArea(int x, int y, int width, int height) {
-	    parent.clearAndAddArea(x + dx, y + dy, width, height);
-	}
-
-	public void guaranteeAreaFilled(Rectangle area) {
-	    guaranteeAreaFilled(area.x, area.y, area.width, area.height);
-	}
-
-	public void guaranteeAreaFilled(int x, int y, int width, int height) {
-	    parent.guaranteeAreaFilled(x+dx, y+dy, width, height);
+	public void guaranteeAreaFilled(DrawRecord r) {
+	    r.applyTranslation(currDx, currDy);
+	    parent.guaranteeAreaFilled(r);
 	}
 
 	public int setTarget(int target) {
@@ -208,6 +198,7 @@ public class Translator extends Feature {
 		features[i].activate();
 	    }
 	    lastDx = Integer.MIN_VALUE;
+	    drawRecord.activate();
 	} else {
 	    for (int i = 0; i < features.length; i++) {
 		features[i].deactivate();
@@ -272,39 +263,10 @@ public class Translator extends Feature {
     /**
      * @inheritDoc
      **/
-    public void addEraseAreas(RenderContext context, boolean srcOver,
-    			      boolean envChanged) 
-    {
-	if (lastDx != Integer.MIN_VALUE) {
-	    if (!isActivated || lastDx != currDx || lastDy != currDy) {
-		childContext.dx = lastDx;
-		childContext.dy = lastDy;
-		childContext.parent = context;
-		for (int i = 0; i < features.length; i++) {
-		    features[i].addEraseAreas(childContext, srcOver, true);
-		}
-	    }
-	}
-	childContext.dx = currDx;
-	childContext.dy = currDy;
+    public void addDisplayAreas(RenderContext context) {
 	childContext.parent = context;
 	for (int i = 0; i < features.length; i++) {
-	    features[i].addEraseAreas(childContext, srcOver, envChanged);
-	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void addDrawAreas(RenderContext context, boolean envChanged) {
-	if (lastDx != currDx || lastDy != currDy) {
-	    envChanged = true;
-	}
-	childContext.dx = currDx;
-	childContext.dy = currDy;
-	childContext.parent = context;
-	for (int i = 0; i < features.length; i++) {
-	    features[i].addDrawAreas(childContext, envChanged);
+	    features[i].addDisplayAreas(childContext);
 	}
 	lastDx = currDx;
 	lastDy = currDy;

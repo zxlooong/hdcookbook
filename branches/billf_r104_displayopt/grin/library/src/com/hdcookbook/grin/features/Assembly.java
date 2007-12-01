@@ -78,7 +78,6 @@ public class Assembly extends Feature {
     private String[] partNames;
     private Feature[] parts;
     private Feature currentFeature = null;
-    private Feature lastFeatureDisplayed = null;
     private boolean activated = false;
 
     public Assembly(Show show, String name) throws IOException {
@@ -168,7 +167,6 @@ public class Assembly extends Feature {
 	activated = mode;
 	if (mode) {
 	    currentFeature.activate();
-	    lastFeatureDisplayed = null;
 	} else {
 	    currentFeature.deactivate();
 	}
@@ -257,27 +255,8 @@ public class Assembly extends Feature {
     /**
      * @inheritDoc
      **/
-    public void addEraseAreas(RenderContext context, boolean srcOver,
-    			      boolean envChanged) 
-    {
-	if (lastFeatureDisplayed != currentFeature) {
-	    envChanged = true;
-	}
-	if (lastFeatureDisplayed != null && envChanged) {
-	    lastFeatureDisplayed.addEraseAreas(context, srcOver, true);
-	}
-	currentFeature.addEraseAreas(context, srcOver, envChanged);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void addDrawAreas(RenderContext context, boolean envChanged) {
-	if (lastFeatureDisplayed != currentFeature) {
-	    envChanged = true;
-	}
-	currentFeature.addDrawAreas(context, envChanged);
-	lastFeatureDisplayed = currentFeature;
+    public void addDisplayAreas(RenderContext context) {
+	currentFeature.addDisplayAreas(context);
     }
 
     /**

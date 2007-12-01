@@ -8,4 +8,4 @@ BG_IMG=$HD_SRC/com/hdcookbook/bookmenu/menu/test_assets/MenuScreenBG_gray.png
 java -cp $CLASSES com.hdcookbook.grin.test.bigjdk.GrinView \
 	-asset_dir $ASSETS \
 	-background $BG_IMG \
-	-fps 5 menu.txt
+	-fps 24 menu.txt

@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
@@ -75,25 +76,47 @@ import java.awt.Rectangle;
  **/
 public class SrcOver extends Modifier {
 
-    private Rectangle clipRegion;
-    private Rectangle lastClipRegion = new Rectangle();
+	// Here, we make an inner class of RenderContext.  We
+	// pass this instance to our child; it modifies calls to the
+	// parent RenderContext from our child.
+	//
+    private ChildContext childContext = new ChildContext();
+    
+    class ChildContext extends RenderContext {
+	RenderContext	parent;
+	private int x;
+	private int y;
+	private int width;
+	private int height;
+
+	public void addArea(DrawRecord r) {
+	    r.setSemiTransparent();
+	    parent.addArea(r);
+	}
+
+	public void guaranteeAreaFilled(DrawRecord r) {
+	    // Nothing - our semi-transparent children can't guarantee
+	    // that anything gets filled.
+	}
+
+	public int setTarget(int target) {
+	    return parent.setTarget(target);
+	}
+
+    };	// End of RenderContext anonymous inner class
 
     public SrcOver(Show show, String name) {
 	super(show, name);
     }
 
+
     /**
      * @inheritDoc
      **/
-    public void addEraseAreas(RenderContext context, boolean srcOver,
-    			      boolean envChanged)
-    {
-	super.addEraseAreas(context, true, envChanged);
+    public void addDisplayAreas(RenderContext context) {
+	childContext.parent = context;
+	super.addDisplayAreas(childContext);
     }
-
-    // We inherit addDrawAreas() 
-
-
 
     /**
      * See superclass definition.

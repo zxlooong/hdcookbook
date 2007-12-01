@@ -75,32 +75,15 @@ abstract public class RenderContext {
 
     /**
      * Add the given area to this render area, so that the animation manager
-     * will cause this area of the screen to be drawn to.  The given area
-     * will <i>not</i> be erased, so the caller must ensure that every
-     * pixel within the given area is drawn to.
+     * knows about it.  The framework will erase any part of the area that
+     * needs it in this frame, cause drawing to any part of the area that
+     * needs it in this frame, and arrange to erase any part of the area
+     * that needs it in the next frame.
      * <p>
-     * This method should only be called for areas of the screen that might
-     * have changed since the last frame of animation.
-     * <p>
-     * This is equivalent to addArea(area.x, area.y, area.width, area.height)
+     * A given DrawRecord instance can't be added to a RenderContext more
+     * than once.
      **/
-    abstract public void addArea(Rectangle area);
-
-    /**
-     * Add the given area to this render area, so that the animation manager
-     * will cause this area of the screen to be drawn to.  The given area
-     * will be erased by the animation manager, before any animation client
-     * is asked to draw to it.  In this way, it's OK for the animation client
-     * to do SrcOver drawing to this area, or drawing that doesn't fill every
-     * pixel in the given area.
-     * <p>
-     * This method should only be called for areas of the screen that might
-     * have changed since the last frame of animation.
-     * <p>
-     * This is equivalent to 
-     * clearAndddArea(area.x, area.y, area.width, area.height)
-     **/
-    abstract public void clearAndAddArea(Rectangle area);
+    abstract public void addArea(DrawRecord r);
 
     /**
      * Guarantee that the given area will have all of its pixels filled
@@ -111,60 +94,18 @@ abstract public class RenderContext {
      * <p>
      * If the fill-guarantee area doesn't result in the rectangular
      * bounds of the erase area being reduced, it probably won't help.
-     * At least in the first implementation, only removal of part of
-     * the bounding rectangle of a RenderArea is effective.
+     * At least in the first implementation, only removal of a complete slice
+     * of the bounding rectangle of a RenderArea is effective.
      * <p>
      * It's OK to call this method for an area that hasn't changed since
      * the last frame of drawing.  The area in question will only be
      * drawn to if requested by a call to one of the other methods.
      * <p>
-     * This is equivalent to 
-     * guaranteeAreaFilled(area.x, area.y, area.width, area.height)
+     * A given DrawRecord instance can't be added to a RenderContext more
+     * than once.  It also can't be used for both addArea() and
+     * guaranteeAreaFilled().
      **/
-    abstract public void guaranteeAreaFilled(Rectangle area);
-
-    /**
-     * Add the given area to this render area, so that the animation manager
-     * will cause this area of the screen to be drawn to.  The given area
-     * will <i>not</i> be erased, so the caller must ensure that every
-     * pixel within the given area is drawn to.
-     * <p>
-     * This method should only be called for areas of the screen that might
-     * have changed since the last frame of animation.
-     **/
-    abstract public void addArea(int x, int y, int width, int height);
-
-    /**
-     * Add the given area to this render area, so that the animation manager
-     * will cause this area of the screen to be drawn to.  The given area
-     * will be erased by the animation manager, before any animation client
-     * is asked to draw to it.  In this way, it's OK for the animation client
-     * to do SrcOver drawing to this area, or drawing that doesn't fill every
-     * pixel in the given area.
-     * <p>
-     * This method should only be called for areas of the screen that might
-     * have changed since the last frame of animation.
-     **/
-    abstract public void clearAndAddArea(int x, int y, int width, int height);
-
-    /**
-     * Guarantee that the given area will have all of its pixels filled
-     * (e.g. by Src mode drawing, or by drawing with fully opaque pixels).
-     * This information can be used to help optimize the areas that need
-     * to be erased - the current RenderArea to be erased can have
-     * this area removed from it.
-     * <p>
-     * If the fill-guarantee area doesn't result in the rectangular
-     * bounds of the erase area being reduced, it probably won't help.
-     * At least in the first implementation, only removal of part of
-     * the bounding rectangle of a RenderArea is effective.
-     * <p>
-     * It's OK to call this method for an area that hasn't changed since
-     * the last frame of drawing.  The area in question will only be
-     * drawn to if requested by a call to one of the other methods.
-     **/
-    abstract public void guaranteeAreaFilled(int x, int y, 
-    					     int width, int height);
+    abstract public void guaranteeAreaFilled(DrawRecord r);
 
     /**
      * Set the render area target for this context to direct its

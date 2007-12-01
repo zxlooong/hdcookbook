@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
@@ -185,7 +186,6 @@ public abstract class Modifier extends Feature {
 	part.paintFrame(g);
     }
 
-
     /**
      * @inheritDoc
      * <p>
@@ -193,21 +193,8 @@ public abstract class Modifier extends Feature {
      * for changes in the drawing environment they make.  The version
      * in this class simply calls this method on the modified part.
      **/
-    public void addEraseAreas(RenderContext context, boolean srcOver,
-    			      boolean envChanged) 
-    {
-	part.addEraseAreas(context, srcOver, envChanged);
-    }
-
-    /**
-     * @inheritDoc
-     * <p>
-     * Subclasses will probably want to override this to account
-     * for changes in the drawing environment they make.  The version
-     * in this class simply calls this method on the modified part.
-     **/
-    public void addDrawAreas(RenderContext context, boolean envChanged) {
-	part.addDrawAreas(context, envChanged);
+    public void addDisplayAreas(RenderContext context) {
+	part.addDisplayAreas(context);
     }
 
     /**

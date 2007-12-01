@@ -89,7 +89,6 @@ public class Segment {
     private RCHandler[] rcHandlers;
     private boolean active = false;
     private boolean nextCommandSent;
-    private boolean justActivated = false;
 
     private ActivateSegmentCommand cmdToActivate;
     private ActivateSegmentCommand cmdToActivatePush;
@@ -228,7 +227,6 @@ public class Segment {
 	    return;
 	}
 	active = true;
-	justActivated = true;
 	nextCommandSent = false;
 	for (int i = 0; i < activeFeatures.length; i++) {
 	    boolean wasNeeded = activeFeatures[i].setup();
@@ -337,27 +335,13 @@ public class Segment {
     }
 
     //
-    // Called from Show with the Show lock held.  This is called
-    // on a segment that is active or was active when the last segment
-    // was painted.
-    //
-    void addEraseAreas(RenderContext context) {
-	boolean envChanged = justActivated || !active;
-	for (int i = 0; i < activeFeatures.length; i++) {
-	    activeFeatures[i].addEraseAreas(context, false, envChanged);
-	}
-    }
-
-    //
     // Called from Show with the Show lock held.  This adds all the
-    // areas that have changed since the last frame, erasing as
-    // needed.
+    // areas that will be drawn this frame.
     //
-    void addDrawAreas(RenderContext context) {
+    void addDisplayAreas(RenderContext context) {
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    activeFeatures[i].addDrawAreas(context, justActivated);
+	    activeFeatures[i].addDisplayAreas(context);
 	}
-	justActivated = false;
     }
 
     //
