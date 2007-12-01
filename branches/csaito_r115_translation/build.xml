@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="hdcookbook" default="deploy" basedir=".">
+
+  <!-- A default target.  This will build tools if necessary.  -->
+  <target name="deploy"> 
+	 <ant dir="grin" antfile="scripts/ant/build_xlets.xml" target="grin-deploy"/>
+  </target>
+
+  <!-- A target for everything -->
+  <target name="all" depends="deploy, build-grinview, build-grin-javadoc">
+  </target>
+  
+  <!-- Build just the tools, and not the xlets in grin directory -->
+  <target name="build-tools">
+	  <ant dir="tools/bdjo"/> 
+	  <ant dir="tools/bdsigner/make"/> 
+  </target>
+
+  <!-- Build the GRIN script viewer -->
+  <target name="build-grinview">
+	    <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="compile-grin-viewer"/>
+  </target>
+  
+    <!-- Build the GRIN javadoc -->
+  <target name="build-grin-javadoc">
+	    <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml"/>
+  </target>
+
+    <!-- Update GRIN javadoc in the trunk/www directory -->
+  <target name="deploy-grin-javadoc"> 
+	    <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml" target="deploy"/>
+  </target>
+  
+  <target name="clean"> 	  
+	  <ant dir="tools/bdjo" target="bdjo-clean"/>
+	  <ant dir="tools/bdsigner/make" target="clean"/>
+	  <ant dir="grin" antfile="scripts/ant/build_xlets.xml" target="grin-clean"/>
+	  <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="clean"/>
+	  <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml" target="clean"/>
+  </target>
+  
+</project>
