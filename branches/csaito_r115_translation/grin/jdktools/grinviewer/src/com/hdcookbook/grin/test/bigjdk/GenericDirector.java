@@ -55,24 +55,20 @@
 
 package com.hdcookbook.grin.test.bigjdk;
 
-
-import java.net.URL;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.IOException;
+import java.net.URL;
 
+import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.features.Assembly;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.text.ShowBuilder;
-import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.binary.GrinBinaryReader;
+import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
-import com.hdcookbook.grin.util.Debug;
 
 /**
  * This is a subclass of the GRIN director class that fakes out
@@ -124,16 +120,25 @@ public class GenericDirector extends Director {
 	Show show = new Show(this);
 	URL source = null;
 	BufferedReader rdr = null;
+        BufferedInputStream bis = null;
 	try {
 	    source = AssetFinder.getURL(showName);
 	    if (source == null) {
 		throw new IOException("Can't find resource " + showName);
 	    }
-	    rdr = new BufferedReader(
+            
+            if (!showName.endsWith(".grin")) {
+	        rdr = new BufferedReader(
 			new InputStreamReader(source.openStream(), "UTF-8"));
-	    ShowParser p = new ShowParser(rdr, showName, show, builder);
-	    p.parse();
-	    rdr.close();
+	        ShowParser p = new ShowParser(rdr, showName, show, builder);
+	        p.parse();
+	        rdr.close();
+            } else {
+                bis = new BufferedInputStream(source.openStream());
+ 	        GrinBinaryReader reader = new GrinBinaryReader(this, bis);
+                show = reader.readShow(builder);
+                bis.close();
+            }   
 	} catch (IOException ex) {
 	    ex.printStackTrace();
 	    System.out.println();
@@ -148,7 +153,13 @@ public class GenericDirector extends Director {
 		    rdr.close();
 		} catch (IOException ex) {
 		}
-	    }
+	    }   
+            if (bis != null) {
+                try {
+                    bis.close();
+                } catch (IOException ex) {
+                }    
+            }
 	}
         return show;
     }

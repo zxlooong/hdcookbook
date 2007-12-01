@@ -53,7 +53,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.text;
+package com.hdcookbook.grin.io;
 
 
 import com.hdcookbook.grin.Show;
@@ -77,17 +77,15 @@ import java.awt.Color;
  */
 public class ShowBuilder {
    
-    protected ShowParser parser;
     protected Show show;
 
     public ShowBuilder() {
     }
 
-    void init(ShowParser parser, Show show) {
-	this.parser = parser;
-	this.show = show;
-    }
-
+    public void init(Show show) {
+        this.show = show;
+    }    
+        
     /** 
      * Called when a new feature is encountered.
      **/

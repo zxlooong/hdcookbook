@@ -101,16 +101,30 @@ information or have any questions.
 		</java>	
 </target>
 
-<target name="run-grin-viewer">
-	<copy todir="${GRIN_VIEWER_DEST}/assets">
-		<fileset dir="jdktools/grinviewer/src/com/hdcookbook/grin/test/assets">	
+<target name="run-grin-viewer" depends="compile-grin-viewer, run-binary-converter">
+	<copy todir="${GRIN_VIEWER_DEST}">
+		<fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/assets">	
 			<exclude name="**/.svn"/>
 		</fileset>   
 	</copy>    
 	
         <java fork="true" jar="${GRIN_VIEWER_DEST}/grinviewer.jar">
-		<arg line="-asset_dir ${GRIN_VIEWER_DEST}/assets ryan_show.txt"/>
+		<arg line="-asset_dir ${GRIN_VIEWER_DEST} menu.grin"/>
 	</java>
+</target>
+
+<target name="debug-grin-viewer" depends="compile-grin-viewer, run-binary-converter">
+                <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
+			<classpath path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+		</nbjpdastart>	
+        <java fork="true" jar="${GRIN_VIEWER_DEST}/grinviewer.jar">
+			<jvmarg value="-Xdebug"/>
+			<jvmarg value="-Xnoagent"/>
+			<jvmarg value="-Djava.compiler=none"/>
+			<jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+
+		<arg line="-asset_dir ${GRIN_VIEWER_DEST} menu.grin"/>                        
+		</java>	
 </target>
 
 <target name="clean">

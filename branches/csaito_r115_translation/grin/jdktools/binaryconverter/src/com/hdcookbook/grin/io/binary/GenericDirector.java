@@ -63,7 +63,7 @@ import java.io.InputStreamReader;
 import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.io.text.ShowBuilder;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.util.AssetFinder;

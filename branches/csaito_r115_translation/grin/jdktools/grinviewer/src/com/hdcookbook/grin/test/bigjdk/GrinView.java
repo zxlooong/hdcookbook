@@ -58,6 +58,7 @@ package com.hdcookbook.grin.test.bigjdk;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.Segment;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -90,8 +91,8 @@ public class GrinView extends GenericMain {
 	screen.setResultText("Double-click in the tree to activate a segment.");
 
 	try {
-	    String[] lines = readShowText(showName);
-	    screen.setShowText(lines);
+            String[] lines = readShowFile(showName);
+	    screen.setShowText(lines);            
 	} catch (IOException ex) {
 	    System.out.println();
 	    System.out.println("Error reading show:  " + ex);
@@ -107,6 +108,17 @@ public class GrinView extends GenericMain {
             }
         });
     }
+    
+    private String[] readShowFile(String showName) throws IOException {
+        String[] lines;
+        if (!showName.endsWith(".grin")) {
+	    lines = readShowText(showName);
+        } else {
+            lines = readShowBinary(showName);
+        }
+        
+        return lines;
+    }     
 
     private String[] readShowText(String showName) throws IOException {
 	URL source = AssetFinder.getURL(showName);
@@ -144,7 +156,70 @@ public class GrinView extends GenericMain {
     void addLineNumber(Object obj, int line) {
 	lineNumberMap.put(obj, new Integer(line));
     }
+    
+    private String[] readShowBinary(String showName) throws IOException {
+	URL source = AssetFinder.getURL(showName);
+	if (source == null) {
+	    throw new IOException("Can't find resource " + showName);
+	}
+        BufferedInputStream bis = new BufferedInputStream(source.openStream());
+	LinkedList lines = new LinkedList();
+        int ch;
+        int count = 0;
+        StringBuffer hexInts = new StringBuffer(); // Hex integer for each line
+        StringBuffer content = new StringBuffer(); // hexInt in either char or '.' 
+        for(;;) {
+            ch = bis.read();
+            int m = count % 16;
+            if (m == 0) {
+                if (ch == -1) {
+                    break;
+                }
+                hexInts.append(toHex(count, 8) + ":  ");
+            }
+            if (m == 8) {
+                hexInts.append(" ");
+            }
+            if (ch == -1) {
+                hexInts.append("  ");
+            } else {
+                hexInts.append(toHex(ch, 2));
+                if (ch >= 32 && ch < 127) {
+                    content.append((char) ch);
+                } else {
+                    content.append('.');
+                }
+            }
+            if (m == 15)  {
+                hexInts.append("   ");
+                hexInts.append(content);
+                lines.add(hexInts.toString());
+                hexInts = hexInts.delete(0, hexInts.length());
+                content = content.delete(0, content.length());
+            } else {
+                hexInts.append(" ");
+            }
+            count++;
+        }
+              
+	bis.close();
+	return (String[]) lines.toArray(new String[lines.size()]);
+    }
 
+    private static String hexDigits = "0123456789abcdef";
+    private static String toHex(int b, int digits) {
+        if (digits <= 0) {
+            throw new IllegalArgumentException();
+        }
+        String result = "";
+        while (digits > 0 || b > 0) {
+            result = hexDigits.charAt(b % 16) + result;
+            b = b / 16;
+            digits--;
+        }
+        return result;
+    }
+    
     int getLineNumber(Object o) {
 	GuiShowBuilder.Node node = (GuiShowBuilder.Node) o;
 	Object v = lineNumberMap.get(node.contents);
@@ -305,6 +380,5 @@ public class GrinView extends GenericMain {
 	m.inputLoop();
         
 	System.exit(0);
-    }
-    
+    }   
 }
