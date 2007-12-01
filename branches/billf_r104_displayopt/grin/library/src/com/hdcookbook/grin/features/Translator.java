@@ -83,8 +83,8 @@ public class Translator extends Feature {
     private int fx;		// Feature's start position
     private int fy;
 
-    private int currDx;		// delta-x and y for current frame
-    private int currDy;
+    private int dx;		// For this frame
+    private int dy;
 
     private int lastDx;		// For last frame shown
     private int lastDy;
@@ -102,15 +102,15 @@ public class Translator extends Feature {
 	RenderContext	parent;
 
 	public void addArea(DrawRecord r) {
-	    r.applyTranslation(currDx, currDy);
-	    if (currDx != lastDx || currDy != lastDy) {
+	    r.applyTranslation(dx, dy);
+	    if (dx != lastDx || dy != lastDy) {
 		r.setChanged();
 	    }
 	    parent.addArea(r);
 	}
 
 	public void guaranteeAreaFilled(DrawRecord r) {
-	    r.applyTranslation(currDx, currDy);
+	    r.applyTranslation(dx, dy);
 	    parent.guaranteeAreaFilled(r);
 	}
 
@@ -255,8 +255,10 @@ public class Translator extends Feature {
 	for (int i = 0; i < features.length; i++) {
 	    features[i].nextFrame();
 	}
-	currDx = translation.getX() - fx;
-	currDy = translation.getY() - fy;
+
+	// Note that at this point, we don't know if our translation
+	// has advanced to the next frame or not, so we can't depend
+	// on its value
     }
 
 
@@ -264,12 +266,14 @@ public class Translator extends Feature {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
+	dx = translation.getX() - fx;
+	dy = translation.getY() - fy;
 	childContext.parent = context;
 	for (int i = 0; i < features.length; i++) {
 	    features[i].addDisplayAreas(childContext);
 	}
-	lastDx = currDx;
-	lastDy = currDy;
+	lastDx = dx;
+	lastDy = dy;
     }
 
 
@@ -280,8 +284,6 @@ public class Translator extends Feature {
 	if (!isActivated) {
 	    return;
 	}
-	int dx = translation.getX() - fx;
-	int dy = translation.getY() - fy;
 	gr.translate(dx, dy);
 	for (int i = 0; i < features.length; i++) {
 	    features[i].paintFrame(gr);
