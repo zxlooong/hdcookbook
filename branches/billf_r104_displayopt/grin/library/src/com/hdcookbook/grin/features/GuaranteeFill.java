@@ -59,148 +59,105 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
+import java.awt.AlphaComposite;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * Abstract base class for features that modify a single child feature.
+ * Guarantees that its children will completely fill a given rectangle
+ * on the screen with source-mode drawing.  In other words, this node and
+ * its children guarantee that they will completely paint every pixel within
+ * a given rectangle.
+ * <p>
+ * This node has a feature to paint transparent pixels (in the current
+ * drawing mode) in rectangular areas.  This allows an author to guarantee
+ * filling a large rectangular area composed of small rectangular items
+ * (like images drawn in Src mode) that have small gaps between them -- in
+ * this case, the GuaranteeFill node can fill in those gaps.  This node
+ * paints those fill areas before it paints its children.
+ * <p>
+ * If this node is a child of a node that sets SrcOver drawing mode,
+ * then the guarantee will not apply.  In other words, it's OK as
+ * far as correctness is concerned to put a structure including a
+ * GuaranteeFill node under a SrcOver node or a Fade node, but you
+ * won't see any increase in redraw efficiency due to the GuaranteeFill
+ * node in this case.
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public abstract class Modifier extends Feature {
+public class GuaranteeFill extends Modifier {
 
-    protected Feature part;
-    protected boolean activated = false;
+	// Here, we make an inner class of RenderContext.  We
+	// pass this instance to our child; it modifies calls to the
+	// parent RenderContext from our child.
+	//
 
-    public Modifier(Show show, String name) {
+    private Rectangle guaranteed;	// Guaranteed area
+    private Rectangle[] fills;		// The areas we need to fill
+    private DrawRecord drawRecord = new DrawRecord();
+
+    /**
+     * Create a new node.
+     *
+     * @param	show	The show we're a part of
+     * @param	name	The name of this node
+     * @param	gx	X coordinate of area guaranteed to be filled
+     * @param	gy	Y coordinate of area guaranteed to be filled
+     * @param	gWidth	Width of area guaranteed to be filled
+     * @param	gHeight	Height of area guaranteed to be filled
+     * @param	guaranteed	The area guaranteed to be filled by this node
+     * @param	fills	The rectangles this node will fill with transparent
+     *			pixels.  Can be empty or null.
+     **/
+    public GuaranteeFill(Show show, String name, Rectangle guaranteed,
+    			 Rectangle[] fills) 
+    {
 	super(show, name);
+	this.guaranteed = guaranteed;
+	this.fills = fills;
     }
 
     /**
-     * Called from the parser.
+     * Internal use only.  
      **/
-    public void setup(Feature part) { 
-	this.part = part;
+    public Rectangle getGuaranteed() {
+	return guaranteed;
     }
 
     /**
-     * Get our child feature
+     * Internal use only.  
      **/
-    public Feature getPart() {
-	return part;
-    }
-
-
-    /**
-     * @inheritDoc
-     **/
-    public int getStartX() {
-	return part.getStartX();
+    public Rectangle[] getFills() {
+       return fills;
     }
 
     /**
      * @inheritDoc
-     **/
-    public int getStartY() {
-	return part.getStartY();
-    }
-
-    /**
-     * Initialize this feature.  This is called on show initialization.
-     * A show will initialize all of its features after it initializes
-     * the phases.
-     **/
-    public void initialize() {
-	// The show will initialize our sub-feature, so we don't
-	// need to do anything here.
-    }
-
-    /**
-     * Free any resources held by this feature.  It is the opposite of
-     * setup; each call to setup() shall be balanced by
-     * a call to unsetup(), and they shall *not* be nested.  
-     * <p>
-     * It's possible an active phase may be destroyed.  For example,
-     * the last phase a show is in when the show is destroyed will
-     * probably be active (and it will probably be an empty phase
-     * too!).
-     **/
-    public void destroy() {
-	// The show will destroy our sub-feature, so we don't
-	// need to do anything here.
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    protected void setActivateMode(boolean mode) {
-	// This is synchronized to only occur within model updates.
-	activated = mode;
-	if (mode) {
-	    part.activate();
-	} else {
-	    part.deactivate();
-	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    protected void setSetupMode(boolean mode) {
-	if (mode) {
-	    part.setup();
-	} else {
-	    part.unsetup();
-	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void doSomeSetup() {
-	if (part.needsMoreSetup()) {
-	    part.doSomeSetup();
-	    return;
-	}
-	// None needed
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public boolean needsMoreSetup() {
-	if (part.needsMoreSetup()) {
-	    return true;
-	}
-	return false;
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void paintFrame(Graphics2D g) {
-	part.paintFrame(g);
-    }
-
-    /**
-     * @inheritDoc
-     * <p>
-     * Subclasses will probably want to override this to account
-     * for changes in the drawing environment they make.  The version
-     * in this class simply calls this method on the modified part.
      **/
     public void addDisplayAreas(RenderContext context) {
-	part.addDisplayAreas(context);
+	drawRecord.setArea(guaranteed.x, guaranteed.y, 
+			   guaranteed.width, guaranteed.height);
+	context.guaranteeAreaFilled(drawRecord);
+	super.addDisplayAreas(context);
     }
 
     /**
      * @inheritDoc
      **/
-    public void nextFrame() {
-	part.nextFrame();
+    public void paintFrame(Graphics2D gr) {
+	if (fills != null) {
+	    gr.setColor(AnimationEngine.transparent);
+	    for (int i = 0; i < fills.length; i++) {
+		Rectangle a = fills[i];
+		gr.fillRect(a.x, a.y, a.width, a.height);
+	    }
+	}
+	part.paintFrame(gr);
     }
 }

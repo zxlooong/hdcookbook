@@ -55,6 +55,8 @@
 
 package com.hdcookbook.grin.animator;
 
+import com.hdcookbook.grin.util.Debug;
+
 import java.awt.Rectangle;
 
 /**
@@ -128,7 +130,7 @@ public class RenderContextBase extends RenderContext {
      **/
     public void addArea(DrawRecord r) {
 	r.target = currTarget;
-	r.addAreaTo(drawTargets[currTarget], eraseTargets[currTarget]);
+	r.addAreaTo(drawTargets[currTarget]);
 	// Remove from lastFrameList, if on it.
 	if (r.prev != null) {
 	    r.prev.next = r.next;
@@ -177,8 +179,8 @@ public class RenderContextBase extends RenderContext {
     //
     void setEmpty() {
 	for (int i = 0; i < drawTargets.length; i++) {
-	    drawTargets[i].width = -1;
-	    eraseTargets[i].width = -1;
+	    drawTargets[i].width = 0;
+	    eraseTargets[i].width = 0;
 	}
     }
 
@@ -202,7 +204,7 @@ public class RenderContextBase extends RenderContext {
 	//
 	DrawRecord n = lastFrameList.prev;
 	while (n != lastFrameList) {
-	    n.eraseLastFrame(drawTargets[n.target], eraseTargets[n.target]);
+	    n.eraseLastFrame(drawTargets[n.target]);
 	    DrawRecord tmp = n;
 	    n = n.prev;
 	    tmp.prev = null;	
@@ -228,28 +230,13 @@ public class RenderContextBase extends RenderContext {
 	lastFrameList.prev = prev;
     }
 
-    //
-    // Called by the animation engine just before collapsing targets,
-    // this process the areas that are guaranteed to be painted, in an
-    // effort to minimize erasing.
-    //
-    void processGuarantees() {
-	while (guaranteeList != null) {
-	    Rectangle area = eraseTargets[guaranteeList.target];
-	    if (!isEmpty(area)) {
-		guaranteeList.applyGuarantee(area);
-	    }
-	    guaranteeList = guaranteeList.next;
-	}
-	guaranteeListLast = null;
-    }
-
     static void setEmpty(Rectangle r) {
-	r.width = -1;
+	r.width = 0;
+	r.height = 0;
     }
 
     static boolean isEmpty(Rectangle r) {
-	return r.width < 0;
+	return r.width <= 0;
     }
 
 
@@ -258,21 +245,99 @@ public class RenderContextBase extends RenderContext {
      * set.
      **/
     void collapseTargets() {
-	numEraseTargets = collapseTargets(eraseTargets);
+
+    		// First, we try to optimally collapse the targets.
 	numDrawTargets = collapseTargets(drawTargets);
     }
 
     //
-    // Collapse the render areas into an optimal set.  Return the number
+    // Collapse the draw areas into an optimal set.  Return the number
     // of targets that need to be drawn; targets[0..n-1]
-    // will need to be drawn.  If no paint is needed, n will be 0.
+    // will need to be drawn .  If no drawing is needed, n will
+    // be 0.
     //
     private int collapseTargets(Rectangle[] targets) {
 
-	int n = targets.length - 1;
+	int n = purgeEmpty(targets, targets.length) - 1;
 
-		// First, the easy part:  Put all of the empty targets
-		// at the end of the list
+	// Now, targets[0..n] are non-empty
+
+		// Next, figure out which areas should be collapsed.
+		// As a SWAG, we collapse areas when combining them
+		// at most adds 200x400 pixels to the area of the screen
+		// drawn to.
+		//
+		// This is an area where it would be worth measuring what
+		// is optimal, and perhaps even using different heuristics
+		// based on player.
+		//
+		// Note that this algorithm is O(n^3) on the number of
+		// targets.
+
+	if (Debug.ASSERT) {
+	    for (int i = 0; i < n; i++) {
+		if (isEmpty(targets[i])) {
+		    Debug.assertFail();
+		}
+	    }
+	}
+    collapse: 
+	for (;;) {
+	    for (int i = 0; i < n; i++) {
+		for (int j = i+1; j <= n; j++) {
+		    collapsed.setBounds(targets[i]);
+		    collapsed.add(targets[j]);
+			// We conservatively combine intersecting draw rects
+			// here, since it's not OK to draw an area twice
+			// in SrcOver mode.
+			//
+			// This could be a bit more efficient, in the
+			// case where the intersection is compeletely
+			// contained within one of the rectangles and
+			// all on one side of the other.  In this case,
+			// instead of collapsing, the other rectangle
+			// could be made smaller.
+		    boolean combine = targets[i].intersects(targets[j]);
+		    if (!combine) {
+			int ac = collapsed.width * collapsed.height;
+			int a = targets[i].width * targets[i].height
+			       + targets[j].width * targets[j].height;
+
+			combine = ac <= a + 400*200;
+		    }
+		    if (combine) {
+			// combine them
+			targets[i].setBounds(collapsed);
+			if (j < n) {
+			    Rectangle ra = targets[j];
+			    targets[j] = targets[n];
+			    targets[n] = ra;
+			}
+			setEmpty(targets[n]);  
+			    // Not necessary, but fast and adds some robustness
+			n--;
+			continue collapse;   // yay goto!
+		    }
+		}
+	    }
+	    break collapse;
+	}
+
+	// At this point, targets[0..n] represents an optimal set of
+	// the areas we need to display and erase.  Add one to get the 
+	// length of the list of targets.
+
+	return n+1;
+    }
+
+
+    // 
+    // Purge the empty targets from the given array considering
+    // [0..num-1]
+    //
+    private int purgeEmpty(Rectangle[] targets, int num) {
+
+	int n = num - 1;
 
 	while (n >= 0 && isEmpty(targets[n])) {
 	    n--;
@@ -291,50 +356,30 @@ public class RenderContextBase extends RenderContext {
 	}
 	// Now, targets[0..n] are non-empty
 
-		// Next, figure out which areas should be collapsed.
-		// As a SWAG, we collapse areas when combining them
-		// at most doubles the area of the screen drawn to.
-		//
-		// This is an area where it would be worth measuring what
-		// is optimal, and perhaps even using different heuristics
-		// based on player.
-		//
-		// Note that this algorithm is O(n^3) on the number of
-		// targets.
-
-    collapse: 
-	for (;;) {
-	    for (int i = 0; i < n; ) {
-		for (int j = i+1; j <= n; j++) {
-		    collapsed.setBounds(targets[i]);
-		    collapsed.add(targets[j]);
-		    int ac = collapsed.width * collapsed.height;
-		    int a = targets[i].width * targets[i].height
-		    	   + targets[j].width * targets[j].height;
-		    if (ac <= 2*a) {
-			// combine them
-			targets[i].setBounds(collapsed);
-			if (j < n) {
-			    Rectangle ra = targets[j];
-			    targets[j] = targets[n];
-			    targets[n] = ra;
-			    setEmpty(targets[n]);  
-			    	// setEmpty() is not strictly necessary,
-				// but it's fast and makes the code a bit
-				// more robust.
-			}
-			n--;
-			continue collapse;   // yay goto!
-		    }
-		}
-	    }
-	    break collapse;
-	}
-
-	// At this point, targets[0..n] represents an optimal set of
-	// the areas we need to display.  Add one to get the length of
-	// the list of targets.
-
 	return n+1;
     }
+
+    //
+    // Called by the animation engine just after collapsing targets,
+    // this process the areas that are guaranteed to be painted, in an
+    // effort to minimize erasing.
+    //
+    void calculateEraseTargets() {
+	numEraseTargets = numDrawTargets;
+	for (int i = 0; i < numEraseTargets; i++) {
+	    eraseTargets[i].setBounds(drawTargets[i]);
+	}
+	while (guaranteeList != null) {
+	    for (int i = 0; i < numEraseTargets; i++) {
+		Rectangle area = eraseTargets[i];
+		if (!isEmpty(area)) {
+		    guaranteeList.applyGuarantee(area);
+		}
+	    }
+	    guaranteeList = guaranteeList.next;
+	}
+	guaranteeListLast = null;
+	numEraseTargets = purgeEmpty(eraseTargets, numEraseTargets);
+    }
+
 }

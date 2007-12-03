@@ -118,6 +118,8 @@ public class Show implements AnimationClient {
 
     private Queue pendingCommands = new Queue(32);
     private boolean deferringPendingCommands = false;
+    private int numTargets = 1;	  // number of RenderContext targets needed 
+    				  // by this show
 
     /** 
      * Create a new show.
@@ -213,6 +215,25 @@ public class Show implements AnimationClient {
 	    			   + "\" already exists.");
 	}
 	features.put(name, f);
+    }
+
+    /**
+     * Internal use only
+     **/
+    public void setNumTargets(int numTargets) {
+	this.numTargets = numTargets;
+    }
+
+    /**
+     * Get the number of RenderContext targets that are needed by this
+     * show.
+     *
+     * @see com.hdcookbook.grin.animator.RenderContext#setTarget(int)
+     * @see com.hdcookbook.grin.animator.AnimationEngine#initNumTargets(int)
+     * @see com.hdcookbook.grin.features.SetTarget
+     **/
+    public int getNumTargets() {
+	return numTargets;
     }
 
     /**

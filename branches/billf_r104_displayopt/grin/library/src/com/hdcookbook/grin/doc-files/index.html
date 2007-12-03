@@ -145,8 +145,9 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     feature ::= fixed_image | image_sequence | box | assembly | sound 
     		  | text | translation | translator | group | timer 
-		  | clipped | src_over | fade | extension_feature
-		  | extension_modifier
+		  | clipped | src_over | fade 
+		  | gurantee_fill | set_target
+		  | extension_feature | extension_modifier
 
     fixed_image ::= "feature" "fixed_image" name x y file_name ";"
 
@@ -191,7 +192,15 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     fade ::= "feature" "fade" name feature_name
     		[ "src_over" ] "{" ( frame_number alpha "linear" ) * "}" 
+		[ "repeat" frame_number ] 
 		[ "end_commands" commands ] ";"
+
+    guarantee_fill ::= "feature" "guarantee_fill" name feature_name
+    				rectangle 	    # guaranteed area
+				{ rectangle * } ";" # areas to be cleared
+
+    set_target ::= "feature" "set_target" name feature_name int ";"
+    	#  target number is in range 0..max
 
     translation ::= "feature" "translation" name 
 			    "{" key_frame * "}" 

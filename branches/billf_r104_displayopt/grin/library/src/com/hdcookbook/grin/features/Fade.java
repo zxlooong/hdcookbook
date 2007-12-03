@@ -82,9 +82,11 @@ import java.awt.AlphaComposite;
 public class Fade extends Modifier {
 
     private AlphaComposite[] alphas;
+    private AlphaComposite opaqueAlpha = null;
     private int[] keyframes;
     private int[] keyAlphas;
     private boolean srcOver;
+    private int repeatFrame;
     private boolean isActivated = false;
     private int alphaIndex;
     private Command[] endCommands;
@@ -116,7 +118,7 @@ public class Fade extends Modifier {
 	}
 
 	public void guaranteeAreaFilled(DrawRecord r) {
-	    if (!srcOver) {
+	    if (!srcOver || currAlpha == opaqueAlpha || currAlpha == null) {
 		parent.guaranteeAreaFilled(r);
 	    }
 	}
@@ -128,9 +130,11 @@ public class Fade extends Modifier {
     };	// End of RenderContext anonymous inner class
 
     public Fade(Show show, String name, boolean srcOver, 
-    		int[] keyframes, int[] keyAlphas, Command[] endCommands) 
+    		int[] keyframes, int[] keyAlphas, int repeatFrame,
+		Command[] endCommands) 
     {
 	super(show, name);
+	this.repeatFrame = repeatFrame;
 	this.endCommands = endCommands;
         this.keyframes = keyframes;
         this.keyAlphas = keyAlphas;
@@ -151,18 +155,25 @@ public class Fade extends Modifier {
        return keyAlphas;
     }
     
-    /* 
+    /** 
      * Internal use only 
-     */
+     **/
     public boolean getSrcOver() {
        return srcOver;
     }
     
-    /* 
+    /** 
      * Internal use only 
-     */    
+     **/    
     public Command[] getEndCommands() {
        return endCommands;
+    }
+    
+    /** 
+     * Internal use only 
+     **/    
+    public int getRepeatFrame() {
+        return repeatFrame;
     }
     
     /**
@@ -193,6 +204,9 @@ public class Fade extends Modifier {
 		    alpha = (keyAlphas[i+1]*distLast + keyAlphas[i]*distNext + dist/2) / dist;
 		}
 		alphas[f] = show.initializer.getAlpha(srcOver, alpha);
+		if (opaqueAlpha == null && alpha == 255) {
+		    opaqueAlpha = alphas[f];
+		}
 	    }
 	}
     }
@@ -219,6 +233,7 @@ public class Fade extends Modifier {
 	    for (int i = 0; i < endCommands.length; i++) {
 		show.runCommand(endCommands[i]);
 	    }
+	    alphaIndex = repeatFrame;
 	}
 	if (alphaIndex < alphas.length) {
 	    currAlpha = alphas[alphaIndex];

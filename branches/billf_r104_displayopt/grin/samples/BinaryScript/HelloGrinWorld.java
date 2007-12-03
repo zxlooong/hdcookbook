@@ -132,7 +132,7 @@ public class HelloGrinWorld implements Xlet, AnimationContext {
            }
            
 	   animationEngine.checkDestroy();
-	   animationEngine.initNumTargets(1);
+	   animationEngine.initNumTargets(show.getNumTargets());
 	   animationEngine.initClients(new AnimationClient[]{show});
 	   animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
 	   

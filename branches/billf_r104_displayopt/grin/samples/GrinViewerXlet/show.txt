@@ -43,11 +43,11 @@ segment S:DrawOpt.Initialize
     setup {
 	F:DrawOpt.Everything
     } setup_done {
-	activate_segment S:DrawOpt.Guarantee ;
+	activate_segment S:DrawOpt.Opt.TargetAndGuarantee ;
     }
 ;
 
-segment S:DrawOpt.Guarantee
+segment S:DrawOpt.Unoptimized
     active {
 	F:DrawOpt.Troopers
 	F:DrawOpt.Troopers.Coords
@@ -59,11 +59,44 @@ segment S:DrawOpt.Guarantee
     }
 ;
 
+segment S:DrawOpt.Opt.Target
+    active {
+	F:DrawOpt.Troopers
+	F:DrawOpt.Troopers.Coords
+	F:DrawOpt.Bunny.Targeted
+	F:DrawOpt.Bunny.Coords
+	F:DrawOpt.FadingPicture.Targeted
+    } setup {
+	F:DrawOpt.Everything
+    }
+;
+
+segment S:DrawOpt.Opt.TargetAndGuarantee
+    active {
+	F:DrawOpt.Troopers.Guaranteed
+	F:DrawOpt.Troopers.Coords
+	F:DrawOpt.Bunny.Targeted
+	F:DrawOpt.Bunny.Coords
+	F:DrawOpt.FadingPicture.Targeted
+    } setup {
+	F:DrawOpt.Everything
+    }
+;
+
+
+feature set_target F:DrawOpt.Bunny.Targeted
+	F:DrawOpt.Bunny 1 ;
+
+feature set_target F:DrawOpt.FadingPicture.Targeted
+	F:DrawOpt.FadingPicture 2 ;
+
+
 feature translation F:DrawOpt.Troopers.Coords {
 	0	 200 900		linear
 	40	1700 900		linear
 	80	 200 900		linear
-} repeat 1 ;
+}  repeat 1 ;
+
 
 feature translator F:DrawOpt.Troopers 
     F:DrawOpt.Troopers.Coords {
@@ -71,6 +104,27 @@ feature translator F:DrawOpt.Troopers
 	F:DrawOpt.Trooper.2
     } 
 ;
+
+feature translator F:DrawOpt.Troopers.Guaranteed
+    F:DrawOpt.Troopers.Coords {
+	F:DrawOpt.Troopers.Guaranteed.Guarantee
+    }
+;
+
+feature guarantee_fill F:DrawOpt.Troopers.Guaranteed.Guarantee
+     F:DrawOpt.Troopers.Guaranteed.Group
+	# two 63x110 images at 200, 900 and 300, 900
+    ( 200 900 362 1009 )	# guarantee area is 163x110
+    {
+        ( 263 900 299 1009 )	# Need to fill the in-between rect with 
+				# transparent pixels
+    }
+;
+
+feature group F:DrawOpt.Troopers.Guaranteed.Group {
+	F:DrawOpt.Trooper.1
+	F:DrawOpt.Trooper.2
+} ;
 
 feature fixed_image F:DrawOpt.Trooper.1 200 900 "images/turtle_trooper.png" ;
 feature fixed_image F:DrawOpt.Trooper.2 300 900 "images/turtle_trooper.png" ;
@@ -98,9 +152,13 @@ feature fade F:DrawOpt.FadingPicture F:DrawOpt.Picture src_over {
 	30	255	linear
 	80	255	linear
 	100	0	linear
-    }
+} repeat 1 ;
+
+feature guarantee_fill F:DrawOpt.Picture.Guaranteed
+     F:DrawOpt.Picture		# it's 400x537
+    ( 1500 500 1899 1036 )
+    { }				#  No fill areas needed
 ;
-# @@ Need "repeat" on fade!
 
 feature fixed_image F:DrawOpt.Picture 1500 500 "images/bunny_with_gun.png" ;
 
@@ -111,6 +169,9 @@ feature group F:DrawOpt.Everything {
 	F:DrawOpt.Bunny.Coords
 	F:DrawOpt.Bunny
 	F:DrawOpt.FadingPicture
+	F:DrawOpt.FadingPicture.Targeted
+	F:DrawOpt.Troopers.Guaranteed
+	F:DrawOpt.Bunny.Targeted
 } ;
 
 

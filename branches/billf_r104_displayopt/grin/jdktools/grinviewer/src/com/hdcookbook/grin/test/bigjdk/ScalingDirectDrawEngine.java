@@ -226,6 +226,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
      **/
     protected void callPaintTargets() throws InterruptedException {
 	if (debugDraw) {
+		// Paint the area to be erased red, and wait
 	    int s = scaleDivisor;
 	    componentG.setColor(new Color(255, 0, 0, 127));
 	    componentG.setComposite(AlphaComposite.SrcOver);
@@ -237,6 +238,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    Toolkit.getDefaultToolkit().sync();
 	    main.waitForUser("To be erased areas shown with red overlay");
 
+		// Paint the area to be drawn green, and wait
 	    componentG.setColor(new Color(0, 255, 0, 127));
 	    for (int i = 0; i < getNumDrawTargets(); i++) {
 		Rectangle a = getDrawTargets()[i];
@@ -298,8 +300,22 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    g.setComposite(AlphaComposite.Src);
 	}
 	if (getNumDrawTargets() > 0) {
-	    for (int i = 0; i < getNumDrawTargets(); i++) {
-		Rectangle a = getDrawTargets()[i];
+	    if (scaleDivisor == 1) {
+		for (int i = 0; i < getNumDrawTargets(); i++) {
+		    Rectangle a = getDrawTargets()[i];
+		    if (bg != null) {
+			g.setComposite(AlphaComposite.Src);
+			drawScaledImage(g, bg, a);
+			g.setComposite(AlphaComposite.SrcOver);
+		    }
+		    drawScaledImage(g, buffer, a);
+		}
+	    } else {
+		// If we're scaling, then rounding errors can cause
+		// odd off-by-one style artifacts, so we just paint the
+		// whole frame if anything's changed.
+		Rectangle a = new Rectangle(0, 0, buffer.getWidth(), 
+						  buffer.getHeight());
 		if (bg != null) {
 		    g.setComposite(AlphaComposite.Src);
 		    drawScaledImage(g, bg, a);
@@ -311,15 +327,28 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 		g.dispose();
 		g = fixG;
 		g.setComposite(AlphaComposite.SrcOver);
-		for (int i = 0; i < getNumDrawTargets(); i++) {
-		    Rectangle a = getDrawTargets()[i];
+		if (scaleDivisor == 1) {
+		    for (int i = 0; i < getNumDrawTargets(); i++) {
+			Rectangle a = getDrawTargets()[i];
+			int s = scaleDivisor;
+			g.drawImage(nonTranslucentFix,
+					    a.x/s, frameCheat + a.y/s, 
+					    (a.x+a.width)/s, 
+					    frameCheat + (a.y+a.height)/s,
+					    a.x/s, frameCheat + a.y/s, 
+					    (a.x+a.width)/s, 
+					    frameCheat + (a.y+a.height)/s,
+					    null);
+		    }
+		} else {
+		    Rectangle a = new Rectangle(0, 0, buffer.getWidth(), 
+						      buffer.getHeight());
 		    int s = scaleDivisor;
-		    // @@ g.drawImage(nonTranslucentFix, 0, 0, null);
 		    g.drawImage(nonTranslucentFix,
-		    			a.x/s, frameCheat + a.y/s, 
+					a.x/s, frameCheat + a.y/s, 
 					(a.x+a.width)/s, 
 					frameCheat + (a.y+a.height)/s,
-		    			a.x/s, frameCheat + a.y/s, 
+					a.x/s, frameCheat + a.y/s, 
 					(a.x+a.width)/s, 
 					frameCheat + (a.y+a.height)/s,
 					null);

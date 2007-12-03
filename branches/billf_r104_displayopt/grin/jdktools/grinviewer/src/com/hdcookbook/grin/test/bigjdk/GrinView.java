@@ -102,6 +102,9 @@ public class GrinView extends GenericMain {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
 		screen.pack();
+		int x = 0;
+		int y = getHeight() + FRAME_CHEAT;
+		screen.setLocation(x, y);
                 screen.setVisible(true);
 		screen.setFpsText("" + getFps());
             }

@@ -964,13 +964,18 @@ feature src_over F:BonusMenu F:BonusMenu.Assembly ;
 feature fixed_image F:BookmarkSnap.Im 1600 70
 	"Graphics/Menu/Bookmark_Snap.png" ;
 
-feature fade F:BookmarkSnap F:BookmarkSnap.Im {
+feature fade F:BookmarkSnap.Fade F:BookmarkSnap.Im {
 	0	255	linear
 	48	255	linear
 	72	  0	linear
 } end_commands {
 	segment_done ;
 } ;
+
+feature set_target F:BookmarkSnap F:BookmarkSnap.Fade 1 ;
+	# This sets the bookmark snap to be in its own render area.
+	# That's justified because the bookmark snap is in a very different
+	# area of the screen.
 
 #
 #  The user input grid

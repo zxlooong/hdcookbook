@@ -547,8 +547,8 @@ public abstract class AnimationEngine implements Runnable {
 	    	// renderContext contains targets
 	}
 	renderContext.processLastFrameRecords();
-	renderContext.processGuarantees();
 	renderContext.collapseTargets();
+	renderContext.calculateEraseTargets();
 	for (int i = 0; i < renderContext.numEraseTargets; i++) {
 	    Rectangle a = renderContext.eraseTargets[i];
 	    clearArea(a.x, a.y, a.width, a.height);

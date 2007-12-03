@@ -75,7 +75,6 @@ public class DrawRecord {
 
     private boolean changed;
     private boolean opaque;
-    private boolean clipped;
 
     private int lastX;
     private int lastY;
@@ -92,6 +91,13 @@ public class DrawRecord {
 
     // RenderContextBase keeps track of which target we were sent to
     int target;
+
+    /**
+     * Create a new, empty DrawRecord
+     **/
+    public DrawRecord() {
+	activate();
+    }
 
     /**
      * Flag this DrawRecord as newly activated.  This means that this
@@ -120,7 +126,6 @@ public class DrawRecord {
 	this.height = height;
 	this.changed = false;
 	this.opaque = true;
-	this.clipped = false;
     }
 
     /**
@@ -260,10 +265,10 @@ public class DrawRecord {
     
     //
     // Called from RenderContextBase when an area to be drawn to is
-    // added to the context.  This is where we actually add erase areas
-    // and draw areas.
+    // added to the context.  This is where we actually add 
+    // draw areas.
     //
-    void addAreaTo(Rectangle drawTarget, Rectangle eraseTarget) {
+    void addAreaTo(Rectangle drawTarget) {
 
 	boolean newCoords = x != lastX || y != lastY
 	                    || width != lastWidth || height != lastHeight;
@@ -274,7 +279,6 @@ public class DrawRecord {
 	if (lastWidth > 0 && lastHeight > 0) {
 	    if (newCoords || (changed && !opaque)) {
 		// erase the whole last frame
-		addToRect(eraseTarget, lastX, lastY, lastWidth, lastHeight);
 		addToRect(drawTarget, lastX, lastY, lastWidth, lastHeight);
 	    } 
 	}
@@ -299,9 +303,8 @@ public class DrawRecord {
     // Called from RenderContextBase when this DrawRecord was used in the
     // last frame of animation, but isn't used in this frame.
     //
-    void eraseLastFrame(Rectangle drawTarget, Rectangle eraseTarget) {
+    void eraseLastFrame(Rectangle drawTarget) {
 	if (lastWidth > 0 && lastHeight > 0) {
-	    addToRect(eraseTarget, lastX, lastY, lastWidth, lastHeight);
 	    addToRect(drawTarget, lastX, lastY, lastWidth, lastHeight);
 	}
     }
@@ -346,7 +349,6 @@ public class DrawRecord {
 		//
 		// Node that after the call to r.add(4, 4), 
 		// r.contains(4,4) is false.
-
 	}
     }
 

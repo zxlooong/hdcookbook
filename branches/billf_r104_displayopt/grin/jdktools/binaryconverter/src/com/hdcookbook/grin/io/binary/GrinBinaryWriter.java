@@ -75,8 +75,10 @@ import com.hdcookbook.grin.features.Clipped;
 import com.hdcookbook.grin.features.Fade;
 import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.Group;
+import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Timer;
@@ -235,6 +237,7 @@ public class GrinBinaryWriter {
         writeSegments(out, (Segment[])segmentsList.toArray(new Segment[segmentsList.size()]));
         
         out.writeInt(show.getSegmentStackDepth());
+        out.writeInt(show.getNumTargets());
         
     }
     
@@ -273,6 +276,10 @@ public class GrinBinaryWriter {
                 writeTranslator(out, (Translator)feature);
             } else if (feature instanceof SrcOver) {
                 writeSrcOver(out, (SrcOver)feature);
+            } else if (feature instanceof GuaranteeFill) {
+                writeGuaranteeFill(out, (GuaranteeFill)feature);
+            } else if (feature instanceof SetTarget) {
+                writeSetTarget(out, (SetTarget)feature);
             } else if (feature instanceof Modifier) {
                 writeUserModifier(out, (UserModifier)feature);
             } else {
@@ -380,6 +387,7 @@ public class GrinBinaryWriter {
        dos.writeIntArray(keyframes);
        int[] keyAlphas = fade.getKeyAlphas();
        dos.writeIntArray(keyAlphas);
+       dos.writeInt(fade.getRepeatFrame());
        Command[] endCommands = fade.getEndCommands();
        writeCommands(dos, endCommands);
        dos.writeInt(featuresList.indexOf(fade.getPart()));
@@ -546,6 +554,35 @@ public class GrinBinaryWriter {
         dos.close();             
     }
     
+    private void writeGuaranteeFill(DataOutputStream out, GuaranteeFill feature) throws IOException {
+	out.writeByte((int)Constants.GUARANTEE_FILL_IDENTIFIER);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos);  
+        
+        dos.writeUTF(feature.getName());
+        dos.writeInt(featuresList.indexOf(srcOver.getPart()));
+	dos.writeRectangle(feature.getGuaranteed());
+	dos.writeRectangleArray(feature.getFills());
+      
+        out.writeInt(baos.size());
+        baos.writeTo(out);      
+        dos.close();
+    }
+
+    private void writeSetTarget(DataOutputStream out, SetTarget feature) throws IOException {
+        out.writeByte(Constants.SET_TARGET_IDENTIFIER);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos);  
+        
+        dos.writeUTF(feature.getName());
+        dos.writeInt(featuresList.indexOf(srcOver.getPart()));
+	dos.writeInt(feature.getTarget());
+      
+        out.writeInt(baos.size());
+        baos.writeTo(out);      
+        dos.close();
+    }
+
     private void writeUserModifier(DataOutputStream out, UserModifier modifier) throws IOException {
         out.writeByte((int)Constants.USER_MODIFIER_IDENTIFIER);
          
@@ -554,7 +591,7 @@ public class GrinBinaryWriter {
             return;
         } 
         
-        out.writeByte(Constants.NON_NULL);      
+        out.writeByte(Constants.NON_NULL);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);

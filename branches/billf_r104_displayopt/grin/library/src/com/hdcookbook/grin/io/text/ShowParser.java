@@ -73,7 +73,9 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Fade;
 import com.hdcookbook.grin.features.Group;
+import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
+import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Timer;
 import com.hdcookbook.grin.features.Translation;
@@ -108,8 +110,9 @@ public class ShowParser {
     private Show show;
     private Lexer lexer;
     private ExtensionsBuilder extBuilder;
-    private Vector[] deferred = { new Vector(), new Vector() };  
+    private Vector[] deferred = { new Vector(), new Vector(), new Vector() };  
     	// Array of Vector<ForwardReference>
+    private int maxTarget;	// Highest target in a set_target feature
 
     private final static String[] emptyStringArray = new String[0];
     private final static Command[] emptyCommandArray = new Command[0];
@@ -217,6 +220,10 @@ public class ShowParser {
 		    parseTranslator(lineStart);
 		} else if ("text".equals(tok)) {
 		    parseText(lineStart);
+		} else if ("guarantee_fill".equals(tok)) {
+		    parseGuaranteeFill(lineStart);
+		} else if ("set_target".equals(tok)) {
+		    parseSetTarget(lineStart);
 		} else if (extBuilder == null || tok == null) {
 		    lexer.reportError("Unrecognized feature \"" + tok + "\"");
 		} else if ("extension".equals(tok) || "modifier".equals(tok)) {
@@ -246,6 +253,8 @@ public class ShowParser {
 			lexer.reportError("Unrecognized feature " + typeName);
 		    }
 		    builder.addFeature(name, lineStart, f);
+		} else {
+		    lexer.reportError("Unrecognized feature \"" + tok + "\"");
 		}
 	    } else if ("rc_handler".equals(tok)) {
 		tok = lexer.getString();
@@ -552,6 +561,13 @@ public class ShowParser {
 	}
 	tok = lexer.getString();
 	Command[] endCommands = emptyCommandArray;
+	int repeatFrame;
+	if ("repeat".equals(tok)) {
+	    repeatFrame = lexer.getInt();
+	    tok = lexer.getString();
+	} else {
+	    repeatFrame = keyframes.size(); 	// Off the end
+	}
 	if ("end_commands".equals(tok)) {
 	    endCommands = parseCommands();
 	    tok = lexer.getString();
@@ -578,7 +594,8 @@ public class ShowParser {
 	if (fs[0] != 0) { 
 	    lexer.reportError("Keyframes must start at frame 0");
 	}
-	Fade fade = new Fade(show, name, srcOver, fs, alphas, endCommands);
+	Fade fade = new Fade(show, name, srcOver, fs, alphas, repeatFrame,
+			     endCommands);
 	builder.addFeature(name, line, fade);
 	resolveModifier(fade, partName);
     }
@@ -604,6 +621,49 @@ public class ShowParser {
 	Timer timer = new Timer(show, name, numFrames, repeat, commands);
 	builder.addFeature(name, line, timer);
     }
+
+    private void parseGuaranteeFill(int line) throws IOException {
+	String name = lexer.getString();
+	String partName =  lexer.getString();
+	Rectangle g = parseRectangle();
+	parseExpected("{");
+        Vector v = new Vector();
+        for (;;) {
+            String tok = lexer.getString();
+	    if ("}".equals(tok)) {
+		break;
+	    } else if (!("(".equals(tok))) {
+	       lexer.reportError("\"(\" expected, \"" + tok + "\" seen");
+	    }
+	    v.add(parseRectangleNoLeading());
+	}
+	parseExpected(";");
+	int num = v.size();
+	Rectangle[] result = null;
+	if (num > 0) {
+	    result = new Rectangle[num];
+	    for (int i = 0; i < num; i++) {
+		result[i] = (Rectangle) v.elementAt(i);
+	    }
+	}
+	GuaranteeFill f = new GuaranteeFill(show, name, g, result);
+	builder.addFeature(name, line, f);
+	resolveModifier(f, partName);
+    }
+
+    private void parseSetTarget(int line) throws IOException {
+	String name = lexer.getString();
+	String partName =  lexer.getString();
+	int target = lexer.getInt();
+	if (target > maxTarget) {
+	    maxTarget = target;
+	}
+	parseExpected(";");
+	SetTarget f = new SetTarget(show, name, target);
+	builder.addFeature(name, line, f);
+	resolveModifier(f, partName);
+    }
+
 
     private void parseTranslation(int line) throws IOException {
 	String name = lexer.getString();
@@ -685,7 +745,9 @@ public class ShowParser {
 		trans.setup((Translation) t, fa);
 	    }
 	};
-	deferred[0].addElement(fw);
+	// Translators must be set up after other modifiers, so that
+	// if they translate a modifier getStartX() will work.
+	deferred[1].addElement(fw);
     }
 
 
@@ -1083,6 +1145,10 @@ public class ShowParser {
 
     private Rectangle parseRectangle() throws IOException {
 	parseExpected("(");
+	return parseRectangleNoLeading();
+    }
+
+    private Rectangle parseRectangleNoLeading() throws IOException {
 	int x1 = lexer.getInt();
 	int y1 = lexer.getInt();
 	int x2 = lexer.getInt();
@@ -1233,7 +1299,7 @@ public class ShowParser {
 		}
 	    }
 	};
-	deferred[1].addElement(fw);
+	deferred[2].addElement(fw);
 	return cmd;
     }
 
@@ -1252,7 +1318,7 @@ public class ShowParser {
 		cmd.setup(a, f);
 	    }
 	};
-	deferred[1].addElement(fw);
+	deferred[2].addElement(fw);
 	return cmd;
     }
 
@@ -1360,6 +1426,7 @@ public class ShowParser {
 	   extBuilder.finishBuilding(show);
 	}
 	builder.finishBuilding();
+	show.setNumTargets(maxTarget + 1);
     }
 
     //***************    Convenience Methods    ******************

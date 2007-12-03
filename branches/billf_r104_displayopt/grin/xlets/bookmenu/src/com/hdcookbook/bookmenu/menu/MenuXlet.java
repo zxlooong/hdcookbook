@@ -166,6 +166,11 @@ public class MenuXlet implements Xlet, UserEventListener,
 	if (assetsJar != null) {
 	    try {
 		assetsJar.detach();
+			// For greater memory efficiency, one can
+			// detach assetsJar as soon as everything has
+			// been read from it.  That could be done by
+			// triggering a command from GRIN once all of
+			// the initialization is done.
 	    } catch (Exception ex) {
 		if (Debug.LEVEL > 0) {
 		    ex.printStackTrace();
@@ -226,7 +231,7 @@ public class MenuXlet implements Xlet, UserEventListener,
 
 	engine.checkDestroy();
 
-	engine.initNumTargets(1);
+	engine.initNumTargets(show.getNumTargets());
 	AnimationClient[] clients = { show };
 	engine.initClients(clients);
 	Rectangle bounds = new Rectangle(0, 0, 1920, 1080);

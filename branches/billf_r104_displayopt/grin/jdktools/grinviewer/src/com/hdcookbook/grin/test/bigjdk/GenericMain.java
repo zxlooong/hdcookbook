@@ -462,7 +462,7 @@ public class GenericMain extends Frame implements AnimationContext {
     }
     
     public void animationInitialize() throws InterruptedException {
-	engine.initNumTargets(1);  // @@ TODO:  Take from show
+	engine.initNumTargets(show.getNumTargets());
 	AnimationClient[] clients = { show };
 	engine.initClients(clients);
 	GraphicsConfiguration con = getGraphicsConfiguration();
