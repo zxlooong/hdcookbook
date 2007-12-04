@@ -73,7 +73,9 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Fade;
 import com.hdcookbook.grin.features.Group;
+import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
+import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Timer;
 import com.hdcookbook.grin.features.Translation;
@@ -109,7 +111,7 @@ public class ShowParser {
     private Show show;
     private Lexer lexer;
     private ExtensionsBuilder extBuilder;
-    private Vector[] deferred = { new Vector(), new Vector() };  
+    private Vector[] deferred = { new Vector(), new Vector(), new Vector() };  
     	// Array of Vector<ForwardReference>
 
     private final static String[] emptyStringArray = new String[0];
@@ -177,8 +179,24 @@ public class ShowParser {
 	if (!"show".equals(tok)) {
 	    lexer.reportError("\"show\" expected");
 	}
+	show.setDrawTargets(new String[] { "T:Default" });	// default value
 	for (;;) {
 	    tok = lexer.getString();
+	    int lineStart = lexer.getLineNumber();
+	    if (!("setting".equals(tok))) {
+		break;
+	    }
+	    tok = lexer.getString();
+	    if ("segment_stack_depth".equals(tok)) {
+		parseSegmentStackDepth();
+	    } else if ("draw_targets".equals(tok)) {
+		parseDrawTargets();
+	    } else {
+		lexer.reportError("Unrecognized setting \"" + tok + "\".");
+	    }
+	}
+	for (;;) {
+		// Current token is in tok
 	    int lineStart = lexer.getLineNumber();
 	    if (tok == null) {
 		lexer.reportError("EOF unexpected");
@@ -187,13 +205,6 @@ public class ShowParser {
 		return;
 	    } else if ("segment".equals(tok)) {
 		parseSegment(lineStart);
-	    } else if ("setting".equals(tok)) {
-		tok = lexer.getString();
-		if ("segment_stack_depth".equals(tok)) {
-		    parseSegmentStackDepth();
-		} else {
-		    lexer.reportError("Unrecognized setting \"" + tok + "\".");
-		}
 	    } else if ("feature".equals(tok)) {
 		tok = lexer.getString();
 		if ("fixed_image".equals(tok)) {
@@ -220,6 +231,10 @@ public class ShowParser {
 		    parseTranslator(lineStart);
 		} else if ("text".equals(tok)) {
 		    parseText(lineStart);
+		} else if ("guarantee_fill".equals(tok)) {
+		    parseGuaranteeFill(lineStart);
+		} else if ("set_target".equals(tok)) {
+		    parseSetTarget(lineStart);
 		} else if (extBuilder == null || tok == null) {
 		    lexer.reportError("Unrecognized feature \"" + tok + "\"");
 		} else if ("extension".equals(tok) || "modifier".equals(tok)) {
@@ -249,6 +264,8 @@ public class ShowParser {
 			lexer.reportError("Unrecognized feature " + typeName);
 		    }
 		    builder.addFeature(name, lineStart, f);
+		} else {
+		    lexer.reportError("Unrecognized feature \"" + tok + "\"");
 		}
 	    } else if ("rc_handler".equals(tok)) {
 		tok = lexer.getString();
@@ -273,6 +290,7 @@ public class ShowParser {
 	    } else {
 		lexer.reportError("Unrecognized token \"" + tok + "\"");
 	    }
+	    tok = lexer.getString();
 	}
     }
 
@@ -283,6 +301,15 @@ public class ShowParser {
 	}
 	parseExpected(";");
 	show.setSegmentStackDepth(depth);
+    }
+
+    private void parseDrawTargets() throws IOException {
+	String[] drawTargets = parseStrings();
+	if (drawTargets.length == 0) {
+	    lexer.reportError("Must have at least one draw target");
+	}
+	parseExpected(";");
+	show.setDrawTargets(drawTargets);
     }
 
     private void parseSegment(final int line) throws IOException {
@@ -555,6 +582,13 @@ public class ShowParser {
 	}
 	tok = lexer.getString();
 	Command[] endCommands = emptyCommandArray;
+	int repeatFrame;
+	if ("repeat".equals(tok)) {
+	    repeatFrame = lexer.getInt();
+	    tok = lexer.getString();
+	} else {
+	    repeatFrame = keyframes.size(); 	// Off the end
+	}
 	if ("end_commands".equals(tok)) {
 	    endCommands = parseCommands();
 	    tok = lexer.getString();
@@ -581,7 +615,8 @@ public class ShowParser {
 	if (fs[0] != 0) { 
 	    lexer.reportError("Keyframes must start at frame 0");
 	}
-	Fade fade = new Fade(show, name, srcOver, fs, alphas, endCommands);
+	Fade fade = new Fade(show, name, srcOver, fs, alphas, repeatFrame,
+			     endCommands);
 	builder.addFeature(name, line, fade);
 	resolveModifier(fade, partName);
     }
@@ -607,6 +642,57 @@ public class ShowParser {
 	Timer timer = new Timer(show, name, numFrames, repeat, commands);
 	builder.addFeature(name, line, timer);
     }
+
+    private void parseGuaranteeFill(int line) throws IOException {
+	String name = lexer.getString();
+	String partName =  lexer.getString();
+	Rectangle g = parseRectangle();
+	parseExpected("{");
+        Vector v = new Vector();
+        for (;;) {
+            String tok = lexer.getString();
+	    if ("}".equals(tok)) {
+		break;
+	    } else if (!("(".equals(tok))) {
+	       lexer.reportError("\"(\" expected, \"" + tok + "\" seen");
+	    }
+	    v.add(parseRectangleNoLeading());
+	}
+	parseExpected(";");
+	int num = v.size();
+	Rectangle[] result = null;
+	if (num > 0) {
+	    result = new Rectangle[num];
+	    for (int i = 0; i < num; i++) {
+		result[i] = (Rectangle) v.elementAt(i);
+	    }
+	}
+	GuaranteeFill f = new GuaranteeFill(show, name, g, result);
+	builder.addFeature(name, line, f);
+	resolveModifier(f, partName);
+    }
+
+    private void parseSetTarget(int line) throws IOException {
+	String name = lexer.getString();
+	String partName =  lexer.getString();
+	String targetName = lexer.getString();
+	String[] names = show.getDrawTargets();
+	int target = -1;
+	for (int i = 0; i < names.length; i++) {
+	    if (names[i].equals(targetName)) {
+		target = i;
+		break;
+	    }
+	}
+	if (target == -1) {
+	    lexer.reportError("Target name \"" + targetName + "\" not found");
+	}
+	parseExpected(";");
+	SetTarget f = new SetTarget(show, name, target);
+	builder.addFeature(name, line, f);
+	resolveModifier(f, partName);
+    }
+
 
     private void parseTranslation(int line) throws IOException {
 	String name = lexer.getString();
@@ -688,7 +774,9 @@ public class ShowParser {
 		trans.setup((Translation) t, fa);
 	    }
 	};
-	deferred[0].addElement(fw);
+	// Translators must be set up after other modifiers, so that
+	// if they translate a modifier getStartX() will work.
+	deferred[1].addElement(fw);
     }
 
 
@@ -1086,6 +1174,10 @@ public class ShowParser {
 
     private Rectangle parseRectangle() throws IOException {
 	parseExpected("(");
+	return parseRectangleNoLeading();
+    }
+
+    private Rectangle parseRectangleNoLeading() throws IOException {
 	int x1 = lexer.getInt();
 	int y1 = lexer.getInt();
 	int x2 = lexer.getInt();
@@ -1236,7 +1328,7 @@ public class ShowParser {
 		}
 	    }
 	};
-	deferred[1].addElement(fw);
+	deferred[2].addElement(fw);
 	return cmd;
     }
 
@@ -1255,7 +1347,7 @@ public class ShowParser {
 		cmd.setup(a, f);
 	    }
 	};
-	deferred[1].addElement(fw);
+	deferred[2].addElement(fw);
 	return cmd;
     }
 

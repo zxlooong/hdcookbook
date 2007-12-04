@@ -59,6 +59,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.Debug;
 
@@ -80,18 +82,59 @@ import java.awt.AlphaComposite;
 public class Fade extends Modifier {
 
     private AlphaComposite[] alphas;
+    private AlphaComposite opaqueAlpha = null;
     private int[] keyframes;
     private int[] keyAlphas;
     private boolean srcOver;
+    private int repeatFrame;
     private boolean isActivated = false;
-    private int startAnimationFrame;
     private int alphaIndex;
     private Command[] endCommands;
+    private AlphaComposite currAlpha;
+    private AlphaComposite lastAlpha;
+
+	//
+	// Here, we make an inner class of RenderContext.  We
+	// pass this instance to our child; it modifies calls to the
+	// parent RenderContext from our child.
+	//
+    private ChildContext childContext = new ChildContext();
+    
+    class ChildContext extends RenderContext {
+	RenderContext	parent;
+	private int x;
+	private int y;
+	private int width;
+	private int height;
+
+	public void addArea(DrawRecord r) {
+	    if (srcOver) {
+		r.setSemiTransparent();
+	    }
+	    if (currAlpha != lastAlpha) {
+		r.setChanged();
+	    }
+	    parent.addArea(r);
+	}
+
+	public void guaranteeAreaFilled(DrawRecord r) {
+	    if (!srcOver || currAlpha == opaqueAlpha || currAlpha == null) {
+		parent.guaranteeAreaFilled(r);
+	    }
+	}
+
+	public int setTarget(int target) {
+	    return parent.setTarget(target);
+	}
+
+    };	// End of RenderContext anonymous inner class
 
     public Fade(Show show, String name, boolean srcOver, 
-    		int[] keyframes, int[] keyAlphas, Command[] endCommands) 
+    		int[] keyframes, int[] keyAlphas, int repeatFrame,
+		Command[] endCommands) 
     {
 	super(show, name);
+	this.repeatFrame = repeatFrame;
 	this.endCommands = endCommands;
         this.keyframes = keyframes;
         this.keyAlphas = keyAlphas;
@@ -112,22 +155,29 @@ public class Fade extends Modifier {
        return keyAlphas;
     }
     
-    /* 
+    /** 
      * Internal use only 
-     */
+     **/
     public boolean getSrcOver() {
        return srcOver;
     }
     
-    /* 
+    /** 
      * Internal use only 
-     */    
+     **/    
     public Command[] getEndCommands() {
        return endCommands;
     }
     
+    /** 
+     * Internal use only 
+     **/    
+    public int getRepeatFrame() {
+        return repeatFrame;
+    }
+    
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void initialize() {
 	if (keyframes.length == 1) {
@@ -154,41 +204,61 @@ public class Fade extends Modifier {
 		    alpha = (keyAlphas[i+1]*distLast + keyAlphas[i]*distNext + dist/2) / dist;
 		}
 		alphas[f] = show.initializer.getAlpha(srcOver, alpha);
+		if (opaqueAlpha == null && alpha == 255) {
+		    opaqueAlpha = alphas[f];
+		}
 	    }
 	}
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	super.setActivateMode(mode);
 	if (mode) {
-	    startAnimationFrame = show.getCurrentFrame();
 	    alphaIndex = 0;
+	    lastAlpha = null;
+	    currAlpha = alphas[alphaIndex];
 	}
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
-	super.advanceToFrame(newFrame);
-	alphaIndex = newFrame - startAnimationFrame;
+    public void nextFrame() {
+	super.nextFrame();
+	alphaIndex++;
 	if (alphaIndex == alphas.length) {
 	    for (int i = 0; i < endCommands.length; i++) {
 		show.runCommand(endCommands[i]);
 	    }
+	    alphaIndex = repeatFrame;
 	}
+	if (alphaIndex < alphas.length) {
+	    currAlpha = alphas[alphaIndex];
+	} else {
+	    currAlpha = null;
+	}
+    }
+
+
+    /**
+     * @inheritDoc
+     **/
+    public void addDisplayAreas(RenderContext context) {
+	childContext.parent = context;
+	super.addDisplayAreas(childContext);
+	lastAlpha = currAlpha;
     }
 
     /**
      * See superclass definition.
      **/
     public void paintFrame(Graphics2D gr) {
-	if (alphaIndex < alphas.length) {
+	if (currAlpha != null) {
 	    Composite old = gr.getComposite();
-	    gr.setComposite(alphas[alphaIndex]);
+	    gr.setComposite(currAlpha);
 	    part.paintFrame(gr);
 	    gr.setComposite(old);
 	} else {

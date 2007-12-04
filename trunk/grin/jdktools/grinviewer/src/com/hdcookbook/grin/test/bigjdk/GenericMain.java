@@ -122,6 +122,7 @@ public class GenericMain extends Frame implements AnimationContext {
     private Graphics2D frameGraphics;
     private int frame;		// Current frame we're on
     private float fps = 24.0f;
+
     private Image background = null;
 
     private ScalingDirectDrawEngine engine;
@@ -129,7 +130,15 @@ public class GenericMain extends Frame implements AnimationContext {
     private int scaleDivisor = 2;
     private int screenWidth= 1920 / scaleDivisor;
     private int screenHeight = 1080 / scaleDivisor;
-    
+
+    private boolean debugWaiting = false;
+
+    /**
+     * Monitor to be held while coordinating a pause in the animation
+     * for debug.
+     **/
+    protected Object debugWaitingMonitor = new Object();
+
     public GenericMain() {
     }
 
@@ -238,7 +247,7 @@ public class GenericMain extends Frame implements AnimationContext {
 
     protected void inputLoop() {
 	try {
-	    engine = new ScalingDirectDrawEngine(scaleDivisor, FRAME_CHEAT);
+	    engine = new ScalingDirectDrawEngine(scaleDivisor,FRAME_CHEAT,this);
 	    setFps(fps);
 	    engine.initialize(this);	// Calls animationInitialize() and
 	    				// animationFinishInitialiation()
@@ -249,8 +258,12 @@ public class GenericMain extends Frame implements AnimationContext {
 	    for (;;) {
 		String msg = null;
 		String s = in.readLine();
-		if (s == null) {
+		if (s == null) {	// EOF
 		    break;
+		}
+		if ("".equals(s) && userWaitingDone()) {
+		    continue;
+		    // Do nothing, we were waiting for enter
 		}
 		msg = doKeyboardCommand(s);
 		if (msg != null) {
@@ -261,6 +274,57 @@ public class GenericMain extends Frame implements AnimationContext {
 	    ex.printStackTrace();
 	    System.exit(1);
 	}
+    }
+
+    /**
+     * When debugging frame-by-frame, this waits for the user to do
+     * something, like hit enter or press a button.
+     **/
+    protected void waitForUser(String msg) {
+	System.out.print("==>  " + msg + "; hit enter to advance...  ");
+	System.out.flush();
+	doWaitForUser();
+    }
+
+    /**
+     * When debugging frame-by-frame, this is called when a complete
+     * frame has just finished.
+     **/
+    public void debugDrawFrameDone() {
+	// Overridden in GUI subclass
+    }
+
+    /**
+     * Do the actual waiting on the monitor for waitForUser
+     **/
+    protected final void doWaitForUser() {
+	synchronized(debugWaitingMonitor) {
+	    debugWaiting = true;
+	    while (debugWaiting) {
+		try { 
+		    debugWaitingMonitor.wait();
+		} catch (InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		    break;
+		}
+	    }
+	}
+    }
+
+
+    /**
+     * This should be called when the wait of waitForUser() is done
+     *
+     * @return true  if we were waiting
+     **/
+    protected boolean userWaitingDone() {
+	boolean wasWaiting;
+	synchronized(debugWaitingMonitor) {
+	    wasWaiting = debugWaiting;
+	    debugWaiting = false;
+	    debugWaitingMonitor.notifyAll();
+	}
+	return wasWaiting;
     }
 
     public void snapshot() {
@@ -369,6 +433,10 @@ public class GenericMain extends Frame implements AnimationContext {
 	}
 	return "    Skipped " + num + " frames.";
     }
+
+    public void setDebugDraw(boolean doDebugDraw) {
+	engine.setDebugDraw(doDebugDraw);
+    }
     
     protected String setFps(float newFps) {
 	fps = newFps;
@@ -394,12 +462,12 @@ public class GenericMain extends Frame implements AnimationContext {
     }
     
     public void animationInitialize() throws InterruptedException {
-	engine.initNumTargets(1);  // @@ TODO:  Take from show
 	AnimationClient[] clients = { show };
 	engine.initClients(clients);
 	GraphicsConfiguration con = getGraphicsConfiguration();
 	if (con.getColorModel().getTransparency() != Transparency.TRANSLUCENT) {
-	    // On windows, alpha blending to a background image requires
+	    // On windows and Mac/Intel/Leopard (at least), alpha blending to a 
+	    // background image requires
 	    // special handling.  See the comments in paint(Graphics).
 	    BufferedImage im = con.createCompatibleImage(screenWidth, 
 						    FRAME_CHEAT+screenHeight);

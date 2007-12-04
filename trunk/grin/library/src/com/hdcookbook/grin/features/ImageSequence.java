@@ -59,6 +59,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
@@ -72,7 +74,8 @@ import java.awt.Rectangle;
 
 /**
  * An image sequence does "cell" animation.  It consists of a number
- * of images that are displayed one after another.
+ * of images that are displayed one after another.  All of the images
+ * in a sequence are assumed to be the same size.
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
@@ -99,9 +102,16 @@ public class ImageSequence extends Feature {
     private ImageSequence linkedTo;	
     	// We use linkedTo to count our frame and for end commands.  If
 	// we aren't linkedTo another ImageSequence, it's set to null.
-    private int startAnimationFrame;	// First frame we animate
-    private ImageSequence activeSlave = null;	// Our active slave, if one
-    private int activeLinkedCount = 0;	// # of active sequences linked to us
+    private int activeLinkedCount = 0;	
+    	// # of active sequences linked to us.  This tells us how many
+	// time nextFrame() will be called per frame
+    private int nextFrameCalls = 0;
+    	// How many times we've been called without advancing currFrame;
+    private int currFrame = 0;	// Frame of our animation
+
+    private ManagedImage lastImage = null;
+    private ManagedImage currImage = null;
+    private DrawRecord drawRecord = new DrawRecord();
 
     public ImageSequence(Show show, String name, int x, int y, String fileName,
     			 String[] middle, String extension, boolean repeat,
@@ -207,30 +217,33 @@ public class ImageSequence extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
 	if (linkedTo != null) {
 	    if (mode) {
 		if (!linkedTo.isActivated && linkedTo.activeLinkedCount == 0) {
-		    linkedTo.startAnimationFrame  = show.getCurrentFrame();
+		    linkedTo.currFrame = 0;
 		}
 		linkedTo.activeLinkedCount++;
-		linkedTo.activeSlave = this;
 	    } else {
 		linkedTo.activeLinkedCount--;
-		linkedTo.activeSlave = null;
 	    }
 	} else {
 	    if (mode && activeLinkedCount == 0) {
-		startAnimationFrame = show.getCurrentFrame();
+		currFrame = 0;
 	    }
+	}
+	if (mode) {
+	    lastImage = null;
+	    currImage = images[getStateHolder().currFrame];
+	    drawRecord.activate();
 	}
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
 	synchronized(setupMonitor) {
@@ -287,7 +300,7 @@ public class ImageSequence extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
 	synchronized (setupMonitor) {
@@ -304,43 +317,44 @@ public class ImageSequence extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
+    public void nextFrame() {
 	if (Debug.LEVEL > 0 && !isActivated) {
 	    Debug.println("\n*** WARNING:  Advancing inactive sequence " 
                           + getName() + "\n");
 	}
-        ImageSequence sh = getStateHolder();
-        int curr = newFrame - sh.startAnimationFrame;
-        if (curr >= images.length && endCommands != null) {
-            for (int i = 0; i < endCommands.length; i++) {
-                show.runCommand(endCommands[i]);
-            }
+	if (linkedTo != null) {
+	    linkedTo.nextFrame();
+	} else {
+	    nextFrameCalls++;
+	    if (nextFrameCalls >= activeLinkedCount) {
+		nextFrameCalls = 0;	// We've got them all
+		currFrame++;
+		if (currFrame == images.length) {
+		    if (endCommands != null) {
+			for (int i = 0; i < endCommands.length; i++) {
+			    show.runCommand(endCommands[i]);
+			}
+		    }
+		    currFrame = 0;
+		}
+	    }
         }
+	currImage = images[getStateHolder().currFrame];
     }
+
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void  addDisplayArea(Rectangle area) {
-	if (!isActivated) {
-	    return;
+    public void addDisplayAreas(RenderContext context) {
+	drawRecord.setArea(x, y, width, height);
+	if (currImage != lastImage) {
+	    drawRecord.setChanged();
 	}
-	if (activeSlave == null) {
-	    doAddDisplayArea(area);
-	} else {
-	    activeSlave.doAddDisplayArea(area);
-	}
-    }
-
-    void doAddDisplayArea(Rectangle area) {
-	if (area.width == 0) {
-	    area.setBounds(x, y, width + 1, height + 1);
-	} else {
-	    area.add(x, y);
-	    area.add(x+width, y+height);
-	}
+	context.addArea(drawRecord);
+	lastImage = currImage;
     }
 
     /**
@@ -350,19 +364,12 @@ public class ImageSequence extends Feature {
 	if (!isActivated) {
 	    return;
 	}
-	if (activeSlave == null) {
-	    doPaint(gr);
-	} else {
-	    activeSlave.doPaint(gr);
-	}
+	doPaint(gr);
     }
 
     private void doPaint(Graphics2D g) {
-	ImageSequence sh = getStateHolder();
-	int curr = (show.getCurrentFrame() - sh.startAnimationFrame) 
-			% images.length;
-	if (images[curr] != null) {
-	    images[curr].draw(g, x, y, show.component);
+	if (currImage != null) {
+	    currImage.draw(g, x, y, show.component);
 	}
     }
 

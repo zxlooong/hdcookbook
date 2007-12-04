@@ -85,7 +85,7 @@ public class CommandRCHandler extends RCHandler {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean handleRCEvent(RCKeyEvent ke) {
 	if ((ke.getBitMask() & mask) != 0) {
@@ -99,21 +99,21 @@ public class CommandRCHandler extends RCHandler {
     }
     
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean handleMouse(int x, int y, boolean activate) {
 	return false;
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void activate(Segment s) {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int frameNumber) {
+    public void nextFrame() {
     }
 }

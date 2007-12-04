@@ -57,8 +57,9 @@
 
 package com.hdcookbook.grin;
 
-import com.hdcookbook.grin.util.SetupClient;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.util.SetupClient;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -252,17 +253,20 @@ public abstract class Feature implements SetupClient {
     }
 
     /**
-     * Request to add the visible area of this feature to the given
-     * rectantle.  
+     * Add all of the areas that are displayed for this feature with the
+     * current frame.  This will be called exactly once per frame
+     * displayed on each activated feature.
+     * <p>
+     * A feature that displays something needs to maintain a record
+     * of it in a DrawRecord.  The animation framework uses this to
+     * track what needs to be erased and drawn from frame to frame.
+     * 
+     * @param	context	The context for tracking rendering state
      *
-     * @param  area The current area, or a rectangle with a width of 0
-     *	       	     to mean "nothing visible so far".
-     *
-     * @deprecated	This will probably go away once transition to
-     *			the animation framework is complete
+     * @see com.hdcookbook.grin.animator.DrawRecord;
      **/
-    // @@ TODO:  Make this go away
-    public abstract void  addDisplayArea(Rectangle area);
+    abstract public void addDisplayAreas(RenderContext context);
+
 
     /**
      * Paint the current state of this feature to gr
@@ -273,9 +277,7 @@ public abstract class Feature implements SetupClient {
 
     /**
      * Called from Segment with the Show lock held, to advance us to
-     * the state we should be in for the given frame.
-     *
-     * @param newFrame	The frame number we're up to in our presentation.
+     * the state we should be in for the next frame.
      **/
-    public abstract void advanceToFrame(int newFrame);
+    public abstract void nextFrame();
 }

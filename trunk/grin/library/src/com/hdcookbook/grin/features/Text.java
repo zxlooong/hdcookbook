@@ -57,6 +57,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
 
 import java.io.IOException;
@@ -81,15 +83,19 @@ public class Text extends Feature {
     private int vspace;
     private Font font;
     private Color[] colors;
+    private Color currColor = null;
+    private Color lastColor = null;
     private Color background;
 
     private boolean isActivated;
     private int ascent;
     private int descent;
-    private int width;
-    private int height;
-    private int startAnimationFrame;	// First frame we animate
+    private int width = -1;
+    private int height = -1;
     private int colorIndex;		// index into colors
+
+    private boolean changed = false;
+    private DrawRecord drawRecord = new DrawRecord();
 
     public Text(Show show, String name, int x, int y, String[] strings, 
     		int vspace, Font font, Color[] colors, Color background) 
@@ -144,7 +150,9 @@ public class Text extends Feature {
      * A show will initialize all of its features after it initializes
      * the phases.
      **/
+    // This is also called from setText
     public void initialize() {
+	changed = true;
 	FontMetrics fm = show.component.getFontMetrics(font);
         width = 0;
         for (int i = 0; i < strings.length; i++) {
@@ -189,8 +197,10 @@ public class Text extends Feature {
 	// This is synchronized to only occur within model updates.
 	isActivated = mode;
 	if (mode) {
-	    startAnimationFrame = show.getCurrentFrame();
 	    colorIndex = 0;
+	    lastColor = null;
+	    currColor = colors[colorIndex];
+	    drawRecord.activate();
 	}
     }
 
@@ -216,26 +226,27 @@ public class Text extends Feature {
     /**
      * See superclass definition.
      **/
-    public void advanceToFrame(int newFrame) {
-	colorIndex = newFrame - startAnimationFrame;
+    public void nextFrame() {
+	colorIndex++;
 	if (colorIndex >= colors.length) {
 	    colorIndex = colors.length - 1;
 	}
+	currColor = colors[colorIndex];
     }
 
+
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void  addDisplayArea(Rectangle area) {
-	if (!isActivated) {
-	    return;
+    public void addDisplayAreas(RenderContext context) {
+	drawRecord.setArea(x, y, width, height);
+	if (lastColor != currColor || changed) {
+	    drawRecord.setChanged();
 	}
-	if (area.width == 0) {
-	    area.setBounds(x, y, width, height);
-	} else {
-	    area.add(x, y);
-	    area.add(x + width, y + height);
-	}
+	drawRecord.setSemiTransparent();
+	context.addArea(drawRecord);
+	lastColor = currColor;
+	changed = false;
     }
 
     /**
@@ -250,7 +261,7 @@ public class Text extends Feature {
 	    gr.fillRect(x, y, width, height);
 	}
 	gr.setFont(font);
-	gr.setColor(colors[colorIndex]);
+	gr.setColor(currColor);
         int y2 = y + ascent;
         for (int i = 0; i < strings.length; i++) {
             gr.drawString(strings[i], x, y2);

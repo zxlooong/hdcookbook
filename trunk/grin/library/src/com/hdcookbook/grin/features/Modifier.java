@@ -59,6 +59,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
@@ -94,14 +96,14 @@ public abstract class Modifier extends Feature {
 
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public int getStartX() {
 	return part.getStartX();
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public int getStartY() {
 	return part.getStartY();
@@ -133,7 +135,7 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	// This is synchronized to only occur within model updates.
@@ -146,7 +148,7 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
 	if (mode) {
@@ -157,7 +159,7 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
 	if (part.needsMoreSetup()) {
@@ -168,7 +170,7 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
 	if (part.needsMoreSetup()) {
@@ -178,23 +180,27 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D g) {
 	part.paintFrame(g);
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
+     * <p>
+     * Subclasses will probably want to override this to account
+     * for changes in the drawing environment they make.  The version
+     * in this class simply calls this method on the modified part.
      **/
-    public void  addDisplayArea(Rectangle area) {
-	part.addDisplayArea(area);
+    public void addDisplayAreas(RenderContext context) {
+	part.addDisplayAreas(context);
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
-	part.advanceToFrame(newFrame);
+    public void nextFrame() {
+	part.nextFrame();
     }
 }

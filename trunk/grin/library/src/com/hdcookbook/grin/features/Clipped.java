@@ -59,6 +59,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
@@ -74,6 +76,39 @@ public class Clipped extends Modifier {
 
     private Rectangle clipRegion;
     private Rectangle lastClipRegion = new Rectangle();
+    private Rectangle tmpI = null;
+
+	//
+	// Here, we make an inner class of RenderContext.  We
+	// pass this instance to our child; it modifies calls to the
+	// parent RenderContext from our child.
+	//
+    private ChildContext childContext = new ChildContext();
+    
+    class ChildContext extends RenderContext {
+	RenderContext	parent;
+	private int x;
+	private int y;
+	private int width;
+	private int height;
+
+	public void addArea(DrawRecord r) {
+	    r.addClip(clipRegion.x, clipRegion.y, 
+	    	      clipRegion.width, clipRegion.height);
+	    parent.addArea(r);
+	}
+
+	public void guaranteeAreaFilled(DrawRecord r) {
+	    r.addClip(clipRegion.x, clipRegion.y, 
+	    	      clipRegion.width, clipRegion.height);
+	    parent.guaranteeAreaFilled(r);
+	}
+
+	public int setTarget(int target) {
+	    return parent.setTarget(target);
+	}
+
+    };	// End of RenderContext anonymous inner class
 
     public Clipped(Show show, String name, Rectangle clipRegion) {
 	super(show, name);
@@ -84,6 +119,16 @@ public class Clipped extends Modifier {
         return clipRegion;
     }
 
+
+    /**
+     * @inheritDoc
+     **/
+    public void addDisplayAreas(RenderContext context) {
+	childContext.parent = context;
+	super.addDisplayAreas(childContext);
+    }
+
+
     /**
      * See superclass definition.
      **/
@@ -92,12 +137,34 @@ public class Clipped extends Modifier {
 	// have to worry about concurrent calls.
 	lastClipRegion.x = Integer.MIN_VALUE;
 	gr.getClipBounds(lastClipRegion);
-	gr.setClip(clipRegion);
-	part.paintFrame(gr);
 	if (lastClipRegion.x == Integer.MIN_VALUE) {
+	    gr.setClip(clipRegion);
+	    part.paintFrame(gr);
 	    gr.setClip(null);
 	} else {
-	    gr.setClip(lastClipRegion);
+	    if (tmpI == null) {
+		tmpI = new Rectangle();		// Holds intersection
+	    }
+	    tmpI.setBounds(lastClipRegion);
+	    if (tmpI.x < clipRegion.x) {
+		tmpI.width -= clipRegion.x - tmpI.x;
+		tmpI.x = clipRegion.x;
+	    }
+	    if (tmpI.y < clipRegion.y) {
+		tmpI.height -= clipRegion.y - tmpI.y;
+		tmpI.y = clipRegion.y;
+	    }
+	    if (tmpI.x + tmpI.width > clipRegion.x + clipRegion.width) {
+		tmpI.width = clipRegion.x + clipRegion.width - tmpI.x;
+	    }
+	    if (tmpI.y + tmpI.height > clipRegion.y + clipRegion.height) {
+		tmpI.height = clipRegion.y + clipRegion.height - tmpI.y;
+	    }
+	    if (tmpI.width > 0 && tmpI.height > 0) {
+		gr.setClip(tmpI);
+		part.paintFrame(gr);
+		gr.setClip(lastClipRegion);
+	    }
 	}
     }
 }

@@ -57,6 +57,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
 
 import java.io.IOException;
@@ -81,6 +83,7 @@ public class Box extends Feature {
     private Color fillColor;
 
     private boolean isActivated;
+    private DrawRecord drawRecord = new DrawRecord();
 
     public Box(Show show, String name, Rectangle placement,
     	       int outlineWidth, Color outlineColor, Color fillColor)
@@ -130,66 +133,62 @@ public class Box extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void destroy() {
     }
 
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	//
 	// This is synchronized to only occur within model updates.
 	//
 	isActivated = mode;
+	if (mode) {
+	    drawRecord.activate();
+	}
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
 	return false;
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
+    public void nextFrame() {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void  addDisplayArea(Rectangle area) {
-	if (!isActivated) {
-	    return;
-	}
-	if (area.width == 0) {
-	    area.setBounds(placement.x, placement.y, 
-	    		   placement.width, placement.height);
-	} else {
-	    area.add(placement.x, placement.y);
-	    area.add(placement.x + placement.width, 
-	    	     placement.y + placement.height); // Issue #3
-	}
+    public void addDisplayAreas(RenderContext context) {
+	drawRecord.setArea(placement.x, placement.y, 
+			   placement.width, placement.height);
+	drawRecord.setSemiTransparent();
+	context.addArea(drawRecord);
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {

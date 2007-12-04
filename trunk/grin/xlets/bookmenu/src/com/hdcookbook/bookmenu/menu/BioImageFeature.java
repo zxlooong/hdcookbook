@@ -65,6 +65,8 @@ import java.awt.Image;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.util.Debug;
 
@@ -89,6 +91,8 @@ public class BioImageFeature extends Modifier {
     private Image replacementImage = null;
     private int width;
     private int height;
+    private DrawRecord drawRecord = new DrawRecord();
+    private boolean changed = true;
 
     /**
      * Create a new instance of this feature.  This is called from
@@ -106,6 +110,14 @@ public class BioImageFeature extends Modifier {
 	replacementImage = newImage;
 	width = newImage.getWidth(null);
 	height = newImage.getHeight(null);
+	changed = true;
+    }
+
+    protected void setActivateMode(boolean mode) {
+	super.setActivateMode(mode);
+	if (mode) {
+	    changed = true;
+	}
     }
 
 
@@ -128,18 +140,18 @@ public class BioImageFeature extends Modifier {
      * Called by the GRIN framework to figure out the extent of the
      * area we paint to.  This is called with the show lock held.
      **/
-    public void  addDisplayArea(Rectangle area) {
+    public void  addDisplayAreas(RenderContext context) {
 	if (replacementImage == null) {
-	    super.addDisplayArea(area);
+	    super.addDisplayAreas(context);
 	} else {
 	    int x = getStartX();
 	    int y = getStartY();
-	    if (area.width == 0) {
-	    	area.setBounds(x, y, width, height);
-	    } else {
-		area.add(x, y);
-		area.add(x+width, y+height);
+	    drawRecord.setArea(x, y, width, height);
+	    if (changed) {
+		drawRecord.setChanged();
+		changed = false;
 	    }
+	    context.addArea(drawRecord);
 	}
     }
 }

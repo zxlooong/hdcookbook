@@ -59,6 +59,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 
@@ -84,6 +86,7 @@ public class FixedImage extends Feature {
     private Object setupMonitor = new Object();
     private boolean imageSetup = false;
     private boolean isActivated = false;
+    private DrawRecord drawRecord = new DrawRecord();
 
     public FixedImage(Show show, String name, int x, int y, String fileName) 
     		throws IOException 
@@ -151,6 +154,9 @@ public class FixedImage extends Feature {
      **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
+	if (mode) {
+	    drawRecord.activate();
+	}
     }
 
     /**
@@ -210,24 +216,17 @@ public class FixedImage extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void addDisplayArea(Rectangle area) {
-	if (area.width == 0) {
-	    area.setBounds(x, y, width, height);
-	} else {
-	    area.add(x, y);
-	    area.add(x+width, y+height);
-	    	// This is correct.  Rectangle.add() (and AWT in general)
-		// believes that the lower-right hand coordinate is "outside"
-		// of a rectangle.
-	}
+    public void addDisplayAreas(RenderContext context) {
+	drawRecord.setArea(x, y, width, height);
+	context.addArea(drawRecord);
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
+    public void nextFrame() {
 	// do nothing
     }
 }

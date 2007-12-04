@@ -76,9 +76,11 @@ import com.hdcookbook.grin.features.Box;
 import com.hdcookbook.grin.features.Clipped;
 import com.hdcookbook.grin.features.Fade;
 import com.hdcookbook.grin.features.FixedImage;
+import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Timer;
@@ -222,12 +224,17 @@ public class GrinBinaryReader {
         features = new Feature[in.readInt()];
         rcHandlers = new RCHandler[in.readInt()];
         segments = new Segment[in.readInt()];
+
+        int showSegmentStackDepth = in.readInt();
+	String[] showDrawTargets = in.readStringArray();
+        show.setSegmentStackDepth(showSegmentStackDepth);
+	show.setDrawTargets(showDrawTargets);
+		// This must be done before features are read
             
         // Read in the show file
         readFeatures(in);
         readRCHandlers(in);
         readSegments(in);      
-        int showSegmentStackDepth = in.readInt();
         
         // Resolve forward references 
         for (int i = 0; i < deferred.size(); i++) {
@@ -237,8 +244,6 @@ public class GrinBinaryReader {
         deferred.clear(); 
         
         builder.init(show);
-        
-        show.setSegmentStackDepth(showSegmentStackDepth);
         
         // Recreate an show object based on what's been read
         for (int i = 0; i < features.length; i++) {
@@ -308,6 +313,12 @@ public class GrinBinaryReader {
                     break;
                 case Constants.USER_MODIFIER_IDENTIFIER :
                     feature = readUserModifier(in);
+                    break;
+                case Constants.GUARANTEE_FILL_IDENTIFIER :
+                    feature = readGuaranteeFill(in);
+                    break;
+                case Constants.SET_TARGET_IDENTIFIER :
+                    feature = readSetTarget(in);
                     break;
                 default:
                     throw new IOException("Unknown feature identifier " + identifier);
@@ -420,13 +431,14 @@ public class GrinBinaryReader {
         boolean srcOver = dis.readBoolean();
         int[] keyframes = dis.readIntArray();
         int[] keyAlphas = dis.readIntArray();
+	int repeatFrame = dis.readInt();
         Command[] endCommands = readCommands(dis);
         Feature part = features[dis.readInt()];
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }
        
-        Fade fade = new Fade(show, name, srcOver, keyframes, keyAlphas, endCommands);
+        Fade fade = new Fade(show, name, srcOver, keyframes, keyAlphas, repeatFrame, endCommands);
         fade.setup(part);
        
         return fade;
@@ -583,6 +595,42 @@ public class GrinBinaryReader {
        
         return translator;
     }
+
+    private GuaranteeFill readGuaranteeFill(GrinDataInputStream dis) throws IOException {
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }   
+        String name = dis.readUTF();
+        Feature part = features[dis.readInt()];
+        Rectangle guaranteed = dis.readRectangle();
+        Rectangle[] fills = dis.readRectangleArray();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
+        GuaranteeFill result = new GuaranteeFill(show, name, guaranteed, fills);
+        result.setup(part);
+       
+        return result;
+    }
+
+    private SetTarget readSetTarget(GrinDataInputStream dis) throws IOException {
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }   
+        String name = dis.readUTF();
+        Feature part = features[dis.readInt()];
+        int target = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
+        SetTarget result = new SetTarget(show, name, target);
+        result.setup(part);
+       
+        return result;
+    }
+
     
     private Modifier readUserModifier(GrinDataInputStream dis) throws IOException {
         if (dis.readByte() == Constants.NULL) {

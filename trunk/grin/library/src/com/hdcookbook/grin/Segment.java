@@ -55,6 +55,7 @@
 
 package com.hdcookbook.grin;
 
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.RCHandler;
@@ -334,24 +335,25 @@ public class Segment {
     }
 
     //
-    // Called from Show with the Show lock held
+    // Called from Show with the Show lock held.  This adds all the
+    // areas that will be drawn this frame.
     //
-    void  addDisplayArea(Rectangle area) {
+    void addDisplayAreas(RenderContext context) {
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    activeFeatures[i].addDisplayArea(area);
+	    activeFeatures[i].addDisplayAreas(context);
 	}
     }
 
     //
     // Called from Show with the Show lock held
     //
-    void advanceToFrame(int newFrame) {
+    void nextFrame() {
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    activeFeatures[i].advanceToFrame(newFrame);
+	    activeFeatures[i].nextFrame();
 	}
 	if (rcHandlers != null) {
 	    for (int i = 0; i < rcHandlers.length; i++) {
-		rcHandlers[i].advanceToFrame(newFrame);
+		rcHandlers[i].nextFrame();
 	    }
 	}
     }

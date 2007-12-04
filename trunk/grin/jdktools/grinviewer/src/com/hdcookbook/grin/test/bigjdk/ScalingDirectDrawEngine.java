@@ -67,6 +67,8 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
+import java.util.Iterator;
 
 /**
  * A double-buffered animation engine that uses direct draw, and
@@ -84,27 +86,48 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     private BufferedImage buffer;
     private Graphics2D bufferG;
     private Graphics2D componentG;
-    private int numTargets;
     private final int scaleDivisor;
     private final int frameCheat;
     private Image background;
     private BufferedImage nonTranslucentFix;
-
+    private boolean debugDraw = false;
+    private GenericMain main;
+    
     /**
      * Create a new ScalingDirectDrawEngine.  It needs to be initialized with
      * the various initXXX methods (including the inherited ones).
      **/
-    public ScalingDirectDrawEngine(int scaleDivisor, int frameCheat) {
+    public ScalingDirectDrawEngine(int scaleDivisor, int frameCheat, 
+    				   GenericMain main) 
+    {
 	this.scaleDivisor = scaleDivisor;
 	this.frameCheat = frameCheat;
+	this.main = main;
     }
 
     /**
      * @inheritDoc
      **/
     public void initContainer(Container container, Rectangle bounds) {
-	buffer = container.getGraphicsConfiguration()
-			.createCompatibleImage(bounds.width, bounds.height);
+	try {
+	    ourInitContainer(container, bounds);
+	} catch (Throwable t) {
+	    t.printStackTrace();
+	    System.exit(1);
+	    // If we don't do this, then the finally clause in
+	    // AnimationEngine.run() swallows the error message,
+	    // and often generates an assertion failure on Show.destroy()
+	    // that hides the real problem.
+	}
+    }
+
+    private void ourInitContainer(Container container, Rectangle bounds) {
+	buffer = new BufferedImage(bounds.width, bounds.height,
+				   BufferedImage.TYPE_4BYTE_ABGR);
+	    // For GrinView, we specifically want TYPE_4BYTE_ABGR,
+	    // and not GrahicsConfiguration.createCompatibleImage().
+	    // This is a big JDK program, so the color model is not
+	    // defined like it is in BD-J.
 	bufferG = buffer.createGraphics();
 	bufferG.setComposite(AlphaComposite.Src);
 	bufferG.setColor(transparent);
@@ -117,7 +140,9 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 		    Debug.println("repainting...");
 		}
 		paintNextFrameFully();
-		    // This will happen the next time a frame is displayed
+		    // This will happen the next time a frame is displayed.
+		    // That's not really what you'd want in professional
+		    // content, but it's good enough for a debug tool.
 	    }
 	};
 	ddComponent.setBounds(bounds);
@@ -168,13 +193,20 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	nonTranslucentFix = buf;
     }
 
+    //
+    // Tell is if we should step through each frame showing
+    // erase, paint areas, then painted result
+    //
+    void setDebugDraw(boolean debugDraw) {
+	this.debugDraw = debugDraw;
+    }
+
 
 
     /**
      * @inheritDoc
      **/
     protected void clearArea(int x, int y, int width, int height) {
-	int s = scaleDivisor;
 	bufferG.setColor(transparent);
 	bufferG.fillRect(x, y, width, height);
     }
@@ -192,10 +224,49 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     /**
      * @inheritDoc
      **/
-    protected void callPaintFrame(int numTargets) throws InterruptedException {
-	this.numTargets = numTargets;
-	paintFrame(bufferG, numTargets);
+    protected void callPaintTargets() throws InterruptedException {
+	if (debugDraw) {
+		// Paint the area to be erased red, and wait
+	    int s = scaleDivisor;
+	    componentG.setColor(new Color(255, 0, 0, 127));
+	    componentG.setComposite(AlphaComposite.SrcOver);
+	    for (int i = 0; i < getNumEraseTargets(); i++) {
+		Rectangle a = getEraseTargets()[i];
+		componentG.fillRect(a.x/s, a.y/s + frameCheat, 
+				    a.width/s, a.height/s);
+	    }
+	    Toolkit.getDefaultToolkit().sync();
+	    main.waitForUser("To be erased areas shown with red overlay");
+
+		// Paint the area to be drawn green, and wait
+	    componentG.setColor(new Color(0, 255, 0, 127));
+	    for (int i = 0; i < getNumDrawTargets(); i++) {
+		Rectangle a = getDrawTargets()[i];
+		componentG.fillRect(a.x/s, a.y/s + frameCheat, 
+				    a.width/s, a.height/s);
+	    }
+	    Toolkit.getDefaultToolkit().sync();
+	    main.waitForUser("To be drawn areas shown with green overlay");
+	    componentG.setComposite(AlphaComposite.Src);
+	}
+	paintTargets(bufferG);
 	bufferG.setComposite(AlphaComposite.Src);	// Add some robustness
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    protected void runAnimationLoop() throws InterruptedException {
+	try {
+	    super.runAnimationLoop();
+	} catch (Throwable t) {
+	    t.printStackTrace();
+	    System.exit(1);
+	    // If we don't do this, then the finally clause in
+	    // AnimationEngine.run() swallows the error message,
+	    // and often generates an assertion failure on Show.destroy()
+	    // that hides the real problem.
+	}
     }
 
     /**
@@ -207,12 +278,12 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	//  the scaling, and it's here where we simulate the BD model
 	//  of BD-J graphics over the video plane.
 	//
-	int s = scaleDivisor;
 	Image bg = background;
 	Graphics2D g = componentG;
 	Graphics2D fixG = null;
 	if (nonTranslucentFix != null && bg == null) {
-		// On windows, the graphics device doesn't
+		// On windows and Mac/Leopard/Intel (at least), 
+		// the graphics device doesn't
 		// natively support a translucent color model.
 		// This means that alpha-blended colors don't
 		// show up properly, unless we SrcOver draw them
@@ -228,34 +299,77 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	} else {
 	    g.setComposite(AlphaComposite.Src);
 	}
-	if (numTargets > 0) {
-	    for (int i = 0; i < numTargets; i++) {
-		Rectangle a = targets[i].getBounds();
+	if (getNumDrawTargets() > 0) {
+	    if (scaleDivisor == 1) {
+		for (int i = 0; i < getNumDrawTargets(); i++) {
+		    Rectangle a = getDrawTargets()[i];
+		    if (bg != null) {
+			g.setComposite(AlphaComposite.Src);
+			drawScaledImage(g, bg, a);
+			g.setComposite(AlphaComposite.SrcOver);
+		    }
+		    drawScaledImage(g, buffer, a);
+		}
+	    } else {
+		// If we're scaling, then rounding errors can cause
+		// odd off-by-one style artifacts, so we just paint the
+		// whole frame if anything's changed.
+		Rectangle a = new Rectangle(0, 0, buffer.getWidth(), 
+						  buffer.getHeight());
 		if (bg != null) {
 		    g.setComposite(AlphaComposite.Src);
-		    g.drawImage(bg, a.x/s, frameCheat + (a.y/s), 
-				    (a.x+a.width)/s, 
-				    frameCheat + ((a.y+a.height)/s),
-				    a.x, a.y,
-				    a.x+a.width, a.y+a.height,
-				    null);
+		    drawScaledImage(g, bg, a);
 		    g.setComposite(AlphaComposite.SrcOver);
 		}
-		g.drawImage(buffer, a.x/s, frameCheat + a.y/s, 
-				    (a.x+a.width)/s, 
-				    frameCheat + (a.y+a.height)/s,
-				    a.x, a.y,
-				    a.x+a.width, a.y+a.height,
-				    null);
+		drawScaledImage(g, buffer, a);
 	    }
 	    if (fixG != null)  {
 		g.dispose();
 		g = fixG;
-		g.setComposite(AlphaComposite.Src);
-		g.drawImage(nonTranslucentFix, 0, 0, null);
+		g.setComposite(AlphaComposite.SrcOver);
+		if (scaleDivisor == 1) {
+		    for (int i = 0; i < getNumDrawTargets(); i++) {
+			Rectangle a = getDrawTargets()[i];
+			int s = scaleDivisor;
+			g.drawImage(nonTranslucentFix,
+					    a.x/s, frameCheat + a.y/s, 
+					    (a.x+a.width)/s, 
+					    frameCheat + (a.y+a.height)/s,
+					    a.x/s, frameCheat + a.y/s, 
+					    (a.x+a.width)/s, 
+					    frameCheat + (a.y+a.height)/s,
+					    null);
+		    }
+		} else {
+		    Rectangle a = new Rectangle(0, 0, buffer.getWidth(), 
+						      buffer.getHeight());
+		    int s = scaleDivisor;
+		    g.drawImage(nonTranslucentFix,
+					a.x/s, frameCheat + a.y/s, 
+					(a.x+a.width)/s, 
+					frameCheat + (a.y+a.height)/s,
+					a.x/s, frameCheat + a.y/s, 
+					(a.x+a.width)/s, 
+					frameCheat + (a.y+a.height)/s,
+					null);
+		}
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	}
+	if (debugDraw) {
+	    main.waitForUser("Frame drawn");
+	    main.debugDrawFrameDone();
+	}
+    }
+
+    private void drawScaledImage(Graphics2D dest, Image src, Rectangle a) {
+	int s = scaleDivisor;
+	dest.drawImage(src, a.x/s, frameCheat + a.y/s, 
+			    (a.x+a.width)/s, 
+			    frameCheat + (a.y+a.height)/s,
+			    a.x, a.y,
+			    a.x+a.width, a.y+a.height,
+			    null);
     }
 
     /**

@@ -67,6 +67,11 @@ show
 setting segment_stack_depth	1 ;
 	# We only ever pop the stack of segment states by one
 
+setting draw_targets {
+	T:Default
+	T:MovingMenu
+} ;
+
 # ==========
 #  Features
 # ==========
@@ -300,7 +305,27 @@ feature translation F:MainMenu.In.Coords {
 
 feature translator F:MainMenu.In.Mover
     F:MainMenu.In.Coords
-    { F:MainMenu }
+    { F:MainMenu.Targeted }
+;
+
+    # To optimize drawing, we put the moving main menu in a different
+    # draw target, and we do a guarantee_fill on it...
+
+feature set_target F:MainMenu.Targeted F:MainMenu.Guaranteed T:MovingMenu ;
+
+    # We guarantee the entire area of the main menu, and fill in between
+    # the src mode images.  They are:
+    #		play	154x55 @  450, 880
+    #		setup   189x55 @  750, 880
+    #           scenes  210x55 @ 1050, 880
+    #  		bonus   197x55 @ 1350, 880
+
+feature guarantee_fill F:MainMenu.Guaranteed F:MainMenu
+	( 450 880 1546 934 ) {
+		( 204 880 749 934 )	# between play and setup
+		( 939 880 1049 934 )	# between setup and scenes
+		( 1260 880 1349 934 )	# between scenes and bonus
+	}
 ;
 
 feature group F:MainMenu.In.Unclipped {
@@ -330,7 +355,7 @@ feature translation F:MainMenu.Out.Coords {
 
 feature translator F:MainMenu.Out.Mover
     F:MainMenu.Out.Coords
-    { F:MainMenu }
+    { F:MainMenu.Targeted }
 ;
 
 feature group F:MainMenu.Out.Unclipped {
@@ -972,6 +997,7 @@ feature fade F:BookmarkSnap F:BookmarkSnap.Im {
 	segment_done ;
 } ;
 
+
 #
 #  The user input grid
 #
@@ -1549,7 +1575,7 @@ feature group F:Bio.NotAvailable {
 #
 feature group F:Everything {
     F:SpinningYinYangClockwise F:SpinningYinYangCCW
-    F:LoadingText F:MainMenu 
+    F:LoadingText F:MainMenu F:MainMenu.Targeted
     F:StillYinYang F:MainMenu.In F:MainMenu.Out
     F:VideoMenu F:VideoMenu.In F:VideoMenu.Out
     F:MenuInactive.SetupActivated

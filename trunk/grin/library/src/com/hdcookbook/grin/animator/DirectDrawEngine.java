@@ -93,7 +93,6 @@ public class DirectDrawEngine extends ClockBasedEngine {
     private BufferedImage buffer;
     private Graphics2D bufferG;
     private Graphics2D componentG;
-    private int numTargets;
 
     /**
      * Create a new DirectDrawEngine.  It needs to be initialized with
@@ -182,9 +181,8 @@ public class DirectDrawEngine extends ClockBasedEngine {
     /**
      * @inheritDoc
      **/
-    protected void callPaintFrame(int numTargets) throws InterruptedException {
-	this.numTargets = numTargets;
-	paintFrame(bufferG, numTargets);
+    protected void callPaintTargets() throws InterruptedException {
+	paintTargets(bufferG);
 	bufferG.setComposite(AlphaComposite.Src);	// Add some robustness
     }
 
@@ -192,9 +190,10 @@ public class DirectDrawEngine extends ClockBasedEngine {
      * @inheritDoc
      **/
     protected void finishedFrame() {
-	if (numTargets > 0) {
-	    for (int i = 0; i < numTargets; i++) {
-		Rectangle a = targets[i].bounds;
+	int n = renderContext.numDrawTargets;
+	if (n > 0) {
+	    for (int i = 0; i < n; i++) {
+		Rectangle a = renderContext.drawTargets[i];
 		componentG.drawImage(buffer, a.x, a.y, 
 					     a.x+a.width, a.y+a.height,
 					     a.x, a.y,

@@ -61,7 +61,7 @@ package com.hdcookbook.grin.io.binary;
 class Constants {
  
 	static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
-	static final int GRINSCRIPT_VERSION = 1;
+	static final int GRINSCRIPT_VERSION = 3;
 	
 	static final int FEATURE_IDENTIFIER= 0x00000fea;
 	static final int SEGMENT_IDENTIFIER= 0x00000ce6;
@@ -90,6 +90,8 @@ class Constants {
         static final byte COMMAND_RCHANDLER_IDENTIFIER = 0x20;
         static final byte VISUAL_RCHANDLER_IDENTIFIER = 0x21;
         static final byte USER_RCHANDLER_IDENTIFIER = 0x22;
+        static final byte GUARANTEE_FILL_IDENTIFIER = 0x23;
+	static final byte SET_TARGET_IDENTIFIER = 0x24;
         
         static final byte NULL = (byte) 0xff;
         static final byte NON_NULL = (byte) 0xee;

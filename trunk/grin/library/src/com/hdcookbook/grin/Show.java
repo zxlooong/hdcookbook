@@ -56,9 +56,10 @@
 package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.animator.AnimationClient;
-import com.hdcookbook.grin.animator.RenderArea;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.SetupManager;
 import com.hdcookbook.grin.util.Debug;
@@ -111,6 +112,8 @@ public class Show implements AnimationClient {
     private Segment currentSegment = null;
     private Segment[] segmentStack = new Segment[0];  // For push/pop
     private int segmentStackPos = 0;
+    private String[] drawTargets;
+    private int defaultDrawTarget = 0;
     private ActivateSegmentCommand popSegmentCommand;
 
     private boolean initialized = false;
@@ -118,7 +121,8 @@ public class Show implements AnimationClient {
 
     private Queue pendingCommands = new Queue(32);
     private boolean deferringPendingCommands = false;
-    private int currentFrame = -1;	// The current frame number
+    private int numTargets = 1;	  // number of RenderContext targets needed 
+    				  // by this show
 
     /** 
      * Create a new show.
@@ -203,6 +207,42 @@ public class Show implements AnimationClient {
      **/
     public int getSegmentStackDepth() {
 	return segmentStack.length;
+    }
+
+    /**
+     * Used by the parser
+     **/
+    public void setDrawTargets(String[] drawTargets) {
+	this.drawTargets = drawTargets;
+    }
+
+    /**
+     * Get the set of draw target names.  The numerical draw targets
+     * in features (e.g. the SetTarget feature) don't necessarily correspond
+     * to indicies in this array, because when AnimationClient instances
+     * are set up in an AnimationEngine, a master list of all of the unique
+     * draw targets is built.
+     *
+     * @see com.hdcookbook.grin.animator.RenderContext#setTarget(int)
+     * @see com.hdcookbook.grin.animator.AnimationEngine#initNumTargets(int)
+     * @see com.hdcookbook.grin.features.SetTarget
+     **/
+    public String[] getDrawTargets() {
+	return drawTargets;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void mapDrawTargets(Hashtable targetMap) {
+	defaultDrawTarget 
+	    = ((Integer) targetMap.get(drawTargets[0])).intValue();
+	for (Enumeration e = features.elements(); e.hasMoreElements() ;) {
+	    Feature f = (Feature) e.nextElement();
+	    if (f instanceof SetTarget) {
+		((SetTarget) f).mapDrawTarget(targetMap);
+	    }
+	}
     }
 
     /**
@@ -370,7 +410,7 @@ public class Show implements AnimationClient {
     /**
      * @inheritDoc
      * <p>
-     * An xlet can call this method just before calling advanceToFrame if
+     * An xlet can call this method just before calling nextFrame() if
      * the animation loop is caught up.  From time to time, pending commands
      * will be deferred until animation has caught up.  GRIN knows we've
      * caught up when we paint a frame, but calling this method can let
@@ -383,93 +423,18 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * Advance the state of the show to the given frame.  Frame numbers
-     * monotonically increase; in the presence of trick play, they
-     * do not track the media time of the underlying video.
-     * <p>
-     * A show starts with the current frame set to -1, so the first frame is
-     * 0.  When the show is advanced to frame 0, there might be a significant
-     * number of features that start initializing, e.g. by loading images.
-     * For this reason, an application might choose to use frame 0 as
-     * a special "initializing" frame that's never displayed, and that
-     * last for a fairly long time.
+     * @inheritDoc
      *
-     * @throws 	IllegalArgumentException if newFrame < getCurrentFrame()
      * @throws	InterruptedException	if the show has been destroyed
      *
      * @see #setCaughtUp()
-     *
-     * @deprecated  With the new animation framework, this is being
-     *		    replaced by nextFrame().  The method advanceToFrame()
-     *		    will soon be removed from Show.
-     **/
-    public synchronized void advanceToFrame(int newFrame) 
-    	throws InterruptedException 
-    {
-	if (Thread.interrupted() || destroyed) {
-	    throw new InterruptedException();
-	}
-	if (newFrame <= currentFrame) {
-	    if (newFrame == currentFrame) {
-		return;
-	    }
-	    throw new IllegalArgumentException();
-	}
-	boolean advanced = false;
-	while (newFrame > currentFrame) {
-	    currentFrame++;
-	    advanced = true;
-	    runPendingCommands();
-	    if (currentSegment != null) {
-		currentSegment.advanceToFrame(currentFrame);
-		runPendingCommands();
-	    }
-	}
-	if (advanced) {
-	    notifyAll();
-	}
-    }
-
-    // Inherited from AnimationClient
-    /**
-     * @inheritDoc
      **/
     public synchronized void nextFrame() throws InterruptedException {
-	// @@ TODO:  Eliminate the old, deprecated method entirely.  When
-	//	     doing this, also change the Feature API to get the
-	//	     int frame number out of the calls - it's misleading,
-	//	     given that each feature is called once per frame anyway...
-	//	     the frame number is just confusing, and it wraps to
-	//	     a negative value in only 2.8 years at 24 fps.
-	advanceToFrame(currentFrame + 1);
-    }
-
-    /**
-     * This is useful for an animation that wants to synchronize on
-     * certain frames in a show, using this pattern:
-     * <pre>
-     *      Show show = ...;
-     *      int wantedFrame = ...;
-     *      synchronized(show) {
-     *          show.waitForFrame(wantedFrame);
-     *          ...  make stateful changes to the show;
-     *      }
-     * </pre>
-     *
-     * @deprecated	Cute, but not useful.  Use a command instead
-     **/
-    // @@ TODO:  Eliminate this.
-    public synchronized void waitForFrame(int wanted) 
-    		throws InterruptedException 
-    {
-	for (;;) {
-	    if (Thread.interrupted() || destroyed) {
-		throw new InterruptedException();
-	    }
-	    if (currentFrame >= wanted) {
-		break;
-	    }
-	    wait();
+	if (currentSegment == null) {
+	    runPendingCommands();
+	} else {
+	    currentSegment.nextFrame();
+	    runPendingCommands();
 	}
     }
 
@@ -483,20 +448,6 @@ public class Show implements AnimationClient {
 	    }
 	}
     }
-
-    /**
-     * Get the current frame number of our underlying mode.
-     *
-     * @see #advanceToFrame(int)
-     *
-     * @deprecated   Really only useful for features, with the old
-     *		     frame number-based way of keeping track of state
-     **/
-    // @@ TODO:  Get rid of this
-    public synchronized int getCurrentFrame() {
-	return currentFrame;
-    }
-
 
     /**
      * This is called from ActivateSegmentCommand, and should not be
@@ -529,118 +480,24 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * Set thisArea to the union of lastArea and what will be
-     * displayed this time.  Set lastArea to what will be displayed
-     * this time.  A width of 0 indicates that nothing is drawn.
-     * <p>
-     * Usage:
-     * <pre>
-     *     Rectangle thisARea = new Rectangle();
-     *     Rectangle lastArea = new Rectangle();
-     *     Rectangle showClip = the bounding Rectangle of the show
-     *     Rectlangle lastClip = new Rectangle();
-     *     Show show = ...;
-     *     for (frame = 1; ...; frame++) {
-     *        show.setDisplayArea(thisArea. lastArea, showClip);
-     *        if (thisArea.width > 0) {
-     *            Graphics2D gr = the graphics to draw into;
-     *            clear thisArea using gr.fillRect();
-     *            Set gr's clip rect to thisArea;
-     *            show.paintFrame(gr);
-     *            Restore gr's clip area to what it was;
-     *        }
-     *    }
-     * </pre>
-     * Doing this will optimize display by reducing the area cleared, and
-     * the amount of acutal drawing the show does.  A concrete example of
-     * this pattern is in com.hdcookbook.grin.test.bigjdk.GrinTestRyan.
-     *
-     * @param thisArea 	The union of lastArea and what will be drawn this time
-     * @param lastArea  What was drawn last time.  Will be set to what will be
-     *			drawn this time.
-     * @param clip	The bounds of this show.  The result that lastArea
-     *			is set to is clipped to these bounds.
-     *
-     * @throws	InterruptedException	if the show has been destroyed
-     *
-     * @deprecated	This was an incremental step toward what the
-     *			animation framework can do better.
-     **/
-    // @@ TODO:  Get rid of this with transition to animation framework
-    public synchronized void setDisplayArea(Rectangle thisArea, 
-    					    Rectangle lastArea,
-					    Rectangle clip)
-    	throws InterruptedException 
-    {
-	if (Thread.interrupted() || destroyed) {
-	    throw new InterruptedException();
-	}
-	thisArea.setBounds(lastArea);
-	lastArea.x = lastArea.y = lastArea.width = lastArea.height = 0;
-	if (currentSegment != null) {
-	    currentSegment.addDisplayArea(lastArea);
-	}
-	int d = clip.x - lastArea.x;
-	if (d > 0) {
-	    lastArea.x = clip.x;
-	    lastArea.width -= d;
-	}
-	d = clip.y - lastArea.y;
-	if (d > 0) {
-	    lastArea.y = clip.y;
-	    lastArea.height -= d;
-	}
-	d = (lastArea.x + lastArea.width) - (clip.x + clip.width);
-	if (d > 0) {
-	    lastArea.width -= d;
-	}
-	d = (lastArea.y + lastArea.height) - (clip.y + clip.height);
-	if (d > 0) {
-	    lastArea.height -= d;
-	}
-	if (lastArea.width <= 0 || lastArea.height <= 0) {
-	    lastArea.width = 0;
-	    lastArea.height = 0;
-	} else {
-	    if (thisArea.width > 0) {
-		thisArea.add(lastArea);
-	    } else {
-		thisArea.setBounds(lastArea);
-	    }
-	}
-    }
-
-    // @@ Some temporary adaptation of the new animation f/w to the
-    // @@ older, less-optimized way of drawing.  This will go away
-    // @@ within a week.
-    private Rectangle tempThisArea = new Rectangle();
-    private Rectangle tempLastArea = new Rectangle();
-    private Rectangle tempShowClip = new Rectangle();
-
-    /**
      * @inheritDoc
      **/
-    public void addDisplayAreas(RenderArea[] targets) 
-    	    throws InterruptedException 
+    public synchronized void addDisplayAreas(RenderContext context) 
+				throws InterruptedException 
     {
-    	// @@ TODO:  Make an optimized version of this that works with
-	//  @@	     the features.
-	tempShowClip.width = component.getWidth();
-	tempShowClip.height = component.getHeight();
-	setDisplayArea(tempThisArea, tempLastArea, tempShowClip);
-	targets[0].clearAndAddArea(tempThisArea);
-	targets[0].addArea(tempLastArea);
+	if (currentSegment != null) {
+	    int old = context.setTarget(defaultDrawTarget);
+	    currentSegment.addDisplayAreas(context);
+	    context.setTarget(old);
+	}
     }
 
     /**
      * @inheritDoc
      * <p>
      * Paint the current state of the enhancement.  This should be
-     * called by the xlet.  This way, the xlet can decide to use
-     * whatever animation style it wants:  direct draw, repaint
-     * draw, SFAA, or anything else.
+     * called by the xlet, usually via the animation framework.  
      **/
-    // @@ TODO:  Think about checking clip rect in features
     public synchronized void paintFrame(Graphics2D gr)
     	throws InterruptedException 
     {
@@ -651,7 +508,7 @@ public class Show implements AnimationClient {
 	    currentSegment.paintFrame(gr);
 	}
 	deferringPendingCommands = false; 	
-	    // If we've paint a frame, we're definitely caught up.
+	    // If we've painted a frame, we're definitely caught up.
     }
 
     /**

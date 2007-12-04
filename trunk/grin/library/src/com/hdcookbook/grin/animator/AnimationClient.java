@@ -58,6 +58,7 @@ package com.hdcookbook.grin.animator;
 import com.hdcookbook.grin.util.Debug;
 import java.awt.Graphics2D;
 import java.awt.Component;
+import java.util.Hashtable;
 
 /**
  * An AnimationClient is a client of an AnimationEngine.  When it's
@@ -121,7 +122,8 @@ public interface AnimationClient {
      * before paintFrame().  
      * <p>
      * In this call, the client must indicate where it intends to draw
-     * by calling methods on RenderArea instances.  Each RenderArea will
+     * by calling methods on RenderContext.  Internally, a RenderContext
+     * keeps a number of RenderArea targets.  Each RenderArea will
      * keep track of a bounding rectangle of all of the indended drawing
      * operations within that area.  When the call to addDisplayAreas
      * is complete, the animation manager may merge some render areas,
@@ -145,14 +147,19 @@ public interface AnimationClient {
      * adds the full extent of the component to one of the targets.
      * In this case, it still calls this method, so that items we draw
      * have the opportunity to erase themselves if needed.
+     * <p>
+     * This method will be called exactly once for each frame displayed.
+     * Because paintFrame can be called multiple times per frame, any state 
+     * maintained by the animation client to optimize display areas should 
+     * be updated in this method, and not in paintFrame().
      *
-     * @param targets		The set of RenderArea targets the client
+     * @param targets		The set of targets the client
      *				can draw to.
      *
      * @throws	InterruptedException	if the thread has been interrupted
      *					(e.g. because the xlet is being killed)
      **/
-    public void addDisplayAreas(RenderArea[] targets)
+    public void addDisplayAreas(RenderContext targets)
 	throws InterruptedException;
 
     /**
@@ -181,4 +188,20 @@ public interface AnimationClient {
      **/
     public void paintFrame(Graphics2D gr)
     	throws InterruptedException ;
+
+
+    /**
+     * Get the names of the draw targets used by this animation client.
+     **/
+    public String[] getDrawTargets();
+
+    /**
+     * Map draw target names into the numeric values that are required by the
+     * animation engine.
+     *
+     * @param targets	A hashtable mapping String names to Integer values
+     *
+     * @see RenderContext#setDrawTarget(int)
+     **/
+    public void mapDrawTargets(Hashtable targets);
 }

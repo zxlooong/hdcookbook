@@ -137,7 +137,7 @@ public class VisualRCHandler extends RCHandler {
 
     private boolean activated = false;
     private int currState;
-    private int startFrame;
+    private int currFrame;
     private boolean timedOut;
 
 
@@ -443,7 +443,7 @@ public class VisualRCHandler extends RCHandler {
      **/
     public void activate(Segment s) {
 	timedOut = timeout <= -1;
-	startFrame = s.getShow().getCurrentFrame();
+	currFrame = 0;
 	if (assembly != null) {
 		// If we have an assembly, make our state mirror
 		// that of the assembly.
@@ -478,10 +478,11 @@ public class VisualRCHandler extends RCHandler {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int frameNumber) {
-    	if (!timedOut && frameNumber > startFrame + timeout) {
+    public void nextFrame() {
+	currFrame++;
+    	if (!timedOut && currFrame > timeout) {
 	    timedOut = true;
 	    for (int i = 0; i < timeoutCommands.length; i++) {
 		show.runCommand(timeoutCommands[i]);

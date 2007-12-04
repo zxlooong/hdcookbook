@@ -182,7 +182,7 @@ public class GrinTestRyan extends Frame {
 
 	show.activateSegment(sInitialize);
 
-	show.advanceToFrame(0);
+	show.nextFrame();
 	director.init();
 	director.waitForVideoStartOK();
 	System.out.println("Pretend the video is starting...");
@@ -196,11 +196,7 @@ public class GrinTestRyan extends Frame {
 	frameGr.drawImage(bufIm,0, FRAME_CHEAT, WIDTH, FRAME_CHEAT+HEIGHT,this);
 	long startTime = System.currentTimeMillis();
 	int fps = 25;	// Run at 25p
-	Rectangle thisArea = new Rectangle();
-	Rectangle lastArea = new Rectangle();
 	director.setFrame(0);
-	Rectangle lastClip = new Rectangle();
-	Rectangle showClip = new Rectangle(0, 0, WIDTH, HEIGHT);
 	Color transparentColor = new Color(0,0,0,0);
 	for (int frame = 1; ; frame++) {
 	    for (;;) {
@@ -220,26 +216,17 @@ public class GrinTestRyan extends Frame {
 	    }
 	    bufGr.setComposite(AlphaComposite.Src);
 	    bufGr.setColor(transparentColor);
-	    show.advanceToFrame(frame);
+	    show.nextFrame();
 	    synchronized(show) {
-		show.setDisplayArea(thisArea, lastArea, showClip);
-		if (thisArea.width > 0) {
-		    lastClip.setBounds(showClip);
-		    bufGr.getClipBounds(lastClip);
-		    bufGr.setClip(thisArea);
-		    bufGr.fillRect(thisArea.x, thisArea.y, 
-				   thisArea.width, thisArea.height);
-                    bufGr.setComposite(AlphaComposite.SrcOver);
-		    show.paintFrame(bufGr);
-		    bufGr.setClip(lastClip);
-		}
+		bufGr.fillRect(0, 0, WIDTH, HEIGHT);
+		bufGr.setComposite(AlphaComposite.SrcOver);
+		show.paintFrame(bufGr);
 	    }
-	    Rectangle a = thisArea;
 	    frameGr.setComposite(AlphaComposite.Src);
 	    frameGr.drawImage(bufIm, 
-		  	      a.x, a.y+FRAME_CHEAT, 
-			      a.x+a.width, a.y+FRAME_CHEAT+a.height, 
-			      a.x, a.y, a.x+a.width, a.y+a.height,
+		  	      0, FRAME_CHEAT, 
+			      WIDTH, FRAME_CHEAT+HEIGHT,
+			      0, 0, WIDTH, HEIGHT,
 			      this);
 	    Toolkit.getDefaultToolkit().sync();
 	}

@@ -57,6 +57,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
 
 import java.io.IOException;
@@ -80,6 +82,42 @@ public class Translator extends Feature {
 
     private int fx;		// Feature's start position
     private int fy;
+
+    private int dx;		// For this frame
+    private int dy;
+
+    private int lastDx;		// For last frame shown
+    private int lastDy;
+
+    private DrawRecord drawRecord = new DrawRecord();
+
+	//
+	// Here, we make an inner class of RenderContext.  We
+	// pass this instance to our child; it modifies calls to the
+	// parent RenderContext from our child.
+	//
+    private ChildContext childContext = new ChildContext();
+    
+    class ChildContext extends RenderContext {
+	RenderContext	parent;
+
+	public void addArea(DrawRecord r) {
+	    r.applyTranslation(dx, dy);
+	    if (dx != lastDx || dy != lastDy) {
+		r.setChanged();
+	    }
+	    parent.addArea(r);
+	}
+
+	public void guaranteeAreaFilled(DrawRecord r) {
+	    r.applyTranslation(dx, dy);
+	    parent.guaranteeAreaFilled(r);
+	}
+
+	public int setTarget(int target) {
+	    return parent.setTarget(target);
+	}
+    };	// End of RenderContext anonymous inner class
 
     public Translator(Show show, String name) {
 	super(show, name);
@@ -120,21 +158,21 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public int getStartX() {
 	return translation.getTranslatorStartX();
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public int getStartY() {
 	return translation.getTranslatorStartY();
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void initialize() {
 	// The show will initialize our sub-feature, so we don't
@@ -142,7 +180,7 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void destroy() {
 	// The show will destroy our sub-features, so we don't
@@ -150,7 +188,7 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	// This is synchronized to only occur within model updates.
@@ -159,6 +197,8 @@ public class Translator extends Feature {
 	    for (int i = 0; i < features.length; i++) {
 		features[i].activate();
 	    }
+	    lastDx = Integer.MIN_VALUE;
+	    drawRecord.activate();
 	} else {
 	    for (int i = 0; i < features.length; i++) {
 		features[i].deactivate();
@@ -167,7 +207,7 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
 	if (mode) {
@@ -182,7 +222,7 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
 	for (int i = 0; i < features.length; i++) {
@@ -194,7 +234,7 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
 	for (int i = 0; i < features.length; i++) {
@@ -206,38 +246,36 @@ public class Translator extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
+    public void nextFrame() {
 	if (Debug.ASSERT && !translation.getIsActivated()) {
 	    Debug.assertFail();
 	}
 	for (int i = 0; i < features.length; i++) {
-	    features[i].advanceToFrame(newFrame);
+	    features[i].nextFrame();
 	}
+
+	// Note that at this point, we don't know if our translation
+	// has advanced to the next frame or not, so we can't depend
+	// on its value
     }
 
+
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void  addDisplayArea(Rectangle area) {
-	if (!isActivated) {
-	    return;
-	}
-	int dx = translation.getX() - fx;
-	int dy = translation.getY() - fy;
-	if (area.width != 0) {
-	    area.x -= dx;
-	    area.y -= dy;
-	}
+    public void addDisplayAreas(RenderContext context) {
+	dx = translation.getX() - fx;
+	dy = translation.getY() - fy;
+	childContext.parent = context;
 	for (int i = 0; i < features.length; i++) {
-	    features[i].addDisplayArea(area);
+	    features[i].addDisplayAreas(childContext);
 	}
-	if (area.width != 0) {
-	    area.x += dx;
-	    area.y += dy;
-	}
+	lastDx = dx;
+	lastDy = dy;
     }
+
 
     /**
      * See superclass definition.
@@ -246,8 +284,6 @@ public class Translator extends Feature {
 	if (!isActivated) {
 	    return;
 	}
-	int dx = translation.getX() - fx;
-	int dy = translation.getY() - fy;
 	gr.translate(dx, dy);
 	for (int i = 0; i < features.length; i++) {
 	    features[i].paintFrame(gr);

@@ -62,6 +62,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.Hashtable;
 
 /**
  * Abstract base class for an animation engine.
@@ -78,10 +79,11 @@ public abstract class AnimationEngine implements Runnable {
     public final static Color transparent = new Color(0, 0, 0, 0);
 
     /** 
-     * The list of areas that were updated in the current frame
-     * of animation.
+     * The list of erase and drawing areas that were updated in 
+     * the current frame of animation, and records of what happened
+     * in the last.
      **/
-    protected RenderArea[] targets;
+    protected RenderContextBase renderContext;
 
     private AnimationClient[] clients;
     private Thread worker;
@@ -96,7 +98,6 @@ public abstract class AnimationEngine implements Runnable {
 
     private AnimationContext context;	// see initialize(), start(), run()
     private Rectangle lastClip = new Rectangle(); // see paintFrame
-    private Rectangle collapsed = new Rectangle(); // see collapseTargets()
 
     private boolean needsFullPaint = true;	// First frame painted fully
     private boolean paused = false;
@@ -127,22 +128,19 @@ public abstract class AnimationEngine implements Runnable {
      **/
     public synchronized void initClients(AnimationClient[] clients) {
 	this.clients = clients;
-    }
-
-    /**
-     * Initialize this engine with the number of render area targets
-     * that clients will want to use.
-     * This should be called exactly once, before start() is called.
-     *
-     * @param numRenderAreas	Number of render areas needed by client
-     **/
-    public synchronized void initNumTargets(int numRenderAreas) {
-	targets = new RenderArea[numRenderAreas];
-	for (int i = 0; i < targets.length; i++) {
-	    targets[i] = new RenderArea(this);
+	Hashtable targets = new Hashtable(); // <String, Integer>
+	int num = 0;
+	for (int i = 0; i < clients.length; i++) {
+	    String[] ts = clients[i].getDrawTargets();
+	    for (int j = 0; j < ts.length; j++) {
+		if (targets.get(ts[j]) == null) {
+		    targets.put(ts[j], new Integer(num++));
+		}
+	    }
+	    clients[i].mapDrawTargets(targets);
 	}
+	renderContext = new RenderContextBase(targets.size());
     }
-
 
     /**
      * Set the priority of the thread that runs the animation loop.
@@ -187,6 +185,37 @@ public abstract class AnimationEngine implements Runnable {
      * @return the height 
      **/
     public abstract int getHeight();
+
+    /**
+     * @return The number of erase areas active for this frame
+     **/
+    protected int getNumEraseTargets() {
+	return renderContext.numEraseTargets;
+    }
+
+    /**
+     * @return the total pool of erase areas.  Iterate this from 0..n-1,
+     *	       n=getNumEraseTargets()
+     **/
+    protected Rectangle[] getEraseTargets() {
+	return renderContext.eraseTargets;
+    }
+
+    /**
+     * @return The number of draw areas active for this frame
+     **/
+    protected int getNumDrawTargets() {
+	return renderContext.numDrawTargets;
+    }
+
+    /**
+     * @return the total pool of draw areas.  Iterate this from 0..n-1,
+     *	       n=getNumDrawTargets()
+     **/
+    protected Rectangle[] getDrawTargets() {
+	return renderContext.drawTargets;
+    }
+
 
     private synchronized void setState(int s) {
         state = s;
@@ -253,7 +282,7 @@ public abstract class AnimationEngine implements Runnable {
      *    for (frame = 0 to infinity) {
      *        wait until it's time for next frame
      *        for each client
-     *            call advanceToFrame
+     *            call nextFrame
      *         if animation isn't behind
      *             for each client
      *                 call setCaughtUp
@@ -365,8 +394,10 @@ public abstract class AnimationEngine implements Runnable {
 
 
     /**
-     * Called from RenderArea to cause an area to be cleared in the
+     * Called from showFrame() to cause an area to be cleared in the
      * current frame.
+     *
+     * @see #showFrame()
      **/
     protected abstract void clearArea(int x, int y, int width, int height);
 
@@ -380,20 +411,17 @@ public abstract class AnimationEngine implements Runnable {
     /**
      * Paint the current frame into the right graphics buffer.
      * The subclass implementation of this method should call
-     * paintFrame(Graphics2D).
-     *
-     * @param numTargets  Number of render area targets that need to
-     *		          be painted.
+     * paintTargets(Graphics2D).
      *
      * @see #paintFrame(java.awt.Graphics2D)
      **/
-    protected abstract void callPaintFrame(int numTargets) 
+    protected abstract void callPaintTargets() 
     	throws InterruptedException;
 
     /**
      * Called when the engine is finished drawing the current frame.
      * This should flush the results to the screen, if needed.  The
-     * framework guarantees that each call to callPaintFram,()
+     * framework guarantees that each call to callPaintTargets()
      * will be followed by a call to finishedFrame(), even
      * if the thread is interrupted or there's a RuntimeException
      * that terminates the thread.
@@ -421,9 +449,6 @@ public abstract class AnimationEngine implements Runnable {
 		synchronized(this) {
 		    if (getComponent() == null) {
 			Debug.assertFail("initContainer() not called");
-		    }
-		    if (targets == null) {
-			Debug.assertFail("initNumTargets() not called");
 		    }
 		    if (clients == null) {
 			Debug.assertFail("initClients() not called");
@@ -469,7 +494,7 @@ public abstract class AnimationEngine implements Runnable {
      * and if it's true, bail out of the loop.  
      * To advance the model by one frame, it should call
      * advanceModel().  When it wants to show a frame (and not skip it), it 
-     * should call showFrame(), which will cause callPaintFrame() to 
+     * should call showFrame(), which will cause callPaintTargets() to 
      * be called.
      * <p>
      * Of course, the animation loop should also check Thread.interrupted()
@@ -478,7 +503,7 @@ public abstract class AnimationEngine implements Runnable {
      * @see #destroyRequested()
      * @see #advanceModel()
      * @see #showFrame()
-     * @see #callPaintFrame(int)
+     * @see #callPaintTargets()
      **/
     abstract protected void runAnimationLoop() throws InterruptedException;
     
@@ -492,41 +517,51 @@ public abstract class AnimationEngine implements Runnable {
 
     /**
      * Tell the model we're caught up, and show the current frame.  This
-     * calls callPaintFrame.
+     * calls callPaintTargets.
      *
-     * @see #callPaintFrame(int)
+     * @see #callPaintTargets()
      **/
     protected final void showFrame() throws InterruptedException {
 	for (int i = 0; i < clients.length; i++) {
 	    clients[i].setCaughtUp();
 	}
-	for (int i = 0; i < targets.length; i++) {
-	    targets[i].setEmpty();
-	}
+	renderContext.setEmpty();
+	renderContext.setTarget(0);
 	boolean fullPaint;
 	synchronized(this) {
 	    fullPaint = needsFullPaint || needsFullRedrawInAnimationLoop();
 	    needsFullPaint = false;
 	}
 	if (fullPaint) {
-	    targets[0].addArea(0, 0, getWidth(), getHeight());
+	    renderContext.setFullPaint(0, 0, getWidth(), getHeight());
 	    // We still add the display areas, because that's also where
-	    // the client does any necessary erasing.
+	    // the client does any necessary erasing, and tracks state
+	    // from frame to frame.  The contract of AnimationClient
+	    // requires that addDisplayAreas be called exactly once per
+	    // frame displayed.
 	}
 	for (int i = 0; i < clients.length; i++) {
-	    clients[i].addDisplayAreas(targets);
+	    clients[i].addDisplayAreas(renderContext);	
+	    	// renderContext contains targets
 	}
-	int n = collapseTargets();
+	renderContext.processLastFrameRecords();
+	renderContext.collapseTargets();
+	renderContext.calculateEraseTargets();
+	for (int i = 0; i < renderContext.numEraseTargets; i++) {
+	    Rectangle a = renderContext.eraseTargets[i];
+	    clearArea(a.x, a.y, a.width, a.height);
+	}
 	try {
-	    callPaintFrame(n);
+	    callPaintTargets();
 	} finally {
 	    finishedFrame();
 	}
     }
 
     /**
-     * Paint the current frame into the given graphics object.  This
-     * should be called by the subclass within callPaintFrame().
+     * Paint the current set of target areas in our RenderContext for
+     * the current frame into the given graphics object.  This
+     * should be called by the subclass within callPaintTargets().
      * <p>
      * The Graphics2D instance must have a clip area that is set to
      * the extent of the area being managed by this animation manager.
@@ -535,27 +570,21 @@ public abstract class AnimationEngine implements Runnable {
      * drawing mode and the foreground color, might be changed.  However,
      * the Graphics2D instance will be suitable for re-use in a subsequent
      * paintFrame operation.
-     * <p>
-     * This method indicates which targets were painted to.  This might
-     * be useful to limit the areas of the double buffer that need to be
-     * flushed to the framebuffer.
      *
      * @param g		A graphics context with a clip area covering
      *			the full extent of the screen area under the
      *			control of this animation manager. 
-     * @param numTargets  Number of render area targets that need to
-     *		          be painted.
      *
-     * @see #callPaintFrame(int)
+     * @see #callPaintTargets()
      **/
-    protected final void paintFrame(Graphics2D g, int numTargets) 
+    protected final void paintTargets(Graphics2D g) 
 	    throws InterruptedException 
     {
 	g.setComposite(AlphaComposite.Src);
 	lastClip.width = 0;
 	g.getClipBounds(lastClip);
-	for (int i = 0; i < numTargets; i++) {
-	    g.setClip(targets[i].bounds);
+	for (int i = 0; i < renderContext.numDrawTargets; i++) {
+	    g.setClip(renderContext.drawTargets[i]);
 	    for (int j = 0; j < clients.length; j++) {
 		clients[j].paintFrame(g);
 	    }
@@ -575,90 +604,13 @@ public abstract class AnimationEngine implements Runnable {
      * @param g		A graphics context with a clip area covering the 
      *			area that needs to be painted to
      *
-     * @see #paintFrame(java.awt.Graphics2D, int)
+     * @see #paintTargets(java.awt.Graphics2D)
      **/
     protected final void paintFrame(Graphics2D g) throws InterruptedException {
 	g.setComposite(AlphaComposite.Src);
 	for (int j = 0; j < clients.length; j++) {
 	    clients[j].paintFrame(g);
 	}
-    }
-
-
-    //
-    // Collapse the render areas into an optimal set.  Return the number
-    // of RenderArea instances that need to be drawn; targets[0..n-1]
-    // will need to be drawn.  If no paint is needed, n will be 0.
-    //
-    private final int collapseTargets() {
-
-	int n = targets.length - 1;
-
-		// First, the easy part:  Put all of the empty targets
-		// at the end of the list
-
-	while (n >= 0 && targets[n].isEmpty()) {
-	    n--;
-	}
-	// Now, targets[n] is non-empty, or n is -1
-
-	for (int i = 0; i < n; ) {
-	    if (targets[i].isEmpty()) {
-		RenderArea a = targets[n];
-		targets[n] = targets[i];
-		targets[i] = a;
-		n--;
-	    } else {
-		i++;
-	    }
-	}
-	// Now, targets[0..n] are non-empty
-
-		// Next, figure out which areas should be collapsed.
-		// As a SWAG, we collapse areas when combining them
-		// at most doubles the area of the screen drawn to.
-		//
-		// This is an area where it would be worth measuring what
-		// is optimal, and perhaps even using different heuristics
-		// based on player.
-		//
-		// Note that this algorithm is O(n^3) on the number of
-		// targets.
-
-    collapse: 
-	for (;;) {
-	    for (int i = 0; i < n; ) {
-		for (int j = i+1; j <= n; j++) {
-		    collapsed.setBounds(targets[i].bounds);
-		    collapsed.add(targets[j].bounds);
-		    int ac = collapsed.width * collapsed.height;
-		    int a = targets[i].bounds.width * targets[i].bounds.height
-		    	   + targets[j].bounds.width * targets[j].bounds.height;
-		    if (ac <= 2*a) {
-			// combine them
-			targets[i].bounds.setBounds(collapsed);
-			if (j < n) {
-			    RenderArea ra = targets[j];
-			    targets[j] = targets[n];
-			    targets[n] = ra;
-			    targets[n].setEmpty();  
-			    	// setEmpty() is not strictly necessary,
-				// but it's fast and makes the code a bit
-				// more robust.
-			}
-			n--;
-			continue collapse;   // yay goto!
-		    }
-		}
-	    }
-	    break collapse;
-	}
-
-	// At this point, targets[0..n] represents an optimal set of
-	// the areas we need to display.  Add one to get the length of
-	// the list of targets.
-
-	return n+1;
     }
 
     /**

@@ -58,6 +58,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
@@ -250,24 +251,25 @@ public class Assembly extends Feature {
 	return currentFeature;
     }
 
+
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void  addDisplayArea(Rectangle area) {
-	currentFeature.addDisplayArea(area);
+    public void addDisplayAreas(RenderContext context) {
+	currentFeature.addDisplayAreas(context);
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
 	currentFeature.paintFrame(gr);
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public void advanceToFrame(int newFrame) {
-	currentFeature.advanceToFrame(newFrame);
+    public void nextFrame() {
+	currentFeature.nextFrame();
     }
 }

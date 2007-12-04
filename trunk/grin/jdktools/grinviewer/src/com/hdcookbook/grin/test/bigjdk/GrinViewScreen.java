@@ -63,6 +63,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.JScrollPane;
@@ -90,9 +91,12 @@ public class GrinViewScreen extends javax.swing.JFrame {
 
     private GrinView main;
     private int[] showTextPos;
+    private boolean debugDraw = false;
 
     private JTextField commandText;
     private JTextField fpsText;
+    private JCheckBox debugDrawCB;
+    private JButton nextDrawButton;
     private JButton stopButton;
     private JButton snapshotButton;
     private JButton frameButton;
@@ -124,6 +128,8 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	showText.setEditable(false);
 	showText.setFocusable(false);
 	showText.setLineWrap(false);
+	debugDrawCB = new JCheckBox();
+	nextDrawButton = new JButton();
         stopButton = new JButton();
         snapshotButton = new JButton();
         frameButton = new JButton();
@@ -151,6 +157,9 @@ public class GrinViewScreen extends javax.swing.JFrame {
 
         jSplitPane1.setRightComponent(showTextScrollPane);
 
+	debugDrawCB.setLabel("Watch drawing");
+	nextDrawButton.setText("next");
+	nextDrawButton.setVisible(false);
         stopButton.setText("Stop");
         snapshotButton.setText("Snapshot");
         frameButton.setText("+frame");
@@ -180,6 +189,18 @@ public class GrinViewScreen extends javax.swing.JFrame {
 		}
 	    }
 	});
+
+	debugDrawCB.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+		debugDrawCBItemChanged(evt);
+            }
+        });
+
+	nextDrawButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nextDrawButtonActionPerformed(evt);
+            }
+        });
 
 	stopButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -220,6 +241,8 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	m.add(commandText);
 	m.add(fpsLabel);
 	m.add(fpsText);
+	m.add(debugDrawCB);
+	m.add(nextDrawButton);
 	m.add(stopButton);
 	m.add(snapshotButton);
 	m.add(frameButton);
@@ -235,11 +258,15 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	layout.putConstraint(n, jSplitPane1, 10, s, nameLabel);
 	layout.putConstraint(e, m, 10, e, jSplitPane1);
 	layout.putConstraint(n, commandText, 10, s, jSplitPane1);
+	layout.putConstraint(s, debugDrawCB, -5, s, commandText);
 	layout.putConstraint(s, stopButton, 0, s, commandText);
 	layout.putConstraint(s, snapshotButton, 0, s, commandText);
 	layout.putConstraint(e, snapshotButton, -10, e, m);
 	layout.putConstraint(e, stopButton, -10, w, snapshotButton);
-	layout.putConstraint(n, frameButton, 10, s, commandText);
+	layout.putConstraint(e, debugDrawCB, -2, w, stopButton);
+	layout.putConstraint(w, nextDrawButton, 20, w, debugDrawCB);
+	layout.putConstraint(n, nextDrawButton, 0, s, debugDrawCB);
+	layout.putConstraint(n, frameButton, 20, s, commandText);
 	layout.putConstraint(s, m, 10, s, frameButton);
 	layout.putConstraint(w, commandLabel, 10, w, m);
 	layout.putConstraint(s, commandLabel, -3, s, commandText);
@@ -249,7 +276,8 @@ public class GrinViewScreen extends javax.swing.JFrame {
 		Spring.minus(Spring.sum(Spring.constant(8),
 		 Spring.sum(layout.getConstraints(snapshotButton).getWidth(),
 		  Spring.sum(layout.getConstraints(stopButton).getWidth(),
-		   layout.getConstraints(commandText).getX()))))));
+		   Spring.sum(layout.getConstraints(debugDrawCB).getWidth(),
+		    layout.getConstraints(commandText).getX())))))));
 	layout.getConstraints(commandText).setHeight(
 	    Spring.constant(commandText.getPreferredSize().height));
 	layout.putConstraint(w, fpsLabel, 10, w, m);
@@ -274,6 +302,18 @@ public class GrinViewScreen extends javax.swing.JFrame {
     private void frameButtonActionPerformed(java.awt.event.ActionEvent evt) {
 	main.advanceFrames(1);
 	commandText.setText("+");
+    }
+
+    private void debugDrawCBItemChanged(java.awt.event.ItemEvent evt) {
+	debugDraw = evt.getStateChange() == evt.SELECTED;
+	main.setDebugDraw(debugDraw);
+
+    }
+
+    private void nextDrawButtonActionPerformed(java.awt.event.ActionEvent evt){
+	forceNextDrawButtonVisible(false);
+	main.userWaitingDone();
+	setResultText("");
     }
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -380,6 +420,17 @@ public class GrinViewScreen extends javax.swing.JFrame {
     public void setFpsText(String s) {
 	fpsText.setText(s);
     }
+
+    void forceNextDrawButtonVisible(boolean visible) {
+	visible = visible || debugDraw;
+	nextDrawButton.setVisible(visible);
+	stopButton.setVisible(!visible);
+	snapshotButton.setVisible(!visible);
+	frameButton.setVisible(!visible);
+	commandText.setVisible(!visible);
+	fpsText.setVisible(!visible);
+    }
+
 
     public void setShowTree(javax.swing.tree.TreeNode tree) {
 	showTree.setModel(new javax.swing.tree.DefaultTreeModel(tree));
