@@ -231,7 +231,6 @@ public class MenuXlet implements Xlet, UserEventListener,
 
 	engine.checkDestroy();
 
-	engine.initNumTargets(show.getNumTargets());
 	AnimationClient[] clients = { show };
 	engine.initClients(clients);
 	Rectangle bounds = new Rectangle(0, 0, 1920, 1080);
