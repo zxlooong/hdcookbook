@@ -534,6 +534,7 @@ public class GrinBinaryWriter {
         dos.writeIntArray(translation.getXs());
         dos.writeIntArray(translation.getYs());
         dos.writeInt(translation.getRepeatFrame());
+        dos.writeBoolean(translation.getIsRelative());
         writeCommands(dos, translation.getEndCommands());        
 
         out.writeInt(baos.size());

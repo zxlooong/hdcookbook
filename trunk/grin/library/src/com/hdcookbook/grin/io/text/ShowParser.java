@@ -698,6 +698,7 @@ public class ShowParser {
 	String name = lexer.getString();
 	parseExpected("{");
 	Vector keyframes = new Vector();
+        boolean isRelative = false;
 	for (;;) {
 	    String tok = lexer.getString();
 	    if ("}".equals(tok)) {
@@ -712,7 +713,14 @@ public class ShowParser {
 	    int x = lexer.getInt();
 	    int y = lexer.getInt();
 	    keyframes.addElement(new int[] { frameNum, x, y } );
-	    parseExpected("linear");
+            String interpolation = lexer.getString();
+            if ("linear".equals(interpolation)) {
+                isRelative = false;
+            } else if ("linear-relative".equals(interpolation)) {
+                isRelative = true;
+            } else {
+                lexer.reportError("linear or linear-relative expected");
+            }
 	}
 	String tok = lexer.getString();
 	int repeatFrame = -1;
@@ -752,7 +760,8 @@ public class ShowParser {
 	    lexer.reportError("repeat > max frame");
 	}
 	final Translation trans 
-	    = new Translation(show, name, fs, xs, ys, repeatFrame, endCommands);
+	    = new Translation(show, name, fs, xs, ys, repeatFrame, 
+                              isRelative, endCommands);
 	builder.addFeature(name, line, trans);
     }
 

@@ -568,11 +568,12 @@ public class GrinBinaryReader {
         int[] xs = dis.readIntArray();
         int[] ys = dis.readIntArray();
         int repeatFrame = dis.readInt();
+        boolean isRelative = dis.readBoolean();
         Command[] endCommands = readCommands(dis);
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }       
-        return new Translation(show, name, frames, xs, ys, repeatFrame, endCommands);
+        return new Translation(show, name, frames, xs, ys, repeatFrame, isRelative, endCommands);
   
     }
 

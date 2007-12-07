@@ -90,16 +90,19 @@ public class Translation extends Feature {
     private int repeatIndex;	// Index when currFrame is repeatFrame-1
     private int currX;
     private int currY;
+    private boolean isRelative;
     private Command[] endCommands;
 
     public Translation(Show show, String name, int[] frames, int[] xs, int[] ys,
-    		       int repeatFrame, Command[] endCommands) 
+    		       int repeatFrame, boolean isRelative,
+                       Command[] endCommands) 
     {
 	super(show, name);
 	this.frames = frames;
 	this.xs = xs;
 	this.ys = ys;
 	this.repeatFrame = repeatFrame;
+        this.isRelative = isRelative;        
 	this.endCommands = endCommands;
 	repeatIndex = 0;
 	// This is tricky.  We must calculate the index such
@@ -128,6 +131,10 @@ public class Translation extends Feature {
     
     public int getRepeatFrame() {
         return repeatFrame;
+    }
+    
+    public boolean getIsRelative() {
+        return isRelative;
     }
     
     /**

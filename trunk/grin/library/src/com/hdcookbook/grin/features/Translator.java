@@ -80,8 +80,8 @@ public class Translator extends Feature {
     private Feature[] features;
     private boolean isActivated = false;
 
-    private int fx;		// Feature's start position
-    private int fy;
+    private int fx = 0;		// Feature's start position
+    private int fy = 0;
 
     private int dx;		// For this frame
     private int dy;
@@ -129,20 +129,21 @@ public class Translator extends Feature {
     public void setup(Translation translation, Feature[] features) {
 	this.translation = translation;
 	this.features = features;
-	fx = Integer.MAX_VALUE;
-	fy = Integer.MAX_VALUE;
-	for (int i = 0; i < features.length; i++) {
-	    int xi = features[i].getStartX();
-	    if (xi < fx) {
-		fx = xi;
-	    }
-	    int yi = features[i].getStartY();
-	    if (yi < fy) {
-		fy = yi;
-	    }
-	}
+        
+        fx = Integer.MAX_VALUE;
+        fy = Integer.MAX_VALUE;
+        for (int i = 0; i < features.length; i++) {
+            int xi = features[i].getStartX();
+            if (xi < fx) {
+                fx = xi;
+            }
+            int yi = features[i].getStartY();
+            if (yi < fy) {
+                fy = yi;
+            }
+        }
+        
     }
-
     /**
      * Get our child features
      **/
@@ -161,14 +162,23 @@ public class Translator extends Feature {
      * @inheritDoc
      **/
     public int getStartX() {
-	return translation.getTranslatorStartX();
+        if (translation.getIsRelative()) {
+            return fx;
+        } else { 
+	   return translation.getTranslatorStartX();
+        }   
     }
+
 
     /**
      * @inheritDoc
      **/
     public int getStartY() {
-	return translation.getTranslatorStartY();
+        if (translation.getIsRelative()) {
+            return fy;
+        } else { 
+	   return translation.getTranslatorStartY();
+        } 
     }
 
     /**
@@ -266,8 +276,12 @@ public class Translator extends Feature {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	dx = translation.getX() - fx;
-	dy = translation.getY() - fy;
+	dx = translation.getX();
+	dy = translation.getY();
+        if (!translation.getIsRelative()) {
+            dx -= fx;
+            dy -= fy;
+        }
 	childContext.parent = context;
 	for (int i = 0; i < features.length; i++) {
 	    features[i].addDisplayAreas(childContext);
