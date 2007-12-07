@@ -130,15 +130,19 @@ public class BDSigner {
     static final String APP_SUBJECT_ALT_NAME = "def@producer.com";
     static final String ROOT_ISSUER_ALT_NAME = "abc@studio.com";
     static final String ROOT_SUBJECT_ALT_NAME = "def@studio.com";
+    static final int APP_SERIAL_NUMBER = 1;
+    static final int ROOT_SERIAL_NUMBER = 2;
 
     static String[] jarfiles;
     static String orgId;
     String appCertDN =  "CN=Producer, OU=Codesigning Department, O=BDJCompany."+orgId+", C=US";
     String rootCertDN = "CN=Studio, OU=Codesigning Department, O=BDJCompany."+orgId+", C=US";
+
     
     private KeyStore store;
 
     static boolean debug = false;
+    
     
     public static void main(String[] args) {
 	    
@@ -173,8 +177,10 @@ public class BDSigner {
 	    new BDSigner();
     }
     
-    private BDSigner() {
+    private BDSigner(){
         
+            boolean failed = false;
+            
 	    cleanup();  // Get rid of any previous key aliases first.
 	     
 	    try {               
@@ -192,11 +198,16 @@ public class BDSigner {
                 
 	    } catch (Exception e) {
 	       e.printStackTrace();
+               failed = true;
 	    } finally {
 	       if (!debug ) { 
 	 	   cleanup();
                }    
 	    }
+            
+            if (failed) {
+                System.exit(1); // VM exit with an error code
+            }
     }
   
     private void initKeyStore() throws Exception {
@@ -278,7 +289,7 @@ public class BDSigner {
         
         boolean check = new CertificateVerifier().runTest(appCert, rootCert);
         if (!check) {
-            System.out.println("Problem with the certification generation");
+            throw new RuntimeException("Problem with the certification generation");
         }
     }
     private void cleanup() {
@@ -332,7 +343,12 @@ public class BDSigner {
         cg.reset();      
 
         X509Name name = new X509Name(issuer, new X509BDJEntryConverter());
-        cg.setSerialNumber(BigInteger.valueOf(1));
+        
+        if (isRootCert) {
+           cg.setSerialNumber(BigInteger.valueOf(ROOT_SERIAL_NUMBER));
+        } else {
+           cg.setSerialNumber(BigInteger.valueOf(APP_SERIAL_NUMBER));           
+        }
         cg.setIssuerDN(name);
         cg.setNotBefore(validFrom);
         cg.setNotAfter(validTo);

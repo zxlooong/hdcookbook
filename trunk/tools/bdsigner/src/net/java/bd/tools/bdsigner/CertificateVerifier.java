@@ -106,15 +106,15 @@ public class CertificateVerifier {
             return;
         }
         
-        File appCert = new File(args[0]);
-        File rootCert = new File(args[1]);
-        if (!appCert.exists() || !rootCert.exists()) {
-            System.out.println("File not found " + appCert.getAbsolutePath() + ", " + rootCert.getAbsolutePath());
+        File appCertFile = new File(args[0]);
+        File rootCertFile = new File(args[1]);
+        if (!appCertFile.exists() || !rootCertFile.exists()) {
+            System.out.println("File not found " + appCertFile.getAbsolutePath() + ", " + rootCertFile.getAbsolutePath());
             printUsage();
             return;
         }
         
-        new CertificateVerifier().runTest(appCert, rootCert);
+        new CertificateVerifier().runTest(appCertFile, rootCertFile);
     }
     
     private String errorString = null;
@@ -123,58 +123,65 @@ public class CertificateVerifier {
      * Check two certificate files according to the bd-j specification.
      * @return true if the check passes, false if either certificate check results in an error.
      */
-    public boolean runTest(File appCert, File rootCert) {
+    public boolean runTest(File appCertFile, File rootCertFile) {
      
         boolean failed = false;
         
         System.out.println("Starting the verfication");
         
-        System.out.println("Checking the application certiticate");
-        try {
-           doAPIChecks(appCert, false);
-           doParsingChecks(appCert);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }   
-        if (errorString != null){
-            System.out.println(errorString);
-            failed = true;
-        }    
-        
-        errorString = null;
-        System.out.println("Checking the root certificate");
+        X509Certificate appCert = null;
+        X509Certificate rootCert = null;
         
         try {
-           doAPIChecks(rootCert, true);
-           doParsingChecks(rootCert);
+            CertificateFactory factory = CertificateFactory.getInstance("X.509");
+            rootCert = (X509Certificate)factory.generateCertificate(new FileInputStream(rootCertFile));   
+            appCert = (X509Certificate)factory.generateCertificate(new FileInputStream(appCertFile));
         } catch (Exception e) {
-            e.printStackTrace();
-        }   
-        if (errorString != null){
-            System.out.println(errorString);           
+            System.out.println("Error in creating certificate from a file");
             failed = true;
-        }  
+        }
+        
+        if (!failed) {
+        
+            System.out.println("Checking the application certiticate");
+            try {
+                checkCert(appCert, false);
+                doParsingChecks(appCertFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (errorString != null){
+                System.out.println(errorString);
+                failed = true;
+            }
+            
+            errorString = null;
+            System.out.println("Checking the root certificate");
+            
+            try {
+                checkCert(rootCert, true);
+                doParsingChecks(rootCertFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // checking the serial number
+            if (appCert.getSerialNumber().equals(rootCert.getSerialNumber())) {
+                errorString += ("Two certificates have the same serial number");
+            }
+            
+            if (errorString != null){
+                System.out.println(errorString);
+                failed = true;
+            }
+        }
+        
         
         System.out.println("Done with the verification");
         
+        
         return !failed;
     }   
- 
-    // Check the cerficicate items that can be done through public APIs.      
-    private void doAPIChecks(File file, boolean isRootCertificate) throws Exception {
-        
-        CertificateFactory factory = CertificateFactory.getInstance("X.509");
-        Certificate cert = factory.generateCertificate(new FileInputStream(file));
-        
-        //System.out.println("Certificate " + cert);
-        
-        checkCert((X509Certificate)cert, isRootCertificate);
-        
-        if (errorString != null) {
-            System.out.println(cert);
-        }
-
-    }
     
     // Check for some DER encoding format by inspecting the bytearray level.
     private void doParsingChecks(File file) throws Exception {
