@@ -71,6 +71,7 @@ import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
@@ -123,7 +124,7 @@ public class HelloGrinWorld implements Xlet, AnimationContext {
                
                AssetFinder.setSearchPath(new String[]{""}, null);      
 	       GrinBinaryReader reader = new GrinBinaryReader(director, AssetFinder.getURL(grinScriptName).openStream());
-               show = reader.readShow();
+               show = reader.readShow(new ShowBuilder());
                
            } catch (IOException e) {
                e.printStackTrace();
@@ -132,7 +133,6 @@ public class HelloGrinWorld implements Xlet, AnimationContext {
            }
            
 	   animationEngine.checkDestroy();
-	   animationEngine.initNumTargets(show.getNumTargets());
 	   animationEngine.initClients(new AnimationClient[]{show});
 	   animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
 	   

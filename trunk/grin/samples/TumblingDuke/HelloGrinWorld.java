@@ -53,7 +53,9 @@
  */
 
 import com.hdcookbook.grin.ChapterManager;
-import com.hdcookbook.grin.reader.text.text.ShowParser;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.text.ShowParser;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -74,8 +76,7 @@ import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.util.AssetFinder;
-imcom.hdcookbook.grin.reader.texteader.text.ExtensionsBuilder;
-	
+
 /** 
  * An xlet example that displays GRIN script.
  */
@@ -124,7 +125,6 @@ public class HelloGrinWorld implements Xlet, AnimationContext {
 	   show = director.createShow();
 
 	   animationEngine.checkDestroy();
-	   animationEngine.initNumTargets(show.getNumTargets());
 	   animationEngine.initClients(new AnimationClient[]{show});
 	   animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
 	   
