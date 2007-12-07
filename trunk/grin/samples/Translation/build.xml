@@ -26,7 +26,7 @@
 	
 	<target name="jar" depends="compile, generate_binary_script" description="Creates a jar file">
 		<jar destfile="${builddir}/00000.jar">	     
-                   <fileset dir="${builddir}"/>	
+                   <fileset dir="${builddir}" excludes="*.jar"/>	
 		   <fileset dir="." includes="${script.name}.grin, bug.png"/>
 		</jar>
 	   

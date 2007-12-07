@@ -24,7 +24,7 @@
 	
 	<target name="jar" depends="compile" description="Creates a jar file">
 		<jar destfile="${builddir}/00000.jar">	     
-                   <fileset dir="${builddir}"/>	
+                   <fileset dir="${builddir}" excludes="*.jar"/>	
 		   <fileset dir="." includes="images/**, tumblingduke.txt"/>
 		</jar>
 	   
