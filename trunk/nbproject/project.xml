@@ -8,11 +8,6 @@
             <properties/>
             <folders>
                 <source-folder>
-                    <label>grin\src</label>
-                    <type>java</type>
-                    <location>grin/src</location>
-                </source-folder>
-                <source-folder>
                     <label>tools\bdjo\src</label>
                     <type>java</type>
                     <location>tools/bdjo/src</location>
@@ -21,6 +16,31 @@
                     <label>tools\bdsigner\src</label>
                     <type>java</type>
                     <location>tools/bdsigner/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>grin/library/src</label>
+                    <type>java</type>
+                    <location>grin/library/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>grin/xlets/bookmenu/src</label>
+                    <type>java</type>
+                    <location>grin/xlets/bookmenu/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>grin/xlets/gunbunny/src</label>
+                    <type>java</type>
+                    <location>grin/xlets/gunbunny/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>grin/jdktools/binaryconverter/src</label>
+                    <type>java</type>
+                    <location>grin/jdktools/binaryconverter/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>grin/jdktools/mosaic/src</label>
+                    <type>java</type>
+                    <location>grin/jdktools/mosaic/src</location>
                 </source-folder>
             </folders>
             <ide-actions>
@@ -38,16 +58,32 @@
             <view>
                 <items>
                     <source-folder style="packages">
-                        <label>grin\src</label>
-                        <location>grin/src</location>
-                    </source-folder>
-                    <source-folder style="packages">
                         <label>tools\bdjo\src</label>
                         <location>tools/bdjo/src</location>
                     </source-folder>
                     <source-folder style="packages">
                         <label>tools\bdsigner\src</label>
                         <location>tools/bdsigner/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/library/src</label>
+                        <location>grin/library/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/xlets/bookmenu/src</label>
+                        <location>grin/xlets/bookmenu/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/xlets/gunbunny/src</label>
+                        <location>grin/xlets/gunbunny/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/jdktools/binaryconverter/src</label>
+                        <location>grin/jdktools/binaryconverter/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/jdktools/mosaic/src</label>
+                        <location>grin/jdktools/mosaic/src</location>
                     </source-folder>
                     <source-file>
                         <location>build.xml</location>
@@ -63,17 +99,32 @@
         </general-data>
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
             <compilation-unit>
-                <package-root>grin/src</package-root>
-                <classpath mode="compile">../bd-j/references/bdj_stubs/classes/enhanced/classes.zip</classpath>
-                <source-level>1.4</source-level>
-            </compilation-unit>
-            <compilation-unit>
                 <package-root>tools/bdjo/src</package-root>
-                <source-level>1.4</source-level>
+                <source-level>1.5</source-level>
             </compilation-unit>
             <compilation-unit>
                 <package-root>tools/bdsigner/src</package-root>
-                <source-level>1.4</source-level>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>grin/library/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>grin/xlets/bookmenu/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>grin/xlets/gunbunny/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>grin/jdktools/binaryconverter/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>grin/jdktools/mosaic/src</package-root>
+                <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
     </configuration>
