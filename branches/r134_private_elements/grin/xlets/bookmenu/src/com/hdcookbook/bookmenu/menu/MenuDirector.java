@@ -70,8 +70,6 @@ import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
@@ -124,17 +122,9 @@ public class MenuDirector extends Director {
             String showName = "menu.grin";
 	    URL u = AssetFinder.getURL(showName);
             
-            // The four lines below are equivalent of the 4 lines of code against the text based ShowParser
-            // ====START-CODE====
-            // BufferedReader rdr = new BufferedReader(new InputStreamReader(u.openStream(), "UTF-8"));
-	    // ShowParser p = new ShowParser(rdr, showName, show);
-	    // p.parse();
-	    // rdr.close();
-            // ====END-CODE====
-            
             BufferedInputStream bis = new BufferedInputStream(u.openStream());
  	    GrinBinaryReader reader = new GrinBinaryReader(this, bis);
-            show = reader.readShow(new ShowBuilder());
+	    reader.readShow(show);
             bis.close();
             
 	} catch (IOException ex) {

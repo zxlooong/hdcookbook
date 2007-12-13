@@ -85,8 +85,8 @@ public class GrinView extends GenericMain {
     public GrinView() {
     }
 
-    private void buildControlGUI(GuiShowBuilder builder, String showName) {
-	screen = new GrinViewScreen(this, builder.getShowTree(showName));
+    private void buildControlGUI(String showName) {
+	screen = new GrinViewScreen(this, new ShowNode(show, showName));
 	screen.setNameText("GRIN show viewer:  " + showName);
 	screen.setResultText("Double-click in the tree to activate a segment.");
 
@@ -224,8 +224,8 @@ public class GrinView extends GenericMain {
     }
     
     int getLineNumber(Object o) {
-	GuiShowBuilder.Node node = (GuiShowBuilder.Node) o;
-	Object v = lineNumberMap.get(node.contents);
+	ShowNode node = (ShowNode) o;
+	Object v = lineNumberMap.get(node.getContents());
 	if (v == null) {
 	    return -1;
 	} else {
@@ -235,9 +235,9 @@ public class GrinView extends GenericMain {
 
     String getSegmentName(Object[] path) {
 	for (int i = path.length - 1; i >= 0; i--) {
-	    GuiShowBuilder.Node node = (GuiShowBuilder.Node) path[i];
-	    if (node.contents instanceof Segment) {
-		return ((Segment) node.contents).getName();
+	    ShowNode node = (ShowNode) path[i];
+	    if (node.getContents() instanceof Segment) {
+		return ((Segment) node.getContents()).getName();
 	    }
 	}
 	return null;
@@ -398,7 +398,7 @@ public class GrinView extends GenericMain {
 	GuiShowBuilder builder = new GuiShowBuilder(m);
         m.init(showFile, builder);
 
-	m.buildControlGUI(builder, showFile);
+	m.buildControlGUI(showFile);
 	if (fps != null) {
 	    m.doKeyboardCommand("f " + fps); // set fps	 
 	}

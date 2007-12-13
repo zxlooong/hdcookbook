@@ -53,78 +53,113 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.build.mosaic;
+package com.hdcookbook.grin;
 
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.ChapterManager;
-import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.commands.ActivateSegmentCommand;
-import com.hdcookbook.grin.commands.ActivatePartCommand;
-import com.hdcookbook.grin.commands.SegmentDoneCommand;
-import com.hdcookbook.grin.features.Assembly;
-import com.hdcookbook.grin.features.FixedImage;
-import com.hdcookbook.grin.features.Group;
-import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Timer;
-import com.hdcookbook.grin.features.Translation;
-import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.input.RCKeyEvent;
-import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.util.Debug;
-import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.input.RCKeyEvent;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.io.IOException;
-import java.io.File;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 
 /**
- * This is a helper class that hooks us into the GRIN parser.
+ * Represents a show, with extra data that's useful for tools that run
+ * on SE (big JDK), including a record of things like the names of private
+ * features, and a list of all of the features and segments.
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
+public class SEShow extends Show {
 
- public class MosaicShowBuilder extends ShowBuilder {
+    private Map<String, Segment> privateSegments = null;
+    private Object internalMonitor = new Object();
 
-    private MosaicMaker maker;
-
-    public MosaicShowBuilder(MosaicMaker maker) {
-	this.maker = maker;
+    /**
+     * Create a new SEShow.
+     *
+     * @param director	A Director helper class that can be used to
+     *			control the show.
+     **/
+    public SEShow(Director director) {
+	super(director);
     }
 
-    public void addFeature(String name, int line, Feature f) throws IOException
-    {
-	super.addFeature(name, line, f);
+    /**
+     * Get all of the segments in the show
+     **/
+    public Segment[] getSegments() {
+	return segments;
     }
 
-    public void addSegment(String name, int line, Segment s) throws IOException
-    {
-	super.addSegment(name, line, s);
+    /**
+     * Get all of the features in the show
+     **/
+    public Feature[] getFeatures() {
+	return features;
     }
 
-    public void addCommand(Command command, int line) {
-	super.addCommand(command, line);
+    /**
+     * Get all of the remote control handlers in the show
+     **/
+    public RCHandler[] getRCHandlers() {
+	return rcHandlers;
     }
 
-    public void addRCHandler(String name, int line, RCHandler hand)
-    			throws IOException
-    {
-	super.addRCHandler(name, line, hand);
+    /**
+     * Look up a private segment.  This only works if the show had
+     * names for the private segments, of course, but for debugging
+     * reasons we expect even binary files will do this.
+     **/
+    public Segment getPrivateSegment(String name) {
+	synchronized(internalMonitor) {
+	    if (privateSegments == null) {
+		privateSegments = new HashMap<String, Segment>();
+		for (int i = 0; i < segments.length; i++) {
+		    if (segments[i].getName() != null) {
+			privateSegments.put(segments[i].getName(), segments[i]);
+		    }
+		}
+	    }
+	    return privateSegments.get(name);
+	}
     }
 
-    public void finishBuilding() throws IOException {
-	super.finishBuilding();
+    /**
+     * Determine if the given Segment is public
+     **/
+    public boolean isPublic(Segment seg) {
+	if (seg.getName() == null) {
+	    return false;
+	} else {
+	    return publicSegments.get(seg.getName()) != null;
+	}
     }
 
- }
+
+    /**
+     * Determine if the given Feature is public
+     **/
+    public boolean isPublic(Feature f) {
+	if (f.getName() == null) {
+	    return false;
+	} else {
+	    return publicFeatures.get(f.getName()) != null;
+	}
+    }
+
+
+    /**
+     * Determine if the given RCHandler is public
+     **/
+    public boolean isPublic(RCHandler hand) {
+	if (hand.getName() == null) {
+	    return false;
+	} else {
+	    return publicRCHandlers.get(hand.getName()) != null;
+	}
+    }
+
+}

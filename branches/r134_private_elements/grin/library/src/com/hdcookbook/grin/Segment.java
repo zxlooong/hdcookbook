@@ -115,6 +115,13 @@ public class Segment {
 	return "Segment(" + name + ")";
     }
 
+    /**
+     * Get the name of this segment.  Public segments all have names.
+     * Private segments may have names -- as of this writing, the binary
+     * writer always wrote out all segment names, because this doesn't
+     * cost much and it's so useful for debugging.  However, it would be
+     * valid to have a null name.
+     **/
     public String getName() {
 	return name;
     }

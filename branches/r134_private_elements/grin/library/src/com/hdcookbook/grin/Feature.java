@@ -87,7 +87,10 @@ public abstract class Feature implements SetupClient {
     }
 
     /**
-     * @return the name of this feature
+     * All public features have a name.  Private features might or might
+     * not have a name; if they do, it's just for debugging.
+     *
+     * @return the name of this feature, or null if it is not known.
      **/
     public String getName() {
 	return name;

@@ -25,6 +25,7 @@ information or have any questions.
 
 <project name="Generates GRIN javadoc" basedir="../.." default="generate-grin-javadoc">
 
+<property file="${os.name}.user.vars.properties"/>
 <property file="user.vars.properties"/>	
 <property file="vars.properties"/>	
 
@@ -38,6 +39,7 @@ information or have any questions.
 	  packagenames="com.hdcookbook.grin.*"
 	  destdir="${GRIN_JAVADOC_DEST}">
 		  <sourcepath location="library/src"/>
+		  <sourcepath location="jdktools/library/src" />
 		  <sourcepath location="jdktools/binaryconverter/src"/>           
 		  <sourcepath location="jdktools/grinviewer/src"/>
 	</javadoc>	       

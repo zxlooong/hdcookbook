@@ -128,7 +128,16 @@ class GrinDataOutputStream extends DataOutputStream {
                writeInt(array[i]);
            }    
        }
-   }   
+   }
+
+    public void writeString(String string) throws IOException {
+	if (string == null)  {
+	    writeByte(Constants.NULL);
+	} else {
+	    writeByte(Constants.NON_NULL);
+	    writeUTF(string);
+	}
+    }
    
    public void writeStringArray(String[] array) throws IOException {
        if (array == null) {

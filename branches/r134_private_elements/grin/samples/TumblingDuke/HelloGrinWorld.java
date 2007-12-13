@@ -54,7 +54,6 @@
 
 import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.text.ShowParser;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;

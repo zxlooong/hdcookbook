@@ -197,7 +197,9 @@ public interface AnimationClient {
 
     /**
      * Map draw target names into the numeric values that are required by the
-     * animation engine.
+     * animation engine.  This is called during initialization.  By calling
+     * this on all AnimationClient instances, clients can share draw targets
+     * by giving them the same name.
      *
      * @param targets	A hashtable mapping String names to Integer values
      *

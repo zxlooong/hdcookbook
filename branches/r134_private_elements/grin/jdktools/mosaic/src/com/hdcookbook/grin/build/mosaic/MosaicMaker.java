@@ -55,6 +55,7 @@
 
 package com.hdcookbook.grin.build.mosaic;
 
+import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.ChapterManager;
@@ -63,6 +64,7 @@ import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.AssetFinder;
@@ -110,7 +112,7 @@ import javax.imageio.ImageIO;
     private String[] shows;
     private File outputDir;
     private String[] assetPath;
-    private Show[] showTrees;
+    private SEShow[] showTrees;
 
     private ArrayList images = new ArrayList();
     private LinkedList mosaics = new LinkedList();
@@ -134,13 +136,13 @@ import javax.imageio.ImageIO;
     }
 
     public void init() throws IOException {
-	MosaicShowBuilder builder = new MosaicShowBuilder(this);
+	ShowBuilder builder = new ShowBuilder();
 	File [] fPath = new File[assetPath.length];
 	for (int i = 0; i < fPath.length; i++) {
 	    fPath[i] = new File(assetPath[i]);
 	}
 	AssetFinder.setSearchPath(null, fPath);
-	showTrees = new Show[shows.length];
+	showTrees = new SEShow[shows.length];
         for (int i = 0; i < shows.length; i++) {
             Director director = new Director() {
                 public ExtensionsBuilder getExtensionsBuilder() {
@@ -166,7 +168,7 @@ import javax.imageio.ImageIO;
 		    }
 		}
             };
-            showTrees[i] = new Show(director);
+            showTrees[i] = new SEShow(director);
             URL source = AssetFinder.getURL(shows[i]);
 	    if (source == null) {
 		throw new IOException("Can't find resource " + shows[i]);
@@ -288,20 +290,20 @@ import javax.imageio.ImageIO;
      **/
     public void makeMosaics() throws IOException {
 	for (int i = 0; i < showTrees.length; i++) {
-	    Show show = showTrees[i];
+	    SEShow show = showTrees[i];
 	    show.initialize(this);
-	    Enumeration features = show.getFeatures();
-	    while (features.hasMoreElements()) {
-		Feature f = (Feature) features.nextElement();
+	    Feature[] features = show.getFeatures();
+	    for (int j = 0; j < features.length; j++) {
+		Feature f = features[j];
 		if (f instanceof FixedImage) {
 		    FixedImage fi = (FixedImage) f;
 		    addImage(fi.getImage());
 		} else if (f instanceof ImageSequence) {
 		    ImageSequence is = (ImageSequence) f;
 		    ManagedImage[] ims = is.getImages();
-		    for (int j = 0; j < ims.length; j++) {
-			if (ims[j] != null) {
-			    addImage(ims[j]);
+		    for (int k = 0; k < ims.length; k++) {
+			if (ims[k] != null) {
+			    addImage(ims[k]);
 			}
 		    }
 		}

@@ -62,6 +62,7 @@ import java.io.InputStreamReader;
 
 import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.text.ShowParser;
@@ -117,8 +118,8 @@ class GenericDirector extends Director {
      * Create a show.  This is called by the main control class of
      * this debug tool.
      **/
-    public Show createShow(ShowBuilder builder) {
-	Show show = new Show(this);
+    public SEShow createShow(ShowBuilder builder) {
+	SEShow show = new SEShow(this);
 	URL source = null;
 	BufferedReader rdr = null;
 	try {

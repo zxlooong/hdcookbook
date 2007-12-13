@@ -180,6 +180,8 @@ public class ShowParser {
 	    lexer.reportError("\"show\" expected");
 	}
 	show.setDrawTargets(new String[] { "T:Default" });	// default value
+
+	    // Parse the settings
 	for (;;) {
 	    tok = lexer.getString();
 	    int lineStart = lexer.getLineNumber();
@@ -195,6 +197,21 @@ public class ShowParser {
 		lexer.reportError("Unrecognized setting \"" + tok + "\".");
 	    }
 	}
+
+	    // Parse the exports clause
+	if ("exports".equals(tok)) {
+	    parseExpected("segments");
+	    String[] publicSegments = parseStrings();
+	    parseExpected("features");
+	    String[] publicFeatures = parseStrings();
+	    parseExpected("handlers");
+	    String[] publicHandlers = parseStrings();
+	    parseExpected(";");
+	    builder.setExported(publicSegments, publicFeatures, publicHandlers);
+	    tok = lexer.getString();
+	}
+
+	    // Parse the show body
 	for (;;) {
 		// Current token is in tok
 	    int lineStart = lexer.getLineNumber();
@@ -441,7 +458,7 @@ public class ShowParser {
 	    final String lt = linkedTo;
 	    ForwardReference fw = new ForwardReference(lexer) {
 		void resolve() throws IOException {
-		    Feature ltf = show.getFeature(lt);
+		    Feature ltf = builder.getNamedFeature(lt);
 		    if (ltf == null || !(ltf instanceof ImageSequence)) {
 			    lexer.reportError("In image_sequence " + name + 
 				      " can't find image_sequence linked_to " 
@@ -774,7 +791,7 @@ public class ShowParser {
 	builder.addFeature(name, line, trans);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
-		Feature t  = show.getFeature(translationName);
+		Feature t  = builder.getNamedFeature(translationName);
 		if (t == null || !(t instanceof Translation)) {
 		    lexer.reportError("Translation \"" + translationName 
 		    			+ "\" not found");
@@ -1323,7 +1340,7 @@ public class ShowParser {
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
 		if (!pop) {
-		    Segment s = show.getSegment(name);
+		    Segment s = builder.getNamedSegment(name);
 		    if (s == null) {
 			reportError("Segment \"" + name + " not found");
 		    } else {
@@ -1389,7 +1406,7 @@ public class ShowParser {
 	final SetVisualRCStateCommand cmd = new SetVisualRCStateCommand();
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
-		RCHandler h = show.getRCHandler(handlerName);
+		RCHandler h = builder.getNamedRCHandler(handlerName);
 		if (h == null || !(h instanceof VisualRCHandler)) {
 		    reportError("Handler not found or wrong type ");
 		}
@@ -1431,7 +1448,7 @@ public class ShowParser {
 	final boolean activateF = activate;
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
-		RCHandler h = show.getRCHandler(handlerName);
+		RCHandler h = builder.getNamedRCHandler(handlerName);
 		if (h == null || !(h instanceof VisualRCHandler)) {
 		    reportError("Handler not found or wrong type ");
 		}
@@ -1477,7 +1494,7 @@ public class ShowParser {
     }
 
     private Feature makeFeature(String name) throws IOException {
-	Feature result = show.getFeature(name);
+	Feature result = builder.getNamedFeature(name);
 	if (result == null) {
 	    lexer.reportError("Feature \"" + name + "\" not found");
 	}
@@ -1488,7 +1505,7 @@ public class ShowParser {
     private RCHandler[] makeRCHandlerList(String[] names) throws IOException {
 	RCHandler[] result = new RCHandler[names.length];
 	for (int i = 0; i < names.length; i++) {
-	    result[i] = show.getRCHandler(names[i]);
+	    result[i] = builder.getNamedRCHandler(names[i]);
 	    if (result[i] == null) {
 		lexer.reportError("RC handler \"" + names[i] + "\" not found");
 	    }
@@ -1539,7 +1556,7 @@ public class ShowParser {
     }
 
     private Feature lookupFeatureOrFail(String name) throws IOException {
-	Feature f = show.getFeature(name);
+	Feature f = builder.getNamedFeature(name);
 	if (f == null) {
 	    lexer.reportError("Feature " + name + " not found,");
 	}
@@ -1655,7 +1672,4 @@ public class ShowParser {
 	   		     + "\" seen");
 	}
     }
-
-
-
 }

@@ -72,6 +72,35 @@ setting draw_targets {
 	T:MovingMenu
 } ;
 
+exports 
+    segments {
+	S:Bio.Available
+	S:Bio.NotAvailable
+	S:BookmarkSnap
+	S:Loading
+	S:Initialize
+	S:StartBonusVideo
+    } features {
+	F:Bio.Bunny
+	F:BookmarksMenu.DeleteHelpMessage.State
+	F:BookmarksMenu.Scenes.State
+	F:BookmarksMenu.1.State
+	F:BookmarksMenu.2.State
+	F:BookmarksMenu.3.State
+	F:BookmarksMenu.4.State
+	F:BookmarksMenu.5.State
+	F:BookmarksMenu.NumBookmarks.Assembly
+	F:BookmarksMenu.1.Text
+	F:BookmarksMenu.2.Text
+	F:BookmarksMenu.3.Text
+	F:BookmarksMenu.4.Text
+	F:BookmarksMenu.5.Text
+	F:UserInput.Message
+    } handlers {
+	H:BookmarksMenu
+    }
+;
+
 # ==========
 #  Features
 # ==========

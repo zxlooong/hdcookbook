@@ -86,6 +86,7 @@ import javax.swing.JFileChooser;
 import javax.imageio.ImageIO;
 
 import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.ChapterManager;
@@ -116,7 +117,7 @@ public class GenericMain extends Frame implements AnimationContext {
     static int BUF_WIDTH = 1920;
     static int BUF_HEIGHT = 1080;
 
-    protected Show show;
+    protected SEShow show;
     private GenericDirector director;
     
     private Graphics2D frameGraphics;
@@ -418,11 +419,20 @@ public class GenericMain extends Frame implements AnimationContext {
 
     protected String gotoSegment(String name) {
 	Segment seg = show.getSegment(name);
-	if (seg == null) {
+	String msg = null;
+	if (seg != null) {
+	    msg = "Activating public segment " + seg;
+	} else {
+	    seg = show.getPrivateSegment(name);
+	    if (seg != null) {
+		msg = "Activating private segment " + seg;
+	    }
+	}
+	if (msg == null) {
 	    return "No segment called \"" + name + "\".";
 	} else {
 	    show.activateSegment(seg);
-	    return "Activating segment " + seg;
+	    return msg;
 	}
     }
     
