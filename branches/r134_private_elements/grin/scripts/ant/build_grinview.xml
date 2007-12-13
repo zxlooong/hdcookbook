@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<!--
+Copyright  1990-2006 Sun Microsystems, Inc. All Rights Reserved.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version
+2 only, as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License version 2 for more details (a copy is
+included at /legal/license.txt).
+
+You should have received a copy of the GNU General Public License
+version 2 along with this work; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+02110-1301 USA
+
+Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
+Clara, CA 95054 or visit www.sun.com if you need additional
+information or have any questions.
+-->
+
+<project name="Build and run the GRIN script viewer for Java SE" basedir="../.." default="compile-grin-viewer">
+
+<property file="user.vars.properties"/>	
+<property file="vars.properties"/>	
+
+<property name="HDC_BUILD_DIR" value="build"/>
+<property name="GRIN_VIEWER_DEST" value="${HDC_BUILD_DIR}/grin_viewer"/>
+
+<target name="compile-grin-viewer">
+	<mkdir dir="${GRIN_VIEWER_DEST}/classes"/>
+	<javac sourcepath=""
+	       destdir="${GRIN_VIEWER_DEST}/classes"
+	        source="1.5" target="1.5"
+	       debug="on" deprecation="off">
+	    <src path="library/src" />
+	    <src path="jdktools/grinviewer/src" />
+	    <include name="com/hdcookbook/grin/*.java"/>
+	    <include name="com/hdcookbook/grin/animator/*.java"/>
+	    <include name="com/hdcookbook/grin/commands/*.java"/>
+	    <include name="com/hdcookbook/grin/features/*.java"/>
+	    <include name="com/hdcookbook/grin/input/*.java"/>
+	    <include name="com/hdcookbook/grin/io/*.java"/>
+	    <include name="com/hdcookbook/grin/io/binary/*.java"/>
+	    <include name="com/hdcookbook/grin/io/text/*.java"/>
+	    <include name="com/hdcookbook/grin/util/*.java"/>
+	    <include name="com/hdcookbook/grin/test/*.java"/>
+	    <include name="com/hdcookbook/grin/test/bigjdk/*.java"/>
+	</javac>
+	
+        <jar jarfile="${GRIN_VIEWER_DEST}/grinviewer.jar" basedir="${GRIN_VIEWER_DEST}/classes">
+		  <manifest>
+			  <attribute name="Main-Class" value="com.hdcookbook.grin.test.bigjdk.GrinView"/>
+		  </manifest>
+        </jar>
+
+</target>
+
+<target name="compile-binary-converter" depends="compile-grin-viewer">
+	<javac sourcepath=""
+	destdir="${GRIN_VIEWER_DEST}/classes"
+	source="1.5" target="1.5"
+	debug="on" deprecation="off">
+	        <src path="library/src" />
+		<src path="jdktools/binaryconverter/src" />
+		<include name="com/hdcookbook/grin/io/**/*.java"/>
+	</javac> 
+        
+	<jar jarfile="${GRIN_VIEWER_DEST}/converter.jar" basedir="${GRIN_VIEWER_DEST}/classes">
+		  <manifest>
+			  <attribute name="Main-Class" value="com.hdcookbook.grin.io.binary.BinaryConverter"/>
+		  </manifest>
+        </jar>
+</target>
+
+<target name="run-binary-converter" depends="compile-binary-converter">
+    <copy todir="${GRIN_VIEWER_DEST}">
+        <fileset file = "jdktools/grinviewer/src/com/hdcookbook/grin/test/assets/ryan_show.txt"/>
+        <fileset file = "xlets/bookmenu/src/com/hdcookbook/bookmenu/assets/menu.txt"/>
+    </copy>
+    <java fork="true" jar="${GRIN_VIEWER_DEST}/converter.jar">
+        <arg line="${GRIN_VIEWER_DEST}/menu.txt"/>
+    </java>    
+
+</target>
+
+	
+<target name="debug-binary-converter" depends="compile-binary-converter">
+                <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
+			<classpath path="${GRIN_VIEWER_DEST}/converter.jar"/>
+		</nbjpdastart>	
+        <java fork="true" jar="${GRIN_VIEWER_DEST}/converter.jar">
+			<jvmarg value="-Xdebug"/>
+			<jvmarg value="-Xnoagent"/>
+			<jvmarg value="-Djava.compiler=none"/>
+			<jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+		</java>	
+</target>
+
+<target name="run-grin-viewer" depends="compile-grin-viewer, run-binary-converter">
+	<copy todir="${GRIN_VIEWER_DEST}">
+		<fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/assets">	
+			<exclude name="**/.svn"/>
+		</fileset>   
+	</copy>    
+	
+        <java fork="true" jar="${GRIN_VIEWER_DEST}/grinviewer.jar">
+		<arg line="-asset_dir ${GRIN_VIEWER_DEST} menu.grin"/>
+	</java>
+</target>
+
+<target name="debug-grin-viewer" depends="compile-grin-viewer, run-binary-converter">
+                <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
+			<classpath path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+		</nbjpdastart>	
+        <java fork="true" jar="${GRIN_VIEWER_DEST}/grinviewer.jar">
+			<jvmarg value="-Xdebug"/>
+			<jvmarg value="-Xnoagent"/>
+			<jvmarg value="-Djava.compiler=none"/>
+			<jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+
+		<arg line="-asset_dir ${GRIN_VIEWER_DEST} menu.grin"/>                        
+		</java>	
+</target>
+
+<target name="clean">
+       <delete dir="${GRIN_VIEWER_DEST}"/>
+</target>
+
+</project>

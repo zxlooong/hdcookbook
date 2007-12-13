@@ -1,0 +1,17 @@
+#! /bin/sh
+
+# resolve links - $0 could be a link 
+PRG="$0"
+progname=`basename "$0"`
+BDSIGNER_HOME=`dirname "$PRG"`/..
+BDSIGNER_HOME=`cd "$BDSIGNER_HOME" && pwd`
+
+if [ -f "${BDSIGNER_HOME}/build/bdsigner.jar" ] ; then
+    if [ "${JAVA_HOME}" != "" ]; then
+       ${JAVA_HOME}/bin/java -cp ${BDSIGNER_HOME}/build/bdsigner.jar:${JAVA_HOME}/lib/tools.jar:${BDSIGNER_HOME}/resource/bcprov-jdk15-137.jar sun.security.tools.JarSigner $*
+    else
+       echo "Please set JAVA_HOME before running this script"
+    fi
+else
+    echo "Please set BDSIGNER_HOME before running this script"
+fi
