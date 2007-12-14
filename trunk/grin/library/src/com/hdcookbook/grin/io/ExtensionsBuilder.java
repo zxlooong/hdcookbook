@@ -58,7 +58,6 @@ package com.hdcookbook.grin.io;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.io.text.Lexer;
 import com.hdcookbook.grin.Show;
 
 import java.io.IOException;

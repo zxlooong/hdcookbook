@@ -69,6 +69,15 @@ import java.io.IOException;
 import java.awt.Font;
 import java.awt.Color;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Hashtable;
+
 /**
  * A helper class for parsing a show.  Clients of the parser can
  * subclass this to intercept items as there's encountered.
@@ -78,6 +87,19 @@ import java.awt.Color;
 public class ShowBuilder {
    
     protected Show show;
+
+    private Map<String, Segment> namedSegments = new HashMap<String, Segment>();
+    private Map<String, Feature> namedFeatures = new HashMap<String, Feature>();
+    private Map<String, RCHandler> namedRCHandlers 
+    		= new HashMap<String, RCHandler>();
+
+    private List<Segment> allSegments = new ArrayList<Segment>();
+    private List<Feature> allFeatures = new ArrayList<Feature>();
+    private List<RCHandler> allRCHandlers = new ArrayList<RCHandler>();
+
+    private List<String> exportedSegments = null;
+    private List<String> exportedFeatures = null;
+    private List<String> exportedRCHandlers = null;
 
     public ShowBuilder() {
     }
@@ -91,7 +113,14 @@ public class ShowBuilder {
      **/
     public void addFeature(String name, int line, Feature f) throws IOException
     {
-	show.addFeature(name, f);
+	if (name != null) {
+	    if (namedFeatures.get(name) != null) {
+		throw new IOException("Feature named \"" + name
+				       + "\" already exists.");
+	    }
+	    namedFeatures.put(name, f);
+	}
+	allFeatures.add(f);
     }
 
     /**
@@ -99,7 +128,14 @@ public class ShowBuilder {
      **/
     public void addSegment(String name, int line, Segment s) throws IOException
     {
-	show.addSegment(name, s);
+	if (name != null) {
+	    if (namedSegments.get(name) != null) {
+		throw new IOException("Segment named \"" + name
+				       + "\" already exists.");
+	    }
+	    namedSegments.put(name, s);
+	}
+	allSegments.add(s);
     }
 
     /**
@@ -116,7 +152,52 @@ public class ShowBuilder {
     public void addRCHandler(String name, int line, RCHandler hand) 
 			throws IOException
     {
-	show.addRCHandler(name, hand);
+	if (name != null) {
+	    if (namedRCHandlers.get(name) != null) {
+		throw new IOException("RC Handler named \"" + name
+				       + "\" already exists.");
+	    }
+	    namedRCHandlers.put(name, hand);
+	}
+	allRCHandlers.add(hand);
+    }
+
+    /**
+     * Called when the exported clause is encountered.  This is optional;
+     * if it's not called, then everything defaults to public visibility.
+     **/
+    public void setExported(String[] segments, String[] features, 
+    			    String[] handlers) 
+		throws IOException
+    {
+	if (exportedSegments != null) {
+	    throw new IOException("Multiple exported clauses");
+	}
+
+	exportedSegments = Arrays.asList(segments);
+	exportedFeatures = Arrays.asList(features);
+	exportedRCHandlers = Arrays.asList(handlers);
+    }
+
+    /** 
+     * Look up a segment in the list of all named segments.
+     **/
+    public Segment getNamedSegment(String name) {
+	return namedSegments.get(name);
+    }
+
+    /** 
+     * Look up a feature in the list of all named features.
+     **/
+    public Feature getNamedFeature(String name) {
+	return namedFeatures.get(name);
+    }
+
+    /** 
+     * Look up an RC handler in the list of all named handlers.
+     **/
+    public RCHandler getNamedRCHandler(String name) {
+	return namedRCHandlers.get(name);
     }
 
     /**
@@ -124,6 +205,39 @@ public class ShowBuilder {
      * have been resolved.
      **/
     public void finishBuilding() throws IOException {
+	Segment[] segments 
+	    = allSegments.toArray(new Segment[allSegments.size()]);
+	Feature[] features
+	    = allFeatures.toArray(new Feature[allFeatures.size()]);
+	RCHandler[] rcHandlers
+	    = allRCHandlers.toArray(new RCHandler[allRCHandlers.size()]);
+	Hashtable publicSegments 
+		= findPublic(namedSegments, exportedSegments, "Segment");
+	Hashtable publicFeatures 
+		= findPublic(namedFeatures, exportedFeatures, "Feature");
+	Hashtable publicRCHandlers 
+		= findPublic(namedRCHandlers, exportedRCHandlers, "RC Handler");
+	show.buildShow(segments, features, rcHandlers,
+		       publicSegments, publicFeatures, publicRCHandlers);
     }
-    
+
+    private Hashtable findPublic(Map namedThings, List exportedThings,
+    				 String thingName) 
+		throws IOException 
+    {
+	Hashtable result = new Hashtable();
+	if (exportedThings == null) {
+	    result.putAll(namedThings);
+	} else {
+	    for (Object key : exportedThings) {
+		Object value = namedThings.get(key);
+		if (value == null) {
+		    throw new IOException(thingName + " " + key + 
+		    			" was exported but does not exist");
+		}
+		result.put(key, value);
+	    }
+	}
+	return result;
+    }
 }

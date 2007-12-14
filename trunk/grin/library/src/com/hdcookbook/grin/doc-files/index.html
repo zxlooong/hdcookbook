@@ -130,7 +130,8 @@ A show can be assembled from a simple show file that's parsed when
 a Show is created.  Here's BNF describing the syntax of a show file:
 </p>
 <pre>
-    show ::= "show" setting* (segment | feature | rc_handler | | mosaic_hint)* 
+    show ::= "show" setting*  [ exports ] 
+    	     (segment | feature | rc_handler | | mosaic_hint)* 
     	     "end_show"
 
     setting ::= "setting" ( segment_stack_depth_setting | draw_targets_setting) 
@@ -140,6 +141,11 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     draw_targets_setting ::= "draw_targets" "{" string* "}"
     	# If this isn't set, it defaults to { T:Default }
+
+    exports ::= "exports" "segments" name_list
+    			"features" name_list
+			"handlers" name_list ";"
+	# If this isn't set, then everything is public
 
     segment ::= "segment" name ["active" feature_list] ["setup" feature_list]
     			["chapter" name] ["rc_handlers" name_list]

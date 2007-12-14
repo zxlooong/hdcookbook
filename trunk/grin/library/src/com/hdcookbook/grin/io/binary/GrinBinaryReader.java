@@ -61,6 +61,7 @@ import java.io.InputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Feature;
@@ -89,7 +90,6 @@ import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
-import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.util.Debug;
 
 /**
@@ -170,6 +170,9 @@ public class GrinBinaryReader {
     private Feature[] features;
     private RCHandler[] rcHandlers;
     private Segment[] segments;
+    private Hashtable publicSegments = new Hashtable();
+    private Hashtable publicFeatures= new Hashtable();
+    private Hashtable publicRCHandlers = new Hashtable();
     private String filename;
     private InputStream stream;
     
@@ -178,7 +181,7 @@ public class GrinBinaryReader {
     /**
      * Constructs a GrinBinaryReader instance.
      *
-     * @param director A Director for the show instance this Reader will create.
+     * @param director A Director used to interpret GRIN extensions
      * @param stream    An InputStream to the grin binary format data.  It is recommended to be
      *                  an instance of BufferedInputStream for a performance improvement.
      */
@@ -208,15 +211,15 @@ public class GrinBinaryReader {
     }
     
     /**
-     * Reconstructes the Show object that this GrinBinaryReader is associated with.
+     * Reconstructs the Show object passed in as argument
      *
-     * @return Show a show object that has been reconstructed.
+     * @param show	An empty Show object
      * @throws IOException if binary data parsing fails.
      */
     
-    public Show readShow(ShowBuilder builder) throws IOException {
+    public void readShow(Show show) throws IOException {
 
-        this.show = new Show(director);
+        this.show = show;
         
         GrinDataInputStream in = new GrinDataInputStream(stream);       
         checkScriptHeader(in);
@@ -235,6 +238,7 @@ public class GrinBinaryReader {
         readFeatures(in);
         readRCHandlers(in);
         readSegments(in);      
+	readPublicElements(in);
         
         // Resolve forward references 
         for (int i = 0; i < deferred.size(); i++) {
@@ -242,25 +246,9 @@ public class GrinBinaryReader {
             setup.setup();
         }
         deferred.clear(); 
-        
-        builder.init(show);
-        
-        // Recreate an show object based on what's been read
-        for (int i = 0; i < features.length; i++) {
-            builder.addFeature(features[i].getName(), 0, features[i]);
-        }
-        
-        for (int i = 0; i < segments.length; i++) {
-            builder.addSegment(segments[i].getName(),  0, segments[i]);
-        }
-        
-        for (int i = 0; i < rcHandlers.length; i++) {
-            builder.addRCHandler(rcHandlers[i].getName(), 0, rcHandlers[i]); 
-        }
-        
-        builder.finishBuilding();
-        
-        return show;
+       
+	show.buildShow(segments, features, rcHandlers, 
+		       publicSegments, publicFeatures, publicRCHandlers);
     }
     
     private void readFeatures(GrinDataInputStream in) 
@@ -373,7 +361,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
                
-        String name = dis.readUTF();
+        String name = dis.readString();
         String[] partNames = dis.readStringArray();
         Feature[] parts = readFeaturesIndex(dis);
         if (Debug.ASSERT) {
@@ -391,7 +379,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }       
-        String name = dis.readUTF();
+        String name = dis.readString();
         Rectangle placement = dis.readRectangle();
         int outlineWidth = dis.readInt();
         Color outline = dis.readColor();
@@ -408,7 +396,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
-        String name = dis.readUTF();
+        String name = dis.readString();
         Rectangle clipRegion = dis.readRectangle();
         Feature part = features[dis.readInt()];
         if (Debug.ASSERT) {
@@ -427,7 +415,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
         
-        String name = dis.readUTF();
+        String name = dis.readString();
         boolean srcOver = dis.readBoolean();
         int[] keyframes = dis.readIntArray();
         int[] keyAlphas = dis.readIntArray();
@@ -451,7 +439,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
        
-        String name = dis.readUTF();
+        String name = dis.readString();
         int startX = dis.readInt();
         int startY = dis.readInt();
         String filename = dis.readUTF();
@@ -467,7 +455,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
-        String name = dis.readUTF();
+        String name = dis.readString();
         Feature[] parts = readFeaturesIndex(dis);
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
@@ -485,7 +473,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
-        String name = dis.readUTF();
+        String name = dis.readString();
         int startX = dis.readInt();
         int startY = dis.readInt();
         String filename = dis.readUTF();
@@ -505,7 +493,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }   
-        String name = dis.readUTF();
+        String name = dis.readString();
         Feature part = features[dis.readInt()];
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
@@ -522,7 +510,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
-        String name = dis.readUTF();
+        String name = dis.readString();
         int x = dis.readInt();
         int y = dis.readInt();
         String[] strings = dis.readStringArray();
@@ -547,7 +535,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
-        String name = dis.readUTF();
+        String name = dis.readString();
         int numFrames = dis.readInt();
         boolean repeat = dis.readBoolean();
        
@@ -563,7 +551,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }        
-        String name = dis.readUTF();  
+        String name = dis.readString();  
         int[] frames = dis.readIntArray();
         int[] xs = dis.readIntArray();
         int[] ys = dis.readIntArray();
@@ -582,7 +570,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }        
-        String name = dis.readUTF();
+        String name = dis.readString();
        
         int index = dis.readInt();
         Translation translation = (Translation) features[index];
@@ -602,7 +590,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }   
-        String name = dis.readUTF();
+        String name = dis.readString();
         Feature part = features[dis.readInt()];
         Rectangle guaranteed = dis.readRectangle();
         Rectangle[] fills = dis.readRectangleArray();
@@ -620,7 +608,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }   
-        String name = dis.readUTF();
+        String name = dis.readString();
         Feature part = features[dis.readInt()];
         int target = dis.readInt();
         if (Debug.ASSERT) {
@@ -642,7 +630,7 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
-        String name = dis.readUTF();
+        String name = dis.readString();
         String typeName = dis.readUTF();
         String arg = dis.readUTF();
         Feature parts = features[dis.readInt()];
@@ -808,7 +796,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
         
-        String name = dis.readUTF();
+        String name = dis.readString();
         int mask = dis.readInt();     
         Command[] commands = readCommands(dis);
         if (Debug.ASSERT) {
@@ -826,7 +814,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
         
-        String name = dis.readUTF();
+        String name = dis.readString();
         int[][] grid = dis.readInt2Array();
         String[] stateNames = dis.readStringArray();
         Command[][] selectCommands;
@@ -882,7 +870,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
         
-        String name = dis.readUTF();
+        String name = dis.readString();
         Feature[] active = readFeaturesIndex(dis);
         Feature[] setup = readFeaturesIndex(dis);
         
@@ -920,6 +908,47 @@ public class GrinBinaryReader {
         }   
         
         return f;
+    }
+
+    private void readPublicElements(GrinDataInputStream dis) throws IOException
+    {
+        checkValue(dis.readInt(), Constants.PUBLIC_ELEMENTS_IDENTIFIER, 
+			"Exports clause");
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }  
+
+	// Public segments
+	for (;;) {
+	    int i = dis.readInt();
+	    if (i == -1) {
+		break;
+	    }
+	    publicSegments.put(segments[i].getName(), segments[i]);
+	}
+
+	// Public features
+	for (;;) {
+	    int i = dis.readInt();
+	    if (i == -1) {
+		break;
+	    }
+	    publicFeatures.put(features[i].getName(), features[i]);
+	}
+
+	// Public RC handlers
+	for (;;) {
+	    int i = dis.readInt();
+	    if (i == -1) {
+		break;
+	    }
+	    publicRCHandlers.put(rcHandlers[i].getName(), rcHandlers[i]);
+	}
+
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }
     }
     
     /**

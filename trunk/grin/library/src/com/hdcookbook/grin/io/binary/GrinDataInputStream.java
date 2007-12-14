@@ -134,7 +134,16 @@ class GrinDataInputStream extends DataInputStream {
        return array;
    }   
 
-      
+
+    public String readString() throws IOException {
+	byte b = readByte();
+	if (b == Constants.NULL) {
+	    return null;
+	} else {
+	    return readUTF();
+	}
+    }
+
    public String[] readStringArray() throws IOException {
        byte b = readByte();
        if (b == Constants.NULL) {

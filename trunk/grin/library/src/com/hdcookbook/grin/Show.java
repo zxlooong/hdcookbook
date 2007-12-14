@@ -105,9 +105,13 @@ public class Show implements AnimationClient {
      **/
     public ShowInitializer initializer = new ShowInitializer();
 
-    private Hashtable features = new Hashtable();
-    private Hashtable rcHandlers = new Hashtable();
-    private Hashtable segments = new Hashtable();
+    protected Segment[] segments;
+    protected Feature[] features;
+    protected RCHandler[] rcHandlers;
+
+    protected Hashtable publicSegments;
+    protected Hashtable publicFeatures;
+    protected Hashtable publicRCHandlers;
 
     private Segment currentSegment = null;
     private Segment[] segmentStack = new Segment[0];  // For push/pop
@@ -145,6 +149,27 @@ public class Show implements AnimationClient {
     }
 
     /**
+     * This is called to build the show.  This needs to be done before
+     * initialize is called.
+     **/
+    public void buildShow(Segment[] segments, Feature[] features, 
+    		          RCHandler[] rcHandlers,
+		          Hashtable publicSegments, Hashtable publicFeatures,
+		          Hashtable publicRCHandlers)
+    {
+	this.segments = segments;
+	this.features = features;
+	this.rcHandlers = rcHandlers;
+	this.publicSegments = publicSegments;
+	this.publicFeatures = publicFeatures;
+	this.publicRCHandlers = publicRCHandlers;
+	
+	for (int i = 0; i < rcHandlers.length; i++) {
+	    rcHandlers[i].setShow(this);
+	}
+    }
+
+    /**
      * @inheritDoc
      * <p>
      * This should be called after the show has been built.
@@ -160,15 +185,13 @@ public class Show implements AnimationClient {
 	initialized = true;
 	this.component = component;
 	popSegmentCommand = new ActivateSegmentCommand(this, false, true);
-    	setupManager = new SetupManager(features.size());
+    	setupManager = new SetupManager(features.length);
 	setupManager.start();
-	for (Enumeration e = segments.elements(); e.hasMoreElements() ;) {
-	    Segment seg = (Segment) e.nextElement();
-	    seg.initialize(this);
+	for (int i = 0; i < segments.length; i++) {
+	    segments[i].initialize(this);
 	}
-	for (Enumeration e = features.elements(); e.hasMoreElements() ;) {
-	    Feature f = (Feature) e.nextElement();
-	    f.initialize();
+	for (int i = 0; i < features.length; i++) {
+	    features[i].initialize();
 	}
 	initializer = null;
     }
@@ -183,34 +206,25 @@ public class Show implements AnimationClient {
 	if (Debug.ASSERT && !initialized) {
 	    Debug.assertFail("Destroy of uninitialized show");
 	}
-	for (Enumeration e = segments.elements(); e.hasMoreElements() ;) {
-	    Segment s = (Segment) e.nextElement();
-	    s.destroy();
+	for (int i = 0; i < segments.length; i++) {
+	    segments[i].destroy();
 	}
-	for (Enumeration e = features.elements(); e.hasMoreElements() ;) {
-	    Feature f = (Feature) e.nextElement();
-	    f.destroy();
+	for (int i = 0; i < features.length; i++) {
+	    features[i].destroy();
 	}
 	destroyed = true;
 	setupManager.stop();
     }
 
     /** 
-     * Used by the parser
+     * Used to build the show
      **/
     public void setSegmentStackDepth(int depth) {
 	segmentStack = new Segment[depth];
     }
 
     /**
-     * Used by the parser
-     **/
-    public int getSegmentStackDepth() {
-	return segmentStack.length;
-    }
-
-    /**
-     * Used by the parser
+     * Used to build the show
      **/
     public void setDrawTargets(String[] drawTargets) {
 	this.drawTargets = drawTargets;
@@ -237,8 +251,8 @@ public class Show implements AnimationClient {
     public void mapDrawTargets(Hashtable targetMap) {
 	defaultDrawTarget 
 	    = ((Integer) targetMap.get(drawTargets[0])).intValue();
-	for (Enumeration e = features.elements(); e.hasMoreElements() ;) {
-	    Feature f = (Feature) e.nextElement();
+	for (int i = 0; i < features.length; i++) {
+	    Feature f = features[i];
 	    if (f instanceof SetTarget) {
 		((SetTarget) f).mapDrawTarget(targetMap);
 	    }
@@ -246,91 +260,43 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * Used by the parser
-     **/
-    public void addFeature(String name, Feature f) throws IOException {
-	if (features.get(name) != null) {
-	    throw new IOException("Feature named \"" + name 
-	    			   + "\" already exists.");
-	}
-	features.put(name, f);
-    }
-
-    /**
-     * Look up the given feature.
+     * Look up the given public feature.
      *
      * @return feature, or null if not found
      **/
     public Feature getFeature(String name) {
-	return (Feature) features.get(name);
+	return (Feature) publicFeatures.get(name);
     }
    
-    /** 
-     * Get all of the features in this show
-     **/
-    public Enumeration getFeatures() {
-        return features.elements();
-    }
-
-    /** 
-     * Get all of the features in this show as an array
-     **/
-    public Feature[] getFeaturesAsArray() {
-        return (Feature[]) features.values().toArray(new Feature[features.size()]);
-    }
-    
     /**
-     * Used by the parser
-     **/
-    public void addRCHandler(String name, RCHandler h) throws IOException {
-	if (rcHandlers.get(name) != null) {
-	    throw new IOException("RC handler named \"" + name 
-	    			   + "\" already exists.");
-	}
-	rcHandlers.put(name, h);
-	h.setShow(this);
-    }
-
-    /**
+     * Get a public RC handler by name.
+     *
      * @return rc handler, or null if not found
      **/
     public RCHandler getRCHandler(String name) {
-	return (RCHandler) rcHandlers.get(name);
+	return (RCHandler) publicRCHandlers.get(name);
     }
     
     /**
-     * Get all of the RCHandlers in this show as an array
-     **/
-    public RCHandler[] getRCHandlersAsArray() {
-        return (RCHandler[]) rcHandlers.values().toArray(new RCHandler[rcHandlers.size()]);       
-    } 
-
-    /**
-     * Look up a segment.  This is done without taking out the show lock.
+     * Look up a public segment.  This is done without taking out the show lock.
      *
      * @return segment, or null if not found.  
      * 	
      **/
     public Segment getSegment(String name) {
-	return (Segment) segments.get(name);
-    }
-
-
-    /**
-     * Used by the parser
-     **/
-    public void addSegment(String name, Segment f) {
-	segments.put(name, f);
+	return (Segment) publicSegments.get(name);
     }
 
     /**
-     * Get all of the segments in this show as an array
+     * Get the depth of the segment stack.  This is how many times you can
+     * push a segment without an old value falling off the end of the stack.
+     * It's set in the show file.
      **/
-    
-    public Segment[] getSegmentsAsArray() {
-        return (Segment[]) segments.values().toArray(new Segment[segments.size()]);       
-    } 
-    
+    public int getSegmentStackDepth() {
+	return segmentStack.length;
+    }
+
+
     /**
      * Set the current segment.  This is the main way an application
      * controls what is being displayed on the screen.  The new segment

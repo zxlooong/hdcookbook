@@ -25,6 +25,7 @@ information or have any questions.
 
 <project name="build xlets" basedir=".">
 
+<property file="${os.name}.user.vars.properties"/>
 <property file="user.vars.properties"/>	
 <property file="vars.properties"/>	
 
@@ -64,6 +65,7 @@ information or have any questions.
 	       destdir="${MOSAIC_DEST}"
 	       debug="on" deprecation="on">
 	    <src path="library/src" />
+	    <src path="jdktools/library/src" />
 	    <src path="jdktools/mosaic/src" />
 	</javac>
 	<property name="MOSAIC_CP" value="${MOSAIC_DEST}"/>

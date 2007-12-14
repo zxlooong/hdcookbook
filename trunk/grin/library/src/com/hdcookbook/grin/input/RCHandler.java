@@ -88,7 +88,8 @@ public abstract class RCHandler {
     }
 
     /**
-     * Returns the name of this RCHandler
+     * Returns the name of this RCHandler, if known.  All public handlers
+     * have names; private handlers might not.
      */
      public String getName() {
          return name;

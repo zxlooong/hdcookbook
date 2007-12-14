@@ -3,44 +3,66 @@
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+            <name>hdcookbook</name>
+        </general-data>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
             <!-- Do not use Project Properties customizer when editing this file manually. -->
             <name>hdcookbook</name>
             <properties/>
             <folders>
                 <source-folder>
-                    <label>tools\bdjo\src</label>
-                    <type>java</type>
-                    <location>tools/bdjo/src</location>
-                </source-folder>
-                <source-folder>
-                    <label>tools\bdsigner\src</label>
-                    <type>java</type>
-                    <location>tools/bdsigner/src</location>
-                </source-folder>
-                <source-folder>
                     <label>grin/library/src</label>
                     <type>java</type>
                     <location>grin/library/src</location>
+                    <excludes>**/assets/**</excludes>
                 </source-folder>
                 <source-folder>
-                    <label>grin/xlets/bookmenu/src</label>
+                    <label>grin/jdktools/library/src</label>
                     <type>java</type>
-                    <location>grin/xlets/bookmenu/src</location>
+                    <location>grin/jdktools/library/src</location>
+                    <excludes>**/assets/**</excludes>
                 </source-folder>
                 <source-folder>
-                    <label>grin/xlets/gunbunny/src</label>
+                    <label>grin/jdktools/grinviewer/src</label>
                     <type>java</type>
-                    <location>grin/xlets/gunbunny/src</location>
+                    <location>grin/jdktools/grinviewer/src</location>
+                    <excludes>**/assets/**</excludes>
                 </source-folder>
                 <source-folder>
                     <label>grin/jdktools/binaryconverter/src</label>
                     <type>java</type>
                     <location>grin/jdktools/binaryconverter/src</location>
+                    <excludes>**/assets/**</excludes>
                 </source-folder>
                 <source-folder>
                     <label>grin/jdktools/mosaic/src</label>
                     <type>java</type>
                     <location>grin/jdktools/mosaic/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>tools\bdjo\src</label>
+                    <type>java</type>
+                    <location>tools/bdjo/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>tools\bdsigner\src</label>
+                    <type>java</type>
+                    <location>tools/bdsigner/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin/xlets/bookmenu/src</label>
+                    <type>java</type>
+                    <location>grin/xlets/bookmenu/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin/xlets/gunbunny/src</label>
+                    <type>java</type>
+                    <location>grin/xlets/gunbunny/src</location>
+                    <excludes>**/assets/**</excludes>
                 </source-folder>
             </folders>
             <ide-actions>
@@ -58,32 +80,49 @@
             <view>
                 <items>
                     <source-folder style="packages">
-                        <label>tools\bdjo\src</label>
-                        <location>tools/bdjo/src</location>
-                    </source-folder>
-                    <source-folder style="packages">
-                        <label>tools\bdsigner\src</label>
-                        <location>tools/bdsigner/src</location>
-                    </source-folder>
-                    <source-folder style="packages">
                         <label>grin/library/src</label>
                         <location>grin/library/src</location>
+                        <excludes>**/assets/**</excludes>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin/xlets/bookmenu/src</label>
-                        <location>grin/xlets/bookmenu/src</location>
+                        <label>grin/jdktools/library/src</label>
+                        <location>grin/jdktools/library/src</location>
+                        <excludes>**/assets/**</excludes>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin/xlets/gunbunny/src</label>
-                        <location>grin/xlets/gunbunny/src</location>
+                        <label>grin/jdktools/grinviewer/src</label>
+                        <location>grin/jdktools/grinviewer/src</location>
+                        <excludes>**/assets/**</excludes>
                     </source-folder>
                     <source-folder style="packages">
                         <label>grin/jdktools/binaryconverter/src</label>
                         <location>grin/jdktools/binaryconverter/src</location>
+                        <excludes>**/assets/**</excludes>
                     </source-folder>
                     <source-folder style="packages">
                         <label>grin/jdktools/mosaic/src</label>
                         <location>grin/jdktools/mosaic/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>tools\bdjo\src</label>
+                        <location>tools/bdjo/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>tools\bdsigner\src</label>
+                        <location>tools/bdsigner/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/xlets/bookmenu/src</label>
+                        <location>grin/xlets/bookmenu/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/xlets/gunbunny/src</label>
+                        <location>grin/xlets/gunbunny/src</location>
+                        <excludes>**/assets/**</excludes>
                     </source-folder>
                     <source-file>
                         <location>build.xml</location>
@@ -112,18 +151,32 @@
             </compilation-unit>
             <compilation-unit>
                 <package-root>grin/xlets/bookmenu/src</package-root>
+                <classpath mode="compile">grin/library/src:lib/bdj_platform.zip</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
             <compilation-unit>
                 <package-root>grin/xlets/gunbunny/src</package-root>
+                <classpath mode="compile">grin/library/src:lib/bdj_platform.zip</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
             <compilation-unit>
                 <package-root>grin/jdktools/binaryconverter/src</package-root>
+                <classpath mode="compile">grin/library/src:grin/jdktools/library/src</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
             <compilation-unit>
                 <package-root>grin/jdktools/mosaic/src</package-root>
+                <classpath mode="compile">grin/library/src:grin/jdktools/library/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>grin/jdktools/grinviewer/src</package-root>
+                <classpath mode="compile">grin/library/src:grin/jdktools/library/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>grin/jdktools/library/src</package-root>
+                <classpath mode="compile">grin/library/src</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>

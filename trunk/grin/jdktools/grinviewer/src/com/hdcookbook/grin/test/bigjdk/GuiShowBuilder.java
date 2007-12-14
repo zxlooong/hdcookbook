@@ -91,8 +91,8 @@ import java.util.NoSuchElementException;
 import javax.swing.tree.TreeNode;
 
 /**
- * This is a ShowBuilder that decorates the Show with 
- * tree-browsing classes for GrinView
+ * This is a ShowBuilder that tracks line number
+ * for GrinView
  *
  * @see GrinView
  *
@@ -101,7 +101,6 @@ import javax.swing.tree.TreeNode;
 public class GuiShowBuilder extends ShowBuilder {
    
     private GrinView gui;
-    private ArrayList segments = new ArrayList();	// <Node>
 
     public GuiShowBuilder(GrinView gui) {
 	this.gui = gui;
@@ -116,7 +115,6 @@ public class GuiShowBuilder extends ShowBuilder {
     public void addSegment(String name, int line, Segment s) throws IOException
     {
 	super.addSegment(name, line, s);
-	segments.add(new Node(s, null));
 	gui.addLineNumber(s, line);
     }
 
@@ -134,178 +132,5 @@ public class GuiShowBuilder extends ShowBuilder {
 
     public void finishBuilding() throws IOException {
 	super.finishBuilding();
-    }
-
-    TreeNode getShowTree(String showName) {
-	Node[] sa = expandNodes(segments);
-	segments = null;
-	Node tree = new Node(showName, sa);
-	return tree;
-    }
-
-    private Node[] expandNodes(ArrayList list) {
-	Node[] result  = (Node[]) list.toArray(new Node[list.size()]);
-	for (int i = 0; i < result.length; i++) {
-	    result[i].expand();
-	}
-	return result;
-    }
-
-
-    static class Node implements TreeNode {
-
-	Object contents;
-	Node[] children;
-	boolean leaf;
-	TreeNode parent;
-	boolean expanded = false;
-	String label = null;	// Extra label, usually null
-
-	Node(Object contents, Node[] children) {
-	    this.contents = contents;
-	    this.leaf = children == null;
-	    if (this.leaf) {
-		if (contents instanceof Segment
-		    || contents instanceof Assembly
-		    || contents instanceof Timer
-		    || contents instanceof Translator
-		    || contents instanceof Translation
-		    || contents instanceof Group
-		    || contents instanceof Modifier) 
-		{
-		    leaf = false;
-		    // expansion will create children
-		} else {
-		    children = new Node[0];
-		}
-	    }
-	    if (children != null) {
-		setChildren(children);
-	    }
-	}
-
-	private void setChildren(Node[] children) {
-	    this.children = children;
-	    for (int i = 0; i < children.length; i++) {
-		children[i].parent = this;
-	    }
-	}
-
-	public Enumeration children() {
-	    expand();
-	    return new Enumeration() {
-		private int i = 0;
-		public boolean hasMoreElements() {
-		    return i < children.length;
-		}
-
-		public Object nextElement() {
-		    if (i < children.length) {
-			return children[i];
-		    } else {
-			throw new NoSuchElementException();
-		    }
-		}
-	    };
-	}
-
-	public boolean getAllowsChildren() {
-	    return !leaf;
-	}
-
-	public int getChildCount() {
-	    expand();
-	    return children.length;
-	}
-        
-        public TreeNode getChildAt(int i) {
-	    expand();
-            return children[i];
-        }
-
-	public int getIndex(TreeNode node) {
-	    expand();
-	    for (int i = 0; i < children.length; i++) {
-		if (children[i] == node) {
-		    return i;
-		}
-	    }
-	    return -1;
-	}
-
-	public TreeNode getParent() {
-	    return parent;
-	}
-
-	public boolean isLeaf() {
-	    return leaf;
-	}
-
-	void expand() {
-	    if (expanded) {
-		return;
-	    }
-	    expanded = true;
-	    if (contents instanceof Segment) {
-		Segment seg = (Segment) contents;
-		leaf = false;
-		Node[] newChildren = new Node[4];
-		newChildren[0] = makeNode("active", seg.getActiveFeatures());
-		newChildren[1] = makeNode("setup", seg.getSetupFeatures());
-		newChildren[2] = makeNode("rc_handlers", seg.getRCHandlers());
-		newChildren[3] = makeNode("next", seg.getNextCommands());
-		setChildren(newChildren);
-	    } else if (contents instanceof Assembly) {
-		Assembly a = (Assembly) contents;
-		String[] partNames = a.getPartNames();
-		setChildren(makeChildren(a.getParts()));
-		for (int i = 0; i < children.length; i++) {
-		    children[i].label = partNames[i];
-		}
-	    } else if (contents instanceof Timer) {
-		Timer t = (Timer) contents;
-		setChildren(makeChildren(t.getEndCommands()));
-	    } else if (contents instanceof Translator) {
-		Translator t = (Translator) contents;
-		Node[] na = new Node[2];
-		na[0] = new Node(t.getTranslation(), null);
-		na[1] = makeNode("translated feature(s)", t.getFeatures());
-		setChildren(na);
-		children[0].label = "Translation";
-	    } else if (contents instanceof Translation) {
-		Translation t = (Translation) contents;
-		setChildren(makeChildren(t.getEndCommands()));
-	    } else if (contents instanceof Group) {
-		Group g = (Group) contents;
-		setChildren(makeChildren(g.getParts()));
-	    } else if (contents instanceof Modifier) {
-		Modifier c = (Modifier) contents;
-		Feature[] f = { c.getPart() };
-		setChildren(makeChildren(f));
-	    } else if (children == null) {
-		setChildren(new Node[0]);
-	    }
-	}
-
-	private static Node makeNode(String name, Object[] kids) {
-	    return new Node(name, makeChildren(kids));
-	}
-
-	private static Node[] makeChildren(Object[] kids) {
-	    Node[] children = new Node[kids.length];
-	    for (int i = 0; i < children.length; i++) {
-		children[i] = new Node(kids[i], null);
-	    }
-	    return children;
-	}
-
-        
-        public String toString() {
-	    if (label == null) {
-		return contents.toString();
-	    } else {
-		return label + ": " + contents.toString();
-	    }
-        }
     }
 }

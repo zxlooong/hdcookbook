@@ -54,6 +54,7 @@
 
 package com.hdcookbook.grin.io.binary;
 
+import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
@@ -120,7 +121,7 @@ public class BinaryConverter {
             GenericDirector director = new GenericDirector(textScriptName, null);
 	    AssetFinder.setSearchPath(null, new File[]{new File("."), new File("")});
   
-            Show show = director.createShow(null);
+            SEShow show = director.createShow(null);
             
             if (binaryScriptName != null) {
                fileName = binaryScriptName;
@@ -142,7 +143,8 @@ public class BinaryConverter {
                // the binary file that just got generated without any error.
                DataInputStream in = new DataInputStream(new FileInputStream(fileName));
                GrinBinaryReader reader = new GrinBinaryReader(director, in);
-               Show recreatedShow = reader.readShow(new ShowBuilder());            
+	       Show recreatedShow = new Show(director);
+               reader.readShow(recreatedShow);
             }
             
             return;
