@@ -289,7 +289,7 @@ public class GrinView extends GenericMain {
         System.out.println("        -scale <number>");
         System.out.println("        -segment <segment name to activate>");
         System.out.println("");
-        System.out.println("    -assets and -assets_dir may be repeated");
+        System.out.println("    -assets and -asset_dir may be repeated");
 	System.out.println();
 	System.exit(1);
     }
