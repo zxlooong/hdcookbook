@@ -52,10 +52,6 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-import com.hdcookbook.grin.ChapterManager;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.text.ShowParser;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -75,20 +71,22 @@ import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
+import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.binary.GrinBinaryReader;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
-
+	
 /** 
  * An xlet example that displays GRIN script.
  */
 
-public class HelloGrinWorld implements Xlet, AnimationContext {
+public class GrinDriverXlet implements Xlet, AnimationContext {
 	
 	public Show show;
 	Container rootContainer;
 	DirectDrawEngine animationEngine;
 	XletContext context;
-	String grinScriptName = "tumblingduke.txt";
-	boolean initialized = false;
+	String grinScriptName = "show.grin";
 	
 	public void initXlet(XletContext context) {
 		
@@ -115,15 +113,25 @@ public class HelloGrinWorld implements Xlet, AnimationContext {
 	
 	public void destroyXlet(boolean unconditional) {
 	   rootContainer = null;
-	   //show.destroy();
 	   animationEngine.destroy();
 	}
 	
 	public void animationInitialize() throws InterruptedException {
 
 	   SimpleDirector director = new SimpleDirector();
-	   show = director.createShow();
-
+           
+           try {
+               
+               AssetFinder.setSearchPath(new String[]{""}, null);      
+	       GrinBinaryReader reader = new GrinBinaryReader(director, AssetFinder.getURL(grinScriptName).openStream());
+               show = reader.readShow(new ShowBuilder());
+               
+           } catch (IOException e) {
+               e.printStackTrace();
+               System.err.println("Error in reading the show file");
+               throw new InterruptedException();
+           }
+           
 	   animationEngine.checkDestroy();
 	   animationEngine.initClients(new AnimationClient[]{show});
 	   animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
@@ -139,30 +147,5 @@ public class HelloGrinWorld implements Xlet, AnimationContext {
 	   public ExtensionsBuilder getExtensionsBuilder() {
 		     return null;
 	   }
-	   
-	   public Show createShow() {
-		   
-	      setup(0, new ChapterManager[]{new ChapterManager("")});
-	      
-	      Show show = new Show(this);
-	      String showName = grinScriptName;
-	      try {
-		 AssetFinder.setSearchPath(new String[]{""}, null);
-	         URL u = AssetFinder.getURL(showName);
-	         if (u == null) {
-		    throw new IOException("Can't find " + showName + " in assets");
-	         }
-	         BufferedReader rdr = new BufferedReader(
-	         new InputStreamReader(u.openStream(), "UTF-8"));
-	         ShowParser p = new ShowParser(rdr, showName, show);
-	         p.parse();
-	         rdr.close();
-	      } catch (IOException ex) {
-		ex.printStackTrace();
-		AssetFinder.abort();
-	      }
-	      
-	      return show;
-	}
-     }
+        }
 }

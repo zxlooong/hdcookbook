@@ -24,7 +24,7 @@ information or have any questions.
 -->
 <project basedir="." default="gen-bdjo-desc">
 
-<property name="xlet.name" value="HelloGrinWorld" />
+<property name="xlet.name" value="GrinDriverXlet" />
 <property name="bdjoconverter.jar" value="../../../tools/bdjo/dist/bdjo.jar" />
 
 <target

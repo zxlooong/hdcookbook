@@ -44,7 +44,7 @@ setting draw_targets {
 # 
 ####################################################################
 
-segment S:DrawOpt.Initialize
+segment S:Initialize
     setup {
 	F:DrawOpt.Everything
     } setup_done {

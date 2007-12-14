@@ -9,14 +9,15 @@
         <property name="bdjoconverter.jar" value="../../../tools/bdjo/dist/bdjo.jar" />
 
         <target name="all">
-            <ant dir="TumblingDuke"/>
-            <ant dir="BinaryScript"/>
+            
+            <ant dir="GrinViewerXlet"/>
+            <ant dir="HelloGrinWorld"/>
             <ant dir="Translation"/>
         </target>
         
-	<target name="clean">
-            <ant dir="TumblingDuke" target="clean"/>
-            <ant dir="BinaryScript" target="clean"/>
+	<target name="clean">      
+            <ant dir="HelloGrinWorld" target="clean"/>          
+            <ant dir="GrinViewerXlet" target="clean"/>      
             <ant dir="Translation" target="clean"/>
 	</target>
 </project>

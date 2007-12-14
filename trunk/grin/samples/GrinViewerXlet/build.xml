@@ -6,7 +6,9 @@
   
 	<property name="bdj.classes"  value="../../../../bd-j/references/enhanced/classes.zip"/>
 	<property name="grin.classes"  value="../../build/grin_viewer/grinviewer.jar"/>
-	<property name="builddir" value="build"/>
+        <property name="converter.classes" value="../../build/grin_viewer/converter.jar"/>
+	<property name="builddir" value="build"/>        
+        <property name="script.name" value="show"/>
 	
 	<target name="all" depends="jar"/>
 	
@@ -22,18 +24,25 @@
 		</javac>		
 	</target>
 	
-	<target name="jar" depends="compile" description="Creates a jar file">
+	<target name="jar" depends="compile, generate_binary_script" description="Creates a jar file">
 		<jar destfile="${builddir}/00000.jar">	     
                    <fileset dir="${builddir}" excludes="*.jar"/>	
-		   <fileset dir="." includes="images/**, tumblingduke.txt"/>
+		   <fileset dir="." includes="images/**, ${script.name}.grin"/>
 		</jar>
 	   
 	    <ant antfile="generate-bdjo-desc.xml"/>   
         </target>
+        
+        <target name="generate_binary_script">
+            <java fork="true" jar="${converter.classes}">
+                <arg line="${script.name}.txt"/>
+            </java>
+            <move file="${script.name}.grin" todir="${builddir}"/>
+        </target>
 	
 	<target name="run_grinview" depends="grinview_check, compile_grinview">
 		<java fork="true" jar="${grin.classes}">
-			<arg line="-asset_dir . tumblingduke.txt"/>
+			<arg line="-asset_dir . ${script.name}.txt"/>
 		</java>
 	</target>
 	
@@ -42,7 +51,7 @@
 			<classpath path="${grin.classes}"/>
 		</nbjpdastart>	
 	        <java fork="true" jar="${grin.classes}">
-			<arg line="-asset_dir . helloworld.txt"/>
+			<arg line="-asset_dir . ${script.name}.txt"/>
 			<jvmarg value="-Xdebug"/>
 			<jvmarg value="-Xnoagent"/>
 			<jvmarg value="-Djava.compiler=none"/>
