@@ -68,16 +68,15 @@ import java.awt.Rectangle;
 /**
  * A Translator wraps other features, and adds movement taken from a
  * Translation to it.  The upper-left hand corner of the subfeature is
- * made to follow the path of the translation.
+ * made to follow the path of the TranslatorModel.
  *
  * @see Translation
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class Translator extends Feature {
+public class Translator extends Modifier {
 
-    private Translation translation;
-    private Feature[] features;
+    private TranslatorModel model;
     private boolean isActivated = false;
 
     private int fx = 0;		// Feature's start position
@@ -126,46 +125,29 @@ public class Translator extends Feature {
     /**
      * Called from the parser
      **/
-    public void setup(Translation translation, Feature[] features) {
-	this.translation = translation;
-	this.features = features;
+    public void setup(TranslatorModel model, Feature part) {
+	super.setup(part);
+	this.model = model;
         
-        fx = Integer.MAX_VALUE;
-        fy = Integer.MAX_VALUE;
-        for (int i = 0; i < features.length; i++) {
-            int xi = features[i].getStartX();
-            if (xi < fx) {
-                fx = xi;
-            }
-            int yi = features[i].getStartY();
-            if (yi < fy) {
-                fy = yi;
-            }
-        }
-        
-    }
-    /**
-     * Get our child features
-     **/
-    public Feature[] getFeatures() {
-	return features;
+        fx = part.getStartX();
+        fy = part.getStartY();
     }
 
     /**
      * Get the translation that moves us
      **/
-    public Translation getTranslation() {
-	return translation;
+    public TranslatorModel getModel() {
+	return model;
     }
 
     /**
      * @inheritDoc
      **/
     public int getStartX() {
-        if (translation.getIsRelative()) {
+        if (model.getIsRelative()) {
             return fx;
         } else { 
-	   return translation.getTranslatorStartX();
+	   return model.getTranslatorStartX();
         }   
     }
 
@@ -174,10 +156,10 @@ public class Translator extends Feature {
      * @inheritDoc
      **/
     public int getStartY() {
-        if (translation.getIsRelative()) {
+        if (model.getIsRelative()) {
             return fy;
         } else { 
-	   return translation.getTranslatorStartY();
+	   return model.getTranslatorStartY();
         } 
     }
 
@@ -185,86 +167,24 @@ public class Translator extends Feature {
      * @inheritDoc
      **/
     public void initialize() {
-	// The show will initialize our sub-feature, so we don't
-	// need to do anything here.
+	super.initialize();
     }
 
     /**
      * @inheritDoc
      **/
     public void destroy() {
-	// The show will destroy our sub-features, so we don't
-	// need to do anything here.
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    protected void setActivateMode(boolean mode) {
-	// This is synchronized to only occur within model updates.
-	isActivated = mode;
-	if (mode) {
-	    for (int i = 0; i < features.length; i++) {
-		features[i].activate();
-	    }
-	    lastDx = Integer.MIN_VALUE;
-	    drawRecord.activate();
-	} else {
-	    for (int i = 0; i < features.length; i++) {
-		features[i].deactivate();
-	    }
-	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    protected void setSetupMode(boolean mode) {
-	if (mode) {
-	    for (int i = 0; i < features.length; i++) {
-		features[i].setup();
-	    }
-	} else {
-	    for (int i = 0; i < features.length; i++) {
-		features[i].unsetup();
-	    }
-	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void doSomeSetup() {
-	for (int i = 0; i < features.length; i++) {
-	    if (features[i].needsMoreSetup()) {
-		features[i].doSomeSetup();
-		return;
-	    }
-	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public boolean needsMoreSetup() {
-	for (int i = 0; i < features.length; i++) {
-	    if (features[i].needsMoreSetup()) {
-		return true;
-	    }
-	}
-	return false;
+	super.destroy();
     }
 
     /**
      * @inheritDoc
      **/
     public void nextFrame() {
-	if (Debug.ASSERT && !translation.getIsActivated()) {
+	if (Debug.ASSERT && !model.getIsActivated()) {
 	    Debug.assertFail();
 	}
-	for (int i = 0; i < features.length; i++) {
-	    features[i].nextFrame();
-	}
+	super.nextFrame();
 
 	// Note that at this point, we don't know if our translation
 	// has advanced to the next frame or not, so we can't depend
@@ -276,16 +196,14 @@ public class Translator extends Feature {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	dx = translation.getX();
-	dy = translation.getY();
-        if (!translation.getIsRelative()) {
+	dx = model.getX();
+	dy = model.getY();
+        if (!model.getIsRelative()) {
             dx -= fx;
             dy -= fy;
         }
 	childContext.parent = context;
-	for (int i = 0; i < features.length; i++) {
-	    features[i].addDisplayAreas(childContext);
-	}
+	part.addDisplayAreas(childContext);
 	lastDx = dx;
 	lastDy = dy;
     }
@@ -299,9 +217,7 @@ public class Translator extends Feature {
 	    return;
 	}
 	gr.translate(dx, dy);
-	for (int i = 0; i < features.length; i++) {
-	    features[i].paintFrame(gr);
-	}
+	part.paintFrame(gr);
 	gr.translate(-dx, -dy);
     }
 

@@ -77,7 +77,7 @@ import java.awt.Rectangle;
  * @author Bill Foote (http://jovial.com)
  *
  */
-public class Translation extends Feature {
+public class TranslatorModel extends Feature {
 
     private int[] frames;	// Frame number of keyframes, [0] is always 0
     private int[] xs;		// Position of keyframes
@@ -93,7 +93,7 @@ public class Translation extends Feature {
     private boolean isRelative;
     private Command[] endCommands;
 
-    public Translation(Show show, String name, int[] frames, int[] xs, int[] ys,
+    public TranslatorModel(Show show, String name, int[] frames, int[] xs, int[] ys,
     		       int repeatFrame, boolean isRelative,
                        Command[] endCommands) 
     {

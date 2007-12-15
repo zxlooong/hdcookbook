@@ -78,7 +78,7 @@ import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Timer;
-import com.hdcookbook.grin.features.Translation;
+import com.hdcookbook.grin.features.TranslatorModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.VisualRCHandler;
@@ -436,10 +436,10 @@ public class ShowParser {
 	    repeat = true;
 	    tok = lexer.getString();
 	}
-	String linkedTo = null;
+	String model = null;
 	Command[] endCommands = emptyCommandArray;
-	if ("linked_to".equals(tok)) {
-	    linkedTo = lexer.getString();
+	if ("model".equals(tok) || "linked_to".equals(tok)) {
+	    model = lexer.getString();
 	    tok = lexer.getString();
 	}
 	if ("end_commands".equals(tok)) {
@@ -454,17 +454,17 @@ public class ShowParser {
                 = new ImageSequence(show, name, x, y, fileName, 
                                     middle,  extension, repeat, endCommands);
 	builder.addFeature(name, line, f);
-	if (linkedTo != null) {
-	    final String lt = linkedTo;
+	if (model != null) {
+	    final String mod = model;
 	    ForwardReference fw = new ForwardReference(lexer) {
 		void resolve() throws IOException {
-		    Feature ltf = builder.getNamedFeature(lt);
-		    if (ltf == null || !(ltf instanceof ImageSequence)) {
+		    Feature modf = builder.getNamedFeature(mod);
+		    if (modf == null || !(modf instanceof ImageSequence)) {
 			    lexer.reportError("In image_sequence " + name + 
 				      " can't find image_sequence linked_to " 
-				      + lt + ".");
+				      + mod + ".");
 		    }
-		    f.setLinkedTo((ImageSequence) ltf);
+		    f.setModel((ImageSequence) modf);
 		}
 	    };
 	    deferred[0].addElement(fw);
@@ -776,8 +776,8 @@ public class ShowParser {
 	} else if (repeatFrame > fs[fs.length - 1]) {
 	    lexer.reportError("repeat > max frame");
 	}
-	final Translation trans 
-	    = new Translation(show, name, fs, xs, ys, repeatFrame, 
+	final TranslatorModel trans 
+	    = new TranslatorModel(show, name, fs, xs, ys, repeatFrame, 
                               isRelative, endCommands);
 	builder.addFeature(name, line, trans);
     }
@@ -792,12 +792,18 @@ public class ShowParser {
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
 		Feature t  = builder.getNamedFeature(translationName);
-		if (t == null || !(t instanceof Translation)) {
+		if (t == null || !(t instanceof TranslatorModel)) {
 		    lexer.reportError("Translation \"" + translationName 
 		    			+ "\" not found");
 		}
 		Feature[] fa = makeFeatureList(featureNames);
-		trans.setup((Translation) t, fa);
+                if (fa.length == 1) {
+                    trans.setup((TranslatorModel) t, fa[0]);
+                } else {
+                    Group group = new Group(show, null);
+                    group.setup(fa);
+                    trans.setup((TranslatorModel) t, group);
+                }
 	    }
 	};
 	// Translators must be set up after other modifiers, so that

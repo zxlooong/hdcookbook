@@ -73,7 +73,7 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Timer;
-import com.hdcookbook.grin.features.Translation;
+import com.hdcookbook.grin.features.TranslatorModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.CommandRCHandler;
@@ -131,7 +131,7 @@ public class ShowNode implements TreeNode {
 		|| contents instanceof Assembly
 		|| contents instanceof Timer
 		|| contents instanceof Translator
-		|| contents instanceof Translation
+		|| contents instanceof TranslatorModel
 		|| contents instanceof Group
 		|| contents instanceof Modifier) 
 	    {
@@ -234,12 +234,12 @@ public class ShowNode implements TreeNode {
 	} else if (contents instanceof Translator) {
 	    Translator t = (Translator) contents;
 	    ShowNode[] na = new ShowNode[2];
-	    na[0] = new ShowNode(t.getTranslation(), null);
-	    na[1] = makeNode("translated feature(s)", t.getFeatures());
+	    na[0] = new ShowNode(t.getModel(), null);
+	    na[1] = new ShowNode(t.getPart(), null);
 	    setChildren(na);
 	    children[0].label = "Translation";
-	} else if (contents instanceof Translation) {
-	    Translation t = (Translation) contents;
+	} else if (contents instanceof TranslatorModel) {
+	    TranslatorModel t = (TranslatorModel) contents;
 	    setChildren(makeChildren(t.getEndCommands()));
 	} else if (contents instanceof Group) {
 	    Group g = (Group) contents;

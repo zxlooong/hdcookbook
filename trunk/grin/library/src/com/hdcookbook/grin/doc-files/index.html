@@ -164,7 +164,10 @@ a Show is created.  Here's BNF describing the syntax of a show file:
     image_sequence ::= "feature" "image_sequence" name x y
 		         file_name "{" name_or_continuation * "}" 
 			 	   extension [ "repeat" ]
-		       [ "linked_to" feature_name | "end_commands" commands] ";"
+		       [ "model" feature_name | "end_commands" commands] ";"
+	    # "linked_to" is accepted for "model", for backwards compatibility.
+	    # In both cases, the model, if specified,  must be a different 
+	    # image_sequence with the same number of images in the sequence.
 
     box ::= "feature" "box" name rectangle
     		[ "outline" width color_value ]

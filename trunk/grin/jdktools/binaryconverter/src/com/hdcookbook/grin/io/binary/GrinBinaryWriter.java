@@ -83,7 +83,7 @@ import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Timer;
-import com.hdcookbook.grin.features.Translation;
+import com.hdcookbook.grin.features.TranslatorModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
@@ -277,8 +277,8 @@ public class GrinBinaryWriter {
                 writeText(out, (Text)feature);
             } else if (feature instanceof Timer) {
                 writeTimer(out, (Timer)feature);
-            } else if (feature instanceof Translation) {
-                writeTranslation(out, (Translation)feature);
+            } else if (feature instanceof TranslatorModel) {
+                writeTranslatorModel(out, (TranslatorModel)feature);
             } else if (feature instanceof Translator) {
                 writeTranslator(out, (Translator)feature);
             } else if (feature instanceof SrcOver) {
@@ -480,6 +480,11 @@ public class GrinBinaryWriter {
        dos.writeStringArray(imageSequence.getMiddle());
        dos.writeUTF(imageSequence.getExtension());
        dos.writeBoolean(imageSequence.getRepeat());
+       ImageSequence model = imageSequence.getModel();
+       dos.writeBoolean(model != null);
+       if (model != null) {
+           dos.writeInt(featuresList.indexOf(model));
+       }
        Command[] endCommands = imageSequence.getEndCommands();
        writeCommands(dos, endCommands);
        
@@ -564,8 +569,8 @@ public class GrinBinaryWriter {
        
     }
 
-    private void writeTranslation(DataOutputStream out, Translation translation) throws IOException {
-        out.writeByte((int)Constants.TRANSLATION_IDENTIFIER);
+    private void writeTranslatorModel(DataOutputStream out, TranslatorModel translation) throws IOException {
+        out.writeByte((int)Constants.TRANSLATOR_MODEL_IDENTIFIER);
       
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos);  
@@ -599,11 +604,10 @@ public class GrinBinaryWriter {
        } else {
 	   dos.writeString(null);
        }
-        Translation translation = translator.getTranslation();
-        int index = featuresList.indexOf(translation);
+        TranslatorModel model = translator.getModel();
+        int index = featuresList.indexOf(model);
         dos.writeInt(index); // write the index only
-        
-        writeFeaturesIndex(dos, translator.getFeatures());
+       	dos.writeInt(featuresList.indexOf(translator.getPart()));
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -1018,14 +1022,6 @@ public class GrinBinaryWriter {
             Feature part = ((Modifier)feature).getPart();
             if (list.contains(part)) {
                 return true;
-            }
-            return false;
-        } else if (feature instanceof Translator) {
-            Feature[] parts = ((Translator)feature).getFeatures();
-            for (int i = 0; i < parts.length; i++) {
-                if (list.contains(parts[i])) {
-                    return true;
-                }
             }
             return false;
         } else {

@@ -72,7 +72,7 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Timer;
-import com.hdcookbook.grin.features.Translation;
+import com.hdcookbook.grin.features.TranslatorModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.CommandRCHandler;

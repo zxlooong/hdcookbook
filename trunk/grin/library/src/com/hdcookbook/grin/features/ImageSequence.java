@@ -99,11 +99,12 @@ public class ImageSequence extends Feature {
     private Object setupMonitor = new Object();
     private boolean isActivated = false;
 
-    private ImageSequence linkedTo;	
-    	// We use linkedTo to count our frame and for end commands.  If
-	// we aren't linkedTo another ImageSequence, it's set to null.
-    private int activeLinkedCount = 0;	
-    	// # of active sequences linked to us.  This tells us how many
+    private ImageSequence model;	
+    	// We use model to count our frame and for end commands.  If
+	// we're our own model, it's set to null.
+    private int activeModelCount = 0;	
+    	// # of active sequences using us as a model, including ourselves
+        // (if we're active).  This tells us how many
 	// time nextFrame() will be called per frame
     private int nextFrameCalls = 0;
     	// How many times we've been called without advancing currFrame;
@@ -124,7 +125,7 @@ public class ImageSequence extends Feature {
 	this.middle = middle;
 	this.extension = extension;
 	this.repeat = repeat;
-	this.linkedTo = null;
+	this.model = null;
 	this.endCommands = endCommands;
     }
     
@@ -147,16 +148,26 @@ public class ImageSequence extends Feature {
     public Command[] getEndCommands() {
        return endCommands;
     }
+    
+    public ImageSequence getModel() {
+        return model;
+    }
 
     /**
-     * Called by the parser.  Animations can be linked, so that they
-     * progress together, even when one is invisible.
+     * Called by the parser and the binary file reader.  Animations can be 
+     * linked, so that they
+     * progress together, even when one is invisible.  This is done by
+     * setting one image sequence's model to be a different image
+     * sequence.
      **/
-    public void setLinkedTo(ImageSequence linkedTo) throws IOException {
-	this.linkedTo = linkedTo;
-	if (linkedTo.middle.length != middle.length) {
-	    throw new IOException("Mismatched number of frames in linkedTo");
+    public void setModel(ImageSequence model) throws IOException {
+	this.model = model;
+	if (model.middle.length != middle.length) {
+	    throw new IOException("Mismatched number of frames in model");
 	}
+        if (model == this) {
+            throw new IOException("Can't set model to self; use null");
+        }
     }
 
     /**
@@ -221,19 +232,24 @@ public class ImageSequence extends Feature {
      **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
-	if (linkedTo != null) {
+	if (model != null) {
 	    if (mode) {
-		if (!linkedTo.isActivated && linkedTo.activeLinkedCount == 0) {
-		    linkedTo.currFrame = 0;
+		if (!model.isActivated && model.activeModelCount == 0) {
+		    model.currFrame = 0;
 		}
-		linkedTo.activeLinkedCount++;
+		model.activeModelCount++;
 	    } else {
-		linkedTo.activeLinkedCount--;
+		model.activeModelCount--;
 	    }
 	} else {
-	    if (mode && activeLinkedCount == 0) {
-		currFrame = 0;
-	    }
+	    if (mode) {
+                if (activeModelCount == 0) {
+                    currFrame = 0;
+                }
+                activeModelCount++;
+	    } else {
+                activeModelCount--;
+            }
 	}
 	if (mode) {
 	    lastImage = null;
@@ -309,10 +325,10 @@ public class ImageSequence extends Feature {
     }
 
     private ImageSequence getStateHolder() {
-	if (linkedTo == null) {
+	if (model == null) {
 	    return this;
 	} else {
-	    return linkedTo;
+	    return model;
 	}
     }
 
@@ -324,11 +340,11 @@ public class ImageSequence extends Feature {
 	    Debug.println("\n*** WARNING:  Advancing inactive sequence " 
                           + getName() + "\n");
 	}
-	if (linkedTo != null) {
-	    linkedTo.nextFrame();
+	if (model != null) {
+	    model.nextFrame();
 	} else {
 	    nextFrameCalls++;
-	    if (nextFrameCalls >= activeLinkedCount) {
+	    if (nextFrameCalls >= activeModelCount) {
 		nextFrameCalls = 0;	// We've got them all
 		currFrame++;
 		if (currFrame == images.length) {
