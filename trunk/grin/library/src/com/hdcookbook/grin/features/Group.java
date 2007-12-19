@@ -98,32 +98,33 @@ public class Group extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public int getStartX() {
+    public int getX() {
 	int x = Integer.MAX_VALUE;
 	for (int i = 0; i < parts.length; i++) {
-	    int xi = parts[i].getStartX();
-	    if (xi < x) {
-		x = xi;
+	    int val = parts[i].getX();
+	    if (val < x) {
+		x = val;
 	    }
 	}
 	return x;
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public int getStartY() {
+    public int getY() {
 	int y = Integer.MAX_VALUE;
 	for (int i = 0; i < parts.length; i++) {
-	    int yi = parts[i].getStartY();
-	    if (yi < y) {
-		y = yi;
+	    int val = parts[i].getY();
+	    if (val < y) {
+		y = val;
 	    }
 	}
 	return y;
     }
+
     /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
@@ -150,7 +151,7 @@ public class Group extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	// This is synchronized to only occur within model updates.
@@ -167,7 +168,7 @@ public class Group extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
 	if (mode) {
@@ -182,7 +183,7 @@ public class Group extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
 	for (int i = 0; i < parts.length; i++) {
@@ -195,7 +196,7 @@ public class Group extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
 	for (int i = 0; i < parts.length; i++) {
@@ -216,7 +217,7 @@ public class Group extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
 	for (int i = 0; i < parts.length; i++) {
@@ -225,7 +226,7 @@ public class Group extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void nextFrame() {
 	for (int i = 0; i < parts.length; i++) {

@@ -121,7 +121,7 @@ feature text F:LoadingText 430 900 { "Loading..." }
 	Lisa plain 60 { { 0 255 0 255 } } 
 ;
 
-feature group F:Nothing  {
+feature group F:Nothing  { 
 } ;
 
 #
@@ -323,7 +323,7 @@ feature assembly F:VideoMenu {
 # obscure F:StillYinYang
 #
 
-feature translation F:MainMenu.In.Coords {
+feature translator_model F:MainMenu.In.Coords {
 	 0	 -750  880	linear
 	24	  450  880	linear
     }
@@ -340,7 +340,8 @@ feature translator F:MainMenu.In.Mover
     # To optimize drawing, we put the moving main menu in a different
     # draw target, and we do a guarantee_fill on it...
 
-feature set_target F:MainMenu.Targeted F:MainMenu.Guaranteed T:MovingMenu ;
+feature set_target F:MainMenu.Targeted F:MainMenu.Guaranteed 
+    T:MovingMenu ;
 
     # We guarantee the entire area of the main menu, and fill in between
     # the src mode images.  They are:
@@ -373,7 +374,7 @@ feature clipped F:MainMenu.In
 # obscure F:StillYinYang
 #
 
-feature translation F:MainMenu.Out.Coords {
+feature translator_model F:MainMenu.Out.Coords {
 	 0	  450  880	linear
 	24	 -750  880	linear
     }
@@ -401,7 +402,7 @@ feature clipped F:MainMenu.Out
 # A feature with the video menu sliding in from the left
 #
 
-feature translation F:VideoMenu.In.Coords {
+feature translator_model F:VideoMenu.In.Coords {
 	 0	 -950  880	linear
 	28	  450  880	linear
     }
@@ -430,7 +431,7 @@ feature clipped F:VideoMenu.In
 # A feature with the video menu sliding out to the left.
 #
 
-feature translation F:VideoMenu.Out.Coords {
+feature translator_model F:VideoMenu.Out.Coords {
 	 0	  450  880	linear
 	28	 -950  880	linear
     }
@@ -444,18 +445,16 @@ feature translator F:VideoMenu.Out.Mover
     { F:VideoMenu }
 ;
 
-feature group F:VideoMenu.Out.Unclipped {
-    F:VideoMenu.Out.Coords
-    F:VideoMenu.Out.Mover
-} ;
-
 feature clipped F:VideoMenu.Out
-	F:VideoMenu.Out.Unclipped
+	sub_feature group {
+	    F:VideoMenu.Out.Coords
+	    F:VideoMenu.Out.Mover
+	} ;
 	( 400 880 1979 980 )
 ;
 
 #
-#  A features for an inactive menu in various states.  Close is either 
+#  A feature for an inactive menu in various states.  Close is either 
 # showing or not, by toggling the assembly F:MenuInactive.CloseOrNothing
 #  between "close" and "nothing"
 
@@ -603,6 +602,11 @@ feature group F:SetupMenu.None.Selected {
     # It was done this way just to show that various menu navigation
     # strategies are possible.
     #
+    # We also put a src_over above the assembly in the graph as an inline
+    # feature, just to show that this can be done.
+    #
+feature src_over F:SetupMenu F:SetupMenu.Assembly ;
+
 feature assembly F:SetupMenu.Assembly {
     	dts_51 		F:SetupMenu.Audio1.Selected
 	dts_71		F:SetupMenu.Audio2.Selected
@@ -610,9 +614,7 @@ feature assembly F:SetupMenu.Assembly {
 	spanish_st	F:SetupMenu.SpanishST.Selected
 	st_off		F:SetupMenu.NoST.Selected
 	none		F:SetupMenu.None.Selected
-} ;
-
-feature src_over F:SetupMenu F:SetupMenu.Assembly ;
+} ; 
 
 #
 #  Features for the scenes submenu
@@ -646,8 +648,6 @@ feature group F:ScenesMenu.BG.Images {
     F:ScenesMenu.BG.Scene.4
     F:ScenesMenu.BG.Scene.5
 } ;
-
-feature src_over F:ScenseMenu.BG.SrcOver F:ScenesMenu.BG.Images ;
 
 feature group F:ScenesMenu.BG {
     F:ScenesMenu.BG.Box
@@ -1179,380 +1179,65 @@ feature timer F:UserInput.Close.Timer 12 {
 	activate_part F:UserInput  close.selected ;
 } ;
 
-feature group F:UserInput.ASelected {
-    F:UserInput.Message
-    F:UserInput.A.Selected
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
+feature menu_assembly F:UserInput 
+    template {
+	all	{ F:UserInput.Message }
+	a	{ F:UserInput.A.Normal }
+	b	{ F:UserInput.B.Normal }
+	d	{ F:UserInput.D.Normal }
+	h	{ F:UserInput.H.Normal }
+	l	{ F:UserInput.L.Normal }
+	r	{ F:UserInput.R.Normal }
+	u	{ F:UserInput.U.Normal }
+	v	{ F:UserInput.V.Normal }
+	y	{ F:UserInput.Y.Normal }
+	enter	{ F:UserInput.Enter.Normal }
+	close	{ F:UserInput.Close.Normal }
+    } parts {
+	a.selected	{ a	  { F:UserInput.A.Selected } }
+	b.selected	{ b	  { F:UserInput.B.Selected } }
+	d.selected	{ d	  { F:UserInput.D.Selected } }
+	h.selected	{ h	  { F:UserInput.H.Selected } }
+	l.selected	{ l	  { F:UserInput.L.Selected } }
+	r.selected	{ r	  { F:UserInput.R.Selected } }
+	u.selected	{ u	  { F:UserInput.U.Selected } }
+	v.selected	{ v	  { F:UserInput.V.Selected } }
+	y.selected	{ y	  { F:UserInput.Y.Selected } }
+	enter.selected	{ enter	  { F:UserInput.Enter.Selected } }
+	close.selected	{ close	  { F:UserInput.Close.Selected } }
 
-feature group F:UserInput.BSelected {
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Selected
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.DSelected {
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Selected
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.HSelected {
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Selected
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.LSelected {
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Selected
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.RSelected {
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Selected
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.USelected {
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Selected
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.VSelected {
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Selected
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.YSelected {
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Selected
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.EnterSelected {
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Selected
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.CloseSelected {
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Selected
-} ;
-
-feature group F:UserInput.AActivated {
-    F:UserInput.A.Timer
-    F:UserInput.Message
-    F:UserInput.A.Activated
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.BActivated {
-    F:UserInput.B.Timer
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Activated
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.DActivated {
-    F:UserInput.D.Timer
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Activated
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.HActivated {
-    F:UserInput.H.Timer
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Activated
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.LActivated {
-    F:UserInput.L.Timer
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Activated
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.RActivated {
-    F:UserInput.R.Timer
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Activated
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.UActivated {
-    F:UserInput.U.Timer
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Activated
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.VActivated {
-    F:UserInput.V.Timer
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Activated
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.YActivated {
-    F:UserInput.Y.Timer
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Activated
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.EnterActivated {
-    F:UserInput.Enter.Timer
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Activated
-    F:UserInput.Close.Normal
-} ;
-
-feature group F:UserInput.CloseActivated {
-    F:UserInput.Close.Timer
-    F:UserInput.Message
-    F:UserInput.A.Normal
-    F:UserInput.B.Normal
-    F:UserInput.D.Normal
-    F:UserInput.H.Normal
-    F:UserInput.L.Normal
-    F:UserInput.R.Normal
-    F:UserInput.U.Normal
-    F:UserInput.V.Normal
-    F:UserInput.Y.Normal
-    F:UserInput.Enter.Normal
-    F:UserInput.Close.Activated
-} ;
-
-feature assembly F:UserInput {
-    a.selected		F:UserInput.ASelected
-    b.selected		F:UserInput.BSelected
-    d.selected		F:UserInput.DSelected
-    h.selected		F:UserInput.HSelected
-    l.selected		F:UserInput.LSelected
-    r.selected		F:UserInput.RSelected
-    u.selected		F:UserInput.USelected
-    v.selected		F:UserInput.VSelected
-    y.selected		F:UserInput.YSelected
-    enter.selected	F:UserInput.EnterSelected
-    close.selected	F:UserInput.CloseSelected
-
-    a.activated		F:UserInput.AActivated
-    b.activated		F:UserInput.BActivated
-    d.activated		F:UserInput.DActivated
-    h.activated		F:UserInput.HActivated
-    l.activated		F:UserInput.LActivated
-    r.activated		F:UserInput.RActivated
-    u.activated		F:UserInput.UActivated
-    v.activated		F:UserInput.VActivated
-    y.activated		F:UserInput.YActivated
-    enter.activated	F:UserInput.EnterActivated
-    close.activated	F:UserInput.CloseActivated
-} ;
+	a.activated	{ a	  { F:UserInput.A.Activated
+				    F:UserInput.A.Timer } }
+	b.activated	{ b	  { F:UserInput.B.Activated
+				    F:UserInput.B.Timer } }
+	d.activated	{ d	  { F:UserInput.D.Activated
+				    F:UserInput.D.Timer } }
+	h.activated	{ h	  { F:UserInput.H.Activated
+				    F:UserInput.H.Timer } }
+	l.activated	{ l	  { F:UserInput.L.Activated
+				    F:UserInput.L.Timer } }
+	r.activated	{ r	  { F:UserInput.R.Activated
+				    F:UserInput.R.Timer } }
+	u.activated	{ u	  { F:UserInput.U.Activated
+				    F:UserInput.U.Timer } }
+	v.activated	{ v	  { F:UserInput.V.Activated
+				    F:UserInput.V.Timer } }
+	y.activated	{ y	  { F:UserInput.Y.Activated
+				    F:UserInput.Y.Timer } }
+	enter.activated	{ enter	  { F:UserInput.Enter.Activated
+				    F:UserInput.Enter.Timer } }
+	close.activated	{ close	  { F:UserInput.Close.Selected 
+				    F:UserInput.Close.Timer } }
+    }
+;
 
 
 
 #
 #  The Bio images.
 #
-#  Here, we create two different segments:  One for when a download is available,
-#  and one for when it isn't.
+#  Here, we create two different segments:  One for when a download is 
+# available, and one for when it isn't.
 #
 #  See H:Bio (both .Available and .NotAvailable)
 
@@ -1916,7 +1601,9 @@ segment S:Bio.NotAvailable
 # =========================
 
 rc_handler visual H:MainMenu
-	grid { {  ( 0 1 )     <activate>  <activate>  <activate>  }
+		# We use the old ( 0 1 ) syntax just so this will continue
+		# to be tested.  It's equivalent to "[ play ]"
+	grid { {   ( 0 1 )   <activate>  <activate>  <activate>  }
 	       {    play        setup       scenes      bonus     } }
 	assembly F:MainMenu
 	select { 
@@ -1953,7 +1640,7 @@ rc_handler visual H:MainMenu
 ;
 
 rc_handler visual H:VideoMenu
-	grid { {   ( 0 1 )   <activate>  <activate>  <activate> ( 4 1 ) }
+	grid { {    [ play ]  <activate>  <activate>  <activate> [ close ] }
 	       {    play        setup      scenes       bonus    close } }
 	assembly F:VideoMenu
 	select { 
@@ -2003,7 +1690,7 @@ rc_handler visual H:SetupMenu
 	   { spanish_st }
 	   { st_off }
 	   { to_main }
-	   { ( 0 5 ) }
+	   { [ to_main ] }
 	   { to_main_mouse }
 	 }
     assembly F:SetupMenu.Assembly
@@ -2066,11 +1753,11 @@ rc_handler visual H:SetupMenu
 ;
 
 rc_handler visual H:ScenesMenu
-    grid {   { bookmarks  ( 0 0 )  ( 0 0 )  ( 0 0 )  ( 0 0 ) }
-             {    1          2        3        4        5   }
-	     { to_main    ( 0 2 )  ( 0 2 )  ( 0 2 )  ( 0 2 ) }
-	     {  ( 0 2 )   ( 0 2 )  ( 0 2 )  ( 0 2 )  ( 0 2 ) }
-	     {  to_main_mouse ( 0 2 ) ( 0 2 ) ( 0 2 )  ( 0 2 ) } }
+    grid { { bookmarks [ bookmarks ] [ bookmarks ] [ bookmarks ] [ bookmarks ] }
+           {    1            2            3              4               5     }
+	   {    to_main     [ to_main ]  [ to_main ]  [ to_main ]  [ to_main ] }
+	   {  [ to_main ]   [ to_main ]  [ to_main ]  [ to_main ]  [ to_main ] }
+	   {  to_main_mouse [ to_main ]  [ to_main ]  [ to_main ]  [ to_main ] } }
     assembly F:ScenesMenu.Assembly
     select {
     	1		1
@@ -2135,11 +1822,11 @@ rc_handler visual H:ScenesMenu
 #  search for "H:BookmarksMenu".
 #
 rc_handler visual H:BookmarksMenu
-    grid {   { scenes     ( 0 0 )  ( 0 0 )  ( 0 0 )  ( 0 0 ) }
-             {    1          2        3        4        5   }
-	     { to_main    ( 0 2 )  ( 0 2 )  ( 0 2 )  ( 0 2 ) }
-	     {  ( 0 2 )   ( 0 2 )  ( 0 2 )  ( 0 2 )  ( 0 2 ) }
-	     {  to_main_mouse ( 0 2 ) ( 0 2 ) ( 0 2 )  ( 0 2 ) } }
+    grid {   { scenes          [ scenes ]  [ scenes ]  [ scenes ]  [ scenes ] }
+             {    1                2           3           4           5   }
+	     {   to_main      [ to_main ] [ to_main ] [ to_main ] [ to_main ] }
+	     { [ to_main ]    [ to_main ] [ to_main ] [ to_main ] [ to_main ] }
+	     {  to_main_mouse [ to_main ] [ to_main ] [ to_main ]  [ to_main ] } }
     select {
     	1		{   BOOK:BookmarkUI select 1 ; }
 	2		{   BOOK:BookmarkUI select 2 ; }
@@ -2230,7 +1917,7 @@ rc_handler visual H:BonusMenu
            { bio }
 	   { bonus1 }
 	   { back } 
-	   { ( 0 3 ) }
+	   { [ back ] }
 	   { back_mouse } }
     assembly F:BonusMenu.Assembly
     select {
@@ -2276,12 +1963,16 @@ rc_handler visual H:BonusMenu
 ;
 
 rc_handler visual H:UserInput
-    grid { { ( 3 5 )	a 	b 	d 	( 1 1 ) }
-           { ( 3 0 )	h 	l 	r 	( 1 2 ) }
-	   { ( 3 1 )	u 	v 	y	( 2 5 ) }
-	   { ( 2 5 )	( 2 5 ) ( 2 5 ) ( 2 5 ) ( 2 5 ) }
-	   { ( 2 5 )	( 2 5 ) ( 2 2 ) ( 2 5 ) ( 2 5 ) }
-	   { ( 2 5 )	( 3 2 )	enter	close	( 1 0 ) } }
+    grid { { [ close ]	  a 	    b 	      d 	[ h ] }
+           {   [ d ]	  h 	    l 	      r 	[ u ] }
+	   {   [ r ]	  u 	    v 	      y	      [ enter ] }
+	   { [ enter ] [ enter ] [ enter ] [ enter ]  [ enter ] }
+	   { [ enter ] [ enter ]  [ v ]    [ enter ]  [ enter ] }
+	   { [ enter ]	[ y ]	  enter	   close	[ a ]   } }
+    rc_override { { a up close }
+                  { b up close }
+		  { d up close } }
+     
     assembly F:UserInput
     select {
 	a	a.selected

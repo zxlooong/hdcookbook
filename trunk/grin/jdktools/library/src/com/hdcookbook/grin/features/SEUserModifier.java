@@ -52,24 +52,24 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.features.Modifier;
 
 /**
- * A Modifier subclass that saves all the data passed into it's constructor.
- * This is used by the GrinBinaryWriter to ensure all possible extension data are
- * captured in the binary file format.
+ * A Modifier subclass that saves all the data passed into its constructor.
+ * This is used by the GrinBinaryWriter to ensure all possible extension 
+ * data are captured in the binary file format.
  */
-class UserModifier extends Modifier {
+public class SEUserModifier extends Modifier {
     
     private String typeName;
     private String name;
     private String arg;
     
-    /** Creates a new instance of UserModifier */
-    public UserModifier(Show show, String typeName, String name, String arg)
+    /** Creates a new instance of SEUserModifier */
+    public SEUserModifier(Show show, String typeName, String name, String arg)
     {
         super(show, name);
         this.typeName = typeName;

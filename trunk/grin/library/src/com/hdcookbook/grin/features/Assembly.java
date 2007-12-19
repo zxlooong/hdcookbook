@@ -94,6 +94,20 @@ public class Assembly extends Feature {
     }
 
     /**
+     * @inheritDoc
+     **/
+    public int getX() {
+	return currentFeature.getX();
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public int getY() {
+	return currentFeature.getY();
+    }
+
+    /**
      * Get the names of our parts.
      **/
     public String[] getPartNames() {
@@ -117,33 +131,6 @@ public class Assembly extends Feature {
 	// need to do anything here.
     }
 
-    /**
-     * See superclass definition.
-     **/
-    public int getStartX() {
-	int x = Integer.MAX_VALUE;
-	for (int i = 0; i < parts.length; i++) {
-	    int xi = parts[i].getStartX();
-	    if (xi < x) {
-		x = xi;
-	    }
-	}
-	return x;
-    }
-
-    /**
-     * See superclass definition.
-     **/
-    public int getStartY() {
-	int y = Integer.MAX_VALUE;
-	for (int i = 0; i < parts.length; i++) {
-	    int yi = parts[i].getStartY();
-	    if (yi < y) {
-		y = yi;
-	    }
-	}
-	return y;
-    }
 
     /**
      * Free any resources held by this feature.  It is the opposite of
@@ -192,7 +179,7 @@ public class Assembly extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
 	if (mode) {
@@ -207,7 +194,7 @@ public class Assembly extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
 	for (int i = 0; i < parts.length; i++) {
@@ -220,7 +207,7 @@ public class Assembly extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
 	for (int i = 0; i < parts.length; i++) {

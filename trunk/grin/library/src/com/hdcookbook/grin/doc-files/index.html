@@ -153,9 +153,9 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     feature_list ::= name_list
 
-    feature ::= fixed_image | image_sequence | box | assembly | sound 
-    		  | text | translation | translator | group | timer 
-		  | clipped | src_over | fade 
+    feature ::= fixed_image | image_sequence | box | assembly | menu_assembly
+    		  | sound | text | translator_model | translator | group 
+		  | timer | clipped | src_over | fade 
 		  | gurantee_fill | set_target
 		  | extension_feature | extension_modifier
 
@@ -178,7 +178,23 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     assembly ::= "feature" "assembly" name "{" assembly_part * "}" ";"
 
-    assembly_part ::= name feature_name
+    assembly_part ::= name sub_feature
+
+    menu_assembly ::= "feature" "menu_assembly" name
+    				"template" "{" menu_assembly_features * "}" ";"
+				"parts" "{" menu_assembly_part "}" ";"
+
+    menu_assembly_features ::= id "{" sub_feature * "}"
+
+    menu_assembly_part ::= name "{" menu_assembly_features * "}"
+
+	# For a menu_assembly, the template features provide a "base" set 
+	# of features included in each part (each branch).  Then,  each 
+	# branch defines an assembly part name, and the specifies what 
+	# is to be replaced out of that template for the given branch.
+	#
+	# A menu_assembly is converted into a normal assembly with a bunch
+	# of automatically-generated anonymous groups as its parts.
 
     text ::= "feature" "text" name x y text_strings font_spec color_spec 
     		[ "background" color_entry ] ";"
@@ -195,43 +211,44 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     color_entry ::= "+" | color_value
 
-    group ::= "feature" "group" name "{" feature_name * "}" ";"
+    group ::= "feature" "group" name "{" sub_feature * "}" ";"
 
     timer ::= "feature" "timer" name num_frames [ "repeat" ] commands ";"
 
-    clipped ::= "feature" "clipped" name feature_name rectangle ";"
+    clipped ::= "feature" "clipped" name sub_feature rectangle ";"
 
-    src_over ::= "feature" "src_over" name feature_name ";"
+    src_over ::= "feature" "src_over" name sub_feature ";"
 
-    fade ::= "feature" "fade" name feature_name
+    fade ::= "feature" "fade" name sub_feature
     		[ "src_over" ] "{" ( frame_number alpha "linear" ) * "}" 
 		[ "repeat" frame_number ] 
 		[ "end_commands" commands ] ";"
 
-    guarantee_fill ::= "feature" "guarantee_fill" name feature_name
+    guarantee_fill ::= "feature" "guarantee_fill" name sub_feature
     				rectangle 	    # guaranteed area
 				{ rectangle * } ";" # areas to be cleared
 
-    set_target ::= "feature" "set_target" name feature_name name ";"
+    set_target ::= "feature" "set_target" name sub_feature name ";"
     	#  The last name is target name taken from draw_targets
 
-    translation ::= "feature" "translation" name 
+    translator_model ::= "feature" "translator_model" name 
 			    "{" key_frame * "}" 
 			    [ "repeat" frame_number ] 
 			    [ "end_commands" commands ] ";"
+	# "translator_model" can be replaced by the old name "translation"
 
     key_frame ::= frame_number x y interpolation_type
 
     interpolation_type ::= "linear" | "linear-relative"
 
-    translator ::= "feature" "translator" name translation_name 
-    			"{" feature_name "}" ";"
+    translator ::= "feature" "translator" name translator_model_name 
+    			"{" sub_feature "}" ";"
 
     extension_feature ::= "feature" "extension" namespace:type_name 
     				name string ";"
 
     modifier_feature ::= "feature" "modifier" namespace:type_name name 
-    				feature_name string ";"
+    				sub_feature string ";"
 
     name_list ::= "{" name * "}"
 
@@ -269,6 +286,7 @@ a Show is created.  Here's BNF describing the syntax of a show file:
     visual_rc_handler
 	::= "rc_handler" "visual" name
 	        "grid" visual_grid
+		[ "rc_override" visual_overrides ]
 	        [ "assembly" assembly_name ]
 	        "select" action_by_state
 	        "activate" action_by_state
@@ -279,7 +297,16 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     visual_grid_row ::= "{" visual_grid_entry * "}"
 
-    visual_grid_entry ::= state_name | "(" x y ")" | "<activate>"
+    visual_grid_entry ::= state_name | "[" state_name "]" 
+    			  | "(" x y ")" | "<activate>"
+
+    visual_overrides ::= "{" visual_override * "}"
+
+    visual_override ::= "{" state_name visual_override_direction state_name "}"
+	# When in the first state, the given key will transition to the
+	# second state
+    
+    visual_override_direction ::= "up" | "down" | "left" | "right"
 
     action_by_state ::= "{" state_and_action * "}"
 
@@ -323,16 +350,22 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     mosaic_hint ::= "mosaic_hint" name width height "{" file_name * "}" ";"
 
+    sub_feature ::= feature_name
+    		    | sub_feature feature_without_name
+
+    feature_without_name ::= ... exactly like feature, without the feature name
+
     segment_name ::= string
     feature_name ::= string
     assembly_name ::= string
-    translation_name ::= string
+    translator_model_name ::= string
     part_name ::= string
     state_name ::= string
     file_name ::= string
     font_name ::= string
     handler_name ::= string
     name ::= string
+    id ::= string
     namespace:type_name ::= string containing ":"
     red_int ::= integer		    # 0..255
     green_int ::= integer	    # 0..255

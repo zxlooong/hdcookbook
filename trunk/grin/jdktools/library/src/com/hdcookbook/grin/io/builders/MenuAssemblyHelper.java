@@ -53,70 +53,102 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+package com.hdcookbook.grin.io.builders;
 
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEUserModifier;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.features.Group;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
 
 /**
- * This is an extensions builder that makes a fake version of any
- * GRIN extension it encounters.  
- */
-class GenericExtensionsBuilder implements ExtensionsBuilder {
-   
-    private GenericDirector director;
-
-    public GenericExtensionsBuilder(GenericDirector director) {
-	this.director = director;
-    }
-    
-    /**
-     * Returns null.
-     **/
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-    {
-	// Not implemented.  If we do this, we'll have to figure out
-	// some syntactical contstraints on an extension feature.
-        return null;
-    }
+ * This class builds the menu_assembly feature.  A menu_assembly is
+ * turned into a normal Assembly, with a bunch of anonymous groups.
+ * Please refer to the BNF in the main GRIN documentation to see a
+ * syntax for this.
+ * <p>
+ * Here's how it works:  A menu_assembly specifies a set of "default"
+ * features.  Then, it specifies the "parts" of the assembly.  Each
+ * part specifies the part name, and specifies which features of the
+ * default set are to be swapped out for that part, and what they're
+ * to be replaced with.
+ **/
+public class MenuAssemblyHelper {
 
     /**
-     * Returns an instance of a SEUserModifier.
+     * This data holder class specifies a set of features within 
+     * a MenuAssembly
      **/
-    public Modifier getModifier(Show show, final String typeName, 
-    			        String name, String arg)
-    {
-	return new SEUserModifier(show, typeName, name, arg);
+    public static class Features {
+
+	/**
+	 * A label identifyiing the features.  A part can swap out
+	 * features from the default set by specifying assembly features
+	 * with the same id.
+	 **/
+	public String id;
+
+	/**
+	 * The list of features under the given ID.  This defaults to
+	 * an empty List.
+	 **/
+	public List<FeatureRef> features = new ArrayList<FeatureRef>();
     }
 
-    /**
-     * Returns an instance of UserCommand.
-     **/
-    public Command getCommand(Show show, final String typeName, String[] args)
-		       throws IOException
-    {
-	return new UserCommand(typeName, args);
-    }
+    public SEShow show;
+    public List<Features> template;
+    public List<String> partNames;
+    public List<List<Features>> parts;
+    public Assembly assembly;
+    public int lineNumber;
 
     /**
-     * @inheritDoc
+     * Setup the assembly.
+     *
+     * @return the synthetic features that were created.  These need to be
+     * 	       added to the show by the caller.
      **/
-    public void finishBuilding(Show show) throws IOException {
+    public Iterable<Feature> setupAssembly() throws IOException {
+	String[] nameList = partNames.toArray(new String[partNames.size()]);
+	Feature[] featureList = new Feature[parts.size()];
+	for (int i = 0; i < featureList.length; i++) {
+	    featureList[i] = buildPart(parts.get(i));
+	}
+	assembly.setParts(nameList, featureList);
+	return Arrays.asList(featureList);
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
+    private Feature buildPart(List<Features> replacements) throws IOException {
+	Map<String, List<FeatureRef>> idMap 
+		= new HashMap<String, List<FeatureRef>>();
+	for (Features f : replacements)  {
+	    if (idMap.get(f.id) != null) {
+		throw new IOException("The id \"" + f.id + "\" occurs twice"
+				      + " (near line " + lineNumber + ")");
+	    }
+	    idMap.put(f.id, f.features);
+	}
+	List<Feature> elements = new ArrayList<Feature>();
+	for (int i = 0; i < template.size(); i++) {
+	    List<FeatureRef> fRefs = idMap.get(template.get(i).id);
+	    if (fRefs == null) {
+		fRefs = template.get(i).features;
+	    }
+	    for (int j = 0; j < fRefs.size(); j++)  {
+		elements.add(fRefs.get(j).getFeature());
+	    }
+	}
+	Feature[] members = elements.toArray(new Feature[elements.size()]);
+	Group g = new Group(show, null);
+	g.setup(members);
+	return g;
     }
-    
+
 }

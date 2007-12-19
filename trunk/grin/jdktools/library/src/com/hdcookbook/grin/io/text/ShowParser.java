@@ -55,6 +55,7 @@
 
 package com.hdcookbook.grin.io.text;
 
+import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.ChapterManager;
@@ -86,6 +87,10 @@ import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.builders.MenuAssemblyHelper;
+import com.hdcookbook.grin.io.builders.TranslatorHelper;
+import com.hdcookbook.grin.io.builders.VisualRCHandlerHelper;
+import com.hdcookbook.grin.io.builders.VisualRCHandlerCell;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.AssetFinder;
 
@@ -95,6 +100,9 @@ import java.awt.Font;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.Vector;
 
@@ -108,13 +116,14 @@ import java.util.Vector;
  **/
 public class ShowParser {
 
-    private Show show;
+    private SEShow show;
     private Lexer lexer;
     private ExtensionsBuilder extBuilder;
     private Vector[] deferred = { new Vector(), new Vector(), new Vector() };  
     	// Array of Vector<ForwardReference>
+    private Map<String, VisualRCHandlerHelper> visualRCHelpers
+	= new HashMap<String, VisualRCHandlerHelper>();
 
-    private final static String[] emptyStringArray = new String[0];
     private final static Command[] emptyCommandArray = new Command[0];
 
     private ShowBuilder builder;
@@ -131,7 +140,7 @@ public class ShowParser {
      * @param show	The show to populate.  This should be a new, empty
      *			show.
      **/
-    public ShowParser(Reader reader, String showName, Show show) {
+    public ShowParser(Reader reader, String showName, SEShow show) {
 	this(reader, showName, show, null);
     }
 
@@ -151,7 +160,7 @@ public class ShowParser {
      *			other than the default to add decorations to the
      *			tree, e.g. for debugging.
      **/
-    public ShowParser(Reader reader, String showName, Show show, 
+    public ShowParser(Reader reader, String showName, SEShow show, 
     		      ShowBuilder builder) 
     {
         this.show = show;
@@ -223,67 +232,7 @@ public class ShowParser {
 	    } else if ("segment".equals(tok)) {
 		parseSegment(lineStart);
 	    } else if ("feature".equals(tok)) {
-		tok = lexer.getString();
-		if ("fixed_image".equals(tok)) {
-		    parseFixedImage(lineStart);
-		} else if ("image_sequence".equals(tok)) {
-		    parseImageSequence(lineStart);
-		} else if ("box".equals(tok)) {
-		    parseBox(lineStart);
-		} else if ("assembly".equals(tok)) {
-		    parseAssembly(lineStart);
-		} else if ("group".equals(tok)) {
-		    parseGroup(lineStart);
-		} else if ("clipped".equals(tok)) {
-		    parseClipped(lineStart);
-		} else if ("src_over".equals(tok)) {
-		    parseSrcOver(lineStart);
-		} else if ("fade".equals(tok)) {
-		    parseFade(lineStart);
-		} else if ("timer".equals(tok)) {
-		    parseTimer(lineStart);
-		} else if ("translation".equals(tok)) {
-		    parseTranslation(lineStart);
-		} else if ("translator".equals(tok)) {
-		    parseTranslator(lineStart);
-		} else if ("text".equals(tok)) {
-		    parseText(lineStart);
-		} else if ("guarantee_fill".equals(tok)) {
-		    parseGuaranteeFill(lineStart);
-		} else if ("set_target".equals(tok)) {
-		    parseSetTarget(lineStart);
-		} else if (extBuilder == null || tok == null) {
-		    lexer.reportError("Unrecognized feature \"" + tok + "\"");
-		} else if ("extension".equals(tok) || "modifier".equals(tok)) {
-		    String typeName = lexer.getString();
-		    String name = lexer.getString();
-		    String subName = null;
-		    if ("modifier".equals(tok)) {
-			subName = lexer.getString();
-		    }
-		    String arg = lexer.getString();
-		    parseExpected(";");
-		    Feature f;
-		    if (typeName.indexOf(':') < 0) {
-			lexer.reportError(typeName + " doesn't contain \":\"");
-		    }
-		    if (subName == null) {
-			f = extBuilder.getFeature(show, typeName, name, arg);
-		    } else {
-			Modifier m = extBuilder.getModifier(show, typeName,
-							   name, arg);
-			f = m;
-			if (m != null) {
-			    resolveModifier(m, subName);
-			}
-		    }
-		    if (f == null) {
-			lexer.reportError("Unrecognized feature " + typeName);
-		    }
-		    builder.addFeature(name, lineStart, f);
-		} else {
-		    lexer.reportError("Unrecognized feature \"" + tok + "\"");
-		}
+		parseFeature(true, lineStart);
 	    } else if ("rc_handler".equals(tok)) {
 		tok = lexer.getString();
 		if ("assembly_grid".equals(tok)) {
@@ -338,16 +287,16 @@ public class ShowParser {
 	    sa = parseStrings();
 	    tok = lexer.getString();
 	} else {
-	    sa = emptyStringArray;
+	    sa = new String[0];
 	}
-	final String[] active = sa;
+	final SubFeature[] active = makeSubFeatureList(sa);
 	if ("setup".equals(tok)) {
 	    sa = parseStrings();
 	    tok = lexer.getString();
 	} else {
-	    sa = emptyStringArray;
+	    sa = new String[0];
 	}
-	final String[] setup = sa;
+	final SubFeature[] setup = makeSubFeatureList(sa);
 	if ("chapter".equals(tok)) {
 	    s = lexer.getString();
 	    tok = lexer.getString();
@@ -359,7 +308,7 @@ public class ShowParser {
 	    sa = parseStrings();
 	    tok = lexer.getString();
 	} else {
-	    sa = emptyStringArray;
+	    sa = new String[0];
 	}
 	final String[] rcHandlers = sa;
 	Command[] ca;
@@ -399,18 +348,109 @@ public class ShowParser {
 	deferred[0].addElement(fw);
     }
 
-    private void parseFixedImage(int line) throws IOException {
-	String name = lexer.getString();
-	int x = lexer.getInt();
-	int y = lexer.getInt();
-	int bobble = 0;
-	String fileName = lexer.getString();
-	parseExpected(";");
-	builder.addFeature(name,line, new FixedImage(show, name, x,y,fileName));
+    //
+    // Segments only have named subfeatures, so this works.
+    //
+    private SubFeature[] makeSubFeatureList(String[] names) {
+	SubFeature[] result = new SubFeature[names.length];
+	for (int i = 0; i < names.length; i++) {
+	    result[i] = new SubFeature(builder, names[i], lexer);
+	}
+	return result;
     }
 
-    private void parseImageSequence(int line) throws IOException {
-	final String name = lexer.getString();
+    private Feature parseFeature(boolean hasName, int lineStart) 
+    		throws IOException 
+    {
+	String tok = lexer.getString();
+	if ("fixed_image".equals(tok)) {
+	    return parseFixedImage(hasName, lineStart);
+	} else if ("image_sequence".equals(tok)) {
+	    return parseImageSequence(hasName, lineStart);
+	} else if ("box".equals(tok)) {
+	    return parseBox(hasName, lineStart);
+	} else if ("assembly".equals(tok)) {
+	    return parseAssembly(hasName, lineStart);
+	} else if ("menu_assembly".equals(tok)) {
+	    return parseMenuAssembly(hasName, lineStart);
+	} else if ("group".equals(tok)) {
+	    return parseGroup(hasName, lineStart);
+	} else if ("clipped".equals(tok)) {
+	    return parseClipped(hasName, lineStart);
+	} else if ("src_over".equals(tok)) {
+	    return parseSrcOver(hasName, lineStart);
+	} else if ("fade".equals(tok)) {
+	    return parseFade(hasName, lineStart);
+	} else if ("timer".equals(tok)) {
+	    return parseTimer(hasName, lineStart);
+	} else if ("translation".equals(tok) || "translator_model".equals(tok)) 
+	{
+	    return parseTranslatorModel(hasName, lineStart);
+	} else if ("translator".equals(tok)) {
+	    return parseTranslator(hasName, lineStart);
+	} else if ("text".equals(tok)) {
+	    return parseText(hasName, lineStart);
+	} else if ("guarantee_fill".equals(tok)) {
+	    return parseGuaranteeFill(hasName, lineStart);
+	} else if ("set_target".equals(tok)) {
+	    return parseSetTarget(hasName, lineStart);
+	} else if (extBuilder == null || tok == null) {
+	    lexer.reportError("Unrecognized feature \"" + tok + "\"");
+	    return null;	// not reached
+	} else if ("extension".equals(tok) || "modifier".equals(tok)) {
+	    String typeName = lexer.getString();
+	    String name = null;
+	    if (hasName) {
+		name = lexer.getString();
+	    }
+	    SubFeature sub = null;
+	    if ("modifier".equals(tok)) {
+		sub = parseSubFeature(lexer.getString());
+	    }
+	    String arg = lexer.getString();
+	    parseExpected(";");
+	    Feature f;
+	    if (typeName.indexOf(':') < 0) {
+		lexer.reportError(typeName + " doesn't contain \":\"");
+	    }
+	    if (sub == null) {
+		f = extBuilder.getFeature(show, typeName, name, arg);
+	    } else {
+		Modifier m = extBuilder.getModifier(show, typeName,
+						   name, arg);
+		f = m;
+		if (m != null) {
+		    resolveModifier(m, sub);
+		}
+	    }
+	    if (f == null) {
+		lexer.reportError("Unrecognized feature " + typeName);
+	    }
+	    builder.addFeature(name, lineStart, f);
+	    return f;
+	} else {
+	    lexer.reportError("Unrecognized feature \"" + tok + "\"");
+	    return null;	// not reached
+	}
+    }
+
+    private Feature parseFixedImage(boolean hasName, int line) 
+    		throws IOException 
+    {
+	String name = parseFeatureName(hasName);
+	int x = lexer.getInt();
+	int y = lexer.getInt();
+	String fileName = lexer.getString();
+	parseExpected(";");
+	Feature f = new FixedImage(show, name, x, y, fileName);
+	builder.addFeature(name,line, f);
+	return f;
+    }
+
+    private Feature parseImageSequence(boolean hasName, int line) 
+    		throws IOException 
+    {
+	final String name = parseFeatureName(hasName);
 	int x = lexer.getInt();
 	int y = lexer.getInt();
 	String fileName = lexer.getString();
@@ -469,10 +509,11 @@ public class ShowParser {
 	    };
 	    deferred[0].addElement(fw);
 	}
+	return f;
     }
 
-    private void parseBox(int line) throws IOException {
-	String name = lexer.getString();
+    private Feature parseBox(boolean hasName, int line) throws IOException {
+	String name = parseFeatureName(hasName);
 	Rectangle placement = parseRectangle();
 	String tok = lexer.getString();
 	int outlineWidth = 0;
@@ -496,82 +537,160 @@ public class ShowParser {
 	if (!(";".equals(tok))) {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
-	builder.addFeature(name, line, 
-	    new Box(show, name, placement, outlineWidth, outlineColor, 
-	    	    fillColor));
+	Box box = new Box(show, name, placement, outlineWidth, outlineColor, 
+			  fillColor);
+	builder.addFeature(name, line, box);
+	return box;
     }
 
 
-    private void parseAssembly(int line) throws IOException {
-	String name = lexer.getString();
-	String[] strings = parseStrings();
-	parseExpected(";");
-	if ((strings.length % 2) == 1) {
-	    lexer.reportError("Assembly part \"" +
-	    		      strings[strings.length-1] +
-			      "\" has no feature");
+    private Feature parseAssembly(boolean hasName, int line) throws IOException
+    {
+	String name = parseFeatureName(hasName);
+	ArrayList<String> namesList = new ArrayList<String>();
+	ArrayList<SubFeature> partsList = new ArrayList<SubFeature>();
+	parseExpected("{");
+	for (;;) {
+	    String tok = lexer.getString();
+	    if (tok == null) {
+		lexer.reportError("Unexpected EOF");
+	    } else if ("}".equals(tok)) {
+		break;
+	    }
+	    namesList.add(tok);
+	    tok = lexer.getString();
+	    partsList.add(parseSubFeature(tok));
 	}
+	parseExpected(";");
 	final Assembly a = new Assembly(show, name);
 	builder.addFeature(name, line, a);
-	final String[] names = new String[strings.length / 2];
-	final String[] featureNames = new String[strings.length / 2];
-	for (int i = 0; i < names.length; i++) {
-	    names[i] = strings[i * 2];
-	    featureNames[i] = strings[i*2 + 1];
-	}
+	final String[] names = namesList.toArray(new String[namesList.size()]);
+	final SubFeature[] parts 
+		= partsList.toArray(new SubFeature[partsList.size()]);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
-		a.setParts(names, makeFeatureList(featureNames));
+		a.setParts(names, makeFeatureList(parts));
 	    }
 	};
 	deferred[0].addElement(fw);
+	return a;
     }
 
-    private void parseGroup(int line) throws IOException {
-	String name = lexer.getString();
-	final String[] featureNames = parseStrings();
+    private Feature parseMenuAssembly(boolean hasName, final int line) 
+    		throws IOException
+    {
+	final MenuAssemblyHelper helper = new MenuAssemblyHelper();
+	helper.lineNumber = lexer.getLineNumber();
+	helper.show = show;
+	String name = parseFeatureName(hasName);
+	parseExpected("template");
+	helper.template = parseMenuAssemblyFeatures();
+	helper.partNames = new ArrayList<String>();
+	helper.parts = new ArrayList<List<MenuAssemblyHelper.Features>>();
+	parseExpected("parts");
+	parseExpected("{");
+	for (;;) {
+	    String tok = lexer.getString();
+	    if (tok == null) {
+		lexer.reportError("Unexpected EOF");
+	    } else if ("}".equals(tok)) {
+		break;
+	    }
+	    helper.partNames.add(tok);
+	    helper.parts.add(parseMenuAssemblyFeatures());
+	}
+	parseExpected(";");
+	Assembly a = new Assembly(show, name);
+	helper.assembly = a;
+	builder.addFeature(name, line, a);
+	ForwardReference fw = new ForwardReference(lexer) {
+	    void resolve() throws IOException {
+		Iterable<Feature> syntheticFeatures = helper.setupAssembly();
+		for (Feature f: syntheticFeatures) {
+		    builder.addFeature(null, line, f);
+		}
+	    }
+	};
+	deferred[1].addElement(fw);
+	return a;
+    }
+
+    private List<MenuAssemblyHelper.Features> parseMenuAssemblyFeatures()
+	    throws IOException
+    {
+	List<MenuAssemblyHelper.Features> result 
+	    = new ArrayList<MenuAssemblyHelper.Features>();
+	parseExpected("{");
+	for (;;) {
+	    String tok = lexer.getString();
+	    if ("}".equals(tok)) {
+		break;
+	    }
+	    MenuAssemblyHelper.Features feat 
+	    	= new MenuAssemblyHelper.Features();
+	    result.add(feat);
+	    feat.id = tok;
+	    parseExpected("{");
+	    for (;;) {
+		tok = lexer.getString();
+		if ("}".equals(tok)) {
+		    break;
+		}
+		SubFeature sf = parseSubFeature(tok);
+		feat.features.add(sf);
+	    }
+	}
+	return result;
+    }
+
+    private Feature parseGroup(boolean hasName, int line) throws IOException {
+	String name = parseFeatureName(hasName);
+	final SubFeature[] parts = parsePartsList();
 	parseExpected(";");
 	final Group group = new Group(show, name);
 	builder.addFeature(name, line, group);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
-		group.setup(makeFeatureList(featureNames));
+		group.setup(makeFeatureList(parts));
 	    }
 	};
 	deferred[0].addElement(fw);
+	return group;
     }
 
-    private void parseClipped(int line) throws IOException {
-	String name = lexer.getString();
-	String partName =  lexer.getString();
+    private Feature parseClipped(boolean hasName, int line) throws IOException {
+	String name = parseFeatureName(hasName);
+	SubFeature part = parseSubFeature(lexer.getString());
 	Rectangle clipRegion = parseRectangle();
 	parseExpected(";");
 	Clipped clipped = new Clipped(show, name, clipRegion);
 	builder.addFeature(name, line, clipped);
-	resolveModifier(clipped, partName);
+	resolveModifier(clipped, part);
+	return clipped;
     }
 
-    private void parseSrcOver(int line) throws IOException {
-	String name = lexer.getString();
-	String partName =  lexer.getString();
+    private Feature parseSrcOver(boolean hasName, int line) throws IOException {
+	String name = parseFeatureName(hasName);
+	SubFeature part = parseSubFeature(lexer.getString());
 	parseExpected(";");
 	SrcOver so = new SrcOver(show, name);
 	builder.addFeature(name, line, so);
-	resolveModifier(so, partName);
+	resolveModifier(so, part);
+	return so;
     }
 
-    private void resolveModifier(final Modifier m, final String partName) {
+    private void resolveModifier(final Modifier m, final SubFeature part) {
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
-		m.setup(makeFeature(partName));
+		m.setup(part.getFeature());
 	    }
 	};
 	deferred[0].addElement(fw);
     }
 
-    private void parseFade(int line) throws IOException {
-	String name = lexer.getString();
-	String partName =  lexer.getString();
+    private Feature parseFade(boolean hasName, int line) throws IOException {
+	String name = parseFeatureName(hasName);
+	SubFeature part = parseSubFeature(lexer.getString());
 	String tok = lexer.getString();
 	boolean srcOver = false;
 	if ("src_over".equals(tok)) {
@@ -635,11 +754,12 @@ public class ShowParser {
 	Fade fade = new Fade(show, name, srcOver, fs, alphas, repeatFrame,
 			     endCommands);
 	builder.addFeature(name, line, fade);
-	resolveModifier(fade, partName);
+	resolveModifier(fade, part);
+	return fade;
     }
 
-    private void parseTimer(int line) throws IOException {
-	String name = lexer.getString();
+    private Feature parseTimer(boolean hasName, int line) throws IOException {
+	String name = parseFeatureName(hasName);
 	int numFrames = lexer.getInt();
 	String tok = lexer.getString();
 	boolean repeat = false;
@@ -658,11 +778,14 @@ public class ShowParser {
 	}
 	Timer timer = new Timer(show, name, numFrames, repeat, commands);
 	builder.addFeature(name, line, timer);
+	return timer;
     }
 
-    private void parseGuaranteeFill(int line) throws IOException {
-	String name = lexer.getString();
-	String partName =  lexer.getString();
+    private Feature parseGuaranteeFill(boolean hasName, int line) 
+    	    throws IOException 
+    {
+	String name = parseFeatureName(hasName);
+	SubFeature part = parseSubFeature(lexer.getString());
 	Rectangle g = parseRectangle();
 	parseExpected("{");
         Vector v = new Vector();
@@ -686,12 +809,15 @@ public class ShowParser {
 	}
 	GuaranteeFill f = new GuaranteeFill(show, name, g, result);
 	builder.addFeature(name, line, f);
-	resolveModifier(f, partName);
+	resolveModifier(f, part);
+	return f;
     }
 
-    private void parseSetTarget(int line) throws IOException {
-	String name = lexer.getString();
-	String partName =  lexer.getString();
+    private Feature parseSetTarget(boolean hasName, int line) 
+    		throws IOException 
+    {
+	String name = parseFeatureName(hasName);
+	SubFeature part = parseSubFeature(lexer.getString());
 	String targetName = lexer.getString();
 	String[] names = show.getDrawTargets();
 	int target = -1;
@@ -707,12 +833,15 @@ public class ShowParser {
 	parseExpected(";");
 	SetTarget f = new SetTarget(show, name, target);
 	builder.addFeature(name, line, f);
-	resolveModifier(f, partName);
+	resolveModifier(f, part);
+	return f;
     }
 
 
-    private void parseTranslation(int line) throws IOException {
-	String name = lexer.getString();
+    private Feature parseTranslatorModel(boolean hasName, int line) 
+    		throws IOException 
+    {
+	String name = parseFeatureName(hasName);
 	parseExpected("{");
 	Vector keyframes = new Vector();
         boolean isRelative = false;
@@ -780,12 +909,15 @@ public class ShowParser {
 	    = new TranslatorModel(show, name, fs, xs, ys, repeatFrame, 
                               isRelative, endCommands);
 	builder.addFeature(name, line, trans);
+	return trans;
     }
 
-    private void parseTranslator(int line) throws IOException {
-	String name = lexer.getString();
+    private Feature parseTranslator(boolean hasName, int line) 
+    		throws IOException 
+    {
+	String name = parseFeatureName(hasName);
 	final String translationName = lexer.getString();
-	final String[] featureNames = parseStrings();
+	final SubFeature[] parts = parsePartsList();
 	parseExpected(";");
 	final Translator trans = new Translator(show, name);
 	builder.addFeature(name, line, trans);
@@ -796,7 +928,7 @@ public class ShowParser {
 		    lexer.reportError("Translation \"" + translationName 
 		    			+ "\" not found");
 		}
-		Feature[] fa = makeFeatureList(featureNames);
+		Feature[] fa = makeFeatureList(parts);
                 if (fa.length == 1) {
                     trans.setup((TranslatorModel) t, fa[0]);
                 } else {
@@ -806,14 +938,14 @@ public class ShowParser {
                 }
 	    }
 	};
-	// Translators must be set up after other modifiers, so that
-	// if they translate a modifier getStartX() will work.
-	deferred[1].addElement(fw);
+	deferred[0].addElement(fw);
+	builder.addDeferredBuilder(new TranslatorHelper(trans, line));
+	return trans;
     }
 
 
-    private void parseText(int line) throws IOException {
-	String name = lexer.getString();
+    private Feature parseText(boolean hasName, int line) throws IOException {
+	String name = parseFeatureName(hasName);
 	int x = lexer.getInt();
 	int y = lexer.getInt();
 	String tok = lexer.getString();
@@ -867,6 +999,7 @@ public class ShowParser {
 	Text text = new Text(show, name, x, y, textStrings, vspace, 
 			     font, cols, background);
 	builder.addFeature(name, line, text);
+	return text;
     }
 
     private Font parseFontSpec(String tok) throws IOException {
@@ -886,6 +1019,14 @@ public class ShowParser {
 	}
 	int size = lexer.getInt();
 	return AssetFinder.getFont(fontName, style, size);
+    }
+
+    private String parseFeatureName(boolean hasName) throws IOException {
+	if (hasName) {
+	    return lexer.getString();
+	} else {
+	    return null;
+	}
     }
 
     private void parseAssemblyGridRCHandler() throws IOException {
@@ -952,23 +1093,29 @@ public class ShowParser {
 	if (!(";".equals(tok))) {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
-	int[][] grid = new int[selectParts.length][];
-	String[] stateNames = new String[height * width];
-	{
-	    int i = 0;
-	    for (int y = 0; y < height; y++) {
-		grid[y] = new int[width];
-		for (int x = 0; x < selectParts[y].length; x++) {
-		    grid[y][x] = i;
-		    stateNames[i] = "" + x + "," + y;
-		    i++;
-		}
+	VisualRCHandlerHelper helper = new VisualRCHandlerHelper();
+	helper.setHandlerName(handlerName);
+	visualRCHelpers.put(handlerName, helper);
+	List<List<VisualRCHandlerCell>> grid 
+	    = new ArrayList<List<VisualRCHandlerCell>>();
+	for (int y = 0; y < height; y++) {
+	    List<VisualRCHandlerCell> row =new ArrayList<VisualRCHandlerCell>();
+	    grid.add(row);
+	    for (int x = 0; x < selectParts[y].length; x++) {
+		row.add(VisualRCHandlerCell.newState("" + x + "," + y));
 	    }
 	}
-	final VisualRCHandler hand 
-	    = new VisualRCHandler(handlerName, grid, stateNames, null,
-	    			  activateCommands, null, null,
-				  timeout, timeoutCommands);
+	String msg = helper.setGrid(grid);
+	if (msg != null) {
+	   lexer.reportError(msg);
+	}
+	helper.setSelectCommands(null);
+	helper.setActivateCommands(activateCommands);
+	helper.setMouseRects(null);
+	helper.setMouseRectStates(null);
+	helper.setTimeout(timeout);
+	helper.setTimeoutCommands(timeoutCommands);
+	final VisualRCHandler hand = helper.getFinishedHandler();
 	builder.addRCHandler(handlerName, lineStart, hand);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
@@ -984,16 +1131,21 @@ public class ShowParser {
     }
 
     private void parseVisualRCHandler() throws IOException {
+	VisualRCHandlerHelper helper = new VisualRCHandlerHelper();
 	int lineStart = lexer.getLineNumber();
 	String handlerName = lexer.getString();
+	helper.setHandlerName(handlerName);
+	visualRCHelpers.put(handlerName, helper);
 	parseExpected("grid");
-	Vector statesV = new Vector();  // <String>
-	int[][] grid = parseVisualGrid(statesV);
-	String[] states = new String[statesV.size()];
-	for (int i = 0; i < states.length; i++) {
-	    states[i] = (String) statesV.elementAt(i);
+	String msg = helper.setGrid(parseVisualGrid());
+	if (msg != null) {
+	    lexer.reportError(msg);
 	}
 	String tok = lexer.getString();
+	if ("rc_override".equals(tok)) {
+	    helper.setRCOverrides(parseRCOverride());
+	    tok = lexer.getString();
+	}
 	if ("assembly".equals(tok)) {
 	    tok = lexer.getString();	// Assembly name
 	    parseExpected("select");
@@ -1004,19 +1156,20 @@ public class ShowParser {
 	}
 	final String assemblyName = tok;
 
-	Object[] oa = parseVisualActions(statesV, assemblyName != null);
+	Map<String, Integer> states = helper.getStates();
+	Object[] oa = parseVisualActions(states, assemblyName != null);
 	final String[] selectParts = (String[]) oa[0];
-	final Command[][] selectCommands = (Command[][]) oa[1];
+	helper.setSelectCommands((Command[][]) oa[1]);
 	parseExpected("activate");
-	oa = parseVisualActions(statesV, assemblyName != null);
+	oa = parseVisualActions(states, assemblyName != null);
 	final String[] activateParts = (String[]) oa[0];
-	final Command[][] activateCommands = (Command[][]) oa[1];
+	helper.setActivateCommands((Command[][]) oa[1]);
 
 	tok = lexer.getString();
 	Rectangle[] mouseRects = null;
 	int[] mouseRectStates = null;
 	if ("mouse".equals(tok)) {
-	    Vector v = parseMouseLocations(statesV);
+	    Vector v = parseMouseLocations(states);
 	    mouseRects = new Rectangle[v.size() / 2];
 	    mouseRectStates = new int[v.size() / 2];
 	    for (int i = 0; i < mouseRects.length; i++) {
@@ -1025,6 +1178,8 @@ public class ShowParser {
 	    }
 	    tok = lexer.getString();
 	}
+	helper.setMouseRects(mouseRects);
+	helper.setMouseRectStates(mouseRectStates);
 	int timeout = -1;
 	Command[] timeoutCommands = emptyCommandArray;
 	if ("timeout".equals(tok)) {
@@ -1033,14 +1188,12 @@ public class ShowParser {
 	    timeoutCommands = parseCommands();
 	    tok = lexer.getString();
 	}
+	helper.setTimeout(timeout);
+	helper.setTimeoutCommands(timeoutCommands);
 	if (!(";".equals(tok))) {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
-	final VisualRCHandler hand 
-	    = new VisualRCHandler(handlerName, grid, states, 
-	    			  selectCommands, activateCommands,
-				  mouseRects, mouseRectStates,
-				  timeout, timeoutCommands);
+	final VisualRCHandler hand = helper.getFinishedHandler();
 	builder.addRCHandler(handlerName, lineStart, hand);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
@@ -1055,58 +1208,33 @@ public class ShowParser {
 		hand.setup(assembly, realSelParts, realActParts);
 	    }
 	};
-	deferred[0].addElement(fw);
+	deferred[1].addElement(fw);
     }
 
-    private int[][] parseVisualGrid(Vector states) throws IOException {
-	Vector v = new Vector();
+    private List<List<VisualRCHandlerCell>> parseVisualGrid() 
+    		throws IOException 
+    {
+	List<List<VisualRCHandlerCell>>  result
+		= new ArrayList<List<VisualRCHandlerCell>>();
 	parseExpected("{");
 	for (;;) {
 	    String tok = lexer.getString();
 	    if ("}".equals(tok)) {
 		break;
 	    } else if ("{".equals(tok)) {
-		int[] el = parseVisualGridRow(states);
-		v.addElement(el);
+		result.add(parseVisualGridRow());
 	    } else {
 		lexer.reportError("'{' or '}' expected, " + tok + " seen");
-	    }
-	}
-	int num = v.size();
-	int[][] result = new int[num][];
-	for (int i = 0; i < num; i++) {
-	    result[i] = (int[]) v.elementAt(i);
-	}
-	if (result.length < 1) {
-	    lexer.reportError("Grid must have at least one row");
-	}
-	for (int i = 1; i < num; i++) {
-	    if (result[0].length != result[i].length) {
-		lexer.reportError("Grid row " + i 
-			+ " (counting from 0) has a different length");
-	    }
-	}
-	for (int y = 0; y < result.length; y++) {
-	    for (int x = 0; x < result[y].length; x++) {
-		int g = result[y][x];
-		if ((g & 0x10000) != 0 && g != VisualRCHandler.GRID_ACTIVATE) {
-		    int y2 = 0xff & (g >> 8);
-		    int x2 = 0xff & g;
-		    if ((result[y2][x2] & 0x10000) != 0) {
-			lexer.reportError(
-			    "Grid refers to cell that refers to cell at x,y " 
-			    + x + ", " + y + " (counting from 0)");
-		    }
-		}
 	    }
 	}
 	return result;
     }
 
-    private int[] parseVisualGridRow(Vector states) throws IOException {
-	Vector v = new Vector();
+    private List<VisualRCHandlerCell> parseVisualGridRow() throws IOException {
+	List<VisualRCHandlerCell> result = new ArrayList<VisualRCHandlerCell>();
 	for (;;) {
 	    String tok = lexer.getString();
+	    VisualRCHandlerCell cell = null;
 	    if (tok == null) {
 		lexer.reportError("EOF unexpected in string list");
 	    } else if ("}".equals(tok)) {
@@ -1114,33 +1242,59 @@ public class ShowParser {
 	    } else if ("(".equals(tok)) {
 		int x = lexer.getInt();
 		int y = lexer.getInt();
-		if (x < 0 || x > 0xff || y < 0 || y > 0xff) {
+		cell = VisualRCHandlerCell.newLocationRef(x, y);
+		if (cell == null)  {
 		    lexer.reportError("Invalid cell address ( " + x + " "
 		    		      + y + " )");
 		}
-		v.addElement(new Integer(0x10000 | (y << 8) | x));
 		parseExpected(")");
+	    } else if ("[".equals(tok)) {
+		String name = lexer.getString();
+		parseExpected("]");
+		cell = VisualRCHandlerCell.newStateRef(name);
 	    } else if ("<activate>".equals(tok)) {
-		v.addElement(new Integer(VisualRCHandler.GRID_ACTIVATE));
+		cell = VisualRCHandlerCell.newActivate();
 	    } else {
-		if (states.contains(tok)) {
-		    lexer.reportError("Duplicate state name:  " + tok);
-		}
-		    // Grid gets number of new state, then add name to states
-		v.addElement(new Integer(states.size()));
-		states.add(tok);
+		cell = VisualRCHandlerCell.newState(tok);
 	    }
+	    result.add(cell);
 	}
-	int num = v.size();
-	int[] result = new int[num];
-	for (int i = 0; i < num; i++) {
-	    result[i] = ((Integer) v.elementAt(i)).intValue();
+	return result;
+    }
+
+    //
+    // The key is a string of the form "<direction>:<statename>", as
+    // in "up:close".  The value is the name of the state to go to with 
+    // that keypress, or the special value "<activate>"
+    //
+    private Map<String, String> parseRCOverride() throws IOException {
+	Map<String, String> result = new HashMap<String, String>();
+	parseExpected("{");
+	for (;;) {
+	    String tok = lexer.getString();
+	    if ("}".equals(tok)) {
+		break;
+	    } else if (!("{".equals(tok))) {
+		lexer.reportError("\"{\" expected, \"" + tok + "\" seen");
+	    }
+	    String fromState = lexer.getString();
+	    String direction = lexer.getString();
+	    String toState = lexer.getString();
+	    parseExpected("}");
+	    if (!("up".equals(direction) || "down".equals(direction)
+	          || "left".equals(direction) || "right".equals(direction))) 
+	    {
+		lexer.reportError("Direction must be up, down, right or left, "
+				  + "not \"" + direction + "\".");
+	    }
+	    result.put(direction + ":" + fromState, toState);
 	}
 	return result;
     }
 
     // Return value [0] is list of parts, [1] is list of commands lists.
-    Object[] parseVisualActions(Vector states, boolean hasAssembly) 
+    Object[] parseVisualActions(Map<String, Integer> states, 
+    				boolean hasAssembly) 
     		throws IOException 
     {
 	String[] parts = null;
@@ -1151,8 +1305,9 @@ public class ShowParser {
 	    if ("}".equals(tok)) {
 		break;
 	    }
-	    int state = states.indexOf(tok);
-	    if (state == -1) {
+	    String stateName = tok;
+	    Integer state = states.get(stateName);
+	    if (state == null) {
 		lexer.reportError("State " + tok + " not found");
 	    }
 	    tok = lexer.getString();
@@ -1163,22 +1318,22 @@ public class ShowParser {
 		if (parts == null) {
 		    parts = new String[states.size()];
 		}
-		if (parts[state] != null) {
-		    lexer.reportError("State " + states.elementAt(state)
+		if (parts[state.intValue()] != null) {
+		    lexer.reportError("State " + stateName
 				      + " has duplicate assembly parts");
 		}
-		parts[state] = tok;
+		parts[state.intValue()] = tok;
 		tok = lexer.getString();
 	    }
 	    if ("{".equals(tok)) {		// If command list
 		if (commands == null) {
 		    commands = new Command[states.size()][];
 		}
-		if (commands[state] != null) {
-		    lexer.reportError("State " + states.elementAt(state)
+		if (commands[state.intValue()] != null) {
+		    lexer.reportError("State " + stateName
 				      + " has duplicate commands");
 		}
-		commands[state] = parseCommandsNoOpenBrace();
+		commands[state.intValue()] = parseCommandsNoOpenBrace();
 		tok = lexer.getString();
 	    }
 	}
@@ -1186,7 +1341,9 @@ public class ShowParser {
     }
 
     // Return value alternates Integer state # and Rectangle
-    private Vector parseMouseLocations(Vector states) throws IOException {
+    private Vector parseMouseLocations(Map<String, Integer> states) 
+    		throws IOException 
+    {
 	parseExpected("{");
         Vector result = new Vector();
         for (;;) {
@@ -1194,11 +1351,11 @@ public class ShowParser {
 	    if ("}".equals(tok)) {
 		break;
 	    }
-	    int state = states.indexOf(tok);
+	    Integer state = states.get(tok);
 	    if (state == -1) {
 		lexer.reportError("State " + tok + " not found");
 	    }
-	    result.add(new Integer(state));
+	    result.add(state);
 	    result.add(parseRectangle());
 	}
 	return result;
@@ -1419,7 +1576,12 @@ public class ShowParser {
 		VisualRCHandler handler = (VisualRCHandler) h;
 		int state = -1;
 		if (row > -1) {
-		    state = handler.getStateChecked(column, row);
+		    VisualRCHandlerHelper helper 
+			= visualRCHelpers.get(handlerName);
+		    state = helper.getState(column, row);
+		    if (state == -1) {
+			reportError("Illegal cell - doesn't refer to state");
+		    }
 		}
 		cmd.setup(true, state, handler);
 	    }
@@ -1491,22 +1653,42 @@ public class ShowParser {
 
     //***************    Convenience Methods    ******************
 
-    private Feature[] makeFeatureList(String[] names) throws IOException {
-	Feature[] result = new Feature[names.length];
-	for (int i = 0; i < names.length; i++) {
-	    result[i] = makeFeature(names[i]);
+    private SubFeature[] parsePartsList() throws IOException {
+	parseExpected("{");
+	ArrayList<SubFeature> partsList = new ArrayList<SubFeature>();
+	for (;;) {
+	    String tok = lexer.getString();
+	    if ("}".equals(tok)) {
+		break;
+	    } 
+	    partsList.add(parseSubFeature(tok));
+	}
+	return partsList.toArray(new SubFeature[partsList.size()]);
+    }
+
+    private SubFeature parseSubFeature(String tok) throws IOException {
+	if ("}".equals(tok)) {
+	    lexer.reportError("\"}\" unexpected");
+	} else if (tok == null) {
+	    lexer.reportError("Unexpected EOF");
+	} else if ("sub_feature".equals(tok)) {
+	    // inline feature
+	    return new SubFeature(parseFeature(false, lexer.getLineNumber()), 
+	    		          lexer);
+	} else {
+	    // reference to named feature
+	    return new SubFeature(builder, tok, lexer);
+	}
+	return null;	// not reached
+    }
+
+    private Feature[] makeFeatureList(SubFeature[] parts) throws IOException {
+	Feature[] result = new Feature[parts.length];
+	for (int i = 0; i < parts.length; i++) {
+	    result[i] = parts[i].getFeature();
 	}
 	return result;
     }
-
-    private Feature makeFeature(String name) throws IOException {
-	Feature result = builder.getNamedFeature(name);
-	if (result == null) {
-	    lexer.reportError("Feature \"" + name + "\" not found");
-	}
-	return result;
-    }
-
 
     private RCHandler[] makeRCHandlerList(String[] names) throws IOException {
 	RCHandler[] result = new RCHandler[names.length];

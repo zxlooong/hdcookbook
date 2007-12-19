@@ -123,19 +123,34 @@ public interface AnimationClient {
      * <p>
      * In this call, the client must indicate where it intends to draw
      * by calling methods on RenderContext.  Internally, a RenderContext
-     * keeps a number of RenderArea targets.  Each RenderArea will
-     * keep track of a bounding rectangle of all of the indended drawing
-     * operations within that area.  When the call to addDisplayAreas
-     * is complete, the animation manager may merge some render areas,
+     * keeps a number of rendering area "targets".  Each target will
+     * keep track of a bounding rectangle of all of drawing
+     * operations that are considered within that target.  When the 
+     * call to addDisplayAreas is complete, the animation manager may 
+     * merge some of these rendering areas targets,
      * or may leave them seperate; it will then call paintFrame() as
-     * many times as it needs to, with a different clip rect each time.
+     * many times as it needs to, with a different clip rect each time.  These
+     * clip rects will never overlap, so you don't need to worry about
+     * a Src mode drawing to the same pixel twice in the same frame.
      * <p>
-     * The number of RenderArea targets is set up when an AnimationEngine
-     * is created.  Each AnimationClient is passed the same set of targets.
+     * The purpose of these targets is to try to minimize the number of
+     * pixels that will be updated on the screen in each frame of animation.
+     * Consider, for example, the case where most of the screen isn't changing,
+     * but where there's a small animation in the upper-left hand corner,
+     * and another small animation in the lower-right hand corner.  If those
+     * two animations used the same target, the overall bounding rectangle
+     * would cover the whole screen.  By using two different targets, the
+     * screen update can be confined to two small rectangles, one at each
+     * corner.
+     * <p>
+     * The number of render area targets is set up when an AnimationEngine
+     * is created, by calling mapDrawTargets() on each client.  During
+     * animation, each AnimationClient is passed the same set of targets.
      * If there are multiple AnimationClient instances attached to an
-     * AnimationEngine, it is up to the programmer to decide which RenderArea
+     * AnimationEngine, it is up to the programmer to decide which render area
      * targets should be shared between clients so as to optimize drawing
-     * performance.
+     * performance.  This can be done with appropriate naming of the
+     * targets in the mapDrawTargets() call.
      * <p>
      * Often, an AnimationClient only needs to erase or draw objects
      * that have changed.  However, under certain circumstances, the
@@ -153,11 +168,14 @@ public interface AnimationClient {
      * maintained by the animation client to optimize display areas should 
      * be updated in this method, and not in paintFrame().
      *
-     * @param targets		The set of targets the client
-     *				can draw to.
+     * @param targets		The RenderContext that manages  the set of 
+     *				targets the client can draw to.
      *
      * @throws	InterruptedException	if the thread has been interrupted
      *					(e.g. because the xlet is being killed)
+     *
+     * @see RenderContext#setTarget(int)
+     * @see mapDrawTargets(Hashtable)
      **/
     public void addDisplayAreas(RenderContext targets)
 	throws InterruptedException;
@@ -200,10 +218,19 @@ public interface AnimationClient {
      * animation engine.  This is called during initialization.  By calling
      * this on all AnimationClient instances, clients can share draw targets
      * by giving them the same name.
+     * <p>
+     * The total number of different draw targets in an animation should
+     * be small, because the algorithm for combining draw targets is
+     * of cubic time complexity.  One or two different draw targets might
+     * be a typical number, and more than four is questionable.  
+     * <p>
+     * See addDisplayAreas() for a discussion of what a render area target
+     * is for.
      *
      * @param targets	A hashtable mapping String names to Integer values
      *
      * @see RenderContext#setDrawTarget(int)
+     * @see #addDisplayAreas(RenderContext)
      **/
     public void mapDrawTargets(Hashtable targets);
 }

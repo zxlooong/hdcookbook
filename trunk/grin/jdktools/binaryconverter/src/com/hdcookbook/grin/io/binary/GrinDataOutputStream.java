@@ -150,17 +150,11 @@ class GrinDataOutputStream extends DataOutputStream {
            }
        }
    }
-   
-   public void writeInt2Array(int[][] array) throws IOException {
-       if (array == null) {
-           writeByte(Constants.NULL);
-       } else {
-           writeByte(Constants.NON_NULL);
-           int length = array.length;
-           writeInt(length);
-           for (int i = 0; i < length; i++) {
-               writeIntArray(array[i]);
-           }
-       }
-   }   
+
+    public void writeFeature(int index) throws IOException {
+	if (index < 0) {
+	    throw new IOException("Invalid feature index");
+	}
+	writeInt(index);
+    }
 }

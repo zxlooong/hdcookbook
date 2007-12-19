@@ -105,11 +105,6 @@ public abstract class AnimationEngine implements Runnable {
 
     /**
      * Initialize a new AnimationEngine.
-     * <p>
-     * Note that the algorithm used to collapse render area targets
-     * is cubic with the number of targets, so this number should be
-     * kept low.  Between one and three would be reasonable, and five
-     * is perhaps a workable maximum.
      **/
     protected AnimationEngine() {
 	worker = new Thread(this, "Animation " + this);
@@ -121,6 +116,11 @@ public abstract class AnimationEngine implements Runnable {
      * managing.  This should be called exactly once, before 
      * AnimationContext.animationInitialize() completes.  It's fine
      * to call it before starting the animation thread, too.
+     * <p>
+     * Note that the algorithm used to collapse render area targets
+     * is cubic with the number of targets, so this number should be
+     * kept low.  Between one and three would be reasonable, and five
+     * is perhaps a workable maximum.
      *
      * @param clients		The animation clients we'll support
      *
@@ -464,6 +464,11 @@ public abstract class AnimationEngine implements Runnable {
 	} catch (InterruptedException ex) {
 	    // Player is trying to terminate us 
 	    Thread.currentThread().interrupt();
+	} catch (Throwable t) {
+	    if (Debug.LEVEL > 0) {
+		t.printStackTrace();
+		Debug.println("****  Exception in animation thread:  " + t);
+	    }
 	} finally {
 	    AnimationClient[] c = clients;
 	    if (c != null) {
@@ -472,14 +477,22 @@ public abstract class AnimationEngine implements Runnable {
 			c[i].destroy();
 		    } catch (Throwable t) {
 			if (Debug.LEVEL > 1) {
+			    t.printStackTrace();
 			    Debug.println("****  Exception in destroy:  " + t);
 			}
 		    }
 		}
 	    }
-	    terminatingEraseScreen();
+	    try {
+		terminatingEraseScreen();
+	    } catch (Throwable t) {
+		if (Debug.LEVEL > 0) {
+		    t.printStackTrace();
+		    Debug.println("****  Exception in destroy:  " + t);
+		}
+	    }
+	    setState(STATE_STOPPED);  // Allows the call to destroy() to return
 	}
-	setState(STATE_STOPPED);  // Allows the call to destroy() to return
     }
 
     /**

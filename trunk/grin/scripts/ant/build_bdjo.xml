@@ -28,6 +28,7 @@ information or have any questions.
 <target name="generate-bdjo" depends="check-bdjoconverter">    
 	<fail unless="bdjoconverter.ok" message="Could not find the bdjoconverter tool at ${HDC_BDJO_CONVERTER}"/>
 	
+	<mkdir dir="${HDC_DISC_BDMV}/BDJO"/>	
 	<java classpath="${HDC_BDJO_CONVERTER}/dist/bdjo.jar"  
 	      fork="true"
 	      classname="net.java.bd.tools.bdjo.Converter">

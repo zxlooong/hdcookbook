@@ -56,13 +56,33 @@
 package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.features.Box;
+import com.hdcookbook.grin.features.Clipped;
+import com.hdcookbook.grin.features.Fade;
+import com.hdcookbook.grin.features.FixedImage;
+import com.hdcookbook.grin.features.Group;
+import com.hdcookbook.grin.features.GuaranteeFill;
+import com.hdcookbook.grin.features.ImageSequence;
+import com.hdcookbook.grin.features.SEUserModifier;
+import com.hdcookbook.grin.features.SetTarget;
+import com.hdcookbook.grin.features.SrcOver;
+import com.hdcookbook.grin.features.Text;
+import com.hdcookbook.grin.features.Timer;
+import com.hdcookbook.grin.features.Translator;
+import com.hdcookbook.grin.features.TranslatorModel;
+import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.input.VisualRCHandler;
 import com.hdcookbook.grin.input.RCKeyEvent;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Hashtable;
 
 
 /**
@@ -159,6 +179,126 @@ public class SEShow extends Show {
 	    return false;
 	} else {
 	    return publicRCHandlers.get(hand.getName()) != null;
+	}
+    }
+
+    /**
+     * @inheritDoc
+     * <p>
+     * This adds internal structure checking to the superclass version of
+     * this method.
+     **/
+    public void buildShow(Segment[] segments, Feature[] features, 
+    		          RCHandler[] rcHandlers,
+		          Hashtable publicSegments, Hashtable publicFeatures,
+		          Hashtable publicRCHandlers)
+	    throws IOException
+    {
+	super.buildShow(segments, features, rcHandlers,
+		        publicSegments, publicFeatures, publicRCHandlers);
+	SEDoubleUseChecker checker = new SEDoubleUseChecker();
+	accept(checker);
+	checker.reportAnyProblems();
+    }
+
+
+    /**
+     * Visit a SEShow with a SEShowVisitor.  This will call
+     * visitShow on the given visitor; it's up to the visitor to
+     * call SEShow.accept(xxx) for any children it wants to visit.
+     **/
+    public void accept(SEShowVisitor visitor) {
+	visitor.visitShow(this);
+    }
+
+    /**
+     * Visit a list of segments with a SEShowVisitor.  This will call
+     * visitSegment on each segment.  
+     **/
+    public static void acceptSegments(SEShowVisitor visitor, Segment[] segments)
+    {
+	for (Segment e : Arrays.asList(segments)) {
+	    visitor.visitSegment(e);
+	}
+    }
+
+    /**
+     * Visit a list of features with a SEShowVisitor.  This will call
+     * acceptFeature() on each of the features.
+     **/
+    public static void acceptFeatures(SEShowVisitor visitor, Feature[] features)
+    {
+	for (Feature e : Arrays.asList(features)) {
+	    acceptFeature(visitor, e);
+	}
+    }
+
+    /**
+     * Visit a list of RC handlers with a SEShowVisitor.  This will
+     * call acceptRCHandler() on each of the handlers.
+     **/
+    public static void acceptRCHandlers(SEShowVisitor visitor, 
+    					RCHandler[] rcHandlers) 
+    {
+	for (RCHandler e : Arrays.asList(rcHandlers)) {
+	    acceptRCHandler(visitor, e);
+	}
+    }
+
+    /**
+     * Accept a feature of a show.  This will call the appropriate
+     * visitXXX method on the visitor, according to the subtype of
+     * feature passed in.
+     **/
+    public static void acceptFeature(SEShowVisitor visitor, Feature feature) {
+	if (feature instanceof Assembly) {
+	    visitor.visitAssembly((Assembly) feature);
+	} else if (feature instanceof Box) {
+	    visitor.visitBox((Box) feature);
+	} else if (feature instanceof Clipped) {
+	    visitor.visitClipped((Clipped) feature);
+	} else if (feature instanceof Fade) {
+	    visitor.visitFade((Fade) feature);
+	} else if (feature instanceof FixedImage) {
+	    visitor.visitFixedImage((FixedImage) feature);
+	} else if (feature instanceof Group) {
+	    visitor.visitGroup((Group) feature);
+	} else if (feature instanceof GuaranteeFill) {
+	    visitor.visitGuaranteeFill((GuaranteeFill) feature);
+	} else if (feature instanceof ImageSequence) {
+	    visitor.visitImageSequence((ImageSequence) feature);
+	} else if (feature instanceof SEUserModifier) {
+	    visitor.visitSEUserModifier((SEUserModifier) feature);
+	} else if (feature instanceof SetTarget) {
+	    visitor.visitSetTarget((SetTarget) feature);
+	} else if (feature instanceof SrcOver) {
+	    visitor.visitSrcOver((SrcOver) feature);
+	} else if (feature instanceof Text) {
+	    visitor.visitText((Text) feature);
+	} else if (feature instanceof Timer) {
+	    visitor.visitTimer((Timer) feature);
+	} else if (feature instanceof Translator) {
+	    visitor.visitTranslator((Translator) feature);
+	} else if (feature instanceof TranslatorModel) {
+	    visitor.visitTranslatorModel((TranslatorModel) feature);
+	} else {
+	    assert false;
+	}
+    }
+
+    /**
+     * Accept an RC handler from a show.  This will call the appropriate
+     * visitXXX method on the visitor, according  to the subtype of the
+     * handler passed in.
+     **/
+    public static void acceptRCHandler(SEShowVisitor visitor, RCHandler handler)
+    {
+	if (handler instanceof CommandRCHandler) {
+	    visitor.visitCommandRCHandler((CommandRCHandler) handler);
+	} else if (handler instanceof VisualRCHandler) {
+	    visitor.visitVisualRCHandler((VisualRCHandler) handler);
+	} else {
+	    assert false;
 	}
     }
 

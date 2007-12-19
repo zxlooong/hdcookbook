@@ -107,16 +107,16 @@ public class FixedImage extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public int getStartX() {
+    public int getX() {
 	return x;
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public int getStartY() {
+    public int getY() {
 	return y;
     }
 
@@ -150,7 +150,7 @@ public class FixedImage extends Feature {
 
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
@@ -160,7 +160,7 @@ public class FixedImage extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
 	synchronized(setupMonitor) {
@@ -175,7 +175,7 @@ public class FixedImage extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
 	synchronized(setupMonitor) {
@@ -197,7 +197,7 @@ public class FixedImage extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
 	synchronized (setupMonitor) {
@@ -206,7 +206,7 @@ public class FixedImage extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {

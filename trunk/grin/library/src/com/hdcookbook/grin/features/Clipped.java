@@ -130,7 +130,7 @@ public class Clipped extends Modifier {
 
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
 	// This is synchronized by Show.paintFrame, so we don't

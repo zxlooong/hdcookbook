@@ -79,6 +79,7 @@ import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.features.SEUserModifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
@@ -288,7 +289,7 @@ public class GrinBinaryWriter {
             } else if (feature instanceof SetTarget) {
                 writeSetTarget(out, (SetTarget)feature);
             } else if (feature instanceof Modifier) {
-                writeUserModifier(out, (UserModifier)feature);
+                writeUserModifier(out, (SEUserModifier)feature);
             } else {
                 throw new IOException("Unknown feature " + feature);
             }
@@ -386,7 +387,7 @@ public class GrinBinaryWriter {
 	   dos.writeString(null);
        }
        dos.writeRectangle(rect);
-       dos.writeInt(featuresList.indexOf(clipped.getPart()));
+       dos.writeFeature(featuresList.indexOf(clipped.getPart()));
        
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -413,7 +414,7 @@ public class GrinBinaryWriter {
        dos.writeInt(fade.getRepeatFrame());
        Command[] endCommands = fade.getEndCommands();
        writeCommands(dos, endCommands);
-       dos.writeInt(featuresList.indexOf(fade.getPart()));
+       dos.writeFeature(featuresList.indexOf(fade.getPart()));
        
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -433,8 +434,8 @@ public class GrinBinaryWriter {
        } else {
 	   dos.writeString(null);
        }
-       dos.writeInt(image.getStartX());
-       dos.writeInt(image.getStartY());
+       dos.writeInt(image.getX());
+       dos.writeInt(image.getY());
        dos.writeUTF(image.getFileName());
        
        out.writeInt(baos.size());
@@ -474,8 +475,8 @@ public class GrinBinaryWriter {
        } else {
 	   dos.writeString(null);
        }
-       dos.writeInt(imageSequence.getStartX());
-       dos.writeInt(imageSequence.getStartY());
+       dos.writeInt(imageSequence.getX());
+       dos.writeInt(imageSequence.getY());
        dos.writeUTF(imageSequence.getFileName());
        dos.writeStringArray(imageSequence.getMiddle());
        dos.writeUTF(imageSequence.getExtension());
@@ -483,7 +484,7 @@ public class GrinBinaryWriter {
        ImageSequence model = imageSequence.getModel();
        dos.writeBoolean(model != null);
        if (model != null) {
-           dos.writeInt(featuresList.indexOf(model));
+           dos.writeFeature(featuresList.indexOf(model));
        }
        Command[] endCommands = imageSequence.getEndCommands();
        writeCommands(dos, endCommands);
@@ -506,7 +507,7 @@ public class GrinBinaryWriter {
        } else {
 	   dos.writeString(null);
        }
-       dos.writeInt(featuresList.indexOf(srcOver.getPart()));
+       dos.writeFeature(featuresList.indexOf(srcOver.getPart()));
       
        out.writeInt(baos.size());
        baos.writeTo(out);      
@@ -526,8 +527,8 @@ public class GrinBinaryWriter {
        } else {
 	   dos.writeString(null);
        }
-       dos.writeInt(text.getStartX());
-       dos.writeInt(text.getStartY());
+       dos.writeInt(text.getX());
+       dos.writeInt(text.getY());
        dos.writeStringArray(text.getStrings());
        dos.writeInt(text.getVspace());
        dos.writeFont(text.getFont());
@@ -599,15 +600,17 @@ public class GrinBinaryWriter {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos);  
         
-       if (show.isPublic(translator)) {
+        if (show.isPublic(translator)) {
 	   dos.writeString(translator.getName());
-       } else {
+        } else {
 	   dos.writeString(null);
-       }
+        }
+        dos.writeInt(translator.getAbsoluteXOffset());
+        dos.writeInt(translator.getAbsoluteYOffset());
         TranslatorModel model = translator.getModel();
         int index = featuresList.indexOf(model);
-        dos.writeInt(index); // write the index only
-       	dos.writeInt(featuresList.indexOf(translator.getPart()));
+        dos.writeFeature(index); // write the index only
+       	dos.writeFeature(featuresList.indexOf(translator.getPart()));
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -624,7 +627,7 @@ public class GrinBinaryWriter {
 	} else {
 	    dos.writeString(null);
 	}
-	dos.writeInt(featuresList.indexOf(feature.getPart()));
+	dos.writeFeature(featuresList.indexOf(feature.getPart()));
 	dos.writeRectangle(feature.getGuaranteed());
 	dos.writeRectangleArray(feature.getFills());
       
@@ -643,7 +646,7 @@ public class GrinBinaryWriter {
 	} else {
 	    dos.writeString(null);
 	}
-        dos.writeInt(featuresList.indexOf(feature.getPart()));
+        dos.writeFeature(featuresList.indexOf(feature.getPart()));
 	dos.writeInt(feature.getTarget());
       
         out.writeInt(baos.size());
@@ -651,7 +654,7 @@ public class GrinBinaryWriter {
         dos.close();
     }
 
-    private void writeUserModifier(DataOutputStream out, UserModifier modifier) throws IOException {
+    private void writeUserModifier(DataOutputStream out, SEUserModifier modifier) throws IOException {
         out.writeByte((int)Constants.USER_MODIFIER_IDENTIFIER);
          
         if (modifier == null) {
@@ -671,7 +674,7 @@ public class GrinBinaryWriter {
 	}
         dos.writeUTF(modifier.getTypeName());
         dos.writeUTF(modifier.getArg());
-        dos.writeInt(featuresList.indexOf(modifier.getPart()));
+        dos.writeFeature(featuresList.indexOf(modifier.getPart()));
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -737,12 +740,12 @@ public class GrinBinaryWriter {
        
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos);
-        
+       
         Assembly assembly = activatePartCommand.getAssembly();
         Feature part = activatePartCommand.getPart();
         
-        dos.writeInt(featuresList.indexOf(assembly));
-        dos.writeInt(featuresList.indexOf(part));
+        dos.writeFeature(featuresList.indexOf(assembly));
+        dos.writeFeature(featuresList.indexOf(part));
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -830,7 +833,8 @@ public class GrinBinaryWriter {
 	} else {
 	    dos.writeString(null);
 	}
-        dos.writeInt2Array(visualRCHandler.getGrid());
+        dos.writeIntArray(visualRCHandler.getUpDown());
+        dos.writeIntArray(visualRCHandler.getRightLeft());
         dos.writeStringArray(visualRCHandler.getStateNames());
         Command[][] selectCommands = visualRCHandler.getSelectCommands();
         if (selectCommands == null) {
@@ -857,8 +861,12 @@ public class GrinBinaryWriter {
         dos.writeIntArray(visualRCHandler.getMouseRectStates());
         dos.writeInt(visualRCHandler.getTimeout());
         writeCommands(dos, visualRCHandler.getTimeoutCommands());
-        
-        dos.writeInt(featuresList.indexOf(visualRCHandler.getAssembly()));
+       
+	Feature assembly = visualRCHandler.getAssembly();
+        dos.writeBoolean(assembly != null);
+	if (assembly != null) {
+	    dos.writeFeature(featuresList.indexOf(assembly));
+	}
         
         Feature[] selectFeatures = visualRCHandler.getSelectFeatures();
         writeFeaturesIndex(dos, selectFeatures);
@@ -920,7 +928,11 @@ public class GrinBinaryWriter {
             if (features[i] == null) {
                 out.writeInt(-1);
             } else {
-                out.writeInt(featuresList.indexOf(features[i]));
+		int index = featuresList.indexOf(features[i]);
+		if (index < 0) {
+		    throw new IOException("Invalid feature index");
+		}
+                out.writeInt(index);
             }
         }   
     }

@@ -94,20 +94,20 @@ public abstract class Modifier extends Feature {
 	return part;
     }
 
-
     /**
      * @inheritDoc
      **/
-    public int getStartX() {
-	return part.getStartX();
+    public int getX() {
+	return part.getX();
     }
 
     /**
      * @inheritDoc
      **/
-    public int getStartY() {
-	return part.getStartY();
+    public int getY() {
+	return part.getY();
     }
+
 
     /**
      * Initialize this feature.  This is called on show initialization.

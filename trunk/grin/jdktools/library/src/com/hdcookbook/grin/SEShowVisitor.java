@@ -53,70 +53,74 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+package com.hdcookbook.grin;
 
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.features.Box;
+import com.hdcookbook.grin.features.Clipped;
+import com.hdcookbook.grin.features.Fade;
+import com.hdcookbook.grin.features.FixedImage;
+import com.hdcookbook.grin.features.Group;
+import com.hdcookbook.grin.features.GuaranteeFill;
+import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.SEUserModifier;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.features.SetTarget;
+import com.hdcookbook.grin.features.SrcOver;
+import com.hdcookbook.grin.features.Text;
+import com.hdcookbook.grin.features.Timer;
+import com.hdcookbook.grin.features.Translator;
+import com.hdcookbook.grin.features.TranslatorModel;
+import com.hdcookbook.grin.input.CommandRCHandler;
+import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.input.VisualRCHandler;
+import com.hdcookbook.grin.input.RCKeyEvent;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
 
 /**
- * This is an extensions builder that makes a fake version of any
- * GRIN extension it encounters.  
- */
-class GenericExtensionsBuilder implements ExtensionsBuilder {
-   
-    private GenericDirector director;
+ * Base class for objects that visit a Show tree to perform some operation
+ * on it.  This uses the classical Visitor pattern (GoF page 331), except
+ * that the "accept" methods are on SEShow, and not on the nodes themselves.
+ * This is less elegant than a true Visitor pattern, but it's necessary
+ * since most of the node types exist in the xlet library, which doesn't
+ * include this visitor class definition.
+ * <p>
+ * Implementers of this interface will have to override each visitXXX() method,
+ * even for node types they're not intersted in.  This is a feature, because
+ * it means that as new node types are added, the compiler catches any
+ * visitors that aren't updated for the new node types.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
+public interface SEShowVisitor {
 
-    public GenericExtensionsBuilder(GenericDirector director) {
-	this.director = director;
-    }
-    
-    /**
-     * Returns null.
-     **/
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-    {
-	// Not implemented.  If we do this, we'll have to figure out
-	// some syntactical contstraints on an extension feature.
-        return null;
-    }
+    public void visitShow(SEShow show);
 
-    /**
-     * Returns an instance of a SEUserModifier.
-     **/
-    public Modifier getModifier(Show show, final String typeName, 
-    			        String name, String arg)
-    {
-	return new SEUserModifier(show, typeName, name, arg);
-    }
+    public void visitSegment(Segment segment);
 
-    /**
-     * Returns an instance of UserCommand.
-     **/
-    public Command getCommand(Show show, final String typeName, String[] args)
-		       throws IOException
-    {
-	return new UserCommand(typeName, args);
-    }
+    public void visitAssembly(Assembly feature);
+    public void visitBox(Box feature);
+    public void visitClipped(Clipped feature);
+    public void visitFade(Fade feature);
+    public void visitFixedImage(FixedImage feature);
+    public void visitGroup(Group feature);
+    public void visitGuaranteeFill(GuaranteeFill feature);
+    public void visitImageSequence(ImageSequence feature);
+    public void visitSEUserModifier(SEUserModifier feature);
+    public void visitSetTarget(SetTarget feature);
+    public void visitSrcOver(SrcOver feature);
+    public void visitText(Text feature);
+    public void visitTimer(Timer feature);
+    public void visitTranslator(Translator feature);
+    public void visitTranslatorModel(TranslatorModel feature);
 
-    /**
-     * @inheritDoc
-     **/
-    public void finishBuilding(Show show) throws IOException {
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
-    }
-    
+    public void visitCommandRCHandler(CommandRCHandler handler);
+    public void visitVisualRCHandler(VisualRCHandler handler);
 }

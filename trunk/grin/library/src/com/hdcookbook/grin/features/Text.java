@@ -130,18 +130,17 @@ public class Text extends Feature {
         return background;
     }
    
-
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public int getStartX() {
+    public int getX() {
 	return x;
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public int getStartY() {
+    public int getY() {
 	return y;
     }
 
@@ -191,7 +190,7 @@ public class Text extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	// This is synchronized to only occur within model updates.
@@ -205,26 +204,26 @@ public class Text extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean needsMoreSetup() {
 	return false;
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void nextFrame() {
 	colorIndex++;
@@ -250,7 +249,7 @@ public class Text extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {

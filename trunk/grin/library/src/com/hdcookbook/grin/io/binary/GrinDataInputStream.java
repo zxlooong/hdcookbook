@@ -156,19 +156,4 @@ class GrinDataInputStream extends DataInputStream {
        }
        return array;
    }
-   
-   
-   public int[][] readInt2Array() throws IOException {
-       byte b = readByte();
-       if (b == Constants.NULL) {
-           return null;
-       }
- 
-       int[][] array = new int[readInt()][];
-       
-       for (int i = 0; i < array.length; i++) {
-           array[i] = readIntArray();
-       }
-       return array;
-   }   
 }

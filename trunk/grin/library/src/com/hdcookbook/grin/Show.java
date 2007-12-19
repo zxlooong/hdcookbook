@@ -151,11 +151,14 @@ public class Show implements AnimationClient {
     /**
      * This is called to build the show.  This needs to be done before
      * initialize is called.
+     *
+     * @throws IOException if anything goes wrong.
      **/
     public void buildShow(Segment[] segments, Feature[] features, 
     		          RCHandler[] rcHandlers,
 		          Hashtable publicSegments, Hashtable publicFeatures,
 		          Hashtable publicRCHandlers)
+	    throws IOException 
     {
 	this.segments = segments;
 	this.features = features;

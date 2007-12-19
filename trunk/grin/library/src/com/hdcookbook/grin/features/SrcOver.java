@@ -119,7 +119,7 @@ public class SrcOver extends Modifier {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
 	Composite old = gr.getComposite();

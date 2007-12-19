@@ -132,7 +132,7 @@ public class BioImageFeature extends Modifier {
 	if (replacementImage == null) {
 	    super.paintFrame(g);
 	} else {
-	    g.drawImage(replacementImage, getStartX(), getStartY(), null);
+	    g.drawImage(replacementImage, getX(), getY(), null);
 	}
     }
 
@@ -144,8 +144,8 @@ public class BioImageFeature extends Modifier {
 	if (replacementImage == null) {
 	    super.addDisplayAreas(context);
 	} else {
-	    int x = getStartX();
-	    int y = getStartY();
+	    int x = getX();
+	    int y = getY();
 	    drawRecord.setArea(x, y, width, height);
 	    if (changed) {
 		drawRecord.setChanged();

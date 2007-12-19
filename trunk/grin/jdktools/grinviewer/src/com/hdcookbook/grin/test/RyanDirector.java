@@ -62,6 +62,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
@@ -152,7 +153,7 @@ public abstract class RyanDirector extends Director {
 
     public Show createShow() {
         String showName = "ryan_show.txt";
-	Show show = new Show(this);
+	SEShow show = new SEShow(this);
 	URL source = null;
 	BufferedReader rdr = null;
 	try {

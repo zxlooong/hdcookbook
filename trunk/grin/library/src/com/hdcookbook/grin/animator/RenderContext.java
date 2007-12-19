@@ -112,8 +112,15 @@ abstract public class RenderContext {
      * calls for adding areas.  Callers of this method should restore
      * the target to the old value when done, to put the RenderContext
      * back in a consistent state.
+     * <p>
+     * A typical scene should usually have a small number of targets, like
+     * between one and maybe four.  See the discussion in 
+     * AnimationClient.addDisplayAreas(RenderContext) for a more
+     * in-depth discussion of this.
      *
      * @return the old target number
+     *
+     * @see AnimationClient#addDisplayAreas(RenderContext)
      **/
     abstract public int setTarget(int newTarget);
 

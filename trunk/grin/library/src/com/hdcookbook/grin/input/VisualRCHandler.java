@@ -1,4 +1,3 @@
-
 /*  
  * Copyright (c) 2007, Sun Microsystems, Inc.
  * 
@@ -109,7 +108,7 @@ public class VisualRCHandler extends RCHandler {
      * A special value in a grid that means to activate the current
      * state
      **/
-    public final static int GRID_ACTIVATE = -2;
+    public final static int GRID_ACTIVATE = 0xffff;
 
     private static int MASK = RCKeyEvent.KEY_UP.getBitMask()
     				| RCKeyEvent.KEY_DOWN.getBitMask()
@@ -117,11 +116,20 @@ public class VisualRCHandler extends RCHandler {
     				| RCKeyEvent.KEY_LEFT.getBitMask()
     				| RCKeyEvent.KEY_ENTER.getBitMask();
     private String name;
-    private int[][] grid;  // [y][x], contains state # if < 0xffff. If bit
-    			   // 0x10000 is set, contains y in bits 0xff00, and
-			   // x in bits 0x00ff.  Or, it can contain the special
-			   // value GRID_ACTIVATE.
-    private int[] stateToGrid; // state to x, y mapping; y in bits 0xff00
+    private int[] upDown;    // For each state, the most significant 16 bits
+    			     // contains the state to go to on "up", and the
+			     // least significant 16 bits the "down" value.
+			     // If this has the special value GRID_ACTIVATE, 
+			     // then there's no movement, but the feature is
+			     // activated.
+
+    private int[] rightLeft; // For each state, the most significant 16 bits
+    			     // contains the state to go to on "right", and the
+			     // least significant 16 bits the "left" value.
+			     // If this has the special value GRID_ACTIVATE, 
+			     // then there's no movement, but the feature is
+			     // activated.
+
     private String[] stateNames;   // The names corresponding to state numbers.
     private Assembly assembly;     // can be null
     private Feature[] selectFeatures; // By state #, array can be null, and
@@ -141,7 +149,8 @@ public class VisualRCHandler extends RCHandler {
     private boolean timedOut;
 
 
-    public VisualRCHandler(String name, int[][] grid, String[] stateNames,
+    public VisualRCHandler(String name, String[] stateNames,
+			   int[] upDown, int[] rightLeft,
 			   Command[][] selectCommands, 
 			   Command[][] activateCommands, 
 			   Rectangle[] mouseRects, int[] mouseRectStates,
@@ -149,64 +158,58 @@ public class VisualRCHandler extends RCHandler {
     {
 	super(name);
         
-	this.grid = grid;
 	this.stateNames = stateNames;
+	this.upDown = upDown;
+	this.rightLeft = rightLeft;
 	this.selectCommands = selectCommands;
 	this.activateCommands = activateCommands;
 	this.mouseRects = mouseRects;
 	this.mouseRectStates = mouseRectStates;
 	this.timeout = timeout;
 	this.timeoutCommands = timeoutCommands;
-	this.stateToGrid = new int[stateNames.length];
-	for (int i = 0; i < this.stateToGrid.length; i++) {
-	    this.stateToGrid[i] = -1;
-	}
-	for (int y = 0; y < this.grid.length; y++) {
-	    for (int x = 0; x < this.grid[y].length; x++) {
-		int g = this.grid[y][x];
-		if (g < 0xffff && g != GRID_ACTIVATE) {
-		    this.stateToGrid[g] = (y << 8) | x;
-		}
-	    }
-	}
     }
     
-    /* used by the binaryconverter */  
-    public int[][] getGrid() {
-        return grid;
+    /** used by the binaryconverter */  
+    public int[] getUpDown() {
+        return upDown;
     }
 
-    /* used by the binaryconverter */  
+    /** used by the binaryconverter */  
+    public int[] getRightLeft() {
+        return rightLeft;
+    }
+
+    /** used by the binaryconverter */  
     public String[] getStateNames() {
         return stateNames;
     }
     
-    /* used by the binaryconverter */  
+    /** used by the binaryconverter */  
     public Command[][] getSelectCommands() {
         return selectCommands;
     }
     
-    /* used by the binaryconverter */  
+    /** used by the binaryconverter */  
     public Command[][] getActivateCommands() {
         return activateCommands;
     }
 
-    /* used by the binaryconverter */  
+    /** used by the binaryconverter */  
     public Rectangle[] getMouseRects() {
         return mouseRects;
     }
     
-    /* used by the binaryconverter */  
+    /** used by the binaryconverter */  
     public int[] getMouseRectStates() {
         return mouseRectStates;
     }
     
-    /* used by the binaryconverter */  
+    /** used by the binaryconverter */  
     public int getTimeout() {
         return timeout;
     }
     
-    /* used by the binaryconverter */  
+    /** used by the binaryconverter */  
     public Command[] getTimeoutCommands() {
         return timeoutCommands;
     }
@@ -221,7 +224,7 @@ public class VisualRCHandler extends RCHandler {
 	this.assembly = assembly;
 	this.selectFeatures = selectFeatures;
 	this.activateFeatures = activateFeatures;
-	currState = getNewState(0, 0);
+	currState = 0;
 	// activating this handler can change its state
     }
 
@@ -299,38 +302,30 @@ public class VisualRCHandler extends RCHandler {
 	    return false;
 	}
 	synchronized(show) {
+	    int newState = 0;
 	    if (ke == ke.KEY_ENTER) {
+		newState = GRID_ACTIVATE;
+	    } else if (ke == ke.KEY_UP) {
+		newState = (upDown[currState] >> 16) & 0xffff;
+            } else if (ke == ke.KEY_DOWN) {
+		newState = upDown[currState] & 0xffff;
+            } else if (ke == ke.KEY_RIGHT) {
+		newState = (rightLeft[currState] >> 16) & 0xffff;
+            } else if (ke == ke.KEY_LEFT) {
+		newState = rightLeft[currState] & 0xffff;
+            } else if (Debug.ASSERT) {
+		Debug.assertFail();
+	    }
+	    if (newState == GRID_ACTIVATE) {
 		if (!handlesActivation()) {
 		    return false;
 		}
 		setState(-1, true, true);
 		return true;
-	    } 
-	    int y = stateToGrid[currState];
-            int x = y & 0x00ff;
-            y = y >> 8;
-            if (Debug.ASSERT && y > 0xff) {
-                Debug.assertFail();
-            }
-            if (ke == ke.KEY_UP) {
-                if (y > 0) {
-                    y--;
-                }
-            } else if (ke == ke.KEY_DOWN) {
-                if (y < grid.length - 1) {
-                    y++;
-                }
-            } else if (ke == ke.KEY_LEFT) {
-                if (x > 0) {
-                    x--;
-                }
-            } else if (ke == ke.KEY_RIGHT) {
-                if (x < grid[y].length - 1) {
-                    x++;
-                }
-            }
-            setState(getNewState(x, y), false, true);
-            return true;
+	    } else {
+		setState(newState, false, true);
+		return true;
+	    }
 	}
     }
     
@@ -353,37 +348,6 @@ public class VisualRCHandler extends RCHandler {
 	return false;
     }
     
-    private int getNewState(int x, int y) {
-        int i = 0;
-        for (;;) {
-            int newState = grid[y][x];
-            if (newState < 0xffff || newState == GRID_ACTIVATE) {
-                return newState;
-            }
-            x = newState & 0x00ff;
-            y = 0xff & (newState  >> 8);
-            if (Debug.ASSERT && i++ > 5) {
-                Debug.assertFail();  // Really, one iteration should always work
-            }
-        }
-    }
-
-    /**
-     * Get the state number of the grid position x, y.  Return
-     * -1 if the coordinates are outside of the grid.
-     **/
-    public int getStateChecked(int x, int y) {
-	if (x < 0 || y < 0 || grid.length >= y || grid[y].length >= x) {
-	    return -1;
-	}
-	int result = getNewState(x, y);
-	if (result < 0) {	// Includes  GRID_ACTIVATE
-	    return -1;
-	} else {
-	    return result;
-	}
-    }
-
     /**
      * Called from InvokeVisualCellCommand, and from internal methods.
      * This is synchronized on our show, to only occur during model

@@ -253,7 +253,7 @@ public class Fade extends Modifier {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
 	if (currAlpha != null) {

@@ -62,8 +62,21 @@ import java.awt.Rectangle;
  * helps in the calculation of an optimized erase/redraw set for a frame
  * of animation, by allowing a convenient means to tracking what was drawn
  * in the previous frame, and what is to be drawn in the current frame.
+ * <p>
+ * The animation framework attempts to minimize the area drawn to in
+ * each frame.  One way it does this is by collecting all of the drawing
+ * operations that target an area of the screen into a single bounding
+ * rectangle for the screen draw, and a (possibly smaller) area that needs
+ * to be erased.  DrawRecord represents one set of drawing operations
+ * contained within a rectangular area, and it remembers what was drawn
+ * in the previous frame, so that the previous frame will be automatically
+ * erased.
+ * <p>
+ * The drawing framework combines all of the DrawRecord drawing operations
+ * that target the same "render area target" into a single bounding rectangle.
  *
  * @see RenderContext
+ * @see AnimationClient#addDisplayAreas(RenderContext)
  **/
 
 public class DrawRecord {

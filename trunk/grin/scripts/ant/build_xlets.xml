@@ -53,7 +53,8 @@ information or have any questions.
 </target>
 
 <target name="grin-build" depends="compile-mosaic-builder, build-menu, 
-                              build-monitor-xlet, build-game-xlet, sign-xlets,  generate-bdjo"/>
+                                   build-monitor-xlet, build-game-xlet, 
+				   sign-xlets,  generate-bdjo"/>
 
 			      
 <target name="compile-mosaic-builder" if="use_mosaic_builder">

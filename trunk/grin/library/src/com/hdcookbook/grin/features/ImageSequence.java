@@ -170,17 +170,18 @@ public class ImageSequence extends Feature {
         }
     }
 
+
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public int getStartX() {
+    public int getX() {
 	return x;
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public int getStartY() {
+    public int getY() {
 	return y;
     }
 
@@ -278,7 +279,7 @@ public class ImageSequence extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void doSomeSetup() {
 	ManagedImage im;
@@ -374,7 +375,7 @@ public class ImageSequence extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {

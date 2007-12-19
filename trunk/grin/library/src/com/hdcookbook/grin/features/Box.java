@@ -95,22 +95,22 @@ public class Box extends Feature {
 	this.fillColor = fillColor;
     }
 
+    public Rectangle getPlacement() {
+       return placement;
+    }
+
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public int getStartX() {
+    public int getX() {
 	return placement.x;
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
-    public int getStartY() {
+    public int getY() {
 	return placement.y;
-    }
-
-    public Rectangle getPlacement() {
-       return placement;
     }
     
     public int getOutlineWidth() {

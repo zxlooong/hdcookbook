@@ -96,6 +96,22 @@ public abstract class Feature implements SetupClient {
 	return name;
     }
 
+    /**
+     * Get the upper-left hand corner of this feature as presently displayed.
+     * Return Integer.MAX_VALUE if this feature has no visible representation.
+     * 
+     * @return the x coordinate
+     **/
+    abstract public int getX();
+
+    /**
+     * Get the upper-left hand corner of this feature as presently displayed
+     * Return Integer.MAX_VALUE if this feature has no visible representation.
+     * 
+     * @return the y coordinate
+     **/
+    abstract public int getY();
+
     /** 
      * @return a developer-friendly description of this feature, for debugging
      **/
@@ -107,20 +123,6 @@ public abstract class Feature implements SetupClient {
 	}
 	return nm + "(" + name + ")";
     }
-
-    /**
-      * Give the x coordinate of the upper-left hand corner of this
-      * feature's bounding box at frame 0 of any translations it might
-      * contain.
-      **/
-    public abstract int getStartX();
-
-    /**
-      * Give the y coordinate of the upper-left hand corner of this
-      * feature's bounding box at frame 0 of any translations it might
-      * contain.
-      **/
-    public abstract int getStartY();
 
     /**
      * Initialize this feature.  This is called on show initialization.

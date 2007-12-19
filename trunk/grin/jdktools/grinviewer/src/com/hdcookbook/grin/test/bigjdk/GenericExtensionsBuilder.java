@@ -98,6 +98,8 @@ public class GenericExtensionsBuilder implements ExtensionsBuilder {
     			        String name, String arg)
     {
 	return new Modifier(show, name) {
+	    // We could use SEUserModifier here for consistency with
+	    // the binary writer
 	    public String toString() {
 		return typeName;
 	    }

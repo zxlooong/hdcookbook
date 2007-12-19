@@ -583,7 +583,9 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }        
         String name = dis.readString();
-       
+      
+	int x = dis.readInt();
+	int y = dis.readInt();
         int index = dis.readInt();
         TranslatorModel model = (TranslatorModel) features[index];
         Feature part = features[dis.readInt()];
@@ -593,6 +595,8 @@ public class GrinBinaryReader {
         
         Translator translator = new Translator(show, name);
         translator.setup(model, part);
+	translator.setupAbsoluteXOffset(x);
+	translator.setupAbsoluteYOffset(y);
        
         return translator;
     }
@@ -827,7 +831,8 @@ public class GrinBinaryReader {
         }  
         
         String name = dis.readString();
-        int[][] grid = dis.readInt2Array();
+        int[] upDown = dis.readIntArray();
+        int[] rightLeft = dis.readIntArray();
         String[] stateNames = dis.readStringArray();
         Command[][] selectCommands;
         if (dis.readByte() == Constants.NULL) {
@@ -853,11 +858,9 @@ public class GrinBinaryReader {
         int timeout = dis.readInt();
         Command[] timeoutCommands = readCommands(dis);
         
-        Assembly assembly;
-        int assemblyIndex = dis.readInt();
-        if (assemblyIndex == -1) {
-            assembly = null;
-        } else {
+        Assembly assembly = null;
+	if (dis.readBoolean()) {
+	    int assemblyIndex = dis.readInt();
             assembly = (Assembly) features[assemblyIndex];
         }    
         Feature[] selectFeatures = readFeaturesIndex(dis);
@@ -866,9 +869,11 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).popExpectedLength();
         }        
                            
-        VisualRCHandler visualRCHandler = new VisualRCHandler(name, grid,
-            stateNames, selectCommands, activateCommands, mouseRects, mouseRectStates,
-            timeout, timeoutCommands);
+        VisualRCHandler visualRCHandler 
+	    = new VisualRCHandler(name, stateNames, upDown, rightLeft, 
+	    			  selectCommands, activateCommands, 
+				  mouseRects, mouseRectStates,
+				  timeout, timeoutCommands);
         
         visualRCHandler.setup(assembly, selectFeatures, activateFeatures);
         

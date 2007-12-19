@@ -53,70 +53,25 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+package com.hdcookbook.grin.io.builders;
 
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEUserModifier;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.SEShow;
 
 import java.io.IOException;
 
+
 /**
- * This is an extensions builder that makes a fake version of any
- * GRIN extension it encounters.  
- */
-class GenericExtensionsBuilder implements ExtensionsBuilder {
-   
-    private GenericDirector director;
-
-    public GenericExtensionsBuilder(GenericDirector director) {
-	this.director = director;
-    }
-    
-    /**
-     * Returns null.
-     **/
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-    {
-	// Not implemented.  If we do this, we'll have to figure out
-	// some syntactical contstraints on an extension feature.
-        return null;
-    }
+ * A superclass for helper classes for creating a Show that need to be
+ * called when the show is complete.  This can be the case, for example,
+ * for a feature that needs to look things up in other features that
+ * might occur later in a text or XML source file.
+ **/
+public interface DeferredBuilder {
 
     /**
-     * Returns an instance of a SEUserModifier.
+     * Finish the building process. 
+     *
+     * @see com.hdcookbook.grin.io.ShowBuilder#finishBuilding()
      **/
-    public Modifier getModifier(Show show, final String typeName, 
-    			        String name, String arg)
-    {
-	return new SEUserModifier(show, typeName, name, arg);
-    }
-
-    /**
-     * Returns an instance of UserCommand.
-     **/
-    public Command getCommand(Show show, final String typeName, String[] args)
-		       throws IOException
-    {
-	return new UserCommand(typeName, args);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void finishBuilding(Show show) throws IOException {
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
-    }
-    
+    public void finishBuilding(SEShow show) throws IOException;
 }

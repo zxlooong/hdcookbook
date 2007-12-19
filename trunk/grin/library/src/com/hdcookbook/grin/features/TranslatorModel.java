@@ -137,34 +137,32 @@ public class TranslatorModel extends Feature {
         return isRelative;
     }
     
-    /**
-     * See superclass definition.
-     **/
-    public int getStartX() {
-	return 0;
-    }
-
-    /**
-     * See superclass definition.
-     **/
-    public int getStartY() {
-	return 0;
-    }
-
-    final int getTranslatorStartX() {
-	return xs[0];
-    }
-
-    final int getTranslatorStartY() {
-	return ys[0];
-    }
-
-    final int getX() {
+    final int getCurrX() {
 	return currX;
     }
 
-    final int getY() {
+    final int getCurrY() {
 	return currY;
+    }
+
+    /**
+     * @inheritDoc
+     * <p>
+     * Since a TranslatorModel is invisible, this returns a garbage value 
+     * (Integer.MAX_VALUE)
+     **/
+    public int getX() {
+	return Integer.MAX_VALUE;
+    }
+
+    /**
+     * @inheritDoc
+     * <p>
+     * Since a TranslatorModel is invisible, this returns a garbage value 
+     * (Integer.MAX_VALUE)
+     **/
+    public int getY() {
+	return Integer.MAX_VALUE;
     }
 
     /**
@@ -188,7 +186,7 @@ public class TranslatorModel extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void destroy() {
     }
@@ -259,7 +257,7 @@ public class TranslatorModel extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
     }

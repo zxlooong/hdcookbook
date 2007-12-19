@@ -48,6 +48,7 @@ information or have any questions.
 	    <include name="com/hdcookbook/grin/input/*.java"/>
 	    <include name="com/hdcookbook/grin/io/*.java"/>
 	    <include name="com/hdcookbook/grin/io/binary/*.java"/>
+	    <include name="com/hdcookbook/grin/io/builders/*.java"/>
 	    <include name="com/hdcookbook/grin/io/text/*.java"/>
 	    <include name="com/hdcookbook/grin/util/*.java"/>
 	    <include name="com/hdcookbook/grin/test/*.java"/>

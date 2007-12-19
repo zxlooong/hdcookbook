@@ -77,9 +77,8 @@ import java.awt.Rectangle;
 public class Translator extends Modifier {
 
     private TranslatorModel model;
-    private boolean isActivated = false;
 
-    private int fx = 0;		// Feature's start position
+    private int fx = 0;		// Feature's start position (if absolute model)
     private int fy = 0;
 
     private int dx;		// For this frame
@@ -128,9 +127,36 @@ public class Translator extends Modifier {
     public void setup(TranslatorModel model, Feature part) {
 	super.setup(part);
 	this.model = model;
-        
-        fx = part.getStartX();
-        fy = part.getStartY();
+    }
+
+    /**
+     * Called from the parser and binary reader if our model uses absolute
+     * coordinates
+     **/
+    public void setupAbsoluteXOffset(int x) {
+	this.fx = x;
+    }
+
+    /**
+     * Called from the parser and binary reader if our model uses absolute
+     * coordinates
+     **/
+    public void setupAbsoluteYOffset(int y) {
+	this.fy = y;
+    }
+
+    /**
+     * Used by binary writer
+     **/
+    public int getAbsoluteXOffset() {
+	return fx;
+    }
+
+    /**
+     * Used by binary writer
+     **/
+    public int getAbsoluteYOffset() {
+	return fy;
     }
 
     /**
@@ -138,29 +164,6 @@ public class Translator extends Modifier {
      **/
     public TranslatorModel getModel() {
 	return model;
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public int getStartX() {
-        if (model.getIsRelative()) {
-            return fx;
-        } else { 
-	   return model.getTranslatorStartX();
-        }   
-    }
-
-
-    /**
-     * @inheritDoc
-     **/
-    public int getStartY() {
-        if (model.getIsRelative()) {
-            return fy;
-        } else { 
-	   return model.getTranslatorStartY();
-        } 
     }
 
     /**
@@ -186,7 +189,7 @@ public class Translator extends Modifier {
 	}
 	super.nextFrame();
 
-	// Note that at this point, we don't know if our translation
+	// Note that at this point, we don't know if our model
 	// has advanced to the next frame or not, so we can't depend
 	// on its value
     }
@@ -196,8 +199,8 @@ public class Translator extends Modifier {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	dx = model.getX();
-	dy = model.getY();
+	dx = model.getCurrX();
+	dy = model.getCurrY();
         if (!model.getIsRelative()) {
             dx -= fx;
             dy -= fy;
@@ -208,12 +211,36 @@ public class Translator extends Modifier {
 	lastDy = dy;
     }
 
+    /**
+     * @inheritDoc
+     **/
+    public int getX() {
+	int x = model.getCurrX();
+	if (!model.getIsRelative()) {
+	    x -= fx;
+	}
+	x += part.getX();
+	return x;
+    }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
+     **/
+    public int getY() {
+	int y = model.getCurrY();
+	if (!model.getIsRelative()) {
+	    y -= fy;
+	}
+	y += part.getY();
+	return y;
+    }
+
+
+    /**
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
-	if (!isActivated) {
+	if (!activated) {
 	    return;
 	}
 	gr.translate(dx, dy);

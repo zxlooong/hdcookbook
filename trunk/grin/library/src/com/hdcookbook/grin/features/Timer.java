@@ -93,6 +93,27 @@ public class Timer extends Feature {
 	this.endCommands = endCommands;
     }
 
+
+    /**
+     * @inheritDoc
+     * <p>
+     * Since a timer is invisible, this returns a garbage value 
+     * (Integer.MAX_VALUE)
+     **/
+    public int getX() {
+	return Integer.MAX_VALUE;
+    }
+
+    /**
+     * @inheritDoc
+     * <p>
+     * Since a timer is invisible, this returns a garbage value
+     * (Integer.MAX_VALUE)
+     **/
+    public int getY() {
+	return Integer.MAX_VALUE;
+    }
+
     public int getNumFrames() {
         return numFrames;
     }
@@ -106,22 +127,6 @@ public class Timer extends Feature {
      **/
     public Command[] getEndCommands() {
 	return endCommands;
-    }
-
-    /**
-     * See superclass definition.
-     **/
-    public int getStartX() {
-	// This only matters to translate in determining upper-left corner
-	return Integer.MAX_VALUE;
-    }
-
-    /**
-     * See superclass definition.
-     **/
-    public int getStartY() {
-	// This only matters to translate in determining upper-left corner
-	return Integer.MAX_VALUE;
     }
 
     /**
@@ -204,7 +209,7 @@ public class Timer extends Feature {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
     }

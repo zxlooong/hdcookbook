@@ -56,12 +56,14 @@
 package com.hdcookbook.grin.io;
 
 
+import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.io.builders.DeferredBuilder;
 import com.hdcookbook.grin.util.Debug;
 
 import java.io.Reader;
@@ -80,13 +82,13 @@ import java.util.Hashtable;
 
 /**
  * A helper class for parsing a show.  Clients of the parser can
- * subclass this to intercept items as there's encountered.
+ * subclass this to intercept items as they are encountered.
  *
  * @author Bill Foote (http://jovial.com)
  */
 public class ShowBuilder {
    
-    protected Show show;
+    protected SEShow show;
 
     private Map<String, Segment> namedSegments = new HashMap<String, Segment>();
     private Map<String, Feature> namedFeatures = new HashMap<String, Feature>();
@@ -101,13 +103,16 @@ public class ShowBuilder {
     private List<String> exportedFeatures = null;
     private List<String> exportedRCHandlers = null;
 
+    private List<DeferredBuilder> deferredBuilders
+    	= new ArrayList<DeferredBuilder>();
+
     public ShowBuilder() {
     }
 
-    public void init(Show show) {
+    public void init(SEShow show) {
         this.show = show;
     }    
-        
+
     /** 
      * Called when a new feature is encountered.
      **/
@@ -163,6 +168,17 @@ public class ShowBuilder {
     }
 
     /**
+     * Called when a DeferrredBuilder is created.  It will be called
+     * after the show is populated with all of its parts, in the
+     * finishBuilding method.
+     *
+     * @see #finishBuilding()
+     **/
+    public void addDeferredBuilder(DeferredBuilder builder) {
+	deferredBuilders.add(builder);
+    }
+
+    /**
      * Called when the exported clause is encountered.  This is optional;
      * if it's not called, then everything defaults to public visibility.
      **/
@@ -202,7 +218,7 @@ public class ShowBuilder {
 
     /**
      * Called when the show has finished parsing and all forward references
-     * have been resolved.
+     * have been resolved.  Any DeferredBuider instances are processed here.
      **/
     public void finishBuilding() throws IOException {
 	Segment[] segments 
@@ -219,6 +235,9 @@ public class ShowBuilder {
 		= findPublic(namedRCHandlers, exportedRCHandlers, "RC Handler");
 	show.buildShow(segments, features, rcHandlers,
 		       publicSegments, publicFeatures, publicRCHandlers);
+	for (DeferredBuilder builder : deferredBuilders) {
+	    builder.finishBuilding(show);
+	}
     }
 
     private Hashtable findPublic(Map namedThings, List exportedThings,

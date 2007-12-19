@@ -53,70 +53,54 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
-
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEUserModifier;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
+package com.hdcookbook.grin.io.text;
 
 import java.io.IOException;
 
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.io.builders.FeatureRef;
+import com.hdcookbook.grin.io.ShowBuilder;
+
 /**
- * This is an extensions builder that makes a fake version of any
- * GRIN extension it encounters.  
- */
-class GenericExtensionsBuilder implements ExtensionsBuilder {
-   
-    private GenericDirector director;
+ * A feature that's contained within another feature.  This can be done
+ * by naming some other feature, or by including it inline.  Inline features
+ * are anonymous, that is, they have no name; as such, they are always private.
+ * <p>
+ * During parsing, a SubFeature can be created for a named feature that
+ * doesn't exist yet.  In this case, the name is resolved to an actual
+ * feature the first time getFeature() is called.
+ *
+ *   @author     Bill Foote (http://jovial.com)
+ **/
+class SubFeature implements FeatureRef {
 
-    public GenericExtensionsBuilder(GenericDirector director) {
-	this.director = director;
-    }
-    
-    /**
-     * Returns null.
-     **/
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-    {
-	// Not implemented.  If we do this, we'll have to figure out
-	// some syntactical contstraints on an extension feature.
-        return null;
-    }
+    private ShowBuilder builder = null;
+    private String name = null;		// null for an inline feature
+    private Feature feature = null;	// initially null for a named feature
+    private Lexer lexer;		// For error reporting
 
-    /**
-     * Returns an instance of a SEUserModifier.
-     **/
-    public Modifier getModifier(Show show, final String typeName, 
-    			        String name, String arg)
-    {
-	return new SEUserModifier(show, typeName, name, arg);
+
+    SubFeature(Feature feature, Lexer lexer) {
+	this.feature = feature;
+	this.lexer = lexer;
     }
 
-    /**
-     * Returns an instance of UserCommand.
-     **/
-    public Command getCommand(Show show, final String typeName, String[] args)
-		       throws IOException
-    {
-	return new UserCommand(typeName, args);
+    SubFeature(ShowBuilder builder, String name, Lexer lexer) {
+	this.builder = builder;
+	this.name = name;
+	this.lexer = lexer;
     }
 
     /**
      * @inheritDoc
      **/
-    public void finishBuilding(Show show) throws IOException {
+    public Feature getFeature() throws IOException {
+	if (feature == null) {
+	    feature = builder.getNamedFeature(name);
+	    if (feature == null) {
+		lexer.reportError("Feature \"" + name + "\" not found");
+	    }
+	}
+	return feature;
     }
-
-    /**
-     * @inheritDoc
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
-    }
-    
 }
