@@ -241,7 +241,7 @@ public class Show implements AnimationClient {
      * draw targets is built.
      *
      * @see com.hdcookbook.grin.animator.RenderContext#setTarget(int)
-     * @see com.hdcookbook.grin.animator.AnimationEngine#initNumTargets(int)
+     * @see #mapDrawTargets(Hashtable)
      * @see com.hdcookbook.grin.features.SetTarget
      **/
     public String[] getDrawTargets() {

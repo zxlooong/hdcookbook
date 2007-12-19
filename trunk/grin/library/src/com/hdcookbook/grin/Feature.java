@@ -268,7 +268,7 @@ public abstract class Feature implements SetupClient {
      * 
      * @param	context	The context for tracking rendering state
      *
-     * @see com.hdcookbook.grin.animator.DrawRecord;
+     * @see com.hdcookbook.grin.animator.DrawRecord
      **/
     abstract public void addDisplayAreas(RenderContext context);
 

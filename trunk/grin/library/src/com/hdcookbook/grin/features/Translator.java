@@ -70,7 +70,7 @@ import java.awt.Rectangle;
  * Translation to it.  The upper-left hand corner of the subfeature is
  * made to follow the path of the TranslatorModel.
  *
- * @see Translation
+ * @see TranslatorModel
  *
  * @author Bill Foote (http://jovial.com)
  */

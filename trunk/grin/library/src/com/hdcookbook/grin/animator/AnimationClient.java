@@ -175,7 +175,7 @@ public interface AnimationClient {
      *					(e.g. because the xlet is being killed)
      *
      * @see RenderContext#setTarget(int)
-     * @see mapDrawTargets(Hashtable)
+     * @see #mapDrawTargets(Hashtable)
      **/
     public void addDisplayAreas(RenderContext targets)
 	throws InterruptedException;
@@ -202,7 +202,7 @@ public interface AnimationClient {
      * @throws	InterruptedException	if the thread has been interrupted
      *					(e.g. because the xlet is being killed)
      *
-     * @see RenderArea#clearAndAddArea(int, int, int, int)
+     * @see RenderContext#addArea(DrawRecord)
      **/
     public void paintFrame(Graphics2D gr)
     	throws InterruptedException ;
@@ -229,7 +229,7 @@ public interface AnimationClient {
      *
      * @param targets	A hashtable mapping String names to Integer values
      *
-     * @see RenderContext#setDrawTarget(int)
+     * @see RenderContext#setTarget(int)
      * @see #addDisplayAreas(RenderContext)
      **/
     public void mapDrawTargets(Hashtable targets);

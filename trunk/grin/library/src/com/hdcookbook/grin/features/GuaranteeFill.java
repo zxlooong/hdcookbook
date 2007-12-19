@@ -106,11 +106,7 @@ public class GuaranteeFill extends Modifier {
      * Create a new node.
      *
      * @param	show	The show we're a part of
-     * @param	name	The name of this node
-     * @param	gx	X coordinate of area guaranteed to be filled
-     * @param	gy	Y coordinate of area guaranteed to be filled
-     * @param	gWidth	Width of area guaranteed to be filled
-     * @param	gHeight	Height of area guaranteed to be filled
+     * @param	name	The name of this node (can be null)
      * @param	guaranteed	The area guaranteed to be filled by this node
      * @param	fills	The rectangles this node will fill with transparent
      *			pixels.  Can be empty or null.
