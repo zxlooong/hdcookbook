@@ -280,16 +280,20 @@ public class GrinView extends GenericMain {
 
     private static void usage() {
 	System.out.println();
-	System.out.println("Usage:  java com.hdcookbook.grin.test.bigjdk.GrinView \\");
-	System.out.println("        -fps <number>");
-        System.out.println("        -assets <asset path in jar file>");
-        System.out.println("        -asset_dir <directory in filesystem>");
-        System.out.println("        -imagemap <mapfile>");
-        System.out.println("        -background <image>");
-        System.out.println("        -scale <number>");
-        System.out.println("        -segment <segment name to activate>");
+	System.out.println("Usage:  java com.hdcookbook.grin.test.bigjdk.GrinView <option> <show file>\\");
+	System.out.println("            <show file> can be a .grin binary file, or a text show file.");
+	System.out.println("                        It is searched for in the asset search path.");
+
+	System.out.println("            <options> can be:");
+	System.out.println("                -fps <number>");
+        System.out.println("                -assets <asset path in jar file>");
+        System.out.println("                -asset_dir <directory in filesystem>");
+        System.out.println("                -imagemap <mapfile>");
+        System.out.println("                -background <image>");
+        System.out.println("                -scale <number>");
+        System.out.println("                -segment <segment name to activate>");
         System.out.println("");
-        System.out.println("    -assets and -asset_dir may be repeated");
+        System.out.println("            -assets and -asset_dir may be repeated to form a search path.lll");
 	System.out.println();
 	System.exit(1);
     }
