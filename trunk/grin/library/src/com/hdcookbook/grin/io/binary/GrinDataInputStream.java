@@ -152,7 +152,11 @@ class GrinDataInputStream extends DataInputStream {
        
        String[] array = new String[readInt()];
        for (int i = 0; i < array.length; i++) {
-           array[i] = readUTF();
+	   if (readByte() == Constants.NULL) {
+	       array[i] = null;
+	   } else {
+               array[i] = readUTF();
+	   }
        }
        return array;
    }
