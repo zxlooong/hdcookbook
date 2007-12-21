@@ -210,6 +210,9 @@ public interface AnimationClient {
 
     /**
      * Get the names of the draw targets used by this animation client.
+     * <p>
+     * Note that GRIN uses the name "T:Default" as the name of the
+     * draw target if the GRIN show doesn't specify any.
      **/
     public String[] getDrawTargets();
 
