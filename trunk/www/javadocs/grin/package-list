@@ -5,6 +5,7 @@ com.hdcookbook.grin.features
 com.hdcookbook.grin.input
 com.hdcookbook.grin.io
 com.hdcookbook.grin.io.binary
+com.hdcookbook.grin.io.builders
 com.hdcookbook.grin.io.text
 com.hdcookbook.grin.test
 com.hdcookbook.grin.test.bigjdk
