@@ -115,7 +115,6 @@ public class VisualRCHandler extends RCHandler {
     				| RCKeyEvent.KEY_RIGHT.getBitMask()
     				| RCKeyEvent.KEY_LEFT.getBitMask()
     				| RCKeyEvent.KEY_ENTER.getBitMask();
-    private String name;
     private int[] upDown;    // For each state, the most significant 16 bits
     			     // contains the state to go to on "up", and the
 			     // least significant 16 bits the "down" value.
@@ -248,7 +247,7 @@ public class VisualRCHandler extends RCHandler {
      * Useful for development.
      **/
     public String toString() {
-	return super.toString() + "(" + name + ")";
+	return super.toString() + "(" + getName() + ")";
     }
 
     private boolean handlesActivation() {
@@ -422,7 +421,7 @@ public class VisualRCHandler extends RCHandler {
 		    currState = i;
 		    activated = true;
 		} else if (Debug.LEVEL > 0) {
-		    Debug.println("Handler " + name 
+		    Debug.println("Handler " + getName()
 		                  + " can't find current assembly state");
 		}
 	    }

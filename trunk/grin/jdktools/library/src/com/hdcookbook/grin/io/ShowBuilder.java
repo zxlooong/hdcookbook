@@ -79,6 +79,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.regex.Pattern;
+
 
 /**
  * A helper class for parsing a show.  Clients of the parser can
@@ -181,6 +183,9 @@ public class ShowBuilder {
     /**
      * Called when the exported clause is encountered.  This is optional;
      * if it's not called, then everything defaults to public visibility.
+     * <p>
+     * The segments, features and handlers may contain the wildcard
+     * character "*", which cannot be escaped.
      **/
     public void setExported(String[] segments, String[] features, 
     			    String[] handlers) 
@@ -228,11 +233,14 @@ public class ShowBuilder {
 	RCHandler[] rcHandlers
 	    = allRCHandlers.toArray(new RCHandler[allRCHandlers.size()]);
 	Hashtable publicSegments 
-		= findPublic(namedSegments, exportedSegments, "Segment");
+		= findPublic(namedSegments, namedSegments.keySet(),
+		             exportedSegments, "Segment");
 	Hashtable publicFeatures 
-		= findPublic(namedFeatures, exportedFeatures, "Feature");
+		= findPublic(namedFeatures, namedFeatures.keySet(),
+			     exportedFeatures, "Feature");
 	Hashtable publicRCHandlers 
-		= findPublic(namedRCHandlers, exportedRCHandlers, "RC Handler");
+		= findPublic(namedRCHandlers, namedRCHandlers.keySet(),
+			     exportedRCHandlers, "RC Handler");
 	show.buildShow(segments, features, rcHandlers,
 		       publicSegments, publicFeatures, publicRCHandlers);
 	for (DeferredBuilder builder : deferredBuilders) {
@@ -240,23 +248,65 @@ public class ShowBuilder {
 	}
     }
 
-    private Hashtable findPublic(Map namedThings, List exportedThings,
-    				 String thingName) 
+    private Hashtable findPublic(Map namedThings, Set<String> names,
+    			         List<String> exportedThings, String thingName) 
 		throws IOException 
     {
 	Hashtable result = new Hashtable();
 	if (exportedThings == null) {
 	    result.putAll(namedThings);
 	} else {
-	    for (Object key : exportedThings) {
-		Object value = namedThings.get(key);
-		if (value == null) {
-		    throw new IOException(thingName + " " + key + 
-		    			" was exported but does not exist");
+	    List<Pattern> patterns = new ArrayList<Pattern>();
+	    for (String pat : exportedThings) {
+		patterns.add(convertWildcard(pat));
+	    }
+	    for (String key : names) {
+		boolean found = false;
+		for (Pattern pat : patterns) {
+		    if (pat.matcher(key).matches()) {
+			found = true;
+			break;
+		    }
 		}
-		result.put(key, value);
+		if (found) {
+		    Object value = namedThings.get(key);
+		    assert value != null;
+		    result.put(key, value);
+		}
 	    }
 	}
 	return result;
+    }
+
+    private Pattern convertWildcard(String wildcard) {
+	StringBuilder pat = new StringBuilder();
+	for (int i = 0; i < wildcard.length(); i++) {
+	    char ch = wildcard.charAt(i);
+	    if (ch == '*') {
+		pat.append(".*");
+	    } else if (ch == '?') {
+		pat.append(".");
+	    } else if (ch == '[') {
+		int pos = wildcard.indexOf("]", i);
+		String range = null;
+		if (pos > -1) {
+		    range = wildcard.substring(i, pos + 1);
+		}
+		if (range.indexOf("[", 1) != -1) {
+		    // Can't handle '[' inside a '[' ']' pair)
+		    pos = -1;
+		}
+		if (pos == -1)  {
+		    // If we don't have a valid set of characters
+		    pat.append(Pattern.quote("" + ch));
+		} else {
+		    pat.append(range);
+		    i += range.length() - 1;
+		}
+	    } else {
+		pat.append(Pattern.quote("" + ch));
+	    }
+	}
+	return Pattern.compile(pat.toString());
     }
 }

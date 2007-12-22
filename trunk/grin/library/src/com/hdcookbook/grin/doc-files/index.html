@@ -146,6 +146,8 @@ a Show is created.  Here's BNF describing the syntax of a show file:
     			"features" name_list
 			"handlers" name_list ";"
 	# If this isn't set, then everything is public
+	# The names in name_list may contain wildcards like
+	# "*", "?", "[wxz]" and "[1-5]".
 
     segment ::= "segment" name ["active" feature_list] ["setup" feature_list]
     			["chapter" name] ["rc_handlers" name_list]
