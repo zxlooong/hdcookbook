@@ -39,7 +39,7 @@ to address the overall control of an application; that's left for
 the developer to do in code.  The framework does provide a simple
 state machine and timeline that might help structure application
 control, but use of this is entirely optional.  It's based on the
-Director and Chapter constructs, but a Show can be used without ever
+Director construct, but a Show can be used without ever
 touching any of that.
 </p><p>
 GRIN is intended to be used in highly interactive enhancements for
@@ -114,13 +114,10 @@ A set of features that are presented together are collected into a "Scene."
 <p>
 A show doesn't provide any real control logic or application state.  That's
 left to the Director.  Director is just an interface declaration; it has
-to be implemented by an application implementing this framework.  Some support
-for a state machine for Director is supplied by the Chapter construct.  Chapter
-is also just an interface declaration, but it's expected that Scene
-instances will be grouped into chapters.  There's no actual chapter
-construct in the framework, but there is a ChapterManager interface.
-An application can use this as a way of grouping state information that's
-needed by a related group of segments.
+to be implemented by an application implementing this framework.  Director
+is an interface that needs to be implemented by the xlet, and it's where
+the GRIN framework asks the xlet for extensions, like a way of reading
+extension features.
 </p><p>
 A UML class diagram illustrating the design is given below:
 </p><p>
@@ -150,7 +147,7 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 	# "*", "?", "[wxz]" and "[1-5]".
 
     segment ::= "segment" name ["active" feature_list] ["setup" feature_list]
-    			["chapter" name] ["rc_handlers" name_list]
+    			["rc_handlers" name_list]
 			[ ( "next" | "setup_done")  commands]  ";"
 
     feature_list ::= name_list
