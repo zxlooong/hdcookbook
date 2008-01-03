@@ -58,7 +58,6 @@ package com.hdcookbook.grin.build.mosaic;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.ImageSequence;
@@ -157,16 +156,6 @@ import javax.imageio.ImageIO;
 			}
 		    };
                 }
-		public ChapterManager getChapterManager(String name) {
-		    synchronized(getShow()) {
-			ChapterManager result = super.getChapterManager(name); 
-			if (result == null) {
-			    result = new ChapterManager(name); 
-			    addState(result);
-			} 
-			return result;
-		    }
-		}
             };
             showTrees[i] = new SEShow(director);
             URL source = AssetFinder.getURL(shows[i]);

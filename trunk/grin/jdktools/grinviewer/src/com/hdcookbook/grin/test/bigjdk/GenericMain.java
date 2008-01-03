@@ -89,7 +89,6 @@ import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.AnimationContext;

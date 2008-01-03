@@ -67,27 +67,17 @@ import java.awt.event.KeyEvent;
  * in a show, positioning due to trick play, and remote control
  * key events.
  * <p>
- * A director manages itself by its state.  A director also keeps a
- * list of all states, indexed by name.  Most of the actual work
- * of the director is done by its states.
- * <p>
  * A director provides the controler that's needed by a Show
  * so that applications don't need to.
  * <p>
- * See also the Facade pattern (GoF page 185) and the State pattern
- * (GoF page 305).
+ * See also the Facade pattern (GoF page 185)
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
 
 public abstract class Director {
 
-    private com.hdcookbook.grin.ChapterManager theController;
-    private Hashtable states = new Hashtable();
     private Show show;
-    private ChapterManager initialState;
-
-    private ChapterManager currentState;		// never null
 
     /**
      * Create a new Director.
@@ -95,32 +85,6 @@ public abstract class Director {
     public Director()  {
     }
     
-    /**
-     * Initialize this director.
-     * 
-     * @param initialState	The initial state of the show
-     * @param states		All states of the show known at initialization
-     *			        time (must include the initial state)
-     **/
-    protected void setup(int initialState, ChapterManager[] states) {
-	this.initialState = states[initialState];
-	this.currentState = this.initialState;
-	for (int i = 0; i < states.length; i++) {
-	    states[i].setDirector(this);
-	    this.states.put(states[i].getName(), states[i]);
-	}
-    }
-   
-    /**
-     * Add a new state (called a "chapter") to the set of states managed
-     * by this director.  This extends the set passed into the setup
-     * method.
-     **/
-    protected void addState(ChapterManager state) {
-        state.setDirector(this);
-        states.put(state.getName(), state);
-    }
-
     //
     // Called from Show constructor
     //
@@ -135,14 +99,6 @@ public abstract class Director {
 	return show;
     }
    
-    /** 
-     * Returns the ChapterManager for a given state.  Xlets
-     * can override this, but if they do the parameter to
-     * the constructor becomes meaningless.
-     **/
-    public ChapterManager getChapterManager(String name) {
-        return (ChapterManager) states.get(name);
-    }
 
     /**
      * Give the ExtensionsBuilder that will build any new

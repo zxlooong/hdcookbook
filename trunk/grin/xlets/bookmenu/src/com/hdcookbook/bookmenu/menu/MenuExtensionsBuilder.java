@@ -64,7 +64,6 @@ import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.input.RCKeyEvent;

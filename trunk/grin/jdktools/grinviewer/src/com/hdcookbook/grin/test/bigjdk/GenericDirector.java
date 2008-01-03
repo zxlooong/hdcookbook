@@ -61,7 +61,6 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.URL;
 
-import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
@@ -84,27 +83,8 @@ public class GenericDirector extends Director {
 
     public GenericDirector(String showName) {
 	this.showName = showName;
-	ChapterManager[] chapters = { new ChapterManager("init") };
-	setup(0, chapters);
     }
     
-    /**
-     * See superclass definition.  The first time we're asked for a given
-     * chapter manager, we just create it.  A real xlet might have named
-     * chapter managers of different types, if it chooses to use the
-     * state pattern.
-     **/
-    public ChapterManager getChapterManager(String name) {
-        synchronized(getShow()) {
-            ChapterManager result = super.getChapterManager(name);
-            if (result == null) {
-                result = new ChapterManager(name);
-                addState(result);
-            }
-            return result;
-        }
-    }
-
     /**
      * See superclass definition.  This extensions parser will just
      * make a fake implementation of each extension.

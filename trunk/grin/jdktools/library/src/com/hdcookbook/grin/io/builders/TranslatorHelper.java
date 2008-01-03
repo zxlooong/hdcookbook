@@ -147,7 +147,7 @@ public class TranslatorHelper implements DeferredBuilder {
 		SEShow.acceptFeatures(this, feature.getParts());
 	    }
 	    public void visitBox(Box feature) { 
-		check(feature.getPlacement().x, feature.getPlacement().y);
+		check(feature.getX(), feature.getY());
 	    }
 	    public void visitClipped(Clipped feature) { 
 		SEShow.acceptFeature(this, feature.getPart());

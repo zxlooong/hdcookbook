@@ -58,7 +58,6 @@ package com.hdcookbook.grin.io.text;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
@@ -298,12 +297,10 @@ public class ShowParser {
 	}
 	final SubFeature[] setup = makeSubFeatureList(sa);
 	if ("chapter".equals(tok)) {
-	    s = lexer.getString();
+	    lexer.getString();
 	    tok = lexer.getString();
-	} else {
-	    s = null;
+	    lexer.reportWarning("Deprecated chapter name ignored");
 	}
-	final String chapter = s;
 	if ("rc_handlers".equals(tok)) {
 	    sa = parseStrings();
 	    tok = lexer.getString();
@@ -327,21 +324,8 @@ public class ShowParser {
 	    void resolve() throws IOException {
 		Feature[] a = makeFeatureList(active);
 		Feature[] s = makeFeatureList(setup);
-		ChapterManager c;
 		RCHandler[] h = makeRCHandlerList(rcHandlers);
-		if (chapter == null) {
-		    c = null;
-		} else {
-		    if (show.getDirector() == null) {
-			c = null;
-		    } else {
-		        c = show.getDirector().getChapterManager(chapter);
-		    }
-		    if (c == null) {
-			reportError("Chapter \"" + name + "\" not found");
-		    }
-		}
-		builder.addSegment(name,line,new Segment(name, a, s, c, h,
+		builder.addSegment(name,line,new Segment(name, a, s, h,
 				   nextOnSetupDone, next));
 	    }
 	};
@@ -537,8 +521,9 @@ public class ShowParser {
 	if (!(";".equals(tok))) {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
-	Box box = new Box(show, name, placement, outlineWidth, outlineColor, 
-			  fillColor);
+	Box box = new Box(show, name, placement.x, placement.y,
+	                  placement.width, placement.height, 
+			  outlineWidth, outlineColor, fillColor);
 	builder.addFeature(name, line, box);
 	return box;
     }

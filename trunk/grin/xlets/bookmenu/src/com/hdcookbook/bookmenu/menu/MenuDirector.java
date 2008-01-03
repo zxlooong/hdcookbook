@@ -67,7 +67,6 @@ import java.io.InputStreamReader;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
@@ -96,9 +95,6 @@ public class MenuDirector extends Director {
      * Initialize this MenuDirector.  Called on xlet startup.
      **/
     public void init() {
-	ChapterManager nullCM = new ChapterManager("");
-	ChapterManager[] chapters = { nullCM };
-	setup(0, chapters);
     }
 
     /**

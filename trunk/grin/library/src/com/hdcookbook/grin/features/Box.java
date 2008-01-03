@@ -77,7 +77,10 @@ import java.awt.Color;
  */
 public class Box extends Feature {
    
-    private Rectangle placement;
+    private int x;
+    private int y;
+    private int width;
+    private int height;
     private int outlineWidth;
     private Color outlineColor;
     private Color fillColor;
@@ -85,32 +88,39 @@ public class Box extends Feature {
     private boolean isActivated;
     private DrawRecord drawRecord = new DrawRecord();
 
-    public Box(Show show, String name, Rectangle placement,
+    public Box(Show show, String name, int x, int y, int width, int height,
     	       int outlineWidth, Color outlineColor, Color fillColor)
     {
 	super(show, name);
-	this.placement = placement;
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
 	this.outlineWidth = outlineWidth;
 	this.outlineColor = outlineColor;
 	this.fillColor = fillColor;
-    }
-
-    public Rectangle getPlacement() {
-       return placement;
     }
 
     /**
      * @inheritDoc
      **/
     public int getX() {
-	return placement.x;
+	return x;
     }
 
     /**
      * @inheritDoc
      **/
     public int getY() {
-	return placement.y;
+	return y;
+    }
+
+    public int implGetWidth() {
+	return width;
+    }
+
+    public int implGetHeight() {
+	return height;
     }
     
     public int getOutlineWidth() {
@@ -181,8 +191,7 @@ public class Box extends Feature {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(placement.x, placement.y, 
-			   placement.width, placement.height);
+	drawRecord.setArea(x, y, width, height);
 	drawRecord.setSemiTransparent();
 	context.addArea(drawRecord);
     }
@@ -194,10 +203,10 @@ public class Box extends Feature {
 	if (!isActivated) {
 	    return;
 	}
-	int x1 = placement.x;
-	int y1 = placement.y;
-	int w = placement.width;
-	int h = placement.height;
+	int x1 = x;
+	int y1 = y;
+	int w = width;
+	int h = height;
 	int x2 = x1 + w - 1;
 	int y2 = y1 + h - 1;
 	if (outlineWidth > 0 && outlineColor != null) {

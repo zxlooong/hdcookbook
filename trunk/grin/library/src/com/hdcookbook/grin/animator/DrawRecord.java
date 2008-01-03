@@ -94,7 +94,7 @@ public class DrawRecord {
     private int lastWidth;
     private int lastHeight;
 
-    // RenderContextBase some lists of DrawRecord instances.  At times
+    // RenderContextBase contains some lists of DrawRecord instances.  At times
     // they're singly linked, and at times doubly-linked.  A DrawRecord
     // instances is never on more than one list at a time.  We maintain these
     // lists "old school" style (not using java.util) for greater speed, and

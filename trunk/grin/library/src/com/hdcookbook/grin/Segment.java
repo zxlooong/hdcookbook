@@ -83,7 +83,6 @@ public class Segment {
     private Feature[] activeFeatures;
     private boolean[] featureWasActivated;
     private Feature[] settingUpFeatures;
-    protected ChapterManager ourChapterManager;
     private boolean nextOnSetupDone;
     private Command[] nextCommands;
     private RCHandler[] rcHandlers;
@@ -94,8 +93,8 @@ public class Segment {
     private ActivateSegmentCommand cmdToActivatePush;
 
     public Segment(String name, Feature[] active, Feature[] setup,
-    		 ChapterManager chapterManager, RCHandler[] rcHandlers,
-		 boolean nextOnSetupDone, Command[] nextCommands) 
+    		 RCHandler[] rcHandlers, boolean nextOnSetupDone, 
+		 Command[] nextCommands) 
 	    throws IOException 
     {
 	this.name = name;	// for debugging
@@ -105,7 +104,6 @@ public class Segment {
 	    featureWasActivated[i] = false;
 	}
 	this.settingUpFeatures = setup;
-	this.ourChapterManager = chapterManager;
 	this.nextOnSetupDone = nextOnSetupDone;
 	this.nextCommands = nextCommands;
 	this.rcHandlers = rcHandlers;

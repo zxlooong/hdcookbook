@@ -80,7 +80,6 @@ import java.util.LinkedList;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.test.RyanDirector;
 import com.hdcookbook.grin.util.AssetFinder;

@@ -363,7 +363,10 @@ public class GrinBinaryWriter {
        } else {
 	   dos.writeString(null);
        }
-       dos.writeRectangle(box.getPlacement());
+       dos.writeInt(box.getX());
+       dos.writeInt(box.getY());
+       dos.writeInt(box.implGetWidth());
+       dos.writeInt(box.implGetHeight());
        dos.writeInt(box.getOutlineWidth());
        dos.writeColor(box.getOutlineColor());
        dos.writeColor(box.getFillColor());

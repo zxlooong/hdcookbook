@@ -380,14 +380,18 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }       
         String name = dis.readString();
-        Rectangle placement = dis.readRectangle();
+	int x = dis.readInt();
+	int y = dis.readInt();
+	int width = dis.readInt();
+	int height = dis.readInt();
         int outlineWidth = dis.readInt();
         Color outline = dis.readColor();
         Color fill = dis.readColor();
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }       
-        return new Box(show, name, placement, outlineWidth, outline, fill);
+        return new Box(show, name, x, y, width, height, 
+		       outlineWidth, outline, fill);
     }
     
     private Clipped readClipped(GrinDataInputStream dis) throws IOException {
@@ -903,8 +907,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).popExpectedLength();
         }        
 
-        // TODO: what about ChapterManager?
-        return new Segment(name, active, setup, null, handlers, nextOnSetupDone, commands);
+        return new Segment(name, active, setup, handlers, nextOnSetupDone, commands);
         
     }
     

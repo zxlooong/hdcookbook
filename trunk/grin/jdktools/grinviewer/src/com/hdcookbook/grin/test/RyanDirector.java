@@ -68,7 +68,6 @@ import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.ChapterManager;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
@@ -95,18 +94,6 @@ public abstract class RyanDirector extends Director {
     /** 
       */
     public RyanDirector() {
-	//
-    	// Ryan is small enough that it doesn't really help to use
-	// chapter managers, so we just invoke some null chapter
-	// managers here.
-	//
-	ChapterManager[] chapters = {
-		new ChapterManager("ch_play_mode_setup"),
-		new ChapterManager("ch_play_mode_menu_activation"),
-		new ChapterManager("ch_play_mode_menu_interaction"),
-		new ChapterManager("ch_commentary_menu")
-	};
-	setup(0, chapters);
     }
 
     protected void init() {
