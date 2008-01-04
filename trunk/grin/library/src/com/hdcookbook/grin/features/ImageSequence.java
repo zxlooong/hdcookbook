@@ -255,7 +255,6 @@ public class ImageSequence extends Feature {
 	if (mode) {
 	    lastImage = null;
 	    currImage = images[getStateHolder().currFrame];
-	    drawRecord.activate();
 	}
     }
 

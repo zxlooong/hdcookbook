@@ -109,7 +109,7 @@ public class DrawRecord {
      * Create a new, empty DrawRecord
      **/
     public DrawRecord() {
-	activate();
+	resetPreviousFrame();
     }
 
     /**
@@ -118,7 +118,7 @@ public class DrawRecord {
      * therefore any record of drawing a previous frame is stale, and
      * should be discarded.
      **/
-    public void activate() {
+    void resetPreviousFrame() {
 	lastWidth = Integer.MIN_VALUE;
     }
 

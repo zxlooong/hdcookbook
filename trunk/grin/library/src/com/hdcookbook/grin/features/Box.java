@@ -157,9 +157,6 @@ public class Box extends Feature {
 	// This is synchronized to only occur within model updates.
 	//
 	isActivated = mode;
-	if (mode) {
-	    drawRecord.activate();
-	}
     }
 
     /**

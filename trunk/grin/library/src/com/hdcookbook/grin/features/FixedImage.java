@@ -154,9 +154,6 @@ public class FixedImage extends Feature {
      **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
-	if (mode) {
-	    drawRecord.activate();
-	}
     }
 
     /**

@@ -199,7 +199,6 @@ public class Text extends Feature {
 	    colorIndex = 0;
 	    lastColor = null;
 	    currColor = colors[colorIndex];
-	    drawRecord.activate();
 	}
     }
 

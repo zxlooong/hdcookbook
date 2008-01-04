@@ -131,10 +131,12 @@ public class RenderContextBase extends RenderContext {
     public void addArea(DrawRecord r) {
 	r.target = currTarget;
 	r.addAreaTo(drawTargets[currTarget]);
-	// Remove from lastFrameList, if on it.
-	if (r.prev != null) {
+	if (r.prev != null) {		// If on lastFrameList
+		// remove from lastFrameList
 	    r.prev.next = r.next;
 	    r.next.prev = r.prev;
+	} else {			// Otherwise, it's newly activated
+	    r.resetPreviousFrame();
 	}
 	// Add to this frame's list
 	r.next = thisFrameList;
