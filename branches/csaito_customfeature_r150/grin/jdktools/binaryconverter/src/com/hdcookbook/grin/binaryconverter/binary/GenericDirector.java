@@ -53,70 +53,81 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+package com.hdcookbook.grin.binaryconverter.binary;
 
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEUserModifier;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-
+import java.net.URL;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.text.ShowParser;
+import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.io.binary.SEExtensionsBuilder;
+import com.hdcookbook.grin.util.AssetFinder;
 
 /**
- * This is an extensions builder that makes a fake version of any
- * GRIN extension it encounters.  
+ * This is a subclass of the GRIN director class which is
+ * used by the BinaryConverter tool.
  */
-class GenericExtensionsBuilder implements ExtensionsBuilder {
+class GenericDirector extends Director {
    
-    private GenericDirector director;
-
-    public GenericExtensionsBuilder(GenericDirector director) {
-	this.director = director;
+    private String showName;
+    private ExtensionsBuilder builder;
+    
+    public GenericDirector(String showName, ExtensionsBuilder builder) {
+	this.showName = showName;
+        this.builder = builder;
     }
     
     /**
-     * Returns null.
+     * See superclass definition.  This extensions builder will just
+     * make a fake implementation of each extension.
      **/
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-    {
-	// Not implemented.  If we do this, we'll have to figure out
-	// some syntactical contstraints on an extension feature.
-        return null;
+    public ExtensionsBuilder getExtensionsBuilder() {
+        if (builder == null) 
+            builder = new SEExtensionsBuilder(this);
+        
+        return builder;
     }
 
     /**
-     * Returns an instance of a SEUserModifier.
+     * Create a show.  This is called by the main control class of
+     * this debug tool.
      **/
-    public Modifier getModifier(Show show, final String typeName, 
-    			        String name, String arg)
-    {
-	return new SEUserModifier(show, typeName, name, arg);
+    public SEShow createShow(ShowBuilder builder) {
+	SEShow show = new SEShow(this);
+	URL source = null;
+	BufferedReader rdr = null;
+	try {
+	    source = AssetFinder.getURL(showName);
+	    if (source == null) {
+		throw new IOException("Can't find resource " + showName);
+	    }
+	    rdr = new BufferedReader(
+			new InputStreamReader(source.openStream(), "UTF-8"));
+	    ShowParser p = new ShowParser(rdr, showName, show, builder);
+	    p.parse();
+	    rdr.close();
+	} catch (IOException ex) {
+	    ex.printStackTrace();
+	    System.out.println();
+	    System.out.println(ex.getMessage());
+	    System.out.println();
+	    System.out.println("Error trying to parse " + showName);
+            System.out.println("    URL:  " + source);
+	    System.exit(1);
+	} finally {
+	    if (rdr != null) {
+		try {
+		    rdr.close();
+		} catch (IOException ex) {
+		}
+	    }
+	}
+        return show;
     }
 
-    /**
-     * Returns an instance of UserCommand.
-     **/
-    public Command getCommand(Show show, final String typeName, String[] args)
-		       throws IOException
-    {
-	return new UserCommand(typeName, args);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void finishBuilding(Show show) throws IOException {
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
-    }
-    
 }

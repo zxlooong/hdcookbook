@@ -52,8 +52,9 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+package com.hdcookbook.grin.binaryconverter.binary;
 
+import com.hdcookbook.grin.io.binary.*;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.ShowBuilder;
