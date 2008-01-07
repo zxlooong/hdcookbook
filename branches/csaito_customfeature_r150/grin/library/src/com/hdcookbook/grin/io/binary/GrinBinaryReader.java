@@ -308,6 +308,9 @@ public class GrinBinaryReader {
                 case Constants.SET_TARGET_IDENTIFIER :
                     feature = readSetTarget(in);
                     break;
+                case Constants.USER_FEATURE_IDENTIFIER :
+                    feature = readUserFeature(in);
+                    break;  
                 default:
                     throw new IOException("Unknown feature identifier " + identifier);
             }
@@ -640,6 +643,26 @@ public class GrinBinaryReader {
         return result;
     }
 
+    private Feature readUserFeature(GrinDataInputStream dis) throws IOException {
+        if (dis.readByte() == Constants.NULL) {
+            return null;
+        }
+        
+        int length = dis.readInt();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).pushExpectedLength(length);
+        }  
+        String name = dis.readString();
+        String typeName = dis.readUTF();
+        String arg = dis.readUTF();
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
+        Feature feature = director.getExtensionsBuilder().getFeature(show, typeName, name, arg);
+       
+        return feature;
+    }
+
     
     private Modifier readUserModifier(GrinDataInputStream dis) throws IOException {
         if (dis.readByte() == Constants.NULL) {
@@ -954,6 +977,7 @@ public class GrinBinaryReader {
 	    if (i == -1) {
 		break;
 	    }
+            System.out.println(i + " : " + features[i]);
 	    publicFeatures.put(features[i].getName(), features[i]);
 	}
 

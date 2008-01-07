@@ -52,50 +52,37 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+package com.hdcookbook.grin.features;
+
+import com.hdcookbook.grin.commands.Command;
 
 /**
- * Defines constants used for the binary format of the Show file.
+ * A Command subclass that saves all the data passed into it's constructor.
+ * This is used by the GrinBinaryWriter to ensure all possible extension data are
+ * captured in the binary file format.
  */
-
-class Constants {
- 
-	static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
-	static final int GRINSCRIPT_VERSION = 9;
-	
-	static final int FEATURE_IDENTIFIER= 0x00000fea;
-	static final int SEGMENT_IDENTIFIER= 0x00000ce6;
-        static final int RCHANDLER_IDENTIFIER=0x000008ee;
-        static final int PUBLIC_ELEMENTS_IDENTIFIER=0x0000040b;
-	
-	static final byte ASSEMBLY_IDENTIFIER= 0x01;
-	static final byte BOX_IDENTIFIER = 0x02;
-	static final byte FIXEDIMAGE_IDENTIFIER = 0x03; 
-	static final byte GROUP_IDENTIFIER = 0x04;
-	static final byte IMAGESEQUENCE_IDENTIFIER = 0x05;
-	static final byte TEXT_IDENTIFIER = 0x06;
-	static final byte TIMER_IDENTIFIER = 0x07;
-	static final byte TRANSLATOR_MODEL_IDENTIFIER = 0x08;
-	static final byte TRANSLATOR_IDENTIFIER = 0x09;
-	static final byte CLIPPED_IDENTIFIER = 0x0a;
-	static final byte FADE_IDENTIFIER = 0x0b;
-	static final byte SRCOVER_IDENTIFIER = 0x0c;
-        static final byte USER_MODIFIER_IDENTIFIER = 0x0d;        
-        static final byte USER_FEATURE_IDENTIFIER = 0x0e;
-        
-        static final byte ACTIVATEPART_CMD_IDENTIFIER = 0x10;
-        static final byte ACTIVATESEGMENT_CMD_IDENTIFIER = 0x11;
-        static final byte SEGMENTDONE_CMD_IDENTIFIER = 0x12;
-        static final byte SETVISUALRCSTATE_CMD_IDENTIFIER = 0x13;
-        static final byte USER_CMD_IDENTIFIER = 0x14; 
-        
-        static final byte COMMAND_RCHANDLER_IDENTIFIER = 0x20;
-        static final byte VISUAL_RCHANDLER_IDENTIFIER = 0x21;
-        static final byte USER_RCHANDLER_IDENTIFIER = 0x22;
-        static final byte GUARANTEE_FILL_IDENTIFIER = 0x23;
-	static final byte SET_TARGET_IDENTIFIER = 0x24;
-        
-        static final byte NULL = (byte) 0xff;
-        static final byte NON_NULL = (byte) 0xee;
-   
-}	
+public class SEUserCommand extends Command {
+    
+    private String typeName;
+    private String[] args;
+    
+    /** Creates a new instance of SEUserCommand */
+    public SEUserCommand(String typeName, String[] args) {
+        super();
+        this.typeName = typeName;
+        this.args = args;
+    }
+    
+    public String getTypeName() {
+        return typeName;
+    }
+    
+    public String[] getArgs() {
+        return args;
+    }
+    
+    public void execute() {
+	System.out.println("Executing " + typeName);
+    }
+    
+}

@@ -1,0 +1,29 @@
+
+show 
+
+segment S:Initialize  
+   setup  {
+	F:Everything
+   } setup_done {
+      # triggerred when F:Everything is done loading
+      activate_segment S:1 ;  
+   }  
+;
+
+segment S:1
+   active {
+        F:Oval
+   } setup  {
+	F:Everything
+   } 
+; 
+
+
+feature group F:Everything {
+	F:Oval
+} ;
+
+
+feature extension EXAMPLE:oval F:Oval "10 10 100 100" ;
+
+end_show

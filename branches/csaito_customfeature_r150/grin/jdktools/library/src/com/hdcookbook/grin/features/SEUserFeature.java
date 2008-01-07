@@ -1,4 +1,3 @@
-
 /*  
  * Copyright (c) 2007, Sun Microsystems, Inc.
  * 
@@ -53,97 +52,54 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test.bigjdk;
+package com.hdcookbook.grin.features;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.net.URL;
-
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.binary.GrinBinaryReader;
-import com.hdcookbook.grin.io.binary.SEExtensionsBuilder;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.animator.RenderContext;
+import java.awt.Graphics2D;
 
 /**
- * This is a subclass of the GRIN director class that fakes out
- * GRIN to accept any extensions of the GRIN syntax.  The extensions
- * are ignored, with default behavior put in.
- *
- * @author Bill Foote (http://jovial.com)
+ * A Feature subclass that saves all the data passed into its constructor.
+ * This is used by the GrinBinaryWriter to ensure all possible extension 
+ * data are captured in the binary file format.
  */
-public class GenericDirector extends Director {
-   
-    private String showName;
-
-    public GenericDirector(String showName) {
-	this.showName = showName;
+public class SEUserFeature extends Feature {
+    
+    private String typeName;
+    private String name;
+    private String arg;
+    
+    /** Creates a new instance of SEUserModifier */
+    public SEUserFeature(Show show, String typeName, String name, String arg)
+    {
+        super(show, name);
+        this.typeName = typeName;
+        this.arg = arg;
     }
     
-    /**
-     * See superclass definition.  This extensions parser will just
-     * make a fake implementation of each extension.
-     **/
-    public ExtensionsBuilder getExtensionsBuilder() {
-	return new SEExtensionsBuilder(this);
+    public String getTypeName() {
+        return typeName;
+    }
+    
+    public String getArg() {
+        return arg;
+    }
+    
+	@Override
+    public String toString() {
+        return typeName;
     }
 
-    /**
-     * Create a show.  This is called by the main control class of
-     * this debug tool.
-     **/
-    public SEShow createShow(ShowBuilder builder) {
-	SEShow show = new SEShow(this);
-	URL source = null;
-	BufferedReader rdr = null;
-        BufferedInputStream bis = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-            
-            if (!showName.endsWith(".grin")) {
-	        rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
-	        ShowParser p = new ShowParser(rdr, showName, show, builder);
-	        p.parse();
-	        rdr.close();
-            } else {
-                bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(this, bis);
-                reader.readShow(show);
-                bis.close();
-            }   
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
-            System.out.println("    URL:  " + source);
-	    System.exit(1);
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }   
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException ex) {
-                }    
-            }
-	}
-        return show;
-    }
-
+    public void addDisplayAreas(RenderContext context) {}
+    public void destroy() {}
+    public void doSomeSetup() {}
+    public int getX() { return 0; }
+    public int getY() { return 0; }
+    public void initialize() {}
+    public boolean needsMoreSetup() { return false; }
+    public void nextFrame() {}
+    public void paintFrame(Graphics2D g) {}
+    public void setActivateMode(boolean b) {}
+    public void setSetupMode(boolean b) {}
 }

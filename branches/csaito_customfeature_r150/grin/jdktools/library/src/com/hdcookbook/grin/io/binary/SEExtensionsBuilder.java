@@ -53,97 +53,73 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test.bigjdk;
+package com.hdcookbook.grin.io.binary;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.net.URL;
-
+import com.hdcookbook.grin.features.SEUserCommand;
 import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.features.SEUserFeature;
+import com.hdcookbook.grin.features.SEUserModifier;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.binary.GrinBinaryReader;
-import com.hdcookbook.grin.io.binary.SEExtensionsBuilder;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.util.AssetFinder;
+
+import java.io.IOException;
 
 /**
- * This is a subclass of the GRIN director class that fakes out
- * GRIN to accept any extensions of the GRIN syntax.  The extensions
- * are ignored, with default behavior put in.
- *
- * @author Bill Foote (http://jovial.com)
+ * This is an extensions builder that makes a fake version of any
+ * GRIN extension it encounters.  
  */
-public class GenericDirector extends Director {
+public class SEExtensionsBuilder implements ExtensionsBuilder {
    
-    private String showName;
+    private Director director;
 
-    public GenericDirector(String showName) {
-	this.showName = showName;
+    public SEExtensionsBuilder(Director director) {
+	this.director = director;
     }
     
     /**
-     * See superclass definition.  This extensions parser will just
-     * make a fake implementation of each extension.
+     * Returns null.
      **/
-    public ExtensionsBuilder getExtensionsBuilder() {
-	return new SEExtensionsBuilder(this);
+    public Feature getFeature(Show show, String typeName, 
+    			      String name, String arg)
+    {
+	// Not implemented.  If we do this, we'll have to figure out
+	// some syntactical contstraints on an extension feature.
+        return new SEUserFeature(show, typeName, name, arg);
     }
 
     /**
-     * Create a show.  This is called by the main control class of
-     * this debug tool.
+     * Returns an instance of a SEUserModifier.
      **/
-    public SEShow createShow(ShowBuilder builder) {
-	SEShow show = new SEShow(this);
-	URL source = null;
-	BufferedReader rdr = null;
-        BufferedInputStream bis = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-            
-            if (!showName.endsWith(".grin")) {
-	        rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
-	        ShowParser p = new ShowParser(rdr, showName, show, builder);
-	        p.parse();
-	        rdr.close();
-            } else {
-                bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(this, bis);
-                reader.readShow(show);
-                bis.close();
-            }   
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
-            System.out.println("    URL:  " + source);
-	    System.exit(1);
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }   
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException ex) {
-                }    
-            }
-	}
-        return show;
+    public Modifier getModifier(Show show, final String typeName, 
+    			        String name, String arg)
+    {
+	return new SEUserModifier(show, typeName, name, arg);
     }
 
+    /**
+     * Returns an instance of SEUserCommand.
+     **/
+    public Command getCommand(Show show, final String typeName, String[] args)
+		       throws IOException
+    {
+	return new SEUserCommand(typeName, args);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void finishBuilding(Show show) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void takeMosaicHint(String name, int width, int height, 
+                               String[] images)
+    {
+    }
+    
 }

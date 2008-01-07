@@ -4,6 +4,11 @@
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
             <name>hdcookbook</name>
+            <folders/>
+            <view>
+                <items/>
+            </view>
+            <subprojects/>
         </general-data>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
             <!-- Do not use Project Properties customizer when editing this file manually. -->

@@ -16,12 +16,15 @@
             
             <ant dir="GrinViewerXlet"/>
             <ant dir="HelloGrinWorld"/>
-            <ant dir="Translation"/>
+            <ant dir="Translation"/>        
+            <ant dir="CustomFeature"/>
+            
         </target>
         
 	<target name="clean">      
             <ant dir="HelloGrinWorld" target="clean"/>          
             <ant dir="GrinViewerXlet" target="clean"/>      
-            <ant dir="Translation" target="clean"/>
+            <ant dir="Translation" target="clean"/>         
+            <ant dir="CustomFeature" target="clean"/>
 	</target>
 </project>
