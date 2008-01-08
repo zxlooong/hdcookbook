@@ -129,8 +129,6 @@ public class RenderContextBase extends RenderContext {
      * @inheritDoc
      **/
     public void addArea(DrawRecord r) {
-	r.target = currTarget;
-	r.addAreaTo(drawTargets[currTarget]);
 	if (r.prev != null) {		// If on lastFrameList
 		// remove from lastFrameList
 	    r.prev.next = r.next;
@@ -138,6 +136,8 @@ public class RenderContextBase extends RenderContext {
 	} else {			// Otherwise, it's newly activated
 	    r.resetPreviousFrame();
 	}
+	r.target = currTarget;
+	r.addAreaTo(drawTargets[currTarget]);
 	// Add to this frame's list
 	r.next = thisFrameList;
 	thisFrameList = r;
