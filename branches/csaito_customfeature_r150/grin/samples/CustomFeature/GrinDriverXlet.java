@@ -74,10 +74,11 @@ import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
+import com.hdcookbook.grin.io.binary.ExtensionsReader;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
 import java.awt.Color;
+import java.io.DataInputStream;
 	
 /** 
  * An xlet example that displays GRIN script.
@@ -120,14 +121,16 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
 	}
 	
 	public void animationInitialize() throws InterruptedException {
-
-	    SimpleDirector director = new SimpleDirector();
            
             try {
-               
+ 
+                show = new Show(null);
+                
                 AssetFinder.setSearchPath(new String[]{""}, null);      
-	        GrinBinaryReader reader = new GrinBinaryReader(director, AssetFinder.getURL(grinScriptName).openStream());
-                show = new Show(director);
+	        GrinBinaryReader reader = new GrinBinaryReader(
+                        AssetFinder.getURL(grinScriptName).openStream(), 
+                        new SimpleExtensionsReader());
+                
 	        reader.readShow(show);
                
             } catch (IOException e) {
@@ -144,36 +147,23 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
 	
 	public void animationFinishInitialization() {
 	    show.activateSegment(show.getSegment("S:Initialize"));		
-	}
-	
-	class SimpleDirector extends Director {
-		
-	   public ExtensionsBuilder getExtensionsBuilder() {
-               return new SimpleExtensionsBuilder();
-	   }
         }
         
-        class SimpleExtensionsBuilder implements ExtensionsBuilder {
+        class SimpleExtensionsReader implements ExtensionsReader {
 
-            public Feature getFeature(Show show, String typeName, String name, String arg) throws IOException {
-                if ("EXAMPLE:oval".equals(typeName)) {
-                    return new Oval(show, name, 10, 10, 100, 100, Color.LIGHT_GRAY);
-                }
-                return null;
+            public Feature readExtensionFeature(DataInputStream in, int length) throws IOException {
+                String name = in.readUTF();
+                return new Oval(show, name, 10, 10, 100, 100, Color.LIGHT_GRAY);
             }
 
-            public Modifier getModifier(Show show, String typeName, String name, String arg) throws IOException { 
+            public Modifier readExtensionModifier(DataInputStream in, int length) throws IOException {
+                in.skipBytes(length);
                 return null; 
             }
 
-            public Command getCommand(Show show, String typeName, String[] args) throws IOException {
+            public Command readExtensionCommand(DataInputStream in, int length) throws IOException {
+                in.skipBytes(length);
                 return null;
             } 
-
-            public void finishBuilding(Show s) throws IOException {
-            }
-
-            public void takeMosaicHint(String name, int width, int height, String[] images) { 
-            }   
         }
 }

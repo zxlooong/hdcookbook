@@ -76,7 +76,7 @@ information or have any questions.
         
 	<jar jarfile="${GRIN_VIEWER_DEST}/converter.jar" basedir="${GRIN_VIEWER_DEST}/classes">
 		  <manifest>
-			  <attribute name="Main-Class" value="com.hdcookbook.grin.binaryconverter.binary.BinaryConverter"/>
+			  <attribute name="Main-Class" value="com.hdcookbook.grin.binaryconverter.BinaryConverter"/>
 		  </manifest>
         </jar>
 </target>

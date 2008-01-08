@@ -189,14 +189,19 @@ public class GrinBinaryWriter {
     private ArrayList segmentsList;
     
     /**
+     * ExtensionsWriter for writing out user-defined extensions.
+     */
+    private ExtensionsWriter extensionsWriter;
+    
+    /**
      * Constructs GrinBinaryWriter.
      * 
      * @param show The show object which this GrinBinaryWriter makes into a binary format.
-     *
      **/
-    public GrinBinaryWriter(SEShow show) {
+    public GrinBinaryWriter(SEShow show, ExtensionsWriter writer) {
        
         this.show = show;
+        this.extensionsWriter = writer;
        
         Feature[] features = show.getFeatures();
         featuresList = createFeaturesArrayList(features);
@@ -673,13 +678,7 @@ public class GrinBinaryWriter {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos);
 
-	if (show.isPublic(feature)) {
-	    dos.writeString(feature.getName());
-	} else {
-	    dos.writeString(null);
-	}
-        dos.writeUTF(feature.getTypeName());
-        dos.writeUTF(feature.getArg());
+	extensionsWriter.writeExtensionFeature(dos, feature);
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -698,15 +697,8 @@ public class GrinBinaryWriter {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos);
-
-	if (show.isPublic(modifier)) {
-	    dos.writeString(modifier.getName());
-	} else {
-	    dos.writeString(null);
-	}
-        dos.writeUTF(modifier.getTypeName());
-        dos.writeUTF(modifier.getArg());
-        dos.writeFeature(featuresList.indexOf(modifier.getPart()));
+	
+	extensionsWriter.writeExtensionModifier(dos, modifier);
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -826,8 +818,7 @@ public class GrinBinaryWriter {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos);
 
-        dos.writeUTF(command.getTypeName());
-        dos.writeStringArray(command.getArgs());
+	extensionsWriter.writeExtensionCommand(dos, command);
         
         out.writeInt(baos.size());
         baos.writeTo(out);

@@ -53,102 +53,36 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test.bigjdk;
+package com.hdcookbook.grin.io.binary;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.net.URL;
-
+import com.hdcookbook.grin.features.SEUserCommand;
 import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.binary.DefaultExtensionsReader;
-import com.hdcookbook.grin.io.binary.GrinBinaryReader;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.features.SEUserFeature;
+import com.hdcookbook.grin.features.SEUserModifier;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 /**
- * This is a subclass of the GRIN director class that fakes out
- * GRIN to accept any extensions of the GRIN syntax.  The extensions
- * are ignored, with default behavior put in.
- *
- * @author Bill Foote (http://jovial.com)
+ * This is an extensions builder that makes a fake version of any
+ * GRIN extension it encounters.  
  */
-public class GenericDirector extends Director {
-   
-    private String showName;
+public class DefaultExtensionsWriter implements ExtensionsWriter {
 
-    public GenericDirector(String showName) {
-	this.showName = showName;
-    }
-    
-    /**
-     * See superclass definition.  This extensions parser will just
-     * make a fake implementation of each extension.
-     **/
-    public ExtensionsBuilder getExtensionsBuilder() {
-	return new ExtensionsBuilder() {
-            public void finishBuilding(Show s) throws IOException {
-            }
-            public void takeMosaicHint(String name, int width, int height, String[] images) {
-            }         
-        };
+    public void writeExtensionFeature(DataOutputStream out, Feature feature) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    /**
-     * Create a show.  This is called by the main control class of
-     * this debug tool.
-     **/
-    public SEShow createShow(ShowBuilder builder) {
-	SEShow show = new SEShow(this);
-	URL source = null;
-	BufferedReader rdr = null;
-        BufferedInputStream bis = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-            
-            if (!showName.endsWith(".grin")) {
-	        rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
-	        ShowParser p = new ShowParser(rdr, showName, show, builder);
-	        p.parse();
-	        rdr.close();
-            } else {
-                bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(bis, new DefaultExtensionsReader(show));
-                reader.readShow(show);
-                bis.close();
-            }   
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
-            System.out.println("    URL:  " + source);
-	    System.exit(1);
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }   
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException ex) {
-                }    
-            }
-	}
-        return show;
+    public void writeExtensionModifier(DataOutputStream out, Modifier modifier) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    public void writeExtensionCommand(DataOutputStream out, Command command) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+      
 }

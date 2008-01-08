@@ -117,6 +117,7 @@ public class ShowParser {
 
     private SEShow show;
     private Lexer lexer;
+    private ExtensionsParser extParser = new ExtensionsParser();
     private ExtensionsBuilder extBuilder;
     private Vector[] deferred = { new Vector(), new Vector(), new Vector() };  
     	// Array of Vector<ForwardReference>
@@ -169,7 +170,7 @@ public class ShowParser {
 	    this.extBuilder = null;
 	} else {
 	    this.extBuilder = d.getExtensionsBuilder();
-	}
+        }    
         
 	if (builder == null) {
 	    builder = new ShowBuilder();
@@ -378,7 +379,7 @@ public class ShowParser {
 	    return parseGuaranteeFill(hasName, lineStart);
 	} else if ("set_target".equals(tok)) {
 	    return parseSetTarget(hasName, lineStart);
-	} else if (extBuilder == null || tok == null) {
+	} else if (extParser == null || tok == null) {
 	    lexer.reportError("Unrecognized feature \"" + tok + "\"");
 	    return null;	// not reached
 	} else if ("extension".equals(tok) || "modifier".equals(tok)) {
@@ -398,9 +399,9 @@ public class ShowParser {
 		lexer.reportError(typeName + " doesn't contain \":\"");
 	    }
 	    if (sub == null) {
-		f = extBuilder.getFeature(show, typeName, name, arg);
+		f = extParser.getFeature(show, typeName, name, arg);
 	    } else {
-		Modifier m = extBuilder.getModifier(show, typeName,
+		Modifier m = extParser.getModifier(show, typeName,
 						   name, arg);
 		f = m;
 		if (m != null) {
@@ -1443,7 +1444,7 @@ public class ShowParser {
 		Command c = parseVisualRC();
 		v.addElement(c);
 		builder.addCommand(c, lineStart);
-	    } else if (extBuilder == null || tok == null || tok.indexOf(':') < 0) 
+	    } else if (extParser == null || tok == null || tok.indexOf(':') < 0) 
 	    {
 		lexer.reportError("command expected, " + tok + " seen");
 	    } else {
@@ -1459,7 +1460,7 @@ public class ShowParser {
 		      args.add(tok);
 	           }
 	        }               
-		Command c = extBuilder.getCommand(show, typeName, (String[])args.toArray(new String[]{}));
+		Command c = extParser.getCommand(show, typeName, (String[])args.toArray(new String[]{}));
 		v.addElement(c);
 		builder.addCommand(c, lineStart);
 	    }

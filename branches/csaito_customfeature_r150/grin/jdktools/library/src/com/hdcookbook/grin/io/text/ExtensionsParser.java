@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,27 +52,18 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io;
+package com.hdcookbook.grin.io.text;
 
 import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.Show;
-
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.features.SEUserCommand;
+import com.hdcookbook.grin.features.SEUserFeature;
+import com.hdcookbook.grin.features.SEUserModifier;
 import java.io.IOException;
 
-/**
- * This class is used by an xlet to add new commands and features
- * to the syntax of its GRIN show file(s).
- * A Director can expand the set of features and commands
- * recognized in a show file.  It does this by providing an
- * implementation of ExtensionsBuilder to handle any extensions.
- * 
- * 
- * @author @author Bill Foote (http://jovial.com)
- */
-public interface ExtensionsBuilder {
-
+public class ExtensionsParser {
     /**
      * Get a feature of the given type.  The type name will have a
      * colon in it.
@@ -95,10 +85,11 @@ public interface ExtensionsBuilder {
      *
      * @return	    A feature if one of the given type is known, null otherwise
      */
-    //public Feature getFeature(Show show, String typeName, 
-    //			      String name, String arg)
-	//	       throws IOException;
-
+    public Feature getFeature(Show show, String typeName, 
+    			      String name, String arg)
+		       throws IOException {
+        return new SEUserFeature(show, typeName, name, arg);        
+    }
 
     /**
      * Get a modifier feature of the given type.  The type name will have a
@@ -122,9 +113,11 @@ public interface ExtensionsBuilder {
      *
      * @return	    A feature if one of the given type is known, null otherwise
      */
-    //public Modifier getModifier(Show show, String typeName, 
-    //			        String name, String arg)
-	//	       throws IOException;
+    public Modifier getModifier(Show show, String typeName, 
+    			        String name, String arg)
+		       throws IOException {
+        return new SEUserModifier(show, typeName, name, arg);
+    }
 
      /**
      * Get a modifier command of the given type.  
@@ -139,21 +132,10 @@ public interface ExtensionsBuilder {
      *
      * @return	    A command if one of the given type is known, null otherwise
      */
-    //public Command getCommand(Show show, String typeName, String[] args)
-//		       throws IOException;   
-
-    /**
-     * Called after parsing is done, and all of the built-in objects
-     * have been resolved.  This allows any final
-     * initialization to be performed.  Note that GRIN's built-in
-     * parser automatically calls Command.resolve() for all commands
-     * in the show, including extension commands.
-     **/
-    public void finishBuilding(Show s) throws IOException;
-    
-    /**
-     * Give a hint how an optimal mosaic could be built.
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-    			       String[] images);
+    public Command getCommand(Show show, String typeName, String[] args)
+		       throws IOException {
+        
+        return new SEUserCommand(typeName, args);
+    }
+   
 }

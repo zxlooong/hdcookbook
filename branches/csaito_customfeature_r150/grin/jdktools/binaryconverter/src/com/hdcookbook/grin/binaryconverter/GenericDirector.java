@@ -53,50 +53,38 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test.bigjdk;
+package com.hdcookbook.grin.binaryconverter;
 
-import java.io.BufferedInputStream;
+import java.net.URL;
+import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.IOException;
-import java.net.URL;
 
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.binary.DefaultExtensionsReader;
-import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
 
 /**
- * This is a subclass of the GRIN director class that fakes out
- * GRIN to accept any extensions of the GRIN syntax.  The extensions
- * are ignored, with default behavior put in.
- *
- * @author Bill Foote (http://jovial.com)
+ * This is a subclass of the GRIN director class which is
+ * used by the BinaryConverter tool.
  */
-public class GenericDirector extends Director {
+class GenericDirector extends Director {
    
     private String showName;
-
+    
     public GenericDirector(String showName) {
 	this.showName = showName;
     }
     
     /**
-     * See superclass definition.  This extensions parser will just
+     * See superclass definition.  This extensions builder will just
      * make a fake implementation of each extension.
      **/
     public ExtensionsBuilder getExtensionsBuilder() {
-	return new ExtensionsBuilder() {
-            public void finishBuilding(Show s) throws IOException {
-            }
-            public void takeMosaicHint(String name, int width, int height, String[] images) {
-            }         
-        };
+        return null;
     }
 
     /**
@@ -107,25 +95,16 @@ public class GenericDirector extends Director {
 	SEShow show = new SEShow(this);
 	URL source = null;
 	BufferedReader rdr = null;
-        BufferedInputStream bis = null;
 	try {
 	    source = AssetFinder.getURL(showName);
 	    if (source == null) {
 		throw new IOException("Can't find resource " + showName);
 	    }
-            
-            if (!showName.endsWith(".grin")) {
-	        rdr = new BufferedReader(
+	    rdr = new BufferedReader(
 			new InputStreamReader(source.openStream(), "UTF-8"));
-	        ShowParser p = new ShowParser(rdr, showName, show, builder);
-	        p.parse();
-	        rdr.close();
-            } else {
-                bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(bis, new DefaultExtensionsReader(show));
-                reader.readShow(show);
-                bis.close();
-            }   
+	    ShowParser p = new ShowParser(rdr, showName, show, builder);
+	    p.parse();
+	    rdr.close();
 	} catch (IOException ex) {
 	    ex.printStackTrace();
 	    System.out.println();
@@ -140,13 +119,7 @@ public class GenericDirector extends Director {
 		    rdr.close();
 		} catch (IOException ex) {
 		}
-	    }   
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException ex) {
-                }    
-            }
+	    }
 	}
         return show;
     }

@@ -54,6 +54,7 @@
 
 package com.hdcookbook.grin.io.binary;
 
+import com.hdcookbook.grin.Director;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -63,7 +64,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Show;
@@ -178,16 +178,17 @@ public class GrinBinaryReader {
     
     private ArrayList deferred = new ArrayList();
     
+    private ExtensionsReader extensionsReader;
+    
     /**
      * Constructs a GrinBinaryReader instance.
      *
-     * @param director A Director used to interpret GRIN extensions
      * @param stream    An InputStream to the grin binary format data.  It is recommended to be
      *                  an instance of BufferedInputStream for a performance improvement.
      */
-    public GrinBinaryReader(Director director, InputStream stream) {
+    public GrinBinaryReader(InputStream stream, ExtensionsReader reader) {
         
-       this.director = director;
+       this.extensionsReader = reader;
        
        if (Debug.ASSERT) {
            this.stream = new DebugInputStream(stream);
@@ -652,13 +653,12 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
-        String name = dis.readString();
-        String typeName = dis.readUTF();
-        String arg = dis.readUTF();
+
+        Feature feature = extensionsReader.readExtensionFeature(dis, length);
+        
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }       
-        Feature feature = director.getExtensionsBuilder().getFeature(show, typeName, name, arg);
        
         return feature;
     }
@@ -673,15 +673,13 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
-        String name = dis.readString();
-        String typeName = dis.readUTF();
-        String arg = dis.readUTF();
-        Feature parts = features[dis.readInt()];
+        
+        Modifier modifier = extensionsReader.readExtensionModifier(dis, length);
+        
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
-        }       
-        Modifier modifier = director.getExtensionsBuilder().getModifier(show, typeName, name, arg);
-        modifier.setup(parts);
+        }          
+        modifier.setup(modifier.getPart());
        
         return modifier;
     }
@@ -823,14 +821,15 @@ public class GrinBinaryReader {
         int length = dis.readInt();
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
-        }   
-        String name = dis.readUTF();
-        String[] args = dis.readStringArray();
+        }
+        
+        Command command = extensionsReader.readExtensionCommand(dis, length);
+        
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }       
-        return show.getDirector().getExtensionsBuilder().getCommand(show, name, args);
-       
+        
+        return command;       
     }
 
     private RCHandler readCommandRCHandler(GrinDataInputStream dis) throws IOException {

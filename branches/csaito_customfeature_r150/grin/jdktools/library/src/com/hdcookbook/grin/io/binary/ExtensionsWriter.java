@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,102 +52,39 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test.bigjdk;
+package com.hdcookbook.grin.io.binary;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.URL;
 
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.binary.DefaultExtensionsReader;
-import com.hdcookbook.grin.io.binary.GrinBinaryReader;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.util.AssetFinder;
-
-/**
- * This is a subclass of the GRIN director class that fakes out
- * GRIN to accept any extensions of the GRIN syntax.  The extensions
- * are ignored, with default behavior put in.
- *
- * @author Bill Foote (http://jovial.com)
- */
-public class GenericDirector extends Director {
-   
-    private String showName;
-
-    public GenericDirector(String showName) {
-	this.showName = showName;
-    }
+public interface ExtensionsWriter {
     
     /**
-     * See superclass definition.  This extensions parser will just
-     * make a fake implementation of each extension.
-     **/
-    public ExtensionsBuilder getExtensionsBuilder() {
-	return new ExtensionsBuilder() {
-            public void finishBuilding(Show s) throws IOException {
-            }
-            public void takeMosaicHint(String name, int width, int height, String[] images) {
-            }         
-        };
-    }
-
+     * Writes out a feature subclass to a given DataOutputStream.
+     * 
+     * @param out The OutputStream to write out the data to.
+     * @param feature The user-defined Feature subclass to write out.
+     * @throws java.io.IOException if IO error occurs.
+     */
+    public void writeExtensionFeature(DataOutputStream out, Feature feature) throws IOException;
+    
     /**
-     * Create a show.  This is called by the main control class of
-     * this debug tool.
-     **/
-    public SEShow createShow(ShowBuilder builder) {
-	SEShow show = new SEShow(this);
-	URL source = null;
-	BufferedReader rdr = null;
-        BufferedInputStream bis = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-            
-            if (!showName.endsWith(".grin")) {
-	        rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
-	        ShowParser p = new ShowParser(rdr, showName, show, builder);
-	        p.parse();
-	        rdr.close();
-            } else {
-                bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(bis, new DefaultExtensionsReader(show));
-                reader.readShow(show);
-                bis.close();
-            }   
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
-            System.out.println("    URL:  " + source);
-	    System.exit(1);
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }   
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException ex) {
-                }    
-            }
-	}
-        return show;
-    }
+     * Writes ou a modifier subclass to a given DataOutputStream.
+     * @param out The OutputStream to write out the data to.
+     * @param modifier The user-defined Modifier subclass to write out.
+     * @throws java.io.IOException if IO error occurs.
+     */
+    public void writeExtensionModifier(DataOutputStream out, Modifier modifier) throws IOException;
+    
+    /**
+     * Writes ou a command subclass to a given DataOutputStream.
+     * @param out The OutputStream to write out the data to.
+     * @param command The user-defined Command subclass to write out.
+     * @throws java.io.IOException if IO error occurs.
+     */
+    public void writeExtensionCommand(DataOutputStream out, Command command) throws IOException;
 
 }

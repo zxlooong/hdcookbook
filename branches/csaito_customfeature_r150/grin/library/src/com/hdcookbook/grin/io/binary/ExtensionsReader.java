@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -55,71 +54,36 @@
 
 package com.hdcookbook.grin.io.binary;
 
-import com.hdcookbook.grin.features.SEUserCommand;
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEUserFeature;
-import com.hdcookbook.grin.features.SEUserModifier;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-
+import java.io.DataInputStream;
 import java.io.IOException;
 
-/**
- * This is an extensions builder that makes a fake version of any
- * GRIN extension it encounters.  
- */
-public class SEExtensionsBuilder implements ExtensionsBuilder {
-   
-    private Director director;
-
-    public SEExtensionsBuilder(Director director) {
-	this.director = director;
-    }
+public interface ExtensionsReader {
     
     /**
-     * Returns null.
-     **/
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-    {
-	// Not implemented.  If we do this, we'll have to figure out
-	// some syntactical contstraints on an extension feature.
-        return new SEUserFeature(show, typeName, name, arg);
-    }
-
-    /**
-     * Returns an instance of a SEUserModifier.
-     **/
-    public Modifier getModifier(Show show, final String typeName, 
-    			        String name, String arg)
-    {
-	return new SEUserModifier(show, typeName, name, arg);
-    }
-
-    /**
-     * Returns an instance of SEUserCommand.
-     **/
-    public Command getCommand(Show show, final String typeName, String[] args)
-		       throws IOException
-    {
-	return new SEUserCommand(typeName, args);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void finishBuilding(Show show) throws IOException {
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
-    }
+     * Reads in a feature subclass from a given DataInputStream.
+     * @param in The InputStream to read in the data from.
+     * @returns Feature A user-defined Feature subclass reconstructed from the data.
+     * @throws java.io.IOException if IO error occurs.
+     */
+    public Feature readExtensionFeature(DataInputStream in, int length) throws IOException;
     
+    /**
+     * Reads in a modifier subclass from a given DataInputStream.
+     * @param in The InputStream to read in the data from.
+     * @returns Modifier A user-defined Modifier subclass reconstructed from the data.
+     * @throws java.io.IOException if IO error occurs.
+     */
+    public Modifier readExtensionModifier(DataInputStream in, int length) throws IOException;
+    
+    /**
+     * Reads in a command subclass from a given DataInputStream.
+     * @param in The InputStream to read in the data from.
+     * @returns Command A user-defined Command subclass reconstructed from the data.
+     * @throws java.io.IOException if IO error occurs.
+     */    
+    public Command readExtensionCommand(DataInputStream in, int length) throws IOException;
+
 }
