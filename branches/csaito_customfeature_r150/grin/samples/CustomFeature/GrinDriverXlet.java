@@ -151,17 +151,17 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
         
         class SimpleExtensionsReader implements ExtensionsReader {
 
-            public Feature readExtensionFeature(DataInputStream in, int length) throws IOException {
+            public Feature readExtensionFeature(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
                 String name = in.readUTF();
                 return new Oval(show, name, 10, 10, 100, 100, Color.LIGHT_GRAY);
             }
 
-            public Modifier readExtensionModifier(DataInputStream in, int length) throws IOException {
+            public Modifier readExtensionModifier(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
                 in.skipBytes(length);
                 return null; 
             }
 
-            public Command readExtensionCommand(DataInputStream in, int length) throws IOException {
+            public Command readExtensionCommand(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
                 in.skipBytes(length);
                 return null;
             } 

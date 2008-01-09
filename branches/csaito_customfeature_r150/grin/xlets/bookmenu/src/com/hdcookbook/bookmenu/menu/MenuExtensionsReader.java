@@ -83,6 +83,9 @@ import com.hdcookbook.bookmenu.menu.commands.DeleteBookmarkCommand;
 import com.hdcookbook.bookmenu.menu.commands.BookmarkUICommand;
 import com.hdcookbook.bookmenu.menu.commands.SelectAudioCommand;
 import com.hdcookbook.bookmenu.menu.commands.SelectSubtitlesCommand;
+import com.hdcookbook.grin.io.binary.ExtensionsReader;
+import com.hdcookbook.grin.io.binary.GrinBinaryReader;
+import java.io.DataInputStream;
 
 /** 
  * This class parses small extensions to the GRIN syntax added
@@ -91,20 +94,21 @@ import com.hdcookbook.bookmenu.menu.commands.SelectSubtitlesCommand;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class MenuExtensionsBuilder implements ExtensionsBuilder {
+public class MenuExtensionsReader implements ExtensionsReader {
 
     private MenuXlet xlet;
+    private Show show;
 
-    public MenuExtensionsBuilder(MenuXlet xlet) {
+    public MenuExtensionsReader(MenuXlet xlet, Show show) {
 	this.xlet = xlet;
+        this.show = show;
     }
 
     /** 
      * Called by the GRIN parser to parse an extension feature 
      * that's not a modifier
      **/
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
+    public Feature readExtensionFeature(GrinBinaryReader reader, DataInputStream in, int length)
 		   throws IOException
     {
 	return null;
@@ -113,12 +117,16 @@ public class MenuExtensionsBuilder implements ExtensionsBuilder {
     /**
      * Called by the GRIN parser to parse a feature that is a modifier
      **/
-    public Modifier getModifier(Show show, String typeName, 
-    			        String name, String arg)
+    public Modifier readExtensionModifier(GrinBinaryReader reader, DataInputStream in, int length)
 		   throws IOException
     {
+        String typeName = in.readUTF();
+        String name = in.readUTF();
 	if ("BOOK:bio_image".equals(typeName)) {
-	    return new BioImageFeature(show, name);
+	    Modifier modifier = new BioImageFeature(show, name);            
+            Feature part = reader.getFeatureFromIndex(in.readInt());
+            modifier.setup(part);
+            return modifier;
 	} else {
 	    return null;
 	}
@@ -127,11 +135,13 @@ public class MenuExtensionsBuilder implements ExtensionsBuilder {
     /**
      * Called by the GRIN parser to parse an extension command.
      **/
-    public Command getCommand(Show show, String typeName, String[] args)
+    public Command readExtensionCommand(GrinBinaryReader reader, DataInputStream in, int length)
 		       throws IOException {
         
+        String typeName = in.readUTF();
+                
 	if ("BOOK:PlayVideo".equals(typeName)) {
-	    String tok = args[0];
+	    String tok = in.readUTF();
 	    BDLocator loc = null;
 	    if ("menu".equals(tok)) {
 		loc = xlet.navigator.menuVideoStartPL;
@@ -152,7 +162,7 @@ public class MenuExtensionsBuilder implements ExtensionsBuilder {
 	    }
 	    return new PlayVideoCommand(xlet, loc);
 	} else if ("BOOK:SetText".equals(typeName)) {
-	    String text = args[0];
+	    String text = in.readUTF();
 	    return new SetTextCommand(xlet, text);
 	} else if ("BOOK:PlayGame".equals(typeName)) {
 	    return new PlayGameCommand(xlet);
@@ -161,14 +171,14 @@ public class MenuExtensionsBuilder implements ExtensionsBuilder {
 	} else if ("BOOK:DownloadBio".equals(typeName)) {
 	    return new DownloadBioCommand(xlet);
 	} else if ("BOOK:PlaySound".equals(typeName)) {
-	    String text = args[0];
+	    String text = in.readUTF();
 	    return new PlaySoundCommand(xlet, text);
 	} else if ("BOOK:MakeBookmark".equals(typeName)) {
 	    return new MakeBookmarkCommand(xlet);
 	} else if ("BOOK:DeleteBookmark".equals(typeName)) {
 	    return new DeleteBookmarkCommand(xlet);
 	} else if ("BOOK:BookmarkUI".equals(typeName)) {
-	    String tok = args[0];
+	    String tok = in.readUTF();
 	    boolean activate = false;
 	    if ("select".equals(tok)) {
 		activate = false;
@@ -178,38 +188,23 @@ public class MenuExtensionsBuilder implements ExtensionsBuilder {
 		throw new IOException("\"select\" or \"activate\" expected, \""
 				  + tok + "\" seen.");
 	    }
-	    int num = Integer.parseInt(args[1]);
+            String arg = in.readUTF();
+	    int num = Integer.parseInt(arg);
 	    if (num < -1 || num > 5) {
 		throw new IOException("" + num + " is an illegal scene number.");
 	    }
 	    return new BookmarkUICommand(xlet, activate, num);
 	} else if ("BOOK:SelectAudio".equals(typeName)) {
-	    int streamNumber = Integer.parseInt(args[0]);
+            String arg = in.readUTF();
+	    int streamNumber = Integer.parseInt(arg);
 	    return new SelectAudioCommand(xlet, streamNumber);
 	} else if ("BOOK:SelectSubtitles".equals(typeName)) {
-	    int streamNumber = Integer.parseInt(args[0]);
+            String arg = in.readUTF();
+	    int streamNumber = Integer.parseInt(arg);
 	    return new SelectSubtitlesCommand(xlet, streamNumber);
 	} else if ("BOOK:NotifyLoaded".equals(typeName)) {
 	    return new NotifyLoadedCommand(xlet);
 	}
 	throw new IOException("Unrecognized command type  \"" + typeName + "\"");
     }
-
-    /**
-     * Called by the GRIN parser when parsing is done, to do
-     * any other work to finish up a show.
-     **/
-    public void finishBuilding(Show s) throws IOException {
-    }
-
-    /**
-     * Called by the GRIN parser when it encounters an optimization
-     * hint about images it would be good to include in their own
-     * mosaic.  This is used at compile time.
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
-    }
-
 }

@@ -40,7 +40,7 @@
                    <pathelement path="${builddir}"/>
                    <pathelement path="${converter.classes}"/>
                 </classpath>    
-                <arg line="-asset_dir ${builddir} -asset_dir . ${script.name}.txt SimpleExtensionsWriter"/>
+                <arg line="${script.name}.txt SimpleExtensionsWriter"/>
             </java>
             <move file="${script.name}.grin" todir="${builddir}"/>
         </target>

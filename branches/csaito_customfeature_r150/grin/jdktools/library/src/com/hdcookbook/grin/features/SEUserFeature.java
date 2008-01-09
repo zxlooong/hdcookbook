@@ -60,9 +60,7 @@ import com.hdcookbook.grin.animator.RenderContext;
 import java.awt.Graphics2D;
 
 /**
- * A Feature subclass that saves all the data passed into its constructor.
- * This is used by the GrinBinaryWriter to ensure all possible extension 
- * data are captured in the binary file format.
+ * A dummy Feature subclass that saves all the data passed into its constructor.
  */
 public class SEUserFeature extends Feature {
     

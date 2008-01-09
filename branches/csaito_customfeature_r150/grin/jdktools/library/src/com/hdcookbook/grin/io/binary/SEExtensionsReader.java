@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -52,37 +51,64 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package com.hdcookbook.grin.io.binary;
 
-import com.hdcookbook.grin.features.SEUserCommand;
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.*;
+import com.hdcookbook.grin.io.binary.*;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.features.SEUserCommand;
 import com.hdcookbook.grin.features.SEUserFeature;
 import com.hdcookbook.grin.features.SEUserModifier;
-
-import java.io.DataOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 
 /**
- * This is an extensions builder that makes a fake version of any
- * GRIN extension it encounters.  
+ * A default ExtensionsReader implementation used for the emulation need on 
+ * big jdk (SE), such as the GrinView. 
+ * This implementation ignores the DataInputStream and creates
+ * a fake SE class versions.
  */
-public class DefaultExtensionsWriter implements ExtensionsWriter {
-
-    public void writeExtensionFeature(DataOutputStream out, Feature feature) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+public class SEExtensionsReader implements ExtensionsReader {
+    
+    private Show show;    
+    private static int featureCount =  1;
+    private static int modifierCount = 1;
+    
+    /**
+     * The default constructor.
+     * @param show The show instance that will be associcated with the Feature, 
+     * Modifier and Command objects that this class creates.
+     */
+    public SEExtensionsReader(Show show) {
+        this.show = show;
     }
 
-    public void writeExtensionModifier(DataOutputStream out, Modifier modifier) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    /**
+     *  Returns an instance of <code>SEUserFeature</code>.
+     */
+    public Feature readExtensionFeature(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
+        in.skipBytes(length);
+        String name = "User-Defined Feature " + (featureCount++);
+        return new SEUserFeature(show, name, name, null);
+    }
+    
+    /**
+     *  Returns an instance of <code>SEUserModifier</code>.
+     */
+    public Modifier readExtensionModifier(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
+        in.skipBytes(length);
+        String name = "User-Defined Modifier " + (modifierCount++);
+        return new SEUserModifier(show, name, name, null);
+    }
+    
+    /**
+     *  Returns an instance of <code>SEUserCommand</code>.
+     */
+    public Command readExtensionCommand(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
+        in.skipBytes(length);
+        return new SEUserCommand(null, null);
     }
 
-    public void writeExtensionCommand(DataOutputStream out, Command command) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-      
 }

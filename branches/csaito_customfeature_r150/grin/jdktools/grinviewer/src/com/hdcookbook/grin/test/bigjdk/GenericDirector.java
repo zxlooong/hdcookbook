@@ -66,7 +66,7 @@ import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.binary.DefaultExtensionsReader;
+import com.hdcookbook.grin.io.binary.SEExtensionsReader;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
@@ -122,7 +122,7 @@ public class GenericDirector extends Director {
 	        rdr.close();
             } else {
                 bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(bis, new DefaultExtensionsReader(show));
+ 	        GrinBinaryReader reader = new GrinBinaryReader(bis, new SEExtensionsReader(show));
                 reader.readShow(show);
                 bis.close();
             }   

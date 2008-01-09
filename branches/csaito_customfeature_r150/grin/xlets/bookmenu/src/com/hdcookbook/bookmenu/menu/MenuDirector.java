@@ -102,7 +102,7 @@ public class MenuDirector extends Director {
      * in our extensions to the GRIN syntax.
      **/
     public ExtensionsBuilder getExtensionsBuilder() {
-	return new MenuExtensionsBuilder(xlet);
+        return null;
     }
 
     /**
@@ -119,7 +119,7 @@ public class MenuDirector extends Director {
 	    URL u = AssetFinder.getURL(showName);
             
             BufferedInputStream bis = new BufferedInputStream(u.openStream());
- 	    GrinBinaryReader reader = new GrinBinaryReader(this, bis);
+ 	    GrinBinaryReader reader = new GrinBinaryReader(bis, new MenuExtensionsReader(xlet, show));
 	    reader.readShow(show);
             bis.close();
             

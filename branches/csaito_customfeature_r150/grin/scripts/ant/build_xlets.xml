@@ -35,6 +35,7 @@ information or have any questions.
 <property name="MENUASSETS_DEST" value="${HDC_BUILD_DIR}/menuassets"/>
 <property name="MONITORXLET_DEST" value="${HDC_BUILD_DIR}/monitorxlet"/>
 <property name="GAMEXLET_DEST" value="${HDC_BUILD_DIR}/gamexlet"/>
+<property name="MENUTOOLS_DEST" value="${HDC_BUILD_DIR}/menu_tools"/>
 
 <import file="build_bdjo.xml"/>
 
@@ -128,12 +129,24 @@ information or have any questions.
 		</java>			
 	</target>
         
- 	<target name="generate-binary-script"> 
-	    <ant antfile="scripts/ant/build_grinview.xml" target="compile-binary-converter"/>
-            <java fork="true" jar="${HDC_BUILD_DIR}/grin_viewer/converter.jar">
-                <arg line="${MENUASSETS_DEST}/menu.txt"/>
+ 	<target name="generate-binary-script" depends="compile-extensions-reader"> 
+            <java fork="true" classname="com.hdcookbook.grin.binaryconverter.BinaryConverter">
+                <classpath>
+                   <pathelement path="${MENUTOOLS_DEST}"/>
+                   <pathelement path="${HDC_BUILD_DIR}/grin_viewer/converter.jar"/>
+                </classpath>    
+                <arg line="${MENUASSETS_DEST}/menu.txt com.hdcookbook.bookmenu.menu.MenuExtensionsWriter"/>
             </java>		
 	</target>       
+        
+        <target name="compile-extensions-reader">          
+	    <ant antfile="scripts/ant/build_grinview.xml" target="compile-binary-converter"/>
+            <mkdir dir="${MENUTOOLS_DEST}"/>
+            <javac srcdir="xlets/tools/src"
+		       classpath="${HDC_BUILD_DIR}/grin_viewer/converter.jar"
+		       destdir="${MENUTOOLS_DEST}" >
+           </javac>           
+        </target>    
 
 <target name="build-monitor-xlet">
 
@@ -194,7 +207,7 @@ information or have any questions.
 <target name = "sign-xlets" depends="check-bdsigner">
 	<fail unless="bdsigner.ok" message="Could not find the bdsigner tool at ${HDC_BDJ_SIGNER}"/>
 	<java classname="net.java.bd.tools.bdsigner.BDSigner" fork="true" failonerror="true">
-		<arg line="56789abc ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar"/>
+		<arg line="56789abc ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar ${HDC_DISC_BDMV}/JAR/00004.jar"/>
 		<classpath>
 			<pathelement location="${HDC_BDJ_SIGNER}/build/bdsigner.jar"/>
 			<pathelement location="${HDC_BDJ_SIGNER}/resource/bcprov-jdk15-137.jar"/>

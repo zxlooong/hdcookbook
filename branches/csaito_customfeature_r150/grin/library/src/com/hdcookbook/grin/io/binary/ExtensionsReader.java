@@ -65,25 +65,25 @@ public interface ExtensionsReader {
     /**
      * Reads in a feature subclass from a given DataInputStream.
      * @param in The InputStream to read in the data from.
-     * @returns Feature A user-defined Feature subclass reconstructed from the data.
+     * @return Feature A user-defined Feature subclass reconstructed from the data.
      * @throws java.io.IOException if IO error occurs.
      */
-    public Feature readExtensionFeature(DataInputStream in, int length) throws IOException;
+    public Feature readExtensionFeature(GrinBinaryReader reader, DataInputStream in, int length) throws IOException;
     
     /**
      * Reads in a modifier subclass from a given DataInputStream.
      * @param in The InputStream to read in the data from.
-     * @returns Modifier A user-defined Modifier subclass reconstructed from the data.
+     * @return Modifier A user-defined Modifier subclass reconstructed from the data.
      * @throws java.io.IOException if IO error occurs.
      */
-    public Modifier readExtensionModifier(DataInputStream in, int length) throws IOException;
+    public Modifier readExtensionModifier(GrinBinaryReader reader, DataInputStream in, int length) throws IOException;
     
     /**
      * Reads in a command subclass from a given DataInputStream.
      * @param in The InputStream to read in the data from.
-     * @returns Command A user-defined Command subclass reconstructed from the data.
+     * @return Command A user-defined Command subclass reconstructed from the data.
      * @throws java.io.IOException if IO error occurs.
      */    
-    public Command readExtensionCommand(DataInputStream in, int length) throws IOException;
+    public Command readExtensionCommand(GrinBinaryReader reader, DataInputStream in, int length) throws IOException;
 
 }

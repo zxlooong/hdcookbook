@@ -218,6 +218,23 @@ public class GrinBinaryWriter {
             segmentsList.add(segments[i]);
         }         
     }
+    
+    /**
+     * Returns an index number of the feature that this GrinBinaryWriter class 
+     * is internally using in the Show.  
+     * 
+     * @see #GrinBinaryReader.getFeatureFromIndex(int)
+     * @param feature the feature to get the index number of.
+     * @return the index number for the feature, or -1 if no such feature exists.
+     */
+    public int getFeatureIndex(Feature feature) {
+        if (feature == null) {
+           return -1;
+        } else {
+           int index = featuresList.indexOf(feature);
+           return index;
+        }   
+    }
 
     /**
      * Writes out the script identifier and the script version to the DataOutputStream.
@@ -678,7 +695,7 @@ public class GrinBinaryWriter {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos);
 
-	extensionsWriter.writeExtensionFeature(dos, feature);
+	extensionsWriter.writeExtensionFeature(this, dos, feature);
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -698,7 +715,7 @@ public class GrinBinaryWriter {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos);
 	
-	extensionsWriter.writeExtensionModifier(dos, modifier);
+	extensionsWriter.writeExtensionModifier(this, dos, modifier);
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -818,7 +835,7 @@ public class GrinBinaryWriter {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos);
 
-	extensionsWriter.writeExtensionCommand(dos, command);
+	extensionsWriter.writeExtensionCommand(this, dos, command);
         
         out.writeInt(baos.size());
         baos.writeTo(out);

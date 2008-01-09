@@ -57,9 +57,7 @@ package com.hdcookbook.grin.features;
 import com.hdcookbook.grin.commands.Command;
 
 /**
- * A Command subclass that saves all the data passed into it's constructor.
- * This is used by the GrinBinaryWriter to ensure all possible extension data are
- * captured in the binary file format.
+ * A dummy Command subclass that saves all the data passed into it's constructor.
  */
 public class SEUserCommand extends Command {
     

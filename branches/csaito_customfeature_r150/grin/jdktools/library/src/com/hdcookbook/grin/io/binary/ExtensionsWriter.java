@@ -69,22 +69,22 @@ public interface ExtensionsWriter {
      * @param feature The user-defined Feature subclass to write out.
      * @throws java.io.IOException if IO error occurs.
      */
-    public void writeExtensionFeature(DataOutputStream out, Feature feature) throws IOException;
+    public void writeExtensionFeature(GrinBinaryWriter writer, DataOutputStream out, Feature feature) throws IOException;
     
     /**
-     * Writes ou a modifier subclass to a given DataOutputStream.
+     * Writes out a modifier subclass to a given DataOutputStream.
      * @param out The OutputStream to write out the data to.
      * @param modifier The user-defined Modifier subclass to write out.
      * @throws java.io.IOException if IO error occurs.
      */
-    public void writeExtensionModifier(DataOutputStream out, Modifier modifier) throws IOException;
+    public void writeExtensionModifier(GrinBinaryWriter writer, DataOutputStream out, Modifier modifier) throws IOException;
     
     /**
-     * Writes ou a command subclass to a given DataOutputStream.
+     * Writes out a command subclass to a given DataOutputStream.
      * @param out The OutputStream to write out the data to.
      * @param command The user-defined Command subclass to write out.
      * @throws java.io.IOException if IO error occurs.
      */
-    public void writeExtensionCommand(DataOutputStream out, Command command) throws IOException;
+    public void writeExtensionCommand(GrinBinaryWriter writer, DataOutputStream out, Command command) throws IOException;
 
 }

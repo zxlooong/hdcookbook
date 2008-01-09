@@ -198,6 +198,23 @@ public class GrinBinaryReader {
        
     }
 
+    /**
+     * Returns an instace of feature that corresponds to the index number
+     * that this GrinBinaryReader keeps track of.
+     * This method is expected to be used by the user defined ExtensionsReader class.
+     * 
+     * @see #GrinBinaryWriter.getFeatureIndex(int)
+     * @param index the index number for the feature.
+     * @return the feature corresponding to the index number, or null if no such feature exists.
+     */
+    public Feature getFeatureFromIndex(int index) {
+        if (index == -1 || index > features.length) {
+            return null;
+        }  else {
+            return features[index];
+        }
+    }
+    
     private void checkValue(int x, int y, String message) throws IOException {
         if (x != y) {
             throw new IOException("Mismatch: " + message);
@@ -654,7 +671,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
 
-        Feature feature = extensionsReader.readExtensionFeature(dis, length);
+        Feature feature = extensionsReader.readExtensionFeature(this, dis, length);
         
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
@@ -674,12 +691,11 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
         
-        Modifier modifier = extensionsReader.readExtensionModifier(dis, length);
+        Modifier modifier = extensionsReader.readExtensionModifier(this, dis, length);
         
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }          
-        modifier.setup(modifier.getPart());
        
         return modifier;
     }
@@ -823,7 +839,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
         
-        Command command = extensionsReader.readExtensionCommand(dis, length);
+        Command command = extensionsReader.readExtensionCommand(this, dis, length);
         
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();

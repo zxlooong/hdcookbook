@@ -69,78 +69,9 @@ import java.io.IOException;
  * recognized in a show file.  It does this by providing an
  * implementation of ExtensionsBuilder to handle any extensions.
  * 
- * 
  * @author @author Bill Foote (http://jovial.com)
  */
 public interface ExtensionsBuilder {
-
-    /**
-     * Get a feature of the given type.  The type name will have a
-     * colon in it.
-     * <p>
-     * The syntax of an extension feature is fixed at
-     * <pre>
-     *     "feature" "extension" namespace:type_name name string ";"
-     * </pre>
-     * where feature_name is given iff the feature is a Modifier.
-     *
-     * @param show      The show being parsed
-     * @param typeName  The name of the feature's type.  This will always
-     *                  contain a ":".
-     * @param name      The name of this instance of feature
-     *			a list of commands if needed.
-     * @param arg	The argument string on the feature
-     *
-     * @throws      IOException if there's an error.
-     *
-     * @return	    A feature if one of the given type is known, null otherwise
-     */
-    //public Feature getFeature(Show show, String typeName, 
-    //			      String name, String arg)
-	//	       throws IOException;
-
-
-    /**
-     * Get a modifier feature of the given type.  The type name will have a
-     * colon in it.  The sub-feature will automatically be set up for
-     * you.
-     * <p>
-     * The syntax of an extension feature is fixed at
-     * <pre>
-     *     "feature" "modifier" namespace:type_name name feature_name string ";"
-     * </pre>
-     * where feature_name is given iff the feature is a Modifier.
-     *
-     * @param show      The show being parsed
-     * @param typeName  The name of the feature's type.  This will always
-     *                  contain a ":".
-     * @param name      The name of this instance of feature
-     *			a list of commands if needed.
-     * @param arg	The argument string on the feature
-     *
-     * @throws      IOException if there's an error.
-     *
-     * @return	    A feature if one of the given type is known, null otherwise
-     */
-    //public Modifier getModifier(Show show, String typeName, 
-    //			        String name, String arg)
-	//	       throws IOException;
-
-     /**
-     * Get a modifier command of the given type.  
-     * <p>
-     *
-     * @param show      The show being parsed
-     * @param typeName  The name of the commands's type.  This will always
-     *                  contain a ":".
-     * @param args	The argument strings on the command
-     *
-     * @throws      IOException if there's an error.
-     *
-     * @return	    A command if one of the given type is known, null otherwise
-     */
-    //public Command getCommand(Show show, String typeName, String[] args)
-//		       throws IOException;   
 
     /**
      * Called after parsing is done, and all of the built-in objects

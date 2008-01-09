@@ -58,9 +58,7 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.features.Modifier;
 
 /**
- * A Modifier subclass that saves all the data passed into its constructor.
- * This is used by the GrinBinaryWriter to ensure all possible extension 
- * data are captured in the binary file format.
+ * A dummy Modifier subclass that saves all the data passed into its constructor.
  */
 public class SEUserModifier extends Modifier {
     

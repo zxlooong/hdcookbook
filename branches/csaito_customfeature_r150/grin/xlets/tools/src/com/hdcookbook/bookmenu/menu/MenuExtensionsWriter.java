@@ -51,45 +51,48 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-package com.hdcookbook.grin.io.binary;
 
-import com.hdcookbook.grin.*;
-import com.hdcookbook.grin.io.binary.*;
+package com.hdcookbook.bookmenu.menu;
+
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SEUserCommand;
-import com.hdcookbook.grin.features.SEUserFeature;
 import com.hdcookbook.grin.features.SEUserModifier;
-import java.io.DataInputStream;
+import com.hdcookbook.grin.io.binary.ExtensionsWriter;
+import com.hdcookbook.grin.io.binary.GrinBinaryWriter;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class DefaultExtensionsReader implements ExtensionsReader {
-    
-    public Show show;
-    
-    private static int featureCount =  1;
-    private static int modifierCount = 1;
-    
-    public DefaultExtensionsReader(Show show) {
-        this.show = show;
+public class MenuExtensionsWriter implements ExtensionsWriter {
+
+    public void writeExtensionFeature(GrinBinaryWriter writer, DataOutputStream out, Feature feature) throws IOException {
+        // Custom features are not used in the MenuXlet
     }
 
-    public Feature readExtensionFeature(DataInputStream in, int length) throws IOException {
-        in.skipBytes(length);
-        String name = "User-Defined Feature " + (featureCount++);
-        return new SEUserFeature(show, name, name, null);
+    public void writeExtensionModifier(GrinBinaryWriter writer, DataOutputStream out, Modifier modifier) throws IOException {
+        SEUserModifier seModifier = (SEUserModifier) modifier;
+        
+        String typeName = seModifier.getTypeName();
+        String name = seModifier.getName(); 
+        
+        out.writeUTF(typeName);
+        out.writeUTF(name);
+        out.writeInt(writer.getFeatureIndex(modifier.getPart()));
     }
 
-    public Modifier readExtensionModifier(DataInputStream in, int length) throws IOException {
-        in.skipBytes(length);
-        String name = "User-Defined Modifier " + (modifierCount++);
-        return new SEUserModifier(show, name, name, null);
-    }
-
-    public Command readExtensionCommand(DataInputStream in, int length) throws IOException {
-        in.skipBytes(length);
-        return new SEUserCommand(null, null);
+    public void writeExtensionCommand(GrinBinaryWriter writer, DataOutputStream out, Command command) throws IOException {
+        SEUserCommand seCommand = (SEUserCommand) command;
+        
+        String typeName = seCommand.getTypeName();
+        String[] args = seCommand.getArgs();
+        
+        out.writeUTF(typeName);
+        if (args != null) {
+            for (int i = 0; i < args.length; i++) {
+                out.writeUTF(args[i]);
+            }
+        }
     }
 
 }

@@ -71,9 +71,8 @@ public class BinaryConverter {
    /**
     * A driver method for the BinaryConverter.convert(String, String).
     * 
-    * @param args  Arguments.  args[0] is  file name the text-based GRIN script to read.
-    * 		    args[1] An optional file name for the binary-based GRIN script to write out.
-    * @see #convert(String, String)
+    * @param args  Arguments.  args[0] is file name the text-based GRIN script to read.
+    * @see #convert(String[], String, ExtensionsWriter)
     **/
    public static void main(String[] args) {
        
@@ -83,6 +82,8 @@ public class BinaryConverter {
         
         int index = 0;
         ArrayList assets = new ArrayList(); 
+        assets.add(".");
+        assets.add("");
         
         while ("-asset_dir".equals(args[index])) {
             index++;
@@ -105,10 +106,6 @@ public class BinaryConverter {
             } catch (ClassNotFoundException ex) {
                  ex.printStackTrace();
             } 
-        }
-        
-        if (extensionsWriter == null) {
-            extensionsWriter = new DefaultExtensionsWriter();
         }
         
         try {
