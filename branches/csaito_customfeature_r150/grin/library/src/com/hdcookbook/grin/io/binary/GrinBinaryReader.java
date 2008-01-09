@@ -185,6 +185,9 @@ public class GrinBinaryReader {
      *
      * @param stream    An InputStream to the grin binary format data.  It is recommended to be
      *                  an instance of BufferedInputStream for a performance improvement.
+     * 
+     * @param reader    A user-defined ExtensionsReader implementation that will be used to 
+     *                  handle reading of the custom extension, or null if extensions are not being used. 
      */
     public GrinBinaryReader(InputStream stream, ExtensionsReader reader) {
         
@@ -203,9 +206,10 @@ public class GrinBinaryReader {
      * that this GrinBinaryReader keeps track of.
      * This method is expected to be used by the user defined ExtensionsReader class.
      * 
-     * @see #GrinBinaryWriter.getFeatureIndex(int)
-     * @param index the index number for the feature.
-     * @return the feature corresponding to the index number, or null if no such feature exists.
+     * @param index     The index number for the feature.
+     * @return          The feature corresponding to the index number, or null if no such feature exists.
+     * 
+     * @see GrinBinaryWriter#getFeatureIndex(Feature)
      */
     public Feature getFeatureFromIndex(int index) {
         if (index == -1 || index > features.length) {
@@ -214,7 +218,42 @@ public class GrinBinaryReader {
             return features[index];
         }
     }
+ 
+    /**
+     * Returns an instace of a segment that corresponds to the index number
+     * that this GrinBinaryReader keeps track of.
+     * This method is expected to be used by the user defined ExtensionsReader class.
+     * 
+     * @param index     The index number for the feature.
+     * @return          The segment corresponding to the index number, or null if no such segment exists.
+     * 
+     * @see GrinBinaryWriter#getSegmentIndex(Segment)
+     */
+    public Segment getSegmentFromIndex(int index) {
+        if (index == -1 || index > segments.length) {
+            return null;
+        }  else {
+            return segments[index];
+        }
+    }
     
+    /**
+     * Returns an instace of a RCHandler that corresponds to the index number
+     * that this GrinBinaryReader keeps track of.
+     * This method is expected to be used by the user defined ExtensionsReader class.
+     * 
+     * @param index     The index number for the feature.
+     * @return          The RCHandler corresponding to the index number, or null if no such RCHandler exists.
+     * 
+     * @see GrinBinaryWriter#getRCHandlerIndex(RCHandler)
+     */
+    public RCHandler getRCHandlerFromIndex(int index) {
+        if (index == -1 || index > rcHandlers.length) {
+            return null;
+        }  else {
+            return rcHandlers[index];
+        }
+    }    
     private void checkValue(int x, int y, String message) throws IOException {
         if (x != y) {
             throw new IOException("Mismatch: " + message);
@@ -229,9 +268,9 @@ public class GrinBinaryReader {
     }
     
     /**
-     * Reconstructs the Show object passed in as argument
+     * Reconstructs the Show object passed in as argument.
      *
-     * @param show	An empty Show object
+     * @param show	An empty Show object to reconstruct.
      * @throws IOException if binary data parsing fails.
      */
     

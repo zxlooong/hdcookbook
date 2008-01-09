@@ -60,29 +60,43 @@ import com.hdcookbook.grin.features.Modifier;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+/**
+ * The ExtensionsWriter defines the methods that handle the writing of the
+ * custom (user-defined) GRIN features, modifiers and commands in the binary file format. 
+ * These who are defining the custom GRIN subclasses should implement these methods 
+ * accordingly.
+ * 
+ * @see GrinBinaryWriter#GrinBinaryWriter(com.hdcookbook.grin.SEShow, ExtensionsWriter)
+ * @see ExtensionsReader
+ */
 public interface ExtensionsWriter {
     
     /**
      * Writes out a feature subclass to a given DataOutputStream.
      * 
-     * @param out The OutputStream to write out the data to.
-     * @param feature The user-defined Feature subclass to write out.
+     * @param writer    The GrinBinaryWriter class that is writing out the Show.
+     * @param out       The OutputStream to write out the data to.
+     * @param feature   The user-defined Feature subclass to write out.
      * @throws java.io.IOException if IO error occurs.
      */
     public void writeExtensionFeature(GrinBinaryWriter writer, DataOutputStream out, Feature feature) throws IOException;
     
     /**
      * Writes out a modifier subclass to a given DataOutputStream.
-     * @param out The OutputStream to write out the data to.
-     * @param modifier The user-defined Modifier subclass to write out.
+     * 
+     * @param writer    The GrinBinaryWriter class that is writing out the Show.
+     * @param out       The OutputStream to write out the data to.
+     * @param modifier  The user-defined Modifier subclass to write out.
      * @throws java.io.IOException if IO error occurs.
      */
     public void writeExtensionModifier(GrinBinaryWriter writer, DataOutputStream out, Modifier modifier) throws IOException;
     
     /**
      * Writes out a command subclass to a given DataOutputStream.
-     * @param out The OutputStream to write out the data to.
-     * @param command The user-defined Command subclass to write out.
+     * 
+     * @param writer    The GrinBinaryWriter class that is writing out the Show.
+     * @param out       The OutputStream to write out the data to.
+     * @param command   The user-defined Command subclass to write out.
      * @throws java.io.IOException if IO error occurs.
      */
     public void writeExtensionCommand(GrinBinaryWriter writer, DataOutputStream out, Command command) throws IOException;

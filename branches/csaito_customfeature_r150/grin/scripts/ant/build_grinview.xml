@@ -81,15 +81,9 @@ information or have any questions.
         </jar>
 </target>
 
-<target name="run-binary-converter" depends="compile-binary-converter">
-    <copy todir="${GRIN_VIEWER_DEST}">
-        <fileset file = "jdktools/grinviewer/src/com/hdcookbook/grin/test/assets/ryan_show.txt"/>
-        <fileset file = "xlets/bookmenu/src/com/hdcookbook/bookmenu/assets/menu.txt"/>
-    </copy>
-    <java fork="true" jar="${GRIN_VIEWER_DEST}/converter.jar">
-        <arg line="${GRIN_VIEWER_DEST}/menu.txt"/>
-    </java>    
 
+<target name="run-binary-converter">
+	<ant antfile="scripts/ant/build_xlets.xml" target="generate-binary-script"/>   
 </target>
 
 	
@@ -113,7 +107,7 @@ information or have any questions.
 	</copy>    
 	
         <java fork="true" jar="${GRIN_VIEWER_DEST}/grinviewer.jar">
-		<arg line="-asset_dir ${GRIN_VIEWER_DEST} menu.grin"/>
+		<arg line="-asset_dir ${GRIN_VIEWER_DEST} menu.txt"/>
 	</java>
 </target>
 

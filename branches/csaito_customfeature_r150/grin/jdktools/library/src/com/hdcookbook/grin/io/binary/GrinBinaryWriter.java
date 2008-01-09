@@ -223,7 +223,7 @@ public class GrinBinaryWriter {
      * Returns an index number of the feature that this GrinBinaryWriter class 
      * is internally using in the Show.  
      * 
-     * @see #GrinBinaryReader.getFeatureFromIndex(int)
+     * @see GrinBinaryReader#getFeatureFromIndex(int)
      * @param feature the feature to get the index number of.
      * @return the index number for the feature, or -1 if no such feature exists.
      */
@@ -637,7 +637,7 @@ public class GrinBinaryWriter {
         dos.writeInt(translator.getAbsoluteYOffset());
         TranslatorModel model = translator.getModel();
         int index = featuresList.indexOf(model);
-        dos.writeFeature(index); // write the index only
+        dos.writeFeature(index); // write the index only 
        	dos.writeFeature(featuresList.indexOf(translator.getPart()));
         
         out.writeInt(baos.size());
@@ -1023,10 +1023,11 @@ public class GrinBinaryWriter {
         ArrayList deferred = new ArrayList();
         
         for (int i = 0; i < features.length; i++) {
-            /* 3 types of Features that could have forward references.  */
+            /* 4 types of Features that could have forward references.  */
             if (features[i] instanceof Assembly || 
                 features[i] instanceof Group ||
-                features[i] instanceof Modifier ) {
+                features[i] instanceof Modifier || 
+                features[i] instanceof Translator) {
                    deferred.add(features[i]);
             } else {    
                 common.add(features[i]);
@@ -1075,6 +1076,13 @@ public class GrinBinaryWriter {
                 return true;
             }
             return false;
+        } else if (feature instanceof Translator) {
+            Feature part = ((Translator)feature).getPart();
+            Feature model = ((Translator)feature).getModel();
+            if (list.contains(part) || list.contains(model)) {
+                return true;
+            }
+            return false;            
         } else {
             throw new RuntimeException("Unexpected instance " + feature);
         }

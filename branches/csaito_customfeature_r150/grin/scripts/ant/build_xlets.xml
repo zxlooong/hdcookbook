@@ -129,7 +129,7 @@ information or have any questions.
 		</java>			
 	</target>
         
- 	<target name="generate-binary-script" depends="compile-extensions-reader"> 
+ 	<target name="generate-binary-script" depends="init-menu-assets, compile-extensions-reader"> 
             <java fork="true" classname="com.hdcookbook.grin.binaryconverter.BinaryConverter">
                 <classpath>
                    <pathelement path="${MENUTOOLS_DEST}"/>
@@ -146,7 +146,8 @@ information or have any questions.
 		       classpath="${HDC_BUILD_DIR}/grin_viewer/converter.jar"
 		       destdir="${MENUTOOLS_DEST}" >
            </javac>           
-        </target>    
+        </target>   
+                
 
 <target name="build-monitor-xlet">
 

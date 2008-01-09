@@ -921,6 +921,7 @@ public class ShowParser {
                     Group group = new Group(show, null);
                     group.setup(fa);
                     trans.setup((TranslatorModel) t, group);
+                    builder.addFeature(null, 0, group);
                 }
 	    }
 	};

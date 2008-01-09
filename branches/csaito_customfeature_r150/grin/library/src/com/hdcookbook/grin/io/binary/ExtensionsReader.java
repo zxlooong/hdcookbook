@@ -60,28 +60,51 @@ import com.hdcookbook.grin.features.Modifier;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+/**
+ * ExtensionsReader defines the methods that handle the reading of the
+ * custom (user-defined) GRIN features, modifiers and commands from an IO stream.  
+ * These who are defining the custom GRIN subclasses should implement these methods accordingly.
+ * 
+ * @see GrinBinaryReader#GrinBinaryReader(java.io.InputStream, ExtensionsReader)
+ * @see ExtensionsWriter
+ */
 public interface ExtensionsReader {
     
     /**
      * Reads in a feature subclass from a given DataInputStream.
-     * @param in The InputStream to read in the data from.
+     * 
+     * @param reader    The GrinBinaryReader that is reconstructing the Show.
+     * @param in        The InputStream to read in the data from.
+     * @param length    The number of bytes used in the InputStream to describe this Feature.
+     * 
      * @return Feature A user-defined Feature subclass reconstructed from the data.
+     * 
      * @throws java.io.IOException if IO error occurs.
      */
     public Feature readExtensionFeature(GrinBinaryReader reader, DataInputStream in, int length) throws IOException;
     
     /**
      * Reads in a modifier subclass from a given DataInputStream.
-     * @param in The InputStream to read in the data from.
+     * 
+     * @param reader    The GrinBinaryReader that is reconstructing the Show.
+     * @param in        The InputStream to read in the data from.
+     * @param length    The number of bytes used in the InputStream to describe this Feature.
+     * 
      * @return Modifier A user-defined Modifier subclass reconstructed from the data.
+     * 
      * @throws java.io.IOException if IO error occurs.
      */
     public Modifier readExtensionModifier(GrinBinaryReader reader, DataInputStream in, int length) throws IOException;
     
     /**
      * Reads in a command subclass from a given DataInputStream.
-     * @param in The InputStream to read in the data from.
-     * @return Command A user-defined Command subclass reconstructed from the data.
+     * 
+     * @param reader    The GrinBinaryReader that is reconstructing the Show.
+     * @param in        The InputStream to read in the data from.
+     * @param length    The number of bytes used in the InputStream to describe this Feature.
+     * 
+     * @return Command  A user-defined Command subclass reconstructed from the data.
+     * 
      * @throws java.io.IOException if IO error occurs.
      */    
     public Command readExtensionCommand(GrinBinaryReader reader, DataInputStream in, int length) throws IOException;
