@@ -1031,7 +1031,6 @@ public class GrinBinaryReader {
 	    if (i == -1) {
 		break;
 	    }
-            System.out.println(i + " : " + features[i]);
 	    publicFeatures.put(features[i].getName(), features[i]);
 	}
 

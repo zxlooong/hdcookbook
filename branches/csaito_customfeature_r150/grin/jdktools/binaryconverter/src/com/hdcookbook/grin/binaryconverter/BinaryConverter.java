@@ -56,9 +56,13 @@ package com.hdcookbook.grin.binaryconverter;
 
 import com.hdcookbook.grin.io.binary.*;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.util.Debug;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,8 +75,11 @@ public class BinaryConverter {
    /**
     * A driver method for the BinaryConverter.convert(String, String).
     * 
-    * @param args  Arguments.  args[0] is file name the text-based GRIN script to read.
-    * @see #convert(String[], String, ExtensionsWriter)
+    * @param args   Arguments. args[0] is file name the text-based GRIN script to read.
+    *               args[1] is an optional argument for the 
+    *               a fully qualified classname of the ExtensionsWriter, which will be
+    *               instanciated from this class' classpath.
+    * @see          #convert(String[], String, ExtensionsWriter)
     **/
    public static void main(String[] args) {
        
@@ -117,14 +124,12 @@ public class BinaryConverter {
    }
 
    /**
-    * Converts the text based GRIN script to a binary format. The GRIN script is searched from
-    * the current directory and as an absolute path.
+    * Converts the text based GRIN script to a binary format. 
     *
-    * @param assetsDir The asset directory to find the text script and the ExtensionsWriter instance
-    * @param textFile The GRIN text script file name to read in.  
-    * @param writer The ExtensionsWriter class to write out the custom extensions.
-    *  If binaryScriptName is null or empty String, then the binary file will be named as 
-    *  the textScriptName plus the ".grin" extension.
+    * @param assetsDir  The asset directory to find the text script from.
+    * @param textFile   The GRIN text script file name to read in.  
+    * @param writer     The ExtensionsWriter class to write out the custom extensions.
+    * 
     */
    public static void convert(String[] assetsDir, String textFile, ExtensionsWriter writer) 
            throws IOException {
@@ -156,16 +161,16 @@ public class BinaryConverter {
 	    out.writeShow(dos);
             dos.close();
             
-            /**
+            
             if (Debug.ASSERT) {
                // A simple assertion test - check that the reader can read back
                // the binary file that just got generated without any error.
-               DataInputStream in = new DataInputStream(new FileInputStream(fileName));
-               GrinBinaryReader reader = new GrinBinaryReader(in, new DefaultExtensionsReader());
+               DataInputStream in = new DataInputStream(new FileInputStream(fileName));               
 	       Show recreatedShow = new Show(director);
+               GrinBinaryReader reader = new GrinBinaryReader(in, new SEExtensionsReader(show));
                reader.readShow(recreatedShow);
             }
-            **/
+            
             
             return;
             
