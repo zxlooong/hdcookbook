@@ -117,7 +117,7 @@ public class ShowParser {
 
     private SEShow show;
     private Lexer lexer;
-    private ExtensionsParser extParser = new ExtensionsParser();
+    private ExtensionsParser extParser;
     private ExtensionsBuilder extBuilder;
     private Vector[] deferred = { new Vector(), new Vector(), new Vector() };  
     	// Array of Vector<ForwardReference>
@@ -178,6 +178,8 @@ public class ShowParser {
         
 	this.builder = builder;
 	builder.init(show);
+        
+        this.extParser = builder.getExtensionsParser();
     }
 
     /**
@@ -392,17 +394,17 @@ public class ShowParser {
 	    if ("modifier".equals(tok)) {
 		sub = parseSubFeature(lexer.getString());
 	    }
-	    String arg = lexer.getString();
-	    parseExpected(";");
+	    //String arg = lexer.getString();
+	    //parseExpected(";");
 	    Feature f;
 	    if (typeName.indexOf(':') < 0) {
 		lexer.reportError(typeName + " doesn't contain \":\"");
 	    }
 	    if (sub == null) {
-		f = extParser.getFeature(show, typeName, name, arg);
+		f = extParser.getFeature(show, typeName, name, lexer);
 	    } else {
 		Modifier m = extParser.getModifier(show, typeName,
-						   name, arg);
+						   name, lexer);
 		f = m;
 		if (m != null) {
 		    resolveModifier(m, sub);
@@ -1450,6 +1452,7 @@ public class ShowParser {
 		lexer.reportError("command expected, " + tok + " seen");
 	    } else {
 		String typeName = tok;
+                /**    
  	        ArrayList args =new ArrayList();
 	        for (;;) {
 	           tok = lexer.getString();
@@ -1460,8 +1463,10 @@ public class ShowParser {
 	           } else {
 		      args.add(tok);
 	           }
-	        }               
-		Command c = extParser.getCommand(show, typeName, (String[])args.toArray(new String[]{}));
+	        } 
+                 **/
+                
+		Command c = extParser.getCommand(show, typeName, lexer);
 		v.addElement(c);
 		builder.addCommand(c, lineStart);
 	    }
@@ -1632,9 +1637,6 @@ public class ShowParser {
 	    }
 	}
 	
-	if (extBuilder != null) {
-	   extBuilder.finishBuilding(show);
-	}
 	builder.finishBuilding();
     }
 
@@ -1833,7 +1835,7 @@ public class ShowParser {
 	parseExpected("}");
 	return AssetFinder.getColor(r, g, b, a);
     }
-
+    
     /**
      * Parses a token that we expect to see.  A token is read, and
      * if it's not the expected token, an IOException is generated.
@@ -1841,10 +1843,6 @@ public class ShowParser {
      * end of various constructs.
      **/
     public void parseExpected(String expected) throws IOException {
-	String tok = lexer.getString();
-	if (!(expected.equals(tok))) {
-	   lexer.reportError("\"" + expected + "\" expected, \"" + tok 
-	   		     + "\" seen");
-	}
-    }
+	lexer.parseExpected(expected);
+    }    
 }

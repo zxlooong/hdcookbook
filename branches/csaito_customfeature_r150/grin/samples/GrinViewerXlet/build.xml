@@ -4,7 +4,7 @@
 	
 	<!-- Property Definitions -->
   
-	<property name="bdj.classes"  value="../../../../bd-j/references/enhanced/classes.zip"/>
+	<property name="bdj.classes"  value="../../../../../bd-j/references/enhanced/classes.zip"/>
 	<property name="grin.classes"  value="../../build/grin_viewer/grinviewer.jar"/>
         <property name="converter.classes" value="../../build/grin_viewer/converter.jar"/>
 	<property name="builddir" value="build"/>        

@@ -152,6 +152,7 @@ public abstract class Modifier extends Feature {
      **/
     protected void setSetupMode(boolean mode) {
 	if (mode) {
+            System.out.println("Modifier " + this + " setting up " + part);
 	    part.setup();
 	} else {
 	    part.unsetup();

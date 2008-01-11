@@ -66,7 +66,6 @@ import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.SEUserModifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
@@ -113,7 +112,7 @@ public interface SEShowVisitor {
     public void visitGroup(Group feature);
     public void visitGuaranteeFill(GuaranteeFill feature);
     public void visitImageSequence(ImageSequence feature);
-    public void visitSEUserModifier(SEUserModifier feature);
+    public void visitUserDefinedFeature(Feature feature);
     public void visitSetTarget(SetTarget feature);
     public void visitSrcOver(SrcOver feature);
     public void visitText(Text feature);

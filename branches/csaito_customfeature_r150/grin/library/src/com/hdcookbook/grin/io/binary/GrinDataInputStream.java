@@ -54,6 +54,7 @@
 
 package com.hdcookbook.grin.io.binary;
 
+import com.hdcookbook.grin.Feature;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -62,15 +63,32 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * A convenience DatInputStream subclass that can handle certain Objects and 
- * Object arrays, including null.
+ * GrinDataInputStream is a convenience DataInputStream subclass 
+ * that can handle certain Objects and Object arrays, including null.
+ * This class is used by the GrinBinaryReader to read in information about the
+ * show nodes.
+ * 
+ * @see GrinBinaryReader
+ * @see GrinDataOutputStream
  */
-class GrinDataInputStream extends DataInputStream {
+public class GrinDataInputStream extends DataInputStream {
    
-   public GrinDataInputStream(InputStream in) {
+   /**
+    * An instance of the GrinBinaryReader that this input stream
+    * is working with.
+    */
+   private GrinBinaryReader binaryReader; 
+   
+   GrinDataInputStream(InputStream in, GrinBinaryReader reader) {
        super(in);
+       this.binaryReader = reader;
    }
    
+   /**
+    * Reads in and constructs a Color instance.
+    * @return A Color instance reconstructed from the input stream.
+    * @throws java.io.IOException if IO error occurs.
+    */
    public Color readColor() throws IOException {
        byte b = readByte();
        if (b == Constants.NULL) {
@@ -84,6 +102,11 @@ class GrinDataInputStream extends DataInputStream {
        return new Color(red, green, blue, alpha);
    }
    
+   /**
+    * Reads in and constructs a Rectangle instance.
+    * @return A Rectangle instance reconstructed from the input stream.
+    * @throws java.io.IOException if IO error occurs.
+    */
    public Rectangle readRectangle() throws IOException {
        byte b = readByte();
        if (b == Constants.NULL) {
@@ -96,6 +119,11 @@ class GrinDataInputStream extends DataInputStream {
        return new Rectangle((int)x,(int)y,(int)w,(int)h);
    }
    
+   /**
+    * Reads in and constructs an array of Rectangle.
+    * @return An array of Rectangles reconstructed from the input stream.
+    * @throws java.io.IOException if IO error occurs.
+    */
    public Rectangle[] readRectangleArray() throws IOException {
        byte b = readByte();
        if (b == Constants.NULL) {
@@ -109,6 +137,11 @@ class GrinDataInputStream extends DataInputStream {
        return array;       
    }
    
+   /**
+    * Reads in and constructs a Font instance.
+    * @return A Font instance reconstructed from the input stream.
+    * @throws java.io.IOException if IO error occurs.
+    */
    public Font readFont() throws IOException {
        byte b = readByte();
        if (b == Constants.NULL) {
@@ -120,7 +153,11 @@ class GrinDataInputStream extends DataInputStream {
        return new Font(name, style, size);
    }  
    
-   
+   /**
+    * Reads in and constructs an array of integer.
+    * @return An array of integers reconstructed from the input stream.
+    * @throws java.io.IOException if IO error occurs.
+    */
    public int[] readIntArray() throws IOException {
        byte b = readByte();
        if (b == Constants.NULL) {
@@ -134,16 +171,25 @@ class GrinDataInputStream extends DataInputStream {
        return array;
    }   
 
-
-    public String readString() throws IOException {
+   /**
+    * Reads in and constructs a String instance.
+    * @return A String instance reconstructed from the input stream.
+    * @throws java.io.IOException if IO error occurs.
+    */
+   public String readString() throws IOException {
 	byte b = readByte();
 	if (b == Constants.NULL) {
 	    return null;
 	} else {
 	    return readUTF();
 	}
-    }
+   }
 
+   /**
+    * Reads in and constructs an array of Strings.
+    * @return An array of Strings reconstructed from the input stream.
+    * @throws java.io.IOException if IO error occurs.
+    */
    public String[] readStringArray() throws IOException {
        byte b = readByte();
        if (b == Constants.NULL) {
@@ -159,5 +205,18 @@ class GrinDataInputStream extends DataInputStream {
 	   }
        }
        return array;
+   }
+   
+   /**
+    * Reads in a reference of a feature and returns an instance of the 
+    * feature.
+    * @return a feature that is referenced from, or null if no such
+    * feature exists in the GrinBinaryReader that this input stream
+    * is working with.
+    */
+   public Feature readFeatureReference() throws IOException {
+       int index = readInt();
+       
+       return binaryReader.getFeatureFromIndex(index);
    }
 }

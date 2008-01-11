@@ -211,7 +211,7 @@ public class GrinBinaryReader {
      * 
      * @see GrinBinaryWriter#getFeatureIndex(Feature)
      */
-    public Feature getFeatureFromIndex(int index) {
+     Feature getFeatureFromIndex(int index) {
         if (index == -1 || index > features.length) {
             return null;
         }  else {
@@ -229,7 +229,7 @@ public class GrinBinaryReader {
      * 
      * @see GrinBinaryWriter#getSegmentIndex(Segment)
      */
-    public Segment getSegmentFromIndex(int index) {
+     Segment getSegmentFromIndex(int index) {
         if (index == -1 || index > segments.length) {
             return null;
         }  else {
@@ -247,7 +247,7 @@ public class GrinBinaryReader {
      * 
      * @see GrinBinaryWriter#getRCHandlerIndex(RCHandler)
      */
-    public RCHandler getRCHandlerFromIndex(int index) {
+    RCHandler getRCHandlerFromIndex(int index) {
         if (index == -1 || index > rcHandlers.length) {
             return null;
         }  else {
@@ -278,7 +278,7 @@ public class GrinBinaryReader {
 
         this.show = show;
         
-        GrinDataInputStream in = new GrinDataInputStream(stream);       
+        GrinDataInputStream in = new GrinDataInputStream(stream, this);       
         checkScriptHeader(in);
         
         features = new Feature[in.readInt()];
@@ -710,7 +710,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
 
-        Feature feature = extensionsReader.readExtensionFeature(this, dis, length);
+        Feature feature = extensionsReader.readExtensionFeature(dis, length);
         
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
@@ -729,12 +729,15 @@ public class GrinBinaryReader {
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
-        
-        Modifier modifier = extensionsReader.readExtensionModifier(this, dis, length);
+
+        Feature part = dis.readFeatureReference();  // Read in the first 4 bytes
+        Modifier modifier = extensionsReader.readExtensionModifier(dis, (length-4));
         
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }          
+        
+        modifier.setup(part);
        
         return modifier;
     }
@@ -878,7 +881,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
         
-        Command command = extensionsReader.readExtensionCommand(this, dis, length);
+        Command command = extensionsReader.readExtensionCommand(dis, length);
         
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();

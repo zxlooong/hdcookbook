@@ -136,6 +136,7 @@ import javax.imageio.ImageIO;
 
     public void init() throws IOException {
 	ShowBuilder builder = new ShowBuilder();
+        builder.setExtensionsBuilderFactory(new GenericExtensionsBuilderFactory());
 	File [] fPath = new File[assetPath.length];
 	for (int i = 0; i < fPath.length; i++) {
 	    fPath[i] = new File(assetPath[i]);
@@ -145,7 +146,7 @@ import javax.imageio.ImageIO;
         for (int i = 0; i < shows.length; i++) {
             Director director = new Director() {
                 public ExtensionsBuilder getExtensionsBuilder() {
-                    return new GenericExtensionsBuilder() {
+                    return new ExtensionsBuilder() {
 			public void takeMosaicHint(String name, int width, 
 						   int height, String[] images) 
 			{

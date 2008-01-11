@@ -130,12 +130,12 @@ information or have any questions.
 	</target>
         
  	<target name="generate-binary-script" depends="init-menu-assets, compile-extensions-reader"> 
-            <java fork="true" classname="com.hdcookbook.grin.binaryconverter.BinaryConverter">
+            <java fork="true" failOnError="true" classname="com.hdcookbook.grin.binaryconverter.Main">
                 <classpath>
                    <pathelement path="${MENUTOOLS_DEST}"/>
                    <pathelement path="${HDC_BUILD_DIR}/grin_viewer/converter.jar"/>
                 </classpath>    
-                <arg line="${MENUASSETS_DEST}/menu.txt com.hdcookbook.bookmenu.menu.MenuExtensionsWriter"/>
+                <arg line="${MENUASSETS_DEST}/menu.txt com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory"/>
             </java>		
 	</target>       
         

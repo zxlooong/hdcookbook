@@ -35,7 +35,7 @@
         </target>
         
         <target name="generate_binary_script" depends="converter_check, compile_converter, compile_extension_writer">
-            <java fork="true" classname="com.hdcookbook.grin.binaryconverter.BinaryConverter">
+            <java fork="true" classname="com.hdcookbook.grin.binaryconverter.Main">
                 <classpath>
                    <pathelement path="${builddir}"/>
                    <pathelement path="${converter.classes}"/>

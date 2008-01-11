@@ -73,7 +73,6 @@ public interface ExtensionsReader {
     /**
      * Reads in a feature subclass from a given DataInputStream.
      * 
-     * @param reader    The GrinBinaryReader that is reconstructing the Show.
      * @param in        The InputStream to read in the data from.
      * @param length    The number of bytes used in the InputStream to describe this Feature.
      * 
@@ -81,12 +80,14 @@ public interface ExtensionsReader {
      * 
      * @throws java.io.IOException if IO error occurs.
      */
-    public Feature readExtensionFeature(GrinBinaryReader reader, DataInputStream in, int length) throws IOException;
+    public Feature readExtensionFeature(GrinDataInputStream in, int length) throws IOException;
     
     /**
-     * Reads in a modifier subclass from a given DataInputStream.
+     * Reads in a modifier subclass from a given DataInputStream.  Note that the child feature
+     * this modifier will be working on is contructed before this method is invoked, and 
+     * modifier.setup(Feature) will ve invoked after this method returns, hence the implementation
+     * of this method does not have to deal with it.
      * 
-     * @param reader    The GrinBinaryReader that is reconstructing the Show.
      * @param in        The InputStream to read in the data from.
      * @param length    The number of bytes used in the InputStream to describe this Feature.
      * 
@@ -94,12 +95,11 @@ public interface ExtensionsReader {
      * 
      * @throws java.io.IOException if IO error occurs.
      */
-    public Modifier readExtensionModifier(GrinBinaryReader reader, DataInputStream in, int length) throws IOException;
+    public Modifier readExtensionModifier(GrinDataInputStream in, int length) throws IOException;
     
     /**
      * Reads in a command subclass from a given DataInputStream.
      * 
-     * @param reader    The GrinBinaryReader that is reconstructing the Show.
      * @param in        The InputStream to read in the data from.
      * @param length    The number of bytes used in the InputStream to describe this Feature.
      * 
@@ -107,6 +107,6 @@ public interface ExtensionsReader {
      * 
      * @throws java.io.IOException if IO error occurs.
      */    
-    public Command readExtensionCommand(GrinBinaryReader reader, DataInputStream in, int length) throws IOException;
+    public Command readExtensionCommand(GrinDataInputStream in, int length) throws IOException;
 
 }

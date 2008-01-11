@@ -66,7 +66,7 @@ import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.SEUserModifier;
+import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
@@ -203,9 +203,11 @@ public class SEDoubleUseChecker implements SEShowVisitor {
 	addActive(feature);
     }
 
-    public void visitSEUserModifier(SEUserModifier feature) {
+    public void visitUserDefinedFeature(Feature feature) {
 	addActive(feature);
-	SEShow.acceptFeature(this, feature.getPart());
+        if (feature instanceof Modifier) {
+	   SEShow.acceptFeature(this, ((Modifier)feature).getPart());
+        }   
     }
 
     public void visitSetTarget(SetTarget feature) {

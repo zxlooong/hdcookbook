@@ -52,52 +52,22 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+package com.hdcookbook.bookmenu.menu;
 
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Modifier;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import com.hdcookbook.grin.io.ExtensionsBuilderFactory;
+import com.hdcookbook.grin.io.binary.ExtensionsWriter;
+import com.hdcookbook.grin.io.text.ExtensionsParser;
 
-/**
- * The ExtensionsWriter defines the methods that handle the writing of the
- * custom (user-defined) GRIN features, modifiers and commands in the binary file format. 
- * These who are defining the custom GRIN subclasses should implement these methods 
- * accordingly.
- * 
- * @see GrinBinaryWriter#GrinBinaryWriter(com.hdcookbook.grin.SEShow, ExtensionsWriter)
- * @see ExtensionsReader
- */
-public interface ExtensionsWriter {
-    
-    /**
-     * Writes out a feature subclass to a given DataOutputStream.
-     * 
-     * @param out       The OutputStream to write out the data to.
-     * @param feature   The user-defined Feature subclass to write out.
-     * @throws java.io.IOException if IO error occurs.
-     */
-    public void writeExtensionFeature(GrinDataOutputStream out, Feature feature) throws IOException;
-    
-    /**
-     * Writes out a modifier subclass to a given DataOutputStream.
-     * Note that the modifier's child feature information is already written out by the time
-     * this method is invoked, so the implementation of this method do not have to do so.
-     * 
-     * @param out       The OutputStream to write out the data to.
-     * @param modifier  The user-defined Modifier subclass to write out.
-     * @throws java.io.IOException if IO error occurs.
-     */
-    public void writeExtensionModifier(GrinDataOutputStream out, Modifier modifier) throws IOException;
-    
-    /**
-     * Writes out a command subclass to a given DataOutputStream.
-     * 
-     * @param out       The OutputStream to write out the data to.
-     * @param command   The user-defined Command subclass to write out.
-     * @throws java.io.IOException if IO error occurs.
-     */
-    public void writeExtensionCommand(GrinDataOutputStream out, Command command) throws IOException;
+public class MenuExtensionsBuilderFactory extends ExtensionsBuilderFactory {
+
+    @Override
+    public ExtensionsWriter getExtensionsWriter() {
+        return new MenuExtensionsWriter();
+    }
+
+    @Override
+    public ExtensionsParser getExtensionsParser() {
+        return new MenuExtensionsParser();
+    }
 
 }

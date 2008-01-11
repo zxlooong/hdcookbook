@@ -58,38 +58,33 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEUserCommand;
-import com.hdcookbook.grin.features.SEUserFeature;
-import com.hdcookbook.grin.features.SEUserModifier;
 import java.io.IOException;
 
-public class ExtensionsParser {
+public interface ExtensionsParser {
+    
     /**
-     * Get a feature of the given type.  The type name will have a
-     * colon in it.
-     * <p>
+     * Get a feature of the given type.  
      * The syntax of an extension feature is fixed at
      * <pre>
-     *     "feature" "extension" namespace:type_name name string ";"
+     *     "feature" "modifier" namespace:type_name name feature_name <arbitrary strings> ";"
      * </pre>
-     * where feature_name is given iff the feature is a Modifier.
      *
      * @param show      The show being parsed
      * @param typeName  The name of the feature's type.  This will always
      *                  contain a ":".
      * @param name      The name of this instance of feature
      *			a list of commands if needed.
-     * @param arg	The argument string on the feature
+     * @param arg	The lexer to parse arguments for this feature.
+     *                  The implementation of this method should parse up to ";"
+     *                  which indicates the end of the feature declaration.
      *
      * @throws      IOException if there's an error.
      *
      * @return	    A feature if one of the given type is known, null otherwise
      */
     public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-		       throws IOException {
-        return new SEUserFeature(show, typeName, name, arg);        
-    }
+    			      String name, Lexer arg)
+		       throws IOException;    
 
     /**
      * Get a modifier feature of the given type.  The type name will have a
@@ -98,7 +93,7 @@ public class ExtensionsParser {
      * <p>
      * The syntax of an extension feature is fixed at
      * <pre>
-     *     "feature" "modifier" namespace:type_name name feature_name string ";"
+     *     "feature" "modifier" namespace:type_name name feature_name  <arbitrary strings> ";"
      * </pre>
      * where feature_name is given iff the feature is a Modifier.
      *
@@ -107,17 +102,17 @@ public class ExtensionsParser {
      *                  contain a ":".
      * @param name      The name of this instance of feature
      *			a list of commands if needed.
-     * @param arg	The argument string on the feature
+     * @param arg	The lexer to parse arguments for this feature.
+     *                  The implementation of this method should parse up to ";"
+     *                  which indicates the end of the feature declaration.
      *
      * @throws      IOException if there's an error.
      *
      * @return	    A feature if one of the given type is known, null otherwise
      */
     public Modifier getModifier(Show show, String typeName, 
-    			        String name, String arg)
-		       throws IOException {
-        return new SEUserModifier(show, typeName, name, arg);
-    }
+    			        String name, Lexer arg)
+		       throws IOException;
 
      /**
      * Get a modifier command of the given type.  
@@ -126,16 +121,14 @@ public class ExtensionsParser {
      * @param show      The show being parsed
      * @param typeName  The name of the commands's type.  This will always
      *                  contain a ":".
-     * @param args	The argument strings on the command
+     * @param arg	The lexer to parse arguments for this feature.
+     *                  The implementation of this method should parse up to ";"
+     *                  which indicates the end of the feature declaration.
      *
      * @throws      IOException if there's an error.
      *
      * @return	    A command if one of the given type is known, null otherwise
      */
-    public Command getCommand(Show show, String typeName, String[] args)
-		       throws IOException {
-        
-        return new SEUserCommand(typeName, args);
-    }
-   
+    public Command getCommand(Show show, String typeName, Lexer arg)
+		       throws IOException;
 }

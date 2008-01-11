@@ -85,6 +85,7 @@ import com.hdcookbook.bookmenu.menu.commands.SelectAudioCommand;
 import com.hdcookbook.bookmenu.menu.commands.SelectSubtitlesCommand;
 import com.hdcookbook.grin.io.binary.ExtensionsReader;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.DataInputStream;
 
 /** 
@@ -108,7 +109,7 @@ public class MenuExtensionsReader implements ExtensionsReader {
      * Called by the GRIN parser to parse an extension feature 
      * that's not a modifier
      **/
-    public Feature readExtensionFeature(GrinBinaryReader reader, DataInputStream in, int length)
+    public Feature readExtensionFeature(GrinDataInputStream in, int length)
 		   throws IOException
     {
 	return null;
@@ -117,15 +118,13 @@ public class MenuExtensionsReader implements ExtensionsReader {
     /**
      * Called by the GRIN parser to parse a feature that is a modifier
      **/
-    public Modifier readExtensionModifier(GrinBinaryReader reader, DataInputStream in, int length)
+    public Modifier readExtensionModifier(GrinDataInputStream in, int length)
 		   throws IOException
     {
         String typeName = in.readUTF();
         String name = in.readUTF();
 	if ("BOOK:bio_image".equals(typeName)) {
-	    Modifier modifier = new BioImageFeature(show, name);            
-            Feature part = reader.getFeatureFromIndex(in.readInt());
-            modifier.setup(part);
+	    Modifier modifier = new BioImageFeature(show, name);   
             return modifier;
 	} else {
 	    return null;
@@ -135,7 +134,7 @@ public class MenuExtensionsReader implements ExtensionsReader {
     /**
      * Called by the GRIN parser to parse an extension command.
      **/
-    public Command readExtensionCommand(GrinBinaryReader reader, DataInputStream in, int length)
+    public Command readExtensionCommand(GrinDataInputStream in, int length)
 		       throws IOException {
         
         String typeName = in.readUTF();

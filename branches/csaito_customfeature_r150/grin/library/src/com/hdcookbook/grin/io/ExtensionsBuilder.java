@@ -74,15 +74,6 @@ import java.io.IOException;
 public interface ExtensionsBuilder {
 
     /**
-     * Called after parsing is done, and all of the built-in objects
-     * have been resolved.  This allows any final
-     * initialization to be performed.  Note that GRIN's built-in
-     * parser automatically calls Command.resolve() for all commands
-     * in the show, including extension commands.
-     **/
-    public void finishBuilding(Show s) throws IOException;
-    
-    /**
      * Give a hint how an optimal mosaic could be built.
      **/
     public void takeMosaicHint(String name, int width, int height, 

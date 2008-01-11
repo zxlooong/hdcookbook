@@ -66,7 +66,6 @@ import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.binary.SEExtensionsReader;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
@@ -92,8 +91,6 @@ public class GenericDirector extends Director {
      **/
     public ExtensionsBuilder getExtensionsBuilder() {
 	return new ExtensionsBuilder() {
-            public void finishBuilding(Show s) throws IOException {
-            }
             public void takeMosaicHint(String name, int width, int height, String[] images) {
             }         
         };
@@ -122,7 +119,7 @@ public class GenericDirector extends Director {
 	        rdr.close();
             } else {
                 bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(bis, new SEExtensionsReader(show));
+ 	        GrinBinaryReader reader = new GrinBinaryReader(bis, null);
                 reader.readShow(show);
                 bis.close();
             }   

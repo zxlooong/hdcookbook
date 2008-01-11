@@ -64,7 +64,6 @@ import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.SEUserModifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
@@ -270,8 +269,6 @@ public class SEShow extends Show {
 	    visitor.visitGuaranteeFill((GuaranteeFill) feature);
 	} else if (featureClazz == ImageSequence.class) {
 	    visitor.visitImageSequence((ImageSequence) feature);
-	} else if (featureClazz == SEUserModifier.class) {
-	    visitor.visitSEUserModifier((SEUserModifier) feature);
 	} else if (featureClazz == SetTarget.class) {
 	    visitor.visitSetTarget((SetTarget) feature);
 	} else if (featureClazz == SrcOver.class) {
@@ -285,7 +282,7 @@ public class SEShow extends Show {
 	} else if (featureClazz == TranslatorModel.class) {
 	    visitor.visitTranslatorModel((TranslatorModel) feature);
 	} else {
-	    assert false;
+	    visitor.visitUserDefinedFeature(feature);
 	}
     }
 

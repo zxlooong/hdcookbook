@@ -54,32 +54,41 @@
 
 package com.hdcookbook.grin.binaryconverter;
 
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.io.binary.*;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.io.ExtensionsBuilderFactory;
+import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
  * A tool that converts a text based GRIN script to the binary format.
  **/
-public class BinaryConverter {
+public class Main {
    
    /**
-    * A driver method for the BinaryConverter.convert(String, String).
+    * A driver method for the Main.convert(String, String).
     * 
     * @param args   Arguments. args[0] is file name the text-based GRIN script to read.
     *               args[1] is an optional argument for the 
     *               a fully qualified classname of the ExtensionsWriter, which will be
     *               instanciated from this class' classpath.
-    * @see          #convert(String[], String, ExtensionsWriter)
+    * @see          #convert(String[], String, ExtensionsBuilderFactory)
     **/
    public static void main(String[] args) {
        
@@ -100,12 +109,12 @@ public class BinaryConverter {
         
         String textFile = args[index++];
         
-        ExtensionsWriter extensionsWriter = null;
+        ExtensionsBuilderFactory extensionsBuilderFactory = null;
         
         if (args.length != index) {
             String clazzName = args[index];
             try {
-                 extensionsWriter = (ExtensionsWriter) Class.forName(clazzName).newInstance();
+                 extensionsBuilderFactory = (ExtensionsBuilderFactory) Class.forName(clazzName).newInstance();
             } catch (IllegalAccessException ex) {
                  ex.printStackTrace();
             } catch (InstantiationException ex) {
@@ -116,8 +125,8 @@ public class BinaryConverter {
         }
         
         try {
-           BinaryConverter.convert((String[])assets.toArray(new String[assets.size()]),
-                                   textFile, extensionsWriter);
+           Main.convert((String[])assets.toArray(new String[assets.size()]),
+                                   textFile, extensionsBuilderFactory);
         } catch (IOException e) {           
             e.printStackTrace();
         }    
@@ -128,17 +137,16 @@ public class BinaryConverter {
     *
     * @param assetsDir  The asset directory to find the text script from.
     * @param textFile   The GRIN text script file name to read in.  
-    * @param writer     The ExtensionsWriter class to write out the custom extensions.
-    * 
+    * @param extensionsFactory     The ExtensionsBuilderFactory instance for parsing and writing out
+    * custom extensions.
     */
-   public static void convert(String[] assetsDir, String textFile, ExtensionsWriter writer) 
+   public static void convert(String[] assetsDir, String textFile, ExtensionsBuilderFactory extensionsFactory) 
            throws IOException {
        
        String fileName = null;
        
        try {
-            GenericDirector director = new GenericDirector(textFile);
-            
+         
             ArrayList list = new ArrayList();
             for (int i = 0; i < assetsDir.length; i++) {      
                 list.add(new File(assetsDir[i]));
@@ -147,7 +155,7 @@ public class BinaryConverter {
 	    AssetFinder.setSearchPath(null, 
                     (File[])list.toArray(new File[list.size()]));
   
-            SEShow show = director.createShow(null);
+            SEShow show = createShow(textFile, extensionsFactory);
               
             fileName = textFile;
             if (textFile.indexOf('.') != -1) {
@@ -157,20 +165,35 @@ public class BinaryConverter {
             
             DataOutputStream dos = new DataOutputStream(new FileOutputStream(fileName));
             
+            ExtensionsWriter writer = extensionsFactory.getExtensionsWriter();
             GrinBinaryWriter out = new GrinBinaryWriter(show, writer);
 	    out.writeShow(dos);
             dos.close();
             
-            
+
+            /**
             if (Debug.ASSERT) {
                // A simple assertion test - check that the reader can read back
                // the binary file that just got generated without any error.
                DataInputStream in = new DataInputStream(new FileInputStream(fileName));               
-	       Show recreatedShow = new Show(director);
-               GrinBinaryReader reader = new GrinBinaryReader(in, new SEExtensionsReader(show));
+	       Show recreatedShow = new Show(null);
+               GrinBinaryReader reader = new GrinBinaryReader(in, new ExtensionsReader() {
+                    public Feature readExtensionFeature(GrinDataInputStream in, int length) throws IOException {
+                        in.skipBytes(length);
+                        return null;
+                    }
+                    public Modifier readExtensionModifier(GrinDataInputStream in, int length) throws IOException {
+                        in.skipBytes(length);
+                        return null;
+                    }
+                    public Command readExtensionCommand(GrinDataInputStream in, int length) throws IOException {
+                        in.skipBytes(length);
+                        return null;
+                    }                 
+               });
                reader.readShow(recreatedShow);
             }
-            
+            **/           
             
             return;
             
@@ -186,10 +209,45 @@ public class BinaryConverter {
             throw e;
         }
    }
-   
+
+   private static SEShow createShow(String showName, ExtensionsBuilderFactory extensionsFactory) {
+	SEShow show = new SEShow(null);
+	URL source = null;
+	BufferedReader rdr = null;
+	try {
+	    source = AssetFinder.getURL(showName);
+	    if (source == null) {
+		throw new IOException("Can't find resource " + showName);
+	    }
+	    rdr = new BufferedReader(
+			new InputStreamReader(source.openStream(), "UTF-8"));
+            ShowBuilder builder = new ShowBuilder();
+            builder.setExtensionsBuilderFactory(extensionsFactory);
+	    ShowParser p = new ShowParser(rdr, showName, show, builder);
+	    p.parse();
+	    rdr.close();
+	} catch (IOException ex) {
+	    ex.printStackTrace();
+	    System.out.println();
+	    System.out.println(ex.getMessage());
+	    System.out.println();
+	    System.out.println("Error trying to parse " + showName);
+            System.out.println("    URL:  " + source);
+	    System.exit(1);
+	} finally {
+	    if (rdr != null) {
+		try {
+		    rdr.close();
+		} catch (IOException ex) {
+		}
+	    }
+	}
+        return show;
+   }
+       
    private static void usage() {
         System.out.println("Missing an argument - need a grin script to parse");
-        System.out.println("Syntax: com.hdcookbook.grin.io.binary.BinaryConverter [-asset_dir <directory>] text-based-grin-file [ExtensionsWriter]");       
+        System.out.println("Syntax: com.hdcookbook.grin.io.binary.Main [-asset_dir <directory>] text-based-grin-file [ExtensionsBuilderFactory]");       
         System.exit(0);
    }
 }     

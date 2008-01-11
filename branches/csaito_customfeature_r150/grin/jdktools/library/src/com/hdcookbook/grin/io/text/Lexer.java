@@ -247,7 +247,20 @@ public class Lexer {
 	}
 	return result;
     }
-
+    
+    /**
+     * Parses a token that we expect to see.  A token is read, and
+     * if it's not the expected token, an IOException is generated.
+     * This can be useful for things like parsing the ";" at the
+     * end of various constructs.
+     **/
+    public void parseExpected(String expected) throws IOException {
+	String tok = getString();
+	if (!(expected.equals(tok))) {
+	   reportError("\"" + expected + "\" expected, \"" + tok 
+	   		     + "\" seen");
+	}
+    }
     //
     //  Called from getString
     //

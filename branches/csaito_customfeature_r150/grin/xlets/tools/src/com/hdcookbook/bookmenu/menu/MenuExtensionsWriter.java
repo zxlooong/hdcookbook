@@ -57,20 +57,20 @@ package com.hdcookbook.bookmenu.menu;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEUserCommand;
-import com.hdcookbook.grin.features.SEUserModifier;
 import com.hdcookbook.grin.io.binary.ExtensionsWriter;
-import com.hdcookbook.grin.io.binary.GrinBinaryWriter;
-import java.io.DataOutputStream;
+import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
 public class MenuExtensionsWriter implements ExtensionsWriter {
 
-    public void writeExtensionFeature(GrinBinaryWriter writer, DataOutputStream out, Feature feature) throws IOException {
+    public void writeExtensionFeature(GrinDataOutputStream out, Feature feature) 
+            throws IOException {
         // Custom features are not used in the MenuXlet
     }
 
-    public void writeExtensionModifier(GrinBinaryWriter writer, DataOutputStream out, Modifier modifier) throws IOException {
+    public void writeExtensionModifier(GrinDataOutputStream out, Modifier modifier) 
+            throws IOException {
+        
         SEUserModifier seModifier = (SEUserModifier) modifier;
         
         String typeName = seModifier.getTypeName();
@@ -78,10 +78,11 @@ public class MenuExtensionsWriter implements ExtensionsWriter {
         
         out.writeUTF(typeName);
         out.writeUTF(name);
-        out.writeInt(writer.getFeatureIndex(modifier.getPart()));
     }
 
-    public void writeExtensionCommand(GrinBinaryWriter writer, DataOutputStream out, Command command) throws IOException {
+    public void writeExtensionCommand(GrinDataOutputStream out, Command command) 
+            throws IOException {
+        
         SEUserCommand seCommand = (SEUserCommand) command;
         
         String typeName = seCommand.getTypeName();

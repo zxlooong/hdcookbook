@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,35 +52,35 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.build.mosaic;
+package com.hdcookbook.bookmenu.menu;
 
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.io.text.Lexer;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.input.RCHandler;
-
-import java.io.IOException;
 
 /**
- * This is a pretend command that does nothing.  It's here so that
- * the mosaic builder can create something when it encounters an
- * extension command in a GRIN show file.
- *
- * @author Bill Foote (http://jovial.com)
+ * A dummy Command subclass that saves all the data passed into it's constructor.
  */
-public class GenericExtensionCommand extends Command {
-   
-    private String name;
-    private String[] body;
-
-    public GenericExtensionCommand(String  name, String[] body) {
-	this.body = body;
+public class SEUserCommand extends Command {
+    
+    private String typeName;
+    private String[] args;
+    
+    /** Creates a new instance of SEUserCommand */
+    public SEUserCommand(String typeName, String[] args) {
+        super();
+        this.typeName = typeName;
+        this.args = args;
     }
-
+    
+    public String getTypeName() {
+        return typeName;
+    }
+    
+    public String[] getArgs() {
+        return args;
+    }
+    
     public void execute() {
-	System.out.println("Executing " + name);
+	System.out.println("Executing " + typeName);
     }
+    
 }

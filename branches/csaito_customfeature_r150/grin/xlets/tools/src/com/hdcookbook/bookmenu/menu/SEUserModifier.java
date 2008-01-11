@@ -51,63 +51,37 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-package com.hdcookbook.grin.io.binary;
+package com.hdcookbook.bookmenu.menu;
 
-import com.hdcookbook.grin.*;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEUserCommand;
-import com.hdcookbook.grin.features.SEUserFeature;
-import com.hdcookbook.grin.features.SEUserModifier;
-import java.io.DataInputStream;
-import java.io.IOException;
 
 /**
- * A default ExtensionsReader implementation used for the emulation need on 
- * big jdk (SE), such as the GrinView. 
- * This implementation ignores the DataInputStream and creates
- * a fake SE class versions.
+ * A dummy Modifier subclass that saves all the data passed into its constructor.
  */
-public class SEExtensionsReader implements ExtensionsReader {
+public class SEUserModifier extends Modifier {
     
-    private Show show;    
-    private static int featureCount =  1;
-    private static int modifierCount = 1;
+    private String typeName;
+    private String name;
+    private String arg;
     
-    /**
-     * The default constructor.
-     * @param show The show instance that will be associcated with the Feature, 
-     * Modifier and Command objects that this class creates.
-     */
-    public SEExtensionsReader(Show show) {
-        this.show = show;
-    }
-
-    /**
-     *  Returns an instance of <code>SEUserFeature</code>.
-     */
-    public Feature readExtensionFeature(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
-        in.skipBytes(length);
-        String name = "User-Defined Feature " + (featureCount++);
-        return new SEUserFeature(show, name, name, null);
+    /** Creates a new instance of SEUserModifier */
+    public SEUserModifier(Show show, String typeName, String name, String arg)
+    {
+        super(show, name);
+        this.typeName = typeName;
+        this.arg = arg;
     }
     
-    /**
-     *  Returns an instance of <code>SEUserModifier</code>.
-     */
-    public Modifier readExtensionModifier(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
-        in.skipBytes(length);
-        String name = "User-Defined Modifier " + (modifierCount++);
-        return new SEUserModifier(show, name, name, null);
+    public String getTypeName() {
+        return typeName;
     }
     
-    /**
-     *  Returns an instance of <code>SEUserCommand</code>.
-     */
-    public Command readExtensionCommand(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
-        in.skipBytes(length);
-        return new SEUserCommand(null, null);
+    public String getArg() {
+        return arg;
     }
-
+    
+    public String toString() {
+        return typeName;
+    }
 }

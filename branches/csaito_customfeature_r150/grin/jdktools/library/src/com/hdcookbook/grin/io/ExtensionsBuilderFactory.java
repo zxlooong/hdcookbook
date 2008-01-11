@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,75 +52,32 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.binaryconverter;
+package com.hdcookbook.grin.io;
 
-import java.net.URL;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.io.binary.ExtensionsWriter;
+import com.hdcookbook.grin.io.text.ExtensionsParser;
 
 /**
- * This is a subclass of the GRIN director class which is
- * used by the BinaryConverter tool.
+ * ExtensionsBuilderFactory provides an instance of ExtensionsParser 
+ * ExtensionsWriter class for handling show extensions.  
+ * 
+ * Those who are defining extensions (custom features, modifiers, or commands)
+ * for show should provide a subclass of this.
  */
-class GenericDirector extends Director {
-   
-    private String showName;
-    
-    public GenericDirector(String showName) {
-	this.showName = showName;
-    }
-    
-    /**
-     * See superclass definition.  This extensions builder will just
-     * make a fake implementation of each extension.
-     **/
-    public ExtensionsBuilder getExtensionsBuilder() {
-        return null;
-    }
+
+public abstract class ExtensionsBuilderFactory {
 
     /**
-     * Create a show.  This is called by the main control class of
-     * this debug tool.
-     **/
-    public SEShow createShow(ShowBuilder builder) {
-	SEShow show = new SEShow(this);
-	URL source = null;
-	BufferedReader rdr = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-	    rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
-	    ShowParser p = new ShowParser(rdr, showName, show, builder);
-	    p.parse();
-	    rdr.close();
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
-            System.out.println("    URL:  " + source);
-	    System.exit(1);
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }
-	}
-        return show;
-    }
-
+     * Returns an user-defined ExtensionsParser instance that can parse
+     * show text file.
+     * @return an user-defined ExtensionsParser instance.
+     */
+    public abstract ExtensionsWriter getExtensionsWriter();
+    
+    /**
+     * Returns an user-defined ExtensionsWriter instance that can write out
+     * extensions to the show binary file.
+     * @return  An user-defined ExtensionsBuilder instance.
+     */
+    public abstract ExtensionsParser getExtensionsParser();
 }
