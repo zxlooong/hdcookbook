@@ -58,6 +58,8 @@ package com.hdcookbook.grin.test.bigjdk;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.Segment;
 
+import com.hdcookbook.grin.io.ExtensionsBuilderFactory;
+import com.hdcookbook.grin.io.binary.ExtensionsReader;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -292,6 +294,8 @@ public class GrinView extends GenericMain {
         System.out.println("                -background <image>");
         System.out.println("                -scale <number>");
         System.out.println("                -segment <segment name to activate>");
+        System.out.println("                -extensions_factory <a fully qualified classname>");       
+        System.out.println("                -extensions_reader <a fully qualified classname>");
         System.out.println("");
         System.out.println("            -assets and -asset_dir may be repeated to form a search path.lll");
 	System.out.println();
@@ -307,6 +311,8 @@ public class GrinView extends GenericMain {
 	String fps = null;
 	String segment = null;
 	String scaleDivisor = null;
+        String extensionsFactoryName = null;
+        String extensionsReaderName = null;
 	while (argsUsed < args.length - 1) {
 	    if ("-fps".equals(args[argsUsed])) {
 		argsUsed++;
@@ -355,8 +361,22 @@ public class GrinView extends GenericMain {
                     usage();
                 }
 		scaleDivisor = args[argsUsed];
-		argsUsed++;		
-	    } else {
+		argsUsed++;	
+	    } else if ("-extensions_factory".equals(args[argsUsed])) {
+                if (extensionsFactoryName != null) {
+                    usage();
+                }
+		argsUsed++;
+		extensionsFactoryName = args[argsUsed];
+		argsUsed++;                
+	    } else if ("-extensions_reader".equals(args[argsUsed])) {
+                if (extensionsReaderName != null) {
+                    usage();
+                }
+		argsUsed++;
+		extensionsReaderName = args[argsUsed];
+		argsUsed++; 
+            } else {
 		break;
 	    }
 	}
@@ -399,7 +419,37 @@ public class GrinView extends GenericMain {
 	if (scaleDivisor != null) {
 	    m.adjustScreenSize(scaleDivisor);
 	}
+        
+        ExtensionsBuilderFactory factory = null;
+        if (extensionsFactoryName != null) {
+            if (showFile.endsWith(".grin")) {
+                System.out.println("Warning: ExtensionsBuilderFactory " 
+                        + extensionsFactoryName + " will not be used for " +
+                        "displaying binary based GRIN show file.");
+            }
+            try {
+                factory = (ExtensionsBuilderFactory)
+                        Class.forName(extensionsFactoryName).newInstance();
+            } catch (Exception e) {
+                System.err.println("Error instanciating " + extensionsFactoryName);
+                e.printStackTrace();
+            }
+        }
+        
+        ExtensionsReader reader = null;
+        if (extensionsReaderName != null) {
+            try {
+                reader = (ExtensionsReader)
+                        Class.forName(extensionsReaderName).newInstance();
+            } catch (Exception e) {
+                System.err.println("Error instanciating " + extensionsReaderName);
+                e.printStackTrace();
+            }
+        }
+        
 	GuiShowBuilder builder = new GuiShowBuilder(m);
+        builder.setExtensionsBuilderFactory(factory);
+        builder.setExtensionsReader(reader);
         m.init(showFile, builder);
 
 	m.buildControlGUI(showFile);

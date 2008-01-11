@@ -9,6 +9,7 @@
         <property name="converter.classes" value="../../build/grin_viewer/converter.jar"/>
 	<property name="builddir" value="build"/>
         <property name="script.name" value="custom-feature-example"/>
+        <property name="extensions.builder.name" value = "ExtensionsBuilderFactoryImpl"/>
 	
 	<target name="all" depends="jar"/>
 	
@@ -21,13 +22,13 @@
 		       destdir="${builddir}" >
 		    <src path="../../library/src" />           
 		    <src path="." />
-                    <exclude name="SimpleExtensionsWriter.java"/>
+                    <exclude name="${extensions.builder.name}.java"/>
 		</javac>		
 	</target>
 	
 	<target name="jar" depends="compile, generate_binary_script" description="Creates a jar file">
 		<jar destfile="${builddir}/00000.jar">	     
-                   <fileset dir="${builddir}" excludes="*.jar, SimpleExtensionsWriter*"/>	
+                   <fileset dir="${builddir}" excludes="*.jar, ${extensions.builder.name}*"/>	
 		   <fileset dir="." includes="${script.name}.grin, bug.png"/>
 		</jar>
 	   
@@ -40,7 +41,7 @@
                    <pathelement path="${builddir}"/>
                    <pathelement path="${converter.classes}"/>
                 </classpath>    
-                <arg line="${script.name}.txt SimpleExtensionsWriter"/>
+                <arg line="${script.name}.txt ${extensions.builder.name}"/>
             </java>
             <move file="${script.name}.grin" todir="${builddir}"/>
         </target>
@@ -49,14 +50,19 @@
 		<javac srcdir="."
 		       classpath="${converter.classes}"
 		       destdir="${builddir}" >
-                    <include name="SimpleExtensionsWriter.java"/>
+                    <include name="${extensions.builder.name}.java"/>
 		</javac>            
         </target>    
 	
 	<target name="run_grinview" depends="grinview_check, compile_grinview, generate_binary_script">
-		<java fork="true" jar="${grin.classes}">
-			<arg line="-asset_dir ${builddir} ${script.name}.grin"/>
-		</java>
+            <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+                <classpath>
+                   <pathelement path="${builddir}"/>
+                   <pathelement path="${grin.classes}"/>
+                </classpath>               
+		<!-- arg line="-asset_dir ${builddir} -asset_dir . -extensions_factory ${extensions.builder.name} ${script.name}.txt"/ -->
+		<arg line="-asset_dir ${builddir} -extensions_reader ExtensionsReaderImpl ${script.name}.grin"/>                
+	    </java>
 	</target>
 	
 	<target name="debug_grinview" depends="grinview_check, compile_grinview">

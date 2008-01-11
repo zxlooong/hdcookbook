@@ -32,6 +32,8 @@ information or have any questions.
 <property name="HDC_BUILD_DIR" value="build"/>
 <property name="GRIN_VIEWER_DEST" value="${HDC_BUILD_DIR}/grin_viewer"/>
 
+<import file="build_xlets.xml"/>
+
 <target name="compile-grin-viewer">
 	<mkdir dir="${GRIN_VIEWER_DEST}/classes"/>
 	<javac sourcepath=""
@@ -100,15 +102,14 @@ information or have any questions.
 </target>
 
 <target name="run-grin-viewer" depends="compile-grin-viewer, run-binary-converter">
-	<copy todir="${GRIN_VIEWER_DEST}">
-		<fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/assets">	
-			<exclude name="**/.svn"/>
-		</fileset>   
-	</copy>    
-	
-        <java fork="true" jar="${GRIN_VIEWER_DEST}/grinviewer.jar">
-		<arg line="-asset_dir ${GRIN_VIEWER_DEST} menu.txt"/>
-	</java>
+    <echo message="${MENUTOOLS_DEST} ${MENUASSETS_DEST} ${GRIN_VIEWER_DEST}"/>
+        <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+                <classpath>
+                   <pathelement path="${MENUTOOLS_DEST}"/>
+                   <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+                </classpath>               
+		<arg line="-asset_dir ${MENUASSETS_DEST} -extensions_reader com.hdcookbook.bookmenu.menu.MenuExtensionsReader menu.grin"/>                
+	</java>	
 </target>
 
 <target name="debug-grin-viewer" depends="compile-grin-viewer, run-binary-converter">

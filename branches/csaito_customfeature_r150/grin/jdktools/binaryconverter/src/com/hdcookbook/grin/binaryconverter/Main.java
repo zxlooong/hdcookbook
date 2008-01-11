@@ -60,6 +60,7 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.io.binary.*;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.ExtensionsBuilderFactory;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.text.ShowParser;
@@ -165,35 +166,46 @@ public class Main {
             
             DataOutputStream dos = new DataOutputStream(new FileOutputStream(fileName));
             
-            ExtensionsWriter writer = extensionsFactory.getExtensionsWriter();
+            ExtensionsWriter writer = null;
+            if (extensionsFactory != null) {
+                writer = extensionsFactory.getExtensionsWriter();
+            }
             GrinBinaryWriter out = new GrinBinaryWriter(show, writer);
 	    out.writeShow(dos);
             dos.close();
             
 
-            /**
+            
             if (Debug.ASSERT) {
                // A simple assertion test - check that the reader can read back
                // the binary file that just got generated without any error.
                DataInputStream in = new DataInputStream(new FileInputStream(fileName));               
 	       Show recreatedShow = new Show(null);
                GrinBinaryReader reader = new GrinBinaryReader(in, new ExtensionsReader() {
-                    public Feature readExtensionFeature(GrinDataInputStream in, int length) throws IOException {
+                    public Feature readExtensionFeature(Show show, String name, 
+                            GrinDataInputStream in, int length) throws IOException {
                         in.skipBytes(length);
-                        return null;
+                        return new Modifier(show, name) {}; //punting
                     }
-                    public Modifier readExtensionModifier(GrinDataInputStream in, int length) throws IOException {
+                    public Modifier readExtensionModifier(Show show, String name, 
+                            GrinDataInputStream in, int length) throws IOException {
                         in.skipBytes(length);
-                        return null;
+                        return new Modifier(show, name) {};
                     }
-                    public Command readExtensionCommand(GrinDataInputStream in, int length) throws IOException {
+                    public Command readExtensionCommand(Show show, 
+                            GrinDataInputStream in, int length) throws IOException {
                         in.skipBytes(length);
-                        return null;
+                        return new Command() {
+                            @Override
+                            public void execute() {
+                                System.out.println("Executing user command");   
+                            }
+                            
+                        };
                     }                 
                });
                reader.readShow(recreatedShow);
-            }
-            **/           
+            }          
             
             return;
             

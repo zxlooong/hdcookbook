@@ -57,7 +57,6 @@ package com.hdcookbook.grin.io.binary;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 /**
@@ -68,6 +67,7 @@ import java.io.IOException;
  * 
  * @see GrinBinaryWriter#GrinBinaryWriter(com.hdcookbook.grin.SEShow, ExtensionsWriter)
  * @see ExtensionsReader
+ * @see com.hdcookbook.grin.io.text.ExtensionsParser
  */
 public interface ExtensionsWriter {
     

@@ -74,10 +74,8 @@ public class MenuExtensionsWriter implements ExtensionsWriter {
         SEUserModifier seModifier = (SEUserModifier) modifier;
         
         String typeName = seModifier.getTypeName();
-        String name = seModifier.getName(); 
         
         out.writeUTF(typeName);
-        out.writeUTF(name);
     }
 
     public void writeExtensionCommand(GrinDataOutputStream out, Command command) 
@@ -89,11 +87,7 @@ public class MenuExtensionsWriter implements ExtensionsWriter {
         String[] args = seCommand.getArgs();
         
         out.writeUTF(typeName);
-        if (args != null) {
-            for (int i = 0; i < args.length; i++) {
-                out.writeUTF(args[i]);
-            }
-        }
+        out.writeStringArray(args);
     }
 
 }

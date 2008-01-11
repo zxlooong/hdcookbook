@@ -60,6 +60,17 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
 import java.io.IOException;
 
+/**
+ * The ExtensionsParser defines methods that handle parsing of the
+ * custom (user-defined) GRIN features, modifiers and commands  
+ * from text-based GRIN script. These who are defining the custom GRIN subclasses 
+ * and reading them from a text GRIN file should implement these methods accordingly.
+ * 
+ * @see com.hdcookbook.grin.io.binary.ExtensionsWriter
+ * @see com.hdcookbook.grin.io.binary.ExtensionsReader
+ */
+
+
 public interface ExtensionsParser {
     
     /**
@@ -68,13 +79,17 @@ public interface ExtensionsParser {
      * <pre>
      *     "feature" "modifier" namespace:type_name name feature_name <arbitrary strings> ";"
      * </pre>
+     * 
+     * The implementation of this method is expected to return an instance of a feature 
+     * which loads on a standard JDK.  It can be different from the feature class
+     * that is going to be used with the xlet in the BD-J environment.     
      *
      * @param show      The show being parsed
      * @param typeName  The name of the feature's type.  This will always
      *                  contain a ":".
      * @param name      The name of this instance of feature
      *			a list of commands if needed.
-     * @param arg	The lexer to parse arguments for this feature.
+     * @param lexer	The lexer to parse arguments for this feature.
      *                  The implementation of this method should parse up to ";"
      *                  which indicates the end of the feature declaration.
      *
@@ -83,7 +98,7 @@ public interface ExtensionsParser {
      * @return	    A feature if one of the given type is known, null otherwise
      */
     public Feature getFeature(Show show, String typeName, 
-    			      String name, Lexer arg)
+    			      String name, Lexer lexer)
 		       throws IOException;    
 
     /**
@@ -96,13 +111,17 @@ public interface ExtensionsParser {
      *     "feature" "modifier" namespace:type_name name feature_name  <arbitrary strings> ";"
      * </pre>
      * where feature_name is given iff the feature is a Modifier.
+     * 
+     * The implementation of this method is expected to return an instance of a modifier 
+     * which loads on a standard JDK.  It can be different from the modifier class
+     * that is going to be used with the xlet in the BD-J environment.     
      *
      * @param show      The show being parsed
      * @param typeName  The name of the feature's type.  This will always
      *                  contain a ":".
      * @param name      The name of this instance of feature
      *			a list of commands if needed.
-     * @param arg	The lexer to parse arguments for this feature.
+     * @param lexer	The lexer to parse arguments for this feature.
      *                  The implementation of this method should parse up to ";"
      *                  which indicates the end of the feature declaration.
      *
@@ -111,17 +130,20 @@ public interface ExtensionsParser {
      * @return	    A feature if one of the given type is known, null otherwise
      */
     public Modifier getModifier(Show show, String typeName, 
-    			        String name, Lexer arg)
+    			        String name, Lexer lexer)
 		       throws IOException;
 
      /**
-     * Get a modifier command of the given type.  
-     * <p>
+     * Get a modifier command of the given type. 
+
+     * The implementation of this method is expected to return an instance of a command 
+     * which loads on a standard JDK.  It can be different from the command class
+     * that is going to be used with the xlet in the BD-J environment.  
      *
      * @param show      The show being parsed
      * @param typeName  The name of the commands's type.  This will always
      *                  contain a ":".
-     * @param arg	The lexer to parse arguments for this feature.
+     * @param lexer	The lexer to parse arguments for this feature.
      *                  The implementation of this method should parse up to ";"
      *                  which indicates the end of the feature declaration.
      *
@@ -129,6 +151,6 @@ public interface ExtensionsParser {
      *
      * @return	    A command if one of the given type is known, null otherwise
      */
-    public Command getCommand(Show show, String typeName, Lexer arg)
+    public Command getCommand(Show show, String typeName, Lexer lexer)
 		       throws IOException;
 }

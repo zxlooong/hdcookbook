@@ -710,7 +710,10 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
 
-        Feature feature = extensionsReader.readExtensionFeature(dis, length);
+        String name = dis.readUTF();
+        int argLength = dis.readInt();
+        
+        Feature feature = extensionsReader.readExtensionFeature(show, name, dis, argLength);
         
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
@@ -730,8 +733,12 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }  
 
-        Feature part = dis.readFeatureReference();  // Read in the first 4 bytes
-        Modifier modifier = extensionsReader.readExtensionModifier(dis, (length-4));
+        String name = dis.readUTF();
+        Feature part = dis.readFeatureReference();  
+      
+        int argLength = dis.readInt();
+        
+        Modifier modifier = extensionsReader.readExtensionModifier(show, name, dis, argLength);
         
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
@@ -881,7 +888,7 @@ public class GrinBinaryReader {
             ((DebugInputStream)stream).pushExpectedLength(length);
         }
         
-        Command command = extensionsReader.readExtensionCommand(dis, length);
+        Command command = extensionsReader.readExtensionCommand(show, dis, length);
         
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();

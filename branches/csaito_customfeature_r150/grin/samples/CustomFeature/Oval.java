@@ -26,7 +26,7 @@ public class Oval extends Feature {
         this.color = color;
     }
 
-        /**
+    /**
      * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
@@ -86,6 +86,12 @@ public class Oval extends Feature {
     public int getX() { return x; }
     
     public int getY() { return y; }
+    
+    public int getWidth() { return w; }
+    
+    public int getHeight() { return h; }
+    
+    public Color getColor() { return color; }
     
     public void initialize() {}
     

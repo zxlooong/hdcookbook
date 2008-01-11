@@ -119,7 +119,7 @@ public class GenericDirector extends Director {
 	        rdr.close();
             } else {
                 bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(bis, null);
+ 	        GrinBinaryReader reader = new GrinBinaryReader(bis, builder.getExtensionsReader());
                 reader.readShow(show);
                 bis.close();
             }   

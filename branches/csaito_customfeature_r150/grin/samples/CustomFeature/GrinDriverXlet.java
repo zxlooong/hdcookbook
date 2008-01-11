@@ -52,33 +52,19 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Modifier;
-import java.awt.Graphics2D;
+import java.awt.Container;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import javax.tv.xlet.Xlet;
 import javax.tv.xlet.XletContext;
 import javax.tv.graphics.TVContainer;
 
-import java.awt.Container;
-
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.animator.AnimationClient; 
-import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
-import com.hdcookbook.grin.io.binary.ExtensionsReader;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
-import java.awt.Color;
-import java.io.DataInputStream;
 	
 /** 
  * An xlet example that displays GRIN script.
@@ -129,7 +115,7 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
                 AssetFinder.setSearchPath(new String[]{""}, null);      
 	        GrinBinaryReader reader = new GrinBinaryReader(
                         AssetFinder.getURL(grinScriptName).openStream(), 
-                        new SimpleExtensionsReader());
+                        new ExtensionsReaderImpl());
                 
 	        reader.readShow(show);
                
@@ -149,21 +135,4 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
 	    show.activateSegment(show.getSegment("S:Initialize"));		
         }
         
-        class SimpleExtensionsReader implements ExtensionsReader {
-
-            public Feature readExtensionFeature(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
-                String name = in.readUTF();
-                return new Oval(show, name, 10, 10, 100, 100, Color.LIGHT_GRAY);
-            }
-
-            public Modifier readExtensionModifier(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
-                in.skipBytes(length);
-                return null; 
-            }
-
-            public Command readExtensionCommand(GrinBinaryReader reader, DataInputStream in, int length) throws IOException {
-                in.skipBytes(length);
-                return null;
-            } 
-        }
 }

@@ -65,7 +65,6 @@ import java.util.ArrayList;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
@@ -689,8 +688,18 @@ public class GrinBinaryWriter {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-
-	extensionsWriter.writeExtensionFeature(dos, feature);
+        
+        dos.writeUTF(feature.getName());
+        
+        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+        GrinDataOutputStream dos2 = new GrinDataOutputStream(baos2, this);
+        
+	extensionsWriter.writeExtensionFeature(dos2, feature);
+        
+        dos.writeInt(baos2.size());
+        baos2.writeTo(baos);
+        
+        dos2.close();
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -710,8 +719,16 @@ public class GrinBinaryWriter {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
 	
+        dos.writeUTF(modifier.getName());
         dos.writeFeatureReference(modifier.getPart());
-	extensionsWriter.writeExtensionModifier(dos, modifier);
+        
+        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+        GrinDataOutputStream dos2 = new GrinDataOutputStream(baos2, this);
+        
+	extensionsWriter.writeExtensionModifier(dos2, modifier);
+        
+        dos.writeInt(baos2.size());
+        baos2.writeTo(baos);
         
         out.writeInt(baos.size());
         baos.writeTo(out);

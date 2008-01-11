@@ -63,6 +63,7 @@ import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.io.binary.ExtensionsReader;
 import com.hdcookbook.grin.io.binary.ExtensionsWriter;
 import com.hdcookbook.grin.io.builders.DeferredBuilder;
 import com.hdcookbook.grin.io.text.ExtensionsParser;
@@ -111,6 +112,7 @@ public class ShowBuilder {
     	= new ArrayList<DeferredBuilder>();
 
     private ExtensionsBuilderFactory factory;
+    private ExtensionsReader extensionsReader;
     
     public ShowBuilder() {
     }
@@ -121,6 +123,10 @@ public class ShowBuilder {
 
     public void setExtensionsBuilderFactory(ExtensionsBuilderFactory factory) {
         this.factory = factory;
+    }
+    
+    public void setExtensionsReader(ExtensionsReader reader) {
+        this.extensionsReader = reader;
     }
     
     /**
@@ -144,7 +150,14 @@ public class ShowBuilder {
         }
         return factory.getExtensionsWriter();
     }
-    
+
+    /**
+     * Returns an instance of ExtensionsReader that this Builder is working with,
+     * or null if it is not set.
+     */
+    public ExtensionsReader getExtensionsReader() {
+        return extensionsReader;
+    }
     /** 
      * Called when a new feature is encountered.
      **/

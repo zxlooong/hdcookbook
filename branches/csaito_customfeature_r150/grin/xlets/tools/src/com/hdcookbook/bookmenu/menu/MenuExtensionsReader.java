@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,58 +52,36 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test.bigjdk;
+package com.hdcookbook.bookmenu.menu;
 
-
-import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.io.ShowBuilder;
-
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.io.binary.ExtensionsReader;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.IOException;
 
 /**
- * This is a ShowBuilder that tracks line number
- * for GrinView
- *
- * @see GrinView
- *
- * @author Bill Foote (http://jovial.com)
+ * MenuExtensionsReader reads in a binary file and creates a fake version
+ * of the Modifier and Command subclasses.  This class is used by the 
+ * GrinView application to display the show.
  */
-public class GuiShowBuilder extends ShowBuilder {
-   
-    private GrinView gui;
+public class MenuExtensionsReader implements ExtensionsReader {
 
-    public GuiShowBuilder(GrinView gui) {
-	this.gui = gui;
+    public Feature readExtensionFeature(Show show, String name, GrinDataInputStream in, int length) throws IOException {
+        return null;  // Custom feature is not used in menu xlet.
     }
 
-    public void addFeature(String name, int line, Feature f) throws IOException
-    {
-	super.addFeature(name, line, f);
-	gui.addLineNumber(f, line);
+    public Modifier readExtensionModifier(Show show, String name, GrinDataInputStream in, int length) throws IOException {
+        String typeName = in.readUTF();
+        return new SEUserModifier(show, typeName, name, null);
     }
 
-    public void addSegment(String name, int line, Segment s) throws IOException
-    {
-	super.addSegment(name, line, s);
-	gui.addLineNumber(s, line);
+    public Command readExtensionCommand(Show show, GrinDataInputStream in, int length) throws IOException {
+        String typeName = in.readUTF();
+        String[] args = in.readStringArray();
+        return new SEUserCommand(typeName, args);
     }
 
-    public void addCommand(Command command, int line) {
-	super.addCommand(command, line);
-	gui.addLineNumber(command, line);
-    }
-
-    public void addRCHandler(String name, int line, RCHandler hand)
-    			throws IOException
-    {
-	super.addRCHandler(name, line, hand);
-	gui.addLineNumber(hand, line);
-    }
-
-    public void finishBuilding() throws IOException {
-	super.finishBuilding();
-    }
 }
