@@ -72,7 +72,7 @@ import com.hdcookbook.grin.util.AssetFinder;
  * This is a subclass of the GRIN director class which is
  * used by the BinaryConverter tool.
  */
-class GenericDirector extends Director {
+public class GenericDirector extends Director {
    
     private String showName;
     private ExtensionsBuilder builder;
