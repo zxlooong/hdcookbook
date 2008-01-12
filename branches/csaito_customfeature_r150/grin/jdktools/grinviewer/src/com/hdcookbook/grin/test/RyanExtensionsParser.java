@@ -53,29 +53,99 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io;
+package com.hdcookbook.grin.test;
 
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.Show;
-
+import com.hdcookbook.grin.io.ExtensionsBuilderFactory;
+import com.hdcookbook.grin.io.binary.ExtensionsWriter;
+import com.hdcookbook.grin.io.text.Lexer;
+import com.hdcookbook.grin.io.text.ExtensionsParser;
 import java.io.IOException;
 
 /**
- * This class is used by an xlet to add new commands and features
- * to the syntax of its GRIN show file(s).
- * A Director can expand the set of features and commands
- * recognized in a show file.  It does this by providing an
- * implementation of ExtensionsBuilder to handle any extensions.
- * 
- * @author @author Bill Foote (http://jovial.com)
+ * This is part of the "Ryan's life" test show.  It's mostly of
+ * historical interest; it still works, but some of the ways of
+ * structuring and using a show are passe.
+ *
+ * @author Bill Foote (http://jovial.com)
  */
-public interface ExtensionsBuilder {
+public class RyanExtensionsParser 
+        extends ExtensionsBuilderFactory 
+        implements ExtensionsParser {
+   
+    RyanDirector director;
 
-    /**
-     * Give a hint how an optimal mosaic could be built.
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-    			       String[] images);
+    public RyanExtensionsParser(RyanDirector director) {
+	this.director = director;
+    }
+
+
+    public Feature getFeature(Show show, String typeName, 
+            String name, Lexer lexer) 
+            throws IOException 
+    {
+        return null;
+    }
+
+    public Modifier getModifier(Show show, String typeName, 
+    			        String name, Lexer lexer)
+                                throws IOException
+    {
+        return null;
+    }
+
+    //public Command parseCommand(Show show, String typeName, Lexer lex,
+    //			        ShowParser parser) 
+    
+    public Command getCommand(Show show, String typeName, 
+            Lexer lexer)
+			throws IOException
+    {
+	Command result = null;
+	if ("ryan:start_video".equals(typeName)) {
+	    result = new Command() {
+	       public void execute() { 
+		    director.startVideo();
+	       }
+	    };
+	} else if ("ryan:play_mode_interactive".equals(typeName)) {
+	    final boolean val = lexer.getBoolean();
+	    result = new Command() {
+	       public void execute() { 
+		    director.setInteractiveMode(val);
+	       }
+	    };
+	} else if ("ryan:toggle_commentary".equals(typeName)) {
+	    result = new Command() {
+	       public void execute() { 
+		    director.toggleCommentary();
+	       }
+	    };
+	} else if ("ryan:commentary_start".equals(typeName)) {
+	    result = new Command() {
+	       public void execute() { 
+		    director.startCommentary();
+	       }
+	    };
+	} else {
+	    throw new IOException("Unrecognized command type \"" + typeName + "\"");
+	}
+        
+        lexer.parseExpected(";");
+        
+	return result;
+    }
+
+    @Override
+    public ExtensionsWriter getExtensionsWriter() {
+        return null; // Not writing Ryan in binary file format right now
+    }
+
+    @Override
+    public ExtensionsParser getExtensionsParser() {
+        return this;
+    }
 }

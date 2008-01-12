@@ -84,7 +84,6 @@ import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.VisualRCHandler;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.builders.MenuAssemblyHelper;
 import com.hdcookbook.grin.io.builders.TranslatorHelper;
@@ -118,7 +117,6 @@ public class ShowParser {
     private SEShow show;
     private Lexer lexer;
     private ExtensionsParser extParser;
-    private ExtensionsBuilder extBuilder;
     private Vector[] deferred = { new Vector(), new Vector(), new Vector() };  
     	// Array of Vector<ForwardReference>
     private Map<String, VisualRCHandlerHelper> visualRCHelpers
@@ -166,11 +164,6 @@ public class ShowParser {
         this.show = show;
 	Director d = show.getDirector();
 	this.lexer = new Lexer(reader, showName);
-	if (d == null) {
-	    this.extBuilder = null;
-	} else {
-	    this.extBuilder = d.getExtensionsBuilder();
-        }    
         
 	if (builder == null) {
 	    builder = new ShowBuilder();
@@ -252,9 +245,7 @@ public class ShowParser {
 		int height = lexer.getInt();
 		String[] files = parseStrings();
 		parseExpected(";");
-		if (extBuilder != null) {
-		    extBuilder.takeMosaicHint(name, width, height, files);
-		}
+		show.takeMosaicHint(name, width, height, files);
 	    } else {
 		lexer.reportError("Unrecognized token \"" + tok + "\"");
 	    }

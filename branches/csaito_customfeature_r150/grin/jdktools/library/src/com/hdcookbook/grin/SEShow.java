@@ -96,6 +96,9 @@ public class SEShow extends Show {
     private Map<String, Segment> privateSegments = null;
     private Object internalMonitor = new Object();
 
+    // For mosaic building.
+    private ArrayList mosaicHints;
+    
     /**
      * Create a new SEShow.
      *
@@ -200,6 +203,31 @@ public class SEShow extends Show {
 	checker.reportAnyProblems();
     }
 
+    /**
+     * Called by the ShowParser when the mosaic_hint element is encountered.
+     */
+    public void takeMosaicHint(String name, int width, 
+			 int height, String[] images) 
+    {    
+        if (mosaicHints == null) {
+            mosaicHints = new ArrayList();       
+        }  
+        
+        mosaicHints.add(new MosaicHint(name, width, height, images));        
+    }
+
+    /**
+     * Returns an array of MosaicHints associated with this show, or
+     * an zero-length array if none is found.
+     */
+    public MosaicHint[] getMosaicHints() {
+        if (mosaicHints == null) {
+            return new MosaicHint[0];
+        }    
+        return (MosaicHint[])
+                mosaicHints.toArray(new MosaicHint[mosaicHints.size()]);
+    }
+    
 
     /**
      * Visit a SEShow with a SEShowVisitor.  This will call

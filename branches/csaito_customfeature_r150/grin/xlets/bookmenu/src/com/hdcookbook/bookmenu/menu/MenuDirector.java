@@ -60,15 +60,9 @@ import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import java.io.BufferedInputStream;
 import java.net.URL;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.input.RCKeyEvent;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.io.binary.ExtensionsReader;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
@@ -96,13 +90,6 @@ public class MenuDirector extends Director {
      * Initialize this MenuDirector.  Called on xlet startup.
      **/
     public void init() {
-    }
-
-    /**
-     * Called by GRIN when it parses a show.  
-     **/
-    public ExtensionsBuilder getExtensionsBuilder() {
-        return null;
     }
 
     /**

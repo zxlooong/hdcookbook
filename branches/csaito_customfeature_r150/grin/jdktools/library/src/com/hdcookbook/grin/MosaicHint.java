@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,90 +52,41 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test;
-
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.io.text.Lexer;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.input.RCHandler;
-
-import java.io.IOException;
+package com.hdcookbook.grin;
 
 /**
- * This is part of the "Ryan's life" test show.  It's mostly of
- * historical interest; it still works, but some of the ways of
- * structuring and using a show are passe.
- *
- * @author Bill Foote (http://jovial.com)
+ * MosaicHint provides hints to the Mosaic builder about how to group images when 
+ * building a imaga mosaic.  This class is used only during the SEShow build time.
  */
-public class RyanExtensionsBuilder implements ExtensionsBuilder {
-   
-    RyanDirector director;
 
-    public RyanExtensionsBuilder(RyanDirector director) {
-	this.director = director;
-    }
-
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-    {
-        return null;
-    }
-
-    public Modifier getModifier(Show show, String typeName, 
-    			        String name, String arg)
-    {
-        return null;
-    }
-
-    //public Command parseCommand(Show show, String typeName, Lexer lex,
-    //			        ShowParser parser) 
+public class MosaicHint {    
     
-    public Command getCommand(Show show, String typeName, String[] args)
-			throws IOException
-    {
-	Command result = null;
-	if ("ryan:start_video".equals(typeName)) {
-	    result = new Command() {
-	       public void execute() { 
-		    director.startVideo();
-	       }
-	    };
-	} else if ("ryan:play_mode_interactive".equals(typeName)) {
-	    final boolean val = Boolean.parseBoolean(args[0]);
-	    result = new Command() {
-	       public void execute() { 
-		    director.setInteractiveMode(val);
-	       }
-	    };
-	} else if ("ryan:toggle_commentary".equals(typeName)) {
-	    result = new Command() {
-	       public void execute() { 
-		    director.toggleCommentary();
-	       }
-	    };
-	} else if ("ryan:commentary_start".equals(typeName)) {
-	    result = new Command() {
-	       public void execute() { 
-		    director.startCommentary();
-	       }
-	    };
-	} else {
-	    throw new IOException("Unrecognized command type \"" + typeName + "\"");
-	}
-	return result;
+    private String name;
+    private int width;
+    private int height;
+    private String[] images;
+    
+    public MosaicHint(String name, int width, 
+		      int height, String[] images) {
+        this.name = name;
+        this.width = width;
+        this.height = height;
+        this.images = images;
     }
-
-    public void finishBuilding(Show show) throws IOException {
+    
+    public String getName() {
+        return name;
     }
-
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
+    
+    public int getWidth() {
+        return width;
     }
-
+    
+    public int getHeight() {
+        return height;        
+    }
+    
+    public String[] getImages() {
+        return images;
+    }
 }

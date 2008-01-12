@@ -55,11 +55,6 @@
 
 package com.hdcookbook.grin;
 
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-
-import java.util.Hashtable;
-import java.awt.event.KeyEvent;
-
 
 /**
  * This class is a generic facade for the control entity that
@@ -98,16 +93,5 @@ public abstract class Director {
     public Show getShow() {
 	return show;
     }
-   
-
-    /**
-     * Give the ExtensionsBuilder that will build any new
-     * features or commands we've extended the framework with.
-     * If no extensions are returned, it's OK to return null.
-     * 
-     * 
-     * @return The extensions builder
-     */
-    abstract public ExtensionsBuilder getExtensionsBuilder();
 
 }

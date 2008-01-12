@@ -52,13 +52,8 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import javax.tv.xlet.Xlet;
 import javax.tv.xlet.XletContext;
 import javax.tv.graphics.TVContainer;
@@ -66,13 +61,10 @@ import javax.tv.graphics.TVContainer;
 import java.awt.Container;
 
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.animator.AnimationClient; 
-import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
 	
 /** 
@@ -116,14 +108,12 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
 	}
 	
 	public void animationInitialize() throws InterruptedException {
-
-	   SimpleDirector director = new SimpleDirector();
            
            try {
                
                AssetFinder.setSearchPath(new String[]{""}, null);      
 	       GrinBinaryReader reader = new GrinBinaryReader(AssetFinder.getURL(grinScriptName).openStream(), null);
-               show = new Show(director);
+               show = new Show(null);
 	       reader.readShow(show);
                
            } catch (IOException e) {
@@ -142,10 +132,4 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
 	   show.activateSegment(show.getSegment("S:Initialize"));		
 	}
 	
-	class SimpleDirector extends Director {
-		
-	   public ExtensionsBuilder getExtensionsBuilder() {
-		     return null;
-	   }
-        }
 }
