@@ -58,7 +58,6 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
-import java.io.DataInputStream;
 import java.io.IOException;
 
 /**
@@ -74,10 +73,14 @@ public interface ExtensionsReader {
     /**
      * Reads in a feature subclass from a given DataInputStream.
      * 
+     * @param show      The show that this feature belongs to.
+     * @param name      The name of this feature.
      * @param in        The InputStream to read in the data from.
-     * @param length    The number of bytes used in the InputStream to describe this Feature.
-     * 
-     * @return Feature A user-defined Feature subclass reconstructed from the data.
+     * @param length    The number of bytes occupied in the InputStream to describe
+     *                  the feature.
+     *
+     * @return Feature  A user-defined Feature subclass reconstructed from the data,
+     *                  or null if none is found.
      * 
      * @throws java.io.IOException if IO error occurs.
      */
@@ -91,10 +94,13 @@ public interface ExtensionsReader {
      * modifier.setup(Feature) will ve invoked after this method returns, hence the implementation
      * of this method does not have to deal with it.
      * 
+     * @param show      The show that this modifier belongs to.
+     * @param name      The name of this modifier.
      * @param in        The InputStream to read in the data from.
-     * @param length    The number of bytes used in the InputStream to describe this Feature.
+     * @param length    The number of bytes used in the InputStream to describe the modifier.
      * 
-     * @return Modifier A user-defined Modifier subclass reconstructed from the data.
+     * @return Modifier A user-defined Modifier subclass reconstructed from the data,
+     *          or null if none is found.
      * 
      * @throws java.io.IOException if IO error occurs.
      */
@@ -105,10 +111,12 @@ public interface ExtensionsReader {
     /**
      * Reads in a command subclass from a given DataInputStream.
      * 
+     * @param show      The show that this command belongs to.
      * @param in        The InputStream to read in the data from.
-     * @param length    The number of bytes used in the InputStream to describe this Feature.
+     * @param length    The number of bytes used in the InputStream to describe this command.
      * 
      * @return Command  A user-defined Command subclass reconstructed from the data.
+     *                  or null if none is found.
      * 
      * @throws java.io.IOException if IO error occurs.
      */    

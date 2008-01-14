@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="Grin samples build" default="all">
-	
-	<!-- Property Definitions -->
-  
-	<property file="../${os.name}.user.vars.properties"/>
-	<property file="../user.vars.properties"/>	
-	<property file="../vars.properties"/>	
 
-	<property name="bdj.classes"  value="${HDC_BDJ_PLATFORM_CLASSES}"/>
+	<property name="bdj.classes"  value="../../../../../bd-j/references/bdj_stubs/classes/interactive/classes.zip"/>
 	<property name="grin.classes"  value="../../../build/grin_viewer/grinviewer.jar"/>
         <property name="bdjoconverter.jar" value="../../../tools/bdjo/dist/bdjo.jar" />
 

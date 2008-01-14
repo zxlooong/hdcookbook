@@ -231,6 +231,40 @@ public class GrinBinaryWriter {
            return index;
         }   
     }
+    
+    /**
+     * Returns an index number of the segment that this GrinBinaryWriter class 
+     * is internally using in the Show.  
+     * 
+     * @see GrinBinaryReader#getSegmentFromIndex(int)
+     * @param segment the segment to get the index number of.
+     * @return the index number for the segment, or -1 if no such segment exists.
+     */
+    int getSegmentIndex(Segment segment) {
+        if (segment == null) {
+           return -1;
+        } else {
+           int index = segmentsList.indexOf(segment);
+           return index;
+        }   
+    }
+    
+    /**
+     * Returns an index number of the RCHandler that this GrinBinaryWriter class 
+     * is internally using in the Show.  
+     * 
+     * @see GrinBinaryReader#getRCHandlerFromIndex(int)
+     * @param rcHandler the RCHandler to get the index number of.
+     * @return the index number for the RCHandler, or -1 if no such RCHandler exists.
+     */
+    int getRCHandlerIndex(RCHandler rcHandler) {
+        if (rcHandler == null) {
+           return -1;
+        } else {
+           int index = rcHandlersList.indexOf(rcHandler);
+           return index;
+        }   
+    }    
 
     /**
      * Writes out the script identifier and the script version to the DataOutputStream.

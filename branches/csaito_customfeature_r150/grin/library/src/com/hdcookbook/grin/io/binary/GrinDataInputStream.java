@@ -55,6 +55,8 @@
 package com.hdcookbook.grin.io.binary;
 
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.input.RCHandler;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -210,13 +212,42 @@ public class GrinDataInputStream extends DataInputStream {
    /**
     * Reads in a reference of a feature and returns an instance of the 
     * feature.
-    * @return a feature that is referenced from, or null if no such
-    * feature exists in the GrinBinaryReader that this input stream
-    * is working with.
+    * 
+    * @return   A feature that is referenced from, or null if no such
+    *           feature exists in the GrinBinaryReader that this input stream
+    *           is working with.
     */
    public Feature readFeatureReference() throws IOException {
        int index = readInt();
        
        return binaryReader.getFeatureFromIndex(index);
    }
+   
+   /**
+    * Reads in a reference of a segment and returns an instance of the 
+    * segment.
+    * 
+    * @return   a Segument that is referenced from, or null if no such
+    *           segment exists in the GrinBinaryReader that this input stream
+    *           is working with.
+    */
+   public Segment readSegmentReference() throws IOException {
+       int index = readInt();
+       
+       return binaryReader.getSegmentFromIndex(index);
+   } 
+   
+   /**
+    * Reads in a reference of an RCHandler and returns an instance of the 
+    * segment.
+    * 
+    * @return   a RCHandler that is referenced from, or null if no such
+    *           RCHandler exists in the GrinBinaryReader that this input stream
+    *           is working with.
+    */
+   public RCHandler readRCHandlerReference() throws IOException {
+       int index = readInt();
+       
+       return binaryReader.getRCHandlerFromIndex(index);
+   }    
 }

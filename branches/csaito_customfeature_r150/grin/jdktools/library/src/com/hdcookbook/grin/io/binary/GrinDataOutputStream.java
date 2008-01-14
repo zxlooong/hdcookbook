@@ -55,6 +55,8 @@
 package com.hdcookbook.grin.io.binary;
 
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.input.RCHandler;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -217,10 +219,10 @@ public class GrinDataOutputStream extends DataOutputStream {
 
    /**
     * Writes out a reference of a Feature.  This method should be used
-    * for writing out a feature reference that a given feature instance 
-    * is refering to. 
+    * when the user is writing out an extension feature or command, and 
+    * need to record about a feature that is referred by that extension.
     * 
-    * @param feature The Feature to write out the reference to.
+    * @param feature The feature to write out.
     * @throws java.io.IOException if IO error occurs, or 
     *           if no such feature exists in the show that
     *           this GrinDataInputStream is working with.         
@@ -234,4 +236,44 @@ public class GrinDataOutputStream extends DataOutputStream {
        
        writeInt(index);
    }
+   
+   /**
+    * Writes out a reference of a segment.  This method should be used
+    * when the user is writing out an extension feature or command, and 
+    * need to record about a segment that is referred by that extension.
+    * 
+    * @param segment    The segment to write out.
+    * @throws java.io.IOException if IO error occurs, or 
+    *           if no such feature exists in the show that
+    *           this GrinDataInputStream is working with.         
+    */
+   public void writeSegmentReference(Segment segment) throws IOException {
+       
+       int index = binaryWriter.getSegmentIndex(segment);      
+       if (index < 0) {
+	    throw new IOException("Invalid segment index");
+       }
+       
+       writeInt(index);
+   }   
+   
+   /**
+    * Writes out a reference of an RCHandler.  This method should be used
+    * when the user is writing out an extension feature or command, and 
+    * need to record about an RCHandler that is referred by that extension.
+    * 
+    * @param  handler    The RCHandler to write out.
+    * @throws java.io.IOException if IO error occurs, or 
+    *           if no such RCHandler exists in the show that
+    *           this GrinDataInputStream is working with.         
+    */
+   public void writeRCHandlerReference(RCHandler handler) throws IOException {
+       
+       int index = binaryWriter.getRCHandlerIndex(handler);      
+       if (index < 0) {
+	    throw new IOException("Invalid RCHandler index");
+       }
+       
+       writeInt(index);
+   }      
 }
