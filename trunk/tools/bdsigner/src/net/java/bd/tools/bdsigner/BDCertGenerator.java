@@ -5,29 +5,10 @@ import sun.security.tools.KeyTool;
 import sun.security.tools.JarSigner;
 
 /**
- * A class that wraps around jarsigner and keytool to perform bd-j required
- * certificate generation.
  * 
- * The steps involved in generating a new certificate are:
- * 1) Generate an application certificate.
- * 2) Generate a root certificate.
- * 3) Generate a certificate signing request (CSR) based on (1).
- * 4) Issue a certificate based on the CSR from (3), using the alias
- *    for root certificate from (2).
- * 5) Import the certificate back into the store issued at (4) as
- *    the root cert signed application certificate generated at (1).
- * 
- * BDCertGenerator syntax is :
- * 		BDCertGenerator [-debug] 8-digit-hex-organization-ID
- * 
- * Example: java -cp $BDSIGNER_HOME/build/bdsigner.jar:$JDK_HOME/lib/tools.jar:$BDSIGNER_HOME/resource/bcprov-jdk15-137.jar net.java.bd.tools.bdsigner.BDCertGenerator 56789abc
- * 
- * Make sure to put bdsigner.jar before tools.jar in the jdk distribution
- * for the jre classpath so that the modified version of the sun.security.*
- * classes in BDCertGenerator this respository are used at the runtime.
- * bdprov-jdk15-137.jar is a bouncycastle distribution; a copy can be bound
- * at "resources" dir.
- * 
+ * WARNING: Do not use this class!!  This is not complete.
+ *          USE BDSigner tool instead for signing BD-J jars.
+ *
  */
 public class BDCertGenerator {
  
