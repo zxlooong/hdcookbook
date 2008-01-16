@@ -108,7 +108,7 @@ information or have any questions.
                    <pathelement path="${MENUTOOLS_DEST}"/>
                    <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
                 </classpath>               
-		<arg line="-asset_dir ${MENUASSETS_DEST} -extensions_reader com.hdcookbook.bookmenu.menu.MenuExtensionsReader menu.grin"/>                
+		<arg line="-asset_dir ${MENUASSETS_DEST} menu.grin"/>                
 	</java>	
 </target>
 

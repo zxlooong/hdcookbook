@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,154 +52,66 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-
-
-package com.hdcookbook.grin.features;
+package com.hdcookbook.grin.test.bigjdk;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
-
-import java.io.IOException;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.io.binary.ExtensionsReader;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.io.IOException;
 
 /**
- * Abstract base class for features that modify a single child feature.
- *
- *   @author     Bill Foote (http://jovial.com)
- **/
-public abstract class Modifier extends Feature {
+ * MenuExtensionsReader reads in a binary file and creates a fake version
+ * of the Modifier and Command subclasses.  This class is used by the 
+ * GrinView application to display the show.
+ */
+public class GenericExtensionsReader implements ExtensionsReader {
 
-    protected Feature part;
-    protected boolean activated = false;
-
-    public Modifier(Show show, String name) {
-	super(show, name);
+    public Feature readExtensionFeature(Show show, String name, GrinDataInputStream in, int length) throws IOException {
+        in.skipBytes(length);
+        return new Feature(show, name) {
+            public int getX() {
+                return Integer.MAX_VALUE;
+            }
+            public int getY() {
+                return Integer.MAX_VALUE;
+            }
+            public void initialize() {
+            }
+            public void destroy() {
+            }
+            protected void setSetupMode(boolean mode) {
+            }
+            protected void setActivateMode(boolean mode) {
+            }
+            public void doSomeSetup() {
+            }
+            public boolean needsMoreSetup() {
+                return false;
+            }
+            public void addDisplayAreas(RenderContext context) {
+            }
+            public void paintFrame(Graphics2D gr) {
+            }
+            public void nextFrame() {
+            }
+        };
     }
 
-    /**
-     * Called from the parser.
-     **/
-    public void setup(Feature part) { 
-	this.part = part;
+    public Modifier readExtensionModifier(Show show, String name, GrinDataInputStream in, int length) throws IOException {
+        in.skipBytes(length);
+        return new Modifier(show, name) {};
     }
 
-    /**
-     * Get our child feature
-     **/
-    public Feature getPart() {
-	return part;
+    public Command readExtensionCommand(Show show, GrinDataInputStream in, int length) throws IOException {
+        in.skipBytes(length);
+        return new Command(){
+            public void execute(){}
+        };
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public int getX() {
-	return part.getX();
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public int getY() {
-	return part.getY();
-    }
-
-
-    /**
-     * Initialize this feature.  This is called on show initialization.
-     * A show will initialize all of its features after it initializes
-     * the phases.
-     **/
-    public void initialize() {
-	// The show will initialize our sub-feature, so we don't
-	// need to do anything here.
-    }
-
-    /**
-     * Free any resources held by this feature.  It is the opposite of
-     * setup; each call to setup() shall be balanced by
-     * a call to unsetup(), and they shall *not* be nested.  
-     * <p>
-     * It's possible an active phase may be destroyed.  For example,
-     * the last phase a show is in when the show is destroyed will
-     * probably be active (and it will probably be an empty phase
-     * too!).
-     **/
-    public void destroy() {
-	// The show will destroy our sub-feature, so we don't
-	// need to do anything here.
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    protected void setActivateMode(boolean mode) {
-	// This is synchronized to only occur within model updates.
-	activated = mode;
-	if (mode) {
-	    part.activate();
-	} else {
-	    part.deactivate();
-	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    protected void setSetupMode(boolean mode) {
-	if (mode) {
-	    part.setup();
-	} else {
-	    part.unsetup();
-	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void doSomeSetup() {
-	if (part.needsMoreSetup()) {
-	    part.doSomeSetup();
-	    return;
-	}
-	// None needed
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public boolean needsMoreSetup() {
-	if (part.needsMoreSetup()) {
-	    return true;
-	}
-	return false;
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void paintFrame(Graphics2D g) {
-	part.paintFrame(g);
-    }
-
-    /**
-     * @inheritDoc
-     * <p>
-     * Subclasses will probably want to override this to account
-     * for changes in the drawing environment they make.  The version
-     * in this class simply calls this method on the modified part.
-     **/
-    public void addDisplayAreas(RenderContext context) {
-	part.addDisplayAreas(context);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void nextFrame() {
-	part.nextFrame();
-    }
 }

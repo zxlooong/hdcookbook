@@ -447,6 +447,10 @@ public class GrinView extends GenericMain {
             }
         }
         
+        if (reader == null) {
+            reader = new GenericExtensionsReader();
+        }
+        
 	GuiShowBuilder builder = new GuiShowBuilder(m);
         builder.setExtensionsBuilderFactory(factory);
         builder.setExtensionsReader(reader);
