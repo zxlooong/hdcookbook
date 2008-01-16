@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,52 +52,57 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io;
+package com.hdcookbook.grin.io.text;
 
 import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.Show;
-
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
 import java.io.IOException;
 
 /**
- * This class is used by an xlet to add new commands and features
- * to the syntax of its GRIN show file(s).
- * A Director can expand the set of features and commands
- * recognized in a show file.  It does this by providing an
- * implementation of ExtensionsBuilder to handle any extensions.
+ * The ExtensionsParser defines methods that handle parsing of the
+ * custom (user-defined) GRIN features, modifiers and commands  
+ * from text-based GRIN script. These who are defining the custom GRIN subclasses 
+ * and reading them from a text GRIN file should implement these methods accordingly.
  * 
- * 
- * @author @author Bill Foote (http://jovial.com)
+ * @see com.hdcookbook.grin.io.binary.ExtensionsWriter
+ * @see com.hdcookbook.grin.io.binary.ExtensionsReader
  */
-public interface ExtensionsBuilder {
 
+
+public interface ExtensionsParser {
+    
     /**
-     * Get a feature of the given type.  The type name will have a
-     * colon in it.
-     * <p>
+     * Get a feature of the given type.  
      * The syntax of an extension feature is fixed at
      * <pre>
-     *     "feature" "extension" namespace:type_name name string ";"
+     *     "feature" "modifier" namespace:type_name name feature_name arguments ";"
      * </pre>
-     * where feature_name is given iff the feature is a Modifier.
+     * 
+     * This method gets a Lexer instance that is pointed to the beginning of 
+     * the arguments.
+     *
+     * The implementation of this method is expected to return an instance of a feature 
+     * which loads on a standard JDK.  It can be different from the feature class
+     * that is going to be used with the xlet in the BD-J environment.     
      *
      * @param show      The show being parsed
      * @param typeName  The name of the feature's type.  This will always
      *                  contain a ":".
      * @param name      The name of this instance of feature
      *			a list of commands if needed.
-     * @param arg	The argument string on the feature
+     * @param lexer	The lexer to parse arguments for this feature.
+     *                  The implementation of this method should parse up to ";"
+     *                  which indicates the end of the feature declaration.
      *
      * @throws      IOException if there's an error.
      *
      * @return	    A feature if one of the given type is known, null otherwise
      */
     public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-		       throws IOException;
-
+    			      String name, Lexer lexer)
+		       throws IOException;    
 
     /**
      * Get a modifier feature of the given type.  The type name will have a
@@ -107,53 +111,52 @@ public interface ExtensionsBuilder {
      * <p>
      * The syntax of an extension feature is fixed at
      * <pre>
-     *     "feature" "modifier" namespace:type_name name feature_name string ";"
+     *     "feature" "modifier" namespace:type_name name feature_name arguments ";"
      * </pre>
      * where feature_name is given iff the feature is a Modifier.
+     * 
+     * This method gets a Lexer instance that is pointed to the beginning of 
+     * the arguments.
+     *
+     * The implementation of this method is expected to return an instance of a modifier 
+     * which loads on a standard JDK.  It can be different from the modifier class
+     * that is going to be used with the xlet in the BD-J environment.     
      *
      * @param show      The show being parsed
      * @param typeName  The name of the feature's type.  This will always
      *                  contain a ":".
      * @param name      The name of this instance of feature
      *			a list of commands if needed.
-     * @param arg	The argument string on the feature
+     * @param lexer	The lexer to parse arguments for this feature.
+     *                  The implementation of this method should parse up to ";"
+     *                  which indicates the end of the feature declaration.
      *
      * @throws      IOException if there's an error.
      *
      * @return	    A feature if one of the given type is known, null otherwise
      */
     public Modifier getModifier(Show show, String typeName, 
-    			        String name, String arg)
+    			        String name, Lexer lexer)
 		       throws IOException;
 
      /**
-     * Get a modifier command of the given type.  
-     * <p>
+     * Get a modifier command of the given type. 
+
+     * The implementation of this method is expected to return an instance of a command 
+     * which loads on a standard JDK.  It can be different from the command class
+     * that is going to be used with the xlet in the BD-J environment.  
      *
      * @param show      The show being parsed
      * @param typeName  The name of the commands's type.  This will always
      *                  contain a ":".
-     * @param args	The argument strings on the command
+     * @param lexer	The lexer to parse arguments for this feature.
+     *                  The implementation of this method should parse up to ";"
+     *                  which indicates the end of the feature declaration.
      *
      * @throws      IOException if there's an error.
      *
      * @return	    A command if one of the given type is known, null otherwise
      */
-    public Command getCommand(Show show, String typeName, String[] args)
-		       throws IOException;   
-
-    /**
-     * Called after parsing is done, and all of the built-in objects
-     * have been resolved.  This allows any final
-     * initialization to be performed.  Note that GRIN's built-in
-     * parser automatically calls Command.resolve() for all commands
-     * in the show, including extension commands.
-     **/
-    public void finishBuilding(Show s) throws IOException;
-    
-    /**
-     * Give a hint how an optimal mosaic could be built.
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-    			       String[] images);
+    public Command getCommand(Show show, String typeName, Lexer lexer)
+		       throws IOException;
 }

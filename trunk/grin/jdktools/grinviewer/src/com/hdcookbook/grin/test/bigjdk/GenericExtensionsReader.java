@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,35 +52,66 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.build.mosaic;
+package com.hdcookbook.grin.test.bigjdk;
 
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.io.text.Lexer;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.input.RCHandler;
-
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.io.binary.ExtensionsReader;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import java.awt.Graphics2D;
 import java.io.IOException;
 
 /**
- * This is a pretend command that does nothing.  It's here so that
- * the mosaic builder can create something when it encounters an
- * extension command in a GRIN show file.
- *
- * @author Bill Foote (http://jovial.com)
+ * MenuExtensionsReader reads in a binary file and creates a fake version
+ * of the Modifier and Command subclasses.  This class is used by the 
+ * GrinView application to display the show.
  */
-public class GenericExtensionCommand extends Command {
-   
-    private String name;
-    private String[] body;
+public class GenericExtensionsReader implements ExtensionsReader {
 
-    public GenericExtensionCommand(String  name, String[] body) {
-	this.body = body;
+    public Feature readExtensionFeature(Show show, String name, GrinDataInputStream in, int length) throws IOException {
+        in.skipBytes(length);
+        return new Feature(show, name) {
+            public int getX() {
+                return Integer.MAX_VALUE;
+            }
+            public int getY() {
+                return Integer.MAX_VALUE;
+            }
+            public void initialize() {
+            }
+            public void destroy() {
+            }
+            protected void setSetupMode(boolean mode) {
+            }
+            protected void setActivateMode(boolean mode) {
+            }
+            public void doSomeSetup() {
+            }
+            public boolean needsMoreSetup() {
+                return false;
+            }
+            public void addDisplayAreas(RenderContext context) {
+            }
+            public void paintFrame(Graphics2D gr) {
+            }
+            public void nextFrame() {
+            }
+        };
     }
 
-    public void execute() {
-	System.out.println("Executing " + name);
+    public Modifier readExtensionModifier(Show show, String name, GrinDataInputStream in, int length) throws IOException {
+        in.skipBytes(length);
+        return new Modifier(show, name) {};
     }
+
+    public Command readExtensionCommand(Show show, GrinDataInputStream in, int length) throws IOException {
+        in.skipBytes(length);
+        return new Command(){
+            public void execute(){}
+        };
+    }
+
 }

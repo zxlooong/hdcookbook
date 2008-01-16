@@ -55,6 +55,7 @@
 
 package com.hdcookbook.grin.io.builders;
 
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.Segment;
@@ -67,7 +68,7 @@ import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.SEUserModifier;
+import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
@@ -167,8 +168,16 @@ public class TranslatorHelper implements DeferredBuilder {
 	    public void visitImageSequence(ImageSequence feature) {
 		check(feature.getX(), feature.getY());
 	    }
-	    public void visitSEUserModifier(SEUserModifier feature) {
-		SEShow.acceptFeature(this, feature.getPart());
+	    public void visitUserDefinedFeature(Feature feature) {
+                if (feature instanceof Modifier) {
+                    SEShow.acceptFeature(this, ((Modifier)feature).getPart());
+                } else {
+                    int x = feature.getX();
+                    int y = feature.getY();
+                    if (x != Integer.MAX_VALUE && y != Integer.MAX_VALUE) {
+                        check(x, y);
+                    }
+                }
 	    }
 	    public void visitSetTarget(SetTarget feature) {
 		SEShow.acceptFeature(this, feature.getPart());

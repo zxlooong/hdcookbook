@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,88 +52,44 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.build.mosaic;
-
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.io.text.Lexer;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.input.RCHandler;
-
-import java.io.IOException;
-import java.util.LinkedList;
+package com.hdcookbook.grin;
 
 /**
- * This is an extensions parser for a GRIN show file.  Since we
- * don't know about any xlet-specific extensions, we just fake
- * them out:  We parse all the tokens, but we fill in generic
- * results rather than xlet-specific ones.  For building an image
- * mosaic, this works fine.
- *
- * @author Bill Foote (http://jovial.com)
+ * MosaicHint provides hints to the Mosaic builder about how to group images when 
+ * building a imaga mosaic.  This class is used only during the SEShow build time, in response to the "mosaic_hint" entry of the text-based show file.
  */
-public class GenericExtensionsBuilder implements ExtensionsBuilder {
-   
 
-    public GenericExtensionsBuilder() {
-    }
-
-    /** 
-     * Parse an extension feature that's not a modifier.
-     **/
-    public Feature getFeature(Show show, String typeName,
-                              String name, String arg)
-    {
-	// Some rules need to be set about the syntax of an extension
-	// feature before we can deal with this.
-        return null;
-    }
-
-
-    /**
-     * Parse an extension command.
-     * This assumes that all commands end with a semicolon, and have no
-     * semicolons embedded in them.
-     **/
-    //public Command parseCommand(Show show, String typeName, Lexer lex,
-    //			        ShowParser parser) 
-    public Command getCommand(Show show, String typeName, String[] args) 
-			throws IOException
-    {
-	return new GenericExtensionCommand(typeName, args);
-    }
-
-    /** 
-     * Parse an extension feature that is a modifer.  Modifiers have
-     * a fixed syntax, so we don't get passed the lexer or the parser.
-     **/
-    public Modifier getModifier(Show show, final String typeName, 
-                                String name, String arg)
-    { 
-        return new Modifier(show, name) {
-            public String toString() {
-                return typeName;
-            } 
-        };
-    }
-
-    /** 
-     * Called by the GRIN parser after the show is parsed
-     **/
-    public void finishBuilding(Show show) throws IOException {
-    }
-
-    /**
-     * Called by the GRIN parser when it encounters a mosaic hint.
-     * This gets overridden in an anonymous subclass in MosaicMaker.
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
+public class MosaicHint {    
+    
+    private String name;
+    private int width;
+    private int height;
+    private String[] images;
+    
+    public MosaicHint(String name, int width, 
+		      int height, String[] images) {
+        this.name = name;
+        this.width = width;
+        this.height = height;
+        this.images = images;
     }
     
+    public String getName() {
+        return name;
+    }
+    
+    public int getWidth() {
+        return width;
+    }
+    
+    public int getHeight() {
+        return height;        
+    }
+    
+    /**
+     * Returns the image names to be contained in a single image mosaic.
+     */
+    public String[] getImages() {
+        return images;
+    }
 }

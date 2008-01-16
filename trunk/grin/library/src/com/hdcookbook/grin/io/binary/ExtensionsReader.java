@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,58 +52,76 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test.bigjdk;
+package com.hdcookbook.grin.io.binary;
 
-
-import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.io.ShowBuilder;
-
+import com.hdcookbook.grin.features.Modifier;
 import java.io.IOException;
 
 /**
- * This is a ShowBuilder that tracks line number
- * for GrinView
- *
- * @see GrinView
- *
- * @author Bill Foote (http://jovial.com)
+ * ExtensionsReader defines the methods that handle the reading of the
+ * custom (user-defined) GRIN features, modifiers and commands from an IO stream.  
+ * These who are defining the custom GRIN subclasses should implement these methods accordingly.
+ * 
+ * @see GrinBinaryReader#GrinBinaryReader(java.io.InputStream, ExtensionsReader)
+ * @see ExtensionsWriter
  */
-public class GuiShowBuilder extends ShowBuilder {
-   
-    private GrinView gui;
+public interface ExtensionsReader {
+    
+    /**
+     * Reads in a feature subclass from a given DataInputStream.
+     * 
+     * @param show      The show that this feature belongs to.
+     * @param name      The name of this feature.
+     * @param in        The InputStream to read in the data from.
+     * @param length    The number of bytes occupied in the InputStream to describe
+     *                  the feature.
+     *
+     * @return Feature  A user-defined Feature subclass reconstructed from the data,
+     *                  or null if none is found.
+     * 
+     * @throws java.io.IOException if IO error occurs.
+     */
+    public Feature readExtensionFeature(Show show, String name, 
+            GrinDataInputStream in, int length) 
+                              throws IOException;
+    
+    /**
+     * Reads in a modifier subclass from a given DataInputStream.  Note that the child feature
+     * this modifier will be working on is contructed before this method is invoked, and 
+     * modifier.setup(Feature) will ve invoked after this method returns, hence the implementation
+     * of this method does not have to deal with it.
+     * 
+     * @param show      The show that this modifier belongs to.
+     * @param name      The name of this modifier.
+     * @param in        The InputStream to read in the data from.
+     * @param length    The number of bytes used in the InputStream to describe the modifier.
+     * 
+     * @return Modifier A user-defined Modifier subclass reconstructed from the data,
+     *          or null if none is found.
+     * 
+     * @throws java.io.IOException if IO error occurs.
+     */
+    public Modifier readExtensionModifier(Show show, String name, 
+            GrinDataInputStream in, int length) 
+                                throws IOException;
+    
+    /**
+     * Reads in a command subclass from a given DataInputStream.
+     * 
+     * @param show      The show that this command belongs to.
+     * @param in        The InputStream to read in the data from.
+     * @param length    The number of bytes used in the InputStream to describe this command.
+     * 
+     * @return Command  A user-defined Command subclass reconstructed from the data.
+     *                  or null if none is found.
+     * 
+     * @throws java.io.IOException if IO error occurs.
+     */    
+    public Command readExtensionCommand(Show show,
+            GrinDataInputStream in, int length) 
+            throws IOException;
 
-    public GuiShowBuilder(GrinView gui) {
-	this.gui = gui;
-    }
-
-    public void addFeature(String name, int line, Feature f) throws IOException
-    {
-	super.addFeature(name, line, f);
-	gui.addLineNumber(f, line);
-    }
-
-    public void addSegment(String name, int line, Segment s) throws IOException
-    {
-	super.addSegment(name, line, s);
-	gui.addLineNumber(s, line);
-    }
-
-    public void addCommand(Command command, int line) {
-	super.addCommand(command, line);
-	gui.addLineNumber(command, line);
-    }
-
-    public void addRCHandler(String name, int line, RCHandler hand)
-    			throws IOException
-    {
-	super.addRCHandler(name, line, hand);
-	gui.addLineNumber(hand, line);
-    }
-
-    public void finishBuilding() throws IOException {
-	super.finishBuilding();
-    }
 }

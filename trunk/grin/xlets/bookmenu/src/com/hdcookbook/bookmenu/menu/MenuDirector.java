@@ -60,15 +60,10 @@ import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import java.io.BufferedInputStream;
 import java.net.URL;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.input.RCKeyEvent;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.io.binary.ExtensionsReader;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
@@ -98,14 +93,6 @@ public class MenuDirector extends Director {
     }
 
     /**
-     * Called by GRIN when it parses a show.  This is how we hook
-     * in our extensions to the GRIN syntax.
-     **/
-    public ExtensionsBuilder getExtensionsBuilder() {
-	return new MenuExtensionsBuilder(xlet);
-    }
-
-    /**
      * Called by the xlet, this creates the GRIN show file that defines
      * most of our menu UI.
      **/
@@ -117,9 +104,16 @@ public class MenuDirector extends Director {
             
             String showName = "menu.grin";
 	    URL u = AssetFinder.getURL(showName);
+            BufferedInputStream bis = new BufferedInputStream(u.openStream());  
             
-            BufferedInputStream bis = new BufferedInputStream(u.openStream());
- 	    GrinBinaryReader reader = new GrinBinaryReader(this, bis);
+            /* 
+             * ExtensionsReader is used to instanciate the extensions during
+             * the construction of the GRIN show.  This is how we hook in
+             * custom extensions into the GRIN syntax.
+             */
+            ExtensionsReader extReader = new MenuExtensionsReader(xlet, show);
+ 	    GrinBinaryReader reader = new GrinBinaryReader(bis, extReader);
+            
 	    reader.readShow(show);
             bis.close();
             

@@ -64,7 +64,6 @@ import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.SEUserModifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
@@ -97,6 +96,9 @@ public class SEShow extends Show {
     private Map<String, Segment> privateSegments = null;
     private Object internalMonitor = new Object();
 
+    // For mosaic building.
+    private ArrayList mosaicHints;
+    
     /**
      * Create a new SEShow.
      *
@@ -201,6 +203,31 @@ public class SEShow extends Show {
 	checker.reportAnyProblems();
     }
 
+    /**
+     * Called by the ShowParser when the mosaic_hint element is encountered.
+     */
+    public void takeMosaicHint(String name, int width, 
+			 int height, String[] images) 
+    {    
+        if (mosaicHints == null) {
+            mosaicHints = new ArrayList();       
+        }  
+        
+        mosaicHints.add(new MosaicHint(name, width, height, images));        
+    }
+
+    /**
+     * Returns an array of MosaicHints associated with this show, or
+     * an zero-length array if none is found.
+     */
+    public MosaicHint[] getMosaicHints() {
+        if (mosaicHints == null) {
+            return new MosaicHint[0];
+        }    
+        return (MosaicHint[])
+                mosaicHints.toArray(new MosaicHint[mosaicHints.size()]);
+    }
+    
 
     /**
      * Visit a SEShow with a SEShowVisitor.  This will call
@@ -251,38 +278,39 @@ public class SEShow extends Show {
      * feature passed in.
      **/
     public static void acceptFeature(SEShowVisitor visitor, Feature feature) {
-	if (feature instanceof Assembly) {
+        
+        Class featureClazz = feature.getClass();
+        
+	if (featureClazz == Assembly.class) {
 	    visitor.visitAssembly((Assembly) feature);
-	} else if (feature instanceof Box) {
+	} else if (featureClazz == Box.class) {
 	    visitor.visitBox((Box) feature);
-	} else if (feature instanceof Clipped) {
+	} else if (featureClazz == Clipped.class) {
 	    visitor.visitClipped((Clipped) feature);
-	} else if (feature instanceof Fade) {
+	} else if (featureClazz == Fade.class) {
 	    visitor.visitFade((Fade) feature);
-	} else if (feature instanceof FixedImage) {
+	} else if (featureClazz == FixedImage.class) {
 	    visitor.visitFixedImage((FixedImage) feature);
-	} else if (feature instanceof Group) {
+	} else if (featureClazz == Group.class) {
 	    visitor.visitGroup((Group) feature);
-	} else if (feature instanceof GuaranteeFill) {
+	} else if (featureClazz == GuaranteeFill.class) {
 	    visitor.visitGuaranteeFill((GuaranteeFill) feature);
-	} else if (feature instanceof ImageSequence) {
+	} else if (featureClazz == ImageSequence.class) {
 	    visitor.visitImageSequence((ImageSequence) feature);
-	} else if (feature instanceof SEUserModifier) {
-	    visitor.visitSEUserModifier((SEUserModifier) feature);
-	} else if (feature instanceof SetTarget) {
+	} else if (featureClazz == SetTarget.class) {
 	    visitor.visitSetTarget((SetTarget) feature);
-	} else if (feature instanceof SrcOver) {
+	} else if (featureClazz == SrcOver.class) {
 	    visitor.visitSrcOver((SrcOver) feature);
-	} else if (feature instanceof Text) {
+	} else if (featureClazz == Text.class) {
 	    visitor.visitText((Text) feature);
-	} else if (feature instanceof Timer) {
+	} else if (featureClazz == Timer.class) {
 	    visitor.visitTimer((Timer) feature);
-	} else if (feature instanceof Translator) {
+	} else if (featureClazz == Translator.class) {
 	    visitor.visitTranslator((Translator) feature);
-	} else if (feature instanceof TranslatorModel) {
+	} else if (featureClazz == TranslatorModel.class) {
 	    visitor.visitTranslatorModel((TranslatorModel) feature);
 	} else {
-	    assert false;
+	    visitor.visitUserDefinedFeature(feature);
 	}
     }
 

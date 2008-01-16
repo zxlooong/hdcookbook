@@ -60,16 +60,10 @@ import java.io.IOException;
 
 import org.bluray.net.BDLocator;
 
-import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.input.RCKeyEvent;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.util.AssetFinder;
-import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.bookmenu.menu.commands.PlayVideoCommand;
 import com.hdcookbook.bookmenu.menu.commands.PlaySoundCommand;
@@ -83,6 +77,8 @@ import com.hdcookbook.bookmenu.menu.commands.DeleteBookmarkCommand;
 import com.hdcookbook.bookmenu.menu.commands.BookmarkUICommand;
 import com.hdcookbook.bookmenu.menu.commands.SelectAudioCommand;
 import com.hdcookbook.bookmenu.menu.commands.SelectSubtitlesCommand;
+import com.hdcookbook.grin.io.binary.ExtensionsReader;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 
 /** 
  * This class parses small extensions to the GRIN syntax added
@@ -91,20 +87,22 @@ import com.hdcookbook.bookmenu.menu.commands.SelectSubtitlesCommand;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class MenuExtensionsBuilder implements ExtensionsBuilder {
+public class MenuExtensionsReader implements ExtensionsReader {
 
     private MenuXlet xlet;
+    private Show show;
 
-    public MenuExtensionsBuilder(MenuXlet xlet) {
+    public MenuExtensionsReader(MenuXlet xlet, Show show) {
 	this.xlet = xlet;
+        this.show = show;
     }
 
     /** 
      * Called by the GRIN parser to parse an extension feature 
      * that's not a modifier
      **/
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
+    public Feature readExtensionFeature(Show show, 
+            String name, GrinDataInputStream in, int length)
 		   throws IOException
     {
 	return null;
@@ -113,12 +111,14 @@ public class MenuExtensionsBuilder implements ExtensionsBuilder {
     /**
      * Called by the GRIN parser to parse a feature that is a modifier
      **/
-    public Modifier getModifier(Show show, String typeName, 
-    			        String name, String arg)
+    public Modifier readExtensionModifier(Show show, 
+            String name, GrinDataInputStream in, int length)
 		   throws IOException
     {
+        String typeName = in.readUTF();
 	if ("BOOK:bio_image".equals(typeName)) {
-	    return new BioImageFeature(show, name);
+	    Modifier modifier = new BioImageFeature(show, name);   
+            return modifier;
 	} else {
 	    return null;
 	}
@@ -127,33 +127,35 @@ public class MenuExtensionsBuilder implements ExtensionsBuilder {
     /**
      * Called by the GRIN parser to parse an extension command.
      **/
-    public Command getCommand(Show show, String typeName, String[] args)
+    public Command readExtensionCommand(Show show, 
+            GrinDataInputStream in, int length)
 		       throws IOException {
         
+        String typeName = in.readUTF();
+        String[] args = in.readStringArray();
+                
 	if ("BOOK:PlayVideo".equals(typeName)) {
-	    String tok = args[0];
 	    BDLocator loc = null;
-	    if ("menu".equals(tok)) {
+	    if ("menu".equals(args[0])) {
 		loc = xlet.navigator.menuVideoStartPL;
-	    } else if ("movie".equals(tok)) {
+	    } else if ("movie".equals(args[0])) {
 		loc = xlet.navigator.movieVideoStartPL;
-	    } else if ("scene_1".equals(tok)) {
+	    } else if ("scene_1".equals(args[0])) {
 		loc = xlet.navigator.sceneVideoStartPL[0];
-	    } else if ("scene_2".equals(tok)) {
+	    } else if ("scene_2".equals(args[0])) {
 		loc = xlet.navigator.sceneVideoStartPL[1];
-	    } else if ("scene_3".equals(tok)) {
+	    } else if ("scene_3".equals(args[0])) {
 		loc = xlet.navigator.sceneVideoStartPL[2];
-	    } else if ("scene_4".equals(tok)) {
+	    } else if ("scene_4".equals(args[0])) {
 		loc = xlet.navigator.sceneVideoStartPL[3];
-	    } else if ("scene_5".equals(tok)) {
+	    } else if ("scene_5".equals(args[0])) {
 		loc = xlet.navigator.sceneVideoStartPL[4];
-	    } else if ("nothing".equals(tok)) {
+	    } else if ("nothing".equals(args[0])) {
 		loc = null;
 	    }
 	    return new PlayVideoCommand(xlet, loc);
 	} else if ("BOOK:SetText".equals(typeName)) {
-	    String text = args[0];
-	    return new SetTextCommand(xlet, text);
+	    return new SetTextCommand(xlet, args[0]);
 	} else if ("BOOK:PlayGame".equals(typeName)) {
 	    return new PlayGameCommand(xlet);
 	} else if ("BOOK:ActivateBio".equals(typeName)) {
@@ -161,22 +163,20 @@ public class MenuExtensionsBuilder implements ExtensionsBuilder {
 	} else if ("BOOK:DownloadBio".equals(typeName)) {
 	    return new DownloadBioCommand(xlet);
 	} else if ("BOOK:PlaySound".equals(typeName)) {
-	    String text = args[0];
-	    return new PlaySoundCommand(xlet, text);
+	    return new PlaySoundCommand(xlet, args[0]);
 	} else if ("BOOK:MakeBookmark".equals(typeName)) {
 	    return new MakeBookmarkCommand(xlet);
 	} else if ("BOOK:DeleteBookmark".equals(typeName)) {
 	    return new DeleteBookmarkCommand(xlet);
 	} else if ("BOOK:BookmarkUI".equals(typeName)) {
-	    String tok = args[0];
 	    boolean activate = false;
-	    if ("select".equals(tok)) {
+	    if ("select".equals(args[0])) {
 		activate = false;
-	    } else if ("activate".equals(tok)) {
+	    } else if ("activate".equals(args[0])) {
 		activate = true;
 	    } else {
 		throw new IOException("\"select\" or \"activate\" expected, \""
-				  + tok + "\" seen.");
+				  + args[0] + "\" seen.");
 	    }
 	    int num = Integer.parseInt(args[1]);
 	    if (num < -1 || num > 5) {
@@ -194,22 +194,4 @@ public class MenuExtensionsBuilder implements ExtensionsBuilder {
 	}
 	throw new IOException("Unrecognized command type  \"" + typeName + "\"");
     }
-
-    /**
-     * Called by the GRIN parser when parsing is done, to do
-     * any other work to finish up a show.
-     **/
-    public void finishBuilding(Show s) throws IOException {
-    }
-
-    /**
-     * Called by the GRIN parser when it encounters an optimization
-     * hint about images it would be good to include in their own
-     * mosaic.  This is used at compile time.
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
-    }
-
 }

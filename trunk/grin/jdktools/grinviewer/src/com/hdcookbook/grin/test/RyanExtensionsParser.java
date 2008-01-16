@@ -53,93 +53,99 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test.bigjdk;
+package com.hdcookbook.grin.test;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.ExtensionsBuilderFactory;
+import com.hdcookbook.grin.io.binary.ExtensionsWriter;
 import com.hdcookbook.grin.io.text.Lexer;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.input.RCHandler;
-
+import com.hdcookbook.grin.io.text.ExtensionsParser;
 import java.io.IOException;
 
 /**
- * This is an extensions parser that makes a fake version of any
- * GRIN extension it encounters.
+ * This is part of the "Ryan's life" test show.  It's mostly of
+ * historical interest; it still works, but some of the ways of
+ * structuring and using a show are passe.
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class GenericExtensionsBuilder implements ExtensionsBuilder {
+public class RyanExtensionsParser 
+        extends ExtensionsBuilderFactory 
+        implements ExtensionsParser {
    
-    private GenericDirector director;
+    RyanDirector director;
 
-    public GenericExtensionsBuilder(GenericDirector director) {
+    public RyanExtensionsParser(RyanDirector director) {
 	this.director = director;
     }
 
-    /**
-     * See superclass definition.
-     **/
+
     public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
+            String name, Lexer lexer) 
+            throws IOException 
     {
-	// Not implemented.  If we do this, we'll have to figure out
-	// some syntactical contstraints on an extension feature.
         return null;
     }
 
-    /**
-     * See superclass definition.
-     **/
-    public Modifier getModifier(Show show, final String typeName, 
-    			        String name, String arg)
+    public Modifier getModifier(Show show, String typeName, 
+    			        String name, Lexer lexer)
+                                throws IOException
     {
-	return new Modifier(show, name) {
-	    // We could use SEUserModifier here for consistency with
-	    // the binary writer
-	    public String toString() {
-		return typeName;
-	    }
-	};
+        return null;
     }
 
-    /**
-     * See superclass definition.
-     * This version assumes that all commands end with a semicolon, and have no
-     * semicolons embedded in them.
-     **/
-    public Command getCommand(Show show, String typeName, String[] args)
-		       throws IOException
+    //public Command parseCommand(Show show, String typeName, Lexer lex,
+    //			        ShowParser parser) 
+    
+    public Command getCommand(Show show, String typeName, 
+            Lexer lexer)
+			throws IOException
     {
-        String name = typeName + " " + ((args.length > 0) ? args[0] : null);
-        for (int i = 1; i < args.length; i++) {
-            name.concat(" " + args[i]);
+	Command result = null;
+	if ("ryan:start_video".equals(typeName)) {
+	    result = new Command() {
+	       public void execute() { 
+		    director.startVideo();
+	       }
+	    };
+	} else if ("ryan:play_mode_interactive".equals(typeName)) {
+	    final boolean val = lexer.getBoolean();
+	    result = new Command() {
+	       public void execute() { 
+		    director.setInteractiveMode(val);
+	       }
+	    };
+	} else if ("ryan:toggle_commentary".equals(typeName)) {
+	    result = new Command() {
+	       public void execute() { 
+		    director.toggleCommentary();
+	       }
+	    };
+	} else if ("ryan:commentary_start".equals(typeName)) {
+	    result = new Command() {
+	       public void execute() { 
+		    director.startCommentary();
+	       }
+	    };
+	} else {
+	    throw new IOException("Unrecognized command type \"" + typeName + "\"");
 	}
         
-        final String fname = name;
+        lexer.parseExpected(";");
         
-	return new Command() {
-	    public void execute() {
-		System.out.println("Executing " + fname);
-	    }
-	};
+	return result;
     }
 
-    /**
-     * See superclass definition.
-     **/
-    public void finishBuilding(Show show) throws IOException {
+    @Override
+    public ExtensionsWriter getExtensionsWriter() {
+        return null; // Not writing Ryan in binary file format right now
     }
 
-    /**
-     * See superclass definition.
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
+    @Override
+    public ExtensionsParser getExtensionsParser() {
+        return this;
     }
-    
 }

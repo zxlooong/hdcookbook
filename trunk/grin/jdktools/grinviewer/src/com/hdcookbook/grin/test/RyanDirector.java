@@ -57,18 +57,16 @@ package com.hdcookbook.grin.test;
 
 import java.net.URL;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
@@ -80,7 +78,6 @@ import com.hdcookbook.grin.util.Debug;
  * @author Bill Foote (http://jovial.com)
  */
 public abstract class RyanDirector extends Director {
-
 
     private Assembly[] commentaryIndicators;
     private Feature[] commentaryOnIndicators;
@@ -134,10 +131,6 @@ public abstract class RyanDirector extends Director {
 	}
     }
 
-    public ExtensionsBuilder getExtensionsBuilder() {
-	return new RyanExtensionsBuilder(this);
-    }
-
     public Show createShow() {
         String showName = "ryan_show.txt";
 	SEShow show = new SEShow(this);
@@ -150,7 +143,9 @@ public abstract class RyanDirector extends Director {
 	    }
 	    rdr = new BufferedReader(
 			new InputStreamReader(source.openStream(), "UTF-8"));
-	    ShowParser p = new ShowParser(rdr, showName, show);
+            ShowBuilder builder = new ShowBuilder();
+            builder.setExtensionsBuilderFactory(new RyanExtensionsParser(this));
+	    ShowParser p = new ShowParser(rdr, showName, show, builder);
 	    p.parse();
 	    rdr.close();
 	} catch (IOException ex) {

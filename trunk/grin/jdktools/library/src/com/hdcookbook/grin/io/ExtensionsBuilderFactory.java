@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,90 +52,32 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.test;
+package com.hdcookbook.grin.io;
 
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.io.text.Lexer;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.input.RCHandler;
-
-import java.io.IOException;
+import com.hdcookbook.grin.io.binary.ExtensionsWriter;
+import com.hdcookbook.grin.io.text.ExtensionsParser;
 
 /**
- * This is part of the "Ryan's life" test show.  It's mostly of
- * historical interest; it still works, but some of the ways of
- * structuring and using a show are passe.
- *
- * @author Bill Foote (http://jovial.com)
+ * ExtensionsBuilderFactory provides an instance of ExtensionsParser 
+ * ExtensionsWriter class for handling show extensions.  
+ * 
+ * Those who are defining extensions (custom features, modifiers, or commands)
+ * for show should provide a subclass of this.
  */
-public class RyanExtensionsBuilder implements ExtensionsBuilder {
-   
-    RyanDirector director;
 
-    public RyanExtensionsBuilder(RyanDirector director) {
-	this.director = director;
-    }
+public abstract class ExtensionsBuilderFactory {
 
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-    {
-        return null;
-    }
-
-    public Modifier getModifier(Show show, String typeName, 
-    			        String name, String arg)
-    {
-        return null;
-    }
-
-    //public Command parseCommand(Show show, String typeName, Lexer lex,
-    //			        ShowParser parser) 
+    /**
+     * Returns an user-defined ExtensionsParser instance that can parse
+     * show text file.
+     * @return an user-defined ExtensionsParser instance.
+     */
+    public abstract ExtensionsWriter getExtensionsWriter();
     
-    public Command getCommand(Show show, String typeName, String[] args)
-			throws IOException
-    {
-	Command result = null;
-	if ("ryan:start_video".equals(typeName)) {
-	    result = new Command() {
-	       public void execute() { 
-		    director.startVideo();
-	       }
-	    };
-	} else if ("ryan:play_mode_interactive".equals(typeName)) {
-	    final boolean val = Boolean.parseBoolean(args[0]);
-	    result = new Command() {
-	       public void execute() { 
-		    director.setInteractiveMode(val);
-	       }
-	    };
-	} else if ("ryan:toggle_commentary".equals(typeName)) {
-	    result = new Command() {
-	       public void execute() { 
-		    director.toggleCommentary();
-	       }
-	    };
-	} else if ("ryan:commentary_start".equals(typeName)) {
-	    result = new Command() {
-	       public void execute() { 
-		    director.startCommentary();
-	       }
-	    };
-	} else {
-	    throw new IOException("Unrecognized command type \"" + typeName + "\"");
-	}
-	return result;
-    }
-
-    public void finishBuilding(Show show) throws IOException {
-    }
-
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
-    }
-
+    /**
+     * Returns an user-defined ExtensionsWriter instance that can write out
+     * extensions to the show binary file.
+     * @return  An user-defined ExtensionsBuilder instance.
+     */
+    public abstract ExtensionsParser getExtensionsParser();
 }

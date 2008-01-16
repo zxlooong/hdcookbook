@@ -59,10 +59,10 @@ import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.MosaicHint;
 import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ManagedImage;
@@ -136,6 +136,7 @@ import javax.imageio.ImageIO;
 
     public void init() throws IOException {
 	ShowBuilder builder = new ShowBuilder();
+        builder.setExtensionsBuilderFactory(new GenericExtensionsBuilderFactory());
 	File [] fPath = new File[assetPath.length];
 	for (int i = 0; i < fPath.length; i++) {
 	    fPath[i] = new File(assetPath[i]);
@@ -143,20 +144,7 @@ import javax.imageio.ImageIO;
 	AssetFinder.setSearchPath(null, fPath);
 	showTrees = new SEShow[shows.length];
         for (int i = 0; i < shows.length; i++) {
-            Director director = new Director() {
-                public ExtensionsBuilder getExtensionsBuilder() {
-                    return new GenericExtensionsBuilder() {
-			public void takeMosaicHint(String name, int width, 
-						   int height, String[] images) 
-			{
-			    for (int i = 0; i < images.length; i++) {
-				mosaicHint.put(images[i], name);
-			    }
-			    specialMosaics.put(name, new Mosaic(width, height));
-			}
-		    };
-                }
-            };
+            Director director = new Director(){};
             showTrees[i] = new SEShow(director);
             URL source = AssetFinder.getURL(shows[i]);
 	    if (source == null) {
@@ -174,8 +162,23 @@ import javax.imageio.ImageIO;
                     rdr.close();
                 }
             }
+            
+            MosaicHint[] hints = showTrees[i].getMosaicHints();
+            
+            for (MosaicHint hint : hints) {
+                String name = hint.getName();
+                String[] mosaicImages = hint.getImages();
+                int width = hint.getWidth();
+                int height = hint.getHeight();
+                
+                for (String imageName : mosaicImages) {
+                    mosaicHint.put(imageName, name);
+                }
+                specialMosaics.put(name, new Mosaic(width, height));                         
+            }
         }
 
+        
 	setLayout(null);
 	setSize(960, 570);
         addWindowListener(new java.awt.event.WindowAdapter() {

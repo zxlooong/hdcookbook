@@ -84,7 +84,6 @@ import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.VisualRCHandler;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.builders.MenuAssemblyHelper;
 import com.hdcookbook.grin.io.builders.TranslatorHelper;
@@ -117,7 +116,7 @@ public class ShowParser {
 
     private SEShow show;
     private Lexer lexer;
-    private ExtensionsBuilder extBuilder;
+    private ExtensionsParser extParser;
     private Vector[] deferred = { new Vector(), new Vector(), new Vector() };  
     	// Array of Vector<ForwardReference>
     private Map<String, VisualRCHandlerHelper> visualRCHelpers
@@ -165,11 +164,6 @@ public class ShowParser {
         this.show = show;
 	Director d = show.getDirector();
 	this.lexer = new Lexer(reader, showName);
-	if (d == null) {
-	    this.extBuilder = null;
-	} else {
-	    this.extBuilder = d.getExtensionsBuilder();
-	}
         
 	if (builder == null) {
 	    builder = new ShowBuilder();
@@ -177,6 +171,8 @@ public class ShowParser {
         
 	this.builder = builder;
 	builder.init(show);
+        
+        this.extParser = builder.getExtensionsParser();
     }
 
     /**
@@ -249,9 +245,7 @@ public class ShowParser {
 		int height = lexer.getInt();
 		String[] files = parseStrings();
 		parseExpected(";");
-		if (extBuilder != null) {
-		    extBuilder.takeMosaicHint(name, width, height, files);
-		}
+		show.takeMosaicHint(name, width, height, files);
 	    } else {
 		lexer.reportError("Unrecognized token \"" + tok + "\"");
 	    }
@@ -378,7 +372,7 @@ public class ShowParser {
 	    return parseGuaranteeFill(hasName, lineStart);
 	} else if ("set_target".equals(tok)) {
 	    return parseSetTarget(hasName, lineStart);
-	} else if (extBuilder == null || tok == null) {
+	} else if (extParser == null || tok == null) {
 	    lexer.reportError("Unrecognized feature \"" + tok + "\"");
 	    return null;	// not reached
 	} else if ("extension".equals(tok) || "modifier".equals(tok)) {
@@ -391,17 +385,17 @@ public class ShowParser {
 	    if ("modifier".equals(tok)) {
 		sub = parseSubFeature(lexer.getString());
 	    }
-	    String arg = lexer.getString();
-	    parseExpected(";");
+	    //String arg = lexer.getString();
+	    //parseExpected(";");
 	    Feature f;
 	    if (typeName.indexOf(':') < 0) {
 		lexer.reportError(typeName + " doesn't contain \":\"");
 	    }
 	    if (sub == null) {
-		f = extBuilder.getFeature(show, typeName, name, arg);
+		f = extParser.getFeature(show, typeName, name, lexer);
 	    } else {
-		Modifier m = extBuilder.getModifier(show, typeName,
-						   name, arg);
+		Modifier m = extParser.getModifier(show, typeName,
+						   name, lexer);
 		f = m;
 		if (m != null) {
 		    resolveModifier(m, sub);
@@ -920,6 +914,7 @@ public class ShowParser {
                     Group group = new Group(show, null);
                     group.setup(fa);
                     trans.setup((TranslatorModel) t, group);
+                    builder.addFeature(null, 0, group);
                 }
 	    }
 	};
@@ -1443,11 +1438,12 @@ public class ShowParser {
 		Command c = parseVisualRC();
 		v.addElement(c);
 		builder.addCommand(c, lineStart);
-	    } else if (extBuilder == null || tok == null || tok.indexOf(':') < 0) 
+	    } else if (extParser == null || tok == null || tok.indexOf(':') < 0) 
 	    {
 		lexer.reportError("command expected, " + tok + " seen");
 	    } else {
 		String typeName = tok;
+                /**    
  	        ArrayList args =new ArrayList();
 	        for (;;) {
 	           tok = lexer.getString();
@@ -1458,8 +1454,10 @@ public class ShowParser {
 	           } else {
 		      args.add(tok);
 	           }
-	        }               
-		Command c = extBuilder.getCommand(show, typeName, (String[])args.toArray(new String[]{}));
+	        } 
+                 **/
+                
+		Command c = extParser.getCommand(show, typeName, lexer);
 		v.addElement(c);
 		builder.addCommand(c, lineStart);
 	    }
@@ -1630,9 +1628,6 @@ public class ShowParser {
 	    }
 	}
 	
-	if (extBuilder != null) {
-	   extBuilder.finishBuilding(show);
-	}
 	builder.finishBuilding();
     }
 
@@ -1831,7 +1826,7 @@ public class ShowParser {
 	parseExpected("}");
 	return AssetFinder.getColor(r, g, b, a);
     }
-
+    
     /**
      * Parses a token that we expect to see.  A token is read, and
      * if it's not the expected token, an IOException is generated.
@@ -1839,10 +1834,6 @@ public class ShowParser {
      * end of various constructs.
      **/
     public void parseExpected(String expected) throws IOException {
-	String tok = lexer.getString();
-	if (!(expected.equals(tok))) {
-	   lexer.reportError("\"" + expected + "\" expected, \"" + tok 
-	   		     + "\" seen");
-	}
-    }
+	lexer.parseExpected(expected);
+    }    
 }

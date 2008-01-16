@@ -136,7 +136,9 @@ public class Show implements AnimationClient {
      **/
     public Show(Director director) {
 	this.director = director;
-	director.setShow(this);
+        if (director != null) {
+	   director.setShow(this);
+        }   
     }
 
     /**

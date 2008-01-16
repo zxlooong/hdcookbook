@@ -64,7 +64,6 @@ import java.net.URL;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.io.text.ShowParser;
@@ -84,15 +83,7 @@ public class GenericDirector extends Director {
     public GenericDirector(String showName) {
 	this.showName = showName;
     }
-    
-    /**
-     * See superclass definition.  This extensions parser will just
-     * make a fake implementation of each extension.
-     **/
-    public ExtensionsBuilder getExtensionsBuilder() {
-	return new GenericExtensionsBuilder(this);
-    }
-
+  
     /**
      * Create a show.  This is called by the main control class of
      * this debug tool.
@@ -116,7 +107,7 @@ public class GenericDirector extends Director {
 	        rdr.close();
             } else {
                 bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(this, bis);
+ 	        GrinBinaryReader reader = new GrinBinaryReader(bis, builder.getExtensionsReader());
                 reader.readShow(show);
                 bis.close();
             }   
