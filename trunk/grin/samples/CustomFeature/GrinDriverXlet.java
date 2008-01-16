@@ -52,39 +52,87 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.features;
+import java.awt.Container;
+import java.awt.Rectangle;
+import java.io.IOException;
+import javax.tv.xlet.Xlet;
+import javax.tv.xlet.XletContext;
+import javax.tv.graphics.TVContainer;
 
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.features.Modifier;
-
-/**
- * A Modifier subclass that saves all the data passed into its constructor.
- * This is used by the GrinBinaryWriter to ensure all possible extension 
- * data are captured in the binary file format.
+import com.hdcookbook.grin.animator.AnimationClient; 
+import com.hdcookbook.grin.animator.AnimationContext;
+import com.hdcookbook.grin.animator.DirectDrawEngine;
+import com.hdcookbook.grin.io.binary.GrinBinaryReader;
+import com.hdcookbook.grin.util.AssetFinder;
+	
+/** 
+ * An xlet example that displays GRIN script.
  */
-public class SEUserModifier extends Modifier {
-    
-    private String typeName;
-    private String name;
-    private String arg;
-    
-    /** Creates a new instance of SEUserModifier */
-    public SEUserModifier(Show show, String typeName, String name, String arg)
-    {
-        super(show, name);
-        this.typeName = typeName;
-        this.arg = arg;
-    }
-    
-    public String getTypeName() {
-        return typeName;
-    }
-    
-    public String getArg() {
-        return arg;
-    }
-    
-    public String toString() {
-        return typeName;
-    }
+
+public class GrinDriverXlet implements Xlet, AnimationContext {
+	
+	public Show show;
+	Container rootContainer;
+	DirectDrawEngine animationEngine;
+	XletContext context;
+	String grinScriptName = "custom-feature-example.grin";
+	
+	public void initXlet(XletContext context) {
+		
+	    this.context = context;
+	   
+	    rootContainer = TVContainer.getRootContainer(context);			
+	    rootContainer.setSize(1920, 1080);
+	   
+	    animationEngine = new DirectDrawEngine();
+	    animationEngine.setFps(24000);
+	    animationEngine.initialize(this);
+	   
+	}
+	
+	public void startXlet() {
+	    rootContainer.setVisible(true);
+	    animationEngine.start(); 	   
+	}
+	
+	public void pauseXlet() {
+	    rootContainer.setVisible(false);
+	    animationEngine.pause();
+	}
+	
+	public void destroyXlet(boolean unconditional) {
+	    rootContainer = null;
+	    animationEngine.destroy();
+	}
+	
+	public void animationInitialize() throws InterruptedException {
+           
+            try {
+ 
+                show = new Show(null);
+                
+                AssetFinder.setSearchPath(new String[]{""}, null);      
+	        GrinBinaryReader reader = new GrinBinaryReader(
+                        AssetFinder.getURL(grinScriptName).openStream(), 
+                        new ExtensionsReaderImpl());
+                
+	        reader.readShow(show);
+               
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.err.println("Error in reading the show file");
+                throw new InterruptedException();
+            }
+           
+	    animationEngine.checkDestroy();
+	    animationEngine.initClients(new AnimationClient[]{show});
+	    animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
+	   
+	} 
+	
+	public void animationFinishInitialization() {
+	    show.activateSegment(show.getSegment("S:Initialize"));		
+        }
+        
 }

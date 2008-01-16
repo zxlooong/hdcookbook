@@ -54,6 +54,7 @@
 
 package com.hdcookbook.grin.io.binary;
 
+import com.hdcookbook.grin.io.binary.*;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.ByteArrayOutputStream;
@@ -64,7 +65,6 @@ import java.util.ArrayList;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
@@ -79,7 +79,6 @@ import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEUserModifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
@@ -186,14 +185,19 @@ public class GrinBinaryWriter {
     private ArrayList segmentsList;
     
     /**
+     * ExtensionsWriter for writing out user-defined extensions.
+     */
+    private ExtensionsWriter extensionsWriter;
+    
+    /**
      * Constructs GrinBinaryWriter.
      * 
      * @param show The show object which this GrinBinaryWriter makes into a binary format.
-     *
      **/
-    public GrinBinaryWriter(SEShow show) {
+    public GrinBinaryWriter(SEShow show, ExtensionsWriter writer) {
        
         this.show = show;
+        this.extensionsWriter = writer;
        
         Feature[] features = show.getFeatures();
         featuresList = createFeaturesArrayList(features);
@@ -210,6 +214,57 @@ public class GrinBinaryWriter {
             segmentsList.add(segments[i]);
         }         
     }
+    
+    /**
+     * Returns an index number of the feature that this GrinBinaryWriter class 
+     * is internally using in the Show.  
+     * 
+     * @see GrinBinaryReader#getFeatureFromIndex(int)
+     * @param feature the feature to get the index number of.
+     * @return the index number for the feature, or -1 if no such feature exists.
+     */
+    int getFeatureIndex(Feature feature) {
+        if (feature == null) {
+           return -1;
+        } else {
+           int index = featuresList.indexOf(feature);
+           return index;
+        }   
+    }
+    
+    /**
+     * Returns an index number of the segment that this GrinBinaryWriter class 
+     * is internally using in the Show.  
+     * 
+     * @see GrinBinaryReader#getSegmentFromIndex(int)
+     * @param segment the segment to get the index number of.
+     * @return the index number for the segment, or -1 if no such segment exists.
+     */
+    int getSegmentIndex(Segment segment) {
+        if (segment == null) {
+           return -1;
+        } else {
+           int index = segmentsList.indexOf(segment);
+           return index;
+        }   
+    }
+    
+    /**
+     * Returns an index number of the RCHandler that this GrinBinaryWriter class 
+     * is internally using in the Show.  
+     * 
+     * @see GrinBinaryReader#getRCHandlerFromIndex(int)
+     * @param rcHandler the RCHandler to get the index number of.
+     * @return the index number for the RCHandler, or -1 if no such RCHandler exists.
+     */
+    int getRCHandlerIndex(RCHandler rcHandler) {
+        if (rcHandler == null) {
+           return -1;
+        } else {
+           int index = rcHandlersList.indexOf(rcHandler);
+           return index;
+        }   
+    }    
 
     /**
      * Writes out the script identifier and the script version to the DataOutputStream.
@@ -235,7 +290,7 @@ public class GrinBinaryWriter {
         out.writeInt(segmentsList.size());
 
 	{
-	    GrinDataOutputStream dos = new GrinDataOutputStream(out);
+	    GrinDataOutputStream dos = new GrinDataOutputStream(out, this);
 	    dos.writeInt(show.getSegmentStackDepth());
 	    dos.writeStringArray(show.getDrawTargets());
 	    dos.flush();
@@ -289,9 +344,9 @@ public class GrinBinaryWriter {
             } else if (feature instanceof SetTarget) {
                 writeSetTarget(out, (SetTarget)feature);
             } else if (feature instanceof Modifier) {
-                writeUserModifier(out, (SEUserModifier)feature);
+                writeUserModifier(out, (Modifier)feature);
             } else {
-                throw new IOException("Unknown feature " + feature);
+                writeUserFeature(out, feature);
             }
 	    
         }
@@ -333,7 +388,7 @@ public class GrinBinaryWriter {
         out.writeByte((int)Constants.ASSEMBLY_IDENTIFIER);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
 	if (show.isPublic(assembly)) {
 	    dos.writeString(assembly.getName());
@@ -356,7 +411,7 @@ public class GrinBinaryWriter {
        out.writeByte((int)Constants.BOX_IDENTIFIER);
              
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
        if (show.isPublic(box)) {
 	   dos.writeString(box.getName());
@@ -381,7 +436,7 @@ public class GrinBinaryWriter {
        out.writeByte((int)Constants.CLIPPED_IDENTIFIER);
        
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
        Rectangle rect = clipped.getClipRegion();      
        if (show.isPublic(clipped)) {
@@ -390,7 +445,7 @@ public class GrinBinaryWriter {
 	   dos.writeString(null);
        }
        dos.writeRectangle(rect);
-       dos.writeFeature(featuresList.indexOf(clipped.getPart()));
+       dos.writeFeatureReference(clipped.getPart());
        
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -402,7 +457,7 @@ public class GrinBinaryWriter {
        out.writeByte((int)Constants.FADE_IDENTIFIER);
       
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
 
        if (show.isPublic(fade)) {
 	   dos.writeString(fade.getName());
@@ -417,7 +472,7 @@ public class GrinBinaryWriter {
        dos.writeInt(fade.getRepeatFrame());
        Command[] endCommands = fade.getEndCommands();
        writeCommands(dos, endCommands);
-       dos.writeFeature(featuresList.indexOf(fade.getPart()));
+       dos.writeFeatureReference(fade.getPart());
        
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -430,7 +485,7 @@ public class GrinBinaryWriter {
        out.writeByte((int)Constants.FIXEDIMAGE_IDENTIFIER);
        
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
        if (show.isPublic(image)) {
 	   dos.writeString(image.getName());
@@ -451,7 +506,7 @@ public class GrinBinaryWriter {
        out.writeByte((int)Constants.GROUP_IDENTIFIER);
 
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
        if (show.isPublic(group)) {
 	   dos.writeString(group.getName());
@@ -471,7 +526,7 @@ public class GrinBinaryWriter {
        out.writeByte((int)Constants.IMAGESEQUENCE_IDENTIFIER);
 
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
                          
        if (show.isPublic(imageSequence)) {
 	   dos.writeString(imageSequence.getName());
@@ -487,7 +542,7 @@ public class GrinBinaryWriter {
        ImageSequence model = imageSequence.getModel();
        dos.writeBoolean(model != null);
        if (model != null) {
-           dos.writeFeature(featuresList.indexOf(model));
+           dos.writeFeatureReference(model);
        }
        Command[] endCommands = imageSequence.getEndCommands();
        writeCommands(dos, endCommands);
@@ -503,14 +558,14 @@ public class GrinBinaryWriter {
        out.writeByte((int)Constants.SRCOVER_IDENTIFIER);
 
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
        if (show.isPublic(srcOver)) {
 	   dos.writeString(srcOver.getName());
        } else {
 	   dos.writeString(null);
        }
-       dos.writeFeature(featuresList.indexOf(srcOver.getPart()));
+       dos.writeFeatureReference(srcOver.getPart());
       
        out.writeInt(baos.size());
        baos.writeTo(out);      
@@ -523,7 +578,7 @@ public class GrinBinaryWriter {
        out.writeByte(Constants.TEXT_IDENTIFIER);
 
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
        if (show.isPublic(text)) {
 	   dos.writeString(text.getName());
@@ -555,7 +610,7 @@ public class GrinBinaryWriter {
        out.writeByte(Constants.TIMER_IDENTIFIER);
 
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
        if (show.isPublic(timer)) {
 	   dos.writeString(timer.getName());
@@ -577,7 +632,7 @@ public class GrinBinaryWriter {
         out.writeByte((int)Constants.TRANSLATOR_MODEL_IDENTIFIER);
       
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);  
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);  
         
        if (show.isPublic(translation)) {
 	   dos.writeString(translation.getName());
@@ -601,7 +656,7 @@ public class GrinBinaryWriter {
         out.writeByte((int)Constants.TRANSLATOR_IDENTIFIER);
  
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);  
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);  
         
         if (show.isPublic(translator)) {
 	   dos.writeString(translator.getName());
@@ -610,10 +665,8 @@ public class GrinBinaryWriter {
         }
         dos.writeInt(translator.getAbsoluteXOffset());
         dos.writeInt(translator.getAbsoluteYOffset());
-        TranslatorModel model = translator.getModel();
-        int index = featuresList.indexOf(model);
-        dos.writeFeature(index); // write the index only
-       	dos.writeFeature(featuresList.indexOf(translator.getPart()));
+        dos.writeFeatureReference(translator.getModel()); // write the index only 
+       	dos.writeFeatureReference(translator.getPart());
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -623,14 +676,14 @@ public class GrinBinaryWriter {
     private void writeGuaranteeFill(DataOutputStream out, GuaranteeFill feature) throws IOException {
 	out.writeByte((int)Constants.GUARANTEE_FILL_IDENTIFIER);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);  
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);  
         
 	if (show.isPublic(feature)) {
 	    dos.writeString(feature.getName());
 	} else {
 	    dos.writeString(null);
 	}
-	dos.writeFeature(featuresList.indexOf(feature.getPart()));
+	dos.writeFeatureReference(feature.getPart());
 	dos.writeRectangle(feature.getGuaranteed());
 	dos.writeRectangleArray(feature.getFills());
       
@@ -642,14 +695,14 @@ public class GrinBinaryWriter {
     private void writeSetTarget(DataOutputStream out, SetTarget feature) throws IOException {
         out.writeByte(Constants.SET_TARGET_IDENTIFIER);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);  
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);  
         
 	if (show.isPublic(feature)) {
 	    dos.writeString(feature.getName());
 	} else {
 	    dos.writeString(null);
 	}
-        dos.writeFeature(featuresList.indexOf(feature.getPart()));
+        dos.writeFeatureReference(feature.getPart());
 	dos.writeInt(feature.getTarget());
       
         out.writeInt(baos.size());
@@ -657,7 +710,37 @@ public class GrinBinaryWriter {
         dos.close();
     }
 
-    private void writeUserModifier(DataOutputStream out, SEUserModifier modifier) throws IOException {
+    private void writeUserFeature(DataOutputStream out, Feature feature) throws IOException {
+        out.writeByte((int)Constants.USER_FEATURE_IDENTIFIER);
+         
+        if (feature == null) {
+            out.writeByte(Constants.NULL);
+            return;
+        } 
+        
+        out.writeByte(Constants.NON_NULL);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
+        
+        dos.writeUTF(feature.getName());
+        
+        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+        GrinDataOutputStream dos2 = new GrinDataOutputStream(baos2, this);
+        
+	extensionsWriter.writeExtensionFeature(dos2, feature);
+        
+        dos.writeInt(baos2.size());
+        baos2.writeTo(baos);
+        
+        dos2.close();
+        
+        out.writeInt(baos.size());
+        baos.writeTo(out);
+        dos.close();   	    
+    }
+
+    private void writeUserModifier(DataOutputStream out, Modifier modifier) throws IOException {
         out.writeByte((int)Constants.USER_MODIFIER_IDENTIFIER);
          
         if (modifier == null) {
@@ -668,16 +751,18 @@ public class GrinBinaryWriter {
         out.writeByte(Constants.NON_NULL);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);
-
-	if (show.isPublic(modifier)) {
-	    dos.writeString(modifier.getName());
-	} else {
-	    dos.writeString(null);
-	}
-        dos.writeUTF(modifier.getTypeName());
-        dos.writeUTF(modifier.getArg());
-        dos.writeFeature(featuresList.indexOf(modifier.getPart()));
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
+	
+        dos.writeUTF(modifier.getName());
+        dos.writeFeatureReference(modifier.getPart());
+        
+        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+        GrinDataOutputStream dos2 = new GrinDataOutputStream(baos2, this);
+        
+	extensionsWriter.writeExtensionModifier(dos2, modifier);
+        
+        dos.writeInt(baos2.size());
+        baos2.writeTo(baos);
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -696,7 +781,7 @@ public class GrinBinaryWriter {
        out.writeInt(commands.length);
        
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
        for (int i = 0; i < commands.length; i++) {
           Command command = commands[i];
@@ -709,7 +794,7 @@ public class GrinBinaryWriter {
           } else if (command instanceof SetVisualRCStateCommand) {
              writeSetVisualRCStateCmd(dos, (SetVisualRCStateCommand) command);
           } else {    /* user-defined or null */
-             writeUserCmd(dos, (UserCommand)command);
+             writeUserCmd(dos, command);
           }
        }
        
@@ -723,7 +808,7 @@ public class GrinBinaryWriter {
         out.writeByte((int)Constants.SETVISUALRCSTATE_CMD_IDENTIFIER);
        
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
         
         dos.writeBoolean(setVisualRCStateCommand.getActivated());
         dos.writeInt(setVisualRCStateCommand.getState());
@@ -742,13 +827,13 @@ public class GrinBinaryWriter {
         out.writeByte((int)Constants.ACTIVATEPART_CMD_IDENTIFIER);
        
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
         Assembly assembly = activatePartCommand.getAssembly();
         Feature part = activatePartCommand.getPart();
         
-        dos.writeFeature(featuresList.indexOf(assembly));
-        dos.writeFeature(featuresList.indexOf(part));
+        dos.writeFeatureReference(assembly);
+        dos.writeFeatureReference(part);
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -761,7 +846,7 @@ public class GrinBinaryWriter {
         out.writeByte((int)Constants.ACTIVATESEGMENT_CMD_IDENTIFIER);
    
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
         
         dos.writeBoolean(activateSegmentCommand.getPush());
         dos.writeBoolean(activateSegmentCommand.getPop());
@@ -782,7 +867,7 @@ public class GrinBinaryWriter {
        // nothing to record for this command.  Return.
    }
 
-    private void writeUserCmd(DataOutputStream out, UserCommand command) 
+    private void writeUserCmd(DataOutputStream out, Command command) 
        throws IOException {
        
         out.writeByte((int)Constants.USER_CMD_IDENTIFIER);
@@ -795,10 +880,9 @@ public class GrinBinaryWriter {
         out.writeByte(Constants.NON_NULL);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
 
-        dos.writeUTF(command.getTypeName());
-        dos.writeStringArray(command.getArgs());
+	extensionsWriter.writeExtensionCommand(dos, command);
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -810,7 +894,7 @@ public class GrinBinaryWriter {
         out.writeByte((int)Constants.COMMAND_RCHANDLER_IDENTIFIER);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);    
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);    
 
 	if (show.isPublic(commandRCHandler)) {
 	    dos.writeString(commandRCHandler.getName());
@@ -829,7 +913,7 @@ public class GrinBinaryWriter {
         out.writeByte((int)Constants.VISUAL_RCHANDLER_IDENTIFIER);
  
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);    
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);    
         
 	if (show.isPublic(visualRCHandler)) {
 	    dos.writeString(visualRCHandler.getName());
@@ -868,7 +952,7 @@ public class GrinBinaryWriter {
 	Feature assembly = visualRCHandler.getAssembly();
         dos.writeBoolean(assembly != null);
 	if (assembly != null) {
-	    dos.writeFeature(featuresList.indexOf(assembly));
+	    dos.writeFeatureReference(assembly);
 	}
         
         Feature[] selectFeatures = visualRCHandler.getSelectFeatures();
@@ -887,7 +971,7 @@ public class GrinBinaryWriter {
         out.writeByte((int)Constants.SEGMENT_IDENTIFIER);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);    
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);    
         
         dos.writeString(segment.getName());
 	//
@@ -945,7 +1029,7 @@ public class GrinBinaryWriter {
         out.writeInt(Constants.PUBLIC_ELEMENTS_IDENTIFIER);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos);    
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);    
 
 	for (int i = 0; i < segmentsList.size(); i++) {
 	    Segment seg = (Segment) segmentsList.get(i);
@@ -989,8 +1073,8 @@ public class GrinBinaryWriter {
             /* 4 types of Features that could have forward references.  */
             if (features[i] instanceof Assembly || 
                 features[i] instanceof Group ||
-                features[i] instanceof Modifier ||
-                features[i] instanceof Translator ) {
+                features[i] instanceof Modifier || 
+                features[i] instanceof Translator) {
                    deferred.add(features[i]);
             } else {    
                 common.add(features[i]);
@@ -1039,6 +1123,13 @@ public class GrinBinaryWriter {
                 return true;
             }
             return false;
+        } else if (feature instanceof Translator) {
+            Feature part = ((Translator)feature).getPart();
+            Feature model = ((Translator)feature).getModel();
+            if (list.contains(part) || list.contains(model)) {
+                return true;
+            }
+            return false;            
         } else {
             throw new RuntimeException("Unexpected instance " + feature);
         }

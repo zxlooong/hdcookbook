@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -52,82 +51,37 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
+package com.hdcookbook.bookmenu.menu;
 
-package com.hdcookbook.grin.io.binary;
-
-import java.net.URL;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.features.Modifier;
 
 /**
- * This is a subclass of the GRIN director class which is
- * used by the BinaryConverter tool.
+ * A dummy Modifier subclass that saves all the data passed into its constructor.
  */
-public class GenericDirector extends Director {
-   
-    private String showName;
-    private ExtensionsBuilder builder;
+public class SEUserModifier extends Modifier {
     
-    public GenericDirector(String showName, ExtensionsBuilder builder) {
-	this.showName = showName;
-        this.builder = builder;
+    private String typeName;
+    private String name;
+    private String arg;
+    
+    /** Creates a new instance of SEUserModifier */
+    public SEUserModifier(Show show, String typeName, String name, String arg)
+    {
+        super(show, name);
+        this.typeName = typeName;
+        this.arg = arg;
     }
     
-    /**
-     * See superclass definition.  This extensions builder will just
-     * make a fake implementation of each extension.
-     **/
-    public ExtensionsBuilder getExtensionsBuilder() {
-        if (builder == null) 
-            builder = new GenericExtensionsBuilder(this);
-        
-        return builder;
+    public String getTypeName() {
+        return typeName;
     }
-
-    /**
-     * Create a show.  This is called by the main control class of
-     * this debug tool.
-     **/
-    public SEShow createShow(ShowBuilder builder) {
-	SEShow show = new SEShow(this);
-	URL source = null;
-	BufferedReader rdr = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-	    rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
-	    ShowParser p = new ShowParser(rdr, showName, show, builder);
-	    p.parse();
-	    rdr.close();
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
-            System.out.println("    URL:  " + source);
-	    System.exit(1);
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }
-	}
-        return show;
+    
+    public String getArg() {
+        return arg;
     }
-
+    
+    public String toString() {
+        return typeName;
+    }
 }

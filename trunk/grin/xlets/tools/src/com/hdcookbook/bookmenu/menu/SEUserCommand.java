@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,70 +52,35 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+package com.hdcookbook.bookmenu.menu;
 
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEUserModifier;
-import com.hdcookbook.grin.io.ExtensionsBuilder;
-
-import java.io.IOException;
 
 /**
- * This is an extensions builder that makes a fake version of any
- * GRIN extension it encounters.  
+ * A dummy Command subclass that saves all the data passed into it's constructor.
  */
-class GenericExtensionsBuilder implements ExtensionsBuilder {
-   
-    private GenericDirector director;
-
-    public GenericExtensionsBuilder(GenericDirector director) {
-	this.director = director;
+public class SEUserCommand extends Command {
+    
+    private String typeName;
+    private String[] args;
+    
+    /** Creates a new instance of SEUserCommand */
+    public SEUserCommand(String typeName, String[] args) {
+        super();
+        this.typeName = typeName;
+        this.args = args;
     }
     
-    /**
-     * Returns null.
-     **/
-    public Feature getFeature(Show show, String typeName, 
-    			      String name, String arg)
-    {
-	// Not implemented.  If we do this, we'll have to figure out
-	// some syntactical contstraints on an extension feature.
-        return null;
+    public String getTypeName() {
+        return typeName;
     }
-
-    /**
-     * Returns an instance of a SEUserModifier.
-     **/
-    public Modifier getModifier(Show show, final String typeName, 
-    			        String name, String arg)
-    {
-	return new SEUserModifier(show, typeName, name, arg);
+    
+    public String[] getArgs() {
+        return args;
     }
-
-    /**
-     * Returns an instance of UserCommand.
-     **/
-    public Command getCommand(Show show, final String typeName, String[] args)
-		       throws IOException
-    {
-	return new UserCommand(typeName, args);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void finishBuilding(Show show) throws IOException {
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void takeMosaicHint(String name, int width, int height, 
-                               String[] images)
-    {
+    
+    public void execute() {
+	System.out.println("Executing " + typeName);
     }
     
 }
