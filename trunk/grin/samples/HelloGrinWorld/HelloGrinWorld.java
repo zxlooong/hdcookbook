@@ -67,12 +67,18 @@ import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
-	
+
+import org.dvb.event.EventManager;
+import org.dvb.event.UserEvent;
+import org.dvb.event.UserEventListener;
+import org.dvb.event.UserEventRepository;
+import org.bluray.ui.event.HRcEvent;
+
 /** 
  * An xlet example that displays GRIN script.
  */
 
-public class HelloGrinWorld implements Xlet, AnimationContext {
+public class HelloGrinWorld implements Xlet, AnimationContext, UserEventListener {
 	
 	public Show show;
 	Container rootContainer;
@@ -132,7 +138,29 @@ public class HelloGrinWorld implements Xlet, AnimationContext {
 	} 
 	
 	public void animationFinishInitialization() {
-	   show.activateSegment(show.getSegment("S:Initialize"));		
+	   show.activateSegment(show.getSegment("S:Initialize"));	
+           
+            UserEventRepository userEventRepo = new UserEventRepository("x");
+            userEventRepo.addAllArrowKeys();
+            userEventRepo.addAllColourKeys();
+            userEventRepo.addAllNumericKeys();
+            userEventRepo.addKey(HRcEvent.VK_ENTER);
+            userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
+
+            //rootContainer.addMouseMotionListener(this);
+            //rootContainer.addMouseListener(this);
+  
+            EventManager.getInstance().addUserEventListener(this, userEventRepo);          
+            rootContainer.requestFocus();          
 	}
-	
+
+    /**
+     * A remote control event that is coming in via
+     * org.dvb.event.UserEventListener
+     **/
+    public void userEventReceived(UserEvent e) {
+        if (e.getType() == HRcEvent.KEY_PRESSED) {
+            show.handleKeyPressed(e.getCode());
+        }
+    }	
 }
