@@ -38,9 +38,6 @@ import sun.security.pkcs.*;
 import sun.security.util.*;
 import sun.misc.BASE64Encoder;
 
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-
 /**
  * <p>The jarsigner utility.
  *
@@ -48,28 +45,6 @@ import javax.naming.ldap.Rdn;
  * @author Roland Schemers
  * @author Jan Luehe
  */
-
-/*
- * BLU-RAY SPECIFIC:
- * 
- * Changes have been made to jarsigner tool to add BDJ specific
- * stuff. Whenever a spec. section is referred it is from
- * the "System Description Blu-Ray Disc Read-Only Format  
- * - Part 3 Audio Visual Basic Specifications" - DRAFT Version 2.02.
- */
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.asn1.DERConstructedSequence;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.jce.X509KeyUsage;
-import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-
-import net.java.bd.tools.bdsigner.X509BDJEntryConverter;
 
 public class JarSigner {
 
@@ -96,9 +71,6 @@ public class JarSigner {
     private static final long SIX_MONTHS = 180*24*60*60*1000L; //milliseconds
 
     public static void main(String args[]) throws Exception {
-      // BLU-RAY SPECIFIC
-      Security.addProvider(new BouncyCastleProvider());
-
 	JarSigner js = new JarSigner();
 	js.run(args);
     }
@@ -135,7 +107,6 @@ public class JarSigner {
     String signedjar; // output filename
     String tsaUrl; // location of the Timestamping Authority
     String tsaAlias; // alias for the Timestamping Authority's certificate
-    String csrfile; // BLU-RAY SPECIFIC: name of the certificate request file generated
 
     boolean verify = false; // verify the jar
     boolean verbose = false; // verbose output when signing/verifying
@@ -221,16 +192,7 @@ public class JarSigner {
 		    signingMechanism = loadSigningMechanism(altSignerClass,
 			altSignerClasspath);
 		}
-            // javaca specific            
-            if (csrfile != null) {
-                try {
-                  issueCert(csrfile, jarfile, alias, args);
-                } catch (Exception exp) {
-                     exp.printStackTrace();
-		}
-            } else {
                 signJar(jarfile, alias, args);
-            }
 	    }
 	} catch (Exception e) {
 	    System.out.println(rb.getString("jarsigner error: ") + e);
@@ -303,21 +265,7 @@ public class JarSigner {
 		sigfile = args[n];
 	    } else if (collator.compare(flags, "-signedjar") ==0) {
 		if (++n == args.length) usage();
-		signedjar = args[n];		
-            /**
-             * BLU-RAY SPECIFIC:
-             * 
-             * The signature file name should be of named as 
-             * SIG-BD'XX'.SF where XX are numeric digits.
-             * Refer to section 12.1.4.2.2.
-             */
-             if (! sigfile.startsWith("SIG-BD")) {
-                 System.err.println("invalid signature file name pattern, must be SIG-BD'XX'");
-             }
-        // BLU-RAY SPECIFIC: javaca 
-	    } else if (collator.compare(flags, "-issuecert") == 0) {
-		if (++n == args.length) usage();
-		csrfile = args[n];             
+		signedjar = args[n];		        
 	    } else if (collator.compare(flags, "-tsa") ==0) {
 		if (++n == args.length) usage();
 		tsaUrl = args[n];
@@ -393,44 +341,11 @@ public class JarSigner {
 	}
     }
 	    
-    // BLU-RAY SPECIFIC: 
-    // Bouncy castle API requires CSR file in DER format. CSR
-    // PKCS#10 files are normally BASE64 encoded. We remove
-    // header, footer lines and decode BASE64.
-    //
-    static byte[] readCSRFile(String file) throws IOException {
-        StringBuffer buf = new StringBuffer();
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String line = null;
-        line = reader.readLine();
-        if (! line.equals("-----BEGIN NEW CERTIFICATE REQUEST-----")) {
-           throw new IOException("not a valid CSR file");
-        }
-        boolean seenLastLine = false;
-        while ((line = reader.readLine()) != null) {
-          if (line.equals("-----END NEW CERTIFICATE REQUEST-----")) {
-             seenLastLine = true;
-             break;
-          }
-          buf.append(line);          
-          buf.append('\n');
-        }
-        if (! seenLastLine) {
-           throw new IOException("not a valid CSR file");
-        }
-        return Base64.decode(buf.toString());
-    }
-
-
     void usage() {
 	System.out.println(rb.getString
 		("Usage: jarsigner [options] jar-file alias"));
 	System.out.println(rb.getString
 		("       jarsigner -verify [options] jar-file"));
-      // BLU-RAY SPECIFIC: javaca specific
-	System.out.println(
-		 "       jarsigner -issuecert csr-file cert-file alias");
-	System.out.println();
 	System.out.println(rb.getString
 		("[-keystore <url>]           keystore location"));
 	System.out.println();
@@ -837,107 +752,18 @@ public class JarSigner {
 	return result;
     }
 
-    // BLU-RAY SPECIFIC: javaca specific
-    void issueCert(String csrfile, String certfile, String alias, String[] args) throws Exception {
-        PKCS10CertificationRequest csr = new PKCS10CertificationRequest(
-            readCSRFile(csrfile));
-
-        String subject = 
-            csr.getCertificationRequestInfo().getSubject().toString();
-
-        // Generate leaf certificate
-        X509V3CertificateGenerator cg = new X509V3CertificateGenerator();
-        cg.reset();
-
-        X509Certificate rootCert
-		= (X509Certificate)store.getCertificate(alias);
-        
-        cg.setIssuerDN(new X509Name(true, rootCert.getSubjectDN().getName(), 
-                                    new X509BDJEntryConverter()));
-        cg.setSubjectDN(new X509Name(subject, new X509BDJEntryConverter()));
-        cg.setNotBefore(rootCert.getNotBefore());
-        cg.setNotAfter(rootCert.getNotAfter());
-        
-        cg.setPublicKey(csr.getPublicKey());
-        cg.setSerialNumber(BigInteger.valueOf(1));
-
-	// BD-J mandates using SHA1WithRSA as a signature Algorithm
-        cg.setSignatureAlgorithm("SHA1WITHRSA"); 
-        
-        cg.addExtension(X509Extensions.KeyUsage.getId(), true,
-        		new X509KeyUsage(X509KeyUsage.digitalSignature));
-
-        // FIXME: how to pull this out from the original app cert's extension?
-        // Email on X500Name is not encoded with UTF8String.
-        cg.addExtension(X509Extensions.SubjectAlternativeName.getId(), false,
-            	getRfc822Name("abc@producer.com"));
-        
-        // Assuming that the root certificate was generated using our tool,
-        // the certificate should have IssuerAlternativeNames as an extension.
-        List issuerName = (List) rootCert.getIssuerAlternativeNames().iterator().next();
-        cg.addExtension(X509Extensions.IssuerAlternativeName.getId(), false,
-            	getRfc822Name((String)issuerName.get(1)));
-       /* 
-        Collection issuerNames = userCert.getSubjectAlternativeNames();
-        if (issuerNames != null) {
-            Iterator iter = issuerNames.iterator();
-            while (iter.hasNext()) {
-                List generalNames = (List) iter.next();
-                //find the first rfc822Name (email address)
-                if (((Integer) generalNames.get(0)).intValue() == 1) {
-                    Object name = generalNames.get(1);
-                    DERIA5String derString;
-                    if (name instanceof String) {
-                        derString = new DERIA5String((String) name);
-                    } else {
-                        derString = new DERIA5String((byte[]) name);
-                    }
-                    seq = new DERConstructedSequence();
-                    seq.addObject(new GeneralName(derString, 1));
-                    cg.addExtension(
-                        X509Extensions.IssuerAlternativeName.getId(),
-                        false, new GeneralNames(seq));
-                    break; //while (iter.hasNext())
-                }
-            }
-        } */
-
-        X509Certificate cert = cg.generate(privateKey);
-
-        // Now, write leaf certificate
-        System.out.println("Writing cert to " + certfile + ".");
-        FileOutputStream str = new FileOutputStream(certfile);
-        str.write(cert.getEncoded());
-	str.close(); 
-    }
-
-    GeneralNames getRfc822Name(String name) {
-        GeneralName gn = new GeneralName(GeneralName.rfc822Name,
-		 new DERIA5String(name));
-        DERConstructedSequence seq = new DERConstructedSequence();
-        seq.addObject(gn);
-	return new GeneralNames(seq);
-    }
-
     void signJar(String jarName, String alias, String[] args) throws Exception {
 	boolean aliasUsed = false;
 	X509Certificate tsaCert = null;
-
-	if (sigfile == null) {
-          /**
-           * BLU-RAY SPECIFIC:
-           *
-           * Refer to section 12.1.4.2.2 on name pattern
-           */
-          sigfile = "SIG-BD00";
-	}
-
+        if (sigfile == null) {
+           sigfile = alias;
+           aliasUsed = true;
+        }
 	if (sigfile.length() > 8) {
 	    sigfile = sigfile.substring(0, 8).toUpperCase();
 	} else {
 	    sigfile = sigfile.toUpperCase();
 	}
-
 	StringBuffer tmpSigFile = new StringBuffer(sigfile.length());
 	for (int j = 0; j < sigfile.length(); j++) {
 	    char c = sigfile.charAt(j);

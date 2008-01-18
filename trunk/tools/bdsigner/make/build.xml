@@ -4,7 +4,7 @@
 
   <!-- Property Definitions -->
 
-  <property name="app.name" value="bdsigner"/>
+  <property name="app.name" value="security"/>
   <property name="src.dir"  value="../src"/>
   <property name="build.dir"  value="../build"/>
   <property name="dist.jar" value="${build.dir}/${app.name}.jar"/>

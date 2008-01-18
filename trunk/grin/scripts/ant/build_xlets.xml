@@ -207,10 +207,10 @@ information or have any questions.
 
 <target name = "sign-xlets" depends="check-bdsigner">
 	<fail unless="bdsigner.ok" message="Could not find the bdsigner tool at ${HDC_BDJ_SIGNER}"/>
-	<java classname="net.java.bd.tools.bdsigner.BDSigner" fork="true" failonerror="true">
+	<java classname="net.java.bd.tools.security.BDSigner" fork="true" failonerror="true">
 		<arg line="56789abc ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar ${HDC_DISC_BDMV}/JAR/00004.jar"/>
 		<classpath>
-			<pathelement location="${HDC_BDJ_SIGNER}/build/bdsigner.jar"/>
+			<pathelement location="${HDC_BDJ_SIGNER}/build/security.jar"/>
 			<pathelement location="${HDC_BDJ_SIGNER}/resource/bcprov-jdk15-137.jar"/>
 			<pathelement location="${java.home}/../lib/tools.jar"/>   
 		</classpath>	   
@@ -224,14 +224,14 @@ information or have any questions.
 </target>
 
 <target name="check-exists-bdsigner">
-	<available file="${HDC_BDJ_SIGNER}/build/bdsigner.jar" type="file"
+	<available file="${HDC_BDJ_SIGNER}/build/security.jar" type="file"
 	    property="bdsigner.ok"/>
 </target>
 
 <target name="compile-bdsigner" unless="bdsigner.ok">	
    <ant dir="${HDC_BDJ_SIGNER}/make"/>
 
-   <available file="${HDC_BDJ_SIGNER}/build/bdsigner.jar" type="file"
+   <available file="${HDC_BDJ_SIGNER}/build/security.jar" type="file"
 	    property="bdsigner.ok"/>
 </target>
 

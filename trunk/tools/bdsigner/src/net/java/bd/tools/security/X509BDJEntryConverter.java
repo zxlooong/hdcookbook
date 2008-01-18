@@ -57,7 +57,7 @@
  * that the Country input uses UTF8String format, required for MHP 12.5.6.
  */
 
-package net.java.bd.tools.bdsigner;
+package net.java.bd.tools.security;
 
 import java.io.IOException;
 import org.bouncycastle.asn1.DERGeneralizedTime;

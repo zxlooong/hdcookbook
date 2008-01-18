@@ -6,20 +6,18 @@ It is meant for generating certificates and signing xlets.
 
 How to use this tool:
 
- * BJSigner syntax is : BDSigner [-debug] 8-digit-hex-organization-ID jarfile1 jarfile2 ...
- * 
- * Example: java -cp $BDSIGNER_HOME/build/bdsigner.jar:$JDK_HOME/lib/tools.jar:$BDSIGNER_HOME/resource/bcprov-jdk15-137.jar net.java.bd.tools.bdsigner.BDSigner 56789abc 00000.jar 
- * 
- * Make sure to put bdsigner.jar before tools.jar in the jdk distribution for the jre 
- * classpath so that the modified version of the sun.security.* classes in this BDSigner respository
- * are used during the run.  bdprov-jdk15-137.jar is a bouncycastle distribution; a copy can be bound at "resources" dir.
+Example: java -cp $SECURITY_HOME/build/security.jar:$JDK_HOME/lib/tools.jar:$SECURITY_HOME/resource/bcprov-jdk15-137.jar net.java.bd.tools.security.BDSigner 56789abc 00000.jar 
+
+Make sure to put security.jar before tools.jar in the jdk distribution for the jre 
+classpath so that the modified version of the sun.security.* classes in this BDSigner respository
+  are used during the run.  bdprov-jdk15-137.jar is a bouncycastle distribution; a copy can be bound at "resources" dir.
  
 This tool also generates a corresponding root certificate file after signing the xlets.
 Place the generated file, app.discroot.crt, in the BDMV's CERTIFICATE directory.
 
 ========================
 
-This is "bdsigner" tool to sign BD-J jar files. Why can't we
+This is "BDsigner" tool to sign BD-J jar files. Why can't we
 just use the standard "jarsigner" tool in Java SE?
 
 Blu-Ray specification requires an extra header in the signature 
@@ -61,8 +59,6 @@ from the "tools.jar" of JDK, chances are that this tool may
 
 ========================
 
-The JarSigner is now also capable of signing certificates 
-with -issuecert" option.
 This tool uses the following open source libraries:
 
 * Bouncy Castle Provider - http://www.bouncycastle.org/

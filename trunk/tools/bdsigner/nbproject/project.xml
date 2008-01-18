@@ -4,11 +4,17 @@
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
             <!-- Do not use Project Properties customizer when editing this file manually. -->
-            <name>bdsigner</name>
+            <name>security</name>
             <properties>
                 <property name="ant.script">make/build.xml</property>
             </properties>
-            <folders/>
+            <folders>
+                <source-folder>
+                    <label>src</label>
+                    <type>java</type>
+                    <location>src</location>
+                </source-folder>
+            </folders>
             <ide-actions>
                 <action name="build">
                     <script>${ant.script}</script>
@@ -26,6 +32,10 @@
             </ide-actions>
             <view>
                 <items>
+                    <source-folder style="packages">
+                        <label>src</label>
+                        <location>src</location>
+                    </source-folder>
                     <source-file>
                         <location>${ant.script}</location>
                     </source-file>
@@ -38,6 +48,11 @@
             </view>
             <subprojects/>
         </general-data>
-        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1"/>
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
+            <compilation-unit>
+                <package-root>src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+        </java-data>
     </configuration>
 </project>

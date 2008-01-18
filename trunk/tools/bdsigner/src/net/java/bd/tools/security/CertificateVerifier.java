@@ -53,7 +53,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package net.java.bd.tools.bdsigner;
+package net.java.bd.tools.security;
 
 
 import java.io.File;
@@ -138,6 +138,7 @@ public class CertificateVerifier {
             appCert = (X509Certificate)factory.generateCertificate(new FileInputStream(appCertFile));
         } catch (Exception e) {
             System.out.println("Error in creating certificate from a file");
+            e.printStackTrace();
             failed = true;
         }
         
