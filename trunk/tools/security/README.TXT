@@ -48,7 +48,7 @@ header "BLU-RAY SPECIFIC:"
 
 * Not all sources needed for the jarsigner tool are here. 
 So, you need to put "tools.jar" from JDK in CLASSPATH. And 
-the classpath needs to be prefixed with "bdsigner.jar" built
+the classpath needs to be prefixed with "security.jar" built
 from this project - so that the modified JarSigner class will
 be loaded instead of the one in tools.jar. See also the scripts
 under the "bin" directory.
