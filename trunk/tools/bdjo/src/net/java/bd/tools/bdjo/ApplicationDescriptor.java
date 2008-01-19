@@ -148,11 +148,11 @@ public class ApplicationDescriptor {
     }
 
     @XmlJavaTypeAdapter(HexStringShortAdapter.class)    
-    public short getIconFlags() {
+    public Short getIconFlags() {
         return iconFlags;
     }
 
-    public void setIconFlags(short iconFlags) {
+    public void setIconFlags(Short iconFlags) {
         this.iconFlags = iconFlags;
     }
 

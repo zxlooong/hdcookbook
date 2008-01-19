@@ -76,20 +76,20 @@ public class AppInfo {
     private ApplicationDescriptor applicationDescriptor;
 
     @XmlJavaTypeAdapter(HexStringByteAdapter.class)    
-    public byte getControlCode() {
+    public Byte getControlCode() {
         return controlCode;
     }
 
-    public void setControlCode(byte controlCode) {
+    public void setControlCode(Byte controlCode) {
         this.controlCode = controlCode;
     }
     
     @XmlJavaTypeAdapter(HexStringByteAdapter.class)    
-    public byte getType() {
+    public Byte getType() {
         return type;
     }
 
-    public void setType(byte type) {
+    public void setType(Byte type) {
         if (type < 0 || type > MAX_APPLICATION_TYPE) {
             throw new IllegalArgumentException("invalid type : " + type);
         }
@@ -97,20 +97,20 @@ public class AppInfo {
     }
 
     @XmlJavaTypeAdapter(HexStringIntegerAdapter.class)
-    public int getOrganizationId() {
+    public Integer getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(int organizationId) {
+    public void setOrganizationId(Integer organizationId) {
         this.organizationId = organizationId;
     }
 
     @XmlJavaTypeAdapter(HexStringShortAdapter.class)
-    public short getApplicationId() {
+    public Short getApplicationId() {
         return applicationId;
     }
 
-    public void setApplicationId(short applicationId) {
+    public void setApplicationId(Short applicationId) {
         this.applicationId = applicationId;
     }
 

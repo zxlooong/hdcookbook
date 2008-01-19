@@ -155,11 +155,11 @@ public class BDJO {
     }
     
     @XmlJavaTypeAdapter(HexStringIntegerAdapter.class)
-    public int getKeyInterestTable() {
+    public Integer getKeyInterestTable() {
         return keyInterestTable;
     }
 
-    public void setKeyInterestTable(int keyInterestTable) {
+    public void setKeyInterestTable(Integer keyInterestTable) {
         this.keyInterestTable = keyInterestTable;
     }
     
