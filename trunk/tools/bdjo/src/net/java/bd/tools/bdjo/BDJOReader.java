@@ -321,7 +321,7 @@ public final class BDJOReader {
             int visibility = ((b & 0x030) >> 4);
             Enum[] visibilities = Visibility.values();
              for (int i = 0; i < visibilities.length; i++) {
-                if (visibilities[i].ordinal() == bind) {
+                if (visibilities[i].ordinal() == visibility) {
                     appDesc.setVisibility((Visibility)visibilities[i]);
                     break;
                 }
