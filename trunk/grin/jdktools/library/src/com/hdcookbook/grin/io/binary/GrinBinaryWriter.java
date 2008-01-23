@@ -422,9 +422,9 @@ public class GrinBinaryWriter {
        dos.writeInt(box.getY());
        dos.writeInt(box.implGetWidth());
        dos.writeInt(box.implGetHeight());
-       dos.writeInt(box.getOutlineWidth());
-       dos.writeColor(box.getOutlineColor());
-       dos.writeColor(box.getFillColor());
+       dos.writeInt(box.implGetOutlineWidth());
+       dos.writeColor(box.implGetOutlineColor());
+       dos.writeColor(box.implGetFillColor());
        
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -438,7 +438,7 @@ public class GrinBinaryWriter {
        ByteArrayOutputStream baos = new ByteArrayOutputStream();
        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
        
-       Rectangle rect = clipped.getClipRegion();      
+       Rectangle rect = clipped.implGetClipRegion();      
        if (show.isPublic(clipped)) {
 	   dos.writeString(clipped.getName());
        } else {
@@ -464,13 +464,13 @@ public class GrinBinaryWriter {
        } else {
 	   dos.writeString(null);
        }
-       dos.writeBoolean(fade.getSrcOver());
-       int[] keyframes = fade.getKeyframes();
+       dos.writeBoolean(fade.implGetSrcOver());
+       int[] keyframes = fade.implGetKeyframes();
        dos.writeIntArray(keyframes);
-       int[] keyAlphas = fade.getKeyAlphas();
+       int[] keyAlphas = fade.implGetKeyAlphas();
        dos.writeIntArray(keyAlphas);
-       dos.writeInt(fade.getRepeatFrame());
-       Command[] endCommands = fade.getEndCommands();
+       dos.writeInt(fade.implGetRepeatFrame());
+       Command[] endCommands = fade.implGetEndCommands();
        writeCommands(dos, endCommands);
        dos.writeFeatureReference(fade.getPart());
        
@@ -494,7 +494,7 @@ public class GrinBinaryWriter {
        }
        dos.writeInt(image.getX());
        dos.writeInt(image.getY());
-       dos.writeUTF(image.getFileName());
+       dos.writeUTF(image.implGetFileName());
        
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -535,16 +535,16 @@ public class GrinBinaryWriter {
        }
        dos.writeInt(imageSequence.getX());
        dos.writeInt(imageSequence.getY());
-       dos.writeUTF(imageSequence.getFileName());
-       dos.writeStringArray(imageSequence.getMiddle());
-       dos.writeUTF(imageSequence.getExtension());
-       dos.writeBoolean(imageSequence.getRepeat());
-       ImageSequence model = imageSequence.getModel();
+       dos.writeUTF(imageSequence.implGetFileName());
+       dos.writeStringArray(imageSequence.implGetMiddle());
+       dos.writeUTF(imageSequence.implGetExtension());
+       dos.writeBoolean(imageSequence.implGetRepeat());
+       ImageSequence model = imageSequence.implGetModel();
        dos.writeBoolean(model != null);
        if (model != null) {
            dos.writeFeatureReference(model);
        }
-       Command[] endCommands = imageSequence.getEndCommands();
+       Command[] endCommands = imageSequence.implGetEndCommands();
        writeCommands(dos, endCommands);
        
        out.writeInt(baos.size());
@@ -587,17 +587,17 @@ public class GrinBinaryWriter {
        }
        dos.writeInt(text.getX());
        dos.writeInt(text.getY());
-       dos.writeStringArray(text.getStrings());
-       dos.writeInt(text.getVspace());
-       dos.writeFont(text.getFont());
+       dos.writeStringArray(text.implGetStrings());
+       dos.writeInt(text.implGetVspace());
+       dos.writeFont(text.implGetFont());
        
-       Color[] colors = text.getColors();
+       Color[] colors = text.implGetColors();
        dos.writeInt(colors.length);
        for (int i = 0; i < colors.length; i++) {
           dos.writeColor(colors[i]);  
        }
        
-       dos.writeColor(text.getBackground());             
+       dos.writeColor(text.implGetBackground());             
       
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -617,8 +617,8 @@ public class GrinBinaryWriter {
        } else {
 	   dos.writeString(null);
        }
-       dos.writeInt(timer.getNumFrames());
-       dos.writeBoolean(timer.getRepeat());
+       dos.writeInt(timer.implGetNumFrames());
+       dos.writeBoolean(timer.implGetRepeat());
        
        writeCommands(dos, timer.getEndCommands());
 
@@ -639,10 +639,10 @@ public class GrinBinaryWriter {
        } else {
 	   dos.writeString(null);
        }
-        dos.writeIntArray(translation.getFrames());
-        dos.writeIntArray(translation.getXs());
-        dos.writeIntArray(translation.getYs());
-        dos.writeInt(translation.getRepeatFrame());
+        dos.writeIntArray(translation.implGetFrames());
+        dos.writeIntArray(translation.implGetXs());
+        dos.writeIntArray(translation.implGetYs());
+        dos.writeInt(translation.implGetRepeatFrame());
         dos.writeBoolean(translation.getIsRelative());
         writeCommands(dos, translation.getEndCommands());        
 
@@ -663,8 +663,8 @@ public class GrinBinaryWriter {
         } else {
 	   dos.writeString(null);
         }
-        dos.writeInt(translator.getAbsoluteXOffset());
-        dos.writeInt(translator.getAbsoluteYOffset());
+        dos.writeInt(translator.implGetAbsoluteXOffset());
+        dos.writeInt(translator.implGetAbsoluteYOffset());
         dos.writeFeatureReference(translator.getModel()); // write the index only 
        	dos.writeFeatureReference(translator.getPart());
         
@@ -684,8 +684,8 @@ public class GrinBinaryWriter {
 	    dos.writeString(null);
 	}
 	dos.writeFeatureReference(feature.getPart());
-	dos.writeRectangle(feature.getGuaranteed());
-	dos.writeRectangleArray(feature.getFills());
+	dos.writeRectangle(feature.implGetGuaranteed());
+	dos.writeRectangleArray(feature.implGetFills());
       
         out.writeInt(baos.size());
         baos.writeTo(out);      
@@ -703,7 +703,7 @@ public class GrinBinaryWriter {
 	    dos.writeString(null);
 	}
         dos.writeFeatureReference(feature.getPart());
-	dos.writeInt(feature.getTarget());
+	dos.writeInt(feature.implGetTarget());
       
         out.writeInt(baos.size());
         baos.writeTo(out);      
@@ -901,8 +901,8 @@ public class GrinBinaryWriter {
 	} else {
 	    dos.writeString(null);
 	}
-        dos.writeInt(commandRCHandler.getMask());
-        writeCommands(dos, commandRCHandler.getCommands());   
+        dos.writeInt(commandRCHandler.implGetMask());
+        writeCommands(dos, commandRCHandler.implGetCommands());   
         
         out.writeInt(baos.size());
         baos.writeTo(out);
@@ -920,10 +920,10 @@ public class GrinBinaryWriter {
 	} else {
 	    dos.writeString(null);
 	}
-        dos.writeIntArray(visualRCHandler.getUpDown());
-        dos.writeIntArray(visualRCHandler.getRightLeft());
-        dos.writeStringArray(visualRCHandler.getStateNames());
-        Command[][] selectCommands = visualRCHandler.getSelectCommands();
+        dos.writeIntArray(visualRCHandler.implGetUpDown());
+        dos.writeIntArray(visualRCHandler.implGetRightLeft());
+        dos.writeStringArray(visualRCHandler.implGetStateNames());
+        Command[][] selectCommands = visualRCHandler.implGetSelectCommands();
         if (selectCommands == null) {
             dos.writeByte(Constants.NULL);
         } else {
@@ -933,7 +933,7 @@ public class GrinBinaryWriter {
                 writeCommands(dos, selectCommands[i]);
             }
         }
-        Command[][] activateCommands = visualRCHandler.getActivateCommands();
+        Command[][] activateCommands = visualRCHandler.implGetActivateCommands();
         if (activateCommands == null) {
             dos.writeByte(Constants.NULL);
         } else {
@@ -944,21 +944,21 @@ public class GrinBinaryWriter {
             }
         }
         
-        dos.writeRectangleArray(visualRCHandler.getMouseRects());
-        dos.writeIntArray(visualRCHandler.getMouseRectStates());
-        dos.writeInt(visualRCHandler.getTimeout());
-        writeCommands(dos, visualRCHandler.getTimeoutCommands());
+        dos.writeRectangleArray(visualRCHandler.implGetMouseRects());
+        dos.writeIntArray(visualRCHandler.implGetMouseRectStates());
+        dos.writeInt(visualRCHandler.implGetTimeout());
+        writeCommands(dos, visualRCHandler.implGetTimeoutCommands());
        
-	Feature assembly = visualRCHandler.getAssembly();
+	Feature assembly = visualRCHandler.implGetAssembly();
         dos.writeBoolean(assembly != null);
 	if (assembly != null) {
 	    dos.writeFeatureReference(assembly);
 	}
         
-        Feature[] selectFeatures = visualRCHandler.getSelectFeatures();
+        Feature[] selectFeatures = visualRCHandler.implGetSelectFeatures();
         writeFeaturesIndex(dos, selectFeatures);
         
-        Feature[] activateFeatures = visualRCHandler.getActivateFeatures();
+        Feature[] activateFeatures = visualRCHandler.implGetActivateFeatures();
         writeFeaturesIndex(dos, activateFeatures);
         
         out.writeInt(baos.size());

@@ -123,7 +123,7 @@ public class FixedImage extends Feature {
     /* 
      * Internal use only 
      */
-    public String getFileName() {
+    public String implGetFileName() {
         return fileName;
     }
     
@@ -133,6 +133,34 @@ public class FixedImage extends Feature {
     public ManagedImage getImage() {
 	return image;
     }
+    
+    /**
+     * Internal use only
+     **/
+    public void implSetX(int x) {
+	this.x = x;
+    }
+
+    /**
+     * Internal use only
+     **/
+    public void implSetY(int y) {
+	this.y = y;
+    }
+
+    /* 
+     * Internal use only 
+     */
+    public void implSetFileName(String fileName) {
+        this.fileName = fileName;
+    }
+    
+    /**
+     * Internal use only
+     **/
+    public void implSetImage(ManagedImage image) {
+	this.image = image;
+    }    
 
     /**
      * Free any resources held by this feature.  It is the opposite of

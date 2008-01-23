@@ -117,25 +117,49 @@ public class TranslatorModel extends Feature {
 	currY = ys[0];
     }
 
-    public int[] getFrames() {
+    public int[] implGetFrames() {
         return frames;
     }
     
-    public int[] getXs() {
+    public int[] implGetXs() {
         return xs;
     }
     
-    public int[] getYs() {
+    public int[] implGetYs() {
         return ys;
     }
     
-    public int getRepeatFrame() {
+    public int implGetRepeatFrame() {
         return repeatFrame;
     }
     
+    /**
+     * Returns true if this translation model uses relative x y coordinates
+     * from the parent node, false otherwise.
+     */
     public boolean getIsRelative() {
         return isRelative;
     }
+        
+    public void implSetFrames(int[] frames) {
+        this.frames = frames;
+    }
+    
+    public void implSetXs(int[] xs) {
+        this.xs = xs;
+    }
+    
+    public void implSetYs(int[] ys) {
+        this.ys = ys;
+    }
+    
+    public void implSetRepeatFrame(int repeatFrame) {
+        this.repeatFrame = repeatFrame;
+    }
+    
+    public void implSetIsRelative(boolean isRelative) {
+        this.isRelative = isRelative;
+    }    
     
     final int getCurrX() {
 	return currX;

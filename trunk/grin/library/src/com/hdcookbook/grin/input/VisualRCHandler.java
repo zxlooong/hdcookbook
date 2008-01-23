@@ -169,51 +169,125 @@ public class VisualRCHandler extends RCHandler {
     }
     
     /** used by the binaryconverter */  
-    public int[] getUpDown() {
+    public int[] implGetUpDown() {
         return upDown;
     }
 
     /** used by the binaryconverter */  
-    public int[] getRightLeft() {
+    public int[] implGetRightLeft() {
         return rightLeft;
     }
 
     /** used by the binaryconverter */  
-    public String[] getStateNames() {
+    public String[] implGetStateNames() {
         return stateNames;
     }
     
     /** used by the binaryconverter */  
-    public Command[][] getSelectCommands() {
+    public Command[][] implGetSelectCommands() {
         return selectCommands;
     }
     
     /** used by the binaryconverter */  
-    public Command[][] getActivateCommands() {
+    public Command[][] implGetActivateCommands() {
         return activateCommands;
     }
 
     /** used by the binaryconverter */  
-    public Rectangle[] getMouseRects() {
+    public Rectangle[] implGetMouseRects() {
         return mouseRects;
     }
     
     /** used by the binaryconverter */  
-    public int[] getMouseRectStates() {
+    public int[] implGetMouseRectStates() {
         return mouseRectStates;
     }
     
     /** used by the binaryconverter */  
-    public int getTimeout() {
+    public int implGetTimeout() {
         return timeout;
     }
     
     /** used by the binaryconverter */  
-    public Command[] getTimeoutCommands() {
+    public Command[] implGetTimeoutCommands() {
         return timeoutCommands;
     }
     
+    /* used by the binaryconverter */  
+    public Assembly implGetAssembly() {
+        return assembly;
+    }
 
+    /* used by the binaryconverter */      
+    public Feature[] implGetSelectFeatures() {
+        return selectFeatures;
+    }
+    
+    /* used by the binaryconverter */  
+    public Feature[] implGetActivateFeatures() {
+        return activateFeatures;
+    }
+
+    /** used by the binaryconverter */  
+    public void implSetUpDown(int[] upDown) {
+        this.upDown = upDown;
+    }
+
+    /** used by the binaryconverter */  
+    public void implSetRightLeft(int[] rightLeft) {
+        this.rightLeft = rightLeft;
+    }
+
+    /** used by the binaryconverter */  
+    public void implSetStateNames(String[] stateNames) {
+        this.stateNames = stateNames;
+    }
+    
+    /** used by the binaryconverter */  
+    public void implSetSelectCommands(Command[][] selectCommands) {
+        this.selectCommands = selectCommands;
+    }
+    
+    /** used by the binaryconverter */  
+    public void implSetActivateCommands(Command[][] activeCommands) {
+        this.activateCommands = activeCommands;
+    }
+
+    /** used by the binaryconverter */  
+    public void implSetMouseRects(Rectangle[] mouseRects) {
+        this.mouseRects = mouseRects;
+    }
+    
+    /** used by the binaryconverter */  
+    public void implSetMouseRectStates(int[] mouseRectStates) {
+        this.mouseRectStates = mouseRectStates;
+    }
+    
+    /** used by the binaryconverter */  
+    public void implSetTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+    
+    /** used by the binaryconverter */  
+    public void implSetTimeoutCommands(Command[] timeoutCommands) {
+        this.timeoutCommands = timeoutCommands;
+    }
+    
+    /* used by the binaryconverter */  
+    public void implSetAssembly(Assembly assembly) {
+        this.assembly = assembly;
+    }
+
+    /* used by the binaryconverter */      
+    public void implSetSelectFeatures(Feature[] selectFeatures) {
+        this.selectFeatures = selectFeatures;
+    }
+    
+    /* used by the binaryconverter */  
+    public void implSetActivateFeatures(Feature[] activateFeatures) {
+        this.activateFeatures = activateFeatures;
+    }
+    
     /**
      * Called from the parser
      **/
@@ -225,21 +299,6 @@ public class VisualRCHandler extends RCHandler {
 	this.activateFeatures = activateFeatures;
 	currState = 0;
 	// activating this handler can change its state
-    }
-
-    /* used by the binaryconverter */  
-    public Assembly getAssembly() {
-        return assembly;
-    }
-
-    /* used by the binaryconverter */      
-    public Feature[] getSelectFeatures() {
-        return selectFeatures;
-    }
-    
-    /* used by the binaryconverter */  
-    public Feature[] getActivateFeatures() {
-        return activateFeatures;
     }
     
     /**

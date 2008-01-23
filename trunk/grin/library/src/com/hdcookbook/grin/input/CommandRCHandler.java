@@ -76,14 +76,21 @@ public class CommandRCHandler extends RCHandler {
 	this.commands = commands;
     }
         
-    public int getMask() {
+    public int implGetMask() {
         return mask;
     }
     
-    public Command[] getCommands() {
+    public Command[] implGetCommands() {
         return commands;
     }
-
+    
+    public void implSetMask(int mask) {
+        this.mask = mask;
+    }
+    
+    public void implSetCommands(Command[] commands) {
+        this.commands = commands;
+    }
     /**
      * @inheritDoc
      **/

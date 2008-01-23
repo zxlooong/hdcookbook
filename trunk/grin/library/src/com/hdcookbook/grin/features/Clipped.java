@@ -115,10 +115,13 @@ public class Clipped extends Modifier {
 	this.clipRegion = clipRegion;
     }
     
-    public Rectangle getClipRegion() {
+    public Rectangle implGetClipRegion() {
         return clipRegion;
     }
-
+    
+    public void implSetClipRegion(Rectangle rect) {
+        this.clipRegion = rect;
+    }
 
     /**
      * @inheritDoc

@@ -114,11 +114,11 @@ public class Timer extends Feature {
 	return Integer.MAX_VALUE;
     }
 
-    public int getNumFrames() {
+    public int implGetNumFrames() {
         return numFrames;
     }
     
-    public boolean getRepeat() {
+    public boolean implGetRepeat() {
         return repeat;
     }
     
@@ -128,6 +128,18 @@ public class Timer extends Feature {
     public Command[] getEndCommands() {
 	return endCommands;
     }
+    
+    public void implSetNumFrames(int numFrames) {
+        this.numFrames = numFrames;
+    }
+    
+    public void implSetRepeat(boolean repeat) {
+        this.repeat = repeat;
+    }
+    
+    public void implSetEndCommands(Command[] endCommands) {
+	this.endCommands = endCommands;
+    }    
 
     /**
      * Initialize this feature.  This is called on show initialization.

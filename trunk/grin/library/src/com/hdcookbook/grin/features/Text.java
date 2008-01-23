@@ -70,7 +70,7 @@ import java.awt.Color;
 
 
 /**
- * Display text.  LIke all features, the upper-left hand corner of
+ * Display text.  Like all features, the upper-left hand corner of
  * the visible text is given.
  *
  * @author Bill Foote (http://jovial.com)
@@ -110,26 +110,54 @@ public class Text extends Feature {
 	this.background = background;
     }
     
-    public String[] getStrings() {
+    public String[] implGetStrings() {
         return strings;
     }
     
-    public int getVspace() {
+    public int implGetVspace() {
         return vspace;
     }
     
-    public Font getFont() {
+    public Font implGetFont() {
         return font;
     }
     
-    public Color[] getColors() {
+    public Color[] implGetColors() {
         return colors;
     }
     
-    public Color getBackground() {
+    public Color implGetBackground() {
         return background;
     }
-   
+
+    public void implSetStrings(String[] strings) {
+        this.strings = strings;
+    }
+    
+    public void implSetVspace(int vspace) {
+        this.vspace = vspace;
+    }
+    
+    public void implSetFont(Font font) {
+        this.font = font;
+    }
+    
+    public void implSetColors(Color[] colors) {
+        this.colors = colors;
+    }
+    
+    public void implSetBackground(Color background) {
+        this.background = background;
+    }    
+    
+    public void implSetX(int x) {
+        this.x = x;
+    }
+    
+    public void implSetY(int y) {
+        this.y = y;
+    }
+    
     /**
      * @inheritDoc
      **/

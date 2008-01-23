@@ -123,17 +123,46 @@ public class Box extends Feature {
 	return height;
     }
     
-    public int getOutlineWidth() {
+    public int implGetOutlineWidth() {
        return outlineWidth;
     }
     
-    public Color getOutlineColor() {
+    public Color implGetOutlineColor() {
        return outlineColor;
     }
     
-    public Color getFillColor() {
+    public Color implGetFillColor() {
        return fillColor;
     }
+    
+    public void implSetX(int x) {
+        this.x = x;
+    }
+    
+    public void implSetY(int y) {
+        this.y = y;
+    }
+    
+    public void implSetWidth(int w) {
+        this.width = w;
+    }
+    
+    public void implSetHeight(int h) {
+        this.height = h;
+    }
+    
+    public void implSetOutlineWidth(int w) {
+        this.outlineWidth = w;
+    }
+    
+    public void implSetOutlineColor(Color color) {
+        this.outlineColor = color;
+    }
+    
+    public void implSetFillColor(Color color) {
+        this.fillColor = color;
+    }
+    
     /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes

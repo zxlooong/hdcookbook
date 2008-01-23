@@ -101,9 +101,16 @@ public class SetTarget extends Modifier {
     /**
      * Internal use only.  
      **/
-    public int getTarget() {
+    public int implGetTarget() {
        return target;
     }
+    
+    /**
+     * Internal use only.  
+     **/
+    public void implSetTarget(int target) {
+       this.target = target;
+    }    
 
     /**
      * Internal use only.  

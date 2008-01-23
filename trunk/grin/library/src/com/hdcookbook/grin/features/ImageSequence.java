@@ -129,30 +129,62 @@ public class ImageSequence extends Feature {
 	this.endCommands = endCommands;
     }
     
-    public String getFileName() {
+    public String implGetFileName() {
        return fileName;
     }
     
-    public String[] getMiddle() {
+    public String[] implGetMiddle() {
        return middle;
     }
     
-    public String getExtension() {
+    public String implGetExtension() {
        return extension;
     }
     
-    public boolean getRepeat() {
+    public boolean implGetRepeat() {
        return repeat;
     }
     
-    public Command[] getEndCommands() {
+    public Command[] implGetEndCommands() {
        return endCommands;
     }
     
-    public ImageSequence getModel() {
+    public ImageSequence implGetModel() {
         return model;
     }
-
+    
+    public void implSetFileName(String fileName) {
+        this.fileName = fileName;
+    }
+    
+    public void implSetMiddle(String[] middle) {
+        this.middle = middle;
+    }
+    
+    public void implSetExtension(String extension) {
+        this.extension = extension;
+    }
+    
+    public void implSetRepeat(boolean repeat) {
+        this.repeat = repeat;
+    }
+    
+    public void implSetEndCommands(Command[] endCommands) {
+       this.endCommands = endCommands;
+    }
+    
+    public void implSetModel(ImageSequence model) {
+        this.model = model;
+    }
+    
+    public void implSetX(int x) {
+        this.x = x;
+    }
+    
+    public void implSetY(int y) {
+        this.y = y;
+    }
+    
     /**
      * Called by the parser and the binary file reader.  Animations can be 
      * linked, so that they

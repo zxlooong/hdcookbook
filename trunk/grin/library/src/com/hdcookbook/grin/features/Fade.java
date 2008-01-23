@@ -144,37 +144,75 @@ public class Fade extends Modifier {
     /* 
      * Internal use only 
      */
-    public int[] getKeyframes() {
+    public int[] implGetKeyframes() {
        return keyframes;
     }
     
     /* 
      * Internal use only 
      */
-    public int[] getKeyAlphas() {
+    public int[] implGetKeyAlphas() {
        return keyAlphas;
     }
     
     /** 
      * Internal use only 
      **/
-    public boolean getSrcOver() {
+    public boolean implGetSrcOver() {
        return srcOver;
     }
     
     /** 
      * Internal use only 
      **/    
-    public Command[] getEndCommands() {
+    public Command[] implGetEndCommands() {
        return endCommands;
     }
     
     /** 
      * Internal use only 
      **/    
-    public int getRepeatFrame() {
+    public int implGetRepeatFrame() {
         return repeatFrame;
     }
+    /* 
+     * Internal use only 
+     */
+    public void implSetKeyframes(int[] keys) {
+        for(int i = 0; i < keyframes.length; i++)
+            this.keyframes[i] = keys[i];
+    }
+    
+    /* 
+     * Internal use only 
+     */
+    public void implSetKeyAlphas(int[] keyAlphas) {
+        for(int i = 0; i < keyAlphas.length; i++)
+            this.keyAlphas[i] = keyAlphas[i];
+    }
+    
+    /** 
+     * Internal use only 
+     **/
+    public void implSetSrcOver(boolean srcOver) {
+       this.srcOver = srcOver;
+    }
+    
+    /** 
+     * Internal use only 
+     **/    
+    public void implSetEndCommands(Command[] endCommands) {
+       for (int i = 0; i < endCommands.length; i++) {
+           this.endCommands[i] = endCommands[i];
+       }
+    }
+    
+    /** 
+     * Internal use only 
+     **/    
+    public void implSetRepeatFrame(int repeatFrame) {
+        this.repeatFrame = repeatFrame;
+    }    
     
     /**
      * @inheritDoc

@@ -170,12 +170,12 @@ public class AssetFinder  {
         if (Debug.ASSERT && u == null) {
 	    if (appJarPath != null) {
 		for (int i = 0; i < appJarPath.length; i++) {
-		    Debug.println("   Tried " + appJarPath[i] + path);
+		    Debug.println("   Tried appJar " + appJarPath[i] + path);
 		}
 	    }
 	    if (filePath != null) {
 		for (int i = 0; i < filePath.length; i++) {
-		    Debug.println("   Tried " + new File(filePath[i], path));
+		    Debug.println("   Tried filepath " + new File(filePath[i], path));
 		}
 	    }
             Debug.println();

@@ -76,6 +76,8 @@ import com.hdcookbook.grin.input.VisualRCHandler;
 import com.hdcookbook.grin.input.RCKeyEvent;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -329,5 +331,23 @@ public class SEShow extends Show {
 	    assert false;
 	}
     }
-
+    
+    public void printContent(PrintStream out) {
+        out.println("Features");
+        for (int i = 0; i < features.length; i++) {
+            out.println(i + " : " + features[i]);
+        }
+        
+        out.println("\nSegments");
+        for (int i = 0; i < segments.length; i++) {
+            out.println(i + " : " + segments[i]);   
+        }
+        
+        out.println("\nRCHandlers");
+        for (int i = 0; i < rcHandlers.length; i++) {
+            out.println(i + " : " + rcHandlers[i]);   
+        }        
+        
+        out.println();        
+    }
 }

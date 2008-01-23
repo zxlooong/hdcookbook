@@ -148,14 +148,14 @@ public class Translator extends Modifier {
     /**
      * Used by binary writer
      **/
-    public int getAbsoluteXOffset() {
+    public int implGetAbsoluteXOffset() {
 	return fx;
     }
 
     /**
      * Used by binary writer
      **/
-    public int getAbsoluteYOffset() {
+    public int implGetAbsoluteYOffset() {
 	return fy;
     }
 
@@ -164,6 +164,10 @@ public class Translator extends Modifier {
      **/
     public TranslatorModel getModel() {
 	return model;
+    }
+    
+    public void implSetModel(TranslatorModel model) {
+	this.model = model;
     }
 
     /**

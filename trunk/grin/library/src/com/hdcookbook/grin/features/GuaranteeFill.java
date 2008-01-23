@@ -122,17 +122,30 @@ public class GuaranteeFill extends Modifier {
     /**
      * Internal use only.  
      **/
-    public Rectangle getGuaranteed() {
+    public Rectangle implGetGuaranteed() {
 	return guaranteed;
     }
 
     /**
      * Internal use only.  
      **/
-    public Rectangle[] getFills() {
+    public Rectangle[] implGetFills() {
        return fills;
     }
+    
+    /**
+     * Internal use only.  
+     **/
+    public void implSetGuaranteed(Rectangle guaranteed) {
+	this.guaranteed = guaranteed;
+    }
 
+    /**
+     * Internal use only.  
+     **/
+    public void implSetFills(Rectangle[] fills) {
+        this.fills = fills;
+    }
     /**
      * @inheritDoc
      **/
