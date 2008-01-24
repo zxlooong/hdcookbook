@@ -55,6 +55,7 @@
 package net.java.bd.tools.security;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -178,7 +179,7 @@ public class SecurityUtil {
          this.rootCertDN = "CN=Studio, OU=Codesigning Department, O=BDJCompany." + orgId + ", C=US";
     }
     
-    public void signJars(){
+    public void signJars()throws Exception {
             boolean failed = false;
             if (newKeys) {
 	        cleanup();  // Get rid of any previous key aliases first.
@@ -207,7 +208,7 @@ public class SecurityUtil {
             }
     }
     
-    public void createCertificates() {
+    public void createCertificates() throws Exception {
         boolean failed = false;
         cleanup();  // Get rid of any previous key aliases first.
         try {
@@ -264,12 +265,6 @@ public class SecurityUtil {
     }
     
     private void generateCSRResponse() throws Exception {
-        /*
-       String[] appCSRRequestArgs = {"-keystore", keystoreFile, "-storepass", keystorePassword,
-                                     "-keypass", ROOTKEYPASSWORD, "-debug", 
-				     "-issuecert", APPCSRFILE, APPCERTFILE, ROOTCERTALIAS};
-       JarSigner.main(appCSRRequestArgs);
-         */
        issueCert(APPCSRFILE, APPCERTFILE, ROOTCERTALIAS, ROOTKEYPASSWORD);
     }
     
@@ -308,16 +303,27 @@ public class SecurityUtil {
         }
     }
     
-    private void cleanup() {    
+    private void cleanup() throws IOException {    
 	 File keystore = new File(keystoreFile);
          if (keystore.exists()) {
-    	    try {
-		 KeyTool.main(new String[]{"-delete", "-alias", appCertAlias, "-keystore", keystoreFile, "-storepass", keystorePassword});
-	    } catch (Exception e) { e.printStackTrace(); }
-	    try {
-		 KeyTool.main(new String[]{"-delete", "-alias", ROOTCERTALIAS, "-keystore", keystoreFile, "-storepass", keystorePassword});
-	    } catch (Exception e) { e.printStackTrace(); }
-	    keystore.delete();
+             FileInputStream fis = null;
+             try {
+                 KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+                 fis = new FileInputStream(keystore);
+                 ks.load(fis, keystorePassword.toCharArray());
+                 if (ks.containsAlias(appCertAlias)) {
+                     ks.deleteEntry(appCertAlias);
+                 }
+                 if (ks.containsAlias(ROOTCERTALIAS)) {
+                     ks.deleteEntry(ROOTCERTALIAS);
+                 }
+                 keystore.delete();      
+	    } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (fis != null)
+                    fis.close();
+            }
 	 }   
 	 new File(APPCSRFILE).delete();
 	 new File(APPCERTFILE).delete();

@@ -69,7 +69,7 @@ public class BDCertGenerator {
     static String orgId;
     static boolean debug = false;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         // Parse the argments
         parseArgs(args);
