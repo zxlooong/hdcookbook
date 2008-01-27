@@ -80,7 +80,14 @@ public class SEUserCommand extends Command {
     }
     
     public void execute() {
-	System.out.println("Executing " + typeName);
+	System.out.println("Executing " + this);
     }
-    
+
+    public String toString() {
+	String result = "SEUserCommand " + typeName;
+	for (int i = 0; i < args.length; i++) {
+	    result = result + " " + args[i];
+	}
+	return result;
+    }
 }

@@ -78,9 +78,9 @@ public class MenuExtensionsWriter implements ExtensionsWriter {
         out.writeUTF(typeName);
     }
 
-    public void writeExtensionCommand(GrinDataOutputStream out, Command command) 
-            throws IOException {
-        
+    public void writeExtensionCommand(GrinDataOutputStream out, Command command)
+            throws IOException 
+    {
         SEUserCommand seCommand = (SEUserCommand) command;
         
         String typeName = seCommand.getTypeName();

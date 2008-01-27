@@ -249,6 +249,44 @@ public class Lexer {
     }
     
     /**
+     * Gets the next string that's the exact contents of the next bit of
+     * the input stream.  This will either be a token (like you'd get from
+     * getString()), or it's whitespace.  Quoted strings aren't recognized.
+     * <p>
+     * This method was added to the lexer in order to read the java code
+     * between a "[[" and a "]]".
+     * 
+     * @return next word or next section of whitespace, or null on eof
+     */
+    public String getStringExact() throws IOException {
+        strBuf.setLength(0);
+        int ch = nextChar();
+        if (ch == -1) {
+            return null;
+        }
+        strBuf.append((char) ch);
+        if (Character.isWhitespace((char) ch)) {
+            for (;;) {
+                ch = nextChar();
+                if (ch == -1 || !Character.isWhitespace((char) ch)) {
+                    putback(ch);
+                    return strBufAsString();
+                }
+                strBuf.append((char) ch);
+            }
+        } else {    // not whitespace
+            for (;;) {
+                ch = nextChar();
+                if (ch == -1 || Character.isWhitespace((char) ch)) {
+                    putback(ch);
+                    return strBufAsString();
+                }
+                strBuf.append((char) ch);
+            }
+        }
+    }
+    
+    /**
      * Parses a token that we expect to see.  A token is read, and
      * if it's not the expected token, an IOException is generated.
      * This can be useful for things like parsing the ";" at the

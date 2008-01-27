@@ -56,6 +56,8 @@
 package com.hdcookbook.grin.io.text;
 
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowCommand;
+import com.hdcookbook.grin.SEShowCommands;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
@@ -214,6 +216,20 @@ public class ShowParser {
 	    builder.setExported(publicSegments, publicFeatures, publicHandlers);
 	    tok = lexer.getString();
 	}
+
+        if ("java_command_class".equals(tok)) {
+            String className = lexer.getString();
+            parseExpected("[[");
+            StringBuffer xletClassBody = new StringBuffer();
+            StringBuffer grinviewClassBody = new StringBuffer();
+            readJavaSource(xletClassBody, grinviewClassBody, null);
+            SEShowCommands cmds = show.getShowCommands();
+            cmds.setClassName(className);
+            cmds.setXletClassBody(xletClassBody.toString());
+            cmds.setGrinviewClassBody(grinviewClassBody.toString());
+            tok = lexer.getString();
+        }
+
 
 	    // Parse the show body
 	for (;;) {
@@ -1418,49 +1434,11 @@ public class ShowParser {
 	    int lineStart = lexer.getLineNumber();
 	    if ("}".equals(tok)) {
 		break;
-	    } else if ("activate_segment".equals(tok)) {
-		Command c = parseActivateSegment();
-		v.addElement(c);
-		builder.addCommand(c, lineStart);
-	    } else if ("activate_part".equals(tok)) {
-		Command c = parseActivatePart();
-		v.addElement(c);
-		builder.addCommand(c, lineStart);
-	    } else if ("segment_done".equals(tok)) {
-		Command c = parseSegmentDone();
-		v.addElement(c);
-		builder.addCommand(c, lineStart);
-	    } else if ("invoke_assembly".equals(tok)) { // deprecated
-		Command c = parseInvokeAssembly();
-		v.addElement(c);
-		builder.addCommand(c, lineStart);
-	    } else if ("set_visual_rc".equals(tok)) {
-		Command c = parseVisualRC();
-		v.addElement(c);
-		builder.addCommand(c, lineStart);
-	    } else if (extParser == null || tok == null || tok.indexOf(':') < 0) 
-	    {
-		lexer.reportError("command expected, " + tok + " seen");
 	    } else {
-		String typeName = tok;
-                /**    
- 	        ArrayList args =new ArrayList();
-	        for (;;) {
-	           tok = lexer.getString();
-	           if (tok == null) {
-		      parseExpected(";");
-	           } else if (";".equals(tok)) {
-		      break;
-	           } else {
-		      args.add(tok);
-	           }
-	        } 
-                 **/
-                
-		Command c = extParser.getCommand(show, typeName, lexer);
-		v.addElement(c);
-		builder.addCommand(c, lineStart);
-	    }
+                Command c = parseCommand(tok);
+                v.addElement(c);
+                builder.addCommand(c, lineStart);
+            }
 	}
 	int num = v.size();
 	Command[] result = new Command[num];
@@ -1468,6 +1446,28 @@ public class ShowParser {
 	    result[i] = (Command) v.elementAt(i);
 	}
 	return result;
+    }
+    
+    private Command parseCommand(String tok) throws IOException {
+        if ("activate_segment".equals(tok)) {
+            return parseActivateSegment();
+        } else if ("activate_part".equals(tok)) {
+            return parseActivatePart();
+        } else if ("segment_done".equals(tok)) {
+            return parseSegmentDone();
+        } else if ("invoke_assembly".equals(tok)) { // deprecated
+            return parseInvokeAssembly();
+        } else if ("set_visual_rc".equals(tok)) {
+            return parseVisualRC();
+        } else if ("java_command".equals(tok)) {
+            return parseJavaCommand();
+        } else if (extParser == null || tok == null || tok.indexOf(':') < 0) {
+            lexer.reportError("command expected, " + tok + " seen");
+            return null;
+        } else {
+            String typeName = tok;
+            return extParser.getCommand(show, typeName, lexer);
+        }
     }
 
     private Command parseActivateSegment() throws IOException {
@@ -1616,6 +1616,21 @@ public class ShowParser {
 	};
 	deferred[0].addElement(fw);
 	return cmd;
+    }
+    
+    private Command parseJavaCommand() throws IOException {
+        SEShowCommands cmds = show.getShowCommands();
+        if (cmds.getClassName() == null) {
+            lexer.reportError("java_command seen, but java_command_class not set");
+        }
+        parseExpected("[[");
+        StringBuffer xletBody = new StringBuffer();
+        StringBuffer grinviewBody = new StringBuffer();
+        SEShowCommand result = cmds.addNewCommand();
+        readJavaSource(xletBody, grinviewBody, result);
+        result.setXletMethodBody(xletBody.toString());
+        result.setGrinviewMethodBody(grinviewBody.toString());
+        return result;
     }
 
 
@@ -1835,5 +1850,47 @@ public class ShowParser {
      **/
     public void parseExpected(String expected) throws IOException {
 	lexer.parseExpected(expected);
-    }    
+    }
+    
+    /**
+     * Read a java_source fragment.  This is terminated with a "]]", which
+     * is consumed.  This recognizes the special sequences
+     * XLET_ONLY_[[ java_source ]],  GRINVIEW_ONLY_[[ java_source ]]
+     * and GRIN_COMMAND_[[ java_source ]]
+     **/
+    public void readJavaSource(StringBuffer xletSource, 
+                               StringBuffer grinviewSource,
+                               SEShowCommand command)
+                       throws IOException
+    {
+        for (;;) {
+            String src = lexer.getStringExact();
+            if (src == null) {
+                lexer.reportError("EOF unexpected");
+            } else if ("]]".equals(src)) {
+                return;
+            } else if ("XLET_ONLY_[[".equals(src)) {
+                readJavaSource(xletSource, null, command);
+            } else if ("GRINVIEW_ONLY_[[".equals(src)) {
+                readJavaSource(null, grinviewSource, command);
+            } else {
+                if ("GRIN_COMMAND_[[".equals(src)) {
+                    if (command == null) {
+                        lexer.reportError("GRINVIEW_COMMAND_[[ unexpected");
+                    }
+                    Command cmd = parseCommand(lexer.getString());
+                    parseExpected("]]");
+                    src = command.addSubCommand(cmd);
+                    src = src + "   // " + cmd;
+                }
+                if (xletSource != null) {
+                    xletSource.append(src);
+                }
+                if (grinviewSource != null) {
+                    grinviewSource.append(src);
+                }
+            }
+        }
+    }
+
 }

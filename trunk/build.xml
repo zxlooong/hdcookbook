@@ -32,6 +32,10 @@
 	    <ant dir="grin/samples"/>
   </target>
   
+  <target name="build-grinview-menu">
+        <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="build-grinview-menu"/>
+  </target>
+  
   <target name="run-grinview-menu">
       <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="run-grinview-menu"/>
   </target>

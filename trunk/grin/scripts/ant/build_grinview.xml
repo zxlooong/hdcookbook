@@ -101,11 +101,12 @@ information or have any questions.
 		</java>	
 </target>
 
-<target name="run-grin-viewer" depends="compile-grin-viewer, run-binary-converter">
+<target name="run-grin-viewer" depends="build-grinview-menu">
     <echo message="${MENUTOOLS_DEST} ${MENUASSETS_DEST} ${GRIN_VIEWER_DEST}"/>
         <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
                 <classpath>
                    <pathelement path="${MENUTOOLS_DEST}"/>
+                   <pathelement path="${MENU_GENERATED}/grinview"/>
                    <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
                 </classpath>               
 		<arg line="-asset_dir ${MENUASSETS_DEST} menu.grin"/>                
@@ -126,11 +127,20 @@ information or have any questions.
 		</java>	
 </target>
 
-<target name="run-grinview-menu" depends="compile-grin-viewer">
+<target name="build-grinview-menu" depends="compile-grin-viewer, run-binary-converter">
+    <javac destdir="${MENU_GENERATED}/grinview" srcdir="${MENU_GENERATED}/grinview" debug="on">
+	<classpath>
+	   <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+	</classpath>
+    </javac>
+</target>
+
+<target name="run-grinview-menu" depends="build-grinview-menu">
         <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
                 <classpath>
                    <pathelement path="${MENUTOOLS_DEST}"/>
                    <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+                   <pathelement path="${MENU_GENERATED}/grinview"/>
                 </classpath>
 		<arg line="-asset_dir xlets/bookmenu/src/com/hdcookbook/bookmenu/assets -extensions_factory com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory -background xlets/bookmenu/src/com/hdcookbook/bookmenu/menu/test_assets/MenuScreenBG_gray.png -fps 24 menu.txt"/>
 	</java>	

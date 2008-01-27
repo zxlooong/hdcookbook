@@ -53,28 +53,100 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-
-package com.hdcookbook.bookmenu.menu.commands;
-
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.bookmenu.menu.MenuXlet;
+package com.hdcookbook.grin.test.bigjdk;
 
 /**
- * Command that selects the audio stream
+ * This class lets you emulate Blu-ray player registers in GRIN show
+ * commands that run under GrinView.  This makes it possible to debug
+ * register-based control logic on a PC, rather than being forced to 
+ * run in a BD emulator.
  *
- *   @author     Bill Foote (http://jovial.com)
+ * @see com.hdcookbook.grin.commands.ShowCommands
+ *
+ * @author Bill Foote
  **/
-public class SelectAudioCommand extends Command {
 
-    private MenuXlet xlet;
-    private int streamNumber;
+import java.util.ArrayList;
 
-    public SelectAudioCommand(MenuXlet xlet, int streamNumber) {
-	this.xlet = xlet;
-	this.streamNumber = streamNumber;
+public class BDRegisterEmulator {
+
+    private static Object LOCK = new Object();
+    private static BDRegisterEmulator theInstance;
+
+    private int gpr[] = new int[4096];
+    private int psr[] = new int[62];
+
+    private ArrayList<BDRegisterEmulatorScreen> screens
+    	= new ArrayList<BDRegisterEmulatorScreen>();
+		// There should be zero or one of these because the
+		// GrinView UI only makes one registers screen, but in
+		// principle there could be multiple views.
+
+    private BDRegisterEmulator() {
     }
 
-    public void execute() {
-	xlet.navigator.selectAudioStream(streamNumber);
+    public static BDRegisterEmulator getInstance() {
+	synchronized(LOCK) {
+	    if (theInstance == null) {
+		theInstance = new BDRegisterEmulator();
+	    }
+	}
+	return theInstance;
     }
+
+    /**
+     *
+     * @throws IllegalArgumentException	  if reg < 0 or >= 4096
+     **/
+    public int getGPR(int reg) {
+	if (reg < 0 || reg> gpr.length) {
+	    throw new IllegalArgumentException("Illegal GPR register " + reg);
+	}
+	return gpr[reg];
+    }
+    /**
+     *
+     * @throws IllegalArgumentException	  if reg < 0 or >= 4096
+     **/
+    public void setGPR(int reg, int value) {
+	if (reg < 0 || reg> gpr.length) {
+	    throw new IllegalArgumentException("Illegal GPR register " + reg);
+	}
+	gpr[reg] = value;
+	synchronized(screens) {
+	    for (int i = 0; i < screens.size(); i++) {
+		screens.get(i).updateGPR(reg, value);
+	    }
+	}
+    }
+
+    /**
+     *
+     * @throws IllegalArgumentException  if reg is an illegal value
+     **/
+    public int getPSR(int reg) {
+	if (reg < 0 || reg > psr.length || reg == 0 || reg == 9
+	    || reg == 10 || reg == 11 || (reg >= 21 && reg <= 28)
+	    || (reg >= 32 && reg <= 35) || reg == 41
+	    || (reg >= 45 && reg <= 47)) 
+	{
+	    throw new IllegalArgumentException("Illegal GPR register " + reg);
+	}
+	return psr[reg];
+    }
+
+    int[] getPSRs() {
+	return psr;
+    }
+
+    int[] getGPRs() {
+	return gpr;
+    }
+
+    void addScreen(BDRegisterEmulatorScreen screen) {
+	synchronized(screens) {
+	    screens.add(screen);
+	}
+    }
+
 }

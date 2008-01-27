@@ -91,6 +91,107 @@ exports
     }
 ;
 
+java_command_class com.hdcookbook.bookmenu.menu.commands.MenuShowCommands [[
+
+    package com.hdcookbook.bookmenu.menu.commands;
+
+    import com.hdcookbook.grin.commands.ShowCommands;
+    XLET_ONLY_[[ 
+        import org.bluray.system.RegisterAccess;
+
+        import com.hdcookbook.bookmenu.menu.MenuXlet; 
+        import com.hdcookbook.bookmenu.menu.MenuDirector; 
+        import com.hdcookbook.bookmenu.menu.MenuDiscNavigator; 
+    ]]
+
+    GRINVIEW_ONLY_[[
+	import com.hdcookbook.grin.test.bigjdk.BDRegisterEmulator;
+    ]]
+
+    public class MenuShowCommands extends ShowCommands {
+	XLET_ONLY_[[
+
+	    private final static RegisterAccess registers 
+	    	= RegisterAccess.getInstance();
+
+	    private MenuDirector getMenuDirector() {
+		return (MenuDirector) getDirector();
+	    }
+
+	]]
+
+	GRINVIEW_ONLY_[[
+	    private final static BDRegisterEmulator registers 
+	    	= BDRegisterEmulator.getInstance();
+	]]
+
+
+	private void setBookmarkUI(int sceneNum, boolean activate) {
+	    XLET_ONLY_[[
+		MenuDirector dir = getMenuDirector();
+		long t = dir.setBookmarkUIForScene(sceneNum);
+		if (activate && t != Long.MIN_VALUE) {
+		    MenuDiscNavigator nav = dir.xlet.navigator;
+		    nav.gotoMediaTime(nav.movieVideoStartPL, t);
+		}
+	    ]]
+	    GRINVIEW_ONLY_[[
+		System.out.println("Setting bookmark UI to scene " + sceneNum
+				   + ", activate:  " + activate);
+	    ]]
+	}
+
+	private void playActivateSound() {
+	    XLET_ONLY_[[
+		MenuDiscNavigator nav = getMenuDirector().xlet.navigator;
+		nav.playSound(nav.activateSound);
+	    ]]
+	    GRINVIEW_ONLY_[[
+		System.out.println("Play activate sound.");
+	    ]]
+	    //
+	    // We increment GPR 1 whenever we play this sound.  This isn't
+	    // useful in a real xlet, but it lets us test the UI that
+	    // simulates registers.
+	    //
+	    int i = registers.getGPR(1);
+	    registers.setGPR(1, i+1);
+	}
+
+	private void selectAudio(int streamNum) {
+	    XLET_ONLY_[[
+		getMenuDirector().xlet.navigator.selectAudioStream(streamNum);
+	    ]]
+	    GRINVIEW_ONLY_[[
+		System.out.println("Select audio stream " + streamNum);
+	    ]]
+	}
+
+	private void selectSubtitles(int streamNum) {
+	    XLET_ONLY_[[
+		getMenuDirector().xlet.navigator.selectSubtitleStream(streamNum);
+	    ]]
+	    GRINVIEW_ONLY_[[
+		System.out.println("Select subtitle stream " + streamNum);
+	    ]]
+	}
+
+	private void setText(String text) {
+	    XLET_ONLY_[[
+		getMenuDirector().setUserInputText(text);
+	    ]]
+	    GRINVIEW_ONLY_[[
+		System.out.println("Set text command \"" + text + "\".");
+	    ]]
+	}
+
+
+	JAVA_COMMAND_BODY
+
+    }
+
+]]
+
 # ==========
 #  Features
 # ==========
@@ -1319,7 +1420,9 @@ segment S:Loading
     setup_done {
 	set_visual_rc H:MainMenu state play selected ;
 	activate_part F:MenuInactive.CloseOrNothing nothing ;
-	BOOK:NotifyLoaded ;
+	java_command [[ XLET_ONLY_[[
+	    getMenuDirector().xlet.navigator.notifyShowLoaded();
+	]] ]]
 	BOOK:PlayVideo menu ;
 		# We can't start playing the menu video until our assets
 		# are loaded, because we can't read from the disc while
@@ -1604,7 +1707,7 @@ rc_handler visual H:MainMenu
 	} 
 	activate { 
 	    play	play.activated		{ 
-			    BOOK:PlaySound activate ;
+			    java_command [[ playActivateSound(); ]]
 			    activate_segment S:MainMenuRollIn ; 
 			    BOOK:PlayVideo movie ;
 			}
@@ -1644,7 +1747,7 @@ rc_handler visual H:VideoMenu
 	    play	play.activated		{ 
 			    activate_segment S:VideoMenuRollBack ;
 			    BOOK:PlayVideo movie ;
-			    BOOK:PlaySound activate ;
+			    java_command [[ playActivateSound(); ]]
 			}
 	    setup	setup.activated {
 			    set_visual_rc H:SetupMenu state dts_51 selected ;
@@ -1699,29 +1802,29 @@ rc_handler visual H:SetupMenu
     }
     activate {
     	dts_51 		{ 
-			    BOOK:SelectAudio  1 ;	# DTS 5.1
+			    java_command [[ selectAudio(1); ]]  # DTS 5.1
 			    set_visual_rc H:SetupMenu state 
 			    			english_st selected ;
 			}
 	dts_71		{
-			    BOOK:SelectAudio 2 ;	# DTS 7.1
+			    java_command [[ selectAudio(2);  ]]  ## DTS 7.1
 			    set_visual_rc H:SetupMenu state 
 			    			english_st selected ;
 			}
 	english_st	{
-			    BOOK:SelectSubtitles 1 ;   # English
+			    java_command [[ selectSubtitles(1); ]]   # English
 			    set_visual_rc H:MainMenu state setup selected ;
 			    set_visual_rc H:VideoMenu state setup selected ;
 			    activate_segment <pop> ;
 			}
 	spanish_st	{
-			    BOOK:SelectSubtitles 2 ;	# Spanish
+			    java_command [[ selectSubtitles(2); ]]   # Spanish
 			    set_visual_rc H:MainMenu state setup selected ;
 			    set_visual_rc H:VideoMenu state setup selected ;
 			    activate_segment <pop> ;
 			}
 	st_off		{
-			    BOOK:SelectSubtitles 0 ;	# None
+			    java_command [[ selectSubtitles(0); ]]   # None
 			    set_visual_rc H:MainMenu state setup selected ;
 			    set_visual_rc H:VideoMenu state setup selected ;
 			    activate_segment <pop> ;
@@ -1785,7 +1888,7 @@ rc_handler visual H:ScenesMenu
 			    activate_segment S:MainMenuRollIn ;	
 			}
 	bookmarks	{
-			    BOOK:BookmarkUI select 1 ;
+			    java_command [[ setBookmarkUI(1, false); ]]
 			    activate_segment S:BookmarksShowing ;
 			}
     	to_main_mouse	{
@@ -1818,44 +1921,44 @@ rc_handler visual H:BookmarksMenu
 	     { [ to_main ]    [ to_main ] [ to_main ] [ to_main ] [ to_main ] }
 	     {  to_main_mouse [ to_main ] [ to_main ] [ to_main ]  [ to_main ] } }
     select {
-    	1		{   BOOK:BookmarkUI select 1 ; }
-	2		{   BOOK:BookmarkUI select 2 ; }
-	3		{   BOOK:BookmarkUI select 3 ; }
-	4		{   BOOK:BookmarkUI select 4 ; }
-	5		{   BOOK:BookmarkUI select 5 ; }
-	scenes		{   BOOK:BookmarkUI select 0 ; }
+    	1		{   java_command [[ setBookmarkUI(1, false); ]] }
+	2		{   java_command [[ setBookmarkUI(2, false); ]] }
+	3		{   java_command [[ setBookmarkUI(3, false); ]] }
+	4		{   java_command [[ setBookmarkUI(4, false); ]] }
+	5		{   java_command [[ setBookmarkUI(5, false); ]] }
+	scenes		{   java_command [[ setBookmarkUI(0, false); ]] }
 	to_main   	{	
 			    set_visual_rc H:VideoMenu state scenes selected ;
 			    set_visual_rc H:MainMenu state scenes selected ;
 			    activate_segment <pop> ;	
 			}
-	to_main_mouse	{   BOOK:BookmarkUI select -1 ; }
+	to_main_mouse	{   java_command [[ setBookmarkUI(-1, false); ]] }
     }
     activate {
     	1		{
-			    BOOK:BookmarkUI activate 1 ;
+			    java_command [[ setBookmarkUI(1, true); ]]
 			    activate_segment S:MainMenuRollIn ;	
-			    BOOK:PlaySound activate ; 
+			    java_command [[ playActivateSound(); ]]
 			}
     	2		{
-			    BOOK:BookmarkUI activate 2 ;
+			    java_command [[ setBookmarkUI(2, true); ]]
 			    activate_segment S:MainMenuRollIn ;	
-			    BOOK:PlaySound activate ; 
+			    java_command [[ playActivateSound(); ]]
 			}
     	3		{
-			    BOOK:BookmarkUI activate 3 ;
+			    java_command [[ setBookmarkUI(3, true); ]]
 			    activate_segment S:MainMenuRollIn ;	
-			    BOOK:PlaySound activate ; 
+			    java_command [[ playActivateSound(); ]]
 			}
     	4		{
-			    BOOK:BookmarkUI activate 4 ;
+			    java_command [[ setBookmarkUI(4, true); ]]
 			    activate_segment S:MainMenuRollIn ;	
-			    BOOK:PlaySound activate ; 
+			    java_command [[ playActivateSound(); ]]
 			}
     	5		{
-			    BOOK:BookmarkUI activate 5 ;
+			    java_command [[ setBookmarkUI(5, true); ]]
 			    activate_segment S:MainMenuRollIn ;	
-			    BOOK:PlaySound activate ; 
+			    java_command [[ playActivateSound(); ]]
 			}
 	scenes		{
 			    set_visual_rc H:ScenesMenu state 1 selected ;
@@ -1881,7 +1984,9 @@ rc_handler visual H:BookmarksMenu
 rc_handler key_pressed H:BookmarksMenu.Color
 	{ red green yellow blue }
 	execute {
-	    BOOK:DeleteBookmark ;
+	    java_command [[ XLET_ONLY_[[ 
+	    	getMenuDirector().deleteCurrentBookmark(); 
+	    ]] ]]
 	}
 ;
 
@@ -1897,7 +2002,9 @@ rc_handler key_pressed H:PopupListener
 rc_handler key_pressed H:MakeBookmarkListener
 	{ red green yellow blue }
 	execute {
-	    BOOK:MakeBookmark ;
+	    java_command [[ XLET_ONLY_[[
+	        getMenuDirector().makeBookmark(); 
+	    ]] ]]
 	    activate_segment S:BookmarkSnap ;
 	}
 ;
@@ -1922,18 +2029,30 @@ rc_handler visual H:BonusMenu
 	back_mouse nothing
     }
     activate {
-	game		{ 	BOOK:PlayGame ;		
-				BOOK:PlaySound activate ;
+	game		{ 
+				java_command [[ 
+				    XLET_ONLY_[[
+					getMenuDirector().xlet.startGame();
+				    ]]
+				    playActivateSound();
+				]]
 			}
 	bio		{
-				BOOK:PlaySound activate ;
-				BOOK:PlayVideo nothing ;
-				BOOK:ActivateBio ;  
-			       # Activates S:Bio.Available or S:Bio.NotAvailable
+				java_command [[ 
+				    playActivateSound();
+				    GRIN_COMMAND_[[ BOOK:PlayVideo nothing ; ]]
+				    XLET_ONLY_[[
+					getMenuDirector().activateBio();
+					    // Activates S:Bio.Available 
+					    // or S:Bio.NotAvailable
+				    ]]
+				]]
 			}
 	bonus1  	{ 
-				BOOK:PlaySound activate ;
-				BOOK:SetText -init- ;
+				java_command [[ 
+				    playActivateSound(); 
+				    setText("-init-");
+				]]
 				BOOK:PlayVideo nothing ;
 				activate_part F:UserInput  a.selected ;
 				activate_segment S:UserInput ;
@@ -1978,17 +2097,17 @@ rc_handler visual H:UserInput
 	close	close.selected
     } 
     activate {
-	a	a.activated		{ BOOK:SetText A ; }
-	b	b.activated		{ BOOK:SetText B ; }
-	d	d.activated		{ BOOK:SetText D ; }
-	h	h.activated		{ BOOK:SetText H ; }
-	l	l.activated		{ BOOK:SetText L ; }
-	r	r.activated		{ BOOK:SetText R ; }
-	u	u.activated		{ BOOK:SetText U ; }
-	v	v.activated		{ BOOK:SetText V ; }
-	y	y.activated		{ BOOK:SetText Y ; }
-	enter	enter.activated		{ BOOK:SetText -enter- ; 
-					  BOOK:PlaySound activate ;
+	a	a.activated		{ java_command [[ setText("A"); ]] }
+	b	b.activated		{ java_command [[ setText("B"); ]] }
+	d	d.activated		{ java_command [[ setText("D"); ]] }
+	h	h.activated		{ java_command [[ setText("H"); ]] }
+	l	l.activated		{ java_command [[ setText("L"); ]] }
+	r	r.activated		{ java_command [[ setText("R"); ]] }
+	u	u.activated		{ java_command [[ setText("U"); ]] }
+	v	v.activated		{ java_command [[ setText("V"); ]] }
+	y	y.activated		{ java_command [[ setText("Y"); ]] }
+	enter	enter.activated		{ java_command [[ setText("-enter-"); 
+							  playActivateSound(); ]]
 					}
 	close	close.activated		{
 		set_visual_rc H:MainMenu state bonus selected ;
@@ -2027,8 +2146,12 @@ rc_handler visual H:Bio.Available
 			    activate_segment S:MenuShowing ;
 			}
 	    download	{
-			    BOOK:PlaySound activate ;
-			    BOOK:DownloadBio ;
+			    java_command [[ 
+				playActivateSound(); 
+				XLET_ONLY_[[
+				    getMenuDirector().downloadBio(); 
+				]]
+			    ]]
 			}
 	}
 	mouse {

@@ -66,17 +66,6 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
 
 import com.hdcookbook.bookmenu.menu.commands.PlayVideoCommand;
-import com.hdcookbook.bookmenu.menu.commands.PlaySoundCommand;
-import com.hdcookbook.bookmenu.menu.commands.SetTextCommand;
-import com.hdcookbook.bookmenu.menu.commands.PlayGameCommand;
-import com.hdcookbook.bookmenu.menu.commands.NotifyLoadedCommand;
-import com.hdcookbook.bookmenu.menu.commands.ActivateBioCommand;
-import com.hdcookbook.bookmenu.menu.commands.DownloadBioCommand;
-import com.hdcookbook.bookmenu.menu.commands.MakeBookmarkCommand;
-import com.hdcookbook.bookmenu.menu.commands.DeleteBookmarkCommand;
-import com.hdcookbook.bookmenu.menu.commands.BookmarkUICommand;
-import com.hdcookbook.bookmenu.menu.commands.SelectAudioCommand;
-import com.hdcookbook.bookmenu.menu.commands.SelectSubtitlesCommand;
 import com.hdcookbook.grin.io.binary.ExtensionsReader;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 
@@ -154,44 +143,7 @@ public class MenuExtensionsReader implements ExtensionsReader {
 		loc = null;
 	    }
 	    return new PlayVideoCommand(xlet, loc);
-	} else if ("BOOK:SetText".equals(typeName)) {
-	    return new SetTextCommand(xlet, args[0]);
-	} else if ("BOOK:PlayGame".equals(typeName)) {
-	    return new PlayGameCommand(xlet);
-	} else if ("BOOK:ActivateBio".equals(typeName)) {
-	    return new ActivateBioCommand(xlet);
-	} else if ("BOOK:DownloadBio".equals(typeName)) {
-	    return new DownloadBioCommand(xlet);
-	} else if ("BOOK:PlaySound".equals(typeName)) {
-	    return new PlaySoundCommand(xlet, args[0]);
-	} else if ("BOOK:MakeBookmark".equals(typeName)) {
-	    return new MakeBookmarkCommand(xlet);
-	} else if ("BOOK:DeleteBookmark".equals(typeName)) {
-	    return new DeleteBookmarkCommand(xlet);
-	} else if ("BOOK:BookmarkUI".equals(typeName)) {
-	    boolean activate = false;
-	    if ("select".equals(args[0])) {
-		activate = false;
-	    } else if ("activate".equals(args[0])) {
-		activate = true;
-	    } else {
-		throw new IOException("\"select\" or \"activate\" expected, \""
-				  + args[0] + "\" seen.");
-	    }
-	    int num = Integer.parseInt(args[1]);
-	    if (num < -1 || num > 5) {
-		throw new IOException("" + num + " is an illegal scene number.");
-	    }
-	    return new BookmarkUICommand(xlet, activate, num);
-	} else if ("BOOK:SelectAudio".equals(typeName)) {
-	    int streamNumber = Integer.parseInt(args[0]);
-	    return new SelectAudioCommand(xlet, streamNumber);
-	} else if ("BOOK:SelectSubtitles".equals(typeName)) {
-	    int streamNumber = Integer.parseInt(args[0]);
-	    return new SelectSubtitlesCommand(xlet, streamNumber);
-	} else if ("BOOK:NotifyLoaded".equals(typeName)) {
-	    return new NotifyLoadedCommand(xlet);
-	}
+        }
 	throw new IOException("Unrecognized command type  \"" + typeName + "\"");
     }
 }

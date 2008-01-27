@@ -76,7 +76,7 @@ import com.hdcookbook.grin.util.Debug;
  **/
 public class MenuDirector extends Director {
 
-    private MenuXlet xlet;
+    public MenuXlet xlet;
     private boolean destroyed = false;
     private BioUpdater bioUpdater = null;
     private BookmarkManager bookmarkManager = null;

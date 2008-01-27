@@ -33,6 +33,8 @@ information or have any questions.
 <property name="MOSAIC_DEST" value="${HDC_BUILD_DIR}/mosaic_builder"/>
 <property name="MENUXLET_DEST" value="${HDC_BUILD_DIR}/menuxlet"/>
 <property name="MENUASSETS_DEST" value="${HDC_BUILD_DIR}/menuassets"/>
+<property name="MENU_GENERATED" value="${HDC_BUILD_DIR}/menu_generated"/>
+<property name="MENU_SHOW_COMMANDS" value="com/hdcookbook/bookmenu/menu/commands/MenuShowCommands.java" />
 <property name="MONITORXLET_DEST" value="${HDC_BUILD_DIR}/monitorxlet"/>
 <property name="GAMEXLET_DEST" value="${HDC_BUILD_DIR}/gamexlet"/>
 <property name="MENUTOOLS_DEST" value="${HDC_BUILD_DIR}/menu_tools"/>
@@ -76,7 +78,7 @@ information or have any questions.
 
 <target name="build-menu" depends="build-menu-xlet, build-menu-assets"/>
 
-	<target name="build-menu-xlet">
+	<target name="build-menu-xlet" depends="generate-binary-script">
 		<echo message="*************  Menu xlet  *****************"/>
 		<mkdir dir="${MENUXLET_DEST}/classes"/>
 	
@@ -87,6 +89,7 @@ information or have any questions.
 		debug="on" deprecation="on">
 		    <src path="library/src" />
 		    <src path="xlets/bookmenu/src" />
+		    <src path="${MENU_GENERATED}/xlet" />
 		    <exclude name="com/hdcookbook/bookmenu/monitor/**" />
 		</javac>
 		
@@ -136,7 +139,11 @@ information or have any questions.
                    <pathelement path="${HDC_BUILD_DIR}/grin_viewer/converter.jar"/>
                 </classpath>    
                 <arg line="${MENUASSETS_DEST}/menu.txt com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory"/>
-            </java>		
+            </java>
+	    <move file="${MENUASSETS_DEST}/menu.grinview.java"
+		  tofile="${MENU_GENERATED}/grinview/${MENU_SHOW_COMMANDS}" />
+	    <move file="${MENUASSETS_DEST}/menu.xlet.java"
+		  tofile="${MENU_GENERATED}/xlet/${MENU_SHOW_COMMANDS}" />
 	</target>       
         
         <target name="compile-extensions-reader">          

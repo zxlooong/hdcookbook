@@ -1,8 +1,12 @@
 #!/bin/sh
+#
+#  This shell script runs grinview on various show file
+#
 
 GRIN_BASE=`dirname $0`/../..
 CLASSES=$GRIN_BASE/build/grin_viewer/classes
 MENU_CLASSES=$GRIN_BASE/build/menu_tools
+MENU_GENERATED=$GRIN_BASE/build/menu_generated/grinview
 EXTENSIONS_FACTORY=com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory
 
 case $1 in
@@ -10,7 +14,7 @@ case $1 in
 	    HD_SRC=$GRIN_BASE/xlets/bookmenu/src/com/hdcookbook/bookmenu
 	    ASSETS=$HD_SRC/assets
 	    BG_IMG=$HD_SRC/menu/test_assets/MenuScreenBG_gray.png
-	    java -cp $CLASSES:$MENU_CLASSES \
+	    java -cp $CLASSES:$MENU_CLASSES:$MENU_GENERATED \
 	    	    com.hdcookbook.grin.test.bigjdk.GrinView \
 		    -asset_dir $ASSETS \
 		    -extensions_factory $EXTENSIONS_FACTORY \

@@ -59,12 +59,17 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.Writer;
+import java.io.FileWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowCommand;
+import com.hdcookbook.grin.SEShowCommands;
 import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
@@ -293,6 +298,7 @@ public class GrinBinaryWriter {
 	    GrinDataOutputStream dos = new GrinDataOutputStream(out, this);
 	    dos.writeInt(show.getSegmentStackDepth());
 	    dos.writeStringArray(show.getDrawTargets());
+	    dos.writeString(show.getShowCommands().getClassName());
 	    dos.flush();
 	    // We intentionally don't close it, because the underlying output
 	    // stream needs to stay open.
@@ -793,6 +799,8 @@ public class GrinBinaryWriter {
              writeSegmentDoneCmd(dos, (SegmentDoneCommand) command);
           } else if (command instanceof SetVisualRCStateCommand) {
              writeSetVisualRCStateCmd(dos, (SetVisualRCStateCommand) command);
+          } else if (command instanceof SEShowCommand) {
+             writeShowCommand(dos, (SEShowCommand) command);
           } else {    /* user-defined or null */
              writeUserCmd(dos, command);
           }
@@ -802,8 +810,17 @@ public class GrinBinaryWriter {
        dos.close();
     }
 
+   private void writeShowCommand(DataOutputStream out, SEShowCommand cmd)
+	   throws IOException 
+    {
+        out.writeByte((int)Constants.SHOW_COMMANDS_CMD_IDENTIFIER);
+	out.writeInt(cmd.getCommandNumber());
+	writeCommands(out, cmd.getSubCommands());
+    }
+
    private void writeSetVisualRCStateCmd(DataOutputStream out, SetVisualRCStateCommand setVisualRCStateCommand) 
-       throws IOException {
+	   throws IOException 
+    {
        
         out.writeByte((int)Constants.SETVISUALRCSTATE_CMD_IDENTIFIER);
        
@@ -867,9 +884,12 @@ public class GrinBinaryWriter {
        // nothing to record for this command.  Return.
    }
 
+    //
+    // Write out a user command, or null
+    //
     private void writeUserCmd(DataOutputStream out, Command command) 
-       throws IOException {
-       
+	    throws IOException 
+    {
         out.writeByte((int)Constants.USER_CMD_IDENTIFIER);
         
         if (command == null) {
@@ -1134,5 +1154,20 @@ public class GrinBinaryWriter {
             throw new RuntimeException("Unexpected instance " + feature);
         }
     }
+
+    public void writeCommandClass(SEShow show, boolean forXlet, String fileName)
+           throws IOException 
+   {
+       SEShowCommands cmds = show.getShowCommands();
+       File f = new File(fileName);
+       if (cmds.getClassName() == null) {
+           f.delete();  // Just in case an old version was there
+           return;      // No commands class
+       }
+       FileWriter w = new FileWriter(fileName);
+       w.write(cmds.getJavaSource(forXlet));
+       w.close();
+   }
+
     
 }

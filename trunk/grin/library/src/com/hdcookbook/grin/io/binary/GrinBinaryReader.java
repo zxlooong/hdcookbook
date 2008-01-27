@@ -72,6 +72,7 @@ import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.SegmentDoneCommand;
 import com.hdcookbook.grin.commands.SetVisualRCStateCommand;
+import com.hdcookbook.grin.commands.ShowCommands;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.Box;
 import com.hdcookbook.grin.features.Clipped;
@@ -166,7 +167,6 @@ import com.hdcookbook.grin.util.Debug;
 public class GrinBinaryReader {
 
     private Show show;
-    private Director director;
     private Feature[] features;
     private RCHandler[] rcHandlers;
     private Segment[] segments;
@@ -175,6 +175,7 @@ public class GrinBinaryReader {
     private Hashtable publicRCHandlers = new Hashtable();
     private String filename;
     private InputStream stream;
+    private Class showCommandsClass = null;
     
     private ArrayList deferred = new ArrayList();
     
@@ -292,6 +293,7 @@ public class GrinBinaryReader {
 		// This must be done before features are read
             
         // Read in the show file
+	readShowCommandsClass(in);
         readFeatures(in);
         readRCHandlers(in);
         readSegments(in);      
@@ -308,6 +310,20 @@ public class GrinBinaryReader {
 		       publicSegments, publicFeatures, publicRCHandlers);
     }
     
+    private void readShowCommandsClass(GrinDataInputStream in)
+	   throws IOException 
+    {
+	String className = in.readString();
+	if (className == null) {
+	    return;
+	}
+	try {
+	    showCommandsClass = Class.forName(className);
+	} catch (Exception ex) {
+	    throw new IOException(ex.toString());
+	}
+    }
+
     private void readFeatures(GrinDataInputStream in) 
        throws IOException {
         
@@ -750,8 +766,8 @@ public class GrinBinaryReader {
     }
     
     private Command[] readCommands(GrinDataInputStream in) 
-        throws IOException {
- 
+	    throws IOException 
+    {
         if (in.readByte() == Constants.NULL) {
            return null;
         }
@@ -761,24 +777,31 @@ public class GrinBinaryReader {
         Command[] commands = new Command[count];
        
         for (int i = 0; i < count; i++) {
-           byte identifier = in.readByte();           
-           switch (identifier) {
-               case Constants.ACTIVATEPART_CMD_IDENTIFIER:
-                   commands[i] = readActivatePartCmd(in);
-                   break;
-               case Constants.ACTIVATESEGMENT_CMD_IDENTIFIER:
-                   commands[i] = readActivateSegmentCmd(in);
-                   break;
-               case Constants.SEGMENTDONE_CMD_IDENTIFIER :
-                   commands[i] = readSegmentDoneCmd(in);
-                   break;
-               case Constants.SETVISUALRCSTATE_CMD_IDENTIFIER :
-                   commands[i] = readSetVisualRCStateCmd(in);
-                   break;
-               default:
-                   commands[i] = readUserCmd(in);
-                   break;    
-           }
+	    byte identifier = in.readByte();           
+	    switch (identifier) {
+	       case Constants.ACTIVATEPART_CMD_IDENTIFIER:
+		   commands[i] = readActivatePartCmd(in);
+		   break;
+	       case Constants.ACTIVATESEGMENT_CMD_IDENTIFIER:
+		   commands[i] = readActivateSegmentCmd(in);
+		   break;
+	       case Constants.SEGMENTDONE_CMD_IDENTIFIER :
+		   commands[i] = readSegmentDoneCmd(in);
+		   break;
+	       case Constants.SETVISUALRCSTATE_CMD_IDENTIFIER :
+		   commands[i] = readSetVisualRCStateCmd(in);
+		   break;
+	       case Constants.SHOW_COMMANDS_CMD_IDENTIFIER :
+		   commands[i] = readShowCommandsCmd(in);
+		   break;
+	       case Constants.USER_CMD_IDENTIFIER:
+		   commands[i] = readUserCmd(in);
+		   break;    
+	       default:
+		   if (Debug.ASSERT) {
+		       Debug.assertFail();
+		   }
+	    }
        }
      
        return commands;
@@ -871,9 +894,27 @@ public class GrinBinaryReader {
     } 
 
     private SegmentDoneCommand readSegmentDoneCmd(GrinDataInputStream dis) 
-        throws IOException {
-       
+	    throws IOException 
+    {
         return new SegmentDoneCommand(show);
+    }
+    
+    private ShowCommands readShowCommandsCmd(GrinDataInputStream dis)
+	    throws IOException
+    {
+	if (showCommandsClass == null) {
+	    throw new IOException();
+	}
+	ShowCommands result;
+	try {
+	    result = (ShowCommands) showCommandsClass.newInstance();
+	} catch (Throwable ex) {
+	    throw new IOException(ex.toString());
+	}
+	result.implSetCommandNumber(dis.readInt());
+	result.implSetSubCommands(readCommands(dis));
+	result.implSetDirector(show.getDirector());
+	return result;
     }
 
     private Command readUserCmd(GrinDataInputStream dis) 

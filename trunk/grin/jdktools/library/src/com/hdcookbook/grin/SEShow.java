@@ -97,9 +97,10 @@ public class SEShow extends Show {
 
     private Map<String, Segment> privateSegments = null;
     private Object internalMonitor = new Object();
+    private SEShowCommands showCommands = new SEShowCommands(this);
 
     // For mosaic building.
-    private ArrayList mosaicHints;
+    private ArrayList<MosaicHint> mosaicHints;
     
     /**
      * Create a new SEShow.
@@ -109,6 +110,13 @@ public class SEShow extends Show {
      **/
     public SEShow(Director director) {
 	super(director);
+    }
+    
+    /**
+     * Get the object that represents the commands defined for this show
+     */
+    public SEShowCommands getShowCommands() {
+        return showCommands;
     }
 
     /**
@@ -192,6 +200,7 @@ public class SEShow extends Show {
      * This adds internal structure checking to the superclass version of
      * this method.
      **/
+    @Override
     public void buildShow(Segment[] segments, Feature[] features, 
     		          RCHandler[] rcHandlers,
 		          Hashtable publicSegments, Hashtable publicFeatures,
@@ -226,8 +235,7 @@ public class SEShow extends Show {
         if (mosaicHints == null) {
             return new MosaicHint[0];
         }    
-        return (MosaicHint[])
-                mosaicHints.toArray(new MosaicHint[mosaicHints.size()]);
+        return mosaicHints.toArray(new MosaicHint[mosaicHints.size()]);
     }
     
 

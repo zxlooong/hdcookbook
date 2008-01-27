@@ -59,7 +59,7 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.io.binary.*;
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.SEShowCommands;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.ExtensionsBuilderFactory;
 import com.hdcookbook.grin.io.ShowBuilder;
@@ -72,6 +72,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -88,7 +89,7 @@ public class Main {
     * @param args   Arguments. args[0] is file name the text-based GRIN script to read.
     *               args[1] is an optional argument for the 
     *               a fully qualified classname of the ExtensionsWriter, which will be
-    *               instanciated from this class' classpath.
+    *               instantiated from this class' classpath.
     * @see          #convert(String[], String, ExtensionsBuilderFactory)
     **/
    public static void main(String[] args) {
@@ -130,7 +131,9 @@ public class Main {
                                    textFile, extensionsBuilderFactory);
         } catch (IOException e) {           
             e.printStackTrace();
-        }    
+            System.exit(1);
+        }
+        System.exit(0);
    }
 
    /**
@@ -142,9 +145,14 @@ public class Main {
     * custom extensions.
     */
    public static void convert(String[] assetsDir, String textFile, ExtensionsBuilderFactory extensionsFactory) 
-           throws IOException {
+           throws IOException 
+   {
+       String fileNames[] = new String[3];
        
-       String fileName = null;
+       String baseName = textFile;
+       if (baseName.indexOf('.') != -1) {
+           baseName = baseName.substring(0, baseName.lastIndexOf('.'));
+       }
        
        try {
          
@@ -158,11 +166,8 @@ public class Main {
   
             SEShow show = createShow(textFile, extensionsFactory);
               
-            fileName = textFile;
-            if (textFile.indexOf('.') != -1) {
-               fileName = textFile.substring(0, textFile.lastIndexOf('.'));
-            }             
-            fileName = fileName.concat(".grin");
+            String fileName = baseName + ".grin";           
+            fileNames[0] = fileName;
             
             DataOutputStream dos = new DataOutputStream(new FileOutputStream(fileName));
             
@@ -174,54 +179,28 @@ public class Main {
 	    out.writeShow(dos);
             dos.close();
             
-
+            fileNames[1] = baseName + ".xlet.java";
+            out.writeCommandClass(show, true, fileNames[1]);
             
-            if (Debug.ASSERT) {
-               // A simple assertion test - check that the reader can read back
-               // the binary file that just got generated without any error.
-               DataInputStream in = new DataInputStream(new FileInputStream(fileName));               
-	       Show recreatedShow = new Show(null);
-               GrinBinaryReader reader = new GrinBinaryReader(in, new ExtensionsReader() {
-                    public Feature readExtensionFeature(Show show, String name, 
-                            GrinDataInputStream in, int length) throws IOException {
-                        in.skipBytes(length);
-                        return new Modifier(show, name) {}; //punting
-                    }
-                    public Modifier readExtensionModifier(Show show, String name, 
-                            GrinDataInputStream in, int length) throws IOException {
-                        in.skipBytes(length);
-                        return new Modifier(show, name) {};
-                    }
-                    public Command readExtensionCommand(Show show, 
-                            GrinDataInputStream in, int length) throws IOException {
-                        in.skipBytes(length);
-                        return new Command() {
-                            @Override
-                            public void execute() {
-                                System.out.println("Executing user command");   
-                            }
-                            
-                        };
-                    }                 
-               });
-               reader.readShow(recreatedShow);
-            }          
+            fileNames[2] = baseName + ".grinview.java";
+            out.writeCommandClass(show, false, fileNames[2]);
             
             return;
             
         } catch (IOException e) { 
             // failed on writing, delete the binary file
-            if (fileName != null) {
-                File file = new File(fileName);
-                if (file.exists()) {
-                   file.delete();
-                }   
+            for (int i = 0; i < fileNames.length; i++) {
+                if (fileNames[i] != null) {
+                    File file = new File(fileNames[i]);
+                    if (file.exists()) {
+                       file.delete();
+                    }   
+                }
             }
             
             throw e;
         }
    }
-
    private static SEShow createShow(String showName, ExtensionsBuilderFactory extensionsFactory) {
 	SEShow show = new SEShow(null);
 	URL source = null;

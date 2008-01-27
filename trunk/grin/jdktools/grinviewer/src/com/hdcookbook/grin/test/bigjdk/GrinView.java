@@ -431,7 +431,7 @@ public class GrinView extends GenericMain {
                 factory = (ExtensionsBuilderFactory)
                         Class.forName(extensionsFactoryName).newInstance();
             } catch (Exception e) {
-                System.err.println("Error instanciating " + extensionsFactoryName);
+                System.err.println("Error instantiating " + extensionsFactoryName);
                 e.printStackTrace();
             }
         }
@@ -442,7 +442,7 @@ public class GrinView extends GenericMain {
                 reader = (ExtensionsReader)
                         Class.forName(extensionsReaderName).newInstance();
             } catch (Exception e) {
-                System.err.println("Error instanciating " + extensionsReaderName);
+                System.err.println("Error instantiating " + extensionsReaderName);
                 e.printStackTrace();
             }
         }
