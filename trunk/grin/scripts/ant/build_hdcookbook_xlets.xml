@@ -131,11 +131,11 @@ information or have any questions.
     </target>
     
     <target name="run-mosaic-builder" depends="copy-menu-assets, compile-mosaic">
-        <java classpath="${MOSAIC_DEST}/classes:${LIBRARY_DEST}:${MENUASSETS_DEST}" 
+        <jdktools.java classpath="${MOSAIC_DEST}/classes:${LIBRARY_DEST}:${MENUASSETS_DEST}" 
               maxmemory="512m"
               classname="com.hdcookbook.grin.build.mosaic.Main">
             <arg line="-show menu.txt -assets ${MENUASSETS_DEST} -out ${MENUASSETS_DEST}"/>
-        </java>			
+        </jdktools.java>			
     </target>
     
     <target name="generate-binary-script" depends="copy-menu-assets, compile-binary-converter,
