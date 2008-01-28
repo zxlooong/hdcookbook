@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<!--
+Copyright  1990-2006 Sun Microsystems, Inc. All Rights Reserved.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version
+2 only, as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License version 2 for more details (a copy is
+included at /legal/license.txt).
+
+You should have received a copy of the GNU General Public License
+version 2 along with this work; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+02110-1301 USA
+
+Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
+Clara, CA 95054 or visit www.sun.com if you need additional
+information or have any questions.
+-->
+
+<project name="Build GRIN tools used on Java SE" basedir="../.." default="compile-all-tools">
+    
+    <property file="../${os.name}.user.vars.properties"/>
+    <property file="../user.vars.properties"/>	
+    <property file="../vars.properties"/>	
+    
+    <property name="HDC_BUILD_DIR" value="build"/>
+    <property name="JDKTOOLS_BUILD_DIR" value="${HDC_BUILD_DIR}/jdktools"/>
+    <property name="LIBRARY_DEST" value="${JDKTOOLS_BUILD_DIR}/library"/>
+    <property name="GRIN_VIEWER_DEST" value="${JDKTOOLS_BUILD_DIR}/grin_viewer"/>
+    <property name="BINARY_CONVERTER_DEST" value="${JDKTOOLS_BUILD_DIR}/binaryconverter"/>
+    <property name="MOSAIC_DEST" value="${JDKTOOLS_BUILD_DIR}/mosaic_builder"/>
+   
+    <import file="preset_defs.xml"/>
+    
+    <target name="compile-all-tools" depends="compile-grinview, compile-binary-converter, compile-mosaic"/>
+    
+    <target name="clean">
+        <delete dir="${JDKTOOLS_BUILD_DIR}"/>
+    </target>
+    
+    <target name="init-library">
+        <mkdir dir="${LIBRARY_DEST}"/>
+    </target>
+    
+    <target name="compile-library" depends="init-library">
+        <jdktools.javac
+            destdir="${LIBRARY_DEST}">
+            <src path="library/src" />                
+            <src path="jdktools/library/src" />
+        </jdktools.javac>    
+    </target>
+    
+    <target name="init-mosaic">       
+        <mkdir dir="${MOSAIC_DEST}/classes"/>
+    </target>       
+    
+    <target name="compile-mosaic" depends="init-mosaic, compile-library">	
+        <jdktools.javac 
+            classpath="${LIBRARY_DEST}"
+            destdir="${MOSAIC_DEST}/classes">
+            <src path="jdktools/mosaic/src" />
+        </jdktools.javac>
+    </target>
+    
+    <target name="init-grinview">
+        <mkdir dir="${GRIN_VIEWER_DEST}/classes"/>
+    </target>
+    
+    <target name="compile-grinview" depends="init-grinview, compile-library">
+        <jdktools.javac
+               classpath="${LIBRARY_DEST}"
+               destdir="${GRIN_VIEWER_DEST}/classes">
+            <src path="jdktools/grinviewer/src" />
+        </jdktools.javac>
+        
+        <jar jarfile="${GRIN_VIEWER_DEST}/grinviewer.jar">
+            <fileset dir="${GRIN_VIEWER_DEST}/classes"/>
+            <fileset dir="${LIBRARY_DEST}"/>
+            <manifest>
+                <attribute name="Main-Class" value="com.hdcookbook.grin.test.bigjdk.GrinView"/>
+            </manifest>
+        </jar>
+        
+    </target>
+    
+    <target name="init-binary-converter">
+        <mkdir dir="${BINARY_CONVERTER_DEST}/classes"/>
+    </target>
+    
+    <target name="compile-binary-converter" depends="init-binary-converter, compile-library">
+        <jdktools.javac      
+               classpath="${LIBRARY_DEST}"
+               destdir="${BINARY_CONVERTER_DEST}/classes">
+            <src path="jdktools/binaryconverter/src" />
+            <include name="com/hdcookbook/grin/**/*.java"/>
+        </jdktools.javac> 
+        
+        <jar jarfile="${BINARY_CONVERTER_DEST}/converter.jar">
+            <fileset dir="${BINARY_CONVERTER_DEST}/classes"/>
+            <fileset dir="${LIBRARY_DEST}"/>
+            <manifest>
+                <attribute name="Main-Class" value="com.hdcookbook.grin.binaryconverter.Main"/>
+            </manifest>
+        </jar>
+    </target>
+    
+</project>

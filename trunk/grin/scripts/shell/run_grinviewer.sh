@@ -4,7 +4,7 @@
 #
 
 GRIN_BASE=`dirname $0`/../..
-CLASSES=$GRIN_BASE/build/grin_viewer/classes
+CLASSES=$GRIN_BASE/build/jdktools/grin_viewer/grinviewer.jar
 MENU_CLASSES=$GRIN_BASE/build/menu_tools
 MENU_GENERATED=$GRIN_BASE/build/menu_generated/grinview
 EXTENSIONS_FACTORY=com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory
@@ -24,7 +24,7 @@ case $1 in
 
     menu-bin)
     	    cd $GRIN_BASE/scripts/ant
-	    ant -f build_grinview.xml run-grin-viewer
+	    ant -f run_jdktools.xml run-grin-viewer-binary
 	    ;;
 
     test)

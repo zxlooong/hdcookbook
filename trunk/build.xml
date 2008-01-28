@@ -1,25 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="hdcookbook" default="deploy" basedir=".">
+    
+  
+  <property file="${os.name}.user.vars.properties"/>
+  <property file="user.vars.properties"/>	
+  <property file="vars.properties"/>	
 
-  <!-- A default target.  This will build tools if necessary.  -->
-  <target name="deploy"> 
-	 <ant dir="grin" antfile="scripts/ant/build_xlets.xml" target="grin-deploy"/>
+  <!-- A default target.  This will create a hdcookbook sample disc image -->
+  <target name="deploy" depends="build-bd-tools, build-grin-jdk-tools"> 
+	 <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml"/>
   </target>
 
   <!-- A target for everything -->
-  <target name="all" depends="deploy, build-grinview, build-grin-javadoc, build-grin-samples">
+  <target name="all" depends="deploy, build-grin-javadoc, build-grin-samples">
   </target>
   
+  <target name="build-grin-jdk-tools">
+      <ant dir="grin" antfile="scripts/ant/build_jdktools.xml"/>
+  </target>    
+  
   <!-- Build just the tools, and not the xlets in grin directory -->
-  <target name="build-tools">
+  <target name="build-bd-tools">
 	  <ant dir="tools/bdjo"/> 
 	  <ant dir="tools/security/make"/> 
   </target>
 
   <!-- Build the GRIN script viewer -->
   <target name="build-grinview">
-	    <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="compile-grin-viewer"/>
+	    <ant dir="grin" antfile="scripts/ant/build_jdktools.xml" target="compile-grin-viewer"/>
   </target>
   
     <!-- Build the GRIN javadoc -->
@@ -48,8 +57,7 @@
   <target name="clean"> 	  
 	  <ant dir="tools/bdjo" target="bdjo-clean"/>
 	  <ant dir="tools/security/make" target="clean"/>
-	  <ant dir="grin" antfile="scripts/ant/build_xlets.xml" target="grin-clean"/>
-	  <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="clean"/>
+	  <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml" target="clean"/>
 	  <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml" target="clean"/>        
 	  <ant dir="grin/samples" target="clean"/>
   </target>
