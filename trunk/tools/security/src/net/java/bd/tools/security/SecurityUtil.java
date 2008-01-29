@@ -74,6 +74,10 @@ import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+import javax.naming.InvalidNameException;
 
 import sun.security.tools.KeyTool;
 import sun.security.tools.JarSigner;
@@ -109,103 +113,169 @@ import org.bouncycastle.jce.provider.X509CertificateObject;
  */
 public class SecurityUtil {
     
-   // Keystore related fields
-   static final String DEFAULT_KEYSTORE_FILE = "keystore.store";
-   static final String DEFAULT_KEYSTORE_PASSWORD = "keystorepassword";
-   static final String DEFAULT_APPKEY_PASSWORD = "appcertpassword";
-   static final String DEFAULT_APPCERT_ALIAS = "appcert"; 
-   String keystoreFile;
-   String keystorePassword;
-   String appKeyPassword;
-   String appCertAlias;
-   static final String ROOTKEYPASSWORD = "rootcertpassword"; 
-   static final String ROOTCERTALIAS = "rootcert";
+   // default values
+   static final String DEF_KEYSTORE_FILE = "keystore.store";
+   static final String DEF_KEYSTORE_PASSWORD = "keystorepassword";
+   static final String DEF_APPKEY_PASSWORD = "appcertpassword";
+   static final String DEF_APPCERT_ALIAS = "appcert";
+   static final String DEF_ROOTKEY_PASSWORD = "rootcertpassword"; 
+   static final String DEF_ROOTCERT_ALIAS = "rootcert";
+   static final String DEF_APP_ALT_NAME = "app@producer.com";
+   static final String DEF_ROOT_ALT_NAME = "root@studio.com";
+   static final String DEF_APP_CERT_DN = "CN=Producer, OU=Codesigning Department, O=BDJCompany, C=US";
+   static final String DEF_ROOT_CERT_DN = "CN=Studio, OU=Codesigning Department, O=BDJCompany, C=US";
     
-    // Intermediate files to create, will be deleted at the tool exit time
+   // Intermediate files to create, will be deleted at the tool exit time;
+   // XXX Make sure they are always deleted.
    static final String APPCSRFILE = "appcert.csr";
    static final String APPCERTFILE = "appcert.cer";
-      
-    // Certificate data.
-    static final String APP_SUBJECT_ALT_NAME = "def@producer.com";
-    static final String ROOT_ISSUER_ALT_NAME = "abc@studio.com";
-    static final String ROOT_SUBJECT_ALT_NAME = "def@studio.com";
+    
+    // XXX We need to change the hardcoded serial numbers and generate random values for them
     static final int APP_SERIAL_NUMBER = 1;
     static final int ROOT_SERIAL_NUMBER = 2;
 
+    // Optional fields initialized by the nested Builder class.
+    String keystoreFile;
+    String keystorePassword;
+    String appKeyPassword;
+    String appCertAlias;
     List<String> jarfiles;
     String orgId;
     String appCertDN;
-    String rootCertDN;
-    
-    private KeyStore store;
-    boolean newKeys = true;
+    String rootCertDN; 
+    String appAltName;
+    String rootAltName;
     boolean debug = false;
     
-    public SecurityUtil(String orgId, boolean debug, List<String> jarfiles) {
-        this.orgId = orgId;
-        this.debug = debug;
-        this.jarfiles = jarfiles;
-        setDefaults();
-        setDNs();
+    // non-optional fields
+    String rootKeyPassword = DEF_ROOTKEY_PASSWORD; 
+    String rootCertAlias = DEF_ROOTCERT_ALIAS;
+   
+    private KeyStore store;    
+   
+    /*
+     * Using the Builder pattern from Effective Java Reloaded. The arguments
+     * for this constructor are way too many. The Builder Pattern makes
+     * it easy to create an instance of this class.
+     * reference:http://developers.sun.com/learning/javaoneonline/2007/pdf/TS-2689.pdf
+     */
+    private SecurityUtil(Builder b) throws Exception {
+        // Optional parameters specified from the command line tools
+        this.orgId = b.orgId;
+        this.keystoreFile = b.keystoreFile;
+        this.keystorePassword = b.keystorePassword;
+        this.appKeyPassword = b.appKeyPassword;
+        this.appCertAlias = b.appCertAlias;
+        this.rootCertDN = b.rootCertDN;
+        this.appCertDN = b.appCertDN;
+        this.rootAltName = b.rootAltName;
+        this.appAltName = b.appAltName;
+        this.debug = b.debug;
+        this.jarfiles = b.jarfiles;
+        
+        // Minor processing;append the orgid to the names
+        rootCertDN = appendOrgId(rootCertDN);
+        appCertDN = appendOrgId(appCertDN);
     }
     
-    public SecurityUtil(String keystoreFile,
-                String keystorePassword,
-                String appCertAlias,
-                String appKeyPassword,
-                String orgId,
-                boolean debug,
-                List<String> jarfiles) {
-         this.keystoreFile = keystoreFile;
-         this.keystorePassword = keystorePassword;
-         this.appCertAlias = appCertAlias;
-         this.appKeyPassword = appKeyPassword;
-         newKeys = false;
-         this.orgId = orgId;
-         this.debug = debug;
-         this.jarfiles = jarfiles;
-         setDNs();
+    public static class Builder {
+         // Initialize with default values.
+         String keystoreFile = DEF_KEYSTORE_FILE;
+         String keystorePassword = DEF_KEYSTORE_PASSWORD;
+         String appKeyPassword = DEF_APPKEY_PASSWORD;
+         String appCertAlias = DEF_APPCERT_ALIAS;
+        
+         // Certificate data.
+         String appAltName = DEF_APP_ALT_NAME;
+         String rootAltName = DEF_ROOT_ALT_NAME;
+         String appCertDN = DEF_APP_CERT_DN;
+         String rootCertDN = DEF_ROOT_CERT_DN;
+         
+         List<String> jarfiles;
+         String orgId;
+         boolean debug = false;
+         
+        public Builder() { }
+        
+        public Builder orgId(String id) {
+           this.orgId = id;
+           return this;
+        }
+        public Builder keystoreFile(String file) {
+            this.keystoreFile = file;
+            return this;
+        }
+        public Builder storepass(String password) {
+            this.keystorePassword = password;
+            return this;
+        }
+        public Builder appAlias(String alias) {
+            this.appCertAlias = alias;
+            return this;
+        }
+        public Builder appPassword(String password) {
+             this.appKeyPassword = password;
+             return this;
+        }
+        public Builder rootDN(String dn) {
+            this.rootCertDN = dn;
+            return this;
+        }
+        public Builder appDN(String dn) {
+            this.appCertDN = dn;
+            return this;
+        }
+        public Builder rootAltName(String name) {
+            this.rootAltName = name;
+            return this;
+        }
+        public Builder appAltName(String name) {
+            this.appAltName = name;
+            return this;
+        }
+        public Builder debug() {
+            this.debug = true;
+            return this;
+        }
+        public Builder jarfiles(List<String> files) {
+            this.jarfiles = files;
+            return this;
+        }
+        public SecurityUtil build() throws Exception {
+            return new SecurityUtil(this);
+        }
     }
     
-    private void setDefaults() {
-        this.keystoreFile = DEFAULT_KEYSTORE_FILE;
-        this.keystorePassword = DEFAULT_KEYSTORE_PASSWORD;
-        this.appCertAlias = DEFAULT_APPCERT_ALIAS;
-        this.appKeyPassword = DEFAULT_APPKEY_PASSWORD;
+     // append the orgId to the OrganizationName of the DN
+    private String appendOrgId(String dn)
+            throws InvalidNameException {
+        LdapName name = new LdapName(dn);
+        List<Rdn> rdns = name.getRdns();
+        List<Rdn> newRdns = new ArrayList<Rdn>();
+        for(Rdn rdn : rdns) {
+           String type = rdn.getType();
+           if (type.equalsIgnoreCase("O")) {
+               String value = (String) rdn.getValue();
+               String newValue = value + "." + orgId;
+               newRdns.add(new Rdn(type, newValue));
+           } else {
+               newRdns.add(rdn);
+           }
+        }
+        return (new LdapName(newRdns)).toString();
     }
     
-    private void setDNs() {
-         this.appCertDN =  "CN=Producer, OU=Codesigning Department, O=BDJCompany." + orgId + ", C=US";
-         this.rootCertDN = "CN=Studio, OU=Codesigning Department, O=BDJCompany." + orgId + ", C=US";
-    }
-    
-    public void signJars()throws Exception {
-            boolean failed = false;
-            if (newKeys) {
-	        cleanup();  // Get rid of any previous key aliases first.
+    public void signJars() {
+        try {               
+            initKeyStore();
+            signJarFile();
+            if (debug) {
+                verifyCertificates();
             }
-	    try {               
-                initKeyStore();
-                if (newKeys) {
-		    generateKeys();
-                }
-		signJarFile();
-		exportRootCertificate();
-                if (debug) {
-                    verifyCertificates();
-                }
-                
-	    } catch (Exception e) {
-	       e.printStackTrace();
-               failed = true;
-	    } finally {
-	       if (!debug && newKeys) { 
-	 	   cleanup();
-               }    
-	    }
-            if (failed) {
-                System.exit(1); // VM exit with an error code
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1); // VM exit with an error code
+        }
     }
     
     public void createCertificates() throws Exception {
@@ -252,7 +322,7 @@ public class SecurityUtil {
     }
     
     private void generateCertificates() throws Exception {
-        generateSelfSignedCertificate(rootCertDN, ROOTCERTALIAS, ROOTKEYPASSWORD, true);
+        generateSelfSignedCertificate(rootCertDN, rootCertAlias, rootKeyPassword, true);
         generateSelfSignedCertificate(appCertDN, appCertAlias, appKeyPassword, false);
     }
 
@@ -265,7 +335,7 @@ public class SecurityUtil {
     }
     
     private void generateCSRResponse() throws Exception {
-       issueCert(APPCSRFILE, APPCERTFILE, ROOTCERTALIAS, ROOTKEYPASSWORD);
+       issueCert(APPCSRFILE, APPCERTFILE, rootCertAlias, rootKeyPassword);
     }
     
     private void importCSRResponse() throws Exception {
@@ -288,7 +358,7 @@ public class SecurityUtil {
     
     private void exportRootCertificate() throws Exception {
 	String[] exportRootCertificateArgs = {
-		"-export", "-alias", ROOTCERTALIAS, "-keypass", ROOTKEYPASSWORD, 
+		"-export", "-alias", rootCertAlias, "-keypass", rootKeyPassword, 
 		"-keystore", keystoreFile, "-storepass", keystorePassword,
 		"-debug", "-file", "app.discroot.crt" };
 	KeyTool.main(exportRootCertificateArgs);
@@ -314,8 +384,8 @@ public class SecurityUtil {
                  if (ks.containsAlias(appCertAlias)) {
                      ks.deleteEntry(appCertAlias);
                  }
-                 if (ks.containsAlias(ROOTCERTALIAS)) {
-                     ks.deleteEntry(ROOTCERTALIAS);
+                 if (ks.containsAlias(rootCertAlias)) {
+                     ks.deleteEntry(rootCertAlias);
                  }
                  keystore.delete();      
 	    } catch (Exception e) {
@@ -329,7 +399,8 @@ public class SecurityUtil {
 	 new File(APPCERTFILE).delete();
     }
     
-    private void generateSelfSignedCertificate(String issuer, String alias, String keyPassword, boolean isRootCert) throws Exception { 
+    private void generateSelfSignedCertificate(String issuer, String alias,
+             String keyPassword, boolean isRootCert) throws Exception { 
         Date validFrom, validTo;
         
         // For forcing GeneralizedTime DER encoding, 
@@ -363,16 +434,16 @@ public class SecurityUtil {
             cg.addExtension(X509Extensions.KeyUsage.getId(), true,
         		new X509KeyUsage(X509KeyUsage.keyCertSign));
             cg.addExtension(X509Extensions.SubjectAlternativeName.getId(), false,
-            	getRfc822Name(ROOT_SUBJECT_ALT_NAME));
+            	getRfc822Name(rootAltName));
             cg.addExtension(X509Extensions.IssuerAlternativeName.getId(), false,
-            	getRfc822Name(ROOT_ISSUER_ALT_NAME));    
+            	getRfc822Name(rootAltName));    
             cg.addExtension(X509Extensions.BasicConstraints.getId(), true, 
                 new BasicConstraints(true));
         } else {
             // For an app cert, most of the extensions will be added when generating
             // a certificate in response to the certificate request file.
              cg.addExtension(X509Extensions.SubjectAlternativeName.getId(), false,
-            	getRfc822Name(APP_SUBJECT_ALT_NAME));
+                            getRfc822Name(appAltName));
         }   
         Certificate cert = cg.generate(keyPair.getPrivate());
 	store.setKeyEntry(alias, keyPair.getPrivate(), keyPassword.toCharArray(), new Certificate[] {cert});
@@ -414,7 +485,7 @@ public class SecurityUtil {
         // FIXME: how to pull this out from the original app cert's extension?
         // Email on X500Name is not encoded with UTF8String.
         cg.addExtension(X509Extensions.SubjectAlternativeName.getId(), false,
-            	getRfc822Name("abc@producer.com"));
+            	getRfc822Name(appAltName));
         
         // Assuming that the root certificate was generated using our tool,
         // the certificate should have IssuerAlternativeNames as an extension.

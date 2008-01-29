@@ -57,83 +57,39 @@ package net.java.bd.tools.security;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
-import static net.java.bd.tools.security.SecurityUtil.*;
 
 /**
- * 
- * BJSigner syntax is : BDSigner [-debug] -orgid 8-digit-hex-organization-ID jar-files 
- * 
- * Example: java -cp $SECURITY_HOME/build/security.jar:$JDK_HOME/lib/tools.jar:$SECURITY_HOME/resource/bcprov-jdk15-137.jar net.java.bd.tools.security.BDSigner -orgid 56789abc 00000.jar 
+ * Example: java -cp $SECURITY_HOME/build/security.jar:$JDK_HOME/lib/tools.jar:$SECURITY_HOME/resource/bcprov-jdk15-137.jar net.java.bd.tools.security.BDSigner 00000.jar 
  * 
  * Make sure to put security.jar before tools.jar in the jdk distribution for the jre 
  * classpath so that the modified version of the sun.security.* classes in this BDSigner respository
  * are used during the run.  bdprov-jdk15-137.jar is a bouncycastle distribution; a copy can be bound at "resources" dir.
- * 
  */
 public class BDSigner {
-
-    static String keystoreFile = DEFAULT_KEYSTORE_FILE;
-    static String keystorePassword = DEFAULT_KEYSTORE_PASSWORD;
-    static String appCertAlias = DEFAULT_APPCERT_ALIAS;
-    static String appKeyPassword = DEFAULT_APPKEY_PASSWORD;
-    static boolean debug = false;
-    static boolean newKeys = true;
-    static String orgId;
-    static List<String> jarfiles;
-    
     public static void main(String[] args) throws Exception {
-	    
-	    // Parse the argments
-	    parseArgs(args);
-            SecurityUtil util;
-	    if (newKeys) {
-               if (orgId == null) {
-                   printUsageAndExit("Bad OrgID " + orgId + ", please provide an 8 digit hex.");
-               }
-               util = new SecurityUtil(orgId, debug, jarfiles);
-            } else {
-               util = new SecurityUtil(keystoreFile,
-                                      keystorePassword,
-                                      appCertAlias,
-                                      appKeyPassword,
-                                      orgId,
-                                      debug,
-                                      jarfiles);
-            }
-            util.signJars();
-    }
-    
-     public static void parseArgs(String args[]) {
-        if (args.length < 2) {
+        if (args.length < 1) {
             printUsageAndExit("No arguments specified");
         }
-        jarfiles = new ArrayList<String>();
+        List<String> jarfiles = new ArrayList<String>();
+        SecurityUtil.Builder builder = new SecurityUtil.Builder();
         for(int i = 0; i < args.length; i++) {
             String opt = args[i];
             if (opt.equals("-keystore")) {
                 if (++i == args.length) errorNeedArgument(opt);
-                keystoreFile = args[i];
-                newKeys = false;
+                 builder = builder.keystoreFile(args[i]);
             } else if (opt.equals("-storepass")) {
                  if (++i == args.length) errorNeedArgument(opt);
-                keystorePassword = args[i];
-            } else if (opt.equals("-appkeyalias")) {
+                 builder = builder.storepass(args[i]);
+            } else if (opt.equals("-alias")) {
                if (++i == args.length) errorNeedArgument(opt);
-                appCertAlias = args[i];
-            } else if (opt.equals("-appkeypass")) {
+                builder = builder.appAlias(args[i]);
+            } else if (opt.equals("-keypass")) {
                if (++i == args.length) errorNeedArgument(opt);
-               appKeyPassword = args[i];
-            } else if (opt.equals("-orgid")) {
-                 if (++i == args.length) errorNeedArgument(opt);
-                 orgId = args[i];
-            	 if (orgId.length()!= 8) {
-		    printUsageAndExit("Bad OrgID " + orgId + ", please provide an 8 digit hex.");
-                 }
+               builder = builder.appPassword(args[i]);
             } else if (opt.equals("-help")) {
                 printUsageAndExit("");
             } else if (opt.equals("-debug")) {
-                debug = true;
-                System.out.println ("Debugging : " + debug);   
+                 builder = builder.debug();
             } else {
 	          jarfiles.add(args[i]);
 	          if (!new File(args[i]).exists()) {
@@ -141,6 +97,13 @@ public class BDSigner {
                   } 
              } 
         }
+        if (jarfiles.isEmpty()) {
+           printUsageAndExit("No jar files to sign..");
+        } else {
+            builder = builder.jarfiles(jarfiles);
+        }
+        SecurityUtil util = builder.build();
+        util.signJars();
     }
      
      static private void tinyHelp() {
@@ -156,26 +119,20 @@ public class BDSigner {
     }
     
     private static void printUsageAndExit(String reason) {
-	 System.err.println("\n==============================\n");
          if (!reason.isEmpty())
-	     System.err.println("Failed: " + reason);
-	 System.err.println("\n==============================\n");
-	 System.err.println("This is a tool to sign jar files according to the bd-j specification.\n");
-         System.err.println("To sign the jar using the existing keystore use -keystore option;");
-         System.err.println("otherwise this tool generates new keys and certificates that are");
-         System.err.println("complaint with the bd-j spec");
-	 System.err.println("BDSigner Syntax:");
-	 System.err.println(
-		 "\t     [-keystore <keystorefile>] [-storepass <password>]");
-         System.err.println(
-		 "\t     [-appkeyalias <alias>] [-appkeypass <password>]");
-         System.err.println(
-                 "\t     [-debug]");
-         System.err.println(
-                 "\t     -orgid <8-digit-hex-organization-ID> jarfiles\n");
-         
-         System.err.println("Example: java -cp security.jar:tools.jar:bcprov-jdk15-137.jar net.java.bd.tools.security.BDSigner -orgid 56789abc 00000.jar\n");
-	 System.err.println("\n==============================\n");
+	     System.err.println("\nFailed: " + reason);
+	 System.err.println("\n***This is a tool for signing jar files according to the bd-j specification***\n");
+         System.err.println("usage: BDSigner [options] jarfiles..\n");
+          System.err.println("Valid Options:");
+         System.err.println(" -keystore filename  \t:Keystore containing the key for signing the jars");
+         System.err.println("                     \tIn the absense of this option, a default store:\"keystore.store\"");
+         System.out.println("                     \tis used from the current working directory.");
+	 System.err.println(" -storepass password \t:Keystore password");
+         System.err.println(" -alias alias        \t:Alias for the signing key");
+         System.err.println(" -keypass password   \t:Password for accessing the signing key");
+         System.err.println(" -debug              \t:Prints debug messages");
+         System.err.println(" -help               \t:Prints this message");
+         System.err.println("\nExample: java -cp security.jar:tools.jar:bcprov-jdk15-137.jar net.java.bd.tools.security.BDSigner 00000.jar\n");
          System.exit(1);
     }
 }

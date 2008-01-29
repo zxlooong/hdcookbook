@@ -57,16 +57,19 @@ information or have any questions.
     
     <target name="sign-xlets" depends="check-bdsigner">
         <fail unless="bdsigner.ok" message="Could not find the bdsigner tool at ${HDC_BDJ_SIGNER}"/>
- 
+        <path id="sec.tools.path">
+            <pathelement location="${HDC_BDJ_SIGNER}/build/security.jar"/>
+            <pathelement location="${HDC_BDJ_SIGNER}/resource/bcprov-jdk15-137.jar"/>
+            <pathelement location="${java.home}/../lib/tools.jar"/>   
+        </path>	   
+        <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
+	    <arg line="56789abc"/>
+            <classpath refid="sec.tools.path"/>
+        </jdktools.java>
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg line="-orgid 56789abc ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar"/>
-            <classpath>
-                <pathelement location="${HDC_BDJ_SIGNER}/build/security.jar"/>
-                <pathelement location="${HDC_BDJ_SIGNER}/resource/bcprov-jdk15-137.jar"/>
-                <pathelement location="${java.home}/../lib/tools.jar"/>   
-            </classpath>	   
+            <arg line="${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar"/>
+            <classpath refid="sec.tools.path"/>	   
         </jdktools.java>	
-        
         <move file="app.discroot.crt" todir="${HDC_DISC_BDMV}/../CERTIFICATE/"/>
         
     </target>

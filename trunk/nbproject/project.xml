@@ -65,9 +65,9 @@
                     <excludes>**/assets/**</excludes>
                 </source-folder>
                 <source-folder>
-                    <label>tools\bdsigner\src</label>
+                    <label>tools\security\src</label>
                     <type>java</type>
-                    <location>tools/bdsigner/src</location>
+                    <location>tools/security/src</location>
                     <excludes>**/assets/**</excludes>
                 </source-folder>
             </folders>
@@ -131,8 +131,8 @@
                         <excludes>**/assets/**</excludes>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>tools\bdsigner\src</label>
-                        <location>tools/bdsigner/src</location>
+                        <label>tools\security\src</label>
+                        <location>tools/security/src</location>
                         <excludes>**/assets/**</excludes>
                     </source-folder>
                     <source-file>
@@ -150,10 +150,6 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
             <compilation-unit>
                 <package-root>tools/bdjo/src</package-root>
-                <source-level>1.5</source-level>
-            </compilation-unit>
-            <compilation-unit>
-                <package-root>tools/bdsigner/src</package-root>
                 <source-level>1.5</source-level>
             </compilation-unit>
             <compilation-unit>
@@ -192,6 +188,10 @@
             </compilation-unit>
             <compilation-unit>
                 <package-root>tools/bdsigner/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>tools/security/src</package-root>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
