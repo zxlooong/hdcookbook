@@ -28,7 +28,7 @@
 
   <!-- Build the GRIN script viewer -->
   <target name="build-grinview">
-	    <ant dir="grin" antfile="scripts/ant/build_jdktools.xml" target="compile-grin-viewer"/>
+	    <ant dir="grin" antfile="scripts/ant/build_jdktools.xml" target="compile-grinview"/>
   </target>
   
     <!-- Build the GRIN javadoc -->
@@ -42,11 +42,11 @@
   </target>
   
   <target name="build-grinview-menu">
-        <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="build-grinview-menu"/>
+        <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml" target="generate-binary-script"/>
   </target>
   
   <target name="run-grinview-menu">
-      <ant dir="grin" antfile="scripts/ant/build_grinview.xml" target="run-grinview-menu"/>
+      <ant dir="grin" antfile="scripts/ant/run_jdktools.xml" target="run-grinview-menu"/>
   </target>
   
     <!-- Update GRIN javadoc in the trunk/www directory -->

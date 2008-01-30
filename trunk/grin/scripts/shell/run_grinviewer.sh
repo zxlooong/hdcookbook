@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/sh -x
 #
 #  This shell script runs grinview on various show file
 #
 
 GRIN_BASE=`dirname $0`/../..
 CLASSES=$GRIN_BASE/build/jdktools/grin_viewer/grinviewer.jar
-MENU_CLASSES=$GRIN_BASE/build/menu_tools
-MENU_GENERATED=$GRIN_BASE/build/menu_generated/grinview
+MENU_CLASSES=$GRIN_BASE/build/xlets_tools/menuxlet
+MENU_GENERATED=$GRIN_BASE/build/xlets/menu_generated/grinview
 EXTENSIONS_FACTORY=com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory
 
 case $1 in

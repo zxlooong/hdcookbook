@@ -153,6 +153,11 @@ information or have any questions.
               tofile="${MENU_GENERATED}/grinview/${MENU_SHOW_COMMANDS}" />
         <move file="${MENUASSETS_DEST}/menu.xlet.java"
               tofile="${MENU_GENERATED}/xlet/${MENU_SHOW_COMMANDS}" />        
+	<javac destdir="${MENU_GENERATED}/grinview" srcdir="${MENU_GENERATED}/grinview" debug="on">
+	    <classpath>
+	       <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+	    </classpath>
+	</javac>
     </target>       
     
     <target name="compile-extensions-reader" depends="init-xlet-dirs, compile-library">          
