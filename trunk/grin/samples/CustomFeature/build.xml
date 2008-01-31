@@ -3,10 +3,11 @@
 <project name="GRIN HelloWorld sample" default="all" basedir=".">
 	
 	<!-- Property Definitions -->
+        <property file="../../scripts/ant/jdktools.properties"/>
   
-	<property name="bdj.classes"  value="../../../../../bd-j/references/enhanced/classes.zip"/>
-	<property name="grin.classes"  value="../../build/grin_viewer/grinviewer.jar"/>
-        <property name="converter.classes" value="../../build/grin_viewer/converter.jar"/>
+	<property name="bdj.classes"  value="../../../../bd-j/references/enhanced/classes.zip"/>
+	<property name="grin.classes"  value="../../${GRIN_VIEWER_JAR}"/>
+        <property name="converter.classes" value="../../${BINARY_CONVERTER_JAR}"/>
 	<property name="builddir" value="build"/>
         <property name="script.name" value="custom-feature-example"/>
         <property name="extensions.builder.name" value = "ExtensionsBuilderFactoryImpl"/>
@@ -35,7 +36,7 @@
 	    <ant antfile="generate-bdjo-desc.xml"/>   
         </target>
         
-        <target name="generate_binary_script" depends="converter_check, compile_converter, compile_extension_writer">
+        <target name="generate_binary_script" depends="compile_extension_writer">
             <java fork="true" classname="com.hdcookbook.grin.binaryconverter.Main">
                 <classpath>
                    <pathelement path="${builddir}"/>
@@ -54,7 +55,7 @@
 		</javac>            
         </target>    
 	
-	<target name="run_grinview" depends="grinview_check, compile_grinview, generate_binary_script">
+	<target name="run_grinview">
             <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
                 <classpath>
                    <pathelement path="${builddir}"/>
@@ -65,7 +66,7 @@
 	    </java>
 	</target>
 	
-	<target name="debug_grinview" depends="grinview_check, compile_grinview">
+	<target name="debug_grinview">
                 <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
 			<classpath path="${grin.classes}"/>
 		</nbjpdastart>	
@@ -77,25 +78,7 @@
 			<jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
 		</java>	
 	</target>
-	
-	<target name="grinview_check">
-		<available file="${grin.classes}" type="file"
-			   property="grinview.ok"/>
-	</target>
-	
-	<target name="compile_grinview" unless="grinview.ok"> 
-	    <ant dir="../.." antfile="scripts/ant/build_grinview.xml" target="compile-grin-viewer"/>
-	</target>
 
-        <target name="converter_check">
-		<available file="${converter.classes}" type="file"
-			   property="converter.ok"/>
-	</target>
-	
-	<target name="compile_converter" unless="converter.ok"> 
-	    <ant dir="../.." antfile="scripts/ant/build_grinview.xml" target="compile-binary-converter"/>
-	</target>
-        
 	<target name="clean">
 		<delete dir="${builddir}"/>
 	</target>

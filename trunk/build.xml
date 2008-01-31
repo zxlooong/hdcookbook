@@ -13,7 +13,7 @@
   </target>
 
   <!-- A target for everything -->
-  <target name="all" depends="deploy, build-grin-javadoc, build-grin-samples">
+  <target name="all" depends="deploy, build-grin-javadoc, build-grin-samples, run-grinview-menu">
   </target>
   
   <target name="build-grin-jdk-tools">
@@ -26,10 +26,6 @@
 	  <ant dir="tools/security/make"/> 
   </target>
 
-  <!-- Build the GRIN script viewer -->
-  <target name="build-grinview">
-	    <ant dir="grin" antfile="scripts/ant/build_jdktools.xml" target="compile-grinview"/>
-  </target>
   
     <!-- Build the GRIN javadoc -->
   <target name="build-grin-javadoc">
@@ -39,10 +35,6 @@
       <!-- Build the GRIN sample xlets -->
   <target name="build-grin-samples">
 	    <ant dir="grin/samples"/>
-  </target>
-  
-  <target name="build-grinview-menu">
-        <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml" target="generate-binary-script"/>
   </target>
   
   <target name="run-grinview-menu">

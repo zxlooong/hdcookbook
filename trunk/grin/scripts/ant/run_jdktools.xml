@@ -52,7 +52,8 @@ information or have any questions.
         </java>	
     </target>
     
-    <target name="run-grinview-menu" depends="compile-grinview, compile-extensions-reader">
+    <target name="run-grinview-menu" depends="compile-grinview, compile-extensions-reader, generate-binary-script">
+
         <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
             <classpath>
                 <pathelement path="${MENUTOOLS_DEST}"/>

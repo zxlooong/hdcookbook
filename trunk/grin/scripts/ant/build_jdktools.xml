@@ -28,13 +28,7 @@ information or have any questions.
     <property file="../${os.name}.user.vars.properties"/>
     <property file="../user.vars.properties"/>	
     <property file="../vars.properties"/>	
-    
-    <property name="HDC_BUILD_DIR" value="build"/>
-    <property name="JDKTOOLS_BUILD_DIR" value="${HDC_BUILD_DIR}/jdktools"/>
-    <property name="LIBRARY_DEST" value="${JDKTOOLS_BUILD_DIR}/library"/>
-    <property name="GRIN_VIEWER_DEST" value="${JDKTOOLS_BUILD_DIR}/grin_viewer"/>
-    <property name="BINARY_CONVERTER_DEST" value="${JDKTOOLS_BUILD_DIR}/binaryconverter"/>
-    <property name="MOSAIC_DEST" value="${JDKTOOLS_BUILD_DIR}/mosaic_builder"/>
+    <property file="scripts/ant/jdktools.properties"/>
    
     <import file="preset_defs.xml"/>
     
@@ -79,7 +73,7 @@ information or have any questions.
             <src path="jdktools/grinviewer/src" />
         </jdktools.javac>
         
-        <jar jarfile="${GRIN_VIEWER_DEST}/grinviewer.jar">
+        <jar jarfile="${GRIN_VIEWER_JAR}">
             <fileset dir="${GRIN_VIEWER_DEST}/classes"/>
             <fileset dir="${LIBRARY_DEST}"/>
             <manifest>
@@ -101,7 +95,7 @@ information or have any questions.
             <include name="com/hdcookbook/grin/**/*.java"/>
         </jdktools.javac> 
         
-        <jar jarfile="${BINARY_CONVERTER_DEST}/converter.jar">
+        <jar jarfile="${BINARY_CONVERTER_JAR}">
             <fileset dir="${BINARY_CONVERTER_DEST}/classes"/>
             <fileset dir="${LIBRARY_DEST}"/>
             <manifest>
