@@ -268,10 +268,10 @@ public class SecurityUtil {
     public void signJars() {
         try {               
             initKeyStore();
-            signJarFile();
             if (debug) {
                 verifyCertificates();
             }
+            signJarFile();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1); // VM exit with an error code
