@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!--
+Copyright  1990-2006 Sun Microsystems, Inc. All Rights Reserved.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version
+2 only, as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License version 2 for more details (a copy is
+included at /legal/license.txt).
+
+You should have received a copy of the GNU General Public License
+version 2 along with this work; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+02110-1301 USA
+
+Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
+Clara, CA 95054 or visit www.sun.com if you need additional
+information or have any questions.
+-->
+
+<project name="Run GRIN tools used on Java SE" basedir="../.." default="run-grin-viewer-binary">
+    
+    <import file="build_hdcookbook_xlets.xml"/>
+    
+    <target name="run-grin-viewer-binary" depends="copy-menu-assets, generate-binary-script, compile-grinview">
+        <echo message="${MENUTOOLS_DEST} ${MENUASSETS_DEST} ${GRIN_VIEWER_DEST}"/>
+        <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+            <classpath>
+                <pathelement path="${MENUTOOLS_DEST}"/>
+                <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+            </classpath>               
+            <arg line="-asset_dir ${MENUASSETS_DEST} menu.grin"/>                
+        </jdktools.java>	
+    </target>
+    
+    <target name="debug-grin-viewer" depends="copy-menu-assets, generate-binary-script, compile-grinview">
+        <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
+            <classpath path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+        </nbjpdastart>	
+        <java fork="true" jar="${GRIN_VIEWER_DEST}/grinviewer.jar">
+            <jvmarg value="-Xdebug"/>			
+            <jvmarg value="-Xnoagent"/>
+            <jvmarg value="-Djava.compiler=none"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+            
+            <arg line="-asset_dir ${GRIN_VIEWER_DEST} menu.grin"/>                        
+        </java>	
+    </target>
+    
+    <target name="run-grinview-menu" depends="compile-grinview, compile-extensions-reader, generate-binary-script">
+
+        <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+            <classpath>
+                <pathelement path="${MENUTOOLS_DEST}"/>
+                <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+            </classpath>
+            <arg line="-asset_dir xlets/bookmenu/src/com/hdcookbook/bookmenu/assets -extensions_factory com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory -background xlets/bookmenu/src/com/hdcookbook/bookmenu/menu/test_assets/MenuScreenBG_gray.png -fps 24 menu.txt"/>
+        </java>	
+    </target>
+    
+</project>
