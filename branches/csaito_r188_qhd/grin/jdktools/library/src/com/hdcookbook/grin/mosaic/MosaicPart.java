@@ -53,37 +53,73 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
+package com.hdcookbook.grin.mosaic;
 
-package com.hdcookbook.bookmenu;
-
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+import java.awt.Rectangle;
 
 /**
- * This interface defines the methods that are exported by the
- * monitor xlet via inter-xlet communication.  Other xlets can 
- * call these methods to get the monitor xlet to do something.
+ * A part of a mosaic.  When a small image is put into a mosaic, it
+ * is represented as a part.  A part knows the name of the original
+ * image, it's placement on the mosaic, and the mosaic it's placed in.
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public interface MonitorIXCInterface extends Remote {
+public class MosaicPart {
+
+    private String name;
+    private Mosaic mosaic;
+    private Rectangle placement;
+
+    public MosaicPart(String name, Mosaic mosaic, Rectangle placement) {
+	this.name = name;
+	this.mosaic = mosaic;
+	this.placement = placement;
+    }
 
     /** 
-     * Called by the menu xlet to start the game.
+     * Get the name of the original image for this part
      **/
-    public void startGame(String s) throws RemoteException;
+    public String getName() {
+	return name;
+    }
 
-    /** 
-     * This could be called by another xlet to start the menu.  Gun Bunny
-     * doesn't use this, though.  Instead, the monitor xlet monitors the
-     * state of Gun Bunny, and when the Gun Bunny xlet is destroyed, it
-     * automatically launches the menu xlet.
+    /**
+     * Get the area where the original image was placed within the mosaic.
      **/
-    public void startMenu(String s) throws RemoteException;
-    
-    public void switchToQhd() throws RemoteException;
-    
-    public void switchToHd() throws RemoteException;
+    public Rectangle getPlacement() {
+	return placement;
+    }
+
+    /**
+     * Return true iff this part intersects with other
+     **/
+    public boolean intersects(Rectangle other) {
+	return placement.intersects(other);
+    }
+
+    /**
+     * Return the X position that another rect would have to be scooted 
+     * over to in order to not overlap with us.  If other doesn't overlap, then
+     * the result is undefined.
+     **/
+    public int nextX() {
+	return placement.x + placement.width;
+    }
+
+    /**
+     * Return the y position that another rect would have to be scooted 
+     * over to in order to not overlap with us.  If other doesn't overlap, then
+     * the result is undefined.
+     **/
+    public int nextY() {
+	return placement.y + placement.height;
+    }
+
+    /**
+     * Get the mosaic we're contained within.
+     **/
+    public Mosaic getMosaic() {
+	return mosaic;
+    }
 
 }
-

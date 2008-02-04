@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,76 +52,67 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.build.mosaic;
+package com.hdcookbook.grin.qhd;
 
-import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ManagedImage;
+import java.awt.Component;
+import java.awt.Graphics2D;
 
-import java.awt.Rectangle;
-
-/**
- * A part of a mosaic.  When a small image is put into a mosaic, it
- * is represented as a part.  A part knows the name of the original
- * image, it's placement on the mosaic, and the mosaic it's placed in.
- *
- *   @author     Bill Foote (http://jovial.com)
- **/
-public class MosaicPart {
-
-    private String name;
-    private Mosaic mosaic;
-    private Rectangle placement;
-
-    public MosaicPart(String name, Mosaic mosaic, Rectangle placement) {
-	this.name = name;
-	this.mosaic = mosaic;
-	this.placement = placement;
+public class QhdFullImage extends ManagedImage {
+    
+    ManagedImage image ;
+    
+    public QhdFullImage(ManagedImage image) {
+        this.image = image;
     }
 
-    /** 
-     * Get the name of the original image for this part
-     **/
+    @Override
     public String getName() {
-	return name;
+        return image.getName();
     }
 
-    /**
-     * Get the area where the original image was placed within the mosaic.
-     **/
-    public Rectangle getPlacement() {
-	return placement;
+    @Override
+    public int getWidth() {
+        return image.getWidth() / 2;
     }
 
-    /**
-     * Return true iff this part intersects with other
-     **/
-    public boolean intersects(Rectangle other) {
-	return placement.intersects(other);
+    @Override
+    public int getHeight() {
+        return image.getHeight() / 2;
     }
 
-    /**
-     * Return the X position that another rect would have to be scooted 
-     * over to in order to not overlap with us.  If other doesn't overlap, then
-     * the result is undefined.
-     **/
-    public int nextX() {
-	return placement.x + placement.width;
+    @Override
+    public void addReference() {
+        image.addReference();
     }
 
-    /**
-     * Return the y position that another rect would have to be scooted 
-     * over to in order to not overlap with us.  If other doesn't overlap, then
-     * the result is undefined.
-     **/
-    public int nextY() {
-	return placement.y + placement.height;
+    @Override
+    public void removeReference() {
+        image.removeReference();
     }
 
-    /**
-     * Get the mosaic we're contained within.
-     **/
-    public Mosaic getMosaic() {
-	return mosaic;
+    @Override
+    public boolean isReferenced() {
+        return image.isReferenced();
     }
 
+    @Override
+    public void prepare(Component comp) {
+        image.prepare(comp);
+    }
+
+    @Override
+    public void unprepare() {
+        image.unprepare();
+    }
+
+    @Override
+    public void draw(Graphics2D gr, int x, int y, Component comp) {
+        image.draw(gr,x,y,comp);
+    }
+
+    public void destroy() {
+        image.destroy();
+    }
+    
 }

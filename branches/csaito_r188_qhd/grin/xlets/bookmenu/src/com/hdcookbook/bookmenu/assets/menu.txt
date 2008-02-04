@@ -1332,31 +1332,31 @@ feature menu_assembly F:UserInput
 #
 #  See H:Bio (both .Available and .NotAvailable)
 
-feature fixed_image F:Bio.Bunny.Original 575 200
+feature fixed_image F:Bio.Bunny.Original:HD 575 200
 	"Graphics/Network/bio00000_img.png" ;
 
-feature modifier BOOK:bio_image F:Bio.Bunny F:Bio.Bunny.Original "" ;
+feature modifier BOOK:bio_image F:Bio.Bunny F:Bio.Bunny.Original:HD "" ;
 
-feature fixed_image F:Bio.Download.Normal 580 800
+feature fixed_image F:Bio.Download.Normal:HD 580 800
 	"Graphics/Network/Download_N.png" ;
 
-feature fixed_image F:Bio.Download.Selected 580 800
+feature fixed_image F:Bio.Download.Selected:HD 580 800
 	"Graphics/Network/Download_S.png" ;
 
-feature fixed_image F:Bio.Close.Normal 500 800
+feature fixed_image F:Bio.Close.Normal:HD 500 800
 	"Graphics/Network/Close_N.png" ;
 
-feature fixed_image F:Bio.Close.Selected 500 800
+feature fixed_image F:Bio.Close.Selected:HD 500 800
 	"Graphics/Network/Close_S.png" ;
 
 feature group F:Bio.Available.Download.Selected {
-    F:Bio.Download.Selected
-    F:Bio.Close.Normal
+    F:Bio.Download.Selected:HD
+    F:Bio.Close.Normal:HD
 } ;
 
 feature group F:Bio.Available.Close.Selected {
-    F:Bio.Download.Normal
-    F:Bio.Close.Selected
+    F:Bio.Download.Normal:HD
+    F:Bio.Close.Selected:HD
 } ;
 
 feature assembly F:Bio.Available.Assembly {
@@ -1372,7 +1372,7 @@ feature group F:Bio.Available {
 
 feature group F:Bio.NotAvailable {
 	F:Bio.Bunny
-	F:Bio.Close.Selected
+	F:Bio.Close.Selected:HD
 } ;
 
 #
@@ -2042,6 +2042,7 @@ rc_handler visual H:BonusMenu
 				    playActivateSound();
 				    GRIN_COMMAND_[[ BOOK:PlayVideo nothing ; ]]
 				    XLET_ONLY_[[
+                                        getMenuDirector().switchToHd();
 					getMenuDirector().activateBio();
 					    // Activates S:Bio.Available 
 					    // or S:Bio.NotAvailable
@@ -2144,6 +2145,11 @@ rc_handler visual H:Bio.Available
 			    set_visual_rc H:MainMenu state bonus selected ;
 			    BOOK:PlayVideo menu ;
 			    activate_segment S:MenuShowing ;
+			    java_command [[ 
+				XLET_ONLY_[[
+				    getMenuDirector().switchToQhd(); 
+				]]
+			    ]]
 			}
 	    download	{
 			    java_command [[ 
@@ -2170,6 +2176,11 @@ rc_handler visual H:Bio.NotAvailable
 			    set_visual_rc H:MainMenu state bonus selected ;
 			    BOOK:PlayVideo menu ;
 			    activate_segment S:MenuShowing ;
+			    java_command [[ 
+				XLET_ONLY_[[
+				    getMenuDirector().switchToQhd(); 
+				]]
+			    ]]
 			}
 	}
 	mouse {

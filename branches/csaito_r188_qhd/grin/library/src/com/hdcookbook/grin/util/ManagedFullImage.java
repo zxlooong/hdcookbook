@@ -169,7 +169,7 @@ public class ManagedFullImage extends ManagedImage {
         gr.drawImage(image, x, y, comp);
     }
 
-    void destroy() {
+    public void destroy() {
 	Image im = image;
 	if (im != null) {
 	    im.flush();	// Shouldn't be necessary, but doesn't hurt.

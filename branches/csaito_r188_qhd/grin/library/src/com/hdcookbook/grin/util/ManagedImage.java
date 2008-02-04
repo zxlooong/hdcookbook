@@ -69,7 +69,7 @@ import java.awt.Graphics2D;
  **/
 abstract public class ManagedImage {
 
-    ManagedImage() {
+    public ManagedImage() {
     }
 
     abstract public String getName();
@@ -115,5 +115,5 @@ abstract public class ManagedImage {
      **/
     abstract public void draw(Graphics2D gr, int x, int y, Component comp);
 
-    abstract void destroy();
+    abstract public void destroy();
 }

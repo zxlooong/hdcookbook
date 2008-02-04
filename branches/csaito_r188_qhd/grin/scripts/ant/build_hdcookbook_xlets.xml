@@ -70,7 +70,14 @@ information or have any questions.
             <fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/menu" includes="*.perm"/>
         </copy>
         
+        <!-- WinDVD bug!!
         <jar basedir="${MENUXLET_DEST}/classes" destfile="${MENUXLET_DEST}/00002.jar"/>
+        -->
+        <jar destfile="${MENUXLET_DEST}/00002.jar">    
+            <fileset dir="${MENUXLET_DEST}/classes"/>
+            <fileset dir="${MENUASSETS_DEST}" 
+                 excludes="Font/**, Graphics/**"/>
+        </jar>    
         <copy file="${MENUXLET_DEST}/00002.jar" todir="${HDC_DISC_BDMV}/JAR"/>	    
         
     </target>
@@ -109,7 +116,7 @@ information or have any questions.
         
     </target>    
     
-    <target name="build-menu-assets" depends="run-mosaic-builder, generate-binary-script">
+    <target name="build-menu-assets" depends="run-qhd">
         
         <delete file="${HDC_DISC_BDMV}/AUXDATA/*"/>
         
@@ -130,6 +137,7 @@ information or have any questions.
         </copy>	
     </target>
     
+    <!--
     <target name="run-mosaic-builder" depends="copy-menu-assets, compile-mosaic">
         <jdktools.java classpath="${MOSAIC_DEST}/classes:${LIBRARY_DEST}:${MENUASSETS_DEST}" 
               maxmemory="512m"
@@ -137,16 +145,17 @@ information or have any questions.
             <arg line="-show menu.txt -assets ${MENUASSETS_DEST} -out ${MENUASSETS_DEST}"/>
         </jdktools.java>			
     </target>
+    -->
     
-    <target name="generate-binary-script" depends="copy-menu-assets, compile-binary-converter,
+    <target name="run-qhd" depends="copy-menu-assets, compile-qhd,
                  compile-extensions-reader"> 
                      
-        <jdktools.java classname="com.hdcookbook.grin.binaryconverter.Main">
+        <jdktools.java classname="com.hdcookbook.grin.qhd.QhdConverter">
             <classpath>
                 <pathelement path="${MENUTOOLS_DEST}"/>
-                <pathelement path="${BINARY_CONVERTER_DEST}/converter.jar"/>
+                <pathelement path="${QHD_DEST}/qhd.jar"/>
             </classpath>    
-            <arg line="${MENUASSETS_DEST}/menu.txt com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory"/>
+            <arg line="-asset_dir ${MENUASSETS_DEST} -output_dir ${MENUASSETS_DEST} -extensions_factory com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory menu.txt"/>
         </jdktools.java>	
         
         <move file="${MENUASSETS_DEST}/menu.grinview.java"

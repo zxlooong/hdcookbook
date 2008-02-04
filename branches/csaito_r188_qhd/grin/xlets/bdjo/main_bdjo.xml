@@ -120,7 +120,7 @@
     </tableOfAccessiblePlayLists>
     <terminalInfo>
         <defaultFontFile>00000</defaultFontFile>
-        <initialHaviConfig>HD_1920_1080</initialHaviConfig>
+        <initialHaviConfig>QHD_960_540</initialHaviConfig>
         <menuCallMask>false</menuCallMask>
         <titleSearchMask>false</titleSearchMask>
     </terminalInfo>

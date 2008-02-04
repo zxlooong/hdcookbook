@@ -54,24 +54,27 @@ information or have any questions.
         <available file="${HDC_BDJO_CONVERTER}/dist/bdjo.jar" type="file"
                    property="bdjoconverter.ok"/>
     </target>
+        
     
-    <target name="sign-xlets" depends="check-bdsigner">
-        <fail unless="bdsigner.ok" message="Could not find the bdsigner tool at ${HDC_BDJ_SIGNER}"/>
-        <path id="sec.tools.path">
-            <pathelement location="${HDC_BDJ_SIGNER}/build/security.jar"/>
-            <pathelement location="${HDC_BDJ_SIGNER}/resource/bcprov-jdk15-137.jar"/>
-            <pathelement location="${java.home}/../lib/tools.jar"/>   
-        </path>	   
-        <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
-	    <arg line="56789abc"/>
-            <classpath refid="sec.tools.path"/>
-        </jdktools.java>
+    <path id="sec.tools.path">
+        <pathelement location="${HDC_BDJ_SIGNER}/build/security.jar"/>
+        <pathelement location="${HDC_BDJ_SIGNER}/resource/bcprov-jdk15-137.jar"/>
+        <pathelement location="${java.home}/../lib/tools.jar"/>   
+    </path>	   
+        
+    <target name="sign-xlets" depends="check-bdsigner, generate-certificates">
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
             <arg line="${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar"/>
             <classpath refid="sec.tools.path"/>	   
         </jdktools.java>	
-        <move file="app.discroot.crt" todir="${HDC_DISC_BDMV}/../CERTIFICATE/"/>
-        
+    </target>
+    
+    <target name="generate-certificates">       
+        <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
+	    <arg line="56789abc"/>
+            <classpath refid="sec.tools.path"/>
+        </jdktools.java>
+        <move file="app.discroot.crt" todir="${HDC_DISC_BDMV}/../CERTIFICATE/"/>      
     </target>
     
     <target name="check-bdsigner" depends="check-exists-bdsigner, compile-bdsigner">

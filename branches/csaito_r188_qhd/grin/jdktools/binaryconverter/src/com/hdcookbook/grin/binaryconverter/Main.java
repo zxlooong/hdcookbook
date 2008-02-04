@@ -180,10 +180,10 @@ public class Main {
             dos.close();
             
             fileNames[1] = baseName + ".xlet.java";
-            out.writeCommandClass(show, true, fileNames[1]);
+            out.writeCommandClass(show, true, new File(fileNames[1]));
             
             fileNames[2] = baseName + ".grinview.java";
-            out.writeCommandClass(show, false, fileNames[2]);
+            out.writeCommandClass(show, false, new File(fileNames[2]));
             
             return;
             

@@ -29,10 +29,13 @@ information or have any questions.
     <property file="../user.vars.properties"/>	
     <property file="../vars.properties"/>	
     <property file="scripts/ant/jdktools.properties"/>
-   
+    <property name="QHD_DEST" value="${JDKTOOLS_BUILD_DIR}/qhd_tool"/>   
+    
     <import file="preset_defs.xml"/>
     
-    <target name="compile-all-tools" depends="compile-grinview, compile-binary-converter, compile-mosaic"/>
+    <target name="compile-all-tools" 
+            depends="compile-grinview, compile-binary-converter, 
+                     compile-mosaic, compile-qhd"/>
     
     <target name="clean">
         <delete dir="${JDKTOOLS_BUILD_DIR}"/>
@@ -103,5 +106,26 @@ information or have any questions.
             </manifest>
         </jar>
     </target>
+    
+    <target name="init-qhd">
+        <mkdir dir="${QHD_DEST}/classes"/>
+    </target>
+    
+    <target name="compile-qhd" depends="init-qhd, compile-library">
+         <jdktools.javac      
+               classpath="${LIBRARY_DEST}"
+               destdir="${QHD_DEST}/classes">
+            <src path="jdktools/qhd/src" />
+            <include name="com/hdcookbook/grin/**/*.java"/>
+        </jdktools.javac> 
+        
+        <jar jarfile="${QHD_DEST}/qhd.jar">
+            <fileset dir="${QHD_DEST}/classes"/>
+            <fileset dir="${LIBRARY_DEST}"/>
+            <manifest>
+                <attribute name="Main-Class" value="com.hdcookbook.grin.qhd.QhdConverter"/>
+            </manifest>
+        </jar>       
+    </target>    
     
 </project>

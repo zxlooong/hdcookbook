@@ -185,6 +185,10 @@ public class ImageSequence extends Feature {
         this.y = y;
     }
     
+    public void implSetImages(ManagedImage[] images) {
+        this.images = images;
+    }
+    
     /**
      * Called by the parser and the binary file reader.  Animations can be 
      * linked, so that they

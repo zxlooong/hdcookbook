@@ -242,5 +242,13 @@ public class MenuDirector extends Director {
 	    }
 	}
     }
+    
+    public void switchToHd() {
+        xlet.switchToHd();
+    }
+    
+    public void switchToQhd() {
+        xlet.switchToQhd();
+    }
 
 }

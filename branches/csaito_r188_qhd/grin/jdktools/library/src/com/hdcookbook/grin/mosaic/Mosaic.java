@@ -53,19 +53,14 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.build.mosaic;
+package com.hdcookbook.grin.mosaic;
 
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ManagedImage;
-import com.hdcookbook.grin.util.AssetFinder;
 
 import java.awt.AlphaComposite;
-import java.awt.Frame;
-import java.awt.Component;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Toolkit;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -138,7 +133,7 @@ public class Mosaic {
     public MosaicPart putImage(ManagedImage mi, BufferedImage im) {
 	// Use a fairly simple brute-force first-fit algorithm.
 
-	Rectangle placement = new Rectangle(im.getWidth(), im.getHeight());
+	Rectangle placement = new Rectangle(mi.getWidth(), mi.getHeight());
 	if (placement.width > buffer.getWidth()) {
 	    return null;	// It can't fit
 	}
@@ -167,7 +162,7 @@ public class Mosaic {
 	    if (found) {
 		MosaicPart part = new MosaicPart(mi.getName(), this, placement);
 		parts.add(part);
-		graphics.drawImage(im, placement.x, placement.y, null);
+		graphics.drawImage(im, placement.x, placement.y, placement.width, placement.height, null);
 		if (part.nextX() > width) {
 		    width = part.nextX();
 		}

@@ -211,7 +211,9 @@ public class MenuXlet implements Xlet, UserEventListener,
 		ex.printStackTrace();
 	    }
 	}
-	File[] path = { assetsJar.getMountPoint() } ;
+        // WinDVD bug!!
+	//File[] path = { assetsJar.getMountPoint() } ;
+        File[] path = { new File(".") } ;
 	AssetFinder.setHelper(new MenuAssetFinder(this));
 	AssetFinder.setSearchPath(null, path);
 	if (AssetFinder.tryURL("images.map") != null) {
@@ -366,6 +368,10 @@ public class MenuXlet implements Xlet, UserEventListener,
 		    }
 		    public void startMenu(String s) {
 		    }
+                    public void switchToHd() {
+                    }
+                    public void switchToQhd() {
+                    }
 		};
 	    }
 	}
@@ -471,6 +477,22 @@ public class MenuXlet implements Xlet, UserEventListener,
 	if (e.getType() == HRcEvent.KEY_PRESSED) {
 	    show.handleKeyPressed(e.getCode());
 	}
+    }
+    
+    public void switchToHd() {
+        try {
+            getMonitorXlet().switchToHd();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void switchToQhd() {
+        try {
+            getMonitorXlet().switchToQhd();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -53,10 +53,9 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.build.mosaic;
+package com.hdcookbook.grin.mosaic;
 
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.MosaicHint;
@@ -64,13 +63,11 @@ import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.AssetFinder;
 
 import java.awt.AlphaComposite;
 import java.awt.Frame;
-import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
@@ -78,7 +75,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -88,7 +84,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.Comparator;
@@ -123,62 +118,47 @@ import javax.imageio.ImageIO;
     /**
      * Create a mosaic maker
      *
-     * @param shows	The GRIN shows these mosaics are for
-     * @param assetPath The search path for images and other assets,
-     *			like the show files.  The assets are read from a file.
+     * @param shows	The GRIN shows these mosaics are for.
      * @param outputDir Where to write the mosaics
      **/
-    public MosaicMaker(String[] shows, String[] assetPath, File outputDir) {
-	this.shows = shows;
-	this.outputDir = outputDir;
-	this.assetPath = assetPath;
+    
+    public MosaicMaker(SEShow[] shows, File outputDir) {        
+        this.outputDir = outputDir;
+        initialize(shows);
     }
+    
+    public void initialize(SEShow[] show) {
+        
+        showTrees = new SEShow[show.length];
+        
+        for (int i = 0; i < show.length; i++) {
+            showTrees[i] = show[i];
 
-    public void init() throws IOException {
-	ShowBuilder builder = new ShowBuilder();
-        builder.setExtensionsBuilderFactory(new GenericExtensionsBuilderFactory());
-	File [] fPath = new File[assetPath.length];
-	for (int i = 0; i < fPath.length; i++) {
-	    fPath[i] = new File(assetPath[i]);
-	}
-	AssetFinder.setSearchPath(null, fPath);
-	showTrees = new SEShow[shows.length];
-        for (int i = 0; i < shows.length; i++) {
-            Director director = new Director(){};
-            showTrees[i] = new SEShow(director);
-            URL source = AssetFinder.getURL(shows[i]);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + shows[i]);
-	    }
-	    BufferedReader rdr = null;
-            try {
-                rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
-                ShowParser p = new ShowParser(rdr, shows[i], 
-                                              showTrees[i], builder);
-                p.parse();
-            } finally {
-                if (rdr != null) {
-                    rdr.close();
-                }
-            }
-            
             MosaicHint[] hints = showTrees[i].getMosaicHints();
-            
             for (MosaicHint hint : hints) {
                 String name = hint.getName();
                 String[] mosaicImages = hint.getImages();
                 int width = hint.getWidth();
                 int height = hint.getHeight();
-                
+
                 for (String imageName : mosaicImages) {
                     mosaicHint.put(imageName, name);
                 }
-                specialMosaics.put(name, new Mosaic(width, height));                         
+                specialMosaics.put(name, new Mosaic(width, height));
             }
+            
+            showTrees[i].initialize(this);
         }
-
         
+        initializeWindow();
+    }
+    
+    public void destroy() {
+        // close the window
+        dispose();
+    }
+    
+    public void initializeWindow() {      
 	setLayout(null);
 	setSize(960, 570);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -281,9 +261,9 @@ import javax.imageio.ImageIO;
      * images to mosaics, then writes the mosaics out.
      **/
     public void makeMosaics() throws IOException {
+        
 	for (int i = 0; i < showTrees.length; i++) {
 	    SEShow show = showTrees[i];
-	    show.initialize(this);
 	    Feature[] features = show.getFeatures();
 	    for (int j = 0; j < features.length; j++) {
 		Feature f = features[j];

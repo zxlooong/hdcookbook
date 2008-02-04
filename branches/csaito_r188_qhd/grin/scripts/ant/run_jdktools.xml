@@ -27,7 +27,7 @@ information or have any questions.
     
     <import file="build_hdcookbook_xlets.xml"/>
     
-    <target name="run-grin-viewer-binary" depends="copy-menu-assets, generate-binary-script, compile-grinview">
+    <target name="run-grin-viewer-binary" depends="copy-menu-assets, run-qhd, compile-grinview">
         <echo message="${MENUTOOLS_DEST} ${MENUASSETS_DEST} ${GRIN_VIEWER_DEST}"/>
         <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
             <classpath>
@@ -38,7 +38,7 @@ information or have any questions.
         </jdktools.java>	
     </target>
     
-    <target name="debug-grin-viewer" depends="copy-menu-assets, generate-binary-script, compile-grinview">
+    <target name="debug-grin-viewer" depends="copy-menu-assets, run-qhd, compile-grinview">
         <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
             <classpath path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
         </nbjpdastart>	
@@ -52,7 +52,7 @@ information or have any questions.
         </java>	
     </target>
     
-    <target name="run-grinview-menu" depends="compile-grinview, compile-extensions-reader, generate-binary-script">
+    <target name="run-grinview-menu" depends="compile-grinview, compile-extensions-reader, run-qhd">
 
         <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
             <classpath>

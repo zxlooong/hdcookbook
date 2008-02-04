@@ -56,7 +56,6 @@
 
 package com.hdcookbook.bookmenu.monitor;
 
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 import org.dvb.application.AppProxy;
@@ -67,6 +66,12 @@ import org.dvb.application.AppID;
 
 import com.hdcookbook.bookmenu.MonitorIXCInterface;
 import com.hdcookbook.grin.util.Debug;
+import java.awt.Dimension;
+import org.davic.resources.ResourceClient;
+import org.davic.resources.ResourceProxy;
+import org.havi.ui.HGraphicsConfiguration;
+import org.havi.ui.HGraphicsDevice;
+import org.havi.ui.HScreen;
 
 /**
  * This class is the object we export via inter-xlet communication.
@@ -107,9 +112,15 @@ public class MonitorIXCListener
 	return db.getAppProxy(new AppID(orgID, appID));
     }
 
+    HGraphicsDevice graphicsDevice;
+    HGraphicsConfiguration hdConfig = null;
+    HGraphicsConfiguration qhdConfig = null;
+    ResourceClient resourceClient = null;
+    
     public void init() {
+        initScreen();
     }
-
+    
     /** 
      * Called by the menu xlet to start the game.
      **/
@@ -121,6 +132,7 @@ public class MonitorIXCListener
 	gameXlet.addAppStateChangeEventListener(this);
 	try {
 	    getAppProxy(ORG_ID, MENU_APP_ID).stop(false);
+            switchToHd();
 	    gameXlet.start();
 	} catch (Throwable ignored) {
 	    if (Debug.LEVEL > 0) {
@@ -161,6 +173,7 @@ public class MonitorIXCListener
 	}
 	try {
 	    gameXlet = null;
+            switchToQhd();
 	    getAppProxy(ORG_ID, MENU_APP_ID).start();
 	} catch (Throwable ignored) {
 	    if (Debug.LEVEL > 0) {
@@ -195,5 +208,69 @@ public class MonitorIXCListener
 	if (g != null) {
 	    g.removeAppStateChangeEventListener(this);
 	}
+    }
+    
+    public void initScreen() {
+        
+        graphicsDevice = HScreen.getDefaultHScreen().getDefaultHGraphicsDevice();
+        HGraphicsConfiguration[] config = graphicsDevice.getConfigurations();
+        
+        // QHD_960_540
+        // HD_1920_1080
+        Dimension qhd = new Dimension(960, 540);
+        Dimension hd  = new Dimension(1920, 1080);
+        for (int i = 0; i < config.length; i++) {
+            Dimension d = config[i].getPixelResolution();
+            System.out.println(i + " " + d + " " + config[i]);
+            if (d.equals(qhd) && qhdConfig == null) {
+                qhdConfig = config[i];
+            } else if (d.equals(hd) && hdConfig == null) {
+                hdConfig = config[i];
+            }
+            if (hdConfig != null && qhdConfig != null) {
+                break;
+            }
+        }
+        resourceClient = new MonitorXletRC();
+
+    }
+    
+    public void switchToQhd() throws RemoteException {
+        if (graphicsDevice != null && qhdConfig != null) {
+            try {
+                graphicsDevice.reserveDevice(resourceClient);
+                graphicsDevice.setGraphicsConfiguration(qhdConfig);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                graphicsDevice.releaseDevice();
+            }
+        }
+    }
+    
+    public void switchToHd() throws RemoteException {
+       if (graphicsDevice != null && hdConfig != null) {
+           try {
+               graphicsDevice.reserveDevice(resourceClient);
+               graphicsDevice.setGraphicsConfiguration(hdConfig);
+           } catch (Exception e) {
+               e.printStackTrace();
+           } finally {
+               graphicsDevice.releaseDevice();
+           } 
+       }   
+    }
+    
+    class MonitorXletRC implements ResourceClient {
+
+        public boolean requestRelease(ResourceProxy arg0, Object arg1) {
+            return false;
+        }
+
+        public void release(ResourceProxy arg0) {
+        }
+
+        public void notifyRelease(ResourceProxy arg0) {
+        }
     }
 }

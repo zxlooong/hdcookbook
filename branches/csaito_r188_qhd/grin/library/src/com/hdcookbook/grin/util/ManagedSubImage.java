@@ -127,7 +127,7 @@ public class ManagedSubImage extends ManagedImage {
 				   p.x, p.y, p.x+p.width, p.y+p.height, null);
     }
 
-    void destroy() {
+    public void destroy() {
 	ImageManager.ungetImage(mosaic);
     }
 }

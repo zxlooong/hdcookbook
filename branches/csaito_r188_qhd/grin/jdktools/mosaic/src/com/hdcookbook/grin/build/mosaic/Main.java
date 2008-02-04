@@ -55,12 +55,19 @@
 
 package com.hdcookbook.grin.build.mosaic;
 
-import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.text.ShowParser;
+import com.hdcookbook.grin.mosaic.MosaicMaker;
+import com.hdcookbook.grin.util.AssetFinder;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.LinkedList;
-
 
 /**
  * This class has the main program for building the assets of a show
@@ -125,14 +132,53 @@ import java.util.LinkedList;
 	    System.out.println("Couldn't create directory " + outputDir);
 	    System.exit(1);
 	}
-	MosaicMaker mm = new MosaicMaker(shows, assetPath, outputDir);
-	try {
-	    mm.init();
+        
+	try {    
+            SEShow[] showTrees = parseShow(assetPath, shows);
+	    MosaicMaker mm = new MosaicMaker(showTrees, outputDir);
 	    mm.makeMosaics();
+            mm.destroy();
 	} catch (IOException ex) {
 	    ex.printStackTrace();
 	    System.exit(1);
 	}
 	System.exit(0);
     }
+    
+     
+    public static SEShow[] parseShow(String[] assetPath, String[] shows) 
+            throws IOException {
+        
+	ShowBuilder builder = new ShowBuilder();
+        builder.setExtensionsBuilderFactory(new GenericExtensionsBuilderFactory());
+	File [] fPath = new File[assetPath.length];
+	for (int i = 0; i < fPath.length; i++) {
+	    fPath[i] = new File(assetPath[i]);
+	}
+	AssetFinder.setSearchPath(null, fPath);
+	SEShow[] seShows = new SEShow[shows.length];
+        for (int i = 0; i < shows.length; i++) {
+            Director director = new Director(){};
+            seShows[i] = new SEShow(director);
+            URL source = AssetFinder.getURL(shows[i]);
+	    if (source == null) {
+		throw new IOException("Can't find resource " + shows[i]);
+	    }
+	    BufferedReader rdr = null;
+            try {
+                rdr = new BufferedReader(
+			new InputStreamReader(source.openStream(), "UTF-8"));
+                ShowParser p = new ShowParser(rdr, shows[i], 
+                                              seShows[i], builder);
+                p.parse();
+            } finally {
+                if (rdr != null) {
+                    rdr.close();
+                }
+            }
+        }
+        
+        return seShows;
+
+    }   
  }

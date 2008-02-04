@@ -1155,16 +1155,15 @@ public class GrinBinaryWriter {
         }
     }
 
-    public void writeCommandClass(SEShow show, boolean forXlet, String fileName)
+    public void writeCommandClass(SEShow show, boolean forXlet, File file)
            throws IOException 
    {
        SEShowCommands cmds = show.getShowCommands();
-       File f = new File(fileName);
        if (cmds.getClassName() == null) {
-           f.delete();  // Just in case an old version was there
+           file.delete();  // Just in case an old version was there
            return;      // No commands class
        }
-       FileWriter w = new FileWriter(fileName);
+       FileWriter w = new FileWriter(file);
        w.write(cmds.getJavaSource(forXlet));
        w.close();
    }

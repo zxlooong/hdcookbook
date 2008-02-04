@@ -85,6 +85,9 @@ public class MonitorXlet implements Xlet {
 	if (Debug.LEVEL > 0) {
 	    Debug.println("MonitorXlet in initXlet");
 	}
+       
+	listener = new MonitorIXCListener(this);
+	listener.init();
     }
 
     public void startXlet() throws XletStateChangeException {
@@ -95,8 +98,6 @@ public class MonitorXlet implements Xlet {
 	    return;
 	}
 	running = true;
-	listener = new MonitorIXCListener(this);
-	listener.init();
 	try {
 	    if (Debug.LEVEL > 0) {
 		Debug.println("*** Monitor xlet exporting IXC object.");
