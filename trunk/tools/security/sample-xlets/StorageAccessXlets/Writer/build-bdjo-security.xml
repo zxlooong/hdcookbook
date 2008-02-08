@@ -27,8 +27,6 @@ information or have any questions.
 <target
 name = "sign-jars"
 depends="security.check">
-      <fail unless="bdmv.ok"
-       message="HDC_DISK_BDMV property (${security.home}) seems to be invalid.  Please provide the location with the -D option to ant"/>       
     <echo message="${java.home}/lib/tools.jar"/>
     <path id="sec.tools.path"> 
        <pathelement location="${basedir}/${security.home}/build/security.jar"/>
