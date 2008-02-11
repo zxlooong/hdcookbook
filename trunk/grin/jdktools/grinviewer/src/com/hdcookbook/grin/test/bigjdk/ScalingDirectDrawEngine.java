@@ -64,6 +64,7 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -87,7 +88,6 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     private Graphics2D bufferG;
     private Graphics2D componentG;
     private final int scaleDivisor;
-    private final int frameCheat;
     private Image background;
     private BufferedImage nonTranslucentFix;
     private boolean debugDraw = false;
@@ -97,11 +97,8 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
      * Create a new ScalingDirectDrawEngine.  It needs to be initialized with
      * the various initXXX methods (including the inherited ones).
      **/
-    public ScalingDirectDrawEngine(int scaleDivisor, int frameCheat, 
-    				   GenericMain main) 
-    {
+    public ScalingDirectDrawEngine(int scaleDivisor, GenericMain main) {
 	this.scaleDivisor = scaleDivisor;
-	this.frameCheat = frameCheat;
 	this.main = main;
     }
 
@@ -232,8 +229,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    componentG.setComposite(AlphaComposite.SrcOver);
 	    for (int i = 0; i < getNumEraseTargets(); i++) {
 		Rectangle a = getEraseTargets()[i];
-		componentG.fillRect(a.x/s, a.y/s + frameCheat, 
-				    a.width/s, a.height/s);
+		componentG.fillRect(a.x/s, a.y/s, a.width/s, a.height/s);
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	    main.waitForUser("To be erased areas shown with red overlay");
@@ -242,8 +238,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    componentG.setColor(new Color(0, 255, 0, 127));
 	    for (int i = 0; i < getNumDrawTargets(); i++) {
 		Rectangle a = getDrawTargets()[i];
-		componentG.fillRect(a.x/s, a.y/s + frameCheat, 
-				    a.width/s, a.height/s);
+		componentG.fillRect(a.x/s, a.y/s, a.width/s, a.height/s);
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	    main.waitForUser("To be drawn areas shown with green overlay");
@@ -332,26 +327,22 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 			Rectangle a = getDrawTargets()[i];
 			int s = scaleDivisor;
 			g.drawImage(nonTranslucentFix,
-					    a.x/s, frameCheat + a.y/s, 
-					    (a.x+a.width)/s, 
-					    frameCheat + (a.y+a.height)/s,
-					    a.x/s, frameCheat + a.y/s, 
-					    (a.x+a.width)/s, 
-					    frameCheat + (a.y+a.height)/s,
-					    null);
+				    a.x/s, a.y/s, 
+				    (a.x+a.width)/s, (a.y+a.height)/s,
+				    a.x/s, a.y/s, 
+				    (a.x+a.width)/s, (a.y+a.height)/s,
+				    null);
 		    }
 		} else {
 		    Rectangle a = new Rectangle(0, 0, buffer.getWidth(), 
 						      buffer.getHeight());
 		    int s = scaleDivisor;
 		    g.drawImage(nonTranslucentFix,
-					a.x/s, frameCheat + a.y/s, 
-					(a.x+a.width)/s, 
-					frameCheat + (a.y+a.height)/s,
-					a.x/s, frameCheat + a.y/s, 
-					(a.x+a.width)/s, 
-					frameCheat + (a.y+a.height)/s,
-					null);
+				a.x/s, a.y/s, 
+				(a.x+a.width)/s, (a.y+a.height)/s,
+				a.x/s, a.y/s, 
+				(a.x+a.width)/s, (a.y+a.height)/s,
+				null);
 		}
 	    }
 	    Toolkit.getDefaultToolkit().sync();
@@ -364,9 +355,8 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 
     private void drawScaledImage(Graphics2D dest, Image src, Rectangle a) {
 	int s = scaleDivisor;
-	dest.drawImage(src, a.x/s, frameCheat + a.y/s, 
-			    (a.x+a.width)/s, 
-			    frameCheat + (a.y+a.height)/s,
+	dest.drawImage(src, a.x/s, a.y/s, 
+			    (a.x+a.width)/s, (a.y+a.height)/s,
 			    a.x, a.y,
 			    a.x+a.width, a.y+a.height,
 			    null);

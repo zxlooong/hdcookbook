@@ -413,7 +413,8 @@ public class VisualRCHandler extends RCHandler {
      *
      * @param newState	     New state, -1 means "current"
      * @param newActivated   New value for activated
-     * @param runCommands
+     * @param runCommands    If true, run the commands normally associated
+     *			     with entering this state due to a keypress.
      **/
     public void setState(int newState, boolean newActivated,
 		         boolean runCommands) 

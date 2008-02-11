@@ -87,8 +87,7 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Timer;
-import com.hdcookbook.grin.features.TranslatorModel;
+import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
@@ -337,10 +336,8 @@ public class GrinBinaryWriter {
                 writeImageSequence(out, (ImageSequence)feature);
             } else if (feature instanceof Text) {
                 writeText(out, (Text)feature);
-            } else if (feature instanceof Timer) {
-                writeTimer(out, (Timer)feature);
-            } else if (feature instanceof TranslatorModel) {
-                writeTranslatorModel(out, (TranslatorModel)feature);
+            } else if (feature instanceof InterpolatedModel) {
+                writeInterpolatedModel(out, (InterpolatedModel) feature);
             } else if (feature instanceof Translator) {
                 writeTranslator(out, (Translator)feature);
             } else if (feature instanceof SrcOver) {
@@ -611,51 +608,33 @@ public class GrinBinaryWriter {
   
     }
 
-    private void writeTimer(DataOutputStream out, Timer timer) throws IOException {
-        
-       out.writeByte(Constants.TIMER_IDENTIFIER);
-
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-       
-       if (show.isPublic(timer)) {
-	   dos.writeString(timer.getName());
-       } else {
-	   dos.writeString(null);
-       }
-       dos.writeInt(timer.implGetNumFrames());
-       dos.writeBoolean(timer.implGetRepeat());
-       
-       writeCommands(dos, timer.getEndCommands());
-
-       out.writeInt(baos.size());
-       baos.writeTo(out);
-       dos.close();      
-       
-    }
-
-    private void writeTranslatorModel(DataOutputStream out, TranslatorModel translation) throws IOException {
-        out.writeByte((int)Constants.TRANSLATOR_MODEL_IDENTIFIER);
+    private void writeInterpolatedModel(DataOutputStream out, 
+    					InterpolatedModel model) 
+		throws IOException 
+    {
+        out.writeByte((int)Constants.INTERPOLATED_MODEL_IDENTIFIER);
       
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);  
         
-       if (show.isPublic(translation)) {
-	   dos.writeString(translation.getName());
+       if (show.isPublic(model)) {
+	   dos.writeString(model.getName());
        } else {
 	   dos.writeString(null);
        }
-        dos.writeIntArray(translation.implGetFrames());
-        dos.writeIntArray(translation.implGetXs());
-        dos.writeIntArray(translation.implGetYs());
-        dos.writeInt(translation.implGetRepeatFrame());
-        dos.writeBoolean(translation.getIsRelative());
-        writeCommands(dos, translation.getEndCommands());        
+        dos.writeIntArray(model.implGetFrames());
+        dos.writeIntArray(model.implGetCurrValues());
+	int[][] values = model.implGetValues();
+	assert values.length == model.implGetCurrValues().length;
+	for (int i = 0; i < values.length; i++) {
+	    dos.writeIntArray(values[i]);
+	}
+        dos.writeInt(model.implGetRepeatFrame());
+        writeCommands(dos, model.getEndCommands());        
 
         out.writeInt(baos.size());
         baos.writeTo(out);
         dos.close();           
-  
     }
 
     private void writeTranslator(DataOutputStream out, Translator translator) throws IOException {
@@ -671,6 +650,7 @@ public class GrinBinaryWriter {
         }
         dos.writeInt(translator.implGetAbsoluteXOffset());
         dos.writeInt(translator.implGetAbsoluteYOffset());
+	dos.writeBoolean(translator.implGetModelIsRelative());
         dos.writeFeatureReference(translator.getModel()); // write the index only 
        	dos.writeFeatureReference(translator.getPart());
         

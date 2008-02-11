@@ -106,7 +106,7 @@ public class GrinView extends GenericMain {
             public void run() {
 		screen.pack();
 		int x = 0;
-		int y = getHeight() + FRAME_CHEAT;
+		int y = getHeight() + getInsets().top;
 		screen.setLocation(x, y);
                 screen.setVisible(true);
 		screen.setFpsText("" + getFps());
@@ -454,14 +454,11 @@ public class GrinView extends GenericMain {
 	GuiShowBuilder builder = new GuiShowBuilder(m);
         builder.setExtensionsBuilderFactory(factory);
         builder.setExtensionsReader(reader);
-        m.init(showFile, builder);
+        m.init(showFile, builder, segment);
 
 	m.buildControlGUI(showFile);
 	if (fps != null) {
 	    m.doKeyboardCommand("f " + fps); // set fps	 
-	}
-	if (segment != null) {
-	    m.doKeyboardCommand("s " + segment); // activate segment
 	}
 
 	m.inputLoop();

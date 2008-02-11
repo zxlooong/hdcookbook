@@ -79,8 +79,7 @@ import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Timer;
-import com.hdcookbook.grin.features.TranslatorModel;
+import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.VisualRCHandler;
@@ -771,7 +770,21 @@ public class ShowParser {
 	if (numFrames < 0 || (repeat && numFrames < 1)) {
 	    lexer.reportError("More frames, please.");
 	}
-	Timer timer = new Timer(show, name, numFrames, repeat, commands);
+	int[] frames = new int[] { 0,  numFrames };
+	int[] currValues = new int[0];
+	int[][] values = new int[0][];
+	int repeatFrame;
+	if (repeat) {
+	    repeatFrame = 0;
+	} else {
+	    repeatFrame = Integer.MAX_VALUE;
+	}
+	InterpolatedModel timer
+	    = new InterpolatedModel(show, name, frames, currValues, values,
+				    repeatFrame, commands);
+	    // Timer can be implemented as a degenerate case of 
+	    // InterpolateModel.  It's just a model that interpolates zero
+	    // data values between frame 0 and frame numFrames.
 	builder.addFeature(name, line, timer);
 	return timer;
     }
@@ -878,13 +891,14 @@ public class ShowParser {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
 	int[] fs = new int[keyframes.size()];
-	int[] xs = new int[keyframes.size()];
-	int[] ys = new int[keyframes.size()];
+	int[][] values = new int[2][];
+	values[0] = new int[keyframes.size()];
+	values[1] = new int[keyframes.size()];
 	for (int i = 0; i < keyframes.size(); i++) {
 	    int[] el = (int[]) keyframes.elementAt(i);
 	    fs[i] = el[0];
-	    xs[i] = el[1];
-	    ys[i] = el[2];
+	    values[Translator.X_FIELD][i] = el[1];
+	    values[Translator.Y_FIELD][i] = el[2];
 	    if (i > 0 && fs[i] <= fs[i-1]) {
 		lexer.reportError("Frame number must be increasing");
 	    }
@@ -896,13 +910,16 @@ public class ShowParser {
 	    lexer.reportError("Keyframes must start at frame 0");
 	}
 	if (repeatFrame == -1) {
-	    repeatFrame = fs[fs.length - 1];	// Make it stick at end
+	    repeatFrame = Integer.MAX_VALUE; 	// Make it stick at end
 	} else if (repeatFrame > fs[fs.length - 1]) {
 	    lexer.reportError("repeat > max frame");
 	}
-	final TranslatorModel trans 
-	    = new TranslatorModel(show, name, fs, xs, ys, repeatFrame, 
-                              isRelative, endCommands);
+	int[] currValues = new int[2];
+	currValues[Translator.X_FIELD] = values[Translator.X_FIELD][0];
+	currValues[Translator.Y_FIELD] = values[Translator.Y_FIELD][0];
+	InterpolatedModel trans 
+	    = new InterpolatedModel(show, name, fs, currValues, values,
+				    repeatFrame, endCommands);
 	builder.addFeature(name, line, trans);
 	return trans;
     }
@@ -919,17 +936,17 @@ public class ShowParser {
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
 		Feature t  = builder.getNamedFeature(translationName);
-		if (t == null || !(t instanceof TranslatorModel)) {
+		if (t == null || !(t instanceof InterpolatedModel)) {
 		    lexer.reportError("Translation \"" + translationName 
 		    			+ "\" not found");
 		}
 		Feature[] fa = makeFeatureList(parts);
                 if (fa.length == 1) {
-                    trans.setup((TranslatorModel) t, fa[0]);
+                    trans.setup((InterpolatedModel) t, fa[0]);
                 } else {
                     Group group = new Group(show, null);
                     group.setup(fa);
-                    trans.setup((TranslatorModel) t, group);
+                    trans.setup((InterpolatedModel) t, group);
                     builder.addFeature(null, 0, group);
                 }
 	    }

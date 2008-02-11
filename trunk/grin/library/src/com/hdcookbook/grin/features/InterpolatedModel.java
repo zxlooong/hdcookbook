@@ -55,7 +55,6 @@
 
 package com.hdcookbook.grin.features;
 
-
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.RenderContext;
@@ -63,41 +62,96 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.Debug;
 
 import java.io.IOException;
-import java.awt.Image;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * A timer is a feature that triggers a set of commands a given number
- * of frames after it's activated.  A timer has no visual representation.
+ * An InterpolatedModel is a feature that controls one or more integer
+ * factors, and interpolates their values according to keyframes.  This
+ * is used by other features to animate the parameters in queestion.  At
+ * the end of the sequence, the InterpolatedModel can kick off a list of
+ * commands, it can repeat the animation, or it can stick at the last frame.
+ * <p>
+ * An InterpolatedModel with no values can function as a timer.  A timer
+ * simply has a number of keyframes, and triggers a set of commands after
+ * those keyframes.
+ *
+ * @see Translator
  *
  * @author Bill Foote (http://jovial.com)
+ *
  */
-public class Timer extends Feature {
-    
-    private Command[] endCommands;
-    private int numFrames;	// # of frames
-    private int currFrame;
-    private boolean repeat;
+public class InterpolatedModel extends Feature {
+
+    private int[] frames;	// Frame number of keyframes, [0] is always 0
+    private int[] currValues;	// Current value of each field
+    private int[][] values;	// Values at keyframe, indexed by field.
+    				// The array for a field can be null, in which
+				// case the initial value of currValues will be
+				// maintained.
+    private int repeatFrame;	// Frame to go to after the end.  
+    				// Integer.MAX_VALUE means "stick at end"
+				// 0 will cause a cycle.
 
     private boolean isActivated = false;
+    private int currFrame;      // Current frame in cycle
+    private int currIndex;      // frames[index] <= currFrame < frames[index+1]
+    private int repeatIndex;	// Index when currFrame is repeatFrame-1
+    private Command[] endCommands;
 
-    private boolean triggered;
-
-    public Timer(Show show, String name, int numFrames, boolean repeat,
-                 Command[] endCommands)  
+    public InterpolatedModel(Show show, String name, int[] frames, 
+				int[] currValues, int[][] values,
+				int repeatFrame, Command[] endCommands) 
     {
 	super(show, name);
-	this.numFrames = numFrames;
-	this.repeat = repeat;
+	this.frames = frames;
+	this.currValues = currValues;
+	this.values = values;
+	this.repeatFrame = repeatFrame;
 	this.endCommands = endCommands;
+	if (repeatFrame == Integer.MAX_VALUE) {
+	    repeatIndex = Integer.MAX_VALUE;
+	}  else {
+	    repeatIndex = 0;
+	    // This is tricky.  We must calculate the index such
+	    // that frames[i] <= (repeatFrame - 1) < frames[i+1]
+	    while (repeatFrame-1 >= frames[repeatIndex + 1]) {
+		repeatIndex++;
+	    }
+	    // now repeatFrame-1 < frames[repeatIndex + 1]
+	    // and repeatFrame-1 >= frames[repeatIndex]
+	}
     }
 
+    public int[] implGetFrames() {
+        return frames;
+    }
+    
+    public int[] implGetCurrValues() {
+        return currValues;
+    }
+    
+    public int[][] implGetValues() {
+        return values;
+    }
+    
+    public int implGetRepeatFrame() {
+        return repeatFrame;
+    }
+   
+    /**
+     * Give the current value for the given field
+     *
+     * @param	fieldNum 	The field number, counting from 0
+     **/
+    public final int getCurrValue(int fieldNum) {
+	return currValues[fieldNum];
+    }
 
     /**
      * @inheritDoc
      * <p>
-     * Since a timer is invisible, this returns a garbage value 
+     * Since an InterpolatedModel is invisible, this returns a very large value
      * (Integer.MAX_VALUE)
      **/
     public int getX() {
@@ -107,39 +161,24 @@ public class Timer extends Feature {
     /**
      * @inheritDoc
      * <p>
-     * Since a timer is invisible, this returns a garbage value
+     * Since an InterpolatedModel is invisible, this returns a very large
      * (Integer.MAX_VALUE)
      **/
     public int getY() {
 	return Integer.MAX_VALUE;
     }
 
-    public int implGetNumFrames() {
-        return numFrames;
-    }
-    
-    public boolean implGetRepeat() {
-        return repeat;
-    }
-    
     /**
-     * Get the commands that are triggered when the timer goes off.
+     * Return the list of commands that are executed at the end
+     * of doing our translation.
      **/
     public Command[] getEndCommands() {
 	return endCommands;
     }
-    
-    public void implSetNumFrames(int numFrames) {
-        this.numFrames = numFrames;
+
+    final boolean getIsActivated() {
+	return isActivated;
     }
-    
-    public void implSetRepeat(boolean repeat) {
-        this.repeat = repeat;
-    }
-    
-    public void implSetEndCommands(Command[] endCommands) {
-	this.endCommands = endCommands;
-    }    
 
     /**
      * Initialize this feature.  This is called on show initialization.
@@ -150,46 +189,44 @@ public class Timer extends Feature {
     }
 
     /**
-     * Free any resources held by this feature.  It is the opposite of
-     * setup; each call to setup() shall be balanced by
-     * a call to unsetup(), and they shall *not* be nested.  
-     * <p>
-     * It's possible an active phase may be destroyed.  For example,
-     * the last phase a show is in when the show is destroyed will
-     * probably be active (and it will probably be an empty phase
-     * too!).
+     * @inheritDoc
      **/
     public void destroy() {
     }
 
-    /**
-     * @inheritDoc
-     **/
+
+    //
+    // This is synchronized to only occur within model updates.
+    //
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
 	if (mode) {
 	    currFrame = 0;
-	    triggered = false;
+	    currIndex = 0;
+	    for (int i = 0; i < currValues.length; i++) {
+		if (values[i] != null) {
+		    currValues[i] = values[i][0];
+		}
+	    }
 	}
     }
 
-    /**
-     * @inheritDoc
-     **/
     protected void setSetupMode(boolean mode) {
+	// do nothing
     }
 
     /**
      * @inheritDoc
      **/
     public void doSomeSetup() {
+	// do nothing
     }
 
     /**
      * @inheritDoc
      **/
     public boolean needsMoreSetup() {
-        return false;
+	return false;
     }
 
     /**
@@ -197,33 +234,53 @@ public class Timer extends Feature {
      **/
     public void nextFrame() {
 	if (Debug.ASSERT && !isActivated) {
-	    Debug.assertFail("Advancing inactive sequence");
+	    Debug.assertFail("InterpolatedModel " + getName()+" not activated");
+	}
+	if (currFrame == Integer.MAX_VALUE) {
+	    return;
 	}
 	currFrame++;
-        if (currFrame == numFrames && !triggered) {
-	    if (repeat) {
-		// Don't set triggered
-		currFrame = 0;
-	    } else {
-		triggered = true;
+	int nextIndex  = currIndex + 1;
+	int dist = frames[nextIndex] - frames[currIndex];
+	int distNext = frames[nextIndex] - currFrame;
+	int distLast = currFrame - frames[currIndex];
+	if (Debug.ASSERT && (distNext < 0 || distLast < 0)) {
+	    Debug.assertFail();
+	}
+	for (int i = 0; i < currValues.length; i++) {
+	    int[] vs = values[i];
+            
+	    if (vs != null) {
+		currValues[i] = (vs[nextIndex] * distLast 
+			          + vs[currIndex] * distNext) /dist;
 	    }
-            for (int i = 0; i < endCommands.length; i++) {
-                show.runCommand(endCommands[i]);
-            }
-        }
+	}
+	if (distNext <= 0) {
+	    currIndex = nextIndex;
+	    if (currIndex+1 >= frames.length) {
+		currFrame = repeatFrame;
+		if (currFrame  != Integer.MAX_VALUE) {
+		    currFrame--;
+		}
+		currIndex = repeatIndex;
+		for (int i = 0; i < endCommands.length; i++) {
+		    show.runCommand(endCommands[i]);
+		}
+	    }
+	}
     }
-
 
     /**
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
+	// do nothing
     }
 
     /**
      * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
+	// do nothing
     }
-
 }

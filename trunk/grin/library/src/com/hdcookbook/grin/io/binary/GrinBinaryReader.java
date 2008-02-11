@@ -85,8 +85,7 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Timer;
-import com.hdcookbook.grin.features.TranslatorModel;
+import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
@@ -360,11 +359,8 @@ public class GrinBinaryReader {
                 case Constants.TEXT_IDENTIFIER :
                     feature = readText(in);
                     break;
-                case Constants.TIMER_IDENTIFIER :
-                    feature = readTimer(in);
-                    break;
-                case Constants.TRANSLATOR_MODEL_IDENTIFIER :
-                    feature = readTranslatorModel(in);
+                case Constants.INTERPOLATED_MODEL_IDENTIFIER :
+                    feature = readInterpolatedModel(in);
                     break;
                 case Constants.TRANSLATOR_IDENTIFIER :
                     feature = readTranslator(in);
@@ -620,40 +616,27 @@ public class GrinBinaryReader {
  
     }
 
-    private Timer readTimer(GrinDataInputStream dis) throws IOException {
-        int length = dis.readInt();
-        if (Debug.ASSERT) {
-            ((DebugInputStream)stream).pushExpectedLength(length);
-        }
-        String name = dis.readString();
-        int numFrames = dis.readInt();
-        boolean repeat = dis.readBoolean();
-       
-        Command[] endCommands = readCommands(dis);
-        if (Debug.ASSERT) {
-            ((DebugInputStream)stream).popExpectedLength();
-        }      
-        return new Timer(show, name, numFrames, repeat, endCommands);
-    }
-
-    private TranslatorModel readTranslatorModel(GrinDataInputStream dis) 
+    private InterpolatedModel readInterpolatedModel(GrinDataInputStream dis) 
             throws IOException 
     {  
         int length = dis.readInt();
         if (Debug.ASSERT) {
-            ((DebugInputStream)stream).pushExpectedLength(length);
+            ((DebugInputStream) stream).pushExpectedLength(length);
         }        
         String name = dis.readString();  
         int[] frames = dis.readIntArray();
-        int[] xs = dis.readIntArray();
-        int[] ys = dis.readIntArray();
+        int[] currValues = dis.readIntArray();
+	int[][] values = new int[currValues.length][];
+	for (int i = 0; i < values.length; i++) {
+	    values[i] = dis.readIntArray();
+	}
         int repeatFrame = dis.readInt();
-        boolean isRelative = dis.readBoolean();
         Command[] endCommands = readCommands(dis);
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }       
-        return new TranslatorModel(show, name, frames, xs, ys, repeatFrame, isRelative, endCommands);
+        return new InterpolatedModel(show, name, frames, currValues, values, 
+				     repeatFrame, endCommands);
   
     }
 
@@ -666,8 +649,9 @@ public class GrinBinaryReader {
       
 	int x = dis.readInt();
 	int y = dis.readInt();
+	boolean modelIsRelative = dis.readBoolean();
         int index = dis.readInt();
-        TranslatorModel model = (TranslatorModel) features[index];
+        InterpolatedModel model = (InterpolatedModel) features[index];
         Feature part = features[dis.readInt()];
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
@@ -677,6 +661,7 @@ public class GrinBinaryReader {
         translator.setup(model, part);
 	translator.setupAbsoluteXOffset(x);
 	translator.setupAbsoluteYOffset(y);
+	translator.setupModelIsRelative(modelIsRelative);
        
         return translator;
     }

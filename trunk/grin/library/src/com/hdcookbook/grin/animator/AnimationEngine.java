@@ -291,6 +291,16 @@ public abstract class AnimationEngine implements Runnable {
      *                 call paintFrame as many times as needed
      *    }
      * </pre>
+     * <p>
+     * This method returns immediately after starting the thread, so that
+     * an Xlet can quickly return from the xlet lifecycle method
+     * Xlet.initXlet().  Any code that depends on animation clients being
+     * initialized should be put in the body of the 
+     * <code>AnimationContext.animationFinishInitialization()</code> method.
+     * For example, if you're using a GRIN show,
+     * <code>animationFinishInitialization() is where you should put
+     * the call to <code>Show.activateSegment()</code> on the show's
+     * initial segument.
      *
      * @param context   The context that the animation manager is running in.
      *		        This can be used for initialization that the client
@@ -299,6 +309,9 @@ public abstract class AnimationEngine implements Runnable {
      *		        synchronously
      * 			start video playing, or do other time-consuming 
      *			operations.
+     *
+     * @see com.hdcookbook.grin.animation.AnimationContext#animationFinishInitialization()
+     * @see com.hdcookbook.grin.Show#activateSegment(com.hdcookbook.grin.Show)
      **/
     public void initialize(AnimationContext context) {
 	if (Debug.ASSERT) {
@@ -315,6 +328,11 @@ public abstract class AnimationEngine implements Runnable {
 	// it puts us in a known state before returning to the caller,
 	// which is probably ultimately initXlet().  By doing this, we
 	// know that the caller is OK to call destroy() on us after we're done.
+	//
+	// We just wait for the thread to start; we don't wait for that
+	// thread to call the initializations methods.  This is intentional,
+	// because Xlet.initXlet() should return as quickly as it reasonably
+	// can, to ensure that the xlet is considered responsive.
 	//
 	synchronized(this) {
 	    try {

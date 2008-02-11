@@ -71,8 +71,7 @@ import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Timer;
-import com.hdcookbook.grin.features.TranslatorModel;
+import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.CommandRCHandler;
@@ -128,9 +127,8 @@ public class ShowNode implements TreeNode {
 	if (this.leaf) {
 	    if (contents instanceof Segment
 		|| contents instanceof Assembly
-		|| contents instanceof Timer
 		|| contents instanceof Translator
-		|| contents instanceof TranslatorModel
+		|| contents instanceof InterpolatedModel
 		|| contents instanceof Group
 		|| contents instanceof Modifier) 
 	    {
@@ -227,9 +225,6 @@ public class ShowNode implements TreeNode {
 	    for (int i = 0; i < children.length; i++) {
 		children[i].label = partNames[i];
 	    }
-	} else if (contents instanceof Timer) {
-	    Timer t = (Timer) contents;
-	    setChildren(makeChildren(t.getEndCommands()));
 	} else if (contents instanceof Translator) {
 	    Translator t = (Translator) contents;
 	    ShowNode[] na = new ShowNode[2];
@@ -237,8 +232,8 @@ public class ShowNode implements TreeNode {
 	    na[1] = new ShowNode(t.getPart(), null);
 	    setChildren(na);
 	    children[0].label = "Translation";
-	} else if (contents instanceof TranslatorModel) {
-	    TranslatorModel t = (TranslatorModel) contents;
+	} else if (contents instanceof InterpolatedModel) {
+	    InterpolatedModel t = (InterpolatedModel) contents;
 	    setChildren(makeChildren(t.getEndCommands()));
 	} else if (contents instanceof Group) {
 	    Group g = (Group) contents;

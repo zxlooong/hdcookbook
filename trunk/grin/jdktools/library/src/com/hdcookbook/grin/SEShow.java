@@ -67,9 +67,8 @@ import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Timer;
 import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.features.TranslatorModel;
+import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
@@ -313,12 +312,10 @@ public class SEShow extends Show {
 	    visitor.visitSrcOver((SrcOver) feature);
 	} else if (featureClazz == Text.class) {
 	    visitor.visitText((Text) feature);
-	} else if (featureClazz == Timer.class) {
-	    visitor.visitTimer((Timer) feature);
 	} else if (featureClazz == Translator.class) {
 	    visitor.visitTranslator((Translator) feature);
-	} else if (featureClazz == TranslatorModel.class) {
-	    visitor.visitTranslatorModel((TranslatorModel) feature);
+	} else if (featureClazz == InterpolatedModel.class) {
+	    visitor.visitInterpolatedModel((InterpolatedModel) feature);
 	} else {
 	    visitor.visitUserDefinedFeature(feature);
 	}

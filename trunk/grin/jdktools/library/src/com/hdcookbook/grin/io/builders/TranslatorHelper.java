@@ -72,9 +72,8 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Timer;
 import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.features.TranslatorModel;
+import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
@@ -115,7 +114,7 @@ public class TranslatorHelper implements DeferredBuilder {
      * @inheritDoc
      * <p>
      * Since the show is built, we can calculate the upper-left hand
-     * corner of our translator's child.  If our TransatorModel uses
+     * corner of our translator's child.  If our model uses
      * absolute coordinates, we use this calculation to transform it
      * into relative coordinates.
      * <p>
@@ -125,7 +124,7 @@ public class TranslatorHelper implements DeferredBuilder {
      * supported.
      **/
     public void finishBuilding(SEShow show) throws IOException {
-	if (translator.getModel().getIsRelative()) {
+	if (translator.implGetModelIsRelative()) {
 	    return;
 	}
 
@@ -188,11 +187,10 @@ public class TranslatorHelper implements DeferredBuilder {
 	    public void visitText(Text feature) {
 		check(feature.getX(), feature.getY());
 	    }
-	    public void visitTimer(Timer feature) { }
 	    public void visitTranslator(Translator feature) {
 		SEShow.acceptFeature(this, feature.getPart());
 	    }
-	    public void visitTranslatorModel(TranslatorModel feature) { }
+	    public void visitInterpolatedModel(InterpolatedModel feature) { }
 
 	    public void visitCommandRCHandler(CommandRCHandler handler) { }
 	    public void visitVisualRCHandler(VisualRCHandler handler) { }

@@ -69,9 +69,8 @@ import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Timer;
 import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.features.TranslatorModel;
+import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
@@ -116,9 +115,8 @@ public interface SEShowVisitor {
     public void visitSetTarget(SetTarget feature);
     public void visitSrcOver(SrcOver feature);
     public void visitText(Text feature);
-    public void visitTimer(Timer feature);
     public void visitTranslator(Translator feature);
-    public void visitTranslatorModel(TranslatorModel feature);
+    public void visitInterpolatedModel(InterpolatedModel feature);
 
     public void visitCommandRCHandler(CommandRCHandler handler);
     public void visitVisualRCHandler(VisualRCHandler handler);

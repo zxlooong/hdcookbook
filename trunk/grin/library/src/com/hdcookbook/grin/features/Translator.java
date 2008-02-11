@@ -67,19 +67,37 @@ import java.awt.Rectangle;
 
 /**
  * A Translator wraps other features, and adds movement taken from a
- * Translation to it.  The upper-left hand corner of the subfeature is
- * made to follow the path of the TranslatorModel.
+ * translator model (represented at runtime by an InterpolatedModel)
+ * to it.  The subfeature is translated by the given amount.  For backwards
+ * compatibility reasons, there's also an "absolute" mode that attempts
+ * to use the coordinates of the upper-left hand corner of the child, but
+ * this mode is deprecated.
  *
- * @see TranslatorModel
+ * @see InterpolatedModel
  *
  * @author Bill Foote (http://jovial.com)
  */
 public class Translator extends Modifier {
 
-    private TranslatorModel model;
+    /**
+     * The field number in our model for the X coordinate
+     *
+     * @see com.hdcookbook.grin.features.InterpolatedModel
+     **/
+    public final static int X_FIELD = 0;
+
+    /**
+     * The field number in our model for the Y coordinate
+     *
+     * @see com.hdcookbook.grin.features.InterpolatedModel
+     **/
+    public final static int Y_FIELD = 1;
+
+    private InterpolatedModel model;
 
     private int fx = 0;		// Feature's start position (if absolute model)
     private int fy = 0;
+    private boolean modelIsRelative;	// false if absolute.
 
     private int dx;		// For this frame
     private int dy;
@@ -124,25 +142,33 @@ public class Translator extends Modifier {
     /**
      * Called from the parser
      **/
-    public void setup(TranslatorModel model, Feature part) {
+    public void setup(InterpolatedModel model, Feature part) {
 	super.setup(part);
 	this.model = model;
     }
 
     /**
-     * Called from the parser and binary reader if our model uses absolute
-     * coordinates
+     * Called from the parser and binary reader for the x offset, useful
+     * only when our model uses absolute coordinates
      **/
     public void setupAbsoluteXOffset(int x) {
 	this.fx = x;
     }
 
     /**
-     * Called from the parser and binary reader if our model uses absolute
-     * coordinates
+     * Called from the parser and binary reader for the y offset, useful
+     * only when our model uses absolute coordinates
      **/
     public void setupAbsoluteYOffset(int y) {
 	this.fy = y;
+    }
+
+    /**
+     * Called from the parser and binary reader to determine if our model
+     * uses absolute coordinates.  Absolute coordinates are deeprecated.
+     **/
+    public void setupModelIsRelative(boolean b) {
+	modelIsRelative = b;
     }
 
     /**
@@ -160,13 +186,20 @@ public class Translator extends Modifier {
     }
 
     /**
+     * Used by binary writer
+     **/
+    public boolean implGetModelIsRelative() {
+	return modelIsRelative;
+    }
+
+    /**
      * Get the translation that moves us
      **/
-    public TranslatorModel getModel() {
+    public InterpolatedModel getModel() {
 	return model;
     }
     
-    public void implSetModel(TranslatorModel model) {
+    public void implSetModel(InterpolatedModel model) {
 	this.model = model;
     }
 
@@ -203,9 +236,9 @@ public class Translator extends Modifier {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	dx = model.getCurrX();
-	dy = model.getCurrY();
-        if (!model.getIsRelative()) {
+	dx = model.getCurrValue(X_FIELD);
+	dy = model.getCurrValue(Y_FIELD);
+        if (!modelIsRelative) {
             dx -= fx;
             dy -= fy;
         }
@@ -219,8 +252,8 @@ public class Translator extends Modifier {
      * @inheritDoc
      **/
     public int getX() {
-	int x = model.getCurrX();
-	if (!model.getIsRelative()) {
+	int x = model.getCurrValue(X_FIELD);
+	if (!modelIsRelative) {
 	    x -= fx;
 	}
 	x += part.getX();
@@ -231,8 +264,8 @@ public class Translator extends Modifier {
      * @inheritDoc
      **/
     public int getY() {
-	int y = model.getCurrY();
-	if (!model.getIsRelative()) {
+	int y = model.getCurrValue(Y_FIELD);
+	if (!modelIsRelative) {
 	    y -= fy;
 	}
 	y += part.getY();

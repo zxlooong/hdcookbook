@@ -70,9 +70,8 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Timer;
 import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.features.TranslatorModel;
+import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
@@ -224,16 +223,12 @@ public class SEDoubleUseChecker implements SEShowVisitor {
 	addActive(feature);
     }
 
-    public void visitTimer(Timer feature) {
-	addActive(feature);
-    }
-
     public void visitTranslator(Translator feature) {
 	addActive(feature);
 	SEShow.acceptFeature(this, feature.getPart());
     }
 
-    public void visitTranslatorModel(TranslatorModel feature) {
+    public void visitInterpolatedModel(InterpolatedModel feature) {
 	addActive(feature);
     }
 

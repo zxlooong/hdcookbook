@@ -292,7 +292,7 @@ public class AssetFinder  {
 	Toolkit tk = Toolkit.getDefaultToolkit();
 	Image result;
         URL url = getURL(path);
-	return tk.getImage(url);
+	return tk.createImage(url);
     }
 
     /**

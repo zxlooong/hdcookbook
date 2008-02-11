@@ -63,11 +63,12 @@ import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
-import java.awt.Transparency;
+import java.awt.AlphaComposite;
 import java.awt.GraphicsConfiguration;
 import java.awt.Graphics;
 import java.awt.Color;
-import java.awt.AlphaComposite;
+import java.awt.Insets;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -112,7 +113,6 @@ import com.hdcookbook.grin.util.ImageWaiter;
  */
 public class GenericMain extends Frame implements AnimationContext {
     
-    static int FRAME_CHEAT = 16;
     static int BUF_WIDTH = 1920;
     static int BUF_HEIGHT = 1080;
 
@@ -132,6 +132,8 @@ public class GenericMain extends Frame implements AnimationContext {
     private int screenHeight = 1080 / scaleDivisor;
 
     private boolean debugWaiting = false;
+    private String initialSegmentName = null;
+    private Insets insets;
 
     /**
      * Monitor to be held while coordinating a pause in the animation
@@ -168,14 +170,20 @@ public class GenericMain extends Frame implements AnimationContext {
     }
     
     
-    protected void init(String showName, ShowBuilder builder) {
+    protected void init(String showName, ShowBuilder builder, 
+    			String initialSegmentName) 
+    {
 
+	this.initialSegmentName = initialSegmentName;
 	director = new GenericDirector(showName);
 	show = director.createShow(builder);
 
         setBackground(Color.black);
         setLayout(null);
-        setSize(screenWidth, screenHeight + FRAME_CHEAT);  
+	pack();
+	insets = getInsets();
+        setSize(screenWidth + insets.left + insets.right, 
+		screenHeight + insets.top + insets.bottom);  
         
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -211,16 +219,16 @@ public class GenericMain extends Frame implements AnimationContext {
 			   + "F5 popup_menu");
 	MouseAdapter mouseL = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-		int x = e.getX() * scaleDivisor;
-		int y = (e.getY() - FRAME_CHEAT) * scaleDivisor;
+		int x = (e.getX() - insets.left) * scaleDivisor;
+		int y = (e.getY() - insets.top) * scaleDivisor;
                 show.handleMouseClicked(x, y);
             }
         };
         addMouseListener(mouseL);
         MouseMotionAdapter mouseM = new MouseMotionAdapter() {
             public void mouseMoved(MouseEvent e) {
-		int x = e.getX() * scaleDivisor;
-		int y = (e.getY() - FRAME_CHEAT) * scaleDivisor;
+		int x = (e.getX() - insets.left) * scaleDivisor;
+		int y = (e.getY() - insets.top) * scaleDivisor;
                 show.handleMouseMoved(x, y);
             }
         };
@@ -247,7 +255,7 @@ public class GenericMain extends Frame implements AnimationContext {
 
     protected void inputLoop() {
 	try {
-	    engine = new ScalingDirectDrawEngine(scaleDivisor,FRAME_CHEAT,this);
+	    engine = new ScalingDirectDrawEngine(scaleDivisor, this);
 	    setFps(fps);
 	    engine.initialize(this);	// Calls animationInitialize() and
 	    				// animationFinishInitialiation()
@@ -478,24 +486,27 @@ public class GenericMain extends Frame implements AnimationContext {
 	    // On windows and Mac/Intel/Leopard (at least), alpha blending to a 
 	    // background image requires
 	    // special handling.  See the comments in paint(Graphics).
-	    BufferedImage im = con.createCompatibleImage(screenWidth, 
-						    FRAME_CHEAT+screenHeight);
+	    BufferedImage im 
+	        = con.createCompatibleImage(screenWidth, screenHeight);
 	    engine.setNonTranslucentFix(im);
 	}
-	Rectangle ourBounds = new Rectangle(0, FRAME_CHEAT, 1920, 1080);
+	Rectangle ourBounds=new Rectangle(insets.left, insets.top, 1920, 1080);
 	engine.initContainer(this, ourBounds);
     }
 
     public void animationFinishInitialization() throws InterruptedException {
+	if (initialSegmentName != null) {
+	    doKeyboardCommand("s " + initialSegmentName); 
+                // Calls Show.activateSegment
+	}
 	System.out.println("Starting frame pump...");
-	// Can call Show.activateSegment here.
     }
     
     public static void main(String[] args) {
 	String[] path = new String[] { "/assets/" };
 	AssetFinder.setSearchPath(path, null);
 	GenericMain m = new GenericMain();
-        m.init(args[0], null);
+        m.init(args[0], null, null);
 
 	m.inputLoop();
         
