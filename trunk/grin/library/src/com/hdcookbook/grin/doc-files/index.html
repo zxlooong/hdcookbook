@@ -286,7 +286,8 @@ a Show is created.  Here's BNF describing the syntax of a show file:
     set_visual_rc_state
 	 ::= "set_visual_rc" handler_name 
 	 	("state" state_name | "current")
-	        ("selected" | "activated")  ";"
+	        ("selected" | "activated") 
+                [ "run_commands" ] ";"
 
     other_command ::= namespace:type_name
     				(syntax as determined by director) ";"

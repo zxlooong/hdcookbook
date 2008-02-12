@@ -58,7 +58,6 @@ package com.hdcookbook.grin.io.text;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowCommand;
 import com.hdcookbook.grin.SEShowCommands;
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
@@ -90,7 +89,6 @@ import com.hdcookbook.grin.io.builders.MenuAssemblyHelper;
 import com.hdcookbook.grin.io.builders.TranslatorHelper;
 import com.hdcookbook.grin.io.builders.VisualRCHandlerHelper;
 import com.hdcookbook.grin.io.builders.VisualRCHandlerCell;
-import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.AssetFinder;
 
 import java.io.Reader;
@@ -1583,7 +1581,7 @@ public class ShowParser {
 			reportError("Illegal cell - doesn't refer to state");
 		    }
 		}
-		cmd.setup(true, state, handler);
+		cmd.setup(true, state, handler, false);
 	    }
 	};
 	deferred[0].addElement(fw);
@@ -1610,10 +1608,20 @@ public class ShowParser {
 	} else {
 	    lexer.reportError("Unexpected token:  " + tok);
 	}
-	parseExpected(";");
+        
+        boolean runCommands = false;
+        tok = lexer.getString();
+        if ("run_commands".equals(tok)) {
+            runCommands = true;
+            tok = lexer.getString();
+        }
+	if (!";".equals(tok)) {
+	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");            
+        }
 	final SetVisualRCStateCommand cmd = new SetVisualRCStateCommand();
 	final String stateF = state;
 	final boolean activateF = activate;
+        final boolean runCommandsF = runCommands;
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
 		RCHandler h = builder.getNamedRCHandler(handlerName);
@@ -1628,7 +1636,7 @@ public class ShowParser {
 			lexer.reportError("State \"" + stateF + "\" not found");
 		    }
 		}
-		cmd.setup(activateF, state, handler);
+		cmd.setup(activateF, state, handler, runCommandsF);
 	    }
 	};
 	deferred[0].addElement(fw);

@@ -57,7 +57,6 @@ package com.hdcookbook.grin.commands;
 
 import com.hdcookbook.grin.input.VisualRCHandler;
 
-import java.io.IOException;
 
 /**
  * This command is used to set the state of a visual RC handler.  It's
@@ -108,14 +107,15 @@ public class SetVisualRCStateCommand extends Command {
     
     /**
      * Called from parser 
-     *
+     *  
      * @param state State number, -1 means "current state"
      **/
-    public void setup(boolean activated, int state, VisualRCHandler handler)  {
+    public void setup(boolean activated, int state, 
+            VisualRCHandler handler, boolean runCommands)  {
 	this.activated = activated;
-	this.state = state;
+      	this.state = state;
 	this.handler = handler;
-	this.runCommands = false;
+	this.runCommands = runCommands;
     }
     
     public void execute() {
@@ -125,7 +125,8 @@ public class SetVisualRCStateCommand extends Command {
     public String toString() {
 	return super.toString() + " : " + handler 
 			        + " (" + activated + ", " 
-				+ handler.getStateName(state) + ")";
+				+ handler.getStateName(state) + ", "
+                                + runCommands + " )";
     }
     
 }

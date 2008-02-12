@@ -802,18 +802,20 @@ public class GrinBinaryReader {
         final boolean activated = dis.readBoolean();
         final int state = dis.readInt();
         final int handlerIndex = dis.readInt();
-        boolean runCommands = dis.readBoolean();
+        final boolean runCommands = dis.readBoolean();
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }        
         final SetVisualRCStateCommand command = new SetVisualRCStateCommand();
         
         if (rcHandlers[handlerIndex] != null) {
-            command.setup(activated, state, (VisualRCHandler)rcHandlers[handlerIndex]);
+            command.setup(activated, state, 
+                    (VisualRCHandler)rcHandlers[handlerIndex], runCommands);
         } else {
             deferred.add(new CommandSetup() {
                public void setup() {
-                  command.setup(activated, state, (VisualRCHandler)rcHandlers[handlerIndex]);
+                  command.setup(activated, state, 
+                          (VisualRCHandler)rcHandlers[handlerIndex], runCommands);
                } 
             });
         }    
