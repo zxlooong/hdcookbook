@@ -67,7 +67,7 @@ information or have any questions.
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg line="${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar"/>
+            <arg line="-debug ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar"/>
             <classpath refid="sec.tools.path"/>	   
         </jdktools.java>	
         <move file="app.discroot.crt" todir="${HDC_DISC_BDMV}/../CERTIFICATE/"/>
@@ -86,8 +86,7 @@ information or have any questions.
         <ant dir="${HDC_BDJ_SIGNER}/make"/>    
         <available file="${HDC_BDJ_SIGNER}/build/security.jar" type="file"
                    property="bdsigner.ok"/>
-    </target>
-    
+    </target> 
  
 </project>
            

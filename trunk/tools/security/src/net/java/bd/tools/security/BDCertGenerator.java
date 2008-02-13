@@ -70,6 +70,7 @@ public class BDCertGenerator {
             printUsageAndExit("Please enter an orgid");
         }
         SecurityUtil.Builder builder = new SecurityUtil.Builder();
+        boolean setOrgId = false;
         for (int i = 0; i < args.length; i++) {
             String opt = args[i];
             if (opt.equals("-keystore")) {
@@ -101,12 +102,18 @@ public class BDCertGenerator {
                 printUsageAndExit("");
             } else if (opt.equals("-debug")) {
                 builder = builder.debug();
+            } else if (opt.equals("-binding")) {
+               builder = builder.binding();
             } else {
                 if (args[i].length() != 8) {
                     printUsageAndExit("Bad OrgID " + args[i] + ", please provide an 8 digit hex.");
                 }
                 builder = builder.orgId(args[i]);
+                setOrgId = true;
             }          
+        }
+        if (!setOrgId) {
+            printUsageAndExit("Please enter an orgid");
         }
         SecurityUtil util = builder.build();
         util.createCertificates();
@@ -131,6 +138,7 @@ public class BDCertGenerator {
         System.err.println("***This tool generates keystore/certificates for securing BD-J applications***\n");
         System.err.println("usage: BDCertGenerator [options] organization_id\n");
         System.err.println("Valid Options:");
+        System.err.println(" -binding           \t:Generate Binding Unit Root Certificate");
         System.err.println(" -keystore filename \t:Create a keystore file with the given filename");
         System.err.println(" -rootdn name       \t:Distinguished name of the root certificate");
         System.err.println(" -appdn  name       \t:Distinguished name of the application certificate");

@@ -431,34 +431,18 @@ class CredentialUtil {
 	dos.close();
         byte[] data = baos.toByteArray();
         if (debug)
-	    printDebugMsg("signed data length:" + data.length);
-	
-	// digest the data
-	byte[] digest;
-	MessageDigest md = MessageDigest.getInstance("SHA1");
-     	md.update(data);
-     	digest = md.digest();
-
-	// The next step is to put together the digest for signing as digestInfo
-        // field explained in RFC 2315, section 9.4
-        DerOutputStream seq = new DerOutputStream();	
-	DerOutputStream digestInfo = new DerOutputStream();
-
-        // digestAlgorithmId
-	digestAlgorithmID = new ObjectIdentifier(SHA1OID);
-        digestInfo.putOID(digestAlgorithmID);
-	digestInfo.putOctetString(digest);	
-        seq.write(DerValue.tag_Sequence, digestInfo);
-
+	    printDebugMsg("To be signed data length:" + data.length);
+        
         PrivateKey grantorKey = getGrantorKey();
-	Cipher c = Cipher.getInstance(ENCR_ALGO);
-	c.init(Cipher.ENCRYPT_MODE, grantorKey);
-	byte[] encrypted = c.doFinal(seq.toByteArray());
-
+        Signature sig = Signature.getInstance(SIG_ALGO);
+        sig.initSign(grantorKey);
+        sig.update(data);
+        byte[] signature = sig.sign();
+        
 	// encode with base64
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	BASE64Encoder base64 = new BASE64Encoder();
-        base64.encode(encrypted, out);
+        base64.encode(signature, out);
 	return out.toString("US-ASCII");
     }
     
@@ -605,7 +589,7 @@ class CredentialUtil {
         BigInteger certificateSerialNumber = issuerAndSerialNumber[1].getBigInteger();
      
         System.out.println("Looking for cert with issuerName:" + issuerName);
-        System.out.println(" and cert serial no:" + certificateSerialNumber);
+        System.out.println(" and cert serial no:" + Integer.toHexString(certificateSerialNumber.intValue()));
         
         // retrieve the cert from the jarfile
         Collection certs = retrieveCerts(jarFileName);

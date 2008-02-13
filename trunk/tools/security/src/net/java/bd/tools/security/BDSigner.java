@@ -71,7 +71,9 @@ public class BDSigner {
             printUsageAndExit("No arguments specified");
         }
         List<String> jarfiles = new ArrayList<String>();
+        boolean isBUMF = false;
         SecurityUtil.Builder builder = new SecurityUtil.Builder();
+        
         for(int i = 0; i < args.length; i++) {
             String opt = args[i];
             if (opt.equals("-keystore")) {
@@ -91,19 +93,28 @@ public class BDSigner {
             } else if (opt.equals("-debug")) {
                  builder = builder.debug();
             } else {
-	          jarfiles.add(args[i]);
+                  if (args[i].endsWith(".bumf")) {
+                      builder = builder.bumf(args[i]);
+                      isBUMF = true;
+                  } else {
+	              jarfiles.add(args[i]);
+                  }
 	          if (!new File(args[i]).exists()) {
 		    printUsageAndExit("File " + args[i] + " not found.");
                   } 
              } 
         }
-        if (jarfiles.isEmpty()) {
-           printUsageAndExit("No jar files to sign..");
-        } else {
+        if (!isBUMF && jarfiles.isEmpty()) {
+           printUsageAndExit("No BUMF or jar files to sign..");
+        } else if (!isBUMF) {
             builder = builder.jarfiles(jarfiles);
         }
         SecurityUtil util = builder.build();
-        util.signJars();
+        if (isBUMF) {
+            util.signBUMF();
+        } else {
+            util.signJars();
+        }
     }
      
      static private void tinyHelp() {
@@ -121,10 +132,10 @@ public class BDSigner {
     private static void printUsageAndExit(String reason) {
          if (!reason.isEmpty())
 	     System.err.println("\nFailed: " + reason);
-	 System.err.println("\n***This is a tool for signing jar files according to the bd-j specification***\n");
-         System.err.println("usage: BDSigner [options] jarfiles..\n");
+	 System.err.println("\n***This is a tool for signing jar files or the Binding Unit Manifest File(BUMF) according to the bd-j specification***\n");
+         System.err.println("usage: BDSigner [options] BUMF or jarfiles..\n");
           System.err.println("Valid Options:");
-         System.err.println(" -keystore filename  \t:Keystore containing the key for signing the jars");
+         System.err.println(" -keystore filename  \t:Keystore containing the key used in signing");
          System.err.println("                     \tIn the absense of this option, a default store:\"keystore.store\"");
          System.out.println("                     \tis used from the current working directory.");
 	 System.err.println(" -storepass password \t:Keystore password");

@@ -34,7 +34,7 @@ depends="security.check">
        <pathelement location="${java.home}/../lib/tools.jar"/>
     </path>
     <java classname="net.java.bd.tools.security.BDCertGenerator" fork="true">
-	<arg line="00000001"/>
+	<arg line="-rootdn &quot;CN=WriterRoot, OU=Studio, O=BDJCompany, C=US&quot; -appdn &quot;CN=WriterApp, OU=Production, O=BDJCompany, C=US&quot; 00000001"/>
         <classpath refid="sec.tools.path"/> 
     </java>	
     <java classname="net.java.bd.tools.security.BDSigner" fork="true">
@@ -42,6 +42,7 @@ depends="security.check">
        <classpath refid="sec.tools.path"/> 
     </java>	
     <copy file="app.discroot.crt" todir="${HDC_DISK_BDMV}/../CERTIFICATE/"/>
+    <copy file="app.discroot.crt" todir="${HDC_DISK_BDMV}/../CERTIFICATE/BACKUP/"/>
 </target>
 	
 <target name="security.check">
@@ -65,6 +66,7 @@ depends="security.check">
 
 <target name="copy-bdmv-id">
 	<copy file="id.bdmv" toDir="${HDC_DISK_BDMV}/../CERTIFICATE/"/>
+	<copy file="id.bdmv" toDir="${HDC_DISK_BDMV}/../CERTIFICATE/BACKUP/"/>
 </target>
 
 <target
@@ -126,7 +128,7 @@ depends="security.check">
                 </profiles>
                 <visibility>V_11</visibility>
             </applicationDescriptor>
-            <applicationId>0x4000</applicationId>
+            <applicationId>0x4001</applicationId>
             <controlCode>0x1</controlCode>
             <organizationId>0x00000001</organizationId>
             <type>0x1</type>
