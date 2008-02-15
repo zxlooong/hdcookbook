@@ -62,6 +62,7 @@ import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.io.binary.ExtensionsReader;
 import com.hdcookbook.grin.io.binary.ExtensionsWriter;
@@ -351,5 +352,61 @@ public class ShowBuilder {
 	    }
 	}
 	return Pattern.compile(pat.toString());
+    }
+
+    public InterpolatedModel makeTimer(String name, int numFrames, 
+    				       boolean repeat, Command[] commands)
+    {
+	int[] frames = new int[] { 0,  numFrames };
+	int[][] values = new int[0][];
+	int repeatFrame;
+	if (repeat) {
+	    repeatFrame = 0;
+	} else {
+	    repeatFrame = Integer.MAX_VALUE;
+	}
+	return makeInterpolatedModel(name, frames, values,repeatFrame,commands);
+	    // Timer can be implemented as a degenerate case of 
+	    // InterpolatedModel.  It's just a model that interpolates zero
+	    // data values between frame 0 and frame numFrames.
+    }
+
+    public InterpolatedModel 
+    makeTranslatorModel(String name, int[] frames, int[][] values, 
+    			  int repeatFrame, Command[] commands) 
+    {
+	return makeInterpolatedModel(name, frames, values, repeatFrame, 
+				     commands);
+    }
+
+    public InterpolatedModel 
+    makeScalingModel(String name, int[] frames, int[][] values, 
+    		     int repeatFrame, Command[] commands) 
+    {
+	return makeInterpolatedModel(name, frames, values, repeatFrame, 
+				     commands);
+    }
+
+    private InterpolatedModel 
+    makeInterpolatedModel(String name, int[] frames, int[][] values, 
+    			  int repeatFrame, Command[] commands)
+    {
+	int[] currValues = new int[values.length];
+	for (int i = 0; i < values.length; i++) {
+	    int[] valueList = values[i];
+	    assert valueList.length > 0;
+	    boolean allSame = true;
+	    currValues[i] = valueList[0];
+	    for (int j = 1; j < valueList.length; j++) {
+		allSame = allSame && currValues[i] == valueList[j];
+	    }
+	    if (allSame) {
+		values[i] = null;
+		    // If all of the values are the same, we don't need the
+		    // list of values for this parameter.
+	    }
+	}
+	return new InterpolatedModel(show, name, frames, currValues, values,
+				     repeatFrame, commands);
     }
 }

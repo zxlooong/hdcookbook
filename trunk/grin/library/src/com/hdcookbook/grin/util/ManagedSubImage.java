@@ -119,13 +119,25 @@ public class ManagedSubImage extends ManagedImage {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void draw(Graphics2D gr, int x, int y, Component comp) {
 	Rectangle p = placement;
 	gr.drawImage(mosaic.image, x, y, x+p.width, y+p.height,
-				   p.x, p.y, p.x+p.width, p.y+p.height, null);
+				   p.x, p.y, p.x+p.width, p.y+p.height, comp);
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
+	Rectangle p = placement;
+	gr.drawImage(mosaic.image, 
+		     bounds.x, bounds.y, 
+		     bounds.x+bounds.width, bounds.y + bounds.height,
+		     p.x, p.y, p.x+p.width, p.y+p.height, comp);
+    }
+
 
     void destroy() {
 	ImageManager.ungetImage(mosaic);

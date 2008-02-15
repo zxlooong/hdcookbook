@@ -129,8 +129,8 @@ public class ShowParser {
      * Create a parser to parse a show at the given location.
      *
      * @param reader    Where to read the show from.  We read it up to the
-     *		    	end_show token.  It is recommended to be a BufferedReader
-     *                  instance for a performance improvement.
+     *		    	end_show token.  It is recommended to be a 
+     *			BufferedReader instance for a performance improvement.
      *
      * @param showName	The name of the show, for error messages.
      *
@@ -381,6 +381,8 @@ public class ShowParser {
 	    return parseTranslator(hasName, lineStart);
 	} else if ("text".equals(tok)) {
 	    return parseText(hasName, lineStart);
+	} else if ("scaling_model".equals(tok)) {
+	    return parseScalingModel(hasName, lineStart);
 	} else if ("guarantee_fill".equals(tok)) {
 	    return parseGuaranteeFill(hasName, lineStart);
 	} else if ("set_target".equals(tok)) {
@@ -428,13 +430,36 @@ public class ShowParser {
     private Feature parseFixedImage(boolean hasName, int line) 
     		throws IOException 
     {
-	String name = parseFeatureName(hasName);
+	final String name = parseFeatureName(hasName);
 	int x = lexer.getInt();
 	int y = lexer.getInt();
 	String fileName = lexer.getString();
-	parseExpected(";");
-	Feature f = new FixedImage(show, name, x, y, fileName);
+	String tok = lexer.getString();
+	String scalingModel = null;
+	if ("scaling_model".equals(tok)) {
+	    scalingModel = lexer.getString();
+	    tok = lexer.getString();
+	}
+	if (!(";".equals(tok))) {
+	    lexer.reportError("';' expected, " + tok + " seen");
+	}
+	final FixedImage f = new FixedImage(show, name, x, y, fileName);
 	builder.addFeature(name,line, f);
+	if (scalingModel != null) {
+	    final String scalingModelF = scalingModel;
+	    ForwardReference fw = new ForwardReference(lexer) {
+		void resolve() throws IOException {
+		    Feature smf = builder.getNamedFeature(scalingModelF);
+		    if (smf == null || !(smf instanceof InterpolatedModel)) {
+			lexer.reportError("In fixed_image " + name + 
+				  " can't find scaling_model "
+				  + scalingModelF + ".");
+		    }
+		    f.implSetScalingModel((InterpolatedModel) smf);
+		}
+	    };
+	    deferred[0].addElement(fw);
+	}
 	return f;
     }
 
@@ -465,6 +490,11 @@ public class ShowParser {
 	boolean repeat = false;
 	if ("repeat".equals(tok)) {
 	    repeat = true;
+	    tok = lexer.getString();
+	}
+	String scalingModel = null;
+	if ("scaling_model".equals(tok)) {
+	    scalingModel = lexer.getString();
 	    tok = lexer.getString();
 	}
 	String model = null;
@@ -500,11 +530,26 @@ public class ShowParser {
 	    };
 	    deferred[0].addElement(fw);
 	}
+	if (scalingModel != null) {
+	    final String scalingModelF = scalingModel;
+	    ForwardReference fw = new ForwardReference(lexer) {
+		void resolve() throws IOException {
+		    Feature smf = builder.getNamedFeature(scalingModelF);
+		    if (smf == null || !(smf instanceof InterpolatedModel)) {
+			lexer.reportError("In image_sequence " + name + 
+				  " can't find scaling_model "
+				  + scalingModelF + ".");
+		    }
+		    f.implSetScalingModel((InterpolatedModel) smf);
+		}
+	    };
+	    deferred[0].addElement(fw);
+	}
 	return f;
     }
 
     private Feature parseBox(boolean hasName, int line) throws IOException {
-	String name = parseFeatureName(hasName);
+	final String name = parseFeatureName(hasName);
 	Rectangle placement = parseRectangle();
 	String tok = lexer.getString();
 	int outlineWidth = 0;
@@ -525,13 +570,33 @@ public class ShowParser {
 	    fillColor = parseColor();
 	    tok = lexer.getString();
 	}
+	String scalingModel = null;
+	if ("scaling_model".equals(tok)) {
+	    scalingModel = lexer.getString();
+	    tok = lexer.getString();
+	}
 	if (!(";".equals(tok))) {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
-	Box box = new Box(show, name, placement.x, placement.y,
-	                  placement.width, placement.height, 
-			  outlineWidth, outlineColor, fillColor);
+	final Box box = new Box(show, name, placement.x, placement.y,
+	                        placement.width, placement.height, 
+			        outlineWidth, outlineColor, fillColor);
 	builder.addFeature(name, line, box);
+	if (scalingModel != null) {
+	    final String scalingModelF = scalingModel;
+	    ForwardReference fw = new ForwardReference(lexer) {
+		void resolve() throws IOException {
+		    Feature smf = builder.getNamedFeature(scalingModelF);
+		    if (smf == null || !(smf instanceof InterpolatedModel)) {
+			lexer.reportError("In box " + name + 
+				  " can't find scale_model "
+				  + scalingModelF + ".");
+		    }
+		    box.implSetScalingModel((InterpolatedModel) smf);
+		}
+	    };
+	    deferred[0].addElement(fw);
+	}
 	return box;
     }
 
@@ -737,8 +802,8 @@ public class ShowParser {
 		lexer.reportError("Illegal alpha value:  " + alphas[i]);
 	    }
 	}
-	if (fs.length < 1) {
-	    lexer.reportError("Need at least one keyframe");
+	if (fs.length < 2) {
+	    lexer.reportError("Need at least two keyframes");
 	}
 	if (fs[0] != 0) { 
 	    lexer.reportError("Keyframes must start at frame 0");
@@ -768,21 +833,8 @@ public class ShowParser {
 	if (numFrames < 0 || (repeat && numFrames < 1)) {
 	    lexer.reportError("More frames, please.");
 	}
-	int[] frames = new int[] { 0,  numFrames };
-	int[] currValues = new int[0];
-	int[][] values = new int[0][];
-	int repeatFrame;
-	if (repeat) {
-	    repeatFrame = 0;
-	} else {
-	    repeatFrame = Integer.MAX_VALUE;
-	}
-	InterpolatedModel timer
-	    = new InterpolatedModel(show, name, frames, currValues, values,
-				    repeatFrame, commands);
-	    // Timer can be implemented as a degenerate case of 
-	    // InterpolateModel.  It's just a model that interpolates zero
-	    // data values between frame 0 and frame numFrames.
+	InterpolatedModel timer 
+	    = builder.makeTimer(name, numFrames, repeat, commands);
 	builder.addFeature(name, line, timer);
 	return timer;
     }
@@ -901,8 +953,8 @@ public class ShowParser {
 		lexer.reportError("Frame number must be increasing");
 	    }
 	}
-	if (fs.length < 2) {
-	    lexer.reportError("Need at least two keyframes");
+	if (fs.length < 1) {
+	    lexer.reportError("Need at least one keyframe");
 	}
 	if (fs[0] != 0) { 
 	    lexer.reportError("Keyframes must start at frame 0");
@@ -912,12 +964,9 @@ public class ShowParser {
 	} else if (repeatFrame > fs[fs.length - 1]) {
 	    lexer.reportError("repeat > max frame");
 	}
-	int[] currValues = new int[2];
-	currValues[Translator.X_FIELD] = values[Translator.X_FIELD][0];
-	currValues[Translator.Y_FIELD] = values[Translator.Y_FIELD][0];
 	InterpolatedModel trans 
-	    = new InterpolatedModel(show, name, fs, currValues, values,
-				    repeatFrame, endCommands);
+	    = builder.makeTranslatorModel(name, fs, values,
+				          repeatFrame, endCommands);
 	builder.addFeature(name, line, trans);
 	return trans;
     }
@@ -1011,6 +1060,78 @@ public class ShowParser {
 			     font, cols, background);
 	builder.addFeature(name, line, text);
 	return text;
+    }
+
+    private Feature parseScalingModel(boolean hasName, int line) 
+    		throws IOException 
+    {
+	String name = parseFeatureName(hasName);
+	parseExpected("{");
+	Vector keyframes = new Vector();
+	for (;;) {
+	    String tok = lexer.getString();
+	    if ("}".equals(tok)) {
+		break;
+	    }
+	    int frameNum = 0;
+	    try {
+		frameNum = Integer.decode(tok).intValue();
+	    } catch (NumberFormatException ex) {
+		lexer.reportError(ex.toString());
+	    }
+	    int x = lexer.getInt();
+	    int y = lexer.getInt();
+	    int scaleX = lexer.getInt();
+	    int scaleY = lexer.getInt();
+	    keyframes.addElement(new int[] { frameNum, x, y, scaleX, scaleY } );
+	    parseExpected("mills");
+	}
+	String tok = lexer.getString();
+	int repeatFrame = -1;
+	if ("repeat".equals(tok)) {
+	    repeatFrame = lexer.getInt();
+	    tok = lexer.getString();
+	}
+	Command[] endCommands = emptyCommandArray;
+	if ("end_commands".equals(tok)) {
+	    endCommands = parseCommands();
+	    tok = lexer.getString();
+	}
+	if (!(";".equals(tok))) {
+	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
+	}
+	int[] fs = new int[keyframes.size()];
+	int[][] values = new int[4][];
+	values[0] = new int[keyframes.size()];
+	values[1] = new int[keyframes.size()];
+	values[2] = new int[keyframes.size()];
+	values[3] = new int[keyframes.size()];
+	for (int i = 0; i < keyframes.size(); i++) {
+	    int[] el = (int[]) keyframes.elementAt(i);
+	    fs[i] = el[0];
+	    values[InterpolatedModel.SCALE_X_FIELD][i] = el[1];
+	    values[InterpolatedModel.SCALE_Y_FIELD][i] = el[2];
+	    values[InterpolatedModel.SCALE_X_FACTOR_FIELD][i] = el[3];
+	    values[InterpolatedModel.SCALE_Y_FACTOR_FIELD][i] = el[4];
+	    if (i > 0 && fs[i] <= fs[i-1]) {
+		lexer.reportError("Frame number must be increasing");
+	    }
+	}
+	if (fs.length < 1) {
+	    lexer.reportError("Need at least one keyframe");
+	}
+	if (fs[0] != 0) { 
+	    lexer.reportError("Keyframes must start at frame 0");
+	}
+	if (repeatFrame == -1) {
+	    repeatFrame = Integer.MAX_VALUE; 	// Make it stick at end
+	} else if (repeatFrame > fs[fs.length - 1]) {
+	    lexer.reportError("repeat > max frame");
+	}
+	InterpolatedModel scaleModel 
+	    = builder.makeScalingModel(name, fs,values,repeatFrame,endCommands);
+	builder.addFeature(name, line, scaleModel);
+	return scaleModel;
     }
 
     private Font parseFontSpec(String tok) throws IOException {

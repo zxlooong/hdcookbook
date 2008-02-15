@@ -58,6 +58,7 @@ package com.hdcookbook.grin.util;
 import java.awt.Image;
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 /**
  * A managed image that's loaded from its own image file (and not
@@ -163,10 +164,20 @@ public class ManagedFullImage extends ManagedImage {
     }
 
     /**
-     * Draw this image into the given graphics context
+     * @inheritDoc
      **/
     public void draw(Graphics2D gr, int x, int y, Component comp) {
         gr.drawImage(image, x, y, comp);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
+	gr.drawImage(image, bounds.x, bounds.y, 
+			    bounds.x+bounds.width, bounds.y+bounds.height,
+			    0, 0, image.getWidth(null), image.getHeight(null), 
+			    comp);
     }
 
     void destroy() {

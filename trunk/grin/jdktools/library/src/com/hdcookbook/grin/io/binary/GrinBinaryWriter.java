@@ -428,6 +428,11 @@ public class GrinBinaryWriter {
        dos.writeInt(box.implGetOutlineWidth());
        dos.writeColor(box.implGetOutlineColor());
        dos.writeColor(box.implGetFillColor());
+       Feature model = box.implGetScalingModel();
+       dos.writeBoolean(model != null);
+       if (model != null) {
+	    dos.writeFeatureReference(model);
+       }
        
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -498,6 +503,11 @@ public class GrinBinaryWriter {
        dos.writeInt(image.getX());
        dos.writeInt(image.getY());
        dos.writeUTF(image.implGetFileName());
+       Feature sm = image.implGetScalingModel();
+       dos.writeBoolean(sm != null);
+       if (sm != null) {
+	    dos.writeFeatureReference(sm);
+       }
        
        out.writeInt(baos.size());
        baos.writeTo(out);
@@ -549,6 +559,11 @@ public class GrinBinaryWriter {
        }
        Command[] endCommands = imageSequence.implGetEndCommands();
        writeCommands(dos, endCommands);
+       Feature sm = imageSequence.implGetScalingModel();
+       dos.writeBoolean(sm != null);
+       if (sm != null) {
+	    dos.writeFeatureReference(sm);
+       }
        
        out.writeInt(baos.size());
        baos.writeTo(out);      
@@ -1070,10 +1085,13 @@ public class GrinBinaryWriter {
         ArrayList deferred = new ArrayList();
         
         for (int i = 0; i < features.length; i++) {
-            /* 4 types of Features that could have forward references.  */
+            /* 7 types of Features that could have forward references.  */
             if (features[i] instanceof Assembly || 
                 features[i] instanceof Group ||
                 features[i] instanceof Modifier || 
+                features[i] instanceof Box || 
+                features[i] instanceof FixedImage || 
+                features[i] instanceof ImageSequence || 
                 features[i] instanceof Translator) {
                    deferred.add(features[i]);
             } else {    
@@ -1130,6 +1148,15 @@ public class GrinBinaryWriter {
                 return true;
             }
             return false;            
+        } else if (feature instanceof Box) {
+            Feature model = ((Box) feature).implGetScalingModel();
+	    return list.contains(model);
+        } else if (feature instanceof FixedImage) {
+            Feature model = ((FixedImage) feature).implGetScalingModel();
+	    return list.contains(model);
+        } else if (feature instanceof ImageSequence) {
+            Feature model = ((ImageSequence) feature).implGetScalingModel();
+	    return list.contains(model);
         } else {
             throw new RuntimeException("Unexpected instance " + feature);
         }

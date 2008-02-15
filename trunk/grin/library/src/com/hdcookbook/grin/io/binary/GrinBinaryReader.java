@@ -459,11 +459,16 @@ public class GrinBinaryReader {
         int outlineWidth = dis.readInt();
         Color outline = dis.readColor();
         Color fill = dis.readColor();
+        Box box = new Box(show, name, x, y, width, height, 
+		          outlineWidth, outline, fill);
+	if (dis.readBoolean()) {
+	    int i = dis.readInt();
+            box.implSetScalingModel((InterpolatedModel) features[i]);
+        }
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }       
-        return new Box(show, name, x, y, width, height, 
-		       outlineWidth, outline, fill);
+	return box;
     }
     
     private Clipped readClipped(GrinDataInputStream dis) throws IOException {
@@ -519,11 +524,15 @@ public class GrinBinaryReader {
         int startX = dis.readInt();
         int startY = dis.readInt();
         String filename = dis.readUTF();
+        FixedImage fi = new FixedImage(show, name, startX, startY, filename);
+	if (dis.readBoolean()) {
+	    int i = dis.readInt();
+            fi.implSetScalingModel((InterpolatedModel) features[i]);
+        }
         if (Debug.ASSERT) {
             ((DebugInputStream)stream).popExpectedLength();
         }
-        
-        return new FixedImage(show, name, startX, startY, filename);       
+	return fi;
     } 
 
     private Group readGroup(GrinDataInputStream dis) throws IOException {
@@ -561,15 +570,19 @@ public class GrinBinaryReader {
             model = (ImageSequence) features[dis.readInt()];
         }
         Command[] endCommands = readCommands(dis);
-        if (Debug.ASSERT) {
-            ((DebugInputStream)stream).popExpectedLength();
-        }       
         ImageSequence is =  new ImageSequence(show, name, startX, startY, 
                                               filename, middle, extension, 
                                               repeat, endCommands);
         if (model != null) {
             is.setModel(model);
         }
+	if (dis.readBoolean()) {
+	    int i = dis.readInt();
+            is.implSetScalingModel((InterpolatedModel) features[i]);
+        }
+        if (Debug.ASSERT) {
+            ((DebugInputStream)stream).popExpectedLength();
+        }       
         return is;
     }
 
@@ -981,7 +994,7 @@ public class GrinBinaryReader {
 	if (dis.readBoolean()) {
 	    int assemblyIndex = dis.readInt();
             assembly = (Assembly) features[assemblyIndex];
-        }    
+        }
         Feature[] selectFeatures = readFeaturesIndex(dis);
         Feature[] activateFeatures = readFeaturesIndex(dis);
         if (Debug.ASSERT) {

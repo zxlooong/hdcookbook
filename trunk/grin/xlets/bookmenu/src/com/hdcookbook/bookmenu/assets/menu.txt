@@ -1323,6 +1323,101 @@ feature menu_assembly F:UserInput
 ;
 
 
+#
+# A demonstration of scaling.  Just for fun, when the user correctly
+# enters the code, we make the user input grid expand and fade out.
+#
+
+feature scaling_model F:UserInput.Success.Scale
+    {
+    	0	1000	800	1000 	1000 	mills
+	12	1000	800	-1000 	1000	mills
+	24	1000	800	1000 	1000	mills
+	28	1000	800	1050 	1050	mills
+	32	1000	800	1150 	1150	mills
+	36	1000	800	1250 	1250	mills
+	72	1000	800	2000 	2000	mills
+    }
+    end_commands {
+	segment_done ;
+    }
+;
+
+feature box F:UserInput.Message.Scaled 
+	( 600 100 1299 159 )
+	fill { 16 240 16 96 }
+	scaling_model F:UserInput.Success.Scale ;
+    # We can't scale text, so we just make a green box and scale it
+
+feature image_sequence F:UserInput.A.Scaled 630 300
+	"Graphics/UserInput/Letter_A_N.png"  { "" } ""
+	scaling_model F:UserInput.Success.Scale ;
+    #  This is an image_sequence just to test scaling an image_sequence
+
+feature fixed_image F:UserInput.B.Scaled 860 300
+	"Graphics/UserInput/Letter_B_N.png" 
+	scaling_model F:UserInput.Success.Scale ;
+
+feature fixed_image F:UserInput.D.Scaled 1090 300
+	"Graphics/UserInput/Letter_D_N.png" 
+	scaling_model F:UserInput.Success.Scale ;
+
+feature fixed_image F:UserInput.H.Scaled 630 500
+	"Graphics/UserInput/Letter_H_N.png" 
+	scaling_model F:UserInput.Success.Scale ;
+
+feature fixed_image F:UserInput.L.Scaled 860 500
+	"Graphics/UserInput/Letter_L_N.png" 
+	scaling_model F:UserInput.Success.Scale ;
+
+feature fixed_image F:UserInput.R.Scaled 1090 500
+	"Graphics/UserInput/Letter_R_N.png" 
+	scaling_model F:UserInput.Success.Scale ;
+
+feature fixed_image F:UserInput.U.Scaled 630 700
+	"Graphics/UserInput/Letter_U_N.png" 
+	scaling_model F:UserInput.Success.Scale ;
+
+feature fixed_image F:UserInput.V.Scaled 860 700
+	"Graphics/UserInput/Letter_V_N.png" 
+	scaling_model F:UserInput.Success.Scale ;
+
+feature fixed_image F:UserInput.Y.Scaled 1090 700
+	"Graphics/UserInput/Letter_Y_N.png" 
+	scaling_model F:UserInput.Success.Scale ;
+
+feature fixed_image F:UserInput.Enter.Scaled 630 900
+	"Graphics/UserInput/Letter_Enter_N.png" 
+	scaling_model F:UserInput.Success.Scale ;
+
+feature fixed_image F:UserInput.Close.Scaled 1330 930
+	"Graphics/Menu/Close_N.png" 
+	scaling_model F:UserInput.Success.Scale ;
+
+
+feature group F:UserInput.Success.Group {
+    F:UserInput.Message.Scaled
+    F:UserInput.Success.Scale
+    F:UserInput.A.Scaled
+    F:UserInput.B.Scaled
+    F:UserInput.D.Scaled
+    F:UserInput.H.Scaled
+    F:UserInput.L.Scaled
+    F:UserInput.R.Scaled
+    F:UserInput.U.Scaled
+    F:UserInput.V.Scaled
+    F:UserInput.Y.Scaled
+    F:UserInput.Enter.Scaled
+    F:UserInput.Close.Scaled
+} ;
+
+feature fade F:UserInput.Success
+    F:UserInput.Success.Group {
+    	0 	255 	linear
+    	24 	255 	linear
+	72	0	linear
+    }
+;
 
 #
 #  The Bio images.
@@ -1392,6 +1487,7 @@ feature group F:Everything {
     F:BookmarksMenu
     F:BookmarkSnap F:UserInput
     F:Bio.Available F:Bio.NotAvailable
+    F:UserInput.Success
 } ;
 
 
@@ -1542,23 +1638,6 @@ segment S:VideoMenuRollBack
     }
 ;
 
-segment S:StartBonusVideo
-	# This is like S:VideoMenuRollBack, but with no bookmarks
-    active {
-	F:SpinningYinYangCCW
-	F:VideoMenu.Out
-    }
-    setup {
-	F:Everything
-    } 
-    rc_handlers {
-	H:PopupListener
-    }
-    next {
-	activate_segment S:VideoBonusPlaying ;
-    }
-;
-
 segment S:VideoBonusPlaying
     active {
     }
@@ -1662,6 +1741,24 @@ segment S:UserInput
 	H:UserInput
     }
 ;
+
+segment S:StartBonusVideo
+    active {
+	F:UserInput.Success
+    }
+    setup {
+	F:Everything
+    }
+    next {
+	activate_segment S:VideoBonusPlaying ;
+    }
+;
+    # Note that this "success" animation attempts to run at the same
+    # time a playlist is being selected.  On many players, you won't
+    # see the animation at all, because the player is too busy processing
+    # the new playlist.  In a real title, you'd want to do the animation
+    # first, then start the playlist, but for this academic exercise it's
+    # instructive to leave it the way it is.
 
 segment S:Bio.Available
     active {

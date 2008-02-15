@@ -84,6 +84,8 @@ public class Box extends Feature {
     private int outlineWidth;
     private Color outlineColor;
     private Color fillColor;
+    private InterpolatedModel scalingModel = null;
+    private Rectangle scaledBounds = null;
 
     private boolean isActivated;
     private DrawRecord drawRecord = new DrawRecord();
@@ -100,6 +102,19 @@ public class Box extends Feature {
 	this.outlineColor = outlineColor;
 	this.fillColor = fillColor;
     }
+
+    public void implSetScalingModel(InterpolatedModel model) {
+	this.scalingModel = model;
+	if (model != null) {
+	    scaledBounds = new Rectangle();
+	}
+    }
+
+    public InterpolatedModel implGetScalingModel() {
+	return scalingModel;
+    }
+
+
 
     /**
      * @inheritDoc
@@ -217,7 +232,20 @@ public class Box extends Feature {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(x, y, width, height);
+	if (scalingModel == null) {
+	    drawRecord.setArea(x, y, width, height);
+	} else {
+	    boolean changed 
+		= scalingModel.scaleBounds(x, y, width, height, scaledBounds);
+		    // When newly activated, we might get a false positive
+		    // on changed, but that's OK because our draw area is
+		    // changed anyway.
+	    drawRecord.setArea(scaledBounds.x, scaledBounds.y, 
+	    		       scaledBounds.width, scaledBounds.height);
+	    if (changed) {
+		drawRecord.setChanged();
+	    }
+	}
 	drawRecord.setSemiTransparent();
 	context.addArea(drawRecord);
     }
@@ -229,10 +257,31 @@ public class Box extends Feature {
 	if (!isActivated) {
 	    return;
 	}
-	int x1 = x;
-	int y1 = y;
-	int w = width;
-	int h = height;
+	int x1;
+	int y1;
+	int w;
+	int h;
+	if (scalingModel == null) {
+	    x1 = x;
+	    y1 = y;
+	    w = width;
+	    h = height;
+	} else {
+	    x1 = scaledBounds.x;
+	    y1 = scaledBounds.y;
+	    w = scaledBounds.width;
+	    if (w < 0) {
+		w = -w;
+		x1 -= w;
+	    }
+	    h = scaledBounds.height;
+	    if (h < 0) {
+		h = -h;
+		y1 -= h;
+	    }
+	    // We don't scale outlineWidth.  This would be complicated
+	    // to do.
+	}
 	int x2 = x1 + w - 1;
 	int y2 = y1 + h - 1;
 	if (outlineWidth > 0 && outlineColor != null) {

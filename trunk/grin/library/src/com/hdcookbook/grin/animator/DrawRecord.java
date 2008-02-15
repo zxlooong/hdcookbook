@@ -126,13 +126,27 @@ public class DrawRecord {
      * Set the area to be drawn to in this frame of animation.  After this
      * is called, the other public methods of this class can be called
      * to indicate the characteristics of this draw operation.
+     * <p>
+     * As with AWT, the pixels to be filled include the pixel at x,y,
+     * but not the pixel at x+width, y+height.  If the width or height
+     * are negative, then x and y are adjusted by the negative value,
+     * and the dimension is negated.  These rules make this method work
+     * like Graphics.drawImage taking a source and a dest rectangle.
      *
      * @param   x  x coordinate of upper left hand corner of drawing
      * @param   y  y coordinate of upper left hand corner of drawing
-     * @param   width width of drawing
-     * @param   height height of drawing
+     * @param   width width of drawing, may be negative
+     * @param   height height of drawing, may be negative
      **/
     public void setArea(int x, int y, int width, int height) {
+	if (width < 0) {
+	    width = -width;
+	    x -= width;
+	}
+	if (height < 0) {
+	    height = -height;
+	    y -= height;
+	}
 	this.x = x;
 	this.y = y;
 	this.width = width;

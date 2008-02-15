@@ -139,7 +139,7 @@ information or have any questions.
     </target>
     
     <target name="generate-binary-script" depends="copy-menu-assets, compile-binary-converter,
-                 compile-extensions-reader"> 
+                 compile-extensions-reader, compile-grinview"> 
                      
         <jdktools.java classname="com.hdcookbook.grin.binaryconverter.Main">
             <classpath>

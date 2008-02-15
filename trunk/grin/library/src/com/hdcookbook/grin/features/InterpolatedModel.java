@@ -83,6 +83,28 @@ import java.awt.Rectangle;
  */
 public class InterpolatedModel extends Feature {
 
+    /**
+     * For a scale_model, the field for the X value 
+     **/
+    public final static int SCALE_X_FIELD = 0;
+
+    /**
+     * For a scale_model, the field for the Y value 
+     **/
+    public final static int SCALE_Y_FIELD = 1;
+
+    /**
+     * For a scale_model, the field for the horizontal scale factor in 
+     * mills (1/1000)
+     **/
+    public final static int SCALE_X_FACTOR_FIELD = 2;
+
+    /**
+     * For a scale_model, the field for the horizontal scale factor in 
+     * mills (1/1000)
+     **/
+    public final static int SCALE_Y_FACTOR_FIELD = 3;
+
     private int[] frames;	// Frame number of keyframes, [0] is always 0
     private int[] currValues;	// Current value of each field
     private int[][] values;	// Values at keyframe, indexed by field.
@@ -201,11 +223,16 @@ public class InterpolatedModel extends Feature {
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
 	if (mode) {
-	    currFrame = 0;
-	    currIndex = 0;
-	    for (int i = 0; i < currValues.length; i++) {
-		if (values[i] != null) {
-		    currValues[i] = values[i][0];
+	    if (frames.length <= 1) {
+		currFrame = Integer.MAX_VALUE;
+		currIndex = Integer.MAX_VALUE;
+	    } else {
+		currFrame = 0;
+		currIndex = 0;
+		for (int i = 0; i < currValues.length; i++) {
+		    if (values[i] != null) {
+			currValues[i] = values[i][0];
+		    }
 		}
 	    }
 	}
@@ -282,5 +309,68 @@ public class InterpolatedModel extends Feature {
      **/
     public void paintFrame(Graphics2D gr) {
 	// do nothing
+    }
+
+    /**
+     * Scale the x, y, width and heigh values according to the current
+     * values of SCALE_X_FIELD, SCALE_Y_FIELD, SCALE_X_FACTOR_FIELD
+     * and SCALE_Y_FACTOR_FIELD, storing them in scaledBounds.  This,
+     * of course, depends on this InterpolatedModel having these four
+     * values in it, which means that this is a scaling_model.
+     *
+     * @return true if the value of scaledBounds have changed, false
+     *			otherwise.
+     **/
+    public boolean scaleBounds(int x, int y, int width, int height,
+    			       Rectangle scaledBounds)
+    {
+	int dx = getCurrValue(SCALE_X_FIELD);
+	int dy = getCurrValue(SCALE_Y_FIELD);
+	int xf = getCurrValue(SCALE_X_FACTOR_FIELD);
+	int yf = getCurrValue(SCALE_Y_FACTOR_FIELD);
+
+	x = (x - dx) * xf;
+	if (x < 0) {
+	    x -= 500;
+	} else {
+	    x += 500;
+	}
+	x = (x / 1000) + dx;
+
+	y = (y - dy) * yf;
+	if (y < 0) {
+	    y -= 500;
+	} else {
+	    y += 500;
+	}
+	y = (y / 1000) + dy;
+
+	width *= xf;
+	if (width < 0) {
+	    width -= 500;
+	} else {
+	    width += 500;
+	}
+	width /= 1000;
+
+	height *= yf;
+	if (height < 0) {
+	    height -= 500;
+	} else {
+	    height += 500;
+	}
+	height /= 1000;
+
+	if (x != scaledBounds.x || y != scaledBounds.y
+	    || width != scaledBounds.width || height != scaledBounds.height)
+	{
+	    scaledBounds.x = x;
+	    scaledBounds.y = y;
+	    scaledBounds.width = width;
+	    scaledBounds.height = height;
+	    return true;
+	} else {
+	    return false;
+	}
     }
 }

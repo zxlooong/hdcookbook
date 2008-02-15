@@ -80,6 +80,8 @@ public class FixedImage extends Feature {
     private int width = 0;
     private int height = 0;
     private String fileName;
+    private InterpolatedModel scalingModel = null;
+    private Rectangle scaledBounds = null;
 
     private ManagedImage image;
     private boolean setupMode = false;
@@ -96,6 +98,18 @@ public class FixedImage extends Feature {
 	this.y = y;
 	this.fileName = fileName;
     }
+
+    public void implSetScalingModel(InterpolatedModel model) {
+	this.scalingModel = model;
+	if (model != null) {
+	    scaledBounds = new Rectangle();
+	}
+    }
+
+    public InterpolatedModel implGetScalingModel() {
+	return scalingModel;
+    }
+
 
     /**
      * Initialize this feature.  This is called on show initialization.
@@ -167,8 +181,8 @@ public class FixedImage extends Feature {
      * setup; each call to setup() shall be balanced by
      * a call to unsetup(), and they shall *not* be nested.  
      * <p>
-     * It's possible an active phase may be destroyed.  For example,
-     * the last phase a show is in when the show is destroyed will
+     * It's possible an active segment may be destroyed.  For example,
+     * the last segment a show is in when the show is destroyed will
      * probably be active (and it will probably be an empty phase
      * too!).
      **/
@@ -237,14 +251,31 @@ public class FixedImage extends Feature {
 	if (!isActivated) {
 	    return;
 	}
-	image.draw(gr, x, y, show.component);
+	if (scalingModel == null) {
+	    image.draw(gr, x, y, show.component);
+	} else {
+	    image.drawScaled(gr, scaledBounds, show.component);
+	}
     }
 
     /**
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(x, y, width, height);
+	if (scalingModel == null) {
+	    drawRecord.setArea(x, y, width, height);
+	} else {
+	    boolean changed 
+		= scalingModel.scaleBounds(x, y, width, height, scaledBounds);
+		    // When newly activated, we might get a false positive
+		    // on changed, but that's OK because our draw area is
+		    // changed anyway.
+	    drawRecord.setArea(scaledBounds.x, scaledBounds.y, 
+	    		       scaledBounds.width, scaledBounds.height);
+	    if (changed) {
+		drawRecord.setChanged();
+	    }
+	}
 	context.addArea(drawRecord);
     }
 

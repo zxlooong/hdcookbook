@@ -89,6 +89,8 @@ public class ImageSequence extends Feature {
     private String[] middle;
     private String extension;
     private boolean repeat;
+    private InterpolatedModel scalingModel = null;
+    private Rectangle scaledBounds = null;
     private Command[] endCommands;
 
     private ManagedImage[] images;
@@ -184,6 +186,18 @@ public class ImageSequence extends Feature {
     public void implSetY(int y) {
         this.y = y;
     }
+
+    public void implSetScalingModel(InterpolatedModel model) {
+	this.scalingModel = model;
+	if (model != null) {
+	    scaledBounds = new Rectangle();
+	}
+    }
+
+    public InterpolatedModel implGetScalingModel() {
+	return scalingModel;
+    }
+
     
     /**
      * Called by the parser and the binary file reader.  Animations can be 
@@ -397,7 +411,20 @@ public class ImageSequence extends Feature {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(x, y, width, height);
+	if (scalingModel == null) {
+	    drawRecord.setArea(x, y, width, height);
+	} else {
+	    boolean changed 
+		= scalingModel.scaleBounds(x, y, width, height, scaledBounds);
+		    // When newly activated, we might get a false positive
+		    // on changed, but that's OK because our draw area is
+		    // changed anyway.
+	    drawRecord.setArea(scaledBounds.x, scaledBounds.y, 
+	    		       scaledBounds.width, scaledBounds.height);
+	    if (changed) {
+		drawRecord.setChanged();
+	    }
+	}
 	if (currImage != lastImage) {
 	    drawRecord.setChanged();
 	}
@@ -417,7 +444,11 @@ public class ImageSequence extends Feature {
 
     private void doPaint(Graphics2D g) {
 	if (currImage != null) {
-	    currImage.draw(g, x, y, show.component);
+	    if (scalingModel == null) {
+		currImage.draw(g, x, y, show.component);
+	    } else {
+		currImage.drawScaled(g, scaledBounds, show.component);
+	    }
 	}
     }
 

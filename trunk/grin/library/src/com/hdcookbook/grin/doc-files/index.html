@@ -168,15 +168,17 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     feature ::= fixed_image | image_sequence | box | assembly | menu_assembly
     		  | sound | text | translator_model | translator | group 
-		  | timer | clipped | src_over | fade 
+		  | timer | clipped | src_over | fade | scaling_model
 		  | gurantee_fill | set_target
 		  | extension_feature | extension_modifier
 
-    fixed_image ::= "feature" "fixed_image" name x y file_name ";"
+    fixed_image ::= "feature" "fixed_image" name x y file_name 
+    		        [ "scaling_model" name ] ";"
 
     image_sequence ::= "feature" "image_sequence" name x y
 		         file_name "{" name_or_continuation * "}" 
 			 	   extension [ "repeat" ]
+    		       [ "scaling_model" name ]
 		       [ "model" feature_name | "end_commands" commands] ";"
 	    # "linked_to" is accepted for "model", for backwards compatibility.
 	    # In both cases, the model, if specified,  must be a different 
@@ -184,7 +186,8 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     box ::= "feature" "box" name rectangle
     		[ "outline" width color_value ]
-		[ "fill" color_value ] ";"
+		[ "fill" color_value ]
+	        [ "scaling_model" name ] ";"
 
     name_or_continuation ::= "+" | "-" | name	# "+" means "repeat last frame",
      						# "-" means "empty"
@@ -236,6 +239,18 @@ a Show is created.  Here's BNF describing the syntax of a show file:
     		[ "src_over" ] "{" ( frame_number alpha "linear" ) * "}" 
 		[ "repeat" frame_number ] 
 		[ "end_commands" commands ] ";"
+
+    scaling_model ::= "feature" "scaling_model" name 
+		"{" scale_key_frame* "}"
+		[ "repeat" frame_number ] 
+		[ "end_commands" commands ] ";"
+	# There must be >= 1 scale_key_frame
+    
+    scale_key_frame ::=  frame_number x y x_scale y_scale "mills"
+    	# The first frame must be zero
+	# The scale factor is in mills (1/1000); a factor of 1000 is 1:1 scale
+
+    key_frame ::= frame_number x y interpolation_type
 
     guarantee_fill ::= "feature" "guarantee_fill" name sub_feature
     				rectangle 	    # guaranteed area
@@ -390,6 +405,8 @@ a Show is created.  Here's BNF describing the syntax of a show file:
     num_frames ::= integer
     frame_number ::= integer
     width ::= integer
+    x_scale ::= integer
+    y_scale ::= integer
     x ::= integer
     y ::= integer
 </pre>

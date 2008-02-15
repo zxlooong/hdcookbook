@@ -58,6 +58,7 @@ package com.hdcookbook.grin.util;
 import java.awt.Image;
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 /**
  * An image that is managed by the GRIN utilities.  Managed images
@@ -114,6 +115,13 @@ abstract public class ManagedImage {
      * Draw this image into the given graphics context
      **/
     abstract public void draw(Graphics2D gr, int x, int y, Component comp);
+
+    /**
+     * Draw this image into the given graphics context, scaled to fit within
+     * the given bounds.
+     **/
+    abstract public void drawScaled(Graphics2D gr, Rectangle bounds,
+    				    Component comp);
 
     abstract void destroy();
 }

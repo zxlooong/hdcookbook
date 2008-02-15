@@ -33,6 +33,7 @@ information or have any questions.
             <classpath>
                 <pathelement path="${MENUTOOLS_DEST}"/>
                 <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+                <pathelement path="${HDC_BUILD_DIR}/xlets/menu_generated/grinview"/>
             </classpath>               
             <arg line="-asset_dir ${MENUASSETS_DEST} menu.grin"/>                
         </jdktools.java>	
