@@ -60,7 +60,6 @@ import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.SetTarget;
-import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.SetupManager;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.Queue;
@@ -68,11 +67,9 @@ import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.RCKeyEvent;
 
 import java.util.Hashtable;
-import java.util.Enumeration;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.io.IOException;
 
 
@@ -448,6 +445,25 @@ public class Show implements AnimationClient {
      **/
     public synchronized Segment getCurrentSegment() {
 	return currentSegment;
+    }
+    
+    /**
+     * Returns true if the node passed in is recorded as an public element
+     * in this show, false otherwise.
+     * 
+     * @throws RuntimeException if node is neither an instance of 
+     * Feature, RCHandler, nor Segment.
+     */
+    public boolean isPublic(Node node) {
+        if (node instanceof Feature) {
+            return publicFeatures.contains(node);
+        } else if (node instanceof RCHandler) {
+            return publicRCHandlers.contains(node);
+        } else if (node instanceof Segment) {
+            return publicSegments.contains(node);
+        } else {
+            throw new RuntimeException("Unknown node type " + node);
+        }
     }
 
     /**

@@ -55,15 +55,17 @@
 
 package com.hdcookbook.grin.features;
 
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 
-import java.io.IOException;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.io.IOException;
 
 /**
  * An InterpolatedModel is a feature that controls one or more integer
@@ -81,7 +83,7 @@ import java.awt.Rectangle;
  * @author Bill Foote (http://jovial.com)
  *
  */
-public class InterpolatedModel extends Feature {
+public class InterpolatedModel extends Feature implements Node {
 
     /**
      * For a scale_model, the field for the X value 
@@ -105,13 +107,13 @@ public class InterpolatedModel extends Feature {
      **/
     public final static int SCALE_Y_FACTOR_FIELD = 3;
 
-    private int[] frames;	// Frame number of keyframes, [0] is always 0
-    private int[] currValues;	// Current value of each field
-    private int[][] values;	// Values at keyframe, indexed by field.
+    protected int[] frames;	// Frame number of keyframes, [0] is always 0
+    protected int[] currValues;	// Current value of each field
+    protected int[][] values;	// Values at keyframe, indexed by field.
     				// The array for a field can be null, in which
 				// case the initial value of currValues will be
 				// maintained.
-    private int repeatFrame;	// Frame to go to after the end.  
+    protected int repeatFrame;	// Frame to go to after the end.  
     				// Integer.MAX_VALUE means "stick at end"
 				// 0 will cause a cycle.
 
@@ -119,48 +121,12 @@ public class InterpolatedModel extends Feature {
     private int currFrame;      // Current frame in cycle
     private int currIndex;      // frames[index] <= currFrame < frames[index+1]
     private int repeatIndex;	// Index when currFrame is repeatFrame-1
-    private Command[] endCommands;
+    protected Command[] endCommands;
 
-    public InterpolatedModel(Show show, String name, int[] frames, 
-				int[] currValues, int[][] values,
-				int repeatFrame, Command[] endCommands) 
-    {
-	super(show, name);
-	this.frames = frames;
-	this.currValues = currValues;
-	this.values = values;
-	this.repeatFrame = repeatFrame;
-	this.endCommands = endCommands;
-	if (repeatFrame == Integer.MAX_VALUE) {
-	    repeatIndex = Integer.MAX_VALUE;
-	}  else {
-	    repeatIndex = 0;
-	    // This is tricky.  We must calculate the index such
-	    // that frames[i] <= (repeatFrame - 1) < frames[i+1]
-	    while (repeatFrame-1 >= frames[repeatIndex + 1]) {
-		repeatIndex++;
-	    }
-	    // now repeatFrame-1 < frames[repeatIndex + 1]
-	    // and repeatFrame-1 >= frames[repeatIndex]
-	}
+    public InterpolatedModel(Show show) {
+        super(show);
     }
-
-    public int[] implGetFrames() {
-        return frames;
-    }
-    
-    public int[] implGetCurrValues() {
-        return currValues;
-    }
-    
-    public int[][] implGetValues() {
-        return values;
-    }
-    
-    public int implGetRepeatFrame() {
-        return repeatFrame;
-    }
-   
+ 
     /**
      * Give the current value for the given field
      *
@@ -208,6 +174,18 @@ public class InterpolatedModel extends Feature {
      * the phases.
      **/
     public void initialize() {
+ 	if (repeatFrame == Integer.MAX_VALUE) {
+	    repeatIndex = Integer.MAX_VALUE;
+	}  else {
+	    repeatIndex = 0;
+	    // This is tricky.  We must calculate the index such
+	    // that frames[i] <= (repeatFrame - 1) < frames[i+1]
+	    while (repeatFrame-1 >= frames[repeatIndex + 1]) {
+		repeatIndex++;
+	    }
+	    // now repeatFrame-1 < frames[repeatIndex + 1]
+	    // and repeatFrame-1 >= frames[repeatIndex]
+	}       
     }
 
     /**
@@ -309,6 +287,21 @@ public class InterpolatedModel extends Feature {
      **/
     public void paintFrame(Graphics2D gr) {
 	// do nothing
+    }
+    
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException { 
+                
+        in.readSuperClassData(this);
+        
+        this.frames = in.readSharedIntArray();
+        this.currValues = in.readSharedIntArray();
+	this.values = new int[currValues.length][];
+	for (int i = 0; i < values.length; i++) {
+	    values[i] = in.readSharedIntArray();
+	}
+        this.repeatFrame = in.readInt();
+        this.endCommands = in.readCommands();       
     }
 
     /**

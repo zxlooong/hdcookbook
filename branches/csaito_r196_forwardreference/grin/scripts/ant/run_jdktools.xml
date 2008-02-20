@@ -28,10 +28,10 @@ information or have any questions.
     <import file="build_hdcookbook_xlets.xml"/>
     
     <target name="run-grin-viewer-binary" depends="copy-menu-assets, generate-binary-script, compile-grinview">
-        <echo message="${MENUTOOLS_DEST} ${MENUASSETS_DEST} ${GRIN_VIEWER_DEST}"/>
         <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
             <classpath>
-                <pathelement path="${MENUTOOLS_DEST}"/>
+                <pathelement path="${MENU_GENERATED}/grinview"/>
+                <pathelement path="${MENUTOOLS_DEST}"/>                
                 <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
                 <pathelement path="${HDC_BUILD_DIR}/xlets/menu_generated/grinview"/>
             </classpath>               
@@ -43,24 +43,29 @@ information or have any questions.
         <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
             <classpath path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
         </nbjpdastart>	
-        <java fork="true" jar="${GRIN_VIEWER_DEST}/grinviewer.jar">
+        <java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+            <classpath>
+                <pathelement path="${MENU_GENERATED}/grinview"/>
+                <pathelement path="${MENUTOOLS_DEST}"/>                
+                <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+            </classpath>    
             <jvmarg value="-Xdebug"/>			
             <jvmarg value="-Xnoagent"/>
             <jvmarg value="-Djava.compiler=none"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
             
-            <arg line="-asset_dir ${GRIN_VIEWER_DEST} menu.grin"/>                        
+            <arg line="-asset_dir ${MENUASSETS_DEST} menu.grin"/>                        
         </java>	
     </target>
     
-    <target name="run-grinview-menu" depends="compile-grinview, compile-extensions-reader, generate-binary-script">
-
+    <target name="run-grinview-menu" depends="compile-grinview"> <!-- , compile-extensions-reader, generate-binary-script" -->
+ 
         <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
             <classpath>
-                <pathelement path="${MENUTOOLS_DEST}"/>
+                <pathelement path="${MENUTOOLS_DEST}"/>                
                 <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
-            </classpath>
-            <arg line="-asset_dir xlets/bookmenu/src/com/hdcookbook/bookmenu/assets -extensions_factory com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory -background xlets/bookmenu/src/com/hdcookbook/bookmenu/menu/test_assets/MenuScreenBG_gray.png -fps 24 menu.txt"/>
+            </classpath>    
+            <arg line="-asset_dir xlets/bookmenu/src/com/hdcookbook/bookmenu/assets -extensions_parser com.hdcookbook.bookmenu.menu.MenuExtensionsParser -background xlets/bookmenu/src/com/hdcookbook/bookmenu/menu/test_assets/MenuScreenBG_gray.png -fps 24 menu.txt"/>
         </java>	
     </target>
     

@@ -56,6 +56,8 @@ package com.hdcookbook.grin.io.binary;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.input.RCHandler;
 import java.awt.Color;
 import java.awt.Font;
@@ -149,7 +151,7 @@ public class GrinDataInputStream extends DataInputStream {
        if (b == Constants.NULL) {
            return null;
        }
-       String name = readUTF();
+       String name = readString();
        int style = readInt();
        int size = readInt();
        return new Font(name, style, size);
@@ -171,7 +173,23 @@ public class GrinDataInputStream extends DataInputStream {
            array[i] = readInt();
        }
        return array;
-   }   
+   }
+   
+   /**
+    * Reads in an reference to an integer array.
+    * 
+    * @return An array of integers reconstructed from the input stream.
+    * @throws java.io.IOException if IO error occurs.
+    */
+   public int[] readSharedIntArray() throws IOException {
+       byte b = readByte();
+       if (b == Constants.NULL) {
+           return null;
+       }
+       
+       int index = readInt();
+       return binaryReader.readIntArrayFromReference(index);
+   }     
 
    /**
     * Reads in and constructs a String instance.
@@ -179,12 +197,16 @@ public class GrinDataInputStream extends DataInputStream {
     * @throws java.io.IOException if IO error occurs.
     */
    public String readString() throws IOException {
-	byte b = readByte();
-	if (b == Constants.NULL) {
+	if (isNull()) {
 	    return null;
 	} else {
-	    return readUTF();
+	    return readStringReference();
 	}
+   }
+   
+   private String readStringReference() throws IOException {
+       int index = readInt();
+       return binaryReader.readStringFromReference(index);
    }
 
    /**
@@ -200,11 +222,7 @@ public class GrinDataInputStream extends DataInputStream {
        
        String[] array = new String[readInt()];
        for (int i = 0; i < array.length; i++) {
-	   if (readByte() == Constants.NULL) {
-	       array[i] = null;
-	   } else {
-               array[i] = readUTF();
-	   }
+           array[i] = readString();
        }
        return array;
    }
@@ -218,8 +236,11 @@ public class GrinDataInputStream extends DataInputStream {
     *           is working with.
     */
    public Feature readFeatureReference() throws IOException {
-       int index = readInt();
+       if (isNull()) {
+           return null;
+       }
        
+       int index = readInt();      
        return binaryReader.getFeatureFromIndex(index);
    }
    
@@ -232,22 +253,192 @@ public class GrinDataInputStream extends DataInputStream {
     *           is working with.
     */
    public Segment readSegmentReference() throws IOException {
-       int index = readInt();
+       if (isNull()) {
+           return null;
+       }
        
+       int index = readInt(); 
        return binaryReader.getSegmentFromIndex(index);
    } 
    
    /**
     * Reads in a reference of an RCHandler and returns an instance of the 
-    * segment.
+    * RCHandler.
     * 
     * @return   a RCHandler that is referenced from, or null if no such
     *           RCHandler exists in the GrinBinaryReader that this input stream
     *           is working with.
     */
    public RCHandler readRCHandlerReference() throws IOException {
-       int index = readInt();
+       if (isNull()) {
+           return null;
+       }
        
+       int index = readInt(); 
        return binaryReader.getRCHandlerFromIndex(index);
-   }    
+   }   
+   
+    /**
+    * Reads in refereces of Features and returns an array of  
+    * Features corresponding to the references.
+    * 
+    * @return   an array of Features that is referenced from.
+    */
+   public Feature[] readFeaturesArrayReference() 
+            throws IOException {
+        
+        if (readByte() == Constants.NULL) {
+            return null;
+        }    
+        
+        Feature[] f = new Feature[readInt()];       
+        for (int i = 0; i < f.length; i++) {
+            f[i] = readFeatureReference();
+        }   
+        
+        return f;
+    }   
+   
+   /**
+    * Reads in refereces of RCHandler and returns an array of the 
+    * RCHandler.
+    * 
+    * @return   an array of RCHandler that is referenced from.
+    */
+   public RCHandler[] readRCHandlersArrayReference() 
+           throws IOException {
+       
+       int length = readInt();
+       RCHandler[] handlers = new RCHandler[length];
+       for (int i = 0; i < handlers.length; i++) {
+           handlers[i] = readRCHandlerReference();
+       }      
+        
+       return handlers;
+   }   
+   
+   /**
+    * Reads in information about Commands and reconstructs
+    * an array of Commands from it.
+    * 
+    * @return an array of Commands reconstructed from this stream.
+    * @throws java.io.IOException
+    */
+   public Command[] readCommands() throws IOException {
+       return binaryReader.readCommands(this);
+   }
+   
+   /**
+    * Checks whether the Object reading is is null or not.
+    * 
+    * When writing custom object, one can do:
+    * <pre>
+    * public void readInstanceData(GrinDataInputStream in) {
+    *    .....
+    *    MyObject myObject = null;
+    *    if (!in.isNull()) {
+    *       // proceed with populating data in "myObject"
+    *    }
+    *    ....
+    * }
+    * </pre>
+    * @return boolean whether the object is null.
+    * @throws java.io.IOException
+    * @see GrinDataOutputStream#writeNull
+    * @see GrinDataOutputStream#writeNonNull
+    */
+   public boolean isNull() throws IOException {
+       return (readByte() == Constants.NULL);
+   }
+   
+   /**
+    * Reads in information common to all Feature types.  This method
+    * reads in following information.
+    * <ul>
+    *     <li>Whether the node is public or private
+    *     <li>The name of a Feature
+    *     <li>The sub-feature "part" of a Modifier if this Feature is a Modifier
+    * </ul> 
+    * @param feature the feature type of populate base data with.
+    * @throws java.io.IOException
+    * 
+    * @see GrinDataOutputStream#writeSuperClassData(Feature)
+    */
+    public void readSuperClassData(Feature feature) 
+            throws IOException {
+        
+        boolean isPublic = readBoolean();
+        if (isPublic || binaryReader.debuggable) {
+            feature.setName(readString());
+        }      
+        if (feature instanceof Modifier) {
+            ((Modifier)feature).setup(readFeatureReference());
+        }
+        
+        if (isPublic) {
+            binaryReader.publicFeatures.put(feature.getName(), feature);
+        }
+    }
+    
+   /**
+    * Reads in information common to all RChandler types.  This method
+    * reads in following information.
+    * <ul>
+    *     <li>Whether the node is public or private
+    *     <li>The name of a RCHandler
+    * </ul> 
+    * @param  handler RCHandler instance to populate data.
+    * @throws java.io.IOException
+    * 
+    * @see GrinDataOutputStream#writeSuperClassData(RCHandler)
+    */    
+    public void readSuperClassData(RCHandler handler) 
+            throws IOException {
+        boolean isPublic = readBoolean();
+        if (isPublic || binaryReader.debuggable) {
+            handler.setName(readString());
+        }
+        
+        if (isPublic) {
+            binaryReader.publicRCHandlers.put(handler.getName(), handler);
+        }        
+    }   
+    
+   /**
+    * Reads in information common to all Segment types.  This method
+    * reads in following information.
+    * <ul>
+    *     <li>Whether the node is public or private
+    *     <li>The name of a Segment
+    * </ul> 
+    * @param  segment RCHandler instance to populate data.
+    * @throws java.io.IOException
+    * 
+    * @see GrinDataOutputStream#writeSuperClassData(Segment)
+    */     
+    public void readSuperClassData(Segment segment) 
+            throws IOException {
+        boolean isPublic = readBoolean();
+        if (isPublic || binaryReader.debuggable) {
+            segment.setName(readString());
+        }
+        
+        if (isPublic) {
+            binaryReader.publicSegments.put(segment.getName(), segment);
+        }        
+    }  
+  
+   /**
+    * Reads in information common to all Command types.  
+    * 
+    * There is no shared data for Command class currently.
+    * 
+    * @param  command Command instance to populate data.
+    * @throws java.io.IOException
+    * 
+    * @see GrinDataOutputStream#writeSuperClassData(Command)
+    */ 
+    public void readSuperClassData(Command command) {
+        // nothing to do for the command.
+    }    
 }

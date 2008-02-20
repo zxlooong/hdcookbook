@@ -59,12 +59,9 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 
-import java.io.IOException;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 
 /**
  * Abstract base class for features that modify a single child feature.
@@ -77,7 +74,12 @@ public abstract class Modifier extends Feature {
     protected boolean activated = false;
 
     public Modifier(Show show, String name) {
-	super(show, name);
+	super(show);
+        this.name = name;
+    }
+    
+    public Modifier(Show show) {
+        super(show);
     }
 
     /**

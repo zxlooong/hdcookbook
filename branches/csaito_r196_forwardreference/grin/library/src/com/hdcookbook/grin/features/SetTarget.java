@@ -57,16 +57,12 @@
 
 package com.hdcookbook.grin.features;
 
-import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.IOException;
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.util.Hashtable;
 
 /**
@@ -78,48 +74,22 @@ import java.util.Hashtable;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class SetTarget extends Modifier {
+public class SetTarget extends Modifier implements Node {
 
-    private int target;
-    private String targetName;	
+    protected int target;
+    protected String targetName;	
     	// Only used when re-mapping target names to numbers
-
-    /**
-     * Create a new SetTarget node.
-     *
-     * @param	show	The show we're a part of
-     * @param	name	The name of this node
-     * @param	target	The target of the RenderContext for our children
-     *			to use.
-     **/
-    public SetTarget(Show show, String name, int target) {
-	super(show, name);
-	this.target = target;
-	this.targetName = show.getDrawTargets()[target];
-    }
-
-    /**
-     * Internal use only.  
-     **/
-    public int implGetTarget() {
-       return target;
+    
+    public SetTarget(Show show) {
+        super(show);
     }
     
-    /**
-     * Internal use only.  
-     **/
-    public void implSetTarget(int target) {
-       this.target = target;
-    }    
-
     /**
      * Internal use only.  
      **/
     public void mapDrawTarget(Hashtable targetMap) {
 	target = ((Integer) targetMap.get(targetName)).intValue();
     }
-
-
     /**
      * @inheritDoc
      **/
@@ -127,5 +97,12 @@ public class SetTarget extends Modifier {
 	int old = context.setTarget(target);
 	super.addDisplayAreas(context);
 	context.setTarget(old);
+    }
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        this.targetName = in.readString();
     }
 }

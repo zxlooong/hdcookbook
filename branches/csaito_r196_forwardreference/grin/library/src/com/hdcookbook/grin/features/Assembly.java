@@ -56,13 +56,14 @@
 
 package com.hdcookbook.grin.features;
 
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.RenderContext;
 
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.IOException;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 
 /**
  * An assembly is a feature composed of other features.  It's a bit
@@ -73,26 +74,23 @@ import java.awt.Rectangle;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class Assembly extends Feature {
+public class Assembly extends Feature implements Node {
 
-    private String[] partNames;
-    private Feature[] parts;
-    private Feature currentFeature = null;
-    private boolean activated = false;
+    protected String[] partNames;
+    protected Feature[] parts;
+    protected Feature currentFeature = null;
+    protected boolean activated = false;
 
-    public Assembly(Show show, String name) throws IOException {
-	super(show, name);
+    public Assembly(Show show) {
+	super(show);
     }
 
-    /**
-     * Called from parser
-     **/
     public void setParts(String[] partNames, Feature[] parts) { 
 	this.partNames = partNames;
 	this.parts = parts;
 	currentFeature = parts[0];
     }
-
+    
     /**
      * @inheritDoc
      **/
@@ -258,5 +256,12 @@ public class Assembly extends Feature {
      **/
     public void nextFrame() {
 	currentFeature.nextFrame();
+    }
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {     
+                
+        in.readSuperClassData(this);
+        setParts(in.readStringArray(), in.readFeaturesArrayReference());
     }
 }

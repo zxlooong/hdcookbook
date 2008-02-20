@@ -55,9 +55,12 @@
 
 package com.hdcookbook.grin.commands;
 
+import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
-
+import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.IOException;
+
 
 /**
  * Command to indicate that the current segment is done.  This causes
@@ -68,12 +71,10 @@ import java.io.IOException;
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class SegmentDoneCommand extends Command {
-
-    private Show show;
+public class SegmentDoneCommand extends Command implements Node {
 
     public SegmentDoneCommand(Show show) {
-	this.show = show;
+        super(show);
     }
     
     public void execute() {
@@ -84,6 +85,12 @@ public class SegmentDoneCommand extends Command {
 	// a different segment before this gets executed.
 	show.doSegmentDone();
     }
-
+ 
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        // nothing to do...
+    }
     
 }

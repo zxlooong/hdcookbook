@@ -57,19 +57,19 @@
 
 package com.hdcookbook.grin.features;
 
-import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 
-import java.io.IOException;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.AlphaComposite;
+import java.io.IOException;
 
 /**
  * Modifies a child feature by applying an alpha value when drawing in
@@ -79,17 +79,17 @@ import java.awt.AlphaComposite;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class Fade extends Modifier {
+public class Fade extends Modifier implements Node {
 
     private AlphaComposite[] alphas;
     private AlphaComposite opaqueAlpha = null;
-    private int[] keyframes;
-    private int[] keyAlphas;
-    private boolean srcOver;
-    private int repeatFrame;
+    protected int[] keyframes;
+    protected int[] keyAlphas;
+    protected boolean srcOver;
+    protected int repeatFrame;
     private boolean isActivated = false;
     private int alphaIndex;
-    private Command[] endCommands;
+    protected Command[] endCommands;
     private AlphaComposite currAlpha;
     private AlphaComposite lastAlpha;
 
@@ -129,90 +129,9 @@ public class Fade extends Modifier {
 
     };	// End of RenderContext anonymous inner class
 
-    public Fade(Show show, String name, boolean srcOver, 
-    		int[] keyframes, int[] keyAlphas, int repeatFrame,
-		Command[] endCommands) 
-    {
-	super(show, name);
-	this.repeatFrame = repeatFrame;
-	this.endCommands = endCommands;
-        this.keyframes = keyframes;
-        this.keyAlphas = keyAlphas;
-        this.srcOver = srcOver;
-    }
-    
-    /* 
-     * Internal use only 
-     */
-    public int[] implGetKeyframes() {
-       return keyframes;
-    }
-    
-    /* 
-     * Internal use only 
-     */
-    public int[] implGetKeyAlphas() {
-       return keyAlphas;
-    }
-    
-    /** 
-     * Internal use only 
-     **/
-    public boolean implGetSrcOver() {
-       return srcOver;
-    }
-    
-    /** 
-     * Internal use only 
-     **/    
-    public Command[] implGetEndCommands() {
-       return endCommands;
-    }
-    
-    /** 
-     * Internal use only 
-     **/    
-    public int implGetRepeatFrame() {
-        return repeatFrame;
-    }
-    /* 
-     * Internal use only 
-     */
-    public void implSetKeyframes(int[] keys) {
-        for(int i = 0; i < keyframes.length; i++)
-            this.keyframes[i] = keys[i];
-    }
-    
-    /* 
-     * Internal use only 
-     */
-    public void implSetKeyAlphas(int[] keyAlphas) {
-        for(int i = 0; i < keyAlphas.length; i++)
-            this.keyAlphas[i] = keyAlphas[i];
-    }
-    
-    /** 
-     * Internal use only 
-     **/
-    public void implSetSrcOver(boolean srcOver) {
-       this.srcOver = srcOver;
-    }
-    
-    /** 
-     * Internal use only 
-     **/    
-    public void implSetEndCommands(Command[] endCommands) {
-       for (int i = 0; i < endCommands.length; i++) {
-           this.endCommands[i] = endCommands[i];
-       }
-    }
-    
-    /** 
-     * Internal use only 
-     **/    
-    public void implSetRepeatFrame(int repeatFrame) {
-        this.repeatFrame = repeatFrame;
-    }    
+    public Fade(Show show) {
+        super(show);
+    }  
     
     /**
      * @inheritDoc
@@ -302,5 +221,16 @@ public class Fade extends Modifier {
 	} else {
 	    part.paintFrame(gr);
 	}
+    }
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        this.srcOver = in.readBoolean();
+        this.keyframes = in.readSharedIntArray();
+        this.keyAlphas = in.readSharedIntArray();
+	this.repeatFrame = in.readInt();
+        this.endCommands = in.readCommands();     
     }
 }

@@ -59,10 +59,11 @@ information or have any questions.
             sign-xlets, generate-bdjo"/>
     
     <target name="build-menu-xlet" depends="init-xlet-dirs, build-menu-assets">
-        <xlets.javac sourcepath=""
+        <xlets.javac
                destdir="${MENUXLET_DEST}/classes">
             <src path="xlets/bookmenu/src" />
-	    <src path="${MENU_GENERATED}/xlet" />            
+	    <src path="${MENU_GENERATED}/xlet" />    
+            <src path="xlets/tools/shared/src"/>
             <exclude name="com/hdcookbook/bookmenu/monitor/**" />
         </xlets.javac>
         
@@ -146,25 +147,27 @@ information or have any questions.
                 <pathelement path="${MENUTOOLS_DEST}"/>
                 <pathelement path="${BINARY_CONVERTER_DEST}/converter.jar"/>
             </classpath>    
-            <arg line="${MENUASSETS_DEST}/menu.txt com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory"/>
+            <arg line="-extension_parser com.hdcookbook.bookmenu.menu.MenuExtensionsParser -debug ${MENUASSETS_DEST}/menu.txt"/>
         </jdktools.java>	
         
         <move file="${MENUASSETS_DEST}/menu.grinview.java"
               tofile="${MENU_GENERATED}/grinview/${MENU_SHOW_COMMANDS}" />
         <move file="${MENUASSETS_DEST}/menu.xlet.java"
               tofile="${MENU_GENERATED}/xlet/${MENU_SHOW_COMMANDS}" />        
-	<javac destdir="${MENU_GENERATED}/grinview" srcdir="${MENU_GENERATED}/grinview" debug="on">
+	<jdktools.javac destdir="${MENU_GENERATED}/grinview" srcdir="${MENU_GENERATED}/grinview" debug="on">
 	    <classpath>
 	       <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+               <pathelement path="${MENUTOOLS_DEST}"/>
 	    </classpath>
-	</javac>
+	</jdktools.javac>
     </target>       
     
     <target name="compile-extensions-reader" depends="init-xlet-dirs, compile-library">          
         <jdktools.javac 
-               srcdir="xlets/tools/src"
                classpath="${LIBRARY_DEST}"
                destdir="${MENUTOOLS_DEST}" >
+                   <src path="xlets/tools/jdk/src"/>
+                   <src path="xlets/tools/shared/src"/>
         </jdktools.javac>           
     </target>   
  

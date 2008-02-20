@@ -407,7 +407,7 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	if (seg != null) {
 	    commandText.setText("s " + seg);
 	    runTextCommand("s " + seg);
-	}
+	} 
     }
 
     private void runTextCommand(String cmd) {

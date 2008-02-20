@@ -55,7 +55,6 @@
 
 package com.hdcookbook.grin;
 
-import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.Box;
 import com.hdcookbook.grin.features.Clipped;
@@ -72,14 +71,11 @@ import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
-import com.hdcookbook.grin.input.RCKeyEvent;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -335,6 +331,25 @@ public class SEShow extends Show {
 	} else {
 	    assert false;
 	}
+    }
+
+    /**
+     * Returns true if the node passed in is recorded as an public element
+     * in this show, false otherwise.
+     * 
+     * @throws RuntimeException if node is neither an instance of 
+     * Feature, RCHandler, nor Segment.
+     */
+    public boolean isPublic(SENode node) {
+        if (node instanceof Feature) {
+            return publicFeatures.contains(node);
+        } else if (node instanceof RCHandler) {
+            return publicRCHandlers.contains(node);
+        } else if (node instanceof Segment) {
+            return publicSegments.contains(node);
+        } else {
+            throw new RuntimeException("Unknown node type " + node);
+        }
     }
     
     public void printContent(PrintStream out) {

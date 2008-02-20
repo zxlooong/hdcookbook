@@ -56,8 +56,8 @@
 package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.commands.ShowCommands;
 
+import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -70,17 +70,18 @@ import java.util.ArrayList;
  *
  *  @author     Bill Foote (http://jovial.com)
  **/
-public class SEShowCommand extends Command {
+public class SEShowCommand extends Command implements SENode {
     
     private SEShowCommands container;
     int commandNumber;
     private String grinviewMethodBody;
     private String xletMethodBody;
     private ArrayList<Command> subCommands = new ArrayList<Command>();
-    private ShowCommands seCommand = null;
+    private GrinXHelper seCommand = null;
     private boolean triedSeCommand = false;
     
-    SEShowCommand(SEShowCommands container, int commandNumber) {
+    SEShowCommand(SEShow show, SEShowCommands container, int commandNumber) {
+        super(show);
         this.container = container;
         this.commandNumber = commandNumber;
     }
@@ -143,15 +144,14 @@ public class SEShowCommand extends Command {
 	    Class cl = container.getCommandClass();
 	    if (cl != null) {
 		try {
-		    seCommand = (ShowCommands) cl.newInstance();
+		    seCommand = (GrinXHelper) cl.newInstance();
 		} catch (Throwable t) {
 		    t.printStackTrace();
 		}
 	    }
 	    if (seCommand != null) {
-		seCommand.implSetCommandNumber(commandNumber);
-		seCommand.implSetSubCommands(getSubCommands());
-		seCommand.implSetDirector(container.getShow().getDirector());
+		seCommand.setCommandNumber(commandNumber);
+		seCommand.setSubCommands(getSubCommands());
 	    }
 	}
 	if (seCommand != null) {
@@ -167,4 +167,15 @@ public class SEShowCommand extends Command {
 	}
     }
 
+    public void writeInstanceData(GrinDataOutputStream out) 
+            throws IOException {
+        
+        out.writeSuperClassData(this);
+	out.writeInt(getCommandNumber());
+	out.writeCommands(getSubCommands());
+    }
+
+    public String getRuntimeClassName() {
+        return container.getClassName();  // Need special care
+    }
 }

@@ -91,11 +91,13 @@ exports
     }
 ;
 
-java_command_class com.hdcookbook.bookmenu.menu.commands.MenuShowCommands [[
+java_generated_class com.hdcookbook.bookmenu.menu.commands.MenuShowCommands [[
 
     package com.hdcookbook.bookmenu.menu.commands;
 
-    import com.hdcookbook.grin.commands.ShowCommands;
+    import com.hdcookbook.grin.Show;
+    import com.hdcookbook.grin.GrinXHelper;
+
     XLET_ONLY_[[ 
         import org.bluray.system.RegisterAccess;
 
@@ -108,14 +110,19 @@ java_command_class com.hdcookbook.bookmenu.menu.commands.MenuShowCommands [[
 	import com.hdcookbook.grin.test.bigjdk.BDRegisterEmulator;
     ]]
 
-    public class MenuShowCommands extends ShowCommands {
+    public class MenuShowCommands extends GrinXHelper {
+
+        public MenuShowCommands(Show show) {
+            super(show);
+        }
+
 	XLET_ONLY_[[
 
 	    private final static RegisterAccess registers 
 	    	= RegisterAccess.getInstance();
 
 	    private MenuDirector getMenuDirector() {
-		return (MenuDirector) getDirector();
+		return (MenuDirector) show.getDirector();
 	    }
 
 	]]

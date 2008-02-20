@@ -54,25 +54,16 @@
 
 package com.hdcookbook.grin.binaryconverter;
 
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.io.binary.*;
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.SEShowCommands;
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.io.ExtensionsBuilderFactory;
 import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.text.ExtensionsParser;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
-import com.hdcookbook.grin.util.Debug;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -86,11 +77,8 @@ public class Main {
    /**
     * A driver method for the Main.convert(String, String).
     * 
-    * @param args   Arguments. args[0] is file name the text-based GRIN script to read.
-    *               args[1] is an optional argument for the 
-    *               a fully qualified classname of the ExtensionsWriter, which will be
-    *               instantiated from this class' classpath.
-    * @see          #convert(String[], String, ExtensionsBuilderFactory)
+    * @param args   Arguments. Requires the name of the text-based GRIN script to read.
+    * @see          #convert(String[], String, ExtensionsParser, boolean)
     **/
    public static void main(String[] args) {
        
@@ -103,20 +91,44 @@ public class Main {
         assets.add(".");
         assets.add("");
         
-        while ("-asset_dir".equals(args[index])) {
-            index++;
-            assets.add(args[index]);
+        String textFile = null;
+        String extensionParserName = null;
+        boolean debug = false;
+        
+        while (index < args.length) {
+            if ("-asset_dir".equals(args[index])) {
+                index++;
+                if (index == args.length) {
+                    usage();
+                }    
+                assets.add(args[index]);
+            } else if ("-debug".equals(args[index])){
+                debug = true;
+            } else if ("-extension_parser".equals(args[index])) {
+                index++;
+                if (index == args.length) {
+                    usage();
+                }                 
+                extensionParserName = args[index];
+            } else {
+                if (textFile != null) {
+                    usage();
+                }
+                textFile = args[index];
+            }
             index++;
         }
         
-        String textFile = args[index++];
+        if (textFile == null) {
+            usage();
+        }
         
-        ExtensionsBuilderFactory extensionsBuilderFactory = null;
+        ExtensionsParser extensionsParser = null;
         
-        if (args.length != index) {
-            String clazzName = args[index];
+        if (extensionParserName != null) {
             try {
-                 extensionsBuilderFactory = (ExtensionsBuilderFactory) Class.forName(clazzName).newInstance();
+                 extensionsParser = (ExtensionsParser) 
+                         Class.forName(extensionParserName).newInstance();
             } catch (IllegalAccessException ex) {
                  ex.printStackTrace();
             } catch (InstantiationException ex) {
@@ -128,7 +140,7 @@ public class Main {
         
         try {
            Main.convert((String[])assets.toArray(new String[assets.size()]),
-                                   textFile, extensionsBuilderFactory);
+                                   textFile, extensionsParser, debug);
         } catch (IOException e) {           
             e.printStackTrace();
             System.exit(1);
@@ -141,10 +153,12 @@ public class Main {
     *
     * @param assetsDir  The asset directory to find the text script from.
     * @param textFile   The GRIN text script file name to read in.  
-    * @param extensionsFactory     The ExtensionsBuilderFactory instance for parsing and writing out
-    * custom extensions.
+    * @param extensionsParser     The ExtensionsParser for writing
+    * @param debug      If true, include debug information to generated
+    * binary file
     */
-   public static void convert(String[] assetsDir, String textFile, ExtensionsBuilderFactory extensionsFactory) 
+   public static void convert(String[] assetsDir, String textFile, 
+           ExtensionsParser extensionsParser, boolean debug) 
            throws IOException 
    {
        String fileNames[] = new String[3];
@@ -164,18 +178,14 @@ public class Main {
 	    AssetFinder.setSearchPath(null, 
                     (File[])list.toArray(new File[list.size()]));
   
-            SEShow show = createShow(textFile, extensionsFactory);
+            SEShow show = createShow(textFile, extensionsParser);
               
             String fileName = baseName + ".grin";           
             fileNames[0] = fileName;
             
             DataOutputStream dos = new DataOutputStream(new FileOutputStream(fileName));
             
-            ExtensionsWriter writer = null;
-            if (extensionsFactory != null) {
-                writer = extensionsFactory.getExtensionsWriter();
-            }
-            GrinBinaryWriter out = new GrinBinaryWriter(show, writer);
+            GrinBinaryWriter out = new GrinBinaryWriter(show, debug);
 	    out.writeShow(dos);
             dos.close();
             
@@ -201,7 +211,8 @@ public class Main {
             throw e;
         }
    }
-   private static SEShow createShow(String showName, ExtensionsBuilderFactory extensionsFactory) {
+   
+   private static SEShow createShow(String showName, ExtensionsParser extensionsParser) {
 	SEShow show = new SEShow(null);
 	URL source = null;
 	BufferedReader rdr = null;
@@ -213,7 +224,7 @@ public class Main {
 	    rdr = new BufferedReader(
 			new InputStreamReader(source.openStream(), "UTF-8"));
             ShowBuilder builder = new ShowBuilder();
-            builder.setExtensionsBuilderFactory(extensionsFactory);
+            builder.setExtensionsParser(extensionsParser);
 	    ShowParser p = new ShowParser(rdr, showName, show, builder);
 	    p.parse();
 	    rdr.close();
@@ -238,7 +249,9 @@ public class Main {
        
    private static void usage() {
         System.out.println("Missing an argument - need a grin script to parse");
-        System.out.println("Syntax: com.hdcookbook.grin.io.binary.Main [-asset_dir <directory>] text-based-grin-file [ExtensionsBuilderFactory]");       
+        System.out.println("Syntax: com.hdcookbook.grin.io.binary.Main " + "\n" +
+                "\t[-asset_dir <directory>]\n\t[-extension_parser ExtensionsParserClassName]\n\t[-debug]\n\t" 
+                + "text-based-grin-file");       
         System.exit(0);
    }
 }     

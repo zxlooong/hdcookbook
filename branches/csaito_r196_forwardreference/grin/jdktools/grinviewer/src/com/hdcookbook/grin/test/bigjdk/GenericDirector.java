@@ -63,7 +63,6 @@ import java.net.URL;
 
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.io.text.ShowParser;
@@ -107,7 +106,7 @@ public class GenericDirector extends Director {
 	        rdr.close();
             } else {
                 bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(bis, builder.getExtensionsReader());
+ 	        GrinBinaryReader reader = new GrinBinaryReader(bis);
                 reader.readShow(show);
                 bis.close();
             }   

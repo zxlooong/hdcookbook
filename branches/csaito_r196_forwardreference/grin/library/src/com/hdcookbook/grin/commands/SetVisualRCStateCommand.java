@@ -55,7 +55,12 @@
 
 package com.hdcookbook.grin.commands;
 
+import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.input.VisualRCHandler;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import java.io.IOException;
 
 
 /**
@@ -65,30 +70,32 @@ import com.hdcookbook.grin.input.VisualRCHandler;
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class SetVisualRCStateCommand extends Command {
+public class SetVisualRCStateCommand extends Command implements Node {
     
-    private boolean activated;
-    private int state;
-    private VisualRCHandler handler;
-    private boolean runCommands;
+    protected boolean activated;
+    protected int state;
+    protected VisualRCHandler handler;
+    protected boolean runCommands;
 
 
-    public SetVisualRCStateCommand() {
+    public SetVisualRCStateCommand(Show show) {
+        super(show);
     }
 
     /**
      * Constructor for use by xlets that want to set a handler state
      **/
-    public SetVisualRCStateCommand(boolean activated, int state, 
+    public SetVisualRCStateCommand(Show show, boolean activated, int state, 
     				   VisualRCHandler handler,
 				   boolean runCommands)  
     {
+        this(show);
 	this.activated = activated;
 	this.state = state;
 	this.handler = handler;
 	this.runCommands = runCommands;
     }
-
+    
     public boolean getActivated() {
         return activated;
     }
@@ -105,19 +112,6 @@ public class SetVisualRCStateCommand extends Command {
         return runCommands;
     }
     
-    /**
-     * Called from parser 
-     *  
-     * @param state State number, -1 means "current state"
-     **/
-    public void setup(boolean activated, int state, 
-            VisualRCHandler handler, boolean runCommands)  {
-	this.activated = activated;
-      	this.state = state;
-	this.handler = handler;
-	this.runCommands = runCommands;
-    }
-    
     public void execute() {
 	handler.setState(state, activated, runCommands);
     }
@@ -127,6 +121,17 @@ public class SetVisualRCStateCommand extends Command {
 			        + " (" + activated + ", " 
 				+ handler.getStateName(state) + ", "
                                 + runCommands + " )";
+    }
+    
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        
+        this.activated = in.readBoolean();
+        this.state = in.readInt();
+        this.handler = (VisualRCHandler) in.readRCHandlerReference();
+        this.runCommands = in.readBoolean();
     }
     
 }

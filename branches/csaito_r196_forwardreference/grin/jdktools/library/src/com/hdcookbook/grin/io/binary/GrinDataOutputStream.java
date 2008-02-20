@@ -55,7 +55,10 @@
 package com.hdcookbook.grin.io.binary;
 
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.input.RCHandler;
 import java.awt.Color;
 import java.awt.Font;
@@ -158,7 +161,7 @@ public class GrinDataOutputStream extends DataOutputStream {
            writeByte(Constants.NULL);
        } else {
            writeByte(Constants.NON_NULL);
-           writeUTF(font.getName());
+           writeString(font.getName());
            writeInt(font.getStyle());
            writeInt(font.getSize());   
        }    
@@ -180,19 +183,45 @@ public class GrinDataOutputStream extends DataOutputStream {
            }    
        }
    }
+   
+   public void writeSharedIntArray(int[] array) throws IOException {
+        if (array == null) {
+           writeNull();
+           return;
+       } else {
+           writeNonNull();
+       }  
+       
+       int index = binaryWriter.getIntArrayIndex(array);      
+       if (index < 0) {
+	    throw new IOException("Invalid integer array index");
+       }
+       
+       writeInt(index);      
+   }
 
    /**
-    * Writes out a String instance.
+    * Writes out a reference to a String instance.
+    * Internally, this method keeps track of the Strings
+    * passed in as a parameter, keeps it in an array, and
+    * writes out an integer index on that array to the stream.
+    * The collected String array table is written out at the 
+    * beginning of the binary file.
+    * 
     * @param string The String to write out.
     * @throws java.io.IOException if IO error occurs.
     */ 
    public void writeString(String string) throws IOException {
-	if (string == null)  {
-	    writeByte(Constants.NULL);
-	} else {
-	    writeByte(Constants.NON_NULL);
-	    writeUTF(string);
-	}
+       if (string == null) {
+           writeNull();
+       } else {
+           writeNonNull();
+           writeStringReference(string);
+       }
+   }
+   
+   private void writeStringReference(String string) throws IOException {
+       writeInt(binaryWriter.getStringIndex(string));
    }
   
    /**
@@ -202,17 +231,12 @@ public class GrinDataOutputStream extends DataOutputStream {
     */
    public void writeStringArray(String[] array) throws IOException {
        if (array == null) {
-           writeByte(Constants.NULL);
+           writeNull();
        } else {
-           writeByte(Constants.NON_NULL);
+           writeNonNull();
            writeInt(array.length);
            for (int i = 0; i < array.length; i++) {
-	       if (array[i] == null) {
-		   writeByte(Constants.NULL);
-	       } else {
-		   writeByte(Constants.NON_NULL);
-		   writeUTF(array[i]);
-	       }
+	      writeString(array[i]);
            }
        }
    }
@@ -229,9 +253,16 @@ public class GrinDataOutputStream extends DataOutputStream {
     */
    public void writeFeatureReference(Feature feature) throws IOException {
        
+       if (feature == null) {
+           writeNull();
+           return;
+       } else {
+           writeNonNull();
+       }  
+       
        int index = binaryWriter.getFeatureIndex(feature);      
        if (index < 0) {
-	    throw new IOException("Invalid feature index");
+	    throw new IOException("Invalid feature index, " + feature);
        }
        
        writeInt(index);
@@ -249,9 +280,16 @@ public class GrinDataOutputStream extends DataOutputStream {
     */
    public void writeSegmentReference(Segment segment) throws IOException {
        
+       if (segment == null) {
+           writeNull();
+           return;
+       } else {
+           writeNonNull();
+       }
+       
        int index = binaryWriter.getSegmentIndex(segment);      
        if (index < 0) {
-	    throw new IOException("Invalid segment index");
+	    throw new IOException("Invalid segment index, " + segment);
        }
        
        writeInt(index);
@@ -269,11 +307,186 @@ public class GrinDataOutputStream extends DataOutputStream {
     */
    public void writeRCHandlerReference(RCHandler handler) throws IOException {
        
+       if (handler == null) {
+           writeNull();
+           return;
+       } else {
+           writeNonNull();
+       }  
+       
        int index = binaryWriter.getRCHandlerIndex(handler);      
        if (index < 0) {
 	    throw new IOException("Invalid RCHandler index");
        }
        
        writeInt(index);
+   } 
+   
+    /**
+    * Reads in refereces of Features and returns an array of  
+    * Features corresponding to the references.
+    */
+   public void writeFeaturesArrayReference(Feature[] features) 
+            throws IOException {
+        
+       if (features == null) {
+           writeByte(Constants.NULL);
+           return;
+       }
+       
+       writeByte(Constants.NON_NULL);
+       writeInt(features.length);
+       
+       for (int i = 0; i < features.length; i++) {
+            writeFeatureReference(features[i]);
+       }   
+    }   
+   
+   /**
+    * Writes out refereces of RCHandler in the array.
+    */
+   public void writeRCHandlersArrayReference(RCHandler[] handlers) 
+           throws IOException {
+       
+       writeInt(handlers.length);
+       for (int i = 0; i < handlers.length; i++) {
+           writeRCHandlerReference(handlers[i]);
+       }      
+   }   
+   
+   /**
+    * Writes out the content, not the reference, of each command in the array.
+    * 
+    * @param commands  An array of commands to write out to.  
+    * @throws java.io.IOException 
+    */
+   public void writeCommands(Command[] commands) throws IOException {
+       binaryWriter.writeCommands(this, commands);
+   }
+   
+  /**
+    * Writes out an indication to the binary file that the object is null.
+    * One can use this when writing out objects that could possibly be null.
+    * 
+    * <pre> 
+    * public void writeInstanceData(GrinDataOutputStream out) {
+    *    .... 
+    *    if (myObject == null) {
+    *       out.writeNull();
+    *    } else {
+    *       out.writeNonNull();
+    *       ... write "myObject" content to "out" ...
+    *    }
+    *    ...
+    * }
+    * </pre>
+    * 
+    * Note that such null check is already done for all the convenience methods
+    * provided in this class, such as writeString(String), writeRectangle(Rect),
+    * writeColor(Color) etc.
+    * 
+    * @see #writeNonNull()
+    * @see GrinDataInputStream#isNull()   
+    */
+   public void writeNull() throws IOException {
+       writeByte(Constants.NULL);
+   }
+ 
+   /**
+    * Writes out an indication to the binary file that the object is not null.
+    * One can use this when writing out objects that could possibly be null.
+    *
+    * @see #writeNull()
+    * @see GrinDataInputStream#isNull()
+    */
+   public void writeNonNull() throws IOException {
+       writeByte(Constants.NON_NULL);
    }      
+
+   /**
+    * Writes out information common to all Feature types.  This method
+    * writes out following information.
+    * <ul>
+    *     <li>Whether the node is public or private
+    *     <li>The name of a Feature
+    *     <li>The sub-feature "part" of a Modifier if this Feature is a Modifier
+    * </ul> 
+    * @param  feature Feature instance to write out.
+    * @throws java.io.IOException
+    * 
+    * @see GrinDataInputStream#readSuperClassData(Feature)
+    */    
+    public void writeSuperClassData(Feature feature) 
+            throws IOException {
+        
+        boolean isPublic = binaryWriter.show.isPublic((SENode)feature);
+        String name = feature.getName();
+        writeBoolean(isPublic);
+        if (isPublic || binaryWriter.isDebugging) {
+            writeString(name);
+        }
+        
+        if (feature instanceof Modifier) {
+            writeFeatureReference(((Modifier)feature).getPart());
+        }
+    }
+    
+   /**
+    * Writes out information common to all RCHandler types.  This method
+    * writes out following information.
+    * <ul>
+    *     <li>Whether the node is public or private
+    *     <li>The name of a RCHandler
+    * </ul> 
+    * @param  handler RCHandler instance to write out.
+    * @throws java.io.IOException
+    * 
+    * @see GrinDataInputStream#readSuperClassData(RCHandler)
+    */        
+    public void writeSuperClassData(RCHandler handler) 
+            throws IOException {
+        boolean isPublic = binaryWriter.show.isPublic((SENode)handler);
+        String name = handler.getName();
+        writeBoolean(isPublic);
+        if (isPublic || binaryWriter.isDebugging) {
+            writeString(name);
+        }
+    }    
+
+   /**
+    * Writes out information common to all Segment types.  This method
+    * writes out following information.
+    * <ul>
+    *     <li>Whether the node is public or private
+    *     <li>The name of a Segment
+    * </ul> 
+    * @param  segment Segment instance to write out.
+    * @throws java.io.IOException
+    * 
+    * @see GrinDataInputStream#readSuperClassData(Segment)
+    */   
+    public void writeSuperClassData(Segment segment) 
+            throws IOException {
+        boolean isPublic = binaryWriter.show.isPublic((SENode)segment);
+        
+        String name = segment.getName();
+        writeBoolean(isPublic);
+        if (isPublic || binaryWriter.isDebugging) {
+            writeString(name);
+        }        
+    }
+   
+   /**
+    * Writes out information common to all Command types.  
+    * 
+    * Currently there is no shared data for Commands.
+    * 
+    * @param  command Command instance to write out.
+    * @throws java.io.IOException
+    * 
+    * @see GrinDataInputStream#readSuperClassData(Command)
+    */     
+    public void writeSuperClassData(Command command) {
+        // nothing to do for the command.
+    }   
 }

@@ -62,7 +62,9 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.SetupClient;
 
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 /**
  * Represents a feature.  A feature is a thing that presents some sort
@@ -74,16 +76,24 @@ import java.awt.Rectangle;
 public abstract class Feature implements SetupClient {
 
     protected Show show;
-    private String name;
+    protected String name = null;
 
     private int activateCount = 0;
     private int setupCount = 0;
 
     boolean activated = false;	// Used by show, not by subfeatures
 
-    protected Feature(Show show, String name) {
+    protected Feature(Show show) {
 	this.show = show;
-	this.name = name;
+    }
+    
+    /**
+     * Sets a name for this feature.  All public features have a name.  
+     * Private features might or might
+     * not have a name; if they do, it's just for debugging.
+     **/    
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
@@ -235,21 +245,23 @@ public abstract class Feature implements SetupClient {
 	}
     }
 
-    // Used by sendFeatureSetup():
-    private Command featureSetupCommand 
-        = new Command() {
-	    public void execute() {
-		Segment s = show.getCurrentSegment();
-		if (s != null) {
-		    s.runFeatureSetup();
-		}
-	    }
-	};
+    private Command featureSetupCommand = null;
+    
     /**
      * When a feature finishes its setup, it should call this to
      * tell the show about it.  This happens in the setup thread.
      **/
     protected void sendFeatureSetup() {
+        if (featureSetupCommand == null) {
+            featureSetupCommand = new Command(show) {
+                public void execute() {
+                    Segment s = show.getCurrentSegment();
+                    if (s != null) {
+                        s.runFeatureSetup();
+                    }
+                }
+            };
+        }
 	show.runCommand(featureSetupCommand);
 	show.runPendingCommands();
 	    // It's safe to run the pending commands, because we're
@@ -285,4 +297,5 @@ public abstract class Feature implements SetupClient {
      * the state we should be in for the next frame.
      **/
     public abstract void nextFrame();
+ 
 }

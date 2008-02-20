@@ -310,8 +310,8 @@ public abstract class AnimationEngine implements Runnable {
      * 			start video playing, or do other time-consuming 
      *			operations.
      *
-     * @see com.hdcookbook.grin.animation.AnimationContext#animationFinishInitialization()
-     * @see com.hdcookbook.grin.Show#activateSegment(com.hdcookbook.grin.Show)
+     * @see com.hdcookbook.grin.animator.AnimationContext#animationFinishInitialization()
+     * @see com.hdcookbook.grin.Show#activateSegment(com.hdcookbook.grin.Segment)
      **/
     public void initialize(AnimationContext context) {
 	if (Debug.ASSERT) {

@@ -65,17 +65,13 @@ import com.hdcookbook.grin.Show;
 public abstract class RCHandler {
 
     protected Show show;
-    private String name;
+    protected String name;
 
-    public RCHandler(String name) {
-        this.name = name;
+    public RCHandler() {
     }
-
-    /**
-     * Called from Show
-     **/
+    
     public void setShow(Show show) {
-	this.show = show;
+        this.show = show;
     }
 
     public String toString() {
@@ -93,6 +89,10 @@ public abstract class RCHandler {
      */
      public String getName() {
          return name;
+     }
+     
+     public void setName(String name) {
+         this.name = name;
      }
     
     abstract public boolean handleRCEvent(RCKeyEvent ke);
@@ -112,4 +112,5 @@ public abstract class RCHandler {
      * time.  This can be useful for things like timeouts.
      **/
     abstract public void nextFrame();
+    
 }

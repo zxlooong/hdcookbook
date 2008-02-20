@@ -57,14 +57,14 @@
 
 package com.hdcookbook.grin.features;
 
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 
-import java.io.IOException;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.io.IOException;
 
 /**
  * Represents a group of features that are all activated at the same
@@ -74,20 +74,13 @@ import java.awt.Rectangle;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class Group extends Feature {
-
-    private Feature[] parts;
+public class Group extends Feature implements Node {
+    
+    protected Feature[] parts;
     private boolean activated = false;
 
-    public Group(Show show, String name) {
-	super(show, name);
-    }
-
-    /**
-     * Called from the parser
-     **/
-    public void setup(Feature[] parts) { 
-	this.parts = parts;
+    public Group(Show show) {
+        super(show);
     }
 
     /**
@@ -232,5 +225,12 @@ public class Group extends Feature {
 	for (int i = 0; i < parts.length; i++) {
 	    parts[i].nextFrame();
 	}
+    }
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        this.parts = in.readFeaturesArrayReference();
     }
 }

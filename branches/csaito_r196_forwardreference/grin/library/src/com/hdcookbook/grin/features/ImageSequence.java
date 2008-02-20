@@ -57,18 +57,18 @@
 
 package com.hdcookbook.grin.features;
 
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.Debug;
 
-
 import java.io.IOException;
-import java.awt.Image;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
@@ -79,19 +79,17 @@ import java.awt.Rectangle;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class ImageSequence extends Feature {
+public class ImageSequence extends Feature implements Node {
 
-    private int x;
-    private int y;
+    protected int x;
+    protected int y;
     private int width = 0;
     private int height = 0;
-    private String fileName;
-    private String[] middle;
-    private String extension;
-    private boolean repeat;
-    private InterpolatedModel scalingModel = null;
-    private Rectangle scaledBounds = null;
-    private Command[] endCommands;
+    protected String[] fileNames; 
+    protected boolean repeat;
+    protected InterpolatedModel scalingModel = null;
+    protected Rectangle scaledBounds = null;
+    protected Command[] endCommands;
 
     private ManagedImage[] images;
     	// The images in this sequence.  A null image is simply not
@@ -101,7 +99,7 @@ public class ImageSequence extends Feature {
     private Object setupMonitor = new Object();
     private boolean isActivated = false;
 
-    private ImageSequence model;	
+    protected ImageSequence model;	
     	// We use model to count our frame and for end commands.  If
 	// we're our own model, it's set to null.
     private int activeModelCount = 0;	
@@ -116,107 +114,10 @@ public class ImageSequence extends Feature {
     private ManagedImage currImage = null;
     private DrawRecord drawRecord = new DrawRecord();
 
-    public ImageSequence(Show show, String name, int x, int y, String fileName,
-    			 String[] middle, String extension, boolean repeat,
-			 Command[] endCommands) 
-    		throws IOException {
-	super(show, name);
-	this.x = x;
-	this.y = y;
-	this.fileName = fileName;
-	this.middle = middle;
-	this.extension = extension;
-	this.repeat = repeat;
-	this.model = null;
-	this.endCommands = endCommands;
+    public ImageSequence(Show show) {
+        super(show);
     }
     
-    public String implGetFileName() {
-       return fileName;
-    }
-    
-    public String[] implGetMiddle() {
-       return middle;
-    }
-    
-    public String implGetExtension() {
-       return extension;
-    }
-    
-    public boolean implGetRepeat() {
-       return repeat;
-    }
-    
-    public Command[] implGetEndCommands() {
-       return endCommands;
-    }
-    
-    public ImageSequence implGetModel() {
-        return model;
-    }
-    
-    public void implSetFileName(String fileName) {
-        this.fileName = fileName;
-    }
-    
-    public void implSetMiddle(String[] middle) {
-        this.middle = middle;
-    }
-    
-    public void implSetExtension(String extension) {
-        this.extension = extension;
-    }
-    
-    public void implSetRepeat(boolean repeat) {
-        this.repeat = repeat;
-    }
-    
-    public void implSetEndCommands(Command[] endCommands) {
-       this.endCommands = endCommands;
-    }
-    
-    public void implSetModel(ImageSequence model) {
-        this.model = model;
-    }
-    
-    public void implSetX(int x) {
-        this.x = x;
-    }
-    
-    public void implSetY(int y) {
-        this.y = y;
-    }
-
-    public void implSetScalingModel(InterpolatedModel model) {
-	this.scalingModel = model;
-	if (model != null) {
-	    scaledBounds = new Rectangle();
-	}
-    }
-
-    public InterpolatedModel implGetScalingModel() {
-	return scalingModel;
-    }
-
-    
-    /**
-     * Called by the parser and the binary file reader.  Animations can be 
-     * linked, so that they
-     * progress together, even when one is invisible.  This is done by
-     * setting one image sequence's model to be a different image
-     * sequence.
-     **/
-    public void setModel(ImageSequence model) throws IOException {
-	this.model = model;
-	if (model.middle.length != middle.length) {
-	    throw new IOException("Mismatched number of frames in model");
-	}
-        if (model == this) {
-            throw new IOException("Can't set model to self; use null");
-        }
-    }
-
-
     /**
      * @inheritDoc
      **/
@@ -245,15 +146,15 @@ public class ImageSequence extends Feature {
      * the phases.
      **/
     public void initialize() {
-	images = new ManagedImage[middle.length];
-	for (int i = 0; i < middle.length; i++) {
-	    if (middle[i] == null) {
-		images[i] = null;
-	    } else {
-		String nm = fileName + middle[i] + extension;
-		images[i] = ImageManager.getImage(nm);
-	    }
-	}
+        images = new ManagedImage[fileNames.length]; 
+        for (int i = 0; i < fileNames.length; i++) { 
+            if (fileNames[i] == null) { 
+                images[i] = null;
+            } else {
+                images[i] = ImageManager.getImage(fileNames[i]); 
+
+            }
+        }
     }
 
     /**
@@ -451,5 +352,21 @@ public class ImageSequence extends Feature {
 	    }
 	}
     }
-
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        this.x = in.readInt();
+        this.y = in.readInt();
+        this.fileNames = in.readStringArray();
+        this.repeat = in.readBoolean();
+        if (in.readBoolean()) {
+            this.model = (ImageSequence) in.readFeatureReference();
+        }
+        this.endCommands = in.readCommands();       
+        if (in.readBoolean()) {
+            this.scalingModel = (InterpolatedModel) in.readFeatureReference();
+            this.scaledBounds = new Rectangle();
+        }
+    }
 }

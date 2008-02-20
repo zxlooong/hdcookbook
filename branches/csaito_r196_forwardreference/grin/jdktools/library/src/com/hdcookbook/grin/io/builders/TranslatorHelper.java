@@ -74,6 +74,7 @@ import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.InterpolatedModel;
+import com.hdcookbook.grin.features.SETranslator;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
@@ -99,13 +100,13 @@ import java.io.IOException;
  */
 public class TranslatorHelper implements DeferredBuilder {
 
-    private Translator translator;
+    private SETranslator translator;
     private int line;
     private int xCoord;
     private int yCoord;
 
 
-    public TranslatorHelper(Translator translator, int line) {
+    public TranslatorHelper(SETranslator translator, int line) {
 	this.translator = translator;
 	this.line = line;
     }
@@ -124,7 +125,7 @@ public class TranslatorHelper implements DeferredBuilder {
      * supported.
      **/
     public void finishBuilding(SEShow show) throws IOException {
-	if (translator.implGetModelIsRelative()) {
+	if (translator.getModelIsRelative()) {
 	    return;
 	}
 

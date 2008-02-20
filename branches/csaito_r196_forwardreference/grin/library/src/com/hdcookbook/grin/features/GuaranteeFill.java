@@ -57,17 +57,16 @@
 
 package com.hdcookbook.grin.features;
 
-import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 
-import java.io.IOException;
-import java.awt.AlphaComposite;
-import java.awt.Composite;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.io.IOException;
 
 /**
  * Guarantees that its children will completely fill a given rectangle
@@ -91,61 +90,22 @@ import java.awt.Rectangle;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class GuaranteeFill extends Modifier {
+public class GuaranteeFill extends Modifier implements Node {
 
 	// Here, we make an inner class of RenderContext.  We
 	// pass this instance to our child; it modifies calls to the
 	// parent RenderContext from our child.
 	//
 
-    private Rectangle guaranteed;	// Guaranteed area
-    private Rectangle[] fills;		// The areas we need to fill
+    protected Rectangle guaranteed;	// Guaranteed area
+    protected Rectangle[] fills;		// The areas we need to fill
     private DrawRecord drawRecord = new DrawRecord();
 
-    /**
-     * Create a new node.
-     *
-     * @param	show	The show we're a part of
-     * @param	name	The name of this node (can be null)
-     * @param	guaranteed	The area guaranteed to be filled by this node
-     * @param	fills	The rectangles this node will fill with transparent
-     *			pixels.  Can be empty or null.
-     **/
-    public GuaranteeFill(Show show, String name, Rectangle guaranteed,
-    			 Rectangle[] fills) 
-    {
-	super(show, name);
-	this.guaranteed = guaranteed;
-	this.fills = fills;
-    }
-
-    /**
-     * Internal use only.  
-     **/
-    public Rectangle implGetGuaranteed() {
-	return guaranteed;
-    }
-
-    /**
-     * Internal use only.  
-     **/
-    public Rectangle[] implGetFills() {
-       return fills;
-    }
     
-    /**
-     * Internal use only.  
-     **/
-    public void implSetGuaranteed(Rectangle guaranteed) {
-	this.guaranteed = guaranteed;
+    public GuaranteeFill(Show show) {
+        super(show);
     }
 
-    /**
-     * Internal use only.  
-     **/
-    public void implSetFills(Rectangle[] fills) {
-        this.fills = fills;
-    }
     /**
      * @inheritDoc
      **/
@@ -168,5 +128,13 @@ public class GuaranteeFill extends Modifier {
 	    }
 	}
 	part.paintFrame(gr);
+    }
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        this.guaranteed = in.readRectangle();
+        this.fills = in.readRectangleArray();
     }
 }

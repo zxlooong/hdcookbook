@@ -57,16 +57,16 @@
 
 package com.hdcookbook.grin.features;
 
-import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 
-import java.io.IOException;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.io.IOException;
 
 /**
  * Causes its child to be painted in SRC_OVER mode, that is, with
@@ -74,7 +74,7 @@ import java.awt.Rectangle;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class SrcOver extends Modifier {
+public class SrcOver extends Modifier implements Node {
 
 	// Here, we make an inner class of RenderContext.  We
 	// pass this instance to our child; it modifies calls to the
@@ -105,10 +105,10 @@ public class SrcOver extends Modifier {
 
     };	// End of RenderContext anonymous inner class
 
-    public SrcOver(Show show, String name) {
-	super(show, name);
+    
+    public SrcOver(Show show) {
+        super(show);
     }
-
 
     /**
      * @inheritDoc
@@ -126,5 +126,12 @@ public class SrcOver extends Modifier {
 	gr.setComposite(AlphaComposite.SrcOver);
 	part.paintFrame(gr);
 	gr.setComposite(old);
+    }
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {  
+                
+        in.readSuperClassData(this);
+        // nothing to do...
     }
 }

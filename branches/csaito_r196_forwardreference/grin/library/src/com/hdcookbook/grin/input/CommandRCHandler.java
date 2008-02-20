@@ -57,6 +57,9 @@ package com.hdcookbook.grin.input;
 
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import java.io.IOException;
 
 /**
  * This remote control handler will trigger a set of commands
@@ -64,33 +67,15 @@ import com.hdcookbook.grin.commands.Command;
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class CommandRCHandler extends RCHandler {
+public class CommandRCHandler extends RCHandler implements Node {
    
-    int mask;
-    Command[] commands;
+    protected int mask;
+    protected Command[] commands;
+    
+    public CommandRCHandler() {
+        super();
+    }
 
-    public CommandRCHandler(String name, int mask, Command[] commands) {
-        super(name);
-        
-	this.mask = mask;
-	this.commands = commands;
-    }
-        
-    public int implGetMask() {
-        return mask;
-    }
-    
-    public Command[] implGetCommands() {
-        return commands;
-    }
-    
-    public void implSetMask(int mask) {
-        this.mask = mask;
-    }
-    
-    public void implSetCommands(Command[] commands) {
-        this.commands = commands;
-    }
     /**
      * @inheritDoc
      **/
@@ -122,5 +107,13 @@ public class CommandRCHandler extends RCHandler {
      * @inheritDoc
      **/
     public void nextFrame() {
+    }
+    
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        this.mask = in.readInt();     
+        this.commands = in.readCommands();
     }
 }
