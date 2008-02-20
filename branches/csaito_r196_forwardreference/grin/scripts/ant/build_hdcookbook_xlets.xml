@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<!--
+Copyright  1990-2006 Sun Microsystems, Inc. All Rights Reserved.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version
+2 only, as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License version 2 for more details (a copy is
+included at /legal/license.txt).
+
+You should have received a copy of the GNU General Public License
+version 2 along with this work; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+02110-1301 USA
+
+Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
+Clara, CA 95054 or visit www.sun.com if you need additional
+information or have any questions.
+-->
+
+<project name="build xlets" basedir="../.." default="build-hdcookbook-xlets">
+    
+    <import file="build_jdktools.xml"/>
+    
+    <property name="XLETS_DEST" value="${HDC_BUILD_DIR}/xlets"/>
+    <property name="BUILDTIME_TOOLS" value="${HDC_BUILD_DIR}/xlets_tools"/>
+    <property name="MENUXLET_DEST" value="${XLETS_DEST}/menuxlet"/>
+    <property name="MENUASSETS_DEST" value="${XLETS_DEST}/menuassets"/>
+    <property name="MONITORXLET_DEST" value="${XLETS_DEST}/monitorxlet"/>
+    <property name="GAMEXLET_DEST" value="${XLETS_DEST}/gamexlet"/>
+    <property name="MENUTOOLS_DEST" value="${BUILDTIME_TOOLS}/menuxlet"/>    
+    <property name="MENU_GENERATED" value="${XLETS_DEST}/menu_generated"/>
+    <property name="MENU_SHOW_COMMANDS" value="com/hdcookbook/bookmenu/menu/commands/MenuShowCommands.java" />
+    
+    <target name="clean">
+        <delete dir="${HDC_BUILD_DIR}"/>
+        <delete dir="${HDC_DISC_BDMV}/JAR"/>
+    </target>
+    
+    <target name="build-hdcookbook-xlets" depends="init-xlet-dirs, build-xlets"/>
+    
+    <target name="init-xlet-dirs">
+        <mkdir dir="${HDC_DISC_BDMV}/JAR"/>
+        <mkdir dir="${HDC_BUILD_DIR}"/>	
+        <mkdir dir="${MENUXLET_DEST}/classes"/>
+        <mkdir dir="${MENUASSETS_DEST}"/>
+        <mkdir dir="${MONITORXLET_DEST}/classes"/>         
+        <mkdir dir="${GAMEXLET_DEST}/classes"/> 
+        <mkdir dir="${MENUTOOLS_DEST}/classes"/>
+    </target>
+    
+    <target name="build-xlets" depends="
+            build-monitor-xlet, build-game-xlet, build-menu-xlet, 
+            sign-xlets, generate-bdjo"/>
+    
+    <target name="build-menu-xlet" depends="init-xlet-dirs, build-menu-assets">
+        <xlets.javac sourcepath=""
+               destdir="${MENUXLET_DEST}/classes">
+            <src path="xlets/bookmenu/src" />
+	    <src path="${MENU_GENERATED}/xlet" />            
+            <exclude name="com/hdcookbook/bookmenu/monitor/**" />
+        </xlets.javac>
+        
+        <copy todir="${MENUXLET_DEST}/classes/com/hdcookbook/bookmenu/menu">
+            <fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/menu" includes="*.perm"/>
+        </copy>
+        
+        <jar basedir="${MENUXLET_DEST}/classes" destfile="${MENUXLET_DEST}/00002.jar"/>
+        <copy file="${MENUXLET_DEST}/00002.jar" todir="${HDC_DISC_BDMV}/JAR"/>	    
+        
+    </target>
+    
+    <target name="build-monitor-xlet" depends="init-xlet-dirs">
+        <xlets.javac 
+               destdir="${MONITORXLET_DEST}/classes">
+            <src path="xlets/bookmenu/src" />
+            <include name="com/hdcookbook/bookmenu/monitor/*.java"/>
+            <include name="com/hdcookbook/bookmenu/MonitorIXCInterface.java"/>
+            <include name="com/hdcookbook/grin/util/*.java"/>
+        </xlets.javac>
+      
+        <copy todir="${MONITORXLET_DEST}/classes/com/hdcookbook/bookmenu/monitor">
+            <fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/monitor" includes="*.perm"/>
+        </copy>
+        <jar basedir="${MONITORXLET_DEST}/classes" destfile="${MONITORXLET_DEST}/00001.jar"/>      
+        <copy file="${MONITORXLET_DEST}/00001.jar" todir="${HDC_DISC_BDMV}/JAR"/>	
+        
+    </target>        
+    
+    <target name="build-game-xlet" depends="init-xlet-dirs">
+        
+        <xlets.javac 
+               destdir="${GAMEXLET_DEST}/classes">
+            <src path="xlets/gunbunny/src" />
+            <include name="com/hdcookbook/gunbunny/*.java" />
+            <include name="com/hdcookbook/gunbunny/util/*.java" />
+        </xlets.javac>
+        
+        <copy todir="${GAMEXLET_DEST}/classes">
+            <fileset dir="xlets/gunbunny/src/com/hdcookbook/gunbunny/assets" excludes="**/*.svn" />
+        </copy>
+        <jar basedir="${GAMEXLET_DEST}/classes" destfile="${GAMEXLET_DEST}/00003.jar"/>       
+        <copy file="${GAMEXLET_DEST}/00003.jar" todir="${HDC_DISC_BDMV}/JAR"/>	
+        
+    </target>    
+    
+    <target name="build-menu-assets" depends="run-mosaic-builder, generate-binary-script">
+        
+        <delete file="${HDC_DISC_BDMV}/AUXDATA/*"/>
+        
+        <move todir="${HDC_DISC_BDMV}/AUXDATA" file="${MENUASSETS_DEST}/sound.bdmv"/>
+        <move tofile="${HDC_DISC_BDMV}/AUXDATA/00000.otf" file="${MENUASSETS_DEST}/Font/Lisa.ttf"/>
+        <move todir="${HDC_DISC_BDMV}/AUXDATA" file="${MENUASSETS_DEST}/Font/dvb.fontindex"/>
+        
+        <jar destfile="${HDC_DISC_BDMV}/JAR/00004.jar">
+            <fileset dir="${MENUASSETS_DEST}" 
+                 excludes="Font/**, Graphics/**"/>
+        </jar>    
+        
+    </target>	
+    
+    <target name="copy-menu-assets">
+        <copy todir="${MENUASSETS_DEST}">
+            <fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/assets" excludes="**/*.svn"/>
+        </copy>	
+    </target>
+    
+    <target name="run-mosaic-builder" depends="copy-menu-assets, compile-mosaic">
+        <jdktools.java classpath="${MOSAIC_DEST}/classes:${LIBRARY_DEST}:${MENUASSETS_DEST}" 
+              maxmemory="512m"
+              classname="com.hdcookbook.grin.build.mosaic.Main">
+            <arg line="-show menu.txt -assets ${MENUASSETS_DEST} -out ${MENUASSETS_DEST}"/>
+        </jdktools.java>			
+    </target>
+    
+    <target name="generate-binary-script" depends="copy-menu-assets, compile-binary-converter,
+                 compile-extensions-reader, compile-grinview"> 
+                     
+        <jdktools.java classname="com.hdcookbook.grin.binaryconverter.Main">
+            <classpath>
+                <pathelement path="${MENUTOOLS_DEST}"/>
+                <pathelement path="${BINARY_CONVERTER_DEST}/converter.jar"/>
+            </classpath>    
+            <arg line="${MENUASSETS_DEST}/menu.txt com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory"/>
+        </jdktools.java>	
+        
+        <move file="${MENUASSETS_DEST}/menu.grinview.java"
+              tofile="${MENU_GENERATED}/grinview/${MENU_SHOW_COMMANDS}" />
+        <move file="${MENUASSETS_DEST}/menu.xlet.java"
+              tofile="${MENU_GENERATED}/xlet/${MENU_SHOW_COMMANDS}" />        
+	<javac destdir="${MENU_GENERATED}/grinview" srcdir="${MENU_GENERATED}/grinview" debug="on">
+	    <classpath>
+	       <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+	    </classpath>
+	</javac>
+    </target>       
+    
+    <target name="compile-extensions-reader" depends="init-xlet-dirs, compile-library">          
+        <jdktools.javac 
+               srcdir="xlets/tools/src"
+               classpath="${LIBRARY_DEST}"
+               destdir="${MENUTOOLS_DEST}" >
+        </jdktools.javac>           
+    </target>   
+ 
+    <target name="generate-bdjo">
+        <ant antfile="scripts/ant/build_bdjo_security.xml"/>
+    </target>
+
+    <target name="sign-xlets">
+        <ant antfile="scripts/ant/build_bdjo_security.xml" target="sign-xlets"/>        
+    </target>    
+</project>
