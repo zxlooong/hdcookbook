@@ -78,7 +78,6 @@ import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
@@ -406,6 +405,9 @@ public class GrinBinaryReader {
                 case Constants.NULL: // happens for commands
                     node = null;
                 default:  // extensions  
+                    if (showCommands == null) {
+                        throw new IOException("Missing GrinXHelper for instantiating extensions");
+                    }
                     node = showCommands.getInstanceOf(show, identifier);
                     break;
                 }
@@ -492,7 +494,7 @@ public class GrinBinaryReader {
     private GrinXHelper instantiateShowCommandsCmd() 
         throws IOException {	
         if (showCommandsClass == null) {
-	    throw new IOException();
+            return null;
 	}
 	GrinXHelper result;
         Class[] paramType = { Show.class };

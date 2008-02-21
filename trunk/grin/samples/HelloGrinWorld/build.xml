@@ -47,6 +47,12 @@
 		</java>
 	</target>
 	
+	<target name="run_grinview-binary" depends="generate_binary_script">
+		<java fork="true" jar="${grin.classes}">
+			<arg line="-asset_dir ${builddir} -asset_dir . ${script.name}.grin"/>
+		</java>
+	</target>        
+        
 	<target name="debug_grinview">
                 <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
 			<classpath path="${grin.classes}"/>
