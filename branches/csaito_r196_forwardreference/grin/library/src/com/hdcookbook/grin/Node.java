@@ -57,7 +57,7 @@ import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.IOException;
 
 
-/*
+/**
  * Defines methods needed to construct Show from a binary file.
  * All show elements (Segments, Features, Commands, RCHandlers) that
  * are constructed from the binary file are expected

@@ -56,7 +56,7 @@ package com.hdcookbook.grin;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
-/*
+/**
  * Defines methods needed to compile Show into a binary file.
  * All show elements (Segments, Features, Commands, RCHandlers) that
  * are constructed on the SE side during show compilation are expected

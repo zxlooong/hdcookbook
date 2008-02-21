@@ -83,6 +83,11 @@ public class Fade extends Modifier implements Node {
 
     private AlphaComposite[] alphas;
     private AlphaComposite opaqueAlpha = null;
+ 
+    /*
+     * keyframes and keyAlphas are read-only, hence they are
+     * reconstructed using GrinDataInputStream.getSharedIntArray().
+     */
     protected int[] keyframes;
     protected int[] keyAlphas;
     protected boolean srcOver;

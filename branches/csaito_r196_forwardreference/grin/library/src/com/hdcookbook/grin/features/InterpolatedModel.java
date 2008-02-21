@@ -107,6 +107,11 @@ public class InterpolatedModel extends Feature implements Node {
      **/
     public final static int SCALE_Y_FACTOR_FIELD = 3;
 
+    /*
+     * frames and values are read-only, hence they are
+     * reconstructed using GrinDataInputStream.getSharedIntArray, while
+     * currValues are mutable, and reconstructed using getIntArray.
+     */
     protected int[] frames;	// Frame number of keyframes, [0] is always 0
     protected int[] currValues;	// Current value of each field
     protected int[][] values;	// Values at keyframe, indexed by field.
@@ -295,7 +300,7 @@ public class InterpolatedModel extends Feature implements Node {
         in.readSuperClassData(this);
         
         this.frames = in.readSharedIntArray();
-        this.currValues = in.readSharedIntArray();
+        this.currValues = in.readIntArray(); // mutable array
 	this.values = new int[currValues.length][];
 	for (int i = 0; i < values.length; i++) {
 	    values[i] = in.readSharedIntArray();

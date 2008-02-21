@@ -182,9 +182,9 @@ public class GrinBinaryWriter {
     /**
      * List of Feature, RCHandler and Segments in the show.
      */
-    private ArrayList<SENode> featureList;
-    private ArrayList<SENode> rcHandlerList;
-    private ArrayList<SENode> segmentList;
+    private IndexedSet<SENode> featureList;
+    private IndexedSet<SENode> rcHandlerList;
+    private IndexedSet<SENode> segmentList;
     
     /**
      * List of shared String instances.
@@ -203,7 +203,7 @@ public class GrinBinaryWriter {
     
     /**
      * An index indicating the beginning of the extension
-     * classses in the runtimeClassNames IndexSet above.
+     * classses in the runtimeClassNames IndexedSet above.
      * We want to auto-generate the code for instantiating
      * extensions but not for the built-time classes.
      */
@@ -227,23 +227,23 @@ public class GrinBinaryWriter {
         this.seShowCommands = show.getShowCommands();
         this.isDebugging = isDebugging;
         
-        featureList = new ArrayList();
-        rcHandlerList = new ArrayList();
-        segmentList = new ArrayList();
+        featureList = new IndexedSet();
+        rcHandlerList = new IndexedSet();
+        segmentList = new IndexedSet();
         
         Feature[] features = show.getFeatures();
         for (Feature feature: features) {
-            featureList.add((SENode) feature);
+            featureList.getIndex((SENode) feature);
         }    
         
         RCHandler[] rcHandlers = show.getRCHandlers();
         for (RCHandler rcHandler: rcHandlers) {
-            rcHandlerList.add((SENode) rcHandler);
+            rcHandlerList.getIndex((SENode) rcHandler);
         }     
         
         Segment[] segments = show.getSegments();
         for (Segment segment: segments) {
-            segmentList.add((SENode) segment);
+            segmentList.getIndex((SENode) segment);
         }         
         
         stringsList = new IndexedSet();
@@ -263,7 +263,7 @@ public class GrinBinaryWriter {
         if (feature == null) {
            return -1;
         } else {
-           int index = featureList.indexOf(feature);
+           int index = featureList.getIndex((SENode) feature);
            return index;
         }   
     }
@@ -280,7 +280,7 @@ public class GrinBinaryWriter {
         if (segment == null) {
            return -1;
         } else {
-           int index = segmentList.indexOf(segment);
+           int index = segmentList.getIndex((SENode) segment);
            return index;
         }   
     }
@@ -297,7 +297,7 @@ public class GrinBinaryWriter {
         if (rcHandler == null) {
            return -1;
         } else {
-           int index = rcHandlerList.indexOf(rcHandler);
+           int index = rcHandlerList.getIndex((SENode) rcHandler);
            return index;
         }   
     }    
@@ -350,11 +350,11 @@ public class GrinBinaryWriter {
         // separate it out to three arrays for reconstructing Show.
         // Hence, treating them as three arrays for now.
         SENode[] features =
-                (SENode[])featureList.toArray(new SENode[featureList.size()]);
+                (SENode[])featureList.toArray(SENode.class);
         SENode[] handlers = 
-                (SENode[])rcHandlerList.toArray(new SENode[rcHandlerList.size()]);
+                (SENode[])rcHandlerList.toArray(SENode.class);
         SENode[] segments = 
-                (SENode[])segmentList.toArray(new SENode[segmentList.size()]);
+                (SENode[])segmentList.toArray(SENode.class);
       
         writeDeclarations(dos, features);
         writeDeclarations(dos, handlers);
@@ -540,6 +540,7 @@ public class GrinBinaryWriter {
    private class IntArray {
        int[] array;
        int hashcode = 0;
+       boolean isHashComputed = false;
        public IntArray(int[] array) {
            this.array = array;
        }
@@ -549,12 +550,10 @@ public class GrinBinaryWriter {
            }
            return Arrays.equals(array, ((IntArray)other).array);
        }
-       public int hashCode() {
-           if (hashcode == 0) {
-               hashcode += array.length;
-               for (int value : array) {
-                   hashcode += new Integer(value).hashCode();
-               }
+       public synchronized int hashCode() {
+           if (!isHashComputed) {
+              hashcode = Arrays.hashCode(array);
+              isHashComputed = true;
            }
            return hashcode;
        }
