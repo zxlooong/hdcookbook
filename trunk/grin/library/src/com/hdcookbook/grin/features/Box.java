@@ -55,17 +55,16 @@
 
 package com.hdcookbook.grin.features;
 
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
-import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Color;
 
 
@@ -75,46 +74,24 @@ import java.awt.Color;
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class Box extends Feature {
+public class Box extends Feature implements Node {
    
-    private int x;
-    private int y;
-    private int width;
-    private int height;
-    private int outlineWidth;
-    private Color outlineColor;
-    private Color fillColor;
-    private InterpolatedModel scalingModel = null;
-    private Rectangle scaledBounds = null;
+    protected int x;
+    protected int y;
+    protected int width;
+    protected int height;
+    protected int outlineWidth;
+    protected Color outlineColor;
+    protected Color fillColor;
+    protected InterpolatedModel scalingModel = null;
+    protected Rectangle scaledBounds = null;
 
     private boolean isActivated;
     private DrawRecord drawRecord = new DrawRecord();
 
-    public Box(Show show, String name, int x, int y, int width, int height,
-    	       int outlineWidth, Color outlineColor, Color fillColor)
-    {
-	super(show, name);
-	this.x = x;
-	this.y = y;
-	this.width = width;
-	this.height = height;
-	this.outlineWidth = outlineWidth;
-	this.outlineColor = outlineColor;
-	this.fillColor = fillColor;
+    public Box(Show show) {
+        super(show);
     }
-
-    public void implSetScalingModel(InterpolatedModel model) {
-	this.scalingModel = model;
-	if (model != null) {
-	    scaledBounds = new Rectangle();
-	}
-    }
-
-    public InterpolatedModel implGetScalingModel() {
-	return scalingModel;
-    }
-
-
 
     /**
      * @inheritDoc
@@ -128,54 +105,6 @@ public class Box extends Feature {
      **/
     public int getY() {
 	return y;
-    }
-
-    public int implGetWidth() {
-	return width;
-    }
-
-    public int implGetHeight() {
-	return height;
-    }
-    
-    public int implGetOutlineWidth() {
-       return outlineWidth;
-    }
-    
-    public Color implGetOutlineColor() {
-       return outlineColor;
-    }
-    
-    public Color implGetFillColor() {
-       return fillColor;
-    }
-    
-    public void implSetX(int x) {
-        this.x = x;
-    }
-    
-    public void implSetY(int y) {
-        this.y = y;
-    }
-    
-    public void implSetWidth(int w) {
-        this.width = w;
-    }
-    
-    public void implSetHeight(int h) {
-        this.height = h;
-    }
-    
-    public void implSetOutlineWidth(int w) {
-        this.outlineWidth = w;
-    }
-    
-    public void implSetOutlineColor(Color color) {
-        this.outlineColor = color;
-    }
-    
-    public void implSetFillColor(Color color) {
-        this.fillColor = color;
     }
     
     /**
@@ -306,5 +235,23 @@ public class Box extends Feature {
 	    gr.setColor(fillColor);
 	    gr.fillRect(x1, y1, w, h); 
 	}
+    }
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        
+	this.x = in.readInt();
+	this.y = in.readInt();
+	this.width = in.readInt();
+	this.height = in.readInt();
+        this.outlineWidth = in.readInt();
+        this.outlineColor = in.readColor();
+        this.fillColor = in.readColor();   
+        if (in.readBoolean()) {
+            this.scalingModel = (InterpolatedModel) in.readFeatureReference();
+            this.scaledBounds = new Rectangle();
+        }       
     }
 }

@@ -57,27 +57,33 @@ package com.hdcookbook.grin.commands;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import java.io.IOException;
 
 /**
  * A GRIN command to activate a part within an assembly.
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class ActivatePartCommand extends Command {
+public class ActivatePartCommand extends Command implements Node {
 
-    private Assembly assembly;
-    private Feature part;
+    protected Assembly assembly;
+    protected Feature part;
 
     /**
      * Constructor for use by xlets that want to change the state
      * of an assembly
      **/
-    public ActivatePartCommand(Assembly assembly, Feature part) {
+    public ActivatePartCommand(Show show, Assembly assembly, Feature part) {
+        this(show);
 	this.assembly = assembly;
 	this.part = part;
     }
 
-    public ActivatePartCommand() {
+    public ActivatePartCommand(Show show) {
+        super(show);
     }
     
     public Assembly getAssembly() {
@@ -86,14 +92,6 @@ public class ActivatePartCommand extends Command {
     
     public Feature getPart() {
         return part;
-    }
-   
-    /**
-     * Called from parser
-     **/
-    public void setup(Assembly assembly, Feature part) {
-	this.assembly = assembly;
-	this.part = part;
     }
 
     public void execute() {
@@ -104,4 +102,12 @@ public class ActivatePartCommand extends Command {
 	return super.toString() + " : " + assembly + " part " + part;
     }
     
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+        
+        in.readSuperClassData(this);
+     
+        this.assembly = (Assembly) in.readFeatureReference();
+        this.part = in.readFeatureReference();      
+    }
 }

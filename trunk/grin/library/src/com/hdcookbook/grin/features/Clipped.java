@@ -57,14 +57,15 @@
 
 package com.hdcookbook.grin.features;
 
-import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 
-import java.io.IOException;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.io.IOException;
 
 /**
  * Represents a clipped version of another feature.  When painting, a
@@ -72,10 +73,10 @@ import java.awt.Rectangle;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class Clipped extends Modifier {
+public class Clipped extends Modifier implements Node {
 
-    private Rectangle clipRegion;
-    private Rectangle lastClipRegion = new Rectangle();
+    protected Rectangle clipRegion;
+    protected Rectangle lastClipRegion = new Rectangle();
     private Rectangle tmpI = null;
 
 	//
@@ -110,17 +111,10 @@ public class Clipped extends Modifier {
 
     };	// End of RenderContext anonymous inner class
 
-    public Clipped(Show show, String name, Rectangle clipRegion) {
-	super(show, name);
-	this.clipRegion = clipRegion;
-    }
+
     
-    public Rectangle implGetClipRegion() {
-        return clipRegion;
-    }
-    
-    public void implSetClipRegion(Rectangle rect) {
-        this.clipRegion = rect;
+    public Clipped(Show show) {
+        super(show);
     }
 
     /**
@@ -169,5 +163,12 @@ public class Clipped extends Modifier {
 		gr.setClip(lastClipRegion);
 	    }
 	}
+    }
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        this.clipRegion = in.readRectangle();   
     }
 }

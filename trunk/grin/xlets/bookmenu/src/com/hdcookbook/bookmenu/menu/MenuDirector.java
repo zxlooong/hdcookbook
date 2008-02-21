@@ -63,9 +63,10 @@ import java.io.IOException;
 
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.io.binary.ExtensionsReader;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
+
+import org.bluray.net.BDLocator;
 
 
 /**
@@ -74,9 +75,9 @@ import com.hdcookbook.grin.util.Debug;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class MenuDirector extends Director {
+public class MenuDirector extends Director implements PlayVideoExtension {
 
-    public MenuXlet xlet;
+    public  MenuXlet xlet;
     private boolean destroyed = false;
     private BioUpdater bioUpdater = null;
     private BookmarkManager bookmarkManager = null;
@@ -105,14 +106,7 @@ public class MenuDirector extends Director {
             String showName = "menu.grin";
 	    URL u = AssetFinder.getURL(showName);
             BufferedInputStream bis = new BufferedInputStream(u.openStream());  
-            
-            /* 
-             * ExtensionsReader is used to instanciate the extensions during
-             * the construction of the GRIN show.  This is how we hook in
-             * custom extensions into the GRIN syntax.
-             */
-            ExtensionsReader extReader = new MenuExtensionsReader(xlet, show);
- 	    GrinBinaryReader reader = new GrinBinaryReader(bis, extReader);
+ 	    GrinBinaryReader reader = new GrinBinaryReader(bis);
             
 	    reader.readShow(show);
             bis.close();
@@ -241,6 +235,30 @@ public class MenuDirector extends Director {
 		userInputManager.destroy();
 	    }
 	}
+    }
+
+    public void playVideo(String arg) {
+        
+        BDLocator locator;
+        if ("menu".equals(arg)) {
+            locator = xlet.navigator.menuVideoStartPL;
+        } else if ("movie".equals(arg)) {
+            locator = xlet.navigator.movieVideoStartPL;
+        } else if ("scene_1".equals(arg)) {
+            locator = xlet.navigator.sceneVideoStartPL[0];
+        } else if ("scene_2".equals(arg)) {
+            locator = xlet.navigator.sceneVideoStartPL[1];
+        } else if ("scene_3".equals(arg)) {
+            locator = xlet.navigator.sceneVideoStartPL[2];
+        } else if ("scene_4".equals(arg)) {
+            locator = xlet.navigator.sceneVideoStartPL[3];
+        } else if ("scene_5".equals(arg)) {
+            locator = xlet.navigator.sceneVideoStartPL[4];
+        } else {
+            locator = null;
+        }
+        
+        xlet.navigator.startVideoAt(locator);       
     }
 
 }

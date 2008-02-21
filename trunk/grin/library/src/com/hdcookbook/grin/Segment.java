@@ -58,12 +58,13 @@ package com.hdcookbook.grin;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.RCKeyEvent;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.io.IOException;
 
 /**
@@ -76,39 +77,25 @@ import java.io.IOException;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class Segment {
+public class Segment implements Node {
 
-    String name;
-    private Show show;
-    private Feature[] activeFeatures;
+    protected String name;
+    protected Show show;
+    protected Feature[] activeFeatures;
     private boolean[] featureWasActivated;
-    private Feature[] settingUpFeatures;
-    private boolean nextOnSetupDone;
-    private Command[] nextCommands;
-    private RCHandler[] rcHandlers;
+    protected Feature[] settingUpFeatures;
+    protected boolean nextOnSetupDone;
+    protected Command[] nextCommands;
+    protected RCHandler[] rcHandlers;
     private boolean active = false;
     private boolean nextCommandSent;
 
     private ActivateSegmentCommand cmdToActivate;
     private ActivateSegmentCommand cmdToActivatePush;
 
-    public Segment(String name, Feature[] active, Feature[] setup,
-    		 RCHandler[] rcHandlers, boolean nextOnSetupDone, 
-		 Command[] nextCommands) 
-	    throws IOException 
-    {
-	this.name = name;	// for debugging
-	this.activeFeatures = active;
-	featureWasActivated = new boolean[active.length];
-	for (int i = 0; i < featureWasActivated.length; i++) {
-	    featureWasActivated[i] = false;
-	}
-	this.settingUpFeatures = setup;
-	this.nextOnSetupDone = nextOnSetupDone;
-	this.nextCommands = nextCommands;
-	this.rcHandlers = rcHandlers;
+    public Segment() {
     }
-
+    
     public String toString() {
 	return "Segment(" + name + ")";
     }
@@ -122,6 +109,10 @@ public class Segment {
      **/
     public String getName() {
 	return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Show getShow() {
@@ -172,6 +163,10 @@ public class Segment {
      **/
     public void initialize(Show show) {
 	this.show = show;
+        featureWasActivated = new boolean[activeFeatures.length];
+	for (int i = 0; i < featureWasActivated.length; i++) {
+	    featureWasActivated[i] = false;
+	}
     }
 
     //
@@ -390,5 +385,16 @@ public class Segment {
 	    }
 	}
 	return handled;
+    }
+    
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        this.activeFeatures = in.readFeaturesArrayReference();
+        this.settingUpFeatures = in.readFeaturesArrayReference();
+        this.rcHandlers = in.readRCHandlersArrayReference();
+        this.nextOnSetupDone = in.readBoolean();
+        this.nextCommands = in.readCommands();
     }
 }

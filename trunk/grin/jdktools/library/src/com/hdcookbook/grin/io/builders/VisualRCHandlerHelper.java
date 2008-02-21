@@ -55,14 +55,10 @@
 
 package com.hdcookbook.grin.io.builders;
 
-import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.input.VisualRCHandler;
+import com.hdcookbook.grin.input.SEVisualRCHandler;
 
 import java.awt.Rectangle;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -253,7 +249,7 @@ public class VisualRCHandlerHelper {
 	return states.get(name).intValue();
     }
 
-    public VisualRCHandler getFinishedHandler() {
+    public SEVisualRCHandler getFinishedHandler() {
 	int[] upDown = new int[states.size()];
 	int[] rightLeft = new int[states.size()];
 	String[] stateNames = new String[states.size()];
@@ -264,8 +260,8 @@ public class VisualRCHandlerHelper {
 	    upDown[stateNum] = cell.getUpDown();
 	    rightLeft[stateNum] = cell.getRightLeft();
 	}
-	VisualRCHandler result
-	    = new VisualRCHandler(handlerName,  stateNames, upDown, rightLeft,
+	SEVisualRCHandler result
+	    = new SEVisualRCHandler(handlerName,  stateNames, upDown, rightLeft,
 	    			  selectCommands, activateCommands,
 				  mouseRects, mouseRectStates,
 				  timeout, timeoutCommands);

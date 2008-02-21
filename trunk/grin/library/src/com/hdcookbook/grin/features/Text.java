@@ -55,18 +55,18 @@
 
 package com.hdcookbook.grin.features;
 
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
-import com.hdcookbook.grin.util.Debug;
 
-import java.io.IOException;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Color;
+import java.io.IOException;
 
 
 /**
@@ -75,17 +75,17 @@ import java.awt.Color;
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class Text extends Feature {
+public class Text extends Feature implements Node {
    
-    private int x;
-    private int y;
-    private String[] strings;
-    private int vspace;
-    private Font font;
-    private Color[] colors;
+    protected int x;
+    protected int y;
+    protected String[] strings;
+    protected int vspace;
+    protected Font font;
+    protected Color[] colors;
     private Color currColor = null;
     private Color lastColor = null;
-    private Color background;
+    protected Color background;
 
     private boolean isActivated;
     private int ascent;
@@ -96,66 +96,9 @@ public class Text extends Feature {
 
     private boolean changed = false;
     private DrawRecord drawRecord = new DrawRecord();
-
-    public Text(Show show, String name, int x, int y, String[] strings, 
-    		int vspace, Font font, Color[] colors, Color background) 
-    {
-	super(show, name);
-	this.x = x;
-	this.y = y;
-	this.strings = strings;
-        this.vspace = vspace;
-	this.font = font;
-	this.colors = colors;
-	this.background = background;
-    }
     
-    public String[] implGetStrings() {
-        return strings;
-    }
-    
-    public int implGetVspace() {
-        return vspace;
-    }
-    
-    public Font implGetFont() {
-        return font;
-    }
-    
-    public Color[] implGetColors() {
-        return colors;
-    }
-    
-    public Color implGetBackground() {
-        return background;
-    }
-
-    public void implSetStrings(String[] strings) {
-        this.strings = strings;
-    }
-    
-    public void implSetVspace(int vspace) {
-        this.vspace = vspace;
-    }
-    
-    public void implSetFont(Font font) {
-        this.font = font;
-    }
-    
-    public void implSetColors(Color[] colors) {
-        this.colors = colors;
-    }
-    
-    public void implSetBackground(Color background) {
-        this.background = background;
-    }    
-    
-    public void implSetX(int x) {
-        this.x = x;
-    }
-    
-    public void implSetY(int y) {
-        this.y = y;
+    public Text(Show show) {
+        super(show);
     }
     
     /**
@@ -293,5 +236,21 @@ public class Text extends Feature {
             gr.drawString(strings[i], x, y2);
             y2 += ascent + descent + vspace;
         }
+    }
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        this.x = in.readInt();
+        this.y = in.readInt();
+        this.strings = in.readStringArray();
+        this.vspace = in.readInt();
+        this.font = in.readFont();
+        this.colors = new Color[in.readInt()];
+        for (int i = 0; i < colors.length; i++) {
+            colors[i] = in.readColor();
+        }
+        this.background = in.readColor();        
     }
 }

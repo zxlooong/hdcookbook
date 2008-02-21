@@ -61,41 +61,36 @@ package com.hdcookbook.grin.io.binary;
 class Constants {
  
 	static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
-	static final int GRINSCRIPT_VERSION = 12;
+	static final int GRINSCRIPT_VERSION = 13;
 	
-	static final int FEATURE_IDENTIFIER= 0x00000fea;
-	static final int SEGMENT_IDENTIFIER= 0x00000ce6;
-        static final int RCHANDLER_IDENTIFIER=0x000008ee;
-        static final int PUBLIC_ELEMENTS_IDENTIFIER=0x0000040b;
-	
-	static final byte ASSEMBLY_IDENTIFIER= 0x01;
-	static final byte BOX_IDENTIFIER = 0x02;
-	static final byte FIXEDIMAGE_IDENTIFIER = 0x03; 
-	static final byte GROUP_IDENTIFIER = 0x04;
-	static final byte IMAGESEQUENCE_IDENTIFIER = 0x05;
-	static final byte TEXT_IDENTIFIER = 0x06;
-	static final byte INTERPOLATED_MODEL_IDENTIFIER = 0x08;
-	static final byte TRANSLATOR_IDENTIFIER = 0x09;
-	static final byte CLIPPED_IDENTIFIER = 0x0a;
-	static final byte FADE_IDENTIFIER = 0x0b;
-	static final byte SRCOVER_IDENTIFIER = 0x0c;
-        static final byte USER_MODIFIER_IDENTIFIER = 0x0d;        
-        static final byte USER_FEATURE_IDENTIFIER = 0x0e;
+        /**
+         * Make sure to change BinaryWriter.recordBuiltInClasses()
+         * when the constants are updated.
+         */
+	static final int ASSEMBLY_IDENTIFIER                = 0;
+	static final int BOX_IDENTIFIER                     = 1;
+	static final int FIXEDIMAGE_IDENTIFIER              = 2; 
+	static final int GROUP_IDENTIFIER                   = 3;
+	static final int IMAGESEQUENCE_IDENTIFIER           = 4;
+	static final int TEXT_IDENTIFIER                    = 5;
+	static final int INTERPOLATED_MODEL_IDENTIFIER      = 6;
+	static final int TRANSLATOR_IDENTIFIER              = 7;
+	static final int CLIPPED_IDENTIFIER                 = 8;
+	static final int FADE_IDENTIFIER                    = 9;
+	static final int SRCOVER_IDENTIFIER                 = 10;        
+        static final int ACTIVATEPART_CMD_IDENTIFIER        = 11;
+        static final int ACTIVATESEGMENT_CMD_IDENTIFIER     = 12;
+        static final int SEGMENTDONE_CMD_IDENTIFIER         = 13;
+        static final int SETVISUALRCSTATE_CMD_IDENTIFIER    = 14;
+        static final int COMMAND_RCHANDLER_IDENTIFIER       = 15;
+        static final int VISUAL_RCHANDLER_IDENTIFIER        = 16;
+        static final int GUARANTEE_FILL_IDENTIFIER          = 17;
+	static final int SET_TARGET_IDENTIFIER              = 18;
+	static final int SEGMENT_IDENTIFIER                 = 19;
         
-        static final byte ACTIVATEPART_CMD_IDENTIFIER = 0x10;
-        static final byte ACTIVATESEGMENT_CMD_IDENTIFIER = 0x11;
-        static final byte SEGMENTDONE_CMD_IDENTIFIER = 0x12;
-        static final byte SETVISUALRCSTATE_CMD_IDENTIFIER = 0x13;
-        static final byte USER_CMD_IDENTIFIER = 0x14;
-        static final byte SHOW_COMMANDS_CMD_IDENTIFIER = 0x15;
-        
-        static final byte COMMAND_RCHANDLER_IDENTIFIER = 0x20;
-        static final byte VISUAL_RCHANDLER_IDENTIFIER = 0x21;
-        static final byte USER_RCHANDLER_IDENTIFIER = 0x22;
-        static final byte GUARANTEE_FILL_IDENTIFIER = 0x23;
-	static final byte SET_TARGET_IDENTIFIER = 0x24;
-        
+        static final byte STRING_CONSTANTS_IDENTIFIER      = (byte) 0xe0;
+        static final byte INT_ARRAY_CONSTANTS_IDENTIFIER   = (byte) 0xe1;
+
         static final byte NULL = (byte) 0xff;
         static final byte NON_NULL = (byte) 0xee;
-   
 }	

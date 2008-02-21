@@ -55,9 +55,9 @@
 
 package com.hdcookbook.bookmenu.menu;
 
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.SetVisualRCStateCommand;
@@ -137,10 +137,11 @@ public class BookmarkManager {
 	VisualRCHandler h 
 	    = (VisualRCHandler) xlet.show.getRCHandler("H:BookmarksMenu");
 	int s = h.lookupState("scenes");
-	setHandlerState[0] = new SetVisualRCStateCommand(false, s, h, false);
+        Show show = xlet.director.getShow();
+	setHandlerState[0] = new SetVisualRCStateCommand(show, false, s, h, false);
 	for (int i = 1; i < setHandlerState.length; i++)  {
 	    s = h.lookupState(Integer.toString(i));
-	    setHandlerState[i] = new SetVisualRCStateCommand(false, s, h,false);
+	    setHandlerState[i] = new SetVisualRCStateCommand(show, false, s, h,false);
 	}
 	for (int i = 0; i < bookmarkText.length; i++) {
 	    bookmarkText[i] 
@@ -166,7 +167,7 @@ public class BookmarkManager {
 		Debug.assertFail();
 	    }
 	}
-	return new ActivatePartCommand(assembly, f);
+	return new ActivatePartCommand(xlet.director.getShow(), assembly, f);
     }
 
     private String bookmarksFileName() {

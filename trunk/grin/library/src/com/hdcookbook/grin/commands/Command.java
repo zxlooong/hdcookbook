@@ -55,7 +55,7 @@
 
 package com.hdcookbook.grin.commands;
 
-import java.io.IOException;
+import com.hdcookbook.grin.Show;
 
 /**
  * Common base class of all GRIN commands.  GRIN defers anything that
@@ -69,10 +69,10 @@ import java.io.IOException;
  */
 public abstract class Command {
     
-    /** 
-     * Creates a new instance of Command 
-     **/
-    protected Command() {
+    protected Show show;
+    
+    protected Command(Show show) {
+        this.show = show;
     }
  
     /**
@@ -106,4 +106,5 @@ public abstract class Command {
 	}
 	return nm;
     }
+    
 }

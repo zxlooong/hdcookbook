@@ -1,12 +1,15 @@
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.io.IOException;
 
-public class Oval extends Feature {
+public class Oval extends Feature implements Node {
     
     int x;
     int y;
@@ -17,13 +20,8 @@ public class Oval extends Feature {
     private DrawRecord drawRecord = new DrawRecord();
     
     /** Creates a new instance of Oval */
-    public Oval(Show show, String name, int x, int y, int w, int h, Color color) {
-        super(show, name);
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.color = color;
+    public Oval(Show show) {
+        super(show);
     }
 
     /**
@@ -94,5 +92,14 @@ public class Oval extends Feature {
     public Color getColor() { return color; }
     
     public void initialize() {}
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+        this.x = in.readInt();
+        this.y = in.readInt();
+        this.w = in.readInt();
+        this.h = in.readInt();
+        this.color = in.readColor();
+    }
     
 }

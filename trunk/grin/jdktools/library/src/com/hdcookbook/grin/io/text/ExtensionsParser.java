@@ -65,11 +65,7 @@ import java.io.IOException;
  * custom (user-defined) GRIN features, modifiers and commands  
  * from text-based GRIN script. These who are defining the custom GRIN subclasses 
  * and reading them from a text GRIN file should implement these methods accordingly.
- * 
- * @see com.hdcookbook.grin.io.binary.ExtensionsWriter
- * @see com.hdcookbook.grin.io.binary.ExtensionsReader
  */
-
 
 public interface ExtensionsParser {
     

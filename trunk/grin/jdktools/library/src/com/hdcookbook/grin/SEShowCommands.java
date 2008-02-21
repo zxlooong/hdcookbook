@@ -57,7 +57,6 @@ package com.hdcookbook.grin;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.hdcookbook.grin.commands.ShowCommands;
 
 /**
  * Represents the commands that are defined in-line in a show file.  All of
@@ -71,6 +70,11 @@ import com.hdcookbook.grin.commands.ShowCommands;
  * it's OK:  GrinView will provide a default command implementation that prints
  * out the source of what would have been executed, rather than trying to run
  * the command.
+ * <p>
+ * This class compiled from the source file that this class emits is pretty much 
+ * a requirement to be present if your show includes any
+ * custom extension and executing a binary file, meanwhile.  SEShowCommands 
+ * generates some code to indicate how to instantiate custom extensions. 
  *
  * @author     Bill Foote (http://jovial.com)
  **/
@@ -134,13 +138,13 @@ public class SEShowCommands  {
     }
     
     public SEShowCommand addNewCommand() {
-        SEShowCommand cmd = new SEShowCommand(this, commands.size());
+        SEShowCommand cmd = new SEShowCommand(show, this, commands.size());
         commands.add(cmd);
         return cmd;
     }
 
     /**
-     * Sets the java source of the body of the class for the GrinView version.  
+     * Adds to the java source of the body of the class for the GrinView version.  
      * The special string JAVA_COMMAND_BODY must occur somewhere in the
      * string.  This will be replaced by the automatically-generated methods.
      * 
@@ -150,11 +154,11 @@ public class SEShowCommands  {
      */
     public void setGrinviewClassBody(String classBody) throws IOException {
         checkForJavaCommandBody(classBody);
-        this.grinviewClassBody = classBody;
+        this.grinviewClassBody = classBody;        
     }
         
     /**
-     * Sets the java source of the body of the class for the JavaSE version.  
+     * Adds to the java source of the body of the class for the JavaSE version.  
      * The special string JAVA_COMMAND_BODY must occur somewhere in the
      * string.  This will be replaced by the automatically-generated methods.
      * 
@@ -174,33 +178,49 @@ public class SEShowCommands  {
         }
     }
     
+    public void appendXletClassBody(String classBody) {
+        
+    }
+    
     /** 
      * Get the java source for the class implementing this show's command.
      * 
+     * @param forXlet true if the code to emit is for the xlet to use, false
+     * if it's meant for GrinView on big jdk to use.
+     * @param moreCode code to append to the end of the generated code.
+     * 
      * @return  The java source, or null if there are no commands to be emitted.
      */
-    public String getJavaSource(boolean forXlet) {
-        if (className == null || commands.size() == 0) {
+    public String getJavaSource(boolean forXlet, String moreCode) {
+        if (className == null) {
             return null;
         }
+        
         StringBuffer generated = new StringBuffer();
-        generated.append("    public void execute() {\n");
-        generated.append("        switch (commandNumber) {\n");
-        for (int i = 0; i < commands.size(); i++) {
-            generated.append("            case " + i + ": grinCommand" + i
-                             + "();    break;\n");
-        }
-        generated.append("        }\n");
-        generated.append("    }\n\n");
-        
-        for (int i = 0; i < commands.size(); i++) {
-            generated.append("    private void grinCommand" + i + "() {\n");
-            generated.append("        " + commands.get(i).getJavaSource(forXlet) 
-                             + "\n");
+        if (commands != null) {
+            // first, command switch statement\
+            generated.append("    public void execute() {\n");
+            generated.append("        switch (commandNumber) {\n");
+            for (int i = 0; i < commands.size(); i++) {
+                generated.append("            case " + i + ": grinCommand" + i + "();    break;\n");
+            }
+            generated.append("        }\n");
             generated.append("    }\n\n");
+
+            for (int i = 0; i < commands.size(); i++) {
+                generated.append("    private void grinCommand" + i + "() {\n");
+                generated.append("        " + commands.get(i).getJavaSource(forXlet) + "\n");
+                generated.append("    }\n\n");
+            }
         }
-        String body = forXlet ? xletClassBody : grinviewClassBody;
         
+        if (moreCode != null) {
+           // append extra code at the end
+           generated.append(moreCode);
+        }
+        
+        String body = forXlet ? xletClassBody : grinviewClassBody;
+              
         return body.replaceFirst("JAVA_COMMAND_BODY", generated.toString());
     }
     

@@ -56,10 +56,14 @@ package com.hdcookbook.grin.input;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 import java.awt.Rectangle;
+import java.io.IOException;
 
 /**
  * A VisualRCHandler models interaction with the remote control and the
@@ -102,7 +106,7 @@ import java.awt.Rectangle;
  * @author Bill Foote (http://jovial.com)
  */
 
-public class VisualRCHandler extends RCHandler {
+public class VisualRCHandler extends RCHandler implements Node {
  
     /**
      * A special value in a grid that means to activate the current
@@ -115,190 +119,40 @@ public class VisualRCHandler extends RCHandler {
     				| RCKeyEvent.KEY_RIGHT.getBitMask()
     				| RCKeyEvent.KEY_LEFT.getBitMask()
     				| RCKeyEvent.KEY_ENTER.getBitMask();
-    private int[] upDown;    // For each state, the most significant 16 bits
+    protected int[] upDown;    // For each state, the most significant 16 bits
     			     // contains the state to go to on "up", and the
 			     // least significant 16 bits the "down" value.
 			     // If this has the special value GRID_ACTIVATE, 
 			     // then there's no movement, but the feature is
 			     // activated.
 
-    private int[] rightLeft; // For each state, the most significant 16 bits
+    protected int[] rightLeft; // For each state, the most significant 16 bits
     			     // contains the state to go to on "right", and the
 			     // least significant 16 bits the "left" value.
 			     // If this has the special value GRID_ACTIVATE, 
 			     // then there's no movement, but the feature is
 			     // activated.
 
-    private String[] stateNames;   // The names corresponding to state numbers.
-    private Assembly assembly;     // can be null
-    private Feature[] selectFeatures; // By state #, array can be null, and
+    protected String[] stateNames;   // The names corresponding to state numbers.
+    protected Assembly assembly;     // can be null
+    protected Feature[] selectFeatures; // By state #, array can be null, and
     				      // any element can be null.
-    private Command[][] selectCommands; // By state #, array can be null, and
+    protected Command[][] selectCommands; // By state #, array can be null, and
            			      // any element can be null.
-    private Feature[] activateFeatures;  // by state #, etc.
-    private Command[][] activateCommands;  // by state #
-    private Rectangle[] mouseRects;   // hit zones on screen for the mouse
-    private int[] mouseRectStates;    // The state # corresponding to each rect
-    int timeout;	// -1 means "no timeout"
-    private Command[] timeoutCommands;
+    protected Feature[] activateFeatures;  // by state #, etc.
+    protected Command[][] activateCommands;  // by state #
+    protected Rectangle[] mouseRects;   // hit zones on screen for the mouse
+    protected int[] mouseRectStates;    // The state # corresponding to each rect
+    protected int timeout;	// -1 means "no timeout"
+    protected Command[] timeoutCommands;
 
     private boolean activated = false;
-    private int currState;
+    private int currState = 0;
     private int currFrame;
     private boolean timedOut;
-
-
-    public VisualRCHandler(String name, String[] stateNames,
-			   int[] upDown, int[] rightLeft,
-			   Command[][] selectCommands, 
-			   Command[][] activateCommands, 
-			   Rectangle[] mouseRects, int[] mouseRectStates,
-			   int timeout, Command[] timeoutCommands) 
-    {
-	super(name);
-        
-	this.stateNames = stateNames;
-	this.upDown = upDown;
-	this.rightLeft = rightLeft;
-	this.selectCommands = selectCommands;
-	this.activateCommands = activateCommands;
-	this.mouseRects = mouseRects;
-	this.mouseRectStates = mouseRectStates;
-	this.timeout = timeout;
-	this.timeoutCommands = timeoutCommands;
-    }
     
-    /** used by the binaryconverter */  
-    public int[] implGetUpDown() {
-        return upDown;
-    }
-
-    /** used by the binaryconverter */  
-    public int[] implGetRightLeft() {
-        return rightLeft;
-    }
-
-    /** used by the binaryconverter */  
-    public String[] implGetStateNames() {
-        return stateNames;
-    }
-    
-    /** used by the binaryconverter */  
-    public Command[][] implGetSelectCommands() {
-        return selectCommands;
-    }
-    
-    /** used by the binaryconverter */  
-    public Command[][] implGetActivateCommands() {
-        return activateCommands;
-    }
-
-    /** used by the binaryconverter */  
-    public Rectangle[] implGetMouseRects() {
-        return mouseRects;
-    }
-    
-    /** used by the binaryconverter */  
-    public int[] implGetMouseRectStates() {
-        return mouseRectStates;
-    }
-    
-    /** used by the binaryconverter */  
-    public int implGetTimeout() {
-        return timeout;
-    }
-    
-    /** used by the binaryconverter */  
-    public Command[] implGetTimeoutCommands() {
-        return timeoutCommands;
-    }
-    
-    /* used by the binaryconverter */  
-    public Assembly implGetAssembly() {
-        return assembly;
-    }
-
-    /* used by the binaryconverter */      
-    public Feature[] implGetSelectFeatures() {
-        return selectFeatures;
-    }
-    
-    /* used by the binaryconverter */  
-    public Feature[] implGetActivateFeatures() {
-        return activateFeatures;
-    }
-
-    /** used by the binaryconverter */  
-    public void implSetUpDown(int[] upDown) {
-        this.upDown = upDown;
-    }
-
-    /** used by the binaryconverter */  
-    public void implSetRightLeft(int[] rightLeft) {
-        this.rightLeft = rightLeft;
-    }
-
-    /** used by the binaryconverter */  
-    public void implSetStateNames(String[] stateNames) {
-        this.stateNames = stateNames;
-    }
-    
-    /** used by the binaryconverter */  
-    public void implSetSelectCommands(Command[][] selectCommands) {
-        this.selectCommands = selectCommands;
-    }
-    
-    /** used by the binaryconverter */  
-    public void implSetActivateCommands(Command[][] activeCommands) {
-        this.activateCommands = activeCommands;
-    }
-
-    /** used by the binaryconverter */  
-    public void implSetMouseRects(Rectangle[] mouseRects) {
-        this.mouseRects = mouseRects;
-    }
-    
-    /** used by the binaryconverter */  
-    public void implSetMouseRectStates(int[] mouseRectStates) {
-        this.mouseRectStates = mouseRectStates;
-    }
-    
-    /** used by the binaryconverter */  
-    public void implSetTimeout(int timeout) {
-        this.timeout = timeout;
-    }
-    
-    /** used by the binaryconverter */  
-    public void implSetTimeoutCommands(Command[] timeoutCommands) {
-        this.timeoutCommands = timeoutCommands;
-    }
-    
-    /* used by the binaryconverter */  
-    public void implSetAssembly(Assembly assembly) {
-        this.assembly = assembly;
-    }
-
-    /* used by the binaryconverter */      
-    public void implSetSelectFeatures(Feature[] selectFeatures) {
-        this.selectFeatures = selectFeatures;
-    }
-    
-    /* used by the binaryconverter */  
-    public void implSetActivateFeatures(Feature[] activateFeatures) {
-        this.activateFeatures = activateFeatures;
-    }
-    
-    /**
-     * Called from the parser
-     **/
-    public void setup(Assembly assembly, Feature[] selectFeatures, 
-    		      Feature[] activateFeatures)
-    {
-	this.assembly = assembly;
-	this.selectFeatures = selectFeatures;
-	this.activateFeatures = activateFeatures;
-	currState = 0;
-	// activating this handler can change its state
+    public VisualRCHandler() {
+        super();
     }
     
     /**
@@ -511,5 +365,42 @@ public class VisualRCHandler extends RCHandler {
 		show.runCommand(timeoutCommands[i]);
 	    }
 	}
+    }
+    
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+        
+        in.readSuperClassData(this);
+        
+        this.upDown = in.readIntArray();
+        this.rightLeft = in.readIntArray();
+        this.stateNames = in.readStringArray();
+        if (in.isNull()) {
+            this.selectCommands = null;
+        } else {
+            this.selectCommands = new Command[in.readInt()][];
+            for (int i = 0; i < selectCommands.length; i++) {
+                this.selectCommands[i] = in.readCommands();
+            }
+        }
+        if (in.isNull()) {
+            activateCommands = null;
+        } else {
+            activateCommands = new Command[in.readInt()][];
+            for (int i = 0; i < activateCommands.length; i++) {
+                activateCommands[i] = in.readCommands();
+            }
+        }
+        
+        this.mouseRects = in.readRectangleArray();
+        this.mouseRectStates = in.readIntArray();
+        this.timeout = in.readInt();
+        this.timeoutCommands = in.readCommands();
+        
+	if (in.readBoolean()) {
+            this.assembly = (Assembly)in.readFeatureReference();
+        }    
+        this.selectFeatures = in.readFeaturesArrayReference();
+        this.activateFeatures = in.readFeaturesArrayReference();      
     }
 }

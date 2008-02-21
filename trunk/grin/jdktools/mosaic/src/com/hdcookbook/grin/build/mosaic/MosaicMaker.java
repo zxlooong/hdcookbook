@@ -64,6 +64,7 @@ import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.text.GenericExtensionsParser;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.AssetFinder;
@@ -136,7 +137,7 @@ import javax.imageio.ImageIO;
 
     public void init() throws IOException {
 	ShowBuilder builder = new ShowBuilder();
-        builder.setExtensionsBuilderFactory(new GenericExtensionsBuilderFactory());
+        builder.setExtensionsParser(new GenericExtensionsParser());
 	File [] fPath = new File[assetPath.length];
 	for (int i = 0; i < fPath.length; i++) {
 	    fPath[i] = new File(assetPath[i]);

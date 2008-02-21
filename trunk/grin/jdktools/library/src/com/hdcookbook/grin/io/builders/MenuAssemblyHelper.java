@@ -60,6 +60,8 @@ import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.Group;
 
+import com.hdcookbook.grin.features.SEAssembly;
+import com.hdcookbook.grin.features.SEGroup;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,7 +108,7 @@ public class MenuAssemblyHelper {
     public List<Features> template;
     public List<String> partNames;
     public List<List<Features>> parts;
-    public Assembly assembly;
+    public SEAssembly assembly;
     public int lineNumber;
 
     /**
@@ -146,7 +148,7 @@ public class MenuAssemblyHelper {
 	    }
 	}
 	Feature[] members = elements.toArray(new Feature[elements.size()]);
-	Group g = new Group(show, null);
+	SEGroup g = new SEGroup(show, null);
 	g.setup(members);
 	return g;
     }

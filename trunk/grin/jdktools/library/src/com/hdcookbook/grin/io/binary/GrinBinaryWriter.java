@@ -54,21 +54,19 @@
 
 package com.hdcookbook.grin.io.binary;
 
-import com.hdcookbook.grin.io.binary.*;
-import java.awt.Color;
-import java.awt.Rectangle;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.Writer;
 import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.GrinXHelper;
+import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.SEShowCommand;
 import com.hdcookbook.grin.SEShowCommands;
 import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
@@ -93,18 +91,23 @@ import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import static com.hdcookbook.grin.io.binary.Constants.*;
+
 
 /**
  * The main class to write out the Show object to a binary file format.
  */
 
 /*
- * The array of features are sorted to eliminate forward references
- * before writing out to the file.
  *
  * This class works with a binary file reader, GrinBinaryReader, which contains
  * read(...) versions of the methods defined in this class.
  * If you change one file, make sure to update the other file as well.
+ *
  *
  * The syntax of a Show's binary file is as follows:
  * 
@@ -112,58 +115,55 @@ import com.hdcookbook.grin.input.VisualRCHandler;
  *  xxxxx.grin {
  *      script_identifier                  integer
  *      version_number                     integer
- *      FeatureArray_info()
- *      RCHandlerArray_info()
- *      SegmentArray_info()
+ *      StringArray_info()
+ *      IntArrays_info()
  *      Show_Setup_info()
+ *      Nodes_declarations()
+ *      Nodes_contents()
  *  }
  *
- *  FeatureArray_info() {
- *      feature_identifier                 integer
- *      features_length                    integer
- *      for (i = 0; i < features_length; i++) {
- *          Feature_info();                 
+ *  StringArray_info {  // Saves all String values needed in this binary file.
+ *                      // The array index integer is used in the file to
+ *                       // refer to String values.
+ *      array_length        integer
+ *      for (i = 0; i < array_length; i++) {
+ *          value                           String
  *      }
  *  }
  * 
- *  RCHandlerArray_info() {
- *      rcHandler_identifier               integer
- *      rcHandlers_length                    integer
- *      for (i = 0; i < rcHandlers_length; i++) {
- *          RCHandler_info();                 
- *      }
- *  }
- *
- *  SegmentArray_info() {
- *      segment_identifier                 integer
- *      segments_length                    integer
- *      for (int i = 0; i < segments_length; i++ ) {
- *          Segment_info();
+ *  IntArrays_info {  // Saves all immutable int[] instances needed in this binary file.
+ *                    // The array index integer is used in the file to
+ *                    // refer to 2 dimensional int arrays that can be shared.
+ *      array_length        integer
+ *      for (i = 0; i < array_length; i++) {
+ *          value                           int[]
  *      }
  *  }
  *  
  *  Show_setup_info() {
  *      show_segment_stack_depth           integer
- *      // could be more data in the future
- *  }
- *
- *  Feature_info() {
- *      feature_type                    byte
- *      feature_length                  integer
- *      ... List of data in this Feature subclass indicated by "feature_type" ... 
+ *      draw_targets                       String[]
+ *      isdebuggable                       boolean
+ *      ShowCommand_classname              String
  *  }
  *  
- *  RCHandler_info() {
- *      rcHandler_type                    byte
- *      rcHandler_length                  integer
- *      ... List of data in this RCHandler subclass indicated by "rcHandler_type" ... 
+ *  Nodes_declaration() {
+ *      foreach (Feature_array, RCHandler_array, Segment_array) 
+ *         array_length                    integer
+ *         for (i = 0; i < array_length; i++) {
+ *             class_indicator     byte                 
+ *         }
+ *      }
  *  }
- *
- *  Segment_info() {
- *      segment_identifier                 byte
- *      segment_length                     integer
- *      ... List of data in this Segment class ... 
- *  }   
+ *  
+ *  Nodes_contents() {
+ *      foreach (Feature_array, RCHandler_array, Segment_array) 
+ *         array_length                    integer
+ *         for (i = 0; i < array_length; i++) {
+ *             node specific info              
+ *         }
+ *      }
+ *  }
  *
  *  --------------------------------      
  */
@@ -172,51 +172,83 @@ public class GrinBinaryWriter {
     /**
      * Show file to write out 
      */
-    private SEShow show;
-    /**
-     * List of Feature in the show.
-     */
-    private ArrayList featuresList;
+    SEShow show;
     
     /**
-     * List of RCHandler in the show.
+     * SEShowCommands file to write out
      */
-    private ArrayList rcHandlersList;
-    
-    /** 
-     * List of Segment in the show.
-     */
-    private ArrayList segmentsList;
+    private SEShowCommands seShowCommands;
     
     /**
-     * ExtensionsWriter for writing out user-defined extensions.
+     * List of Feature, RCHandler and Segments in the show.
      */
-    private ExtensionsWriter extensionsWriter;
+    private IndexedSet<SENode> featureList;
+    private IndexedSet<SENode> rcHandlerList;
+    private IndexedSet<SENode> segmentList;
+    
+    /**
+     * List of shared String instances.
+     */
+    private IndexedSet<String> stringsList;
+    
+    /* 
+     * List of shared integer array instances.
+     */
+    private IndexedSet<IntArray> intArrayList;
+    
+    /**
+     * List of class names, both built-ins and extensions.
+     */
+    private IndexedSet<String> runtimeClassNames;
+    
+    /**
+     * An index indicating the beginning of the extension
+     * classses in the runtimeClassNames IndexedSet above.
+     * We want to auto-generate the code for instantiating
+     * extensions but not for the built-time classes.
+     */
+    private int extensionsIndex = 0;
+    
+    /* 
+     * An indication of whether to include debug information
+     * to the binary file.  If true, write out the name field of
+     * non-public segements and features.
+     */
+    boolean isDebugging = false;
     
     /**
      * Constructs GrinBinaryWriter.
      * 
      * @param show The show object which this GrinBinaryWriter makes into a binary format.
      **/
-    public GrinBinaryWriter(SEShow show, ExtensionsWriter writer) {
+    public GrinBinaryWriter(SEShow show, boolean isDebugging) {
        
         this.show = show;
-        this.extensionsWriter = writer;
-       
+        this.seShowCommands = show.getShowCommands();
+        this.isDebugging = isDebugging;
+        
+        featureList = new IndexedSet();
+        rcHandlerList = new IndexedSet();
+        segmentList = new IndexedSet();
+        
         Feature[] features = show.getFeatures();
-        featuresList = createFeaturesArrayList(features);
+        for (Feature feature: features) {
+            featureList.getIndex((SENode) feature);
+        }    
         
         RCHandler[] rcHandlers = show.getRCHandlers();
-        rcHandlersList = new ArrayList(rcHandlers.length);
-        for (int i = 0; i < rcHandlers.length; i++) {
-            rcHandlersList.add(rcHandlers[i]);
+        for (RCHandler rcHandler: rcHandlers) {
+            rcHandlerList.getIndex((SENode) rcHandler);
         }     
         
         Segment[] segments = show.getSegments();
-        segmentsList = new ArrayList(segments.length);
-        for (int i = 0; i < segments.length; i++) {
-            segmentsList.add(segments[i]);
+        for (Segment segment: segments) {
+            segmentList.getIndex((SENode) segment);
         }         
+        
+        stringsList = new IndexedSet();
+        intArrayList = new IndexedSet();
+        runtimeClassNames = new IndexedSet();
     }
     
     /**
@@ -231,7 +263,7 @@ public class GrinBinaryWriter {
         if (feature == null) {
            return -1;
         } else {
-           int index = featuresList.indexOf(feature);
+           int index = featureList.getIndex((SENode) feature);
            return index;
         }   
     }
@@ -248,7 +280,7 @@ public class GrinBinaryWriter {
         if (segment == null) {
            return -1;
         } else {
-           int index = segmentsList.indexOf(segment);
+           int index = segmentList.getIndex((SENode) segment);
            return index;
         }   
     }
@@ -265,18 +297,26 @@ public class GrinBinaryWriter {
         if (rcHandler == null) {
            return -1;
         } else {
-           int index = rcHandlersList.indexOf(rcHandler);
+           int index = rcHandlerList.getIndex((SENode) rcHandler);
            return index;
         }   
     }    
+    
+    int getStringIndex(String s) {
+        return stringsList.getIndex(s);
+    }
 
+    int getIntArrayIndex(int[] array) {
+        return intArrayList.getIndex(new IntArray(array));
+    }
     /**
      * Writes out the script identifier and the script version to the DataOutputStream.
      *
      */
-    private static void writeScriptIdentifier(DataOutputStream out) throws IOException {
-        out.writeInt(Constants.GRINSCRIPT_IDENTIFIER);
-        out.writeInt(Constants.GRINSCRIPT_VERSION);
+    private static void writeScriptIdentifier(DataOutputStream out) 
+            throws IOException {
+        out.writeInt(GRINSCRIPT_IDENTIFIER);
+        out.writeInt(GRINSCRIPT_VERSION);
     }
  
     /**
@@ -285,884 +325,179 @@ public class GrinBinaryWriter {
      * @param out The DataOutputStream to write out show's binary data to.
      * @throws IOException if writing to the DataOutputStream fails.
      */
-    public void writeShow(DataOutputStream out) throws IOException {
+    public void writeShow(DataOutputStream out) 
+            throws IOException {
         
+        // The first item on the script should be a header.
         writeScriptIdentifier(out);
         
-        out.writeInt(featuresList.size());
-        out.writeInt(rcHandlersList.size());
-        out.writeInt(segmentsList.size());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
 
-	{
-	    GrinDataOutputStream dos = new GrinDataOutputStream(out, this);
-	    dos.writeInt(show.getSegmentStackDepth());
-	    dos.writeStringArray(show.getDrawTargets());
-	    dos.writeString(show.getShowCommands().getClassName());
-	    dos.flush();
-	    // We intentionally don't close it, because the underlying output
-	    // stream needs to stay open.
-	}
+        // First, include all of the known pre-defined Grin runtime node
+        // class names into the runtimeClasses data structure.
+        registerBuiltInClasses();
+        extensionsIndex = runtimeClassNames.size();
         
-        writeFeatures(out, (Feature[])featuresList.toArray(new Feature[featuresList.size()]));   
-        writeRCHandlers(out, (RCHandler[])rcHandlersList.toArray(new RCHandler[rcHandlersList.size()]));
-        writeSegments(out, (Segment[])segmentsList.toArray(new Segment[segmentsList.size()]));
-	writePublicElements(out);
+        // Write out information about the show itself.
+        dos.writeInt(show.getSegmentStackDepth());
+        dos.writeStringArray(show.getDrawTargets());
+        dos.writeBoolean(isDebugging);
+        dos.writeString(seShowCommands.getClassName());
+        
+        // We can create one large SENode array including all elements and write
+        // it out, but if we do that, the reader needs to sort through it and
+        // separate it out to three arrays for reconstructing Show.
+        // Hence, treating them as three arrays for now.
+        SENode[] features =
+                (SENode[])featureList.toArray(SENode.class);
+        SENode[] handlers = 
+                (SENode[])rcHandlerList.toArray(SENode.class);
+        SENode[] segments = 
+                (SENode[])segmentList.toArray(SENode.class);
+      
+        writeDeclarations(dos, features);
+        writeDeclarations(dos, handlers);
+        writeDeclarations(dos, segments);
+        writeContents(dos, features);  
+        writeContents(dos, handlers); 
+        writeContents(dos, segments);   
+        
+        // Note, this is writing to the base DataOutputStream instance.
+        // We want to write out all the String and integer array instances 
+        // at the beginning of the binary file.
+        writeStringConstants(out, (String[]) stringsList.toArray(String.class));
+        writeIntArrayConstants(out, (IntArray[]) intArrayList.toArray(IntArray.class));
+        
+        baos.writeTo(out);
+        dos.close();  
     }
+
+    /**
+     * Records buildin node classes.
+     * Note that order of the registration needs to match exactly the value of the
+     * Identifier integer defined in Constants.java, since the identifier values
+     * are later used as an index to the runtimeClassName list (see 
+     * getRuntimeClassNames.getIndex() call in writeDeclarations(OutputStream, SENode[])).
+     */
+    private void registerBuiltInClasses() throws IOException {
+        registerBuiltInClass(ASSEMBLY_IDENTIFIER, Assembly.class.getName());
+        registerBuiltInClass(BOX_IDENTIFIER, Box.class.getName());
+        registerBuiltInClass(FIXEDIMAGE_IDENTIFIER, FixedImage.class.getName());
+        registerBuiltInClass(GROUP_IDENTIFIER, Group.class.getName());
+        registerBuiltInClass(IMAGESEQUENCE_IDENTIFIER, ImageSequence.class.getName());
+	registerBuiltInClass(TEXT_IDENTIFIER, Text.class.getName());
+	registerBuiltInClass(INTERPOLATED_MODEL_IDENTIFIER, InterpolatedModel.class.getName());
+	registerBuiltInClass(TRANSLATOR_IDENTIFIER, Translator.class.getName());
+	registerBuiltInClass(CLIPPED_IDENTIFIER, Clipped.class.getName());
+	registerBuiltInClass(FADE_IDENTIFIER, Fade.class.getName());
+	registerBuiltInClass(SRCOVER_IDENTIFIER, SrcOver.class.getName());        
+        registerBuiltInClass(ACTIVATEPART_CMD_IDENTIFIER, ActivatePartCommand.class.getName());
+        registerBuiltInClass(ACTIVATESEGMENT_CMD_IDENTIFIER, ActivateSegmentCommand.class.getName());
+        registerBuiltInClass(SEGMENTDONE_CMD_IDENTIFIER, SegmentDoneCommand.class.getName());
+        registerBuiltInClass(SETVISUALRCSTATE_CMD_IDENTIFIER, SetVisualRCStateCommand.class.getName());
+        registerBuiltInClass(COMMAND_RCHANDLER_IDENTIFIER, CommandRCHandler.class.getName());
+        registerBuiltInClass(VISUAL_RCHANDLER_IDENTIFIER, VisualRCHandler.class.getName());
+        registerBuiltInClass(GUARANTEE_FILL_IDENTIFIER, GuaranteeFill.class.getName());	
+        registerBuiltInClass(SET_TARGET_IDENTIFIER, SetTarget.class.getName());
+	registerBuiltInClass(SEGMENT_IDENTIFIER, Segment.class.getName());
+    }
+
+    private void registerBuiltInClass(int identifier, String className) 
+        throws IOException {
+        if (runtimeClassNames.getIndex(className) != identifier)
+            throw new IOException("Built-in class ID mismatch for " + className);
+    }
+
+    private void writeDeclarations(GrinDataOutputStream out, SENode[] nodes) 
+            throws IOException {
+        
+        if (nodes == null) {
+            return;
+        }
+        
+        out.writeInt(nodes.length);    
+        for (SENode node : nodes) {
+            if (node == null) {
+                out.writeInt(NULL);
+            }
+            String runtimeName = node.getRuntimeClassName();
+            out.writeInt(runtimeClassNames.getIndex(runtimeName));
+        }
+    }   
     
-    private void writeFeatures(DataOutputStream out, Feature[] features) 
+    private void writeContents(GrinDataOutputStream out, SENode[] nodes) 
        throws IOException {
 	
-        if (features == null) 
+        if (nodes == null) 
             return;
- 
-        out.writeInt(Constants.FEATURE_IDENTIFIER);   
-        out.writeInt(features.length);
 		
-        for (int i = 0; i < features.length; i++) {
-            Feature feature = features[i];
-            if (feature instanceof Assembly) {
-                writeAssembly(out, (Assembly)feature);
-            } else if (feature instanceof Box) {
-                writeBox(out, (Box)feature);
-	    } else if (feature instanceof Clipped) {
-                writeClipped(out, (Clipped)feature);
-	    } else if (feature instanceof Fade) {
-                writeFade(out, (Fade)feature);		
-            } else if (feature instanceof FixedImage) {
-                writeFixedImage(out, (FixedImage)feature);
-            } else if (feature instanceof Group) {
-                writeGroup(out, (Group)feature);
-            } else if (feature instanceof ImageSequence) {
-                writeImageSequence(out, (ImageSequence)feature);
-            } else if (feature instanceof Text) {
-                writeText(out, (Text)feature);
-            } else if (feature instanceof InterpolatedModel) {
-                writeInterpolatedModel(out, (InterpolatedModel) feature);
-            } else if (feature instanceof Translator) {
-                writeTranslator(out, (Translator)feature);
-            } else if (feature instanceof SrcOver) {
-                writeSrcOver(out, (SrcOver)feature);
-            } else if (feature instanceof GuaranteeFill) {
-                writeGuaranteeFill(out, (GuaranteeFill)feature);
-            } else if (feature instanceof SetTarget) {
-                writeSetTarget(out, (SetTarget)feature);
-            } else if (feature instanceof Modifier) {
-                writeUserModifier(out, (Modifier)feature);
-            } else {
-                writeUserFeature(out, feature);
-            }
-	    
-        }
-    }
-
-    private void writeRCHandlers(DataOutputStream out, RCHandler[] rcHandlers) throws IOException {
-        if (rcHandlers == null) 
-            return;
-        
-        out.writeInt(Constants.RCHANDLER_IDENTIFIER);
-        out.writeInt(rcHandlers.length);
-        
-        for (int i = 0; i < rcHandlers.length; i++) {
-            RCHandler handler = rcHandlers[i];
-            if (handler instanceof CommandRCHandler) {
-                writeCommandRCHandler(out, (CommandRCHandler)handler);
-            } else if (handler instanceof VisualRCHandler) {
-                writeVisualRCHandler(out, (VisualRCHandler) handler);
-            } else {
-                throw new IOException("Unknown RCHandler " + handler);
+        for (SENode node: nodes) {          
+            if (node != null) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
+                node.writeInstanceData(dos);
+                out.writeInt(baos.size());
+                baos.writeTo(out);      
+                dos.close();
             }
         }
     }
 
-    private void writeSegments(DataOutputStream out, Segment[] segments) throws IOException {        
-        if (segments == null) 
-            return;
-        
-        out.writeInt(Constants.SEGMENT_IDENTIFIER);
-        out.writeInt(segments.length);
-        
-        for (int i = 0; i < segments.length; i++) {
-            writeSegment(out, segments[i]);
+    private void writeStringConstants(DataOutputStream out, String[] list) 
+        throws IOException {
+        out.writeByte(STRING_CONSTANTS_IDENTIFIER);     
+        out.writeInt(list.length);
+        for (String str : list) {
+            out.writeUTF(str);
         }
     }
     
-    private void writeAssembly(DataOutputStream out, Assembly assembly) throws IOException {
-        
-        out.writeByte((int)Constants.ASSEMBLY_IDENTIFIER);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-       
-	if (show.isPublic(assembly)) {
-	    dos.writeString(assembly.getName());
-	} else {
-	    dos.writeString(null);
-	}
-        String[] partNames = assembly.getPartNames();
-        Feature[] parts = assembly.getParts();
-        
-        dos.writeStringArray(partNames);
-        writeFeaturesIndex(dos, parts);
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();
+    private void writeIntArrayConstants(DataOutputStream out, IntArray[] list) 
+        throws IOException {
+        out.writeByte(INT_ARRAY_CONSTANTS_IDENTIFIER);     
+        out.writeInt(list.length);
+        for (IntArray intArray : list) {
+            int[] array = intArray.array;
+            if (array == null) {
+                out.writeByte(Constants.NULL);
+            } else {
+                out.writeByte(Constants.NON_NULL);
+                out.writeInt(array.length);
+                for (int j = 0; j < array.length; j++) {
+                    out.writeInt(array[j]);
+                }
+            }
+        }       
     }
-
-    private void writeBox(DataOutputStream out, Box box) throws IOException {
- 
-       out.writeByte((int)Constants.BOX_IDENTIFIER);
-             
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-       
-       if (show.isPublic(box)) {
-	   dos.writeString(box.getName());
-       } else {
-	   dos.writeString(null);
-       }
-       dos.writeInt(box.getX());
-       dos.writeInt(box.getY());
-       dos.writeInt(box.implGetWidth());
-       dos.writeInt(box.implGetHeight());
-       dos.writeInt(box.implGetOutlineWidth());
-       dos.writeColor(box.implGetOutlineColor());
-       dos.writeColor(box.implGetFillColor());
-       Feature model = box.implGetScalingModel();
-       dos.writeBoolean(model != null);
-       if (model != null) {
-	    dos.writeFeatureReference(model);
-       }
-       
-       out.writeInt(baos.size());
-       baos.writeTo(out);
-       dos.close();
-    }
-    
-    private void writeClipped(DataOutputStream out, Clipped clipped) throws IOException {
-       
-       out.writeByte((int)Constants.CLIPPED_IDENTIFIER);
-       
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-       
-       Rectangle rect = clipped.implGetClipRegion();      
-       if (show.isPublic(clipped)) {
-	   dos.writeString(clipped.getName());
-       } else {
-	   dos.writeString(null);
-       }
-       dos.writeRectangle(rect);
-       dos.writeFeatureReference(clipped.getPart());
-       
-       out.writeInt(baos.size());
-       baos.writeTo(out);
-       dos.close();
-    }
-    
-    private void writeFade(DataOutputStream out, Fade fade) throws IOException {
-       
-       out.writeByte((int)Constants.FADE_IDENTIFIER);
-      
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-
-       if (show.isPublic(fade)) {
-	   dos.writeString(fade.getName());
-       } else {
-	   dos.writeString(null);
-       }
-       dos.writeBoolean(fade.implGetSrcOver());
-       int[] keyframes = fade.implGetKeyframes();
-       dos.writeIntArray(keyframes);
-       int[] keyAlphas = fade.implGetKeyAlphas();
-       dos.writeIntArray(keyAlphas);
-       dos.writeInt(fade.implGetRepeatFrame());
-       Command[] endCommands = fade.implGetEndCommands();
-       writeCommands(dos, endCommands);
-       dos.writeFeatureReference(fade.getPart());
-       
-       out.writeInt(baos.size());
-       baos.writeTo(out);
-       dos.close();
-       
-    }
-
-    private void writeFixedImage(DataOutputStream out, FixedImage image) throws IOException {
-       
-       out.writeByte((int)Constants.FIXEDIMAGE_IDENTIFIER);
-       
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-       
-       if (show.isPublic(image)) {
-	   dos.writeString(image.getName());
-       } else {
-	   dos.writeString(null);
-       }
-       dos.writeInt(image.getX());
-       dos.writeInt(image.getY());
-       dos.writeUTF(image.implGetFileName());
-       Feature sm = image.implGetScalingModel();
-       dos.writeBoolean(sm != null);
-       if (sm != null) {
-	    dos.writeFeatureReference(sm);
-       }
-       
-       out.writeInt(baos.size());
-       baos.writeTo(out);
-       dos.close();
-    }
-
-    private void writeGroup(DataOutputStream out, Group group) throws IOException {
-
-       out.writeByte((int)Constants.GROUP_IDENTIFIER);
-
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-       
-       if (show.isPublic(group)) {
-	   dos.writeString(group.getName());
-       } else {
-	   dos.writeString(null);
-       }
-       writeFeaturesIndex(dos, group.getParts());
-       
-       out.writeInt(baos.size());
-       baos.writeTo(out);
-       dos.close();
- 
-    }
-
-    private void writeImageSequence(DataOutputStream out, ImageSequence imageSequence) throws IOException {
-       
-       out.writeByte((int)Constants.IMAGESEQUENCE_IDENTIFIER);
-
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-                         
-       if (show.isPublic(imageSequence)) {
-	   dos.writeString(imageSequence.getName());
-       } else {
-	   dos.writeString(null);
-       }
-       dos.writeInt(imageSequence.getX());
-       dos.writeInt(imageSequence.getY());
-       dos.writeUTF(imageSequence.implGetFileName());
-       dos.writeStringArray(imageSequence.implGetMiddle());
-       dos.writeUTF(imageSequence.implGetExtension());
-       dos.writeBoolean(imageSequence.implGetRepeat());
-       ImageSequence model = imageSequence.implGetModel();
-       dos.writeBoolean(model != null);
-       if (model != null) {
-           dos.writeFeatureReference(model);
-       }
-       Command[] endCommands = imageSequence.implGetEndCommands();
-       writeCommands(dos, endCommands);
-       Feature sm = imageSequence.implGetScalingModel();
-       dos.writeBoolean(sm != null);
-       if (sm != null) {
-	    dos.writeFeatureReference(sm);
-       }
-       
-       out.writeInt(baos.size());
-       baos.writeTo(out);      
-       dos.close();
-    }
-
-    
-    private void writeSrcOver(DataOutputStream out, SrcOver srcOver) throws IOException {
-       
-       out.writeByte((int)Constants.SRCOVER_IDENTIFIER);
-
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-       
-       if (show.isPublic(srcOver)) {
-	   dos.writeString(srcOver.getName());
-       } else {
-	   dos.writeString(null);
-       }
-       dos.writeFeatureReference(srcOver.getPart());
-      
-       out.writeInt(baos.size());
-       baos.writeTo(out);      
-       dos.close();
-       
-    }
-
-    private void writeText(DataOutputStream out, Text text) throws IOException {
-       
-       out.writeByte(Constants.TEXT_IDENTIFIER);
-
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-       
-       if (show.isPublic(text)) {
-	   dos.writeString(text.getName());
-       } else {
-	   dos.writeString(null);
-       }
-       dos.writeInt(text.getX());
-       dos.writeInt(text.getY());
-       dos.writeStringArray(text.implGetStrings());
-       dos.writeInt(text.implGetVspace());
-       dos.writeFont(text.implGetFont());
-       
-       Color[] colors = text.implGetColors();
-       dos.writeInt(colors.length);
-       for (int i = 0; i < colors.length; i++) {
-          dos.writeColor(colors[i]);  
-       }
-       
-       dos.writeColor(text.implGetBackground());             
-      
-       out.writeInt(baos.size());
-       baos.writeTo(out);
-       dos.close();    
-  
-    }
-
-    private void writeInterpolatedModel(DataOutputStream out, 
-    					InterpolatedModel model) 
-		throws IOException 
-    {
-        out.writeByte((int)Constants.INTERPOLATED_MODEL_IDENTIFIER);
-      
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);  
-        
-       if (show.isPublic(model)) {
-	   dos.writeString(model.getName());
-       } else {
-	   dos.writeString(null);
-       }
-        dos.writeIntArray(model.implGetFrames());
-        dos.writeIntArray(model.implGetCurrValues());
-	int[][] values = model.implGetValues();
-	assert values.length == model.implGetCurrValues().length;
-	for (int i = 0; i < values.length; i++) {
-	    dos.writeIntArray(values[i]);
-	}
-        dos.writeInt(model.implGetRepeatFrame());
-        writeCommands(dos, model.getEndCommands());        
-
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();           
-    }
-
-    private void writeTranslator(DataOutputStream out, Translator translator) throws IOException {
-        out.writeByte((int)Constants.TRANSLATOR_IDENTIFIER);
- 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);  
-        
-        if (show.isPublic(translator)) {
-	   dos.writeString(translator.getName());
-        } else {
-	   dos.writeString(null);
-        }
-        dos.writeInt(translator.implGetAbsoluteXOffset());
-        dos.writeInt(translator.implGetAbsoluteYOffset());
-	dos.writeBoolean(translator.implGetModelIsRelative());
-        dos.writeFeatureReference(translator.getModel()); // write the index only 
-       	dos.writeFeatureReference(translator.getPart());
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();             
-    }
-    
-    private void writeGuaranteeFill(DataOutputStream out, GuaranteeFill feature) throws IOException {
-	out.writeByte((int)Constants.GUARANTEE_FILL_IDENTIFIER);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);  
-        
-	if (show.isPublic(feature)) {
-	    dos.writeString(feature.getName());
-	} else {
-	    dos.writeString(null);
-	}
-	dos.writeFeatureReference(feature.getPart());
-	dos.writeRectangle(feature.implGetGuaranteed());
-	dos.writeRectangleArray(feature.implGetFills());
-      
-        out.writeInt(baos.size());
-        baos.writeTo(out);      
-        dos.close();
-    }
-
-    private void writeSetTarget(DataOutputStream out, SetTarget feature) throws IOException {
-        out.writeByte(Constants.SET_TARGET_IDENTIFIER);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);  
-        
-	if (show.isPublic(feature)) {
-	    dos.writeString(feature.getName());
-	} else {
-	    dos.writeString(null);
-	}
-        dos.writeFeatureReference(feature.getPart());
-	dos.writeInt(feature.implGetTarget());
-      
-        out.writeInt(baos.size());
-        baos.writeTo(out);      
-        dos.close();
-    }
-
-    private void writeUserFeature(DataOutputStream out, Feature feature) throws IOException {
-        out.writeByte((int)Constants.USER_FEATURE_IDENTIFIER);
-         
-        if (feature == null) {
-            out.writeByte(Constants.NULL);
-            return;
-        } 
-        
-        out.writeByte(Constants.NON_NULL);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-        
-        dos.writeUTF(feature.getName());
-        
-        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
-        GrinDataOutputStream dos2 = new GrinDataOutputStream(baos2, this);
-        
-	extensionsWriter.writeExtensionFeature(dos2, feature);
-        
-        dos.writeInt(baos2.size());
-        baos2.writeTo(baos);
-        
-        dos2.close();
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();   	    
-    }
-
-    private void writeUserModifier(DataOutputStream out, Modifier modifier) throws IOException {
-        out.writeByte((int)Constants.USER_MODIFIER_IDENTIFIER);
-         
-        if (modifier == null) {
-            out.writeByte(Constants.NULL);
-            return;
-        } 
-        
-        out.writeByte(Constants.NON_NULL);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-	
-        dos.writeUTF(modifier.getName());
-        dos.writeFeatureReference(modifier.getPart());
-        
-        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
-        GrinDataOutputStream dos2 = new GrinDataOutputStream(baos2, this);
-        
-	extensionsWriter.writeExtensionModifier(dos2, modifier);
-        
-        dos.writeInt(baos2.size());
-        baos2.writeTo(baos);
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();           
-    }
-    
-    private void writeCommands(DataOutputStream out, Command[] commands) 
+   
+    void writeCommands(GrinDataOutputStream out, Command[] commands) 
         throws IOException {
  
        if (commands == null) {
-           out.writeByte(Constants.NULL);
+           out.writeByte(NULL);
            return;
-       } 
+       }     
+       out.writeByte(NON_NULL);
        
-       out.writeByte(Constants.NON_NULL);
-       out.writeInt(commands.length);
-       
-       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-       GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-       
-       for (int i = 0; i < commands.length; i++) {
-          Command command = commands[i];
-          if (command instanceof ActivatePartCommand) {
-             writeActivatePartCmd(dos, (ActivatePartCommand) command);
-          } else if (command instanceof ActivateSegmentCommand) {
-             writeActivateSegmentCmd(dos, (ActivateSegmentCommand) command);
-          } else if (command instanceof SegmentDoneCommand) {
-             writeSegmentDoneCmd(dos, (SegmentDoneCommand) command);
-          } else if (command instanceof SetVisualRCStateCommand) {
-             writeSetVisualRCStateCmd(dos, (SetVisualRCStateCommand) command);
-          } else if (command instanceof SEShowCommand) {
-             writeShowCommand(dos, (SEShowCommand) command);
-          } else {    /* user-defined or null */
-             writeUserCmd(dos, command);
-          }
+       SENode[] nodes = new SENode[commands.length];
+       for (int i = 0; i < nodes.length; i++) {
+           nodes[i] = (SENode) commands[i];
        }
        
-       baos.writeTo(out);
-       dos.close();
-    }
-
-   private void writeShowCommand(DataOutputStream out, SEShowCommand cmd)
-	   throws IOException 
-    {
-        out.writeByte((int)Constants.SHOW_COMMANDS_CMD_IDENTIFIER);
-	out.writeInt(cmd.getCommandNumber());
-	writeCommands(out, cmd.getSubCommands());
-    }
-
-   private void writeSetVisualRCStateCmd(DataOutputStream out, SetVisualRCStateCommand setVisualRCStateCommand) 
-	   throws IOException 
-    {
+       writeDeclarations(out, nodes);
+       writeContents(out, nodes);
        
-        out.writeByte((int)Constants.SETVISUALRCSTATE_CMD_IDENTIFIER);
-       
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-        
-        dos.writeBoolean(setVisualRCStateCommand.getActivated());
-        dos.writeInt(setVisualRCStateCommand.getState());
-        VisualRCHandler handler = setVisualRCStateCommand.getVisualRCHandler();
-        dos.writeInt(rcHandlersList.indexOf(handler));
-        dos.writeBoolean(setVisualRCStateCommand.getRunCommands());
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();     
-   }
-
-   private void writeActivatePartCmd(DataOutputStream out, ActivatePartCommand activatePartCommand) 
-       throws IOException {
-       
-        out.writeByte((int)Constants.ACTIVATEPART_CMD_IDENTIFIER);
-       
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-       
-        Assembly assembly = activatePartCommand.getAssembly();
-        Feature part = activatePartCommand.getPart();
-        
-        dos.writeFeatureReference(assembly);
-        dos.writeFeatureReference(part);
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();                
-   }
-
-   private void writeActivateSegmentCmd(DataOutputStream out, ActivateSegmentCommand activateSegmentCommand) 
-       throws IOException {
-       
-        out.writeByte((int)Constants.ACTIVATESEGMENT_CMD_IDENTIFIER);
-   
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-        
-        dos.writeBoolean(activateSegmentCommand.getPush());
-        dos.writeBoolean(activateSegmentCommand.getPop());
-        Segment segment = activateSegmentCommand.getSegment();
-        dos.writeInt(segmentsList.indexOf(segment));
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();         
-        
-   }    
-
-   private void writeSegmentDoneCmd(DataOutputStream out, SegmentDoneCommand segmentDoneCommand) 
-       throws IOException {
-       
-       out.writeByte((int)Constants.SEGMENTDONE_CMD_IDENTIFIER);
-       
-       // nothing to record for this command.  Return.
-   }
-
-    //
-    // Write out a user command, or null
-    //
-    private void writeUserCmd(DataOutputStream out, Command command) 
-	    throws IOException 
-    {
-        out.writeByte((int)Constants.USER_CMD_IDENTIFIER);
-        
-        if (command == null) {
-            out.writeByte(Constants.NULL);
-            return;
-        } 
-        
-        out.writeByte(Constants.NON_NULL);
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-
-	extensionsWriter.writeExtensionCommand(dos, command);
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();                 
-       
-    }
-
-    private void writeCommandRCHandler(DataOutputStream out, CommandRCHandler commandRCHandler) throws IOException {
-        out.writeByte((int)Constants.COMMAND_RCHANDLER_IDENTIFIER);
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);    
-
-	if (show.isPublic(commandRCHandler)) {
-	    dos.writeString(commandRCHandler.getName());
-	} else {
-	    dos.writeString(null);
-	}
-        dos.writeInt(commandRCHandler.implGetMask());
-        writeCommands(dos, commandRCHandler.implGetCommands());   
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();                 
-    }
-
-    private void writeVisualRCHandler(DataOutputStream out, VisualRCHandler visualRCHandler) throws IOException {
-        out.writeByte((int)Constants.VISUAL_RCHANDLER_IDENTIFIER);
- 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);    
-        
-	if (show.isPublic(visualRCHandler)) {
-	    dos.writeString(visualRCHandler.getName());
-	} else {
-	    dos.writeString(null);
-	}
-        dos.writeIntArray(visualRCHandler.implGetUpDown());
-        dos.writeIntArray(visualRCHandler.implGetRightLeft());
-        dos.writeStringArray(visualRCHandler.implGetStateNames());
-        Command[][] selectCommands = visualRCHandler.implGetSelectCommands();
-        if (selectCommands == null) {
-            dos.writeByte(Constants.NULL);
-        } else {
-            dos.writeByte(Constants.NON_NULL);
-            dos.writeInt(selectCommands.length);
-            for (int i = 0; i < selectCommands.length; i++) {
-                writeCommands(dos, selectCommands[i]);
-            }
-        }
-        Command[][] activateCommands = visualRCHandler.implGetActivateCommands();
-        if (activateCommands == null) {
-            dos.writeByte(Constants.NULL);
-        } else {
-            dos.writeByte(Constants.NON_NULL);
-            dos.writeInt(activateCommands.length);
-            for (int i = 0; i < activateCommands.length; i++) {
-                writeCommands(dos, activateCommands[i]);
-            }
-        }
-        
-        dos.writeRectangleArray(visualRCHandler.implGetMouseRects());
-        dos.writeIntArray(visualRCHandler.implGetMouseRectStates());
-        dos.writeInt(visualRCHandler.implGetTimeout());
-        writeCommands(dos, visualRCHandler.implGetTimeoutCommands());
-       
-	Feature assembly = visualRCHandler.implGetAssembly();
-        dos.writeBoolean(assembly != null);
-	if (assembly != null) {
-	    dos.writeFeatureReference(assembly);
-	}
-        
-        Feature[] selectFeatures = visualRCHandler.implGetSelectFeatures();
-        writeFeaturesIndex(dos, selectFeatures);
-        
-        Feature[] activateFeatures = visualRCHandler.implGetActivateFeatures();
-        writeFeaturesIndex(dos, activateFeatures);
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();         
-    }
-
-    private void writeSegment(DataOutputStream out, Segment segment) throws IOException {
-        
-        out.writeByte((int)Constants.SEGMENT_IDENTIFIER);
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);    
-        
-        dos.writeString(segment.getName());
-	//
-	// We could chech show.isPublic(segment), and write out null
-	// if it isn't.  That would save a bit of space, but the segment
-	// name is really key for debugging.  If we ever do this, there
-	// should be an option for including the names of private segments
-	// for debugging purposes.
-	//
-        
-        Feature[] active = segment.getActiveFeatures();
-        writeFeaturesIndex(dos, active);
-      
-        Feature[] setup = segment.getSetupFeatures();
-        writeFeaturesIndex(dos, setup);    
-
-        RCHandler[] rcHandlers = segment.getRCHandlers();
-        dos.writeInt(rcHandlers.length);
-        for (int i = 0; i < rcHandlers.length; i++) {
-            dos.writeInt(rcHandlersList.indexOf(rcHandlers[i]));
-        }
-        
-        dos.writeBoolean(segment.getNextOnSetupDone());
-        
-        writeCommands(dos, segment.getNextCommands());
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();                 
-    }
-    
-    private void writeFeaturesIndex(DataOutputStream out, Feature [] features) throws IOException {
-        if (features == null) {
-            out.writeByte(Constants.NULL);
-            return;
-        } 
-        out.writeByte(Constants.NON_NULL);
-        out.writeInt(features.length);
-        
-        for (int i = 0; i < features.length; i++) {
-            if (features[i] == null) {
-                out.writeInt(-1);
-            } else {
-		int index = featuresList.indexOf(features[i]);
-		if (index < 0) {
-		    throw new IOException("Invalid feature index");
-		}
-                out.writeInt(index);
-            }
-        }   
-    }
-
-    private void writePublicElements(DataOutputStream out) throws IOException {
-        
-        out.writeInt(Constants.PUBLIC_ELEMENTS_IDENTIFIER);
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);    
-
-	for (int i = 0; i < segmentsList.size(); i++) {
-	    Segment seg = (Segment) segmentsList.get(i);
-	    if (show.isPublic(seg)) {
-		dos.writeInt(i);
-	    }
-	}
-	dos.writeInt(-1);
-
-	for (int i = 0; i < featuresList.size(); i++) {
-	    Feature feature = (Feature) featuresList.get(i);
-	    if (show.isPublic(feature)) {
-		dos.writeInt(i);
-	    }
-	}
-	dos.writeInt(-1);
-
-	for (int i = 0; i < rcHandlersList.size(); i++) {
-	    RCHandler hand = (RCHandler) rcHandlersList.get(i);
-	    if (show.isPublic(hand)) {
-		dos.writeInt(i);
-	    }
-	}
-	dos.writeInt(-1);
-        
-        out.writeInt(baos.size());
-        baos.writeTo(out);
-        dos.close();                 
-    }
-    
-
-    /**
-     * Sort the array to eliminates forward references within this array of Features.
-     * Note that the references from the Command objects within a Feature is ignored.
-     */
-    private ArrayList createFeaturesArrayList(Feature[] features) {
-        ArrayList common = new ArrayList();
-        ArrayList deferred = new ArrayList();
-        
-        for (int i = 0; i < features.length; i++) {
-            /* 7 types of Features that could have forward references.  */
-            if (features[i] instanceof Assembly || 
-                features[i] instanceof Group ||
-                features[i] instanceof Modifier || 
-                features[i] instanceof Box || 
-                features[i] instanceof FixedImage || 
-                features[i] instanceof ImageSequence || 
-                features[i] instanceof Translator) {
-                   deferred.add(features[i]);
-            } else {    
-                common.add(features[i]);
-            }          
-        }
-        
-        // Sort the deferred list to ensure that items contain no forward references in them.
-        ArrayList sorted = new ArrayList();
-        Feature feature;
-        while (!deferred.isEmpty()) {
-            
-            for (int i = 0; i < deferred.size(); i++ ) {
-                feature = (Feature) deferred.get(i);
-                if (!containsReference(deferred, feature)) {
-                    sorted.add(feature);
-                }    
-            }
-            deferred.removeAll(sorted);
-        }
-        
-        common.addAll(sorted);
-        
-        return common;
-    }
-    
-    private boolean containsReference(ArrayList list, Feature feature) {
-        if (feature instanceof Assembly) {
-            Feature[] parts = ((Assembly)feature).getParts();
-            for (int i = 0; i < parts.length; i++) {
-                if (list.contains(parts[i])) {
-                    return true;
-                }   
-            }    
-            return false;
-        } else if (feature instanceof Group) {
-            Feature[] parts = ((Group)feature).getParts();
-            for (int i = 0; i < parts.length; i++) {
-                if (list.contains(parts[i])) {
-                    return true;
-                }
-            }
-            return false;
-        } else if (feature instanceof Modifier) {
-            Feature part = ((Modifier)feature).getPart();
-            if (list.contains(part)) {
-                return true;
-            }
-            return false;
-        } else if (feature instanceof Translator) {
-            Feature part = ((Translator)feature).getPart();
-            Feature model = ((Translator)feature).getModel();
-            if (list.contains(part) || list.contains(model)) {
-                return true;
-            }
-            return false;            
-        } else if (feature instanceof Box) {
-            Feature model = ((Box) feature).implGetScalingModel();
-	    return list.contains(model);
-        } else if (feature instanceof FixedImage) {
-            Feature model = ((FixedImage) feature).implGetScalingModel();
-	    return list.contains(model);
-        } else if (feature instanceof ImageSequence) {
-            Feature model = ((ImageSequence) feature).implGetScalingModel();
-	    return list.contains(model);
-        } else {
-            throw new RuntimeException("Unexpected instance " + feature);
-        }
-    }
-
-    public void writeCommandClass(SEShow show, boolean forXlet, String fileName)
+       for (int i = 0; i < nodes.length; i++) {
+           commands[i] = (Command) nodes[i];
+       }
+    }   
+  
+   /**
+    * Writes out an auto-generated java class that includes information about
+    * Extension classes and ShowCommand subclasses.
+    */
+   public void writeCommandClass(SEShow show, boolean forXlet, String fileName)
            throws IOException 
    {
        SEShowCommands cmds = show.getShowCommands();
@@ -1172,9 +507,86 @@ public class GrinBinaryWriter {
            return;      // No commands class
        }
        FileWriter w = new FileWriter(fileName);
-       w.write(cmds.getJavaSource(forXlet));
+       String extensionCode = generateExtensionCode();
+       w.write(cmds.getJavaSource(forXlet, extensionCode));
        w.close();
    }
+   
+   private String generateExtensionCode() {     
+       
+       String[] list = (String[]) runtimeClassNames.toArray(String.class);
+       assert (extensionsIndex <= list.length);
+       
+       String nodeClassName = Node.class.getName();
+       StringBuffer generated = new StringBuffer();
+       generated.append("    public " + nodeClassName + " getInstanceOf(Show show, int id) ");
+       generated.append("throws java.io.IOException {\n");
+       generated.append("        switch (id) {\n");
+       for (int i = extensionsIndex; i < list.length; i++ ) {
+            String className = (String) list[i];
+            generated.append("         case " + i + ": ");
+            if (className == null || "".equals(className)) {
+                generated.append(" return null; \n");
+            } else {
+                generated.append(" return new " + className + "(show); \n");
+            }    
+        }
+        generated.append("        }\n");
+        generated.append("    throw new java.io.IOException(\"Error instantiating extension, id=\" + id); \n \n    }\n");
+        
+        return generated.toString();             
+   }
+    
+   private class IntArray {
+       int[] array;
+       int hashcode = 0;
+       boolean isHashComputed = false;
+       public IntArray(int[] array) {
+           this.array = array;
+       }
+       public boolean equals(Object other) {
+           if (!(other instanceof IntArray)) {
+               return false;
+           }
+           return Arrays.equals(array, ((IntArray)other).array);
+       }
+       public synchronized int hashCode() {
+           if (!isHashComputed) {
+              hashcode = Arrays.hashCode(array);
+              isHashComputed = true;
+           }
+           return hashcode;
+       }
+   }
+   
+   private class IndexedSet<T> {
 
+        HashMap<T, Integer> mapTToInt = new HashMap();
+        
+        public synchronized int getIndex(T element) {
+            Integer i = mapTToInt.get(element);
+            if (i == null) {
+                i = new Integer(mapTToInt.size());
+                mapTToInt.put(element, i);
+            }
+            return i;    // autoboxing converts to int
+        }
+
+        public synchronized T[] toArray(Class type) {
+            
+            T[] result = (T[]) Array.newInstance(type, size());
+            
+            for (Map.Entry<T, Integer> entry : mapTToInt.entrySet()) {
+               assert result[entry.getValue()] == null;
+               result[entry.getValue()] = entry.getKey();
+            }
+            
+            return result;
+        }
+
+        public synchronized int size() {
+            return mapTToInt.size();
+        }
+    }
     
 }

@@ -57,10 +57,12 @@
 
 package com.hdcookbook.grin.features;
 
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 
@@ -73,43 +75,26 @@ import java.awt.Rectangle;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class FixedImage extends Feature {
+public class FixedImage extends Feature implements Node {
 
-    private int x;
-    private int y;
+    protected int x;
+    protected int y;
     private int width = 0;
     private int height = 0;
-    private String fileName;
-    private InterpolatedModel scalingModel = null;
-    private Rectangle scaledBounds = null;
+    protected String fileName;
+    protected InterpolatedModel scalingModel = null;
+    protected Rectangle scaledBounds = null;
 
-    private ManagedImage image;
+    protected ManagedImage image;
     private boolean setupMode = false;
     private Object setupMonitor = new Object();
     private boolean imageSetup = false;
     private boolean isActivated = false;
     private DrawRecord drawRecord = new DrawRecord();
-
-    public FixedImage(Show show, String name, int x, int y, String fileName) 
-    		throws IOException 
-    {
-	super(show, name);
-	this.x = x;
-	this.y = y;
-	this.fileName = fileName;
+    
+    public FixedImage(Show show) {
+        super(show);
     }
-
-    public void implSetScalingModel(InterpolatedModel model) {
-	this.scalingModel = model;
-	if (model != null) {
-	    scaledBounds = new Rectangle();
-	}
-    }
-
-    public InterpolatedModel implGetScalingModel() {
-	return scalingModel;
-    }
-
 
     /**
      * Initialize this feature.  This is called on show initialization.
@@ -133,13 +118,6 @@ public class FixedImage extends Feature {
     public int getY() {
 	return y;
     }
-
-    /* 
-     * Internal use only 
-     */
-    public String implGetFileName() {
-        return fileName;
-    }
     
     /**
      * Get the underlying image that we display.
@@ -148,34 +126,6 @@ public class FixedImage extends Feature {
 	return image;
     }
     
-    /**
-     * Internal use only
-     **/
-    public void implSetX(int x) {
-	this.x = x;
-    }
-
-    /**
-     * Internal use only
-     **/
-    public void implSetY(int y) {
-	this.y = y;
-    }
-
-    /* 
-     * Internal use only 
-     */
-    public void implSetFileName(String fileName) {
-        this.fileName = fileName;
-    }
-    
-    /**
-     * Internal use only
-     **/
-    public void implSetImage(ManagedImage image) {
-	this.image = image;
-    }    
-
     /**
      * Free any resources held by this feature.  It is the opposite of
      * setup; each call to setup() shall be balanced by
@@ -284,5 +234,18 @@ public class FixedImage extends Feature {
      **/
     public void nextFrame() {
 	// do nothing
+    }
+    
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+        this.x = in.readInt();
+        this.y = in.readInt();
+        this.fileName = in.readString();    
+        if (in.readBoolean()) {
+            this.scalingModel = (InterpolatedModel) in.readFeatureReference();                    
+            this.scaledBounds = new Rectangle();
+        } 
     }
 }

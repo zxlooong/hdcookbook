@@ -114,8 +114,7 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
                 
                 AssetFinder.setSearchPath(new String[]{""}, null);      
 	        GrinBinaryReader reader = new GrinBinaryReader(
-                        AssetFinder.getURL(grinScriptName).openStream(), 
-                        new ExtensionsReaderImpl());
+                        AssetFinder.getURL(grinScriptName).openStream());
                 
 	        reader.readShow(show);
                

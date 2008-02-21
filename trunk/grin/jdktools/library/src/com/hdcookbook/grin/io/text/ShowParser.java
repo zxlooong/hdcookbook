@@ -61,29 +61,36 @@ import com.hdcookbook.grin.SEShowCommands;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.SESegment;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.commands.ActivateSegmentCommand;
-import com.hdcookbook.grin.commands.ActivatePartCommand;
-import com.hdcookbook.grin.commands.SetVisualRCStateCommand;
-import com.hdcookbook.grin.commands.SegmentDoneCommand;
+import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
+import com.hdcookbook.grin.commands.SEActivatePartCommand;
+import com.hdcookbook.grin.commands.SESegmentDoneCommand;
+import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
 import com.hdcookbook.grin.features.Assembly;
-import com.hdcookbook.grin.features.Box;
-import com.hdcookbook.grin.features.FixedImage;
-import com.hdcookbook.grin.features.Clipped;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SrcOver;
-import com.hdcookbook.grin.features.Fade;
-import com.hdcookbook.grin.features.Group;
-import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.SetTarget;
-import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.InterpolatedModel;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.features.SEImageSequence;
+import com.hdcookbook.grin.features.SEInterpolatedModel;
+import com.hdcookbook.grin.features.SEAssembly;
+import com.hdcookbook.grin.features.SEBox;
+import com.hdcookbook.grin.features.SEClipped;
+import com.hdcookbook.grin.features.SEFade;
+import com.hdcookbook.grin.features.SEFixedImage;
+import com.hdcookbook.grin.features.SEGroup;
+import com.hdcookbook.grin.features.SEGuaranteeFill;
+import com.hdcookbook.grin.features.SEImageSequence;
+import com.hdcookbook.grin.features.SESetTarget;
+import com.hdcookbook.grin.features.SESrcOver;
+import com.hdcookbook.grin.features.SEText;
+import com.hdcookbook.grin.features.SETranslator;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.VisualRCHandler;
-import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.input.SECommandRCHandler;
+import com.hdcookbook.grin.input.SEVisualRCHandler;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.builders.MenuAssemblyHelper;
 import com.hdcookbook.grin.io.builders.TranslatorHelper;
@@ -214,7 +221,7 @@ public class ShowParser {
 	    tok = lexer.getString();
 	}
 
-        if ("java_command_class".equals(tok)) {
+        if ("java_generated_class".equals(tok)) {
             String className = lexer.getString();
             parseExpected("[[");
             StringBuffer xletClassBody = new StringBuffer();
@@ -332,7 +339,7 @@ public class ShowParser {
 		Feature[] a = makeFeatureList(active);
 		Feature[] s = makeFeatureList(setup);
 		RCHandler[] h = makeRCHandlerList(rcHandlers);
-		builder.addSegment(name,line,new Segment(name, a, s, h,
+		builder.addSegment(name,line,new SESegment(name, a, s, h,
 				   nextOnSetupDone, next));
 	    }
 	};
@@ -443,7 +450,7 @@ public class ShowParser {
 	if (!(";".equals(tok))) {
 	    lexer.reportError("';' expected, " + tok + " seen");
 	}
-	final FixedImage f = new FixedImage(show, name, x, y, fileName);
+	final SEFixedImage f = new SEFixedImage(show, name, x, y, fileName);
 	builder.addFeature(name,line, f);
 	if (scalingModel != null) {
 	    final String scalingModelF = scalingModel;
@@ -455,7 +462,7 @@ public class ShowParser {
 				  " can't find scaling_model "
 				  + scalingModelF + ".");
 		    }
-		    f.implSetScalingModel((InterpolatedModel) smf);
+		    f.setScalingModel((InterpolatedModel) smf);
 		}
 	    };
 	    deferred[0].addElement(fw);
@@ -511,8 +518,8 @@ public class ShowParser {
 	} else {
 	    lexer.reportError("';' expected, " + tok + " seen");
 	}
-	final ImageSequence f 
-                = new ImageSequence(show, name, x, y, fileName, 
+	final SEImageSequence f 
+                = new SEImageSequence(show, name, x, y, fileName, 
                                     middle,  extension, repeat, endCommands);
 	builder.addFeature(name, line, f);
 	if (model != null) {
@@ -540,7 +547,7 @@ public class ShowParser {
 				  " can't find scaling_model "
 				  + scalingModelF + ".");
 		    }
-		    f.implSetScalingModel((InterpolatedModel) smf);
+		    f.setScalingModel((InterpolatedModel) smf);
 		}
 	    };
 	    deferred[0].addElement(fw);
@@ -578,7 +585,7 @@ public class ShowParser {
 	if (!(";".equals(tok))) {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
-	final Box box = new Box(show, name, placement.x, placement.y,
+	final SEBox box = new SEBox(show, name, placement.x, placement.y,
 	                        placement.width, placement.height, 
 			        outlineWidth, outlineColor, fillColor);
 	builder.addFeature(name, line, box);
@@ -592,7 +599,7 @@ public class ShowParser {
 				  " can't find scale_model "
 				  + scalingModelF + ".");
 		    }
-		    box.implSetScalingModel((InterpolatedModel) smf);
+		    box.setScalingModel((InterpolatedModel) smf);
 		}
 	    };
 	    deferred[0].addElement(fw);
@@ -619,7 +626,8 @@ public class ShowParser {
 	    partsList.add(parseSubFeature(tok));
 	}
 	parseExpected(";");
-	final Assembly a = new Assembly(show, name);
+	final SEAssembly a = new SEAssembly(show);
+        a.setName(name);
 	builder.addFeature(name, line, a);
 	final String[] names = namesList.toArray(new String[namesList.size()]);
 	final SubFeature[] parts 
@@ -657,7 +665,8 @@ public class ShowParser {
 	    helper.parts.add(parseMenuAssemblyFeatures());
 	}
 	parseExpected(";");
-	Assembly a = new Assembly(show, name);
+	SEAssembly a = new SEAssembly(show);
+        a.setName(name);
 	helper.assembly = a;
 	builder.addFeature(name, line, a);
 	ForwardReference fw = new ForwardReference(lexer) {
@@ -704,7 +713,7 @@ public class ShowParser {
 	String name = parseFeatureName(hasName);
 	final SubFeature[] parts = parsePartsList();
 	parseExpected(";");
-	final Group group = new Group(show, name);
+	final SEGroup group = new SEGroup(show, name);
 	builder.addFeature(name, line, group);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
@@ -720,7 +729,7 @@ public class ShowParser {
 	SubFeature part = parseSubFeature(lexer.getString());
 	Rectangle clipRegion = parseRectangle();
 	parseExpected(";");
-	Clipped clipped = new Clipped(show, name, clipRegion);
+	SEClipped clipped = new SEClipped(show, name, clipRegion);
 	builder.addFeature(name, line, clipped);
 	resolveModifier(clipped, part);
 	return clipped;
@@ -730,7 +739,7 @@ public class ShowParser {
 	String name = parseFeatureName(hasName);
 	SubFeature part = parseSubFeature(lexer.getString());
 	parseExpected(";");
-	SrcOver so = new SrcOver(show, name);
+	SESrcOver so = new SESrcOver(show, name);
 	builder.addFeature(name, line, so);
 	resolveModifier(so, part);
 	return so;
@@ -808,7 +817,7 @@ public class ShowParser {
 	if (fs[0] != 0) { 
 	    lexer.reportError("Keyframes must start at frame 0");
 	}
-	Fade fade = new Fade(show, name, srcOver, fs, alphas, repeatFrame,
+	SEFade fade = new SEFade(show, name, srcOver, fs, alphas, repeatFrame,
 			     endCommands);
 	builder.addFeature(name, line, fade);
 	resolveModifier(fade, part);
@@ -865,7 +874,7 @@ public class ShowParser {
 		result[i] = (Rectangle) v.elementAt(i);
 	    }
 	}
-	GuaranteeFill f = new GuaranteeFill(show, name, g, result);
+	SEGuaranteeFill f = new SEGuaranteeFill(show, name, g, result);
 	builder.addFeature(name, line, f);
 	resolveModifier(f, part);
 	return f;
@@ -889,7 +898,7 @@ public class ShowParser {
 	    lexer.reportError("Target name \"" + targetName + "\" not found");
 	}
 	parseExpected(";");
-	SetTarget f = new SetTarget(show, name, target);
+	SESetTarget f = new SESetTarget(show, name, target);
 	builder.addFeature(name, line, f);
 	resolveModifier(f, part);
 	return f;
@@ -978,7 +987,7 @@ public class ShowParser {
 	final String translationName = lexer.getString();
 	final SubFeature[] parts = parsePartsList();
 	parseExpected(";");
-	final Translator trans = new Translator(show, name);
+	final SETranslator trans = new SETranslator(show, name);
 	builder.addFeature(name, line, trans);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
@@ -991,7 +1000,7 @@ public class ShowParser {
                 if (fa.length == 1) {
                     trans.setup((InterpolatedModel) t, fa[0]);
                 } else {
-                    Group group = new Group(show, null);
+                    SEGroup group = new SEGroup(show, null);
                     group.setup(fa);
                     trans.setup((InterpolatedModel) t, group);
                     builder.addFeature(null, 0, group);
@@ -1056,7 +1065,7 @@ public class ShowParser {
 	if (cols.length < 1) {
 	    lexer.reportError("At least one color needed");
 	}
-	Text text = new Text(show, name, x, y, textStrings, vspace, 
+	SEText text = new SEText(show, name, x, y, textStrings, vspace, 
 			     font, cols, background);
 	builder.addFeature(name, line, text);
 	return text;
@@ -1247,7 +1256,7 @@ public class ShowParser {
 	helper.setMouseRectStates(null);
 	helper.setTimeout(timeout);
 	helper.setTimeoutCommands(timeoutCommands);
-	final VisualRCHandler hand = helper.getFinishedHandler();
+	final SEVisualRCHandler hand = helper.getFinishedHandler();
 	builder.addRCHandler(handlerName, lineStart, hand);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
@@ -1325,7 +1334,7 @@ public class ShowParser {
 	if (!(";".equals(tok))) {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
-	final VisualRCHandler hand = helper.getFinishedHandler();
+	final SEVisualRCHandler hand = helper.getFinishedHandler();
 	builder.addRCHandler(handlerName, lineStart, hand);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
@@ -1529,7 +1538,7 @@ public class ShowParser {
 	Command[] commands = parseCommands();
 	parseExpected(";");
 	builder.addRCHandler(handlerName, lineStart,
-			     new CommandRCHandler(handlerName, mask, commands));
+			     new SECommandRCHandler(handlerName, mask, commands));
     }
 
     //
@@ -1617,8 +1626,8 @@ public class ShowParser {
 	if (!(";".equals(tok))) {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
-	final ActivateSegmentCommand cmd 
-		= new ActivateSegmentCommand(show, push, pop);
+	final SEActivateSegmentCommand cmd 
+		= new SEActivateSegmentCommand(show, push, pop);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
 		if (!pop) {
@@ -1644,7 +1653,7 @@ public class ShowParser {
 	final String assemblyName = lexer.getString();
 	final String partName = lexer.getString();
 	parseExpected(";");
-	final ActivatePartCommand cmd = new ActivatePartCommand();
+	final SEActivatePartCommand cmd = new SEActivatePartCommand(show);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
 		Assembly a = lookupAssemblyOrFail(assemblyName);
@@ -1661,7 +1670,7 @@ public class ShowParser {
 
     private Command parseSegmentDone() throws IOException {
 	parseExpected(";");
-	return new SegmentDoneCommand(show);
+	return new SESegmentDoneCommand(show);
     }
 
     private Command parseInvokeAssembly() throws IOException {
@@ -1685,7 +1694,7 @@ public class ShowParser {
 	final int row = r;
 	final int column = c;
 	parseExpected(";");
-	final SetVisualRCStateCommand cmd = new SetVisualRCStateCommand();
+	final SESetVisualRCStateCommand cmd = new SESetVisualRCStateCommand(show);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
 		RCHandler h = builder.getNamedRCHandler(handlerName);
@@ -1739,7 +1748,7 @@ public class ShowParser {
 	if (!";".equals(tok)) {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");            
         }
-	final SetVisualRCStateCommand cmd = new SetVisualRCStateCommand();
+	final SESetVisualRCStateCommand cmd = new SESetVisualRCStateCommand(show);
 	final String stateF = state;
 	final boolean activateF = activate;
         final boolean runCommandsF = runCommands;
@@ -2027,7 +2036,6 @@ public class ShowParser {
                     Command cmd = parseCommand(lexer.getString());
                     parseExpected("]]");
                     src = command.addSubCommand(cmd);
-                    src = src + "   // " + cmd;
                 }
                 if (xletSource != null) {
                     xletSource.append(src);

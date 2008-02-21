@@ -55,8 +55,11 @@
 
 package com.hdcookbook.grin.commands;
 
+import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 
 import java.io.IOException;
@@ -66,15 +69,15 @@ import java.io.IOException;
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class ActivateSegmentCommand extends Command {
+public class ActivateSegmentCommand extends Command implements Node {
   
-    private Show show;
-    private Segment segment;
-    private boolean push;
-    private boolean pop;
+    protected Segment segment;
+    protected boolean push;
+    protected boolean pop;
 
-    public ActivateSegmentCommand(Show show, boolean push, boolean pop) {
-	this.show = show;
+    public ActivateSegmentCommand(Show show, 
+            boolean push, boolean pop) {
+        super(show);
 	this.push = push;
 	this.pop = pop;
     }
@@ -94,13 +97,10 @@ public class ActivateSegmentCommand extends Command {
     public Segment getSegment() {
         return segment;
     }
-
-    /**
-     * Called by the parser
-     **/
+    
     public void setup(Segment segment) {
 	this.segment = segment;
-    }
+    }    
 
     public void execute() {
 	if (push) {
@@ -129,5 +129,15 @@ public class ActivateSegmentCommand extends Command {
 	} else {
 	    return result;
 	}
+    }
+    
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException { 
+                
+        in.readSuperClassData(this);
+        
+        this.push = in.readBoolean();
+        this.pop = in.readBoolean();
+        this.segment = in.readSegmentReference();
     }
 }

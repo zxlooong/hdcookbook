@@ -144,7 +144,7 @@ public abstract class RyanDirector extends Director {
 	    rdr = new BufferedReader(
 			new InputStreamReader(source.openStream(), "UTF-8"));
             ShowBuilder builder = new ShowBuilder();
-            builder.setExtensionsBuilderFactory(new RyanExtensionsParser(this));
+            builder.setExtensionsParser(new RyanExtensionsParser(this));
 	    ShowParser p = new ShowParser(rdr, showName, show, builder);
 	    p.parse();
 	    rdr.close();

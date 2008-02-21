@@ -59,8 +59,7 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.io.ExtensionsBuilderFactory;
-import com.hdcookbook.grin.io.binary.ExtensionsWriter;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.io.text.Lexer;
 import com.hdcookbook.grin.io.text.ExtensionsParser;
 import java.io.IOException;
@@ -73,7 +72,6 @@ import java.io.IOException;
  * @author Bill Foote (http://jovial.com)
  */
 public class RyanExtensionsParser 
-        extends ExtensionsBuilderFactory 
         implements ExtensionsParser {
    
     RyanDirector director;
@@ -106,29 +104,41 @@ public class RyanExtensionsParser
     {
 	Command result = null;
 	if ("ryan:start_video".equals(typeName)) {
-	    result = new Command() {
+	    result = new Command(show) {
 	       public void execute() { 
 		    director.startVideo();
 	       }
+               public void readInstanceData(GrinDataInputStream in) throws IOException {
+                    throw new UnsupportedOperationException("Not supported yet.");
+               }
 	    };
 	} else if ("ryan:play_mode_interactive".equals(typeName)) {
 	    final boolean val = lexer.getBoolean();
-	    result = new Command() {
+	    result = new Command(show) {
 	       public void execute() { 
 		    director.setInteractiveMode(val);
 	       }
+               public void readInstanceData(GrinDataInputStream in) throws IOException {
+                    throw new UnsupportedOperationException("Not supported yet.");
+               }
 	    };
 	} else if ("ryan:toggle_commentary".equals(typeName)) {
-	    result = new Command() {
+	    result = new Command(show) {
 	       public void execute() { 
 		    director.toggleCommentary();
 	       }
+               public void readInstanceData(GrinDataInputStream in) throws IOException {
+                    throw new UnsupportedOperationException("Not supported yet.");
+               }
 	    };
 	} else if ("ryan:commentary_start".equals(typeName)) {
-	    result = new Command() {
+	    result = new Command(show) {
 	       public void execute() { 
 		    director.startCommentary();
 	       }
+               public void readInstanceData(GrinDataInputStream in) throws IOException {
+                    throw new UnsupportedOperationException("Not supported yet.");
+               }
 	    };
 	} else {
 	    throw new IOException("Unrecognized command type \"" + typeName + "\"");
@@ -137,15 +147,5 @@ public class RyanExtensionsParser
         lexer.parseExpected(";");
         
 	return result;
-    }
-
-    @Override
-    public ExtensionsWriter getExtensionsWriter() {
-        return null; // Not writing Ryan in binary file format right now
-    }
-
-    @Override
-    public ExtensionsParser getExtensionsParser() {
-        return this;
     }
 }

@@ -128,7 +128,7 @@ A show can be assembled from a simple show file that's parsed when
 a Show is created.  Here's BNF describing the syntax of a show file:
 </p>
 <pre>
-    show ::= "show" setting*  [ exports ] [ java_command_class ]
+    show ::= "show" setting*  [ exports ] [ java_generated_class ]
     	     (segment | feature | rc_handler | | mosaic_hint)* 
     	     "end_show"
 
@@ -147,7 +147,7 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 	# The names in name_list may contain wildcards like
 	# "*", "?", "[wxz]" and "[1-5]".
          
-    java_command_class ::= "java_command_class" name "[[" java_source "]]"
+    java_generated_class ::= "java_generated_class" name "[[" java_source "]]"
         # This contains the full text of the class declaration.  The class
         # must extend com.hdcookbook.grin.commands.ShowCommands, and must
         # contain the string JAVA_COMMAND_BODY.  JAVA_COMMAND_BODY gets

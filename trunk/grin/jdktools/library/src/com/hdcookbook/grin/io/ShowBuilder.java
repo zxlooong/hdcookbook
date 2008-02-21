@@ -57,27 +57,19 @@ package com.hdcookbook.grin.io;
 
 
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.InterpolatedModel;
+import com.hdcookbook.grin.features.SEInterpolatedModel;
 import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.io.binary.ExtensionsReader;
-import com.hdcookbook.grin.io.binary.ExtensionsWriter;
 import com.hdcookbook.grin.io.builders.DeferredBuilder;
 import com.hdcookbook.grin.io.text.ExtensionsParser;
-import com.hdcookbook.grin.util.Debug;
 
-import java.io.Reader;
 import java.io.IOException;
-import java.awt.Font;
-import java.awt.Color;
 
 import java.util.Arrays;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -112,8 +104,7 @@ public class ShowBuilder {
     private List<DeferredBuilder> deferredBuilders
     	= new ArrayList<DeferredBuilder>();
 
-    private ExtensionsBuilderFactory factory;
-    private ExtensionsReader extensionsReader;
+    private ExtensionsParser extensionsParser;
     
     public ShowBuilder() {
     }
@@ -122,12 +113,8 @@ public class ShowBuilder {
         this.show = show;
     }    
 
-    public void setExtensionsBuilderFactory(ExtensionsBuilderFactory factory) {
-        this.factory = factory;
-    }
-    
-    public void setExtensionsReader(ExtensionsReader reader) {
-        this.extensionsReader = reader;
+    public void setExtensionsParser(ExtensionsParser parser) {
+        this.extensionsParser = parser;
     }
     
     /**
@@ -135,30 +122,9 @@ public class ShowBuilder {
      * or null if it is not set.
      */
     public ExtensionsParser getExtensionsParser() {
-        if (factory == null) {
-            return null;
-        }
-        return factory.getExtensionsParser();
+        return extensionsParser;
     }
  
-    /**
-     * Returns an instance of ExtensionsWriter that this Builder is working with,
-     * or null if it is not set.
-     */
-    public ExtensionsWriter getExtensionsWriter() {
-        if (factory == null) {
-            return null;
-        }
-        return factory.getExtensionsWriter();
-    }
-
-    /**
-     * Returns an instance of ExtensionsReader that this Builder is working with,
-     * or null if it is not set.
-     */
-    public ExtensionsReader getExtensionsReader() {
-        return extensionsReader;
-    }
     /** 
      * Called when a new feature is encountered.
      **/
@@ -406,7 +372,7 @@ public class ShowBuilder {
 		    // list of values for this parameter.
 	    }
 	}
-	return new InterpolatedModel(show, name, frames, currValues, values,
+	return new SEInterpolatedModel(show, name, frames, currValues, values,
 				     repeatFrame, commands);
     }
 }

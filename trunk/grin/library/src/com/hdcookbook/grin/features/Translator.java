@@ -55,15 +55,16 @@
 
 package com.hdcookbook.grin.features;
 
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 
-import java.io.IOException;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.io.IOException;
 
 /**
  * A Translator wraps other features, and adds movement taken from a
@@ -77,7 +78,7 @@ import java.awt.Rectangle;
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class Translator extends Modifier {
+public class Translator extends Modifier implements Node {
 
     /**
      * The field number in our model for the X coordinate
@@ -93,11 +94,11 @@ public class Translator extends Modifier {
      **/
     public final static int Y_FIELD = 1;
 
-    private InterpolatedModel model;
+    protected InterpolatedModel model;
 
-    private int fx = 0;		// Feature's start position (if absolute model)
-    private int fy = 0;
-    private boolean modelIsRelative;	// false if absolute.
+    protected int fx = 0;		// Feature's start position (if absolute model)
+    protected int fy = 0;
+    protected boolean modelIsRelative;	// false if absolute.
 
     private int dx;		// For this frame
     private int dy;
@@ -113,6 +114,11 @@ public class Translator extends Modifier {
 	// parent RenderContext from our child.
 	//
     private ChildContext childContext = new ChildContext();
+
+    public void setup(InterpolatedModel model, Feature part) {
+	super.setup(part);
+	this.model = model;
+    }
     
     class ChildContext extends RenderContext {
 	RenderContext	parent;
@@ -134,17 +140,9 @@ public class Translator extends Modifier {
 	    return parent.setTarget(target);
 	}
     };	// End of RenderContext anonymous inner class
-
-    public Translator(Show show, String name) {
-	super(show, name);
-    }
     
-    /**
-     * Called from the parser
-     **/
-    public void setup(InterpolatedModel model, Feature part) {
-	super.setup(part);
-	this.model = model;
+    public Translator(Show show) {
+        super(show);
     }
 
     /**
@@ -172,35 +170,10 @@ public class Translator extends Modifier {
     }
 
     /**
-     * Used by binary writer
-     **/
-    public int implGetAbsoluteXOffset() {
-	return fx;
-    }
-
-    /**
-     * Used by binary writer
-     **/
-    public int implGetAbsoluteYOffset() {
-	return fy;
-    }
-
-    /**
-     * Used by binary writer
-     **/
-    public boolean implGetModelIsRelative() {
-	return modelIsRelative;
-    }
-
-    /**
      * Get the translation that moves us
      **/
     public InterpolatedModel getModel() {
 	return model;
-    }
-    
-    public void implSetModel(InterpolatedModel model) {
-	this.model = model;
     }
 
     /**
@@ -209,7 +182,6 @@ public class Translator extends Modifier {
     public void initialize() {
 	super.initialize();
     }
-
     /**
      * @inheritDoc
      **/
@@ -285,4 +257,13 @@ public class Translator extends Modifier {
 	gr.translate(-dx, -dy);
     }
 
+    public void readInstanceData(GrinDataInputStream in, int length) 
+            throws IOException {
+                
+        in.readSuperClassData(this);
+ 	this.fx = in.readInt();
+	this.fy = in.readInt();
+	this.modelIsRelative = in.readBoolean();
+        this.model = (InterpolatedModel) in.readFeatureReference();
+    }
 }
