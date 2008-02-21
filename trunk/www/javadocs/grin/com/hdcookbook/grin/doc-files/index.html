@@ -1,10 +1,11 @@
 <html><body>
-</pre>
+
+
 <style type="text/css">
   P.pagebreak {page-break-before: always}
 </style>
 <h2><center>GRIN - an extensible Java animation framework for TV</center></h2>
-<h3><center>Version 1.1.0, November 21, 2007</h3></center>
+<h3><center>Version 1.1.0, November 21, 2007</center></h3>
 <p><center>
 <img src="grin_bear.jpg">
 </center></p>
@@ -127,7 +128,7 @@ A show can be assembled from a simple show file that's parsed when
 a Show is created.  Here's BNF describing the syntax of a show file:
 </p>
 <pre>
-    show ::= "show" setting*  [ exports ] 
+    show ::= "show" setting*  [ exports ] [ java_generated_class ]
     	     (segment | feature | rc_handler | | mosaic_hint)* 
     	     "end_show"
 
@@ -145,6 +146,19 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 	# If this isn't set, then everything is public
 	# The names in name_list may contain wildcards like
 	# "*", "?", "[wxz]" and "[1-5]".
+         
+    java_generated_class ::= "java_generated_class" name "[[" java_source "]]"
+        # This contains the full text of the class declaration.  The class
+        # must extend com.hdcookbook.grin.commands.ShowCommands, and must
+        # contain the string JAVA_COMMAND_BODY.  JAVA_COMMAND_BODY gets
+        # replaced with the automatically-generated method execute() and
+        # the methods grinCommandNN() for each command.
+    
+    java_source ::= string*
+        # May contain the special sequences:
+        #   XLET_ONLY_[[ java_source ]]
+        #   GRINVIEW_ONLY_[[ java_source ]]
+        #   GRIN_COMMAND_[[ java_source ]]
 
     segment ::= "segment" name ["active" feature_list] ["setup" feature_list]
     			["rc_handlers" name_list]
@@ -154,15 +168,17 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     feature ::= fixed_image | image_sequence | box | assembly | menu_assembly
     		  | sound | text | translator_model | translator | group 
-		  | timer | clipped | src_over | fade 
+		  | timer | clipped | src_over | fade | scaling_model
 		  | gurantee_fill | set_target
 		  | extension_feature | extension_modifier
 
-    fixed_image ::= "feature" "fixed_image" name x y file_name ";"
+    fixed_image ::= "feature" "fixed_image" name x y file_name 
+    		        [ "scaling_model" name ] ";"
 
     image_sequence ::= "feature" "image_sequence" name x y
 		         file_name "{" name_or_continuation * "}" 
 			 	   extension [ "repeat" ]
+    		       [ "scaling_model" name ]
 		       [ "model" feature_name | "end_commands" commands] ";"
 	    # "linked_to" is accepted for "model", for backwards compatibility.
 	    # In both cases, the model, if specified,  must be a different 
@@ -170,7 +186,8 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     box ::= "feature" "box" name rectangle
     		[ "outline" width color_value ]
-		[ "fill" color_value ] ";"
+		[ "fill" color_value ]
+	        [ "scaling_model" name ] ";"
 
     name_or_continuation ::= "+" | "-" | name	# "+" means "repeat last frame",
      						# "-" means "empty"
@@ -223,6 +240,18 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 		[ "repeat" frame_number ] 
 		[ "end_commands" commands ] ";"
 
+    scaling_model ::= "feature" "scaling_model" name 
+		"{" scale_key_frame* "}"
+		[ "repeat" frame_number ] 
+		[ "end_commands" commands ] ";"
+	# There must be >= 1 scale_key_frame
+    
+    scale_key_frame ::=  frame_number x y x_scale y_scale "mills"
+    	# The first frame must be zero
+	# The scale factor is in mills (1/1000); a factor of 1000 is 1:1 scale
+
+    key_frame ::= frame_number x y interpolation_type
+
     guarantee_fill ::= "feature" "guarantee_fill" name sub_feature
     				rectangle 	    # guaranteed area
 				{ rectangle * } ";" # areas to be cleared
@@ -256,7 +285,7 @@ a Show is created.  Here's BNF describing the syntax of a show file:
 
     command ::= activate_segment | activate_part | segment_done 
     		    | deprecated_invoke_assembly_cell | set_visual_rc_state
-		    | other_command
+		    | other_command | java_command
 
     activate_segment ::= "activate_segment" segment_name [ "&lt;push&gt;" ] ";"
     			 | "activate_segment" "&lt;pop&gt;" ";"
@@ -272,12 +301,15 @@ a Show is created.  Here's BNF describing the syntax of a show file:
     set_visual_rc_state
 	 ::= "set_visual_rc" handler_name 
 	 	("state" state_name | "current")
-	        ("selected" | "activated")  ";"
+	        ("selected" | "activated") 
+                [ "run_commands" ] ";"
 
     other_command ::= namespace:type_name
     				(syntax as determined by director) ";"
 	#  The custom command shouldn't include a ";" token.  If it does,
 	#  testing with GenericMain will be more difficult.
+         
+    java_command ::= "java_command" "[[" java_source "]]"
 
     rc_handler ::=  visual_rc_handler | command_rc_handler
                     | deprecated_assembly_grid_handler ";"
@@ -373,6 +405,8 @@ a Show is created.  Here's BNF describing the syntax of a show file:
     num_frames ::= integer
     frame_number ::= integer
     width ::= integer
+    x_scale ::= integer
+    y_scale ::= integer
     x ::= integer
     y ::= integer
 </pre>
