@@ -57,6 +57,7 @@ package com.hdcookbook.grin.io.binary;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.util.AssetFinder;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -152,7 +153,7 @@ public class GrinDataInputStream extends DataInputStream {
        String name = readUTF();
        int style = readInt();
        int size = readInt();
-       return new Font(name, style, size);
+       return AssetFinder.getFont(name, style, size);
    }  
    
    /**
