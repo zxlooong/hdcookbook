@@ -143,8 +143,11 @@ public class SEShowCommand extends Command implements SENode {
 	    triedSeCommand = true;
 	    Class cl = container.getCommandClass();
 	    if (cl != null) {
+                Class[] paramType = { Show.class };
+                Object[] params = { show };
 		try {
-		    seCommand = (GrinXHelper) cl.newInstance();
+		    seCommand = (GrinXHelper) 
+                            cl.getConstructor(paramType).newInstance(params);
 		} catch (Throwable t) {
 		    t.printStackTrace();
 		}

@@ -33,7 +33,6 @@ information or have any questions.
                 <pathelement path="${MENU_GENERATED}/grinview"/>
                 <pathelement path="${MENUTOOLS_DEST}"/>                
                 <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
-                <pathelement path="${HDC_BUILD_DIR}/xlets/menu_generated/grinview"/>
             </classpath>               
             <arg line="-asset_dir ${MENUASSETS_DEST} menu.grin"/>                
         </jdktools.java>	
@@ -58,11 +57,12 @@ information or have any questions.
         </java>	
     </target>
     
-    <target name="run-grinview-menu" depends="compile-grinview"> <!-- , compile-extensions-reader, generate-binary-script" -->
- 
-        <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+    <target name="run-grinview-menu" depends="copy-menu-assets, generate-binary-script, compile-grinview">  
+    <!-- Need to generate binary script for the ShowCommands compilation -->       
+       <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
             <classpath>
-                <pathelement path="${MENUTOOLS_DEST}"/>                
+                <pathelement path="${MENU_GENERATED}/grinview"/>                
+                <pathelement path="${MENUTOOLS_DEST}"/>                  
                 <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
             </classpath>    
             <arg line="-asset_dir xlets/bookmenu/src/com/hdcookbook/bookmenu/assets -extensions_parser com.hdcookbook.bookmenu.menu.MenuExtensionsParser -background xlets/bookmenu/src/com/hdcookbook/bookmenu/menu/test_assets/MenuScreenBG_gray.png -fps 24 menu.txt"/>
