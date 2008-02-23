@@ -12,24 +12,25 @@
 </div>
 <p>&nbsp;</p> 
 <h2>Welcome!</h2>
-<p> Welcome to the HD Cookbook source repository!  This is an open, c
-ollaborative place to gather useful code for Blu-ray Java, and other G
-EM terminal specifications like MHP, OCAP, and GEM-IPTV. If you h
-ave something you'd like to contribute, please do!  All we ask i
-s a little bit of coordination on package names, and a few simple f
-ormatting conventions.  Here's what we have so far: </p>
+<p> Welcome to the HD Cookbook source repository!  This is an open, 
+collaborative place to gather useful code for Blu-ray Java, and other 
+GEM terminal specifications like MHP, OCAP, and GEM-IPTV. If you 
+have something you'd like to contribute, please do!  All we ask 
+is a little bit of coordination on package names, and a few simple 
+formatting conventions.  Here's what we have so far: </p>
 <ul> 
-    <li> <a href="javadocs/grin/com/hdcookbook/grin/doc-files/index.html">GRIN -
-    a framework for Graphical Interactivity.</a>  This framework manages the 
-    display of &quot;features&quot; that are arranged into 
-    a &quot;show&quot;, and provides simple remote control handling.  It 
-    grew out of a prototype MHP application written for the DVD forum 
-    by Sun, Technicolor and NDS France in November of 2004.  In 2006 
-    it found new life in BD-Java as the basis of the interactivity for a 
-    demo shown at CES 2007.
-
-    <li>A set of three xlets that can be used in a BD disc image.  There's 
-    a main menu xlet that uses GRIN in the package
+    <li> <a href="animator.html">Animator</a>, a lightweight animation package.
+         This package manages the animation loop, drawing optimization, 
+	 and double-buffering for a Java Xlet, such as a BD-J application.
+    <li> <a href="grin.html">GRIN -
+	a framework for Graphical Interactivity.</a>  This framework uses the
+	animation framework described above, and adds a "scene graph" to it.
+	A scene graph is the thing that, at runtime, represents what gets
+	built with a visual design tool.  It's a tree of objects that 
+	represents drawing operations, much like an HTML document or a 
+	Flash file.
+    <li>A set of three Blu-ray Java xlets that can be used in a BD disc 
+        image.  There's a main menu xlet that uses GRIN in the package
     <strong>com.hdcookbook.bookmenu.menu</strong>, a game 
     called &quot;Gun Bunny&quot; in <strong>com.hdcookbook.gunbunny</strong>, 
     and a &quot;monitor xlet&quot; to control
@@ -48,6 +49,22 @@ ormatting conventions.  Here's what we have so far: </p>
     <li>A set of shell scripts you can use as a starting point to set up a 
 build environment.  These can be found in the &quot;scripts&quot; directory.
 </ul> 
+<p>
+This code is being used in production Blu-ray titles, including
+major studio releases.
+</p>
+
+<h2>Playing a Blu-ray Disc Image at Home</h2>
+<p>
+By assembling the parts available here, you can build your own
+Blu-ray disc image, and burn it to a rewritable BD-RE disc.  This
+disc can be played almost all consumer players, including the PS/3.
+You can also modify the BD-J code provided, or write your own.  Soon,
+we hope to assmeble enough tools so you can build a disc image from
+scratch:  We'd like it to be possible for folks who are interested to
+shoot their own HD footage, edit it with something like Final Cut,
+build the disc data structures, write code for the interactivity, and
+emerge with a BD-RE disc that will work on a normal Blu-ray player.
 <p>For everything but the disc image, you'll need to hook up to 
 the SVN repository and 
 do a bringover.  That process is described in the java.net pages.  When 
