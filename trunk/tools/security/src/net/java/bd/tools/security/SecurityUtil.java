@@ -62,6 +62,9 @@ import java.io.BufferedReader;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.net.URL;
 import java.security.KeyPair;
@@ -79,15 +82,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.naming.InvalidNameException;
 
 import sun.security.tools.KeyTool;
 import sun.security.tools.JarSigner;
-import sun.security.tools.Base64;
 import sun.security.util.DerInputStream;
 import sun.security.util.DerOutputStream;
+import sun.security.pkcs.ContentInfo;
+import sun.security.pkcs.PKCS7;
+import sun.security.pkcs.SignerInfo;
+import sun.misc.BASE64Decoder;
+import sun.tools.jar.Main;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.asn1.DERConstructedSequence;
@@ -130,6 +139,7 @@ public class SecurityUtil {
    static final String DEF_ROOT_ALT_NAME = "root@studio.com";
    static final String DEF_APP_CERT_DN = "CN=Producer, OU=Codesigning Department, O=BDJCompany, C=US";
    static final String DEF_ROOT_CERT_DN = "CN=Studio, OU=Codesigning Department, O=BDJCompany, C=US";
+   static final String SIG_ALG = "SHA1WithRSA";
     
    // Intermediate files to create, will be deleted at the tool exit time;
    // XXX Make sure they are always deleted.
@@ -374,6 +384,7 @@ public class SecurityUtil {
                                      "-keystore", keystoreFile, "-storepass", keystorePassword,
                                      "-debug", jfile, appCertAlias};
           JarSigner.main(jarSigningArgs);
+          signWithBDJHeader(jfile);
        }
     }
     
@@ -386,7 +397,7 @@ public class SecurityUtil {
     public void signBUMF() throws Exception {
         try {            
             initKeyStore();
-            Signature signer = Signature.getInstance("SHA1WithRSA");
+            Signature signer = Signature.getInstance(SIG_ALG);
             PrivateKey key = (PrivateKey) store.getKey(rootCertAlias,
                               rootKeyPassword.toCharArray());
             signer.initSign(key);
@@ -416,7 +427,7 @@ public class SecurityUtil {
     } 
     
      private void verifySignatureFile(String sigFile) throws Exception {
-        Signature verifier = Signature.getInstance("SHA1WithRSA");
+        Signature verifier = Signature.getInstance(SIG_ALG);
         Certificate cert =  store.getCertificate(rootCertAlias);
         verifier.initVerify(cert);
         
@@ -452,6 +463,130 @@ public class SecurityUtil {
         }
         fis.close();
         return Arrays.copyOfRange(buf, 0, off);
+    }
+    
+    /**
+     * This method adds the BD-J specific attribute to the signature file (.SF file)
+     * of a signed jar (already signed using JDK's jarsigner). This leads to
+     * resigning of the signature file and building a new signature block file
+     * (.RSA file) with the updated signature and update the jar with new files.
+     * @param jarFile
+     * @throws java.lang.Exception
+     */
+    private void signWithBDJHeader(String jarFile) throws Exception {
+        String SIG_FILE = "META-INF/SIG-BD00.SF";
+        String SIG_BLOCK_FILE = "META-INF/SIG-BD00.RSA";
+        if (debug) {
+            System.out.println("Adding BD header to:" + jarFile);
+        }
+        JarFile jf = new JarFile(jarFile);
+	JarEntry sigFile = (JarEntry) jf.getJarEntry(SIG_FILE);
+        if (sigFile == null) {
+            System.out.println("No entry found:" + SIG_FILE);
+        }
+        JarEntry sigBFile = (JarEntry) jf.getJarEntry(SIG_BLOCK_FILE);
+        if (sigBFile == null) {
+            System.out.println("No entry found:" + SIG_BLOCK_FILE);
+        }
+	InputStream pkcs7Is = jf.getInputStream(sigBFile);
+	PKCS7 signBlock = new PKCS7(pkcs7Is);
+	pkcs7Is.close();
+        
+        // Add the desired line to the Signature file.
+	BufferedReader br = new BufferedReader(new InputStreamReader(
+                                               jf.getInputStream(sigFile)));
+        StringWriter sw = new StringWriter();
+        String line;
+        boolean addBDLine = false;
+        while((line = br.readLine()) != null) {
+            
+            if (addBDLine) {
+                // the BD-J header already exists;stop here.
+                if (line.startsWith("BDJ-Signature_Version")) {
+                    br.close();
+                    jf.close();
+                    return;
+                }
+                sw.write("BDJ-Signature-Version: 1.0\n");
+                addBDLine = false;
+            } 
+            
+            // BD-J doesn't mandate this attribute; keeping it should be fine
+            // Lets just be on the safer side and take it out since it's not required by
+            // BD-J
+            if (!line.startsWith("SHA1-Digest-Manifest-Main-Attributes:")) {
+                sw.write(line);
+                sw.write("\n");
+            }
+            if (line.startsWith("Created-By:")) {
+                addBDLine = true;
+            }
+        }
+        br.close();
+        jf.close();
+        
+        // Re-sign the signature file after adding the BD-J header
+        Signature signer = Signature.getInstance(SIG_ALG);
+        PrivateKey key = (PrivateKey) store.getKey(appCertAlias,
+                              appKeyPassword.toCharArray());
+        signer.initSign(key);
+        byte[] newContent = sw.toString().getBytes();
+        signer.update(newContent);
+        byte[] signedContent = signer.sign();
+        
+        ContentInfo newContentInfo = new ContentInfo(ContentInfo.DATA_OID, null);
+        SignerInfo[]  signerInfos =  signBlock.getSignerInfos();
+        Certificate signerCert = store.getCertificate(appCertAlias);
+        SignerInfo newSignerInfo = null;
+        
+        // Note, BD-J allows only one signerInfo, but let's have this loop since
+        // it does not add more code and it's easy to read.
+        for(int i = 0; i < signerInfos.length; i++) {
+            SignerInfo si = signerInfos[i];
+            if (signerCert.equals(si.getCertificate(signBlock))) {
+                
+                // update the encrypted digest.
+                newSignerInfo = new SignerInfo(si.getIssuerName(),
+                                si.getCertificateSerialNumber(),
+                                si.getDigestAlgorithmId(),
+                                si.getDigestEncryptionAlgorithmId(),
+                                signedContent);
+                signerInfos[i] = newSignerInfo;
+            }
+        }
+        
+        // generate the updated PKCS7 Block
+        PKCS7 newSignBlock = new PKCS7(
+		signBlock.getDigestAlgorithmIds(),
+		newContentInfo,
+		signBlock.getCertificates(),
+		signerInfos); 
+        if (debug) {
+            System.out.println("Signer Info Verified:" + (newSignBlock.verify(
+                                newSignerInfo, newContent)).toString());
+        }
+        
+        // Write down the files and re-bundle the jar with the updated signature
+        // and signature block files.
+        File mif = new File("META-INF");
+        File sf, sbf;
+        if (!mif.isDirectory()) {
+            if (!mif.mkdir()) {
+                System.err.println("Could not create a META-INF directory");
+                return;
+            }
+        }
+        sf = new File(SIG_FILE);
+        FileOutputStream fout = new FileOutputStream(sf);
+        fout.write(newContent);
+        fout.close();
+        sbf = new File(SIG_BLOCK_FILE);
+        FileOutputStream fos = new FileOutputStream(sbf);
+        newSignBlock.encodeSignedData(fos);
+        fos.close();
+        String[] jarArgs = {"-uvf", jarFile, SIG_FILE, SIG_BLOCK_FILE};
+        Main jar = new Main(System.out, System.err, "jar");
+        jar.run(jarArgs);
     }
     
     private void exportRootCertificate() throws Exception {
@@ -654,6 +789,7 @@ public class SecurityUtil {
         if (! seenLastLine) {
            throw new IOException("not a valid CSR file");
         }
-        return Base64.decode(buf.toString());
+        BASE64Decoder decoder = new BASE64Decoder();
+        return decoder.decodeBuffer(buf.toString());
     }
 }
