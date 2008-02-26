@@ -118,9 +118,12 @@ abstract public class RenderContext {
      * AnimationClient.addDisplayAreas(RenderContext) for a more
      * in-depth discussion of this.
      *
+     * @param newTarget The draw target number, obtained from mapDrawTargets
+     *
      * @return the old target number
      *
      * @see AnimationClient#addDisplayAreas(RenderContext)
+     * @see AnimationClient#mapDrawTargets(java.util.Hashtable)
      **/
     abstract public int setTarget(int newTarget);
 

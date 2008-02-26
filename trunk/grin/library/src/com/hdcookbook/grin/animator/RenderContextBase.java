@@ -209,10 +209,15 @@ public class RenderContextBase extends RenderContext {
 	    n.eraseLastFrame(drawTargets[n.target]);
 	    DrawRecord tmp = n;
 	    n = n.prev;
-	    tmp.prev = null;	
+	    tmp.prev = null;
 	    	// Nodes not on a list need to have a prev set to null,
 		// since we use prev to know to take a node off lastFrameList
 		// in other methods of this class.
+	    tmp.next = null;
+		// We also null out the next pointer, in order to minimize
+		// any problem with unintentional object retention, in case
+		// our client retains some DrawRecord instances, but not 
+		// others.
 	}
 	//
 	// Now, set lastFrameList to thisFrameList, and set up the
