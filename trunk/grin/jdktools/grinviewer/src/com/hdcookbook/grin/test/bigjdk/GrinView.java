@@ -58,7 +58,8 @@ package com.hdcookbook.grin.test.bigjdk;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.Segment;
 
-import com.hdcookbook.grin.io.text.ExtensionsParser;
+import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.text.ExtensionParser;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -293,9 +294,14 @@ public class GrinView extends GenericMain {
         System.out.println("                -background <image>");
         System.out.println("                -scale <number>");
         System.out.println("                -segment <segment name to activate>");      
-        System.out.println("                -extensions_parser <a fully qualified classname>");
+        System.out.println("                -extension_parser <a fully qualified classname>");       
+        System.out.println("                -automate");
         System.out.println("");
-        System.out.println("            -assets and -asset_dir may be repeated to form a search path.lll");
+        System.out.println("            -assets and -asset_dir may be repeated to form a search path.");
+        System.out.println("            -automate option will launch a testing thread which activates");       
+        System.out.println("            every named segment in a given show with an 1 second interval.");
+        System.out.println("            -extension_parser is needed when the show is a text file and");
+        System.out.println("            uses a custom feature or command subclass.");
 	System.out.println();
 	System.exit(1);
     }
@@ -309,7 +315,8 @@ public class GrinView extends GenericMain {
 	String fps = null;
 	String segment = null;
 	String scaleDivisor = null;
-        String extensionsParserName = null;
+        String extensionParserName = null;
+        boolean doAutoTest = false;
 	while (argsUsed < args.length - 1) {
 	    if ("-fps".equals(args[argsUsed])) {
 		argsUsed++;
@@ -359,13 +366,16 @@ public class GrinView extends GenericMain {
                 }
 		scaleDivisor = args[argsUsed];
 		argsUsed++;	               
-	    } else if ("-extensions_parser".equals(args[argsUsed])) {
-                if (extensionsParserName != null) {
+	    } else if ("-extension_parser".equals(args[argsUsed])) {
+                if (extensionParserName != null) {
                     usage();
                 }
 		argsUsed++;
-		extensionsParserName = args[argsUsed];
+		extensionParserName = args[argsUsed];
 		argsUsed++; 
+            } else if ("-automate".equals(args[argsUsed])) {
+                doAutoTest = true;
+                argsUsed++;
             } else {
 		break;
 	    }
@@ -410,30 +420,26 @@ public class GrinView extends GenericMain {
 	    m.adjustScreenSize(scaleDivisor);
 	}
         
-        ExtensionsParser reader = null;
-        if (extensionsParserName != null) {
+        ExtensionParser reader = null;
+        if (extensionParserName != null) {
             try {
-                reader = (ExtensionsParser)
-                        Class.forName(extensionsParserName).newInstance();
+                reader = (ExtensionParser)
+                        Class.forName(extensionParserName).newInstance();
             } catch (Exception e) {
-                System.err.println("Error instantiating " + extensionsParserName);
+                System.err.println("Error instantiating " + extensionParserName);
                 e.printStackTrace();
             }
         }
         
-//        if (reader == null) {
-//            reader = new GenericExtensionsParser();
-//        }
-        
 	GuiShowBuilder builder = new GuiShowBuilder(m);
-        builder.setExtensionsParser(reader);
-        m.init(showFile, builder, segment);
+        builder.setExtensionParser(reader);
+        m.init(showFile, builder, segment, doAutoTest);
 
 	m.buildControlGUI(showFile);
 	if (fps != null) {
 	    m.doKeyboardCommand("f " + fps); // set fps	 
 	}
-
+        
 	m.inputLoop();
         
 	System.exit(0);

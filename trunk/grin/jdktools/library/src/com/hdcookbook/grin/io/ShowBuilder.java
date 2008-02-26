@@ -64,7 +64,7 @@ import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.SEInterpolatedModel;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.io.builders.DeferredBuilder;
-import com.hdcookbook.grin.io.text.ExtensionsParser;
+import com.hdcookbook.grin.io.text.ExtensionParser;
 
 import java.io.IOException;
 
@@ -104,7 +104,7 @@ public class ShowBuilder {
     private List<DeferredBuilder> deferredBuilders
     	= new ArrayList<DeferredBuilder>();
 
-    private ExtensionsParser extensionsParser;
+    private ExtensionParser extensionParser;
     
     public ShowBuilder() {
     }
@@ -113,16 +113,16 @@ public class ShowBuilder {
         this.show = show;
     }    
 
-    public void setExtensionsParser(ExtensionsParser parser) {
-        this.extensionsParser = parser;
+    public void setExtensionParser(ExtensionParser parser) {
+        this.extensionParser = parser;
     }
     
     /**
-     * Returns an instance of ExtensionsParser that this Builder is working with,
+     * Returns an instance of ExtensionParser that this Builder is working with,
      * or null if it is not set.
      */
-    public ExtensionsParser getExtensionsParser() {
-        return extensionsParser;
+    public ExtensionParser getExtensionParser() {
+        return extensionParser;
     }
  
     /** 

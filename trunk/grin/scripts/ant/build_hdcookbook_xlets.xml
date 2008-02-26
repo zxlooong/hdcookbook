@@ -58,8 +58,9 @@ information or have any questions.
             build-monitor-xlet, build-game-xlet, build-menu-xlet, 
             sign-xlets, generate-bdjo"/>
     
-    <target name="build-menu-xlet" depends="init-xlet-dirs, build-menu-assets">
-        <xlets.javac
+    <target name="build-menu-xlet" depends="init-xlet-dirs, build-menu-assets, compile-me-library">
+        <xlets.javac    
+               classpath="${ME_LIBRARY_DEST}"
                destdir="${MENUXLET_DEST}/classes">
             <src path="xlets/bookmenu/src" />
 	    <src path="${MENU_GENERATED}/xlet" />    
@@ -71,15 +72,19 @@ information or have any questions.
             <fileset dir="xlets/bookmenu/src/com/hdcookbook/bookmenu/menu" includes="*.perm"/>
         </copy>
         
-        <jar basedir="${MENUXLET_DEST}/classes" destfile="${MENUXLET_DEST}/00002.jar"/>
-        <copy file="${MENUXLET_DEST}/00002.jar" todir="${HDC_DISC_BDMV}/JAR"/>	    
+        <jar jarfile="${MENUXLET_DEST}/00002.jar">
+            <fileset dir="${MENUXLET_DEST}/classes"/>
+            <fileset dir="${ME_LIBRARY_DEST}"/>
+        </jar>        
         
+        <copy file="${MENUXLET_DEST}/00002.jar" todir="${HDC_DISC_BDMV}/JAR"/>	    
     </target>
     
     <target name="build-monitor-xlet" depends="init-xlet-dirs">
         <xlets.javac 
                destdir="${MONITORXLET_DEST}/classes">
-            <src path="xlets/bookmenu/src" />
+            <src path="xlets/bookmenu/src" />        
+            <src path="library/src"/> <!-- this is just to include Debug.java... -->
             <include name="com/hdcookbook/bookmenu/monitor/*.java"/>
             <include name="com/hdcookbook/bookmenu/MonitorIXCInterface.java"/>
             <include name="com/hdcookbook/grin/util/*.java"/>
@@ -110,7 +115,7 @@ information or have any questions.
         
     </target>    
     
-    <target name="build-menu-assets" depends="run-mosaic-builder, generate-binary-script">
+    <target name="build-menu-assets" depends="copy-menu-assets, generate-binary-script">
         
         <delete file="${HDC_DISC_BDMV}/AUXDATA/*"/>
         
@@ -131,23 +136,23 @@ information or have any questions.
         </copy>	
     </target>
     
-    <target name="run-mosaic-builder" depends="copy-menu-assets, compile-mosaic">
-        <jdktools.java classpath="${MOSAIC_DEST}/classes:${LIBRARY_DEST}:${MENUASSETS_DEST}" 
-              maxmemory="512m"
-              classname="com.hdcookbook.grin.build.mosaic.Main">
-            <arg line="-show menu.txt -assets ${MENUASSETS_DEST} -out ${MENUASSETS_DEST}"/>
-        </jdktools.java>			
-    </target>
-    
-    <target name="generate-binary-script" depends="copy-menu-assets, compile-binary-converter,
-                 compile-extensions-reader, compile-grinview"> 
+    <target name="generate-binary-script" depends="copy-menu-assets, compile-grin-compiler,
+                 compile-extension-reader, compile-grinview"> 
                      
         <jdktools.java classname="com.hdcookbook.grin.binaryconverter.Main">
             <classpath>
                 <pathelement path="${MENUTOOLS_DEST}"/>
-                <pathelement path="${BINARY_CONVERTER_DEST}/converter.jar"/>
+                <pathelement path="${GRIN_COMPILER_JAR}"/>
+                <pathelement path="${MENUASSETS_DEST}"/>
             </classpath>    
-            <arg line="-extension_parser com.hdcookbook.bookmenu.menu.MenuExtensionsParser -debug ${MENUASSETS_DEST}/menu.txt"/>
+            <arg value="-extension_parser"/>
+            <arg value="com.hdcookbook.bookmenu.menu.MenuExtensionParser"/>
+            <arg value="-asset_dir"/>
+            <arg value="${MENUASSETS_DEST}"/>
+            <arg value="-out"/>
+            <arg value="${MENUASSETS_DEST}"/>
+            <arg value="-debug"/>
+            <arg value="menu.txt"/>
         </jdktools.java>	
         
         <move file="${MENUASSETS_DEST}/menu.grinview.java"
@@ -156,15 +161,15 @@ information or have any questions.
               tofile="${MENU_GENERATED}/xlet/${MENU_SHOW_COMMANDS}" />        
 	<jdktools.javac destdir="${MENU_GENERATED}/grinview" srcdir="${MENU_GENERATED}/grinview" debug="on">
 	    <classpath>
-	       <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+	       <pathelement path="${GRIN_VIEWER_JAR}"/>
                <pathelement path="${MENUTOOLS_DEST}"/>
 	    </classpath>
 	</jdktools.javac>
     </target>       
     
-    <target name="compile-extensions-reader" depends="init-xlet-dirs, compile-library">          
+    <target name="compile-extension-reader" depends="init-xlet-dirs, compile-jdk-library">          
         <jdktools.javac 
-               classpath="${LIBRARY_DEST}"
+               classpath="${JDK_LIBRARY_DEST}"
                destdir="${MENUTOOLS_DEST}" >
                    <src path="xlets/tools/jdk/src"/>
                    <src path="xlets/tools/shared/src"/>

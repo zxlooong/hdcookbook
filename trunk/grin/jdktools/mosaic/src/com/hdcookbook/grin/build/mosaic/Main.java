@@ -55,8 +55,11 @@
 
 package com.hdcookbook.grin.build.mosaic;
 
-import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.io.text.ShowParser;
+import com.hdcookbook.grin.mosaic.MosaicMaker;
 
+import com.hdcookbook.grin.util.AssetFinder;
 import java.io.IOException;
 import java.io.File;
 import java.util.LinkedList;
@@ -125,13 +128,28 @@ import java.util.LinkedList;
 	    System.out.println("Couldn't create directory " + outputDir);
 	    System.exit(1);
 	}
-	MosaicMaker mm = new MosaicMaker(shows, assetPath, outputDir);
+ 
+        File [] fPath = new File[assetPath.length];
+	for (int i = 0; i < fPath.length; i++) {
+	    fPath[i] = new File(assetPath[i]);
+	}
+        
+        AssetFinder.setSearchPath(null, fPath);
+        
 	try {
+
+            SEShow[] showObjects = new SEShow[shows.length];
+            for (int i = 0; i < shows.length; i++) {
+                showObjects[i] = ShowParser.parseShow(shows[i], null, null);
+            }
+
+            MosaicMaker mm = new MosaicMaker(showObjects, outputDir);         
 	    mm.init();
 	    mm.makeMosaics();
+            mm.destroy();
 	} catch (IOException ex) {
 	    ex.printStackTrace();
-	    System.exit(1);
+            System.exit(1);
 	}
 	System.exit(0);
     }

@@ -57,9 +57,6 @@
 package com.hdcookbook.grin.util;
 
 
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.DataInputStream;
 import java.io.IOException;

@@ -58,7 +58,7 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
 
 /**
- * This is a generic SECommand class in which the ExtensionsParser implementation
+ * This is a generic SECommand class in which the ExtensionParser implementation
  * can choose to subclass.  This is meant to be used for the show compiled time only.
  */
 public abstract class SEGenericCommand extends Command 

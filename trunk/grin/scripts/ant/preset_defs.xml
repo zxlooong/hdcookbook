@@ -25,6 +25,11 @@ information or have any questions.
 
 <project name="Preset ant tasks">
     
+    <property file="../${os.name}.user.vars.properties"/>
+    <property file="../user.vars.properties"/>	
+    <property file="../vars.properties"/>	
+    <property file="scripts/ant/grin.properties"/>
+     
     <!-- all the tools destined for big jdk (JavaSE) are 
     compiled against jdk 1.5 -->
     <presetdef name="jdktools.javac">
@@ -39,9 +44,8 @@ information or have any questions.
     <presetdef name="xlets.javac">
         <javac sourcepath=""
                source="1.3" target="1.3"
-               bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
+               bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"  
                debug="on" deprecation="on"> 
-           <src path="library/src"/>
         </javac>   
     </presetdef>
     

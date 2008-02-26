@@ -55,20 +55,18 @@
 
 package com.hdcookbook.grin.test.bigjdk;
 
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.Image;
 import java.awt.Graphics2D; 
 import java.awt.Color;
 import java.awt.Rectangle;
-import java.awt.Scrollbar;
 import java.awt.AlphaComposite;
 import java.awt.GraphicsConfiguration;
-import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.Insets;
 import java.awt.Transparency;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -76,30 +74,19 @@ import java.awt.event.MouseMotionAdapter;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.net.URL;
 
 import javax.swing.JFileChooser;
 import javax.imageio.ImageIO;
 
-import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.animator.AnimationClient;
-import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.AnimationContext;
-import com.hdcookbook.grin.animator.DirectDrawEngine;
-import com.hdcookbook.grin.animator.RepaintDrawEngine;
 import com.hdcookbook.grin.input.RCKeyEvent;
-import com.hdcookbook.grin.test.RyanDirector;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
-import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ImageWaiter;
 
 /**
@@ -133,6 +120,7 @@ public class GenericMain extends Frame implements AnimationContext {
 
     private boolean debugWaiting = false;
     private String initialSegmentName = null;
+    private boolean doAutoTest = false;
     private Insets insets;
 
     /**
@@ -171,10 +159,12 @@ public class GenericMain extends Frame implements AnimationContext {
     
     
     protected void init(String showName, ShowBuilder builder, 
-    			String initialSegmentName) 
+    			String initialSegmentName, boolean doAutoTest) 
     {
 
 	this.initialSegmentName = initialSegmentName;
+        this.doAutoTest = doAutoTest;
+        
 	director = new GenericDirector(showName);
 	show = director.createShow(builder);
 
@@ -202,11 +192,11 @@ public class GenericMain extends Frame implements AnimationContext {
             public void keyPressed(java.awt.event.KeyEvent e) {
 	    	int code = e.getKeyCode();
 		// Translate F1..F4 into red/green/yellow/blue
-		if (code >= e.VK_F1 && code <= e.VK_F4) {
-		    code = code - e.VK_F1 + RCKeyEvent.KEY_RED.getKeyCode();
-		} else if (code >= e.VK_NUMPAD0 && code <= e.VK_NUMPAD9) {
-		    code = code - e.VK_NUMPAD0 + RCKeyEvent.KEY_0.getKeyCode();
-		} else if (code == e.VK_F5) {
+		if (code >= KeyEvent.VK_F1 && code <= KeyEvent.VK_F4) {
+		    code = code - KeyEvent.VK_F1 + RCKeyEvent.KEY_RED.getKeyCode();
+		} else if (code >= KeyEvent.VK_NUMPAD0 && code <= KeyEvent.VK_NUMPAD9) {
+		    code = code - KeyEvent.VK_NUMPAD0 + RCKeyEvent.KEY_0.getKeyCode();
+		} else if (code == KeyEvent.VK_F5) {
 		    code =RCKeyEvent.KEY_POPUP_MENU.getKeyCode();
 		}
 		show.handleKeyPressed(code);
@@ -500,13 +490,36 @@ public class GenericMain extends Frame implements AnimationContext {
                 // Calls Show.activateSegment
 	}
 	System.out.println("Starting frame pump...");
+        
+        if (doAutoTest) {
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        Segment[] segments = show.getSegments();
+                        for (Segment seg : segments) {
+                            String name = seg.getName();
+                            if (name != null) {
+                                doKeyboardCommand("s " + name);
+                                Thread.sleep(1000);
+                            }
+                        }
+                        dispose();
+                        System.exit(0);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+                }
+            }.start();
+        }
     }
     
     public static void main(String[] args) {
 	String[] path = new String[] { "/assets/" };
 	AssetFinder.setSearchPath(path, null);
 	GenericMain m = new GenericMain();
-        m.init(args[0], null, null);
+        m.init(args[0], null, null, false);
 
 	m.inputLoop();
         

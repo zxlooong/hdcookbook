@@ -54,20 +54,19 @@
 
 package com.hdcookbook.grin.binaryconverter;
 
+import com.hdcookbook.grin.compiler.GrinCompiler;
 import com.hdcookbook.grin.io.binary.*;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.text.ExtensionsParser;
+import com.hdcookbook.grin.io.text.ExtensionParser;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * A tool that converts a text based GRIN script to the binary format.
@@ -78,7 +77,7 @@ public class Main {
     * A driver method for the Main.convert(String, String).
     * 
     * @param args   Arguments. Requires the name of the text-based GRIN script to read.
-    * @see          #convert(String[], String, ExtensionsParser, boolean)
+    * @see          #convert(String[], File[], String, ExtensionParser, String, boolean, boolean)
     **/
    public static void main(String[] args) {
        
@@ -87,21 +86,33 @@ public class Main {
         }
         
         int index = 0;
-        ArrayList assets = new ArrayList(); 
-        assets.add(".");
-        assets.add("");
+        LinkedList assetPathLL = new LinkedList();
+        LinkedList assetDirsLL = new LinkedList();
         
         String textFile = null;
         String extensionParserName = null;
+        String outputDir = null;
         boolean debug = false;
+        boolean optimize = true;
         
         while (index < args.length) {
-            if ("-asset_dir".equals(args[index])) {
-                index++;
+	    if ("-assets".equals(args[index])) {
+		index++;
+                String path = args[index];
                 if (index == args.length) {
                     usage();
-                }    
-                assets.add(args[index]);
+                }
+                if (!path.endsWith("/")) {
+                    path = path + "/";
+                }
+		assetPathLL.add(path);
+	    } else if ("-asset_dir".equals(args[index])) {
+		index++;
+                if (index == args.length) {
+                    usage();
+                }                
+                String path = args[index];
+		assetDirsLL.add(path);
             } else if ("-debug".equals(args[index])){
                 debug = true;
             } else if ("-extension_parser".equals(args[index])) {
@@ -110,6 +121,14 @@ public class Main {
                     usage();
                 }                 
                 extensionParserName = args[index];
+            } else if ("-out".equals(args[index])) {
+                index++;
+                if (index == args.length) {
+                    usage();
+                } 
+                outputDir = args[index];
+            } else if ("-avoid_optimization".equals(args[index])) {
+                optimize = false;
             } else {
                 if (textFile != null) {
                     usage();
@@ -123,11 +142,11 @@ public class Main {
             usage();
         }
         
-        ExtensionsParser extensionsParser = null;
+        ExtensionParser extensionParser = null;
         
-        if (extensionParserName != null) {
+        if (extensionParserName != null && !"".equals(extensionParserName)) {
             try {
-                 extensionsParser = (ExtensionsParser) 
+                 extensionParser = (ExtensionParser) 
                          Class.forName(extensionParserName).newInstance();
             } catch (IllegalAccessException ex) {
                  ex.printStackTrace();
@@ -137,10 +156,33 @@ public class Main {
                  ex.printStackTrace();
             } 
         }
+
+        String[] assetPath = null;
+        File[] assetDirs = null;
+	if (assetDirsLL.size() > 0) {
+	    assetDirs = new File[assetDirsLL.size()];
+	    int i = 0;
+	    for (Iterator it = assetDirsLL.iterator(); it.hasNext(); ) {
+		File f = new File((String) it.next());
+		assetDirs[i++] = f;
+	    }
+	}
+        if (assetPathLL.isEmpty() && assetDirs.length == 0) {
+            assetPath = new String[]{ "." }; // current dir
+        } else {
+            assetPath = (String[]) 
+               assetPathLL.toArray(new String[assetPathLL.size()]);
+        }
         
+	AssetFinder.setHelper(new AssetFinder() {
+	    protected void abortHelper() {
+		System.exit(1);
+	    }
+	});
+       	AssetFinder.setSearchPath(assetPath, assetDirs);
         try {
-           Main.convert((String[])assets.toArray(new String[assets.size()]),
-                                   textFile, extensionsParser, debug);
+           Main.convert(assetPath, assetDirs, textFile, 
+                   extensionParser, outputDir, debug, optimize);
         } catch (IOException e) {           
             e.printStackTrace();
             System.exit(1);
@@ -151,60 +193,70 @@ public class Main {
    /**
     * Converts the text based GRIN script to a binary format. 
     *
-    * @param assetsDir  The asset directory to find the text script from.
-    * @param textFile   The GRIN text script file name to read in.  
-    * @param extensionsParser     The ExtensionsParser for writing
+    * @param assets The path to the assets in a jarfile, which is used
+    * as the first parameter to <code>AssetFinder.setSearchPath(String[], File[])</code>.
+    * Could be null.
+    * @param assetsDir  The path to the assets in the filesystem, which is 
+    * used as the second parameter to  <code>AssetFinder.setSearchPath(String[], File[])</code>.
+    * Could be null.
+    * @param showFile   The GRIN text script file to read in.  
+    * @param extensionParser     The ExtensionParser for handling extensions.
+    * @param outputDir  The directory to output generated files.
     * @param debug      If true, include debug information to generated
-    * binary file
+    * binary file.
+    * @param optimize   If true, apply optimization to the show object,
+    * such as creating image mosaics.
     */
-   public static void convert(String[] assetsDir, String textFile, 
-           ExtensionsParser extensionsParser, boolean debug) 
+   public static void convert(String[] assets, File[] assetsDir, String showFile, 
+           ExtensionParser extensionParser, String outputDir, 
+           boolean debug, boolean optimize) 
            throws IOException 
-   {
-       String fileNames[] = new String[3];
-       
-       String baseName = textFile;
+   {   
+       String baseName = showFile;
        if (baseName.indexOf('.') != -1) {
            baseName = baseName.substring(0, baseName.lastIndexOf('.'));
        }
        
-       try {
-         
-            ArrayList list = new ArrayList();
-            for (int i = 0; i < assetsDir.length; i++) {      
-                list.add(new File(assetsDir[i]));
+       File[] files = new File[3];
+       
+       try {   
+	    AssetFinder.setSearchPath(assets, assetsDir);
+  
+            ShowBuilder builder = new ShowBuilder();
+            builder.setExtensionParser(extensionParser);         
+            
+            SEShow show = ShowParser.parseShow(showFile, null, builder);
+            
+            if (outputDir == null) {
+                outputDir = "."; // current dir
             }
             
-	    AssetFinder.setSearchPath(null, 
-                    (File[])list.toArray(new File[list.size()]));
-  
-            SEShow show = createShow(textFile, extensionsParser);
-              
-            String fileName = baseName + ".grin";           
-            fileNames[0] = fileName;
+            if (optimize) {
+               new GrinCompiler().optimizeShow(show, outputDir);
+            }
             
-            DataOutputStream dos = new DataOutputStream(new FileOutputStream(fileName));
+            String fileName = baseName + ".grin";           
+            files[0] = new File(outputDir, fileName);
+            
+            DataOutputStream dos = new DataOutputStream(new FileOutputStream(files[0]));
             
             GrinBinaryWriter out = new GrinBinaryWriter(show, debug);
 	    out.writeShow(dos);
             dos.close();
             
-            fileNames[1] = baseName + ".xlet.java";
-            out.writeCommandClass(show, true, fileNames[1]);
-            
-            fileNames[2] = baseName + ".grinview.java";
-            out.writeCommandClass(show, false, fileNames[2]);
+            files[1] = new File(outputDir, baseName + ".xlet.java");
+            out.writeCommandClass(show, true, files[1]);
+
+            files[2] = new File(outputDir, baseName + ".grinview.java");
+            out.writeCommandClass(show, false, files[2]);
             
             return;
             
         } catch (IOException e) { 
             // failed on writing, delete the binary file
-            for (int i = 0; i < fileNames.length; i++) {
-                if (fileNames[i] != null) {
-                    File file = new File(fileNames[i]);
-                    if (file.exists()) {
-                       file.delete();
-                    }   
+            for (File file: files) {
+                if (file != null && file.exists()) {
+                   file.delete();
                 }
             }
             
@@ -212,46 +264,32 @@ public class Main {
         }
    }
    
-   private static SEShow createShow(String showName, ExtensionsParser extensionsParser) {
-	SEShow show = new SEShow(null);
-	URL source = null;
-	BufferedReader rdr = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-	    rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
-            ShowBuilder builder = new ShowBuilder();
-            builder.setExtensionsParser(extensionsParser);
-	    ShowParser p = new ShowParser(rdr, showName, show, builder);
-	    p.parse();
-	    rdr.close();
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
-            System.out.println("    URL:  " + source);
-	    System.exit(1);
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }
-	}
-        return show;
-   }
-       
    private static void usage() {
-        System.out.println("Missing an argument - need a grin script to parse");
-        System.out.println("Syntax: com.hdcookbook.grin.io.binary.Main " + "\n" +
-                "\t[-asset_dir <directory>]\n\t[-extension_parser ExtensionsParserClassName]\n\t[-debug]\n\t" 
-                + "text-based-grin-file");       
+        System.out.println("Error in tools argument.\n");
+        
+        System.out.println("");
+        System.out.println("This tool lets you create a binary show file " +
+                "from a text show file, with possible compile time optimizations.");
+        System.out.println("");
+        System.out.println("Usage: com.hdcookbook.grin.io.binary.Main <options> <show file>");
+        System.out.println("");
+        System.out.println("\t<show file> should be a text based show file availale " +
+                "in the assets search path.");
+        System.out.println("");
+        System.out.println("\t<options> can be:");
+        System.out.println("\t\t-assets <directory>");
+        System.out.println("\t\t-asset_dir <directory>");
+        System.out.println("\t\t-extension_parser <a fully-qualified-classname>");
+        System.out.println("\t\t-out <output_dir>");      
+        System.out.println("\t\t-debug");
+        System.out.println("\t\t-avoid_optimization");
+        System.out.println("");
+        System.out.println("\t-assets and -asset_dir may be repeated to form a search path.");
+        System.out.println("\t-avoid_otimization prevents the conversion process from using " +
+                "GrinCompiler methods.");
+        System.out.println("\t-debug includes debugging information to the generated binary file.");
+        
+         
         System.exit(0);
    }
 }     

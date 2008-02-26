@@ -2,48 +2,80 @@
 
 <project name="hdcookbook" default="deploy" basedir=".">
     
-  
   <property file="${os.name}.user.vars.properties"/>
   <property file="user.vars.properties"/>	
   <property file="vars.properties"/>	
 
   <!-- A default target.  This will create a hdcookbook sample disc image -->
   <target name="deploy" depends="build-bd-tools, build-grin-jdk-tools"> 
-	 <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml"/>
+      <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml"/>
   </target>
 
-  <!-- A target for everything -->
-  <target name="all" depends="deploy, build-grin-javadoc, build-grin-samples, run-grinview-menu">
-  </target>
-  
+  <!-- A target for doing everything -->
+  <target name="all" depends="deploy, build-grin-javadoc,
+                              build-grin-samples, run-tests, bundle"/>
+ 
+  <!-- Build Grin's compile-time (javase-based) library and tools -->                            
   <target name="build-grin-jdk-tools">
       <ant dir="grin" antfile="scripts/ant/build_jdktools.xml"/>
   </target>    
   
-  <!-- Build just the tools, and not the xlets in grin directory -->
+  <!-- Build just the tools needed for making a BD disc image -->
   <target name="build-bd-tools">
 	  <ant dir="tools/bdjo"/> 
 	  <ant dir="tools/security/make"/> 
   </target>
 
   
-    <!-- Build the GRIN javadoc -->
+  <!-- Build the GRIN javadoc -->
   <target name="build-grin-javadoc">
 	    <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml"/>
   </target>
   
-      <!-- Build the GRIN sample xlets -->
-  <target name="build-grin-samples">
+  <!-- Build the GRIN sample xlets -->
+  <target name="build-grin-samples" depends="build-bd-tools, build-grin-jdk-tools">
 	    <ant dir="grin/samples"/>
   </target>
   
+  <!-- Runs MenuXlet's show text file on GrinView, our grin runtime tool on jdk -->
   <target name="run-grinview-menu">
       <ant dir="grin" antfile="scripts/ant/run_jdktools.xml" target="run-grinview-menu"/>
   </target>
   
-    <!-- Update GRIN javadoc in the trunk/www directory -->
+  <!-- Update GRIN javadoc in the trunk/www directory -->
   <target name="deploy-grin-javadoc"> 
 	    <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml" target="deploy"/>
+  </target>
+  
+  <!-- Runs autotest -->
+  <target name="run-tests">
+      <ant dir="grin" antfile="scripts/ant/run_jdktools.xml" target="autotest-grinview"/>
+      <ant dir="grin/samples" target="autotest-grinview"/>
+  </target>
+  
+  <!-- Creates a bundle for the distribution -->
+  <target name="bundle" depends="deploy">
+      <mkdir dir="bundle/discroot"/>
+      <copy todir="bundle">
+          <fileset dir="tools">
+              <include name="**/bdjo.jar"/>
+              <include name="**/security.jar"/>
+          </fileset>
+          <fileset dir="grin/build/jdktools">
+             <include name="**/*.jar"/>
+          </fileset>
+      </copy>
+      <copy todir="bundle/discroot">
+          <fileset dir="${HDC_DISC_BDMV}">      
+              <include name="**/*.jar"/>
+              <include name="**/*.bdjo"/>
+          </fileset>
+          <fileset dir="${HDC_DISC_BDMV}/..">  
+             <include name="**/*.crt"/>
+         </fileset>
+      </copy>
+      <zip destfile="${RELEASE_BUNDLE}"
+           basedir="bundle"/>
   </target>
   
   <target name="clean"> 	  
@@ -52,6 +84,9 @@
 	  <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml" target="clean"/>
 	  <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml" target="clean"/>        
 	  <ant dir="grin/samples" target="clean"/>
+          
+          <delete file="${RELEASE_BUNDLE}"/>
+          <delete dir="bundle"/>
   </target>
   
 </project>

@@ -59,7 +59,7 @@ import com.hdcookbook.grin.animator.RenderContext;
 import java.awt.Graphics2D;
 
 /**
- * This is a generic SEFeature class in which the ExtensionsParser implementation
+ * This is a generic SEFeature class in which the ExtensionParser implementation
  * can choose to subclass.  This is meant to be used for the show compiled time only.
  */
 public abstract class SEGenericFeature extends Feature implements SENode {

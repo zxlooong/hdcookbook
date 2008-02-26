@@ -57,34 +57,14 @@ package com.hdcookbook.grin.test.bigjdk;
 
 
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.commands.ActivateSegmentCommand;
-import com.hdcookbook.grin.commands.ActivatePartCommand;
-import com.hdcookbook.grin.commands.SegmentDoneCommand;
 import com.hdcookbook.grin.features.Assembly;
-import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.input.RCKeyEvent;
-import com.hdcookbook.grin.input.CommandRCHandler;
-import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.util.Debug;
-import com.hdcookbook.grin.util.AssetFinder;
 
-import java.awt.Font;
-import java.awt.Color;
-import java.io.Reader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import javax.swing.tree.TreeNode;

@@ -7,7 +7,7 @@ GRIN_BASE=`dirname $0`/../..
 CLASSES=$GRIN_BASE/build/jdktools/grin_viewer/grinviewer.jar
 MENU_CLASSES=$GRIN_BASE/build/xlets_tools/menuxlet
 MENU_GENERATED=$GRIN_BASE/build/xlets/menu_generated/grinview
-EXTENSIONS_FACTORY=com.hdcookbook.bookmenu.menu.MenuExtensionsBuilderFactory
+EXTENSION_PARSER=com.hdcookbook.bookmenu.menu.MenuExtensionParser
 
 case $1 in
     menu)
@@ -17,7 +17,7 @@ case $1 in
 	    java -cp $CLASSES:$MENU_CLASSES:$MENU_GENERATED \
 	    	    com.hdcookbook.grin.test.bigjdk.GrinView \
 		    -asset_dir $ASSETS \
-		    -extensions_factory $EXTENSIONS_FACTORY \
+		    -extension_parser $EXTENSION_PARSER \
 		    -background $BG_IMG \
 		    -fps 24 menu.txt
 	    ;;
@@ -28,7 +28,7 @@ case $1 in
 	    ;;
 
     test)
-	    ASSETS=$GRIN_BASE/samples/GrinViewerXlet
+	    ASSETS=$GRIN_BASE/samples/Scripts/DrawingOptimization
 	    java -cp $CLASSES com.hdcookbook.grin.test.bigjdk.GrinView \
 		    -asset_dir $ASSETS show.txt
 	    ;;

@@ -59,7 +59,7 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.features.Modifier;
 
 /**
- * This is a generic SEModifier class in which the ExtensionsParser implementation
+ * This is a generic SEModifier class in which the ExtensionParser implementation
  * can choose to subclass.  This is meant to be used for the show compiled time only.
  */
 public abstract class SEGenericModifier extends Modifier implements SENode {

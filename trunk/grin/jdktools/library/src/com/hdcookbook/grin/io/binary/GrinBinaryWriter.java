@@ -207,7 +207,7 @@ public class GrinBinaryWriter {
      * We want to auto-generate the code for instantiating
      * extensions but not for the built-time classes.
      */
-    private int extensionsIndex = 0;
+    private int extensionIndex = 0;
     
     /* 
      * An indication of whether to include debug information
@@ -337,7 +337,7 @@ public class GrinBinaryWriter {
         // First, include all of the known pre-defined Grin runtime node
         // class names into the runtimeClasses data structure.
         registerBuiltInClasses();
-        extensionsIndex = runtimeClassNames.size();
+        extensionIndex = runtimeClassNames.size();
         
         // Write out information about the show itself.
         dos.writeInt(show.getSegmentStackDepth());
@@ -497,16 +497,15 @@ public class GrinBinaryWriter {
     * Writes out an auto-generated java class that includes information about
     * Extension classes and ShowCommand subclasses.
     */
-   public void writeCommandClass(SEShow show, boolean forXlet, String fileName)
+   public void writeCommandClass(SEShow show, boolean forXlet, File file)
            throws IOException 
    {
        SEShowCommands cmds = show.getShowCommands();
-       File f = new File(fileName);
        if (cmds.getClassName() == null) {
-           f.delete();  // Just in case an old version was there
+           file.delete();  // Just in case an old version was there
            return;      // No commands class
        }
-       FileWriter w = new FileWriter(fileName);
+       FileWriter w = new FileWriter(file);
        String extensionCode = generateExtensionCode();
        w.write(cmds.getJavaSource(forXlet, extensionCode));
        w.close();
@@ -515,14 +514,14 @@ public class GrinBinaryWriter {
    private String generateExtensionCode() {     
        
        String[] list = (String[]) runtimeClassNames.toArray(String.class);
-       assert (extensionsIndex <= list.length);
+       assert (extensionIndex <= list.length);
        
        String nodeClassName = Node.class.getName();
        StringBuffer generated = new StringBuffer();
        generated.append("    public " + nodeClassName + " getInstanceOf(Show show, int id) ");
        generated.append("throws java.io.IOException {\n");
        generated.append("        switch (id) {\n");
-       for (int i = extensionsIndex; i < list.length; i++ ) {
+       for (int i = extensionIndex; i < list.length; i++ ) {
             String className = (String) list[i];
             generated.append("         case " + i + ": ");
             if (className == null || "".equals(className)) {

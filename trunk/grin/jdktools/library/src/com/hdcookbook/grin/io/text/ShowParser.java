@@ -72,7 +72,6 @@ import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SEImageSequence;
-import com.hdcookbook.grin.features.SEInterpolatedModel;
 import com.hdcookbook.grin.features.SEAssembly;
 import com.hdcookbook.grin.features.SEBox;
 import com.hdcookbook.grin.features.SEClipped;
@@ -103,6 +102,9 @@ import java.io.IOException;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -122,7 +124,7 @@ public class ShowParser {
 
     private SEShow show;
     private Lexer lexer;
-    private ExtensionsParser extParser;
+    private ExtensionParser extParser;
     private Vector[] deferred = { new Vector(), new Vector(), new Vector() };  
     	// Array of Vector<ForwardReference>
     private Map<String, VisualRCHandlerHelper> visualRCHelpers
@@ -178,7 +180,7 @@ public class ShowParser {
 	this.builder = builder;
 	builder.init(show);
         
-        this.extParser = builder.getExtensionsParser();
+        this.extParser = builder.getExtensionParser();
     }
 
     /**
@@ -2045,6 +2047,60 @@ public class ShowParser {
                 }
             }
         }
+    }
+    
+    /**
+     * A utility method to convert text-based grin file to an
+     * SEShow object.  Before calling this method, AssetFinder
+     * should be set with a proper search path for assets.
+     * 
+     * @param showName The name of the show text file to parse.
+     * @param director The director to use for the recreated show,
+     * could be null.
+     * @param builder The show builder object with the extension parser
+     * being set, could be null.
+     * 
+     * @return the SEShow object that got reconstructed.
+     */
+    public static SEShow parseShow(String showName, 
+            Director director, ShowBuilder builder) 
+       throws IOException {
+        
+        BufferedReader rdr = null;
+        SEShow show = new SEShow(director);
+        IOException ioe = null;
+
+        try {
+            URL source = AssetFinder.getURL(showName);
+            if (source == null) {
+                throw new IOException("Can't find resource " + showName);
+            }
+            rdr = new BufferedReader(
+                    new InputStreamReader(source.openStream(), "UTF-8"));
+
+            ShowParser parser = new ShowParser(rdr, showName, show, builder);
+            parser.parse(); // populates show
+            rdr.close();
+        } catch (IOException e) {
+            ioe = e;
+	    System.out.println();
+	    System.out.println(e.getMessage());
+	    System.out.println();
+	    System.out.println("Error trying to parse " + showName);
+        } finally {
+            if (rdr != null) {
+                try {
+                    rdr.close();
+                } catch (IOException ex) {
+                }
+            }
+        }
+
+        if (ioe != null) {
+            throw ioe;
+        }
+
+        return show;
     }
 
 }

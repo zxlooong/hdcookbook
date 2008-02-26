@@ -99,12 +99,18 @@ public class GenericDirector extends Director {
 	    }
             
             if (!showName.endsWith(".grin")) {
-	        rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
-	        ShowParser p = new ShowParser(rdr, showName, show, builder);
-	        p.parse();
-	        rdr.close();
+                rdr = new BufferedReader(
+                        new InputStreamReader(source.openStream(), "UTF-8"));
+                ShowParser p = new ShowParser(rdr, showName, show, builder);
+                p.parse();
+                rdr.close();
             } else {
+                if (AssetFinder.tryURL("images.map") != null) {
+                    System.out.println("Found images.map, using mosaic.");
+                    AssetFinder.setImageMap("images.map");
+                } else {
+                    System.out.println("No images.map found");
+                }
                 bis = new BufferedInputStream(source.openStream());
  	        GrinBinaryReader reader = new GrinBinaryReader(bis);
                 reader.readShow(show);
