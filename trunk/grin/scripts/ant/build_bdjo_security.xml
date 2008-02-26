@@ -35,8 +35,8 @@ information or have any questions.
         <java classpath="${HDC_BDJO_CONVERTER}/dist/bdjo.jar"  
               fork="true"
               classname="net.java.bd.tools.bdjo.Converter">
-            <arg line="xlets/bdjo/main_bdjo.xml 
-            ${HDC_DISC_BDMV}/BDJO/00000.bdjo"/>
+            <arg value="xlets/bdjo/main_bdjo.xml"/>
+            <arg value="${HDC_DISC_BDMV}/BDJO/00000.bdjo"/>
         </java>	
     </target>	
     
@@ -63,11 +63,13 @@ information or have any questions.
             <pathelement location="${java.home}/../lib/tools.jar"/>   
         </path>	   
         <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
-	    <arg line="56789abc"/>
+	    <arg value="56789abc"/>
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg line="-debug ${HDC_DISC_BDMV}/JAR/00001.jar ${HDC_DISC_BDMV}/JAR/00002.jar"/>
+            <arg value="-debug"/>
+            <arg value="${HDC_DISC_BDMV}/JAR/00001.jar"/>
+            <arg value="${HDC_DISC_BDMV}/JAR/00002.jar"/>
             <classpath refid="sec.tools.path"/>	   
         </jdktools.java>	
         <move file="app.discroot.crt" todir="${HDC_DISC_BDMV}/../CERTIFICATE/"/>
