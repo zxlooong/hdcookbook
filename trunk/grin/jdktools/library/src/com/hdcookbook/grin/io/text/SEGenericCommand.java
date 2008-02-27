@@ -54,6 +54,7 @@
 package com.hdcookbook.grin.io.text;
 
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
 
@@ -65,5 +66,9 @@ public abstract class SEGenericCommand extends Command
         implements SENode {
     public SEGenericCommand(Show show) {
         super(show);
+    }
+    
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitUserDefinedCommand(this);
     }
 }

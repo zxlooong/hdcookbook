@@ -56,6 +56,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.awt.Rectangle;
 import java.io.IOException;
@@ -91,4 +92,7 @@ public class SEClipped extends Clipped implements SENode {
         return Clipped.class.getName();
     }
 
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitClipped(this);
+    }
 }

@@ -55,30 +55,24 @@
 
 package com.hdcookbook.grin.io.builders;
 
+import com.hdcookbook.grin.AbstractSEShowVisitor;
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.SESegment;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
-import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.util.Debug;
-import com.hdcookbook.grin.features.Assembly;
-import com.hdcookbook.grin.features.Box;
-import com.hdcookbook.grin.features.Clipped;
-import com.hdcookbook.grin.features.Fade;
-import com.hdcookbook.grin.features.FixedImage;
-import com.hdcookbook.grin.features.Group;
-import com.hdcookbook.grin.features.GuaranteeFill;
-import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SetTarget;
-import com.hdcookbook.grin.features.SrcOver;
-import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.features.InterpolatedModel;
+import com.hdcookbook.grin.features.SEAssembly;
+import com.hdcookbook.grin.features.SEBox;
+import com.hdcookbook.grin.features.SEClipped;
+import com.hdcookbook.grin.features.SEFade;
+import com.hdcookbook.grin.features.SEFixedImage;
+import com.hdcookbook.grin.features.SEGroup;
+import com.hdcookbook.grin.features.SEGuaranteeFill;
+import com.hdcookbook.grin.features.SEImageSequence;
+import com.hdcookbook.grin.features.SESetTarget;
+import com.hdcookbook.grin.features.SESrcOver;
+import com.hdcookbook.grin.features.SEText;
 import com.hdcookbook.grin.features.SETranslator;
-import com.hdcookbook.grin.input.CommandRCHandler;
-import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.input.VisualRCHandler;
-import com.hdcookbook.grin.input.RCKeyEvent;
 
 
 import java.io.IOException;
@@ -140,32 +134,29 @@ public class TranslatorHelper implements DeferredBuilder {
 	// purposes of this calculation, which is about the only reasonable
 	// thing for us to do.
 	//
-	SEShowVisitor visitor = new SEShowVisitor() {
-	    public void visitShow(SEShow show) { }
-	    public void visitSegment(Segment segment) { }
-
-	    public void visitAssembly(Assembly feature) { 
+	SEShowVisitor visitor = new AbstractSEShowVisitor() {
+	    public void visitAssembly(SEAssembly feature) { 
 		SEShow.acceptFeatures(this, feature.getParts());
 	    }
-	    public void visitBox(Box feature) { 
+	    public void visitBox(SEBox feature) { 
 		check(feature.getX(), feature.getY());
 	    }
-	    public void visitClipped(Clipped feature) { 
+	    public void visitClipped(SEClipped feature) { 
 		SEShow.acceptFeature(this, feature.getPart());
 	    }
-	    public void visitFade(Fade feature) { 
+	    public void visitFade(SEFade feature) { 
 		SEShow.acceptFeature(this, feature.getPart());
 	    }
-	    public void visitFixedImage(FixedImage feature) { 
+	    public void visitFixedImage(SEFixedImage feature) { 
 		check(feature.getX(), feature.getY());
 	    }
-	    public void visitGroup(Group feature) {
+	    public void visitGroup(SEGroup feature) {
 		SEShow.acceptFeatures(this, feature.getParts());
 	    }
-	    public void visitGuaranteeFill(GuaranteeFill feature) { 
+	    public void visitGuaranteeFill(SEGuaranteeFill feature) { 
 		SEShow.acceptFeature(this, feature.getPart());
 	    }
-	    public void visitImageSequence(ImageSequence feature) {
+	    public void visitImageSequence(SEImageSequence feature) {
 		check(feature.getX(), feature.getY());
 	    }
 	    public void visitUserDefinedFeature(Feature feature) {
@@ -179,22 +170,18 @@ public class TranslatorHelper implements DeferredBuilder {
                     }
                 }
 	    }
-	    public void visitSetTarget(SetTarget feature) {
+	    public void visitSetTarget(SESetTarget feature) {
 		SEShow.acceptFeature(this, feature.getPart());
 	    }
-	    public void visitSrcOver(SrcOver feature) {
+	    public void visitSrcOver(SESrcOver feature) {
 		SEShow.acceptFeature(this, feature.getPart());
 	    }
-	    public void visitText(Text feature) {
+	    public void visitText(SEText feature) {
 		check(feature.getX(), feature.getY());
 	    }
-	    public void visitTranslator(Translator feature) {
+	    public void visitTranslator(SETranslator feature) {
 		SEShow.acceptFeature(this, feature.getPart());
 	    }
-	    public void visitInterpolatedModel(InterpolatedModel feature) { }
-
-	    public void visitCommandRCHandler(CommandRCHandler handler) { }
-	    public void visitVisualRCHandler(VisualRCHandler handler) { }
 	};
 
 	    // This does the actual depth-first traversal...

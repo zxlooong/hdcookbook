@@ -56,6 +56,7 @@ package com.hdcookbook.grin.features;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -87,4 +88,7 @@ public class SEGroup extends Group implements SENode {
         return Group.class.getName();
     }
 
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitGroup(this);
+    }
 }

@@ -55,6 +55,7 @@
 package com.hdcookbook.grin.io.text;
 
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.features.Modifier;
 
@@ -68,4 +69,7 @@ public abstract class SEGenericModifier extends Modifier implements SENode {
         super(show);
     }
     
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitUserDefinedFeature(this);
+    }
 }

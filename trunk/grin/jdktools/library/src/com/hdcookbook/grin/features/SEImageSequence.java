@@ -56,6 +56,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.awt.Rectangle;
@@ -165,5 +166,9 @@ public class SEImageSequence extends ImageSequence implements SENode {
 
     public String getRuntimeClassName() {
         return ImageSequence.class.getName();
+    }
+    
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitImageSequence(this);
     }
 }

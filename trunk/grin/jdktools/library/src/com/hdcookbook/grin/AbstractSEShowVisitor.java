@@ -1,5 +1,6 @@
+
 /*  
- * Copyright (c) 2008, Sun Microsystems, Inc.
+ * Copyright (c) 2007, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -52,89 +53,63 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.features;
+package com.hdcookbook.grin;
 
-import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.SEShowVisitor;
+
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
-import java.io.IOException;
+import com.hdcookbook.grin.commands.SEActivatePartCommand;
+import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
+import com.hdcookbook.grin.commands.SESegmentDoneCommand;
+import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
+import com.hdcookbook.grin.features.SEAssembly;
+import com.hdcookbook.grin.features.SEBox;
+import com.hdcookbook.grin.features.SEClipped;
+import com.hdcookbook.grin.features.SEFade;
+import com.hdcookbook.grin.features.SEFixedImage;
+import com.hdcookbook.grin.features.SEGroup;
+import com.hdcookbook.grin.features.SEGuaranteeFill;
+import com.hdcookbook.grin.features.SEImageSequence;
+import com.hdcookbook.grin.features.SEInterpolatedModel;
+import com.hdcookbook.grin.features.SESetTarget;
+import com.hdcookbook.grin.features.SESrcOver;
+import com.hdcookbook.grin.features.SEText;
+import com.hdcookbook.grin.features.SETranslator;
+import com.hdcookbook.grin.input.SECommandRCHandler;
+import com.hdcookbook.grin.input.SEVisualRCHandler;
 
-public class SEInterpolatedModel extends InterpolatedModel implements SENode {
 
-    public SEInterpolatedModel(SEShow show) {
-        super(show);        
-    }
-    
-    public SEInterpolatedModel(SEShow show, String name, int[] frames, 
-				int[] currValues, int[][] values,
-				int repeatFrame, Command[] endCommands) 
-    {
-	this(show);
-        this.name = name;
-	this.frames = frames;
-	this.currValues = currValues;
-	this.values = values;
-	this.repeatFrame = repeatFrame;
-	this.endCommands = endCommands;
-    }
- 
-    public void setFrames(int[] frames) {
-        this.frames = frames;
-    }
-    
-    public void setCurrValues(int[] currValues) {
-        this.currValues = currValues;
-    }
-    
-    public void setValues(int[][] values) {
-        this.values = values;
-    }
-    
-    public void setRepeatFrame(int repeatFrame) {
-        this.repeatFrame = repeatFrame;
-    }
-    
-    public void setEndCommands(Command[] endCommands) {
-        this.endCommands = endCommands;
-    }
+/**
+ * A simple dummy implementation for visitor that does nothing on visit methods.
+ **/
+public abstract class AbstractSEShowVisitor implements SEShowVisitor {
 
-    public int[] getFrames() {
-        return frames;
-    }
-    
-    public int[] getCurrValues() {
-        return currValues;
-    }
-    
-    public int[][] getValues() {
-        return values;
-    }
-    
-    public int getRepeatFrame() {
-        return repeatFrame;
-    }
-       
-    public void writeInstanceData(GrinDataOutputStream out) 
-            throws IOException {
-        
-        out.writeSuperClassData(this);
-        out.writeSharedIntArray(getFrames());
-        out.writeIntArray(getCurrValues());
-	assert values.length == getCurrValues().length;
-	for (int i = 0; i < values.length; i++) {
-	    out.writeSharedIntArray(values[i]);
-	}
-        out.writeInt(getRepeatFrame());
-        out.writeCommands(getEndCommands());       
-    }
+    public void visitShow(SEShow show) {}
 
-    public String getRuntimeClassName() {
-        return InterpolatedModel.class.getName();
-    }
+    public void visitSegment(SESegment segment) {}
 
-    public void accept(SEShowVisitor visitor) {
-        visitor.visitInterpolatedModel(this);
-    }
+    public void visitAssembly(SEAssembly feature) {}
+    public void visitBox(SEBox feature) {}
+    public void visitClipped(SEClipped feature) {}
+    public void visitFade(SEFade feature) {}
+    public void visitFixedImage(SEFixedImage feature) {}
+    public void visitGroup(SEGroup feature) {}
+    public void visitGuaranteeFill(SEGuaranteeFill feature) {}
+    public void visitImageSequence(SEImageSequence feature) {}
+    public void visitUserDefinedFeature(Feature feature) {}
+    public void visitSetTarget(SESetTarget feature) {}
+    public void visitSrcOver(SESrcOver feature) {}
+    public void visitText(SEText feature) {}
+    public void visitTranslator(SETranslator feature){}
+    public void visitInterpolatedModel(SEInterpolatedModel feature) {}
+
+    public void visitCommandRCHandler(SECommandRCHandler handler) {}
+    public void visitVisualRCHandler(SEVisualRCHandler handler) {}
+    
+    public void visitActivatePartCommand(SEActivatePartCommand command) {}
+    public void visitActivateSegmentCommand(SEActivateSegmentCommand command) {}
+    public void visitSegmentDoneCommand(SESegmentDoneCommand command) {}
+    public void visitSetVisualRCStateCommand(SESetVisualRCStateCommand cmd) {}
+    public void visitShowCommand(SEShowCommand command) {}
+    public void visitUserDefinedCommand(Command command) {}
 }

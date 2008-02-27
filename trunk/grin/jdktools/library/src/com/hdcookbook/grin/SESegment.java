@@ -115,4 +115,7 @@ public class SESegment extends Segment implements SENode {
         return Segment.class.getName();
     }
    
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitSegment(this);
+    }
 }

@@ -93,5 +93,13 @@ public interface SENode {
      * @return String A fully qualified classname of a Node at xlet runtime.
      */
     public String getRuntimeClassName();
-    
+
+    /**
+     * Calls the visit method corresponding to this node type.
+     *
+     * @param visitor SEShowVisitor object.
+     *
+     * @see SEShowVisitor
+     */
+    public void accept(SEShowVisitor visitor);
 }

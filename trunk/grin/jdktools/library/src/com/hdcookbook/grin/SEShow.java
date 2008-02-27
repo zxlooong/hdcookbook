@@ -55,27 +55,12 @@
 
 package com.hdcookbook.grin;
 
-import com.hdcookbook.grin.features.Assembly;
-import com.hdcookbook.grin.features.Box;
-import com.hdcookbook.grin.features.Clipped;
-import com.hdcookbook.grin.features.Fade;
-import com.hdcookbook.grin.features.FixedImage;
-import com.hdcookbook.grin.features.Group;
-import com.hdcookbook.grin.features.GuaranteeFill;
-import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.SetTarget;
-import com.hdcookbook.grin.features.SrcOver;
-import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.features.InterpolatedModel;
-import com.hdcookbook.grin.input.CommandRCHandler;
+import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.input.VisualRCHandler;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -249,9 +234,11 @@ public class SEShow extends Show {
      **/
     public static void acceptSegments(SEShowVisitor visitor, Segment[] segments)
     {
-	for (Segment e : Arrays.asList(segments)) {
-	    visitor.visitSegment(e);
-	}
+	for (Segment e : segments) {
+            if (e instanceof SENode) {
+                ((SENode)e).accept(visitor);
+            }
+        }
     }
 
     /**
@@ -260,7 +247,7 @@ public class SEShow extends Show {
      **/
     public static void acceptFeatures(SEShowVisitor visitor, Feature[] features)
     {
-	for (Feature e : Arrays.asList(features)) {
+	for (Feature e : features) {
 	    acceptFeature(visitor, e);
 	}
     }
@@ -272,7 +259,7 @@ public class SEShow extends Show {
     public static void acceptRCHandlers(SEShowVisitor visitor, 
     					RCHandler[] rcHandlers) 
     {
-	for (RCHandler e : Arrays.asList(rcHandlers)) {
+	for (RCHandler e : rcHandlers) {
 	    acceptRCHandler(visitor, e);
 	}
     }
@@ -283,40 +270,13 @@ public class SEShow extends Show {
      * feature passed in.
      **/
     public static void acceptFeature(SEShowVisitor visitor, Feature feature) {
-        
-        Class featureClazz = feature.getClass();
-        
-	if (featureClazz == Assembly.class) {
-	    visitor.visitAssembly((Assembly) feature);
-	} else if (featureClazz == Box.class) {
-	    visitor.visitBox((Box) feature);
-	} else if (featureClazz == Clipped.class) {
-	    visitor.visitClipped((Clipped) feature);
-	} else if (featureClazz == Fade.class) {
-	    visitor.visitFade((Fade) feature);
-	} else if (featureClazz == FixedImage.class) {
-	    visitor.visitFixedImage((FixedImage) feature);
-	} else if (featureClazz == Group.class) {
-	    visitor.visitGroup((Group) feature);
-	} else if (featureClazz == GuaranteeFill.class) {
-	    visitor.visitGuaranteeFill((GuaranteeFill) feature);
-	} else if (featureClazz == ImageSequence.class) {
-	    visitor.visitImageSequence((ImageSequence) feature);
-	} else if (featureClazz == SetTarget.class) {
-	    visitor.visitSetTarget((SetTarget) feature);
-	} else if (featureClazz == SrcOver.class) {
-	    visitor.visitSrcOver((SrcOver) feature);
-	} else if (featureClazz == Text.class) {
-	    visitor.visitText((Text) feature);
-	} else if (featureClazz == Translator.class) {
-	    visitor.visitTranslator((Translator) feature);
-	} else if (featureClazz == InterpolatedModel.class) {
-	    visitor.visitInterpolatedModel((InterpolatedModel) feature);
+	if (feature instanceof SENode) {
+            ((SENode)feature).accept(visitor);
 	} else {
 	    visitor.visitUserDefinedFeature(feature);
 	}
     }
-
+    
     /**
      * Accept an RC handler from a show.  This will call the appropriate
      * visitXXX method on the visitor, according  to the subtype of the
@@ -324,15 +284,39 @@ public class SEShow extends Show {
      **/
     public static void acceptRCHandler(SEShowVisitor visitor, RCHandler handler)
     {
-	if (handler instanceof CommandRCHandler) {
-	    visitor.visitCommandRCHandler((CommandRCHandler) handler);
-	} else if (handler instanceof VisualRCHandler) {
-	    visitor.visitVisualRCHandler((VisualRCHandler) handler);
+	if (handler instanceof SENode) {
+	    ((SENode)handler).accept(visitor);
 	} else {
 	    assert false;
 	}
     }
 
+    /**
+     * Visit a list of commands with a SEShowVisitor.  This will
+     * call acceptCommand() on each of the commands.
+     **/
+    public static void acceptCommands(SEShowVisitor visitor, 
+    					Command[] commands) 
+    {
+	for (Command e : commands) {
+	    acceptCommand(visitor, e);
+	}
+    }
+
+    /**
+     * Accept a command from a show.  This will call the appropriate
+     * visitXXX method on the visitor, according  to the subtype of the
+     * command passed in.
+     **/
+    public static void acceptCommand(SEShowVisitor visitor, Command command)
+    {
+	if (command instanceof SENode) {
+	    ((SENode)command).accept(visitor);
+	} else {
+	    visitor.visitUserDefinedCommand(command);
+	}
+    }
+    
     /**
      * Returns true if the node passed in is recorded as an public element
      * in this show, false otherwise.

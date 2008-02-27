@@ -139,4 +139,7 @@ public class SEFixedImage extends FixedImage implements SENode {
         return FixedImage.class.getName();
     }
 
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitFixedImage(this);
+    }
 }

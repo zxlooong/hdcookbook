@@ -55,6 +55,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -104,4 +105,7 @@ public class SESetTarget extends SetTarget implements SENode {
         return SetTarget.class.getName();
     }
 
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitSetTarget(this);
+    }
 }

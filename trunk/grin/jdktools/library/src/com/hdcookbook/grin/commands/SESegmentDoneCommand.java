@@ -55,6 +55,7 @@ package com.hdcookbook.grin.commands;
 
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -75,4 +76,7 @@ public class SESegmentDoneCommand extends SegmentDoneCommand implements SENode {
         return SegmentDoneCommand.class.getName();
     }
 
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitSegmentDoneCommand(this);
+    }
 }

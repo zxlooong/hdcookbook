@@ -56,33 +56,31 @@
 package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Assembly;
-import com.hdcookbook.grin.features.Box;
-import com.hdcookbook.grin.features.Clipped;
-import com.hdcookbook.grin.features.Fade;
-import com.hdcookbook.grin.features.FixedImage;
-import com.hdcookbook.grin.features.Group;
-import com.hdcookbook.grin.features.GuaranteeFill;
-import com.hdcookbook.grin.features.ImageSequence;
+import com.hdcookbook.grin.commands.SEActivatePartCommand;
+import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
+import com.hdcookbook.grin.commands.SESegmentDoneCommand;
+import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SetTarget;
-import com.hdcookbook.grin.features.SrcOver;
-import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.features.InterpolatedModel;
-import com.hdcookbook.grin.input.CommandRCHandler;
-import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.input.VisualRCHandler;
-import com.hdcookbook.grin.input.RCKeyEvent;
+import com.hdcookbook.grin.features.SEAssembly;
+import com.hdcookbook.grin.features.SEBox;
+import com.hdcookbook.grin.features.SEClipped;
+import com.hdcookbook.grin.features.SEFade;
+import com.hdcookbook.grin.features.SEFixedImage;
+import com.hdcookbook.grin.features.SEGroup;
+import com.hdcookbook.grin.features.SEGuaranteeFill;
+import com.hdcookbook.grin.features.SEImageSequence;
 
+import com.hdcookbook.grin.features.SEInterpolatedModel;
+import com.hdcookbook.grin.features.SESetTarget;
+import com.hdcookbook.grin.features.SESrcOver;
+import com.hdcookbook.grin.features.SEText;
+import com.hdcookbook.grin.features.SETranslator;
+import com.hdcookbook.grin.input.SECommandRCHandler;
+import com.hdcookbook.grin.input.SEVisualRCHandler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -95,7 +93,7 @@ import java.util.HashSet;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class SEDoubleUseChecker implements SEShowVisitor {
+public class SEDoubleUseChecker extends AbstractSEShowVisitor {
 
     private ArrayList<String> errors = new ArrayList<String>();
     private Set<Feature> activeFeatures;
@@ -124,7 +122,7 @@ public class SEDoubleUseChecker implements SEShowVisitor {
 	SEShow.acceptSegments(this, show.getSegments());
     }
 
-    public void visitSegment(Segment segment) {
+    public void visitSegment(SESegment segment) {
 	activeFeatures = new HashSet<Feature>();
 	SEShow.acceptFeatures(this, segment.getActiveFeatures());
     }
@@ -141,7 +139,7 @@ public class SEDoubleUseChecker implements SEShowVisitor {
     }
 
 
-    public void visitAssembly(Assembly feature) {
+    public void visitAssembly(SEAssembly feature) {
 	addActive(feature);
 	//
 	// An assembly is the tricky case.  The parts of an assembly can
@@ -161,25 +159,25 @@ public class SEDoubleUseChecker implements SEShowVisitor {
 	activeFeatures = unionSet;
     }
 
-    public void visitBox(Box feature) {
+    public void visitBox(SEBox feature) {
 	addActive(feature);
     }
 
-    public void visitClipped(Clipped feature) {
-	addActive(feature);
-	SEShow.acceptFeature(this, feature.getPart());
-    }
-
-    public void visitFade(Fade feature) {
+    public void visitClipped(SEClipped feature) {
 	addActive(feature);
 	SEShow.acceptFeature(this, feature.getPart());
     }
 
-    public void visitFixedImage(FixedImage feature) {
+    public void visitFade(SEFade feature) {
+	addActive(feature);
+	SEShow.acceptFeature(this, feature.getPart());
+    }
+
+    public void visitFixedImage(SEFixedImage feature) {
 	addActive(feature);
     }
 
-    public void visitGroup(Group feature) {
+    public void visitGroup(SEGroup feature) {
 	Feature[] parts = feature.getParts();
 	if (parts.length != 0) {
 	    addActive(feature);
@@ -193,12 +191,12 @@ public class SEDoubleUseChecker implements SEShowVisitor {
 	}
     }
 
-    public void visitGuaranteeFill(GuaranteeFill feature) {
+    public void visitGuaranteeFill(SEGuaranteeFill feature) {
 	addActive(feature);
 	SEShow.acceptFeature(this, feature.getPart());
     }
 
-    public void visitImageSequence(ImageSequence feature) {
+    public void visitImageSequence(SEImageSequence feature) {
 	addActive(feature);
     }
 
@@ -209,34 +207,26 @@ public class SEDoubleUseChecker implements SEShowVisitor {
         }   
     }
 
-    public void visitSetTarget(SetTarget feature) {
+    public void visitSetTarget(SESetTarget feature) {
 	addActive(feature);
 	SEShow.acceptFeature(this, feature.getPart());
     }
 
-    public void visitSrcOver(SrcOver feature) {
+    public void visitSrcOver(SESrcOver feature) {
 	addActive(feature);
 	SEShow.acceptFeature(this, feature.getPart());
     }
 
-    public void visitText(Text feature) {
+    public void visitText(SEText feature) {
 	addActive(feature);
     }
 
-    public void visitTranslator(Translator feature) {
+    public void visitTranslator(SETranslator feature) {
 	addActive(feature);
 	SEShow.acceptFeature(this, feature.getPart());
     }
 
-    public void visitInterpolatedModel(InterpolatedModel feature) {
+    public void visitInterpolatedModel(SEInterpolatedModel feature) {
 	addActive(feature);
-    }
-
-    public void visitCommandRCHandler(CommandRCHandler handler) {
-	// do nothing
-    }
-
-    public void visitVisualRCHandler(VisualRCHandler handler) {
-	// do nothing
     }
 }

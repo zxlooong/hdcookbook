@@ -181,4 +181,8 @@ public class SEShowCommand extends Command implements SENode {
     public String getRuntimeClassName() {
         return container.getClassName();  // Need special care
     }
+    
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitShowCommand(this);
+    }
 }

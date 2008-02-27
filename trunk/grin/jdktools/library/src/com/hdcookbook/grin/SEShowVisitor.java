@@ -56,30 +56,27 @@
 package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.features.Assembly;
-import com.hdcookbook.grin.features.Box;
-import com.hdcookbook.grin.features.Clipped;
-import com.hdcookbook.grin.features.Fade;
-import com.hdcookbook.grin.features.FixedImage;
-import com.hdcookbook.grin.features.Group;
-import com.hdcookbook.grin.features.GuaranteeFill;
-import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.SetTarget;
-import com.hdcookbook.grin.features.SrcOver;
-import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.features.InterpolatedModel;
-import com.hdcookbook.grin.input.CommandRCHandler;
-import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.input.VisualRCHandler;
-import com.hdcookbook.grin.input.RCKeyEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.commands.SEActivatePartCommand;
+import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
+import com.hdcookbook.grin.commands.SESegmentDoneCommand;
+import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
+import com.hdcookbook.grin.features.SEAssembly;
+import com.hdcookbook.grin.features.SEBox;
+import com.hdcookbook.grin.features.SEClipped;
+import com.hdcookbook.grin.features.SEFade;
+import com.hdcookbook.grin.features.SEFixedImage;
+import com.hdcookbook.grin.features.SEGroup;
+import com.hdcookbook.grin.features.SEGuaranteeFill;
+import com.hdcookbook.grin.features.SEImageSequence;
+import com.hdcookbook.grin.features.SEInterpolatedModel;
+import com.hdcookbook.grin.features.SESetTarget;
+import com.hdcookbook.grin.features.SESrcOver;
+import com.hdcookbook.grin.features.SEText;
+import com.hdcookbook.grin.features.SETranslator;
+import com.hdcookbook.grin.input.SECommandRCHandler;
+import com.hdcookbook.grin.input.SEVisualRCHandler;
 
 
 /**
@@ -101,23 +98,30 @@ public interface SEShowVisitor {
 
     public void visitShow(SEShow show);
 
-    public void visitSegment(Segment segment);
+    public void visitSegment(SESegment segment);
 
-    public void visitAssembly(Assembly feature);
-    public void visitBox(Box feature);
-    public void visitClipped(Clipped feature);
-    public void visitFade(Fade feature);
-    public void visitFixedImage(FixedImage feature);
-    public void visitGroup(Group feature);
-    public void visitGuaranteeFill(GuaranteeFill feature);
-    public void visitImageSequence(ImageSequence feature);
+    public void visitAssembly(SEAssembly feature);
+    public void visitBox(SEBox feature);
+    public void visitClipped(SEClipped feature);
+    public void visitFade(SEFade feature);
+    public void visitFixedImage(SEFixedImage feature);
+    public void visitGroup(SEGroup feature);
+    public void visitGuaranteeFill(SEGuaranteeFill feature);
+    public void visitImageSequence(SEImageSequence feature);
     public void visitUserDefinedFeature(Feature feature);
-    public void visitSetTarget(SetTarget feature);
-    public void visitSrcOver(SrcOver feature);
-    public void visitText(Text feature);
-    public void visitTranslator(Translator feature);
-    public void visitInterpolatedModel(InterpolatedModel feature);
+    public void visitSetTarget(SESetTarget feature);
+    public void visitSrcOver(SESrcOver feature);
+    public void visitText(SEText feature);
+    public void visitTranslator(SETranslator feature);
+    public void visitInterpolatedModel(SEInterpolatedModel feature);
 
-    public void visitCommandRCHandler(CommandRCHandler handler);
-    public void visitVisualRCHandler(VisualRCHandler handler);
+    public void visitCommandRCHandler(SECommandRCHandler handler);
+    public void visitVisualRCHandler(SEVisualRCHandler handler);
+    
+    public void visitActivatePartCommand(SEActivatePartCommand command);
+    public void visitActivateSegmentCommand(SEActivateSegmentCommand command);
+    public void visitSegmentDoneCommand(SESegmentDoneCommand command);
+    public void visitSetVisualRCStateCommand(SESetVisualRCStateCommand command);
+    public void visitShowCommand(SEShowCommand command);
+    public void visitUserDefinedCommand(Command command);
 }

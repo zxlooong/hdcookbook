@@ -56,6 +56,7 @@ package com.hdcookbook.grin.commands;
 
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -90,4 +91,7 @@ public class SEActivateSegmentCommand extends ActivateSegmentCommand implements 
         return ActivateSegmentCommand.class.getName();
     }
 
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitActivateSegmentCommand(this);
+    }
 }

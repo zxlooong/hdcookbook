@@ -57,6 +57,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.awt.Color;
 import java.awt.Font;
@@ -150,4 +151,7 @@ public class SEText extends Text implements SENode {
         return Text.class.getName();
     }
 
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitText(this);
+    }
 }

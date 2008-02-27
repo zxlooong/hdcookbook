@@ -55,6 +55,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -74,5 +75,9 @@ public class SEAssembly extends Assembly implements SENode {
 
     public String getRuntimeClassName() {
         return Assembly.class.getName();
+    }
+    
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitAssembly(this);
     }
 }

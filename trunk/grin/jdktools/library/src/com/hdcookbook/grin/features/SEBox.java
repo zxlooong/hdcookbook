@@ -56,6 +56,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -161,4 +162,7 @@ public class SEBox extends Box implements SENode {
         return Box.class.getName();
     }
 
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitBox(this);
+    }
 }

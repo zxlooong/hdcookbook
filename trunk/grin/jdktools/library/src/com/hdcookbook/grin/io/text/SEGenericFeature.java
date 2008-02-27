@@ -102,4 +102,8 @@ public abstract class SEGenericFeature extends Feature implements SENode {
 
     public void nextFrame() {
     }
+    
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitUserDefinedFeature(this);
+    }
 }

@@ -57,6 +57,7 @@ package com.hdcookbook.grin.input;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
@@ -265,5 +266,9 @@ public class SEVisualRCHandler extends VisualRCHandler implements SENode {
 
     public String getRuntimeClassName() {
         return VisualRCHandler.class.getName();
+    }
+    
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitVisualRCHandler(this);
     }
 }
