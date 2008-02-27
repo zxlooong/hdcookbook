@@ -55,6 +55,7 @@
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
@@ -150,4 +151,11 @@ public class OvalExtensionCompiler extends Oval
     public String getRuntimeClassName() {
         return Oval.class.getName();
     }
+
+    /**
+     * For a visitor method
+     */
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitUserDefinedFeature(this);
+    } 
 }
