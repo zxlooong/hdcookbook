@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="hdcookbook" default="deploy" basedir=".">
+<project name="hdcookbook" default="all" basedir=".">
     
   <property file="${os.name}.user.vars.properties"/>
   <property file="user.vars.properties"/>	
   <property file="vars.properties"/>	
 
-  <!-- A default target.  This will create a hdcookbook sample disc image -->
-  <target name="deploy" depends="build-bd-tools, build-grin-jdk-tools"> 
-      <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml"/>
-  </target>
-
   <!-- A target for doing everything -->
   <target name="all" depends="deploy, build-grin-javadoc,
                               build-grin-samples, run-tests, bundle"/>
- 
+                              
+  <!-- This will create a hdcookbook disc image and needed tools for it. -->
+  <target name="deploy" depends="build-bd-tools, build-grin-jdk-tools"> 
+      <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml"/>
+  </target>
+  
   <!-- Build Grin's compile-time (javase-based) library and tools -->                            
   <target name="build-grin-jdk-tools">
       <ant dir="grin" antfile="scripts/ant/build_jdktools.xml"/>
