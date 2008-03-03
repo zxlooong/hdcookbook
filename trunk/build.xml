@@ -53,29 +53,9 @@
       <ant dir="grin/samples" target="autotest-grinview"/>
   </target>
   
-  <!-- Creates a bundle for the distribution -->
-  <target name="bundle" depends="deploy">
-      <mkdir dir="bundle/discroot"/>
-      <copy todir="bundle">
-          <fileset dir="tools">
-              <include name="**/bdjo.jar"/>
-              <include name="**/security.jar"/>
-          </fileset>
-          <fileset dir="grin/build/jdktools">
-             <include name="**/*.jar"/>
-          </fileset>
-      </copy>
-      <copy todir="bundle/discroot">
-          <fileset dir="${HDC_DISC_BDMV}">      
-              <include name="**/*.jar"/>
-              <include name="**/*.bdjo"/>
-          </fileset>
-          <fileset dir="${HDC_DISC_BDMV}/..">  
-             <include name="**/*.crt"/>
-         </fileset>
-      </copy>
-      <zip destfile="${RELEASE_BUNDLE}"
-           basedir="bundle"/>
+  <!-- makes a release bundle -->
+  <target name="bundle">
+      <ant antfile="bundle.xml"/>
   </target>
   
   <target name="clean"> 	  
@@ -84,9 +64,7 @@
 	  <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml" target="clean"/>
 	  <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml" target="clean"/>        
 	  <ant dir="grin/samples" target="clean"/>
-          
-          <delete file="${RELEASE_BUNDLE}"/>
-          <delete dir="bundle"/>
+          <ant antfile="bundle.xml" target="clean"/>
   </target>
   
 </project>
