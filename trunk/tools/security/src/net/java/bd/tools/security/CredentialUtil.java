@@ -98,12 +98,18 @@
 
 package net.java.bd.tools.security;
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
-import java.util.zip.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.InputStream;
 import java.math.BigInteger;
-import java.nio.charset.*;
 
 import java.security.MessageDigest;
 import java.security.Signature;
@@ -113,26 +119,40 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertPath;
-import javax.crypto.Cipher;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 import javax.naming.ldap.LdapName;
 import javax.security.auth.x500.X500Principal;
-import sun.security.x509.X500Name;
-import sun.security.util.*;
+
 import sun.security.pkcs.PKCS7;
 import sun.misc.BASE64Encoder;
 import sun.misc.BASE64Decoder;
 import sun.tools.jar.Main;
 
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import sun.security.util.DerInputStream;
+import sun.security.util.DerOutputStream;
+import sun.security.util.DerValue;
+import sun.security.util.ObjectIdentifier;
 
 class CredentialUtil {
     
@@ -301,6 +321,7 @@ class CredentialUtil {
         TransformerFactory tfactory = TransformerFactory.newInstance();
         Transformer transformer = tfactory.newTransformer();
         transformer.transform(domSource, fileResult);
+        removeEntityReference(permReqFile);
     }
     
      private Node getNodeWithTag(Node node, String tag) throws Exception {
@@ -514,7 +535,7 @@ class CredentialUtil {
 	FileOutputStream fos = new FileOutputStream(sbf);	
 	newSignBlockFile.encodeSignedData(fos);
  	fos.close();
-        String[] jarArgs = {"-uf", jarFileName, SIG_BLOCK_FILE};
+        String[] jarArgs = {"-uvf", jarFileName, SIG_BLOCK_FILE};
         Main jar = new Main(System.out, System.err, "jar");
         jar.run(jarArgs);
         if (debug) {
@@ -560,7 +581,6 @@ class CredentialUtil {
         }     
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();    
 	Document doc = factory.newDocumentBuilder().parse(jf.getInputStream(je));
-        //new File(permReqFile));
         Element e = doc.getDocumentElement();;
         Node credNode = getNodeWithTag(e, FILE_CRED_TAG);
         Node grantorNode = getNodeWithTag(credNode, GRANTOR_ID_TAG);
@@ -627,6 +647,38 @@ class CredentialUtil {
             }
        }
        return cert;
+    }
+    
+    /**
+     * This method explicitly removes the character references from the PRF file
+     * that were generated after updating the PRF file with credentials. The XML
+     * APIs automatically generate character references when the XML document
+     * is written to a file. According to MHP Specifcation section 14.3
+     * character or entity references are not allowed in XML structure.
+     * @param fileName
+     * @throws java.lang.Exception
+     */
+    void removeEntityReference(String fileName) throws Exception {
+        System.out.println("Reading PRF file............");    
+	BufferedReader br = new BufferedReader(
+                            new FileReader(fileName));
+        int ch;
+        CharArrayWriter caw = new CharArrayWriter(2000);
+        while ((ch = br.read()) != -1) {
+            if (ch == '&') {
+                if (br.skip(4) != 4) {
+                    System.out.println("Could not skip 4 chars");
+                }
+                System.out.print("ch:" + ch);
+            } else {
+                caw.write(ch);
+            }
+        }
+        System.out.println();
+        br.close();
+        FileWriter fw = new FileWriter(fileName);
+        fw.write(caw.toCharArray());
+        fw.close();
     }
     
     // XXX This method's implementation is incomplete.

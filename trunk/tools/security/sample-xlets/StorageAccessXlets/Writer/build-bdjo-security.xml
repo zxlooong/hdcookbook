@@ -34,7 +34,7 @@ depends="security.check">
        <pathelement location="${java.home}/../lib/tools.jar"/>
     </path>
     <java classname="net.java.bd.tools.security.BDCertGenerator" fork="true">
-	<arg line="-rootdn &quot;CN=WriterRoot, OU=Studio, O=BDJCompany, C=US&quot; -appdn &quot;CN=WriterApp, OU=Production, O=BDJCompany, C=US&quot; 00000001"/>
+	<arg line="-rootdn &quot;CN=WriterRoot, OU=Studio, O=BDJCompany, C=US&quot; -appdn &quot;CN=WriterApp, OU=Production, O=BDJCompany, C=US&quot; 7fff3456"/>
         <classpath refid="sec.tools.path"/> 
     </java>	
     <java classname="net.java.bd.tools.security.BDSigner" fork="true">
@@ -130,7 +130,7 @@ depends="security.check">
             </applicationDescriptor>
             <applicationId>0x4001</applicationId>
             <controlCode>0x1</controlCode>
-            <organizationId>0x00000001</organizationId>
+            <organizationId>0x7fff3456</organizationId>
             <type>0x1</type>
         </applications>
     </applicationManagementTable>

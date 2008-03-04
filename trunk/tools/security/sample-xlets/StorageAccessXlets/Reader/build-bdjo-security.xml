@@ -34,7 +34,7 @@ depends="security.check">
        <pathelement location="${java.home}/../lib/tools.jar"/>
     </path>
     <java classname="net.java.bd.tools.security.BDCertGenerator" fork="true">
-	    <arg line="-rootdn &quot;CN=ReaderRoot, OU=Studio, O=BDJCompany, C=US&quot; -appdn &quot;CN=ReaderApp, OU=Production, O=BDJCompany, C=US&quot; 00000002"/>
+	    <arg line="-rootdn &quot;CN=ReaderRoot, OU=Studio, O=BDJCompany, C=US&quot; -appdn &quot;CN=ReaderApp, OU=Production, O=BDJCompany, C=US&quot; 7fff1234"/>
         <classpath refid="sec.tools.path"/> 
     </java>	
     <delete file="${basedir}/grantor.store"/>
@@ -132,7 +132,7 @@ depends="security.check">
             </applicationDescriptor>
             <applicationId>0x4002</applicationId>
             <controlCode>0x1</controlCode>
-            <organizationId>0x00000002</organizationId>
+            <organizationId>0x7fff1234</organizationId>
             <type>0x1</type>
         </applications>
     </applicationManagementTable>
