@@ -658,8 +658,7 @@ class CredentialUtil {
      * @param fileName
      * @throws java.lang.Exception
      */
-    void removeEntityReference(String fileName) throws Exception {
-        System.out.println("Reading PRF file............");    
+    void removeEntityReference(String fileName) throws Exception {    
 	BufferedReader br = new BufferedReader(
                             new FileReader(fileName));
         int ch;
@@ -667,14 +666,15 @@ class CredentialUtil {
         while ((ch = br.read()) != -1) {
             if (ch == '&') {
                 if (br.skip(4) != 4) {
-                    System.out.println("Could not skip 4 chars");
+                    System.out.println("ERROR removing character references" +
+                          " from PRF file; Could not skip 4 chars");
+                    br.close();
+                    System.exit(1);
                 }
-                System.out.print("ch:" + ch);
             } else {
                 caw.write(ch);
             }
         }
-        System.out.println();
         br.close();
         FileWriter fw = new FileWriter(fileName);
         fw.write(caw.toCharArray());
