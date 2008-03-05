@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.ant.freeform</type>
+    <configuration>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+            <name>hdcookbook</name>
+        </general-data>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
+            <!-- Do not use Project Properties customizer when editing this file manually. -->
+            <name>hdcookbook</name>
+            <properties/>
+            <folders>
+                <source-folder>
+                    <label>grin/library/src</label>
+                    <type>java</type>
+                    <location>grin/library/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin/jdktools/library/src</label>
+                    <type>java</type>
+                    <location>grin/jdktools/library/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin/jdktools/grinviewer/src</label>
+                    <type>java</type>
+                    <location>grin/jdktools/grinviewer/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin/jdktools/binaryconverter/src</label>
+                    <type>java</type>
+                    <location>grin/jdktools/binaryconverter/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin/jdktools/mosaic/src</label>
+                    <type>java</type>
+                    <location>grin/jdktools/mosaic/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>tools\bdjo\src</label>
+                    <type>java</type>
+                    <location>tools/bdjo/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>tools\bdsigner\src</label>
+                    <type>java</type>
+                    <location>tools/bdsigner/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin/xlets/bookmenu/src</label>
+                    <type>java</type>
+                    <location>grin/xlets/bookmenu/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin/xlets/gunbunny/src</label>
+                    <type>java</type>
+                    <location>grin/xlets/gunbunny/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>tools\security\src</label>
+                    <type>java</type>
+                    <location>tools/security/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin\xlets\tools\shared\src</label>
+                    <type>java</type>
+                    <location>grin/xlets/tools/shared/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin\xlets\tools\jdk\src</label>
+                    <type>java</type>
+                    <location>grin/xlets/tools/jdk/src</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+                <source-folder>
+                    <label>grin\samples\CustomFeature</label>
+                    <type>java</type>
+                    <location>grin/samples/CustomFeature</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
+            </folders>
+            <ide-actions>
+                <action name="build">
+                    <target>deploy</target>
+                </action>
+                <action name="clean">
+                    <target>clean</target>
+                </action>
+                <action name="rebuild">
+                    <target>clean</target>
+                    <target>deploy</target>
+                </action>
+            </ide-actions>
+            <view>
+                <items>
+                    <source-folder style="packages">
+                        <label>grin/library/src</label>
+                        <location>grin/library/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/jdktools/library/src</label>
+                        <location>grin/jdktools/library/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/jdktools/grinviewer/src</label>
+                        <location>grin/jdktools/grinviewer/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/jdktools/binaryconverter/src</label>
+                        <location>grin/jdktools/binaryconverter/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/jdktools/mosaic/src</label>
+                        <location>grin/jdktools/mosaic/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>tools\bdjo\src</label>
+                        <location>tools/bdjo/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>tools\bdsigner\src</label>
+                        <location>tools/bdsigner/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/xlets/bookmenu/src</label>
+                        <location>grin/xlets/bookmenu/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/xlets/gunbunny/src</label>
+                        <location>grin/xlets/gunbunny/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>tools\security\src</label>
+                        <location>tools/security/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin\xlets\tools\shared\src</label>
+                        <location>grin/xlets/tools/shared/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin\xlets\tools\jdk\src</label>
+                        <location>grin/xlets/tools/jdk/src</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>grin\samples\CustomFeature</label>
+                        <location>grin/samples/CustomFeature</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
+                    <source-file>
+                        <location>build.xml</location>
+                    </source-file>
+                </items>
+                <context-menu>
+                    <ide-action name="build"/>
+                    <ide-action name="clean"/>
+                    <ide-action name="rebuild"/>
+                </context-menu>
+            </view>
+            <subprojects/>
+        </general-data>
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
+            <compilation-unit>
+                <package-root>grin/library/src</package-root>
+                <package-root>grin/jdktools/library/src</package-root>
+                <package-root>grin/jdktools/grinviewer/src</package-root>
+                <package-root>grin/jdktools/binaryconverter/src</package-root>
+                <package-root>grin/jdktools/mosaic/src</package-root>
+                <package-root>tools/bdjo/src</package-root>
+                <package-root>tools/bdsigner/src</package-root>
+                <package-root>grin/xlets/bookmenu/src</package-root>
+                <package-root>grin/xlets/gunbunny/src</package-root>
+                <package-root>tools/security/src</package-root>
+                <package-root>grin/xlets/tools/shared/src</package-root>
+                <package-root>grin/xlets/tools/jdk/src</package-root>
+                <package-root>grin/samples/CustomFeature</package-root>
+                <classpath mode="compile">../bd-j/references/enhanced/classes.zip</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+        </java-data>
+    </configuration>
+</project>
