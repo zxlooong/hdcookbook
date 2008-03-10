@@ -252,8 +252,6 @@ public class AssetFinder  {
      * Get a Font that's used within a Show.  This method
      * might someday share one Font instance and any needed font
      * factories for multiple calls with the same specifications.
-     *
-     * @throws IOException if the font isn't found for some reason
      **/
     public static Font getFont(String fontName, int style, int size) {
 	if (helper != null) {

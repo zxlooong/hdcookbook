@@ -61,6 +61,7 @@ import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.text.ExtensionParser;
 import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
+import java.awt.Font;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -178,6 +179,14 @@ public class Main {
 	    protected void abortHelper() {
 		System.exit(1);
 	    }
+            
+            protected Font getFontHelper(String fontName, int style, int size) {
+                // On JavaSE, one cannot easily load a custom font.
+                // The font created here will have a different glyph from what's 
+                // expected for the xlet runtime, but it will hold the correct
+                // fontName, style, and size.
+                return new Font(fontName, style, size);
+            }
 	});
        	AssetFinder.setSearchPath(assetPath, assetDirs);
         try {
