@@ -8,11 +8,11 @@
                               
   <!-- This will create a hdcookbook disc image and the tools required for it -->
   <target name="main" depends="bd-tools">
-      <!-- Build Grin's compile-time (javase-based) library and tools --> 
-      <ant dir="grin" antfile="scripts/ant/build_jdktools.xml"/>
+      <!-- Build Grin's compile-time (javase-based) library and tools,
+       as well as the hdcookbook sample disc image --> 
+      <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml"/>
       <!-- Build the GRIN sample xlets -->
       <ant dir="grin/samples"/>
-      <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml"/>
   </target>
   
   <!-- Build just the tools needed for making a BD disc image -->
@@ -27,14 +27,11 @@
         <ant dir="grin" antfile="scripts/ant/run_jdktools.xml" target="autotest-grinview"/>
         <ant dir="grin/samples" target="autotest-grinview"/>
         <ant antfile="dist.xml"/>
-        <!-- Runs MenuXlet's show text file on GrinView, our grin runtime tool on jdk -->
-        <ant dir="grin" antfile="scripts/ant/run_jdktools.xml" target="run-grinview-menu"/>
   </target>
   
    <!-- Build the GRIN javadoc and update the trunk/www directory with this javadoc -->
-   <target name="javadoc" depends="main">
-	<ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml"/>
-        <ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml" target="deploy"/>
+   <target name="javadoc">
+	<ant dir="grin" antfile="scripts/ant/build_grin_javadoc.xml" target="deploy"/>
     </target>
     
   <target name="clean"> 	  
