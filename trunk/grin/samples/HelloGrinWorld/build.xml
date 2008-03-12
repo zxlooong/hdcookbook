@@ -62,7 +62,7 @@
             </java>
 	</target>   
         
-        <target name="test" depends="generate_binary_script">
+        <target name="test" depends="jar">
             <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
                 <classpath>
                     <pathelement path="${grin.classes}"/>

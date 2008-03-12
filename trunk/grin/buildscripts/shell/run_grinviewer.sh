@@ -23,7 +23,7 @@ case $1 in
 	    ;;
 
     menu-bin)
-    	    cd $GRIN_BASE/scripts/ant
+    	    cd $GRIN_BASE/buildscripts/ant
 	    ant -f run_jdktools.xml run-grin-viewer-binary
 	    ;;
 

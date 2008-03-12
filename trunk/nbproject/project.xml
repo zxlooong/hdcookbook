@@ -101,6 +101,36 @@
                     <target>main</target>
                 </action>
             </ide-actions>
+            <export>
+                <type>jar</type>
+                <location>grin/build/jdktools/grin_viewer/grinviewer.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>folder</type>
+                <location>grin/build/jdktools/library</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>grin/build/jdktools/compiler/compiler.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>grin/build/xlets/gamexlet/00003.jar</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>folder</type>
+                <location>grin/build/xlets/menuxlet/classes</location>
+                <build-target>main</build-target>
+            </export>
+            <export>
+                <type>jar</type>
+                <location>grin/build/xlets/monitorxlet/00001.jar</location>
+                <build-target>main</build-target>
+            </export>
             <view>
                 <items>
                     <source-folder style="packages">
@@ -195,7 +225,13 @@
                 <package-root>grin/xlets/tools/jdk/src</package-root>
                 <package-root>grin/samples/CustomFeature</package-root>
                 <package-root>grin/scripts/ant</package-root>
-                <classpath mode="compile">../bd-j/references/enhanced/classes.zip</classpath>
+                <classpath mode="compile">../bd-j/references/enhanced/classes.zip;grin/build/jdktools/library;grin/build/library</classpath>
+                <built-to>grin/build/jdktools/grin_viewer/grinviewer.jar</built-to>
+                <built-to>grin/build/jdktools/library</built-to>
+                <built-to>grin/build/jdktools/compiler/compiler.jar</built-to>
+                <built-to>grin/build/xlets/gamexlet/00003.jar</built-to>
+                <built-to>grin/build/xlets/menuxlet/classes</built-to>
+                <built-to>grin/build/xlets/monitorxlet/00001.jar</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>

@@ -4,7 +4,7 @@ source vars.sh
 DEST=$HDC_BUILD_DIR/grin_javadoc
 
 cd $HDC_REPOSITORY
-ant javadoc
+ant javadoc-deploy
 if [[ $? != 0 ]] ; then
     exit 1;
 fi

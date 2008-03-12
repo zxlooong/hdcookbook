@@ -25,9 +25,9 @@ information or have any questions.
 
 <project name="Generates GRIN javadoc" basedir="../.." default="generate-grin-javadoc">
 
-<property file="../${os.name}.user.vars.properties"/>
-<property file="../user.vars.properties"/>	
-<property file="../vars.properties"/>	
+<property file="${os.name}.user.vars.properties"/>
+<property file="user.vars.properties"/>	
+<property file="vars.properties"/>	
 
 <property name="HDC_BUILD_DIR" value="build"/>
 <property name="GRIN_JAVADOC_DEST" value="${HDC_BUILD_DIR}/grin_javadoc"/>

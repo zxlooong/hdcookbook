@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!---
+  This ant file creates a distribution binary bundle from the
+  hdcookbook build.  It is meant to be invoked after the build
+  completes successfully.
+  -->
+  
 <project name="hdcookbook-bundle" default="bundle" basedir=".">
     
     <property file="${os.name}.user.vars.properties"/>
     <property file="user.vars.properties"/>	
     <property file="vars.properties"/>	
-
-    <!-- Creates a bundle for the distribution -->
+    
+    <!-- Creates a binary bundle for the distribution -->
     <target name="bundle">
-
+        <tstamp/>
         <mkdir dir="${RELEASE_BUNDLE}"/>
         
         <copy todir="${RELEASE_BUNDLE}/HDCookbook-DiscImage">
@@ -52,14 +58,16 @@
             <fileset dir="release-notes"/>
         </copy>
         
-        <zip destfile="${RELEASE_BUNDLE}.zip"
+        <zip destfile="${RELEASE_BUNDLE}-${DSTAMP}.zip"
              basedir="."
              includes="${RELEASE_BUNDLE}/"/>
              
     </target>
     
     <target name="clean">
-        <delete file="${RELEASE_BUNDLE}.zip"/>
+        <delete>
+             <fileset dir="." includes="${RELEASE_BUNDLE}*"/>
+        </delete>
         <delete dir="${RELEASE_BUNDLE}"/>
     </target>
     

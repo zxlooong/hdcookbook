@@ -9,7 +9,7 @@
   <property file="vars.properties"/>	
   
   <target name="all">
-        <ant dir="grin" antfile="scripts/ant/run_jdktools.xml" target="run-grinview-menu"/>
+        <ant dir="grin" antfile="buildscripts/ant/run_jdktools.xml" target="run-grinview-menu"/>
   </target>
 
 </project> 

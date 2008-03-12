@@ -54,7 +54,7 @@ information or have any questions.
         <mkdir dir="${MENUTOOLS_DEST}/classes"/>
     </target>
     
-    <target name="build-xlets" depends="
+    <target name="build-xlets" depends="compile-me-library,
             build-monitor-xlet, build-game-xlet, build-menu-xlet, 
             sign-xlets, generate-bdjo"/>
     
@@ -139,12 +139,14 @@ information or have any questions.
     <target name="generate-binary-script" depends="copy-menu-assets, compile-grin-compiler,
                  compile-extension-reader, compile-grinview"> 
                      
-        <jdktools.java classname="com.hdcookbook.grin.binaryconverter.Main">
-            <classpath>
-                <pathelement path="${MENUTOOLS_DEST}"/>
-                <pathelement path="${GRIN_COMPILER_JAR}"/>
-                <pathelement path="${MENUASSETS_DEST}"/>
-            </classpath>    
+        <path id="compiler_menuxlet_path">                
+            <pathelement path="${MENUTOOLS_DEST}"/>
+            <pathelement path="${GRIN_COMPILER_JAR}"/>
+            <pathelement path="${MENUASSETS_DEST}"/>
+        </path>          
+        
+        <grincompiler.jdktools.java classname="com.hdcookbook.grin.binaryconverter.Main"
+                       classpath.ref="compiler_menuxlet_path">   
             <arg value="-extension_parser"/>
             <arg value="com.hdcookbook.bookmenu.menu.MenuExtensionParser"/>
             <arg value="-asset_dir"/>
@@ -153,7 +155,7 @@ information or have any questions.
             <arg value="${MENUASSETS_DEST}"/>
             <arg value="-debug"/>
             <arg value="menu.txt"/>
-        </jdktools.java>	
+        </grincompiler.jdktools.java>	
         
         <move file="${MENUASSETS_DEST}/menu.grinview.java"
               tofile="${MENU_GENERATED}/grinview/${MENU_SHOW_COMMANDS}" />
@@ -177,10 +179,10 @@ information or have any questions.
     </target>   
  
     <target name="generate-bdjo">
-        <ant antfile="scripts/ant/build_bdjo_security.xml"/>
+        <ant antfile="buildscripts/ant/build_bdjo_security.xml"/>
     </target>
 
     <target name="sign-xlets">
-        <ant antfile="scripts/ant/build_bdjo_security.xml" target="sign-xlets"/>        
+        <ant antfile="buildscripts/ant/build_bdjo_security.xml" target="sign-xlets"/>        
     </target>    
 </project>

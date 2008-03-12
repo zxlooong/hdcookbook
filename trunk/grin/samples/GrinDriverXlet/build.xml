@@ -9,7 +9,7 @@
     <property file="${top.dir}/${os.name}.user.vars.properties"/>
     <property file="${top.dir}/user.vars.properties"/>	
     <property file="${top.dir}/vars.properties"/>	
-    <property file="${top.dir}/grin/scripts/ant/grin.properties"/>
+    <property file="${top.dir}/grin/buildscripts/ant/grin.properties"/>
     
     <property name="bdj.classes"  value="${HDC_BDJ_PLATFORM_CLASSES}"/>
     <property name="grinviewer.jar"  value="${top.dir}/grin/${GRIN_VIEWER_JAR}"/>

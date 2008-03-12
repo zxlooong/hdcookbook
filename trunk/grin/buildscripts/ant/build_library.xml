@@ -34,7 +34,7 @@ information or have any questions.
         <delete dir="${ME_LIBRARY_DEST}"/>
     </target>
     
-    <target name="init-grin-me-library">
+    <target name="init-grin-me-library" depends="init-preset-defs">
         <mkdir dir="${ME_LIBRARY_DEST}"/>
     </target>
     
@@ -45,7 +45,7 @@ information or have any questions.
         </xlets.javac>    
     </target>
 
-    <target name="init-grin-jdk-library">
+    <target name="init-grin-jdk-library" depends="init-preset-defs">
         <mkdir dir="${JDK_LIBRARY_DEST}"/>
     </target>
     
