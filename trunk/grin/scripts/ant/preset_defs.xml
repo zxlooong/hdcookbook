@@ -31,7 +31,7 @@ information or have any questions.
     <property file="scripts/ant/grin.properties"/>
      
     <!-- all the tools destined for big jdk (JavaSE) are 
-    compiled against jdk 1.5 -->
+	 compiled against jdk 1.5 -->
     <presetdef name="jdktools.javac">
         <javac sourcepath=""
                source="1.5" target="1.5"

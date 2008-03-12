@@ -9,7 +9,7 @@
 	<!-- Property Definitions -->
         <property file="../../scripts/ant/grin.properties"/>
         
-	<property name="bdj.classes"  value="../../../../bd-j/references/enhanced/classes.zip"/>
+	<property name="bdj.classes"  value="${HDC_BDJ_PLATFORM_CLASSES}"/>
 	<property name="grin.classes"  value="../../${GRIN_VIEWER_JAR}"/>
         <property name="converter.classes" value="../../${GRIN_COMPILER_JAR}"/>
 	<property name="builddir" value="build"/>

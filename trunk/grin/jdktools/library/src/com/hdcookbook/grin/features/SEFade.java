@@ -150,8 +150,8 @@ public class SEFade extends Fade implements SENode {
     }  
     
     public void writeInstanceData(GrinDataOutputStream out) 
-            throws IOException {
-        
+            throws IOException 
+    {
        out.writeSuperClassData(this);
        out.writeBoolean(getSrcOver());
        out.writeSharedIntArray(getKeyframes());

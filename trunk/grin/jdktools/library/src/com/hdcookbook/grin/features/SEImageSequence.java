@@ -58,24 +58,27 @@ import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.parts.SEImageSeqPlacement;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.awt.Rectangle;
 import java.io.IOException;
 
 public class SEImageSequence extends ImageSequence implements SENode {
-    
+
+    private SEImageSeqPlacement sePlacement;
+
     public SEImageSequence(SEShow show) {
         super(show);
     }
     
-    public SEImageSequence(SEShow show, String name, int x, int y, String fileName,
+    public SEImageSequence(SEShow show, String name, 
+    			   SEImageSeqPlacement sePlacement, String fileName,
     			 String[] middle, String extension, boolean repeat,
 			 Command[] endCommands) 
     		throws IOException {
 	super(show);
         this.name = name;
-	this.x = x;
-	this.y = y;
+	this.sePlacement = sePlacement;
 	this.repeat = repeat;
 	this.model = null;
 	this.endCommands = endCommands;
@@ -88,7 +91,7 @@ public class SEImageSequence extends ImageSequence implements SENode {
 		fileNames[i] = (fileName + middle[i] + extension).intern();
 	    }
 	}
-                
+	this.placements = sePlacement.getImageSeqPlacementRects(fileNames);
     }
     
     public boolean getRepeat() {
@@ -122,14 +125,6 @@ public class SEImageSequence extends ImageSequence implements SENode {
         this.model = model;
     }
     
-    public void setX(int x) {
-        this.x = x;
-    }
-    
-    public void setY(int y) {
-        this.y = y;
-    }    
-    
     public void setFileNames(String[] fileNames) {
         this.fileNames = fileNames;
     }
@@ -141,16 +136,18 @@ public class SEImageSequence extends ImageSequence implements SENode {
         }
     }
 
+    public void setPlacements(Rectangle[] placements) {
+	this.placements = placements;
+    }
+
     public InterpolatedModel getScalingModel() {
         return scalingModel;
     }
     
-    public void writeInstanceData(GrinDataOutputStream out) 
-            throws IOException {
-
+    public void writeInstanceData(GrinDataOutputStream out) throws IOException 
+    {
        out.writeSuperClassData(this);
-       out.writeInt(getX());
-       out.writeInt(getY());
+       out.writeSharedRectangleArray(placements);
        out.writeStringArray(getFileNames());
        out.writeBoolean(getRepeat());
        out.writeBoolean(model != null);

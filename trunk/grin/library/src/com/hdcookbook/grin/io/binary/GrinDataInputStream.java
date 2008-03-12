@@ -77,7 +77,8 @@ import java.io.InputStream;
  * @see GrinDataOutputStream
  */
 public class GrinDataInputStream extends DataInputStream {
-   
+
+
    /**
     * An instance of the GrinBinaryReader that this input stream
     * is working with.
@@ -182,15 +183,20 @@ public class GrinDataInputStream extends DataInputStream {
     * @return An array of integers reconstructed from the input stream.
     * @throws java.io.IOException if IO error occurs.
     */
-   public int[] readSharedIntArray() throws IOException {
-       byte b = readByte();
-       if (b == Constants.NULL) {
-           return null;
-       }
-       
-       int index = readInt();
-       return binaryReader.readIntArrayFromReference(index);
-   }     
+    public int[] readSharedIntArray() throws IOException {
+        int index = readInt();
+	return binaryReader.getIntArrayFromReference(index);
+    }     
+
+    public Rectangle[] readSharedRectangleArray() throws IOException {
+	int index = readInt();
+	return binaryReader.getRectangleArrayFromReference(index);
+    }
+
+    public Rectangle readSharedRectangle() throws IOException {
+	int index = readInt();
+	return binaryReader.getRectangleFromReference(index);
+    }
 
    /**
     * Reads in and constructs a String instance.
@@ -198,16 +204,8 @@ public class GrinDataInputStream extends DataInputStream {
     * @throws java.io.IOException if IO error occurs.
     */
    public String readString() throws IOException {
-	if (isNull()) {
-	    return null;
-	} else {
-	    return readStringReference();
-	}
-   }
-   
-   private String readStringReference() throws IOException {
-       int index = readInt();
-       return binaryReader.readStringFromReference(index);
+       int index = readInt();		// index 0 is null
+       return binaryReader.getStringFromReference(index);
    }
 
    /**
@@ -366,8 +364,8 @@ public class GrinDataInputStream extends DataInputStream {
     * @see GrinDataOutputStream#writeSuperClassData(Feature)
     */
     public void readSuperClassData(Feature feature) 
-            throws IOException {
-        
+            throws IOException 
+    {
         boolean isPublic = readBoolean();
         if (isPublic || binaryReader.debuggable) {
             feature.setName(readString());

@@ -203,15 +203,53 @@ java_generated_class com.hdcookbook.bookmenu.menu.commands.MenuShowCommands [[
 #  Features
 # ==========
 
-feature image_sequence F:SpinningYinYangClockwise 250 850
+feature image_sequence F:SpinningYinYangClockwise {
+	    ( left 250 top 850	scale  1000  1000 mills )
+	    ( left 250 top 850	scale  1000  1000 mills )
+	    ( left 250 top 850	scale  1000  1000 mills )
+	    ( left 250 top 850	scale  1000  1000 mills )
+	    ( left 250 top 850	scale  1000  1000 mills )
+	    ( left 250 top 850	scale  1000  1000 mills )
+	    ( left 250 top 850	scale  1000  1000 mills )
+	    ( left 250 top 850	scale  1000  1000 mills )
+	    ( left 250 top 850	scale -1000 -1000 mills )
+	    ( left 250 top 850	scale -1000 -1000 mills )
+	    ( left 250 top 850	scale -1000 -1000 mills )
+	    ( left 250 top 850	scale -1000 -1000 mills )
+	    ( left 250 top 850	scale -1000 -1000 mills )
+	    ( left 250 top 850	scale -1000 -1000 mills )
+	    ( left 250 top 850	scale -1000 -1000 mills )
+	    ( left 250 top 850	scale -1000 -1000 mills )
+	}
 	"Graphics/Menu/Load_00" {
-		00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+		00 01 02 03 04 05 06 07 00 01 02 03 04 05 06 07
 	} ".png" repeat
+		# Images 08..15 are the same as flipping 00..07 both
+		# vertically and horizontally.  A flipped image renders
+		# quickly, so using the flipped version saves image decode
+		# time at slight runtime cost.
 ;
 
-feature image_sequence F:SpinningYinYangCCW 250 850
+feature image_sequence F:SpinningYinYangCCW {
+	    ( left   250 top     850	scale -1000 -1000 mills )
+	    ( left   250 top     850	scale -1000 -1000 mills )
+	    ( middle 313 top     850	scale -1000 -1000 mills )
+	    ( right  375 top     850	scale -1000 -1000 mills )
+	    ( left   250 middle  913	scale -1000 -1000 mills )
+	    ( middle 313 middle  913	scale -1000 -1000 mills )
+	    ( right  375 middle  913	scale -1000 -1000 mills )
+	    ( left   250 bottom  975	scale -1000 -1000 mills )
+	    ( middle 313 bottom  975	scale  1000  1000 mills )
+	    ( right  375 bottom  975	scale  1000  1000 mills )
+	    ( left   250 top 850	scale  1000  1000 mills )
+	    ( left   250 top 850	scale  1000  1000 mills )
+	    250 850	# same as ( left 250 top 850 scale 1000 1000 mills )
+	    250 850	#
+	    250 850	# We also specify different anchor points above just
+	    250 850	# to test.  They all land at left 250 top 850.
+	}
 	"Graphics/Menu/Load_00" {
-		15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
+		07 06 05 04 03 02 01 00 07 06 05 04 03 02 01 00
 	} ".png" repeat
 ;
 
@@ -1758,14 +1796,15 @@ segment S:StartBonusVideo
     }
     next {
 	activate_segment S:VideoBonusPlaying ;
+	java_command [[ XLET_ONLY_[[ 
+	    MenuDiscNavigator nav = getMenuDirector().xlet.navigator;
+	    nav.startVideoAt(nav.bonusVideoStartPL);
+	]] ]]
     }
 ;
-    # Note that this "success" animation attempts to run at the same
-    # time a playlist is being selected.  On many players, you won't
-    # see the animation at all, because the player is too busy processing
-    # the new playlist.  In a real title, you'd want to do the animation
-    # first, then start the playlist, but for this academic exercise it's
-    # instructive to leave it the way it is.
+    # Note that we don't try to start the bonus video until after the
+    # "success" animation runs.  Even the PS/3 doesn't animate perfectly
+    # while setting up video play.
 
 segment S:Bio.Available
     active {
@@ -2290,7 +2329,7 @@ rc_handler visual H:Bio.NotAvailable
 #  "Loading" image can be spinning as we load the rest of our assets.
 #
 
-mosaic_hint loading 600 600 {
+mosaic_hint loading 600 300 {
 	Graphics/Menu/Load_0000.png
 	Graphics/Menu/Load_0001.png
 	Graphics/Menu/Load_0002.png
@@ -2299,14 +2338,6 @@ mosaic_hint loading 600 600 {
 	Graphics/Menu/Load_0005.png
 	Graphics/Menu/Load_0006.png
 	Graphics/Menu/Load_0007.png
-	Graphics/Menu/Load_0008.png
-	Graphics/Menu/Load_0009.png
-	Graphics/Menu/Load_0010.png
-	Graphics/Menu/Load_0011.png
-	Graphics/Menu/Load_0012.png
-	Graphics/Menu/Load_0013.png
-	Graphics/Menu/Load_0014.png
-	Graphics/Menu/Load_0015.png
 } ;
 
 #

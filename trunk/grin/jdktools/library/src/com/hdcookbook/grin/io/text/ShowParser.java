@@ -85,6 +85,9 @@ import com.hdcookbook.grin.features.SESrcOver;
 import com.hdcookbook.grin.features.SEText;
 import com.hdcookbook.grin.features.SETranslator;
 import com.hdcookbook.grin.features.Translator;
+import com.hdcookbook.grin.features.parts.SEImagePlacement;
+import com.hdcookbook.grin.features.parts.SEImagePlacementList;
+import com.hdcookbook.grin.features.parts.SEImageSeqPlacement;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.input.VisualRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
@@ -440,8 +443,8 @@ public class ShowParser {
     		throws IOException 
     {
 	final String name = parseFeatureName(hasName);
-	int x = lexer.getInt();
-	int y = lexer.getInt();
+	final SEImagePlacement placement 
+	    = parseImagePlacement(lexer.getString());
 	String fileName = lexer.getString();
 	String tok = lexer.getString();
 	String scalingModel = null;
@@ -452,7 +455,7 @@ public class ShowParser {
 	if (!(";".equals(tok))) {
 	    lexer.reportError("';' expected, " + tok + " seen");
 	}
-	final SEFixedImage f = new SEFixedImage(show, name, x, y, fileName);
+	final SEFixedImage f = new SEFixedImage(show, name, placement,fileName);
 	builder.addFeature(name,line, f);
 	if (scalingModel != null) {
 	    final String scalingModelF = scalingModel;
@@ -476,8 +479,7 @@ public class ShowParser {
     		throws IOException 
     {
 	final String name = parseFeatureName(hasName);
-	int x = lexer.getInt();
-	int y = lexer.getInt();
+	SEImageSeqPlacement placement = parseImageSeqPlacement();
 	String fileName = lexer.getString();
 	String[] middle = parseStrings();
 	if (middle.length == 0) {
@@ -521,8 +523,8 @@ public class ShowParser {
 	    lexer.reportError("';' expected, " + tok + " seen");
 	}
 	final SEImageSequence f 
-                = new SEImageSequence(show, name, x, y, fileName, 
-                                    middle,  extension, repeat, endCommands);
+                = new SEImageSequence(show, name, placement, fileName, 
+                                      middle,  extension, repeat, endCommands);
 	builder.addFeature(name, line, f);
 	if (model != null) {
 	    final String mod = model;
@@ -555,6 +557,74 @@ public class ShowParser {
 	    deferred[0].addElement(fw);
 	}
 	return f;
+    }
+    
+    
+    private SEImageSeqPlacement parseImageSeqPlacement() throws IOException {
+	String tok = lexer.getString();
+	if ("{".equals(tok)) {
+	    ArrayList<SEImagePlacement> placements = new ArrayList();
+	    for (;;) {
+		tok = lexer.getString();
+		if ("}".equals(tok)) {
+		    break;
+		}
+		placements.add(parseImagePlacement(tok));
+	    }
+	    return new SEImagePlacementList(placements);
+	} else {
+	    return parseImagePlacement(tok);
+	}
+    }
+
+    //
+    // We pass in the first token so that parseImageSeqPlacement can figure
+    // out the list syntax
+    //
+    private SEImagePlacement parseImagePlacement(String tok) throws IOException 
+    {
+	SEImagePlacement placement = new SEImagePlacement();
+	if ("(".equals(tok)) {
+	    tok = lexer.getString();
+	    if ("left".equals(tok)) {
+		placement.setXAlign(SEImagePlacement.HorizontalAlignment.LEFT);
+	    } else if ("middle".equals(tok)) {
+		placement.setXAlign(
+			    SEImagePlacement.HorizontalAlignment.MIDDLE);
+	    } else if ("right".equals(tok)) {
+		placement.setXAlign(SEImagePlacement.HorizontalAlignment.RIGHT);
+	    } else {
+		lexer.reportError("left, middle or right expected, \"" 
+				  + tok + "\" seen.");
+	    }
+	    placement.setX(lexer.getInt());
+
+	    tok = lexer.getString();
+	    if ("top".equals(tok)) {
+		placement.setYAlign(SEImagePlacement.VerticalAlignment.TOP);
+	    } else if ("middle".equals(tok)) {
+		placement.setYAlign(SEImagePlacement.VerticalAlignment.MIDDLE);
+	    } else if ("bottom".equals(tok)) {
+		placement.setYAlign(SEImagePlacement.VerticalAlignment.BOTTOM);
+	    } else {
+		lexer.reportError("left, middle or right expected, \"" 
+				  + tok + "\" seen.");
+	    }
+	    placement.setY(lexer.getInt());
+
+	    tok = lexer.getString();
+	    if ("scale".equals(tok)) {
+		placement.setScaleX(lexer.getInt() / 1000.0);
+		placement.setScaleY(lexer.getInt() / 1000.0);
+		parseExpected("mills");
+		tok = lexer.getString();
+	    }
+	    lexer.expectString(")", tok);
+	} else {
+	    placement.setX(lexer.convertToInt(tok));
+	    placement.setY(lexer.getInt());
+	}
+	return placement;
     }
 
     private Feature parseBox(boolean hasName, int line) throws IOException {
@@ -1239,10 +1309,11 @@ public class ShowParser {
 	VisualRCHandlerHelper helper = new VisualRCHandlerHelper();
 	helper.setHandlerName(handlerName);
 	visualRCHelpers.put(handlerName, helper);
-	List<List<VisualRCHandlerCell>> grid 
-	    = new ArrayList<List<VisualRCHandlerCell>>();
+	ArrayList<ArrayList<VisualRCHandlerCell>> grid 
+	    = new ArrayList<ArrayList<VisualRCHandlerCell>>();
 	for (int y = 0; y < height; y++) {
-	    List<VisualRCHandlerCell> row =new ArrayList<VisualRCHandlerCell>();
+	    ArrayList<VisualRCHandlerCell> row 
+		= new ArrayList<VisualRCHandlerCell>();
 	    grid.add(row);
 	    for (int x = 0; x < selectParts[y].length; x++) {
 		row.add(VisualRCHandlerCell.newState("" + x + "," + y));
@@ -1354,11 +1425,11 @@ public class ShowParser {
 	deferred[1].addElement(fw);
     }
 
-    private List<List<VisualRCHandlerCell>> parseVisualGrid() 
+    private ArrayList<ArrayList<VisualRCHandlerCell>> parseVisualGrid() 
     		throws IOException 
     {
-	List<List<VisualRCHandlerCell>>  result
-		= new ArrayList<List<VisualRCHandlerCell>>();
+	ArrayList<ArrayList<VisualRCHandlerCell>>  result
+		= new ArrayList<ArrayList<VisualRCHandlerCell>>();
 	parseExpected("{");
 	for (;;) {
 	    String tok = lexer.getString();
@@ -1373,8 +1444,11 @@ public class ShowParser {
 	return result;
     }
 
-    private List<VisualRCHandlerCell> parseVisualGridRow() throws IOException {
-	List<VisualRCHandlerCell> result = new ArrayList<VisualRCHandlerCell>();
+    private ArrayList<VisualRCHandlerCell> parseVisualGridRow() 
+	    throws IOException 
+    {
+	ArrayList<VisualRCHandlerCell> result 
+	    = new ArrayList<VisualRCHandlerCell>();
 	for (;;) {
 	    String tok = lexer.getString();
 	    VisualRCHandlerCell cell = null;

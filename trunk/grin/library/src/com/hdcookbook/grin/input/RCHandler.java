@@ -55,6 +55,7 @@
 
 package com.hdcookbook.grin.input;
 
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Show;
 

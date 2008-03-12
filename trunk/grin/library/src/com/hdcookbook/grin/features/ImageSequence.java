@@ -81,19 +81,16 @@ import java.awt.Rectangle;
  **/
 public class ImageSequence extends Feature implements Node {
 
-    protected int x;
-    protected int y;
-    private int width = 0;
-    private int height = 0;
+    protected Rectangle[] placements;	// Same length as fileNames[]
     protected String[] fileNames; 
     protected boolean repeat;
     protected InterpolatedModel scalingModel = null;
     protected Rectangle scaledBounds = null;
     protected Command[] endCommands;
 
-    private ManagedImage[] images;
-    	// The images in this sequence.  A null image is simply not
-	// painted, thus leaving the previous image in place.
+    protected ManagedImage[] images;
+    	// The images in this sequence.  A null image will show up as
+	// blank, that is, any previous image will be erased.
     private boolean setupMode = false;
     private int imagesSetup = 0;
     private Object setupMonitor = new Object();
@@ -112,6 +109,7 @@ public class ImageSequence extends Feature implements Node {
 
     private ManagedImage lastImage = null;
     private ManagedImage currImage = null;
+    private Rectangle currPlacement = null;
     private DrawRecord drawRecord = new DrawRecord();
 
     public ImageSequence(Show show) {
@@ -122,14 +120,14 @@ public class ImageSequence extends Feature implements Node {
      * @inheritDoc
      **/
     public int getX() {
-	return x;
+	return placements[getStateHolder().currFrame].x;
     }
 
     /**
      * @inheritDoc
      **/
     public int getY() {
-	return y;
+	return placements[getStateHolder().currFrame].y;
     }
 
     /**
@@ -144,8 +142,14 @@ public class ImageSequence extends Feature implements Node {
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
      * the phases.
+     * <p>
+     * It's OK to call this method earlier if needed, e.g. in order to
+     * determine image widths.
      **/
     public void initialize() {
+	if (images != null) {
+	    return;	// Already initialized
+	}
         images = new ManagedImage[fileNames.length]; 
         for (int i = 0; i < fileNames.length; i++) { 
             if (fileNames[i] == null) { 
@@ -243,14 +247,6 @@ public class ImageSequence extends Feature implements Node {
 	    im.prepare(show.component);
 	    synchronized(setupMonitor) {
 		if (setupMode) {
-		    int w = images[imagesSetup].getWidth();
-		    int h = images[imagesSetup].getHeight();
-		    if (w > width) {
-			width = w;
-		    }
-		    if (h > height) {
-			height = h;
-		    }
 		    imagesSetup++;
 		} else {
 		    im.unprepare();
@@ -304,7 +300,6 @@ public class ImageSequence extends Feature implements Node {
 		}
 	    }
         }
-	currImage = images[getStateHolder().currFrame];
     }
 
 
@@ -312,11 +307,18 @@ public class ImageSequence extends Feature implements Node {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
+	int frame = getStateHolder().currFrame;
+	currImage = images[frame];
+	currPlacement = placements[frame];
 	if (scalingModel == null) {
-	    drawRecord.setArea(x, y, width, height);
+	    drawRecord.setArea(currPlacement.x, currPlacement.y, 
+	    		       currPlacement.width, currPlacement.height);
 	} else {
-	    boolean changed 
-		= scalingModel.scaleBounds(x, y, width, height, scaledBounds);
+	    boolean changed = 
+		scalingModel.scaleBounds(currPlacement.x, currPlacement.y, 
+					 currPlacement.width, 
+					 currPlacement.height, 
+					 scaledBounds);
 		    // When newly activated, we might get a false positive
 		    // on changed, but that's OK because our draw area is
 		    // changed anyway.
@@ -346,18 +348,18 @@ public class ImageSequence extends Feature implements Node {
     private void doPaint(Graphics2D g) {
 	if (currImage != null) {
 	    if (scalingModel == null) {
-		currImage.draw(g, x, y, show.component);
+		currImage.drawScaled(g, currPlacement, show.component);
 	    } else {
 		currImage.drawScaled(g, scaledBounds, show.component);
 	    }
 	}
     }
+
     public void readInstanceData(GrinDataInputStream in, int length) 
-            throws IOException {
-                
+            throws IOException 
+    {
         in.readSuperClassData(this);
-        this.x = in.readInt();
-        this.y = in.readInt();
+        this.placements = in.readSharedRectangleArray();
         this.fileNames = in.readStringArray();
         this.repeat = in.readBoolean();
         if (in.readBoolean()) {
@@ -368,5 +370,8 @@ public class ImageSequence extends Feature implements Node {
             this.scalingModel = (InterpolatedModel) in.readFeatureReference();
             this.scaledBounds = new Rectangle();
         }
+	if (Debug.ASSERT && placements.length != fileNames.length) {
+	    Debug.assertFail();
+	}
     }
 }

@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,91 +52,35 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.commands;
+package com.hdcookbook.grin.features.parts;
 
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.Node;
-import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.io.binary.GrinDataInputStream;
-import com.hdcookbook.grin.util.Debug;
-
+import java.awt.Rectangle;
 import java.io.IOException;
 
 /**
- * A command to make a new segment be the active one within a show.
- *
- * @author Bill Foote (http://jovial.com)
- */
-public class ActivateSegmentCommand extends Command implements Node {
-  
-    protected Segment segment;
-    protected boolean push;
-    protected boolean pop;
+ * This interface represents an image_seq_placement structure.  This structure
+ * determines the placement (x,y position, width and height) of an image
+ * sequence.  It can either be a single placement, or a list of placements.
+ **/
+public interface SEImageSeqPlacement {
 
-    public ActivateSegmentCommand(Show show, 
-            boolean push, boolean pop) {
-        super(show);
-	this.push = push;
-	this.pop = pop;
-    }
+    /**
+     * Constants for the alignment of the x coordinate
+     **/
+    public enum HorizontalAlignment { LEFT, MIDDLE, RIGHT };
+    
+    /**
+     * Constants for the alignment of the y coordinate
+     **/
+    public enum VerticalAlignment { TOP, MIDDLE, BOTTOM };
 
-    public ActivateSegmentCommand(Show show) {
-	this(show, false, false);
-    }
-    
-    public boolean getPush() {
-        return push;
-    }
-    
-    public boolean getPop() {
-        return pop;
-    }
-    
-    public Segment getSegment() {
-        return segment;
-    }
-    
-    public void setup(Segment segment) {
-	this.segment = segment;
-    }    
-
-    public void execute() {
-	if (push) {
-	    show.pushCurrentSegment();
-	}
-	Segment seg = segment;
-	if (pop) {
-	    seg = show.popSegmentStack();
-	    if (Debug.LEVEL > 0 && seg == null) {
-		Debug.println("****  Error:  Popping segment stack gets null ***");
-	    }
-	}
-	if (seg != null) {
-	    show.doActivateSegment(seg);
-	}
-    }
-
-    public String toString() {
-	String result = super.toString() + " : ";
-	if (pop) {
-	    return result + "<pop>";
-	}
-	result = result + segment;
-	if (push) {
-	    return result + " <push>";
-	} else {
-	    return result;
-	}
-    }
-    
-    public void readInstanceData(GrinDataInputStream in, int length) 
-            throws IOException { 
-                
-        in.readSuperClassData(this);
-        
-        this.push = in.readBoolean();
-        this.pop = in.readBoolean();
-        this.segment = in.readSegmentReference();
-    }
+    /**
+     * Calculate the image placement rectangles for this placement when used
+     * in an image_sequence
+     *
+     * @throws IOException if reading an image fails, or if there is an
+     *			   incompatible number of placements.
+     **/
+    public Rectangle[] getImageSeqPlacementRects(String[] images) 
+    	throws IOException;
 }

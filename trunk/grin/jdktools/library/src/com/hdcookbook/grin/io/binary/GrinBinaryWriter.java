@@ -54,6 +54,7 @@
 
 package com.hdcookbook.grin.io.binary;
 
+import java.awt.Rectangle;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileWriter;
@@ -189,12 +190,22 @@ public class GrinBinaryWriter {
     /**
      * List of shared String instances.
      */
-    private IndexedSet<String> stringsList;
+    private IndexedSet<String> sharedStrings;
     
     /* 
      * List of shared integer array instances.
      */
-    private IndexedSet<IntArray> intArrayList;
+    private IndexedSet<IntArray> sharedIntArrays;
+
+    //
+    // List of shared rectangles
+    //
+    private IndexedSet<Rectangle> sharedRectangles;
+
+    //
+    // List of shared rectangle arrays
+    //
+    private IndexedSet<ObjectArray<Rectangle>> sharedRectangleArrays;
     
     /**
      * List of class names, both built-ins and extensions.
@@ -246,9 +257,19 @@ public class GrinBinaryWriter {
             segmentList.getIndex((SENode) segment);
         }         
         
-        stringsList = new IndexedSet();
-        intArrayList = new IndexedSet();
         runtimeClassNames = new IndexedSet();
+
+        sharedStrings = new IndexedSet();
+        sharedIntArrays = new IndexedSet();
+	sharedRectangles = new IndexedSet();
+	sharedRectangleArrays = new IndexedSet();
+
+	    // For the constant data types, we make entry 0 be null.
+	    // This saves having an "is null" flag on every other element.
+	sharedStrings.getIndex(null);
+	sharedIntArrays.getIndex(new IntArray(null));
+	sharedRectangles.getIndex(null);
+	sharedRectangleArrays.getIndex(new ObjectArray<Rectangle>(null));
     }
     
     /**
@@ -303,12 +324,27 @@ public class GrinBinaryWriter {
     }    
     
     int getStringIndex(String s) {
-        return stringsList.getIndex(s);
+        return sharedStrings.getIndex(s);
     }
 
     int getIntArrayIndex(int[] array) {
-        return intArrayList.getIndex(new IntArray(array));
+        return sharedIntArrays.getIndex(new IntArray(array));
     }
+
+    int getRectangleIndex(Rectangle r) {
+	return sharedRectangles.getIndex(r);
+    }
+
+    int getRectangleArrayIndex(Rectangle[] array) {
+	if (array != null) {
+	    for (int i = 0; i < array.length; i++) {
+		getRectangleIndex(array[i]);
+	    }
+	}
+	return sharedRectangleArrays.getIndex(
+			new ObjectArray<Rectangle>(array));
+    }
+
     /**
      * Writes out the script identifier and the script version to the DataOutputStream.
      *
@@ -366,9 +402,15 @@ public class GrinBinaryWriter {
         // Note, this is writing to the base DataOutputStream instance.
         // We want to write out all the String and integer array instances 
         // at the beginning of the binary file.
-        writeStringConstants(out, (String[]) stringsList.toArray(String.class));
-        writeIntArrayConstants(out, (IntArray[]) intArrayList.toArray(IntArray.class));
-        
+        writeStringConstants(out, 
+			     (String[]) sharedStrings.toArray(String.class));
+        writeIntArrayConstants(out, (IntArray[]) 
+			  	    sharedIntArrays.toArray(IntArray.class));
+        writeRectangleConstants(out, (Rectangle[]) 
+			  	    sharedRectangles.toArray(Rectangle.class));
+        writeRectangleArrayConstants(out, (ObjectArray<Rectangle>[]) 
+				    sharedRectangleArrays.toArray(
+					ObjectArray.class));
         baos.writeTo(out);
         dos.close();  
     }
@@ -410,64 +452,102 @@ public class GrinBinaryWriter {
     }
 
     private void writeDeclarations(GrinDataOutputStream out, SENode[] nodes) 
-            throws IOException {
-        
-        if (nodes == null) {
-            return;
+            throws IOException 
+    {
+	assert nodes != null;
+	int i = 0;
+	out.writeInt(nodes.length);
+	for (SENode node : nodes) {
+	    if (node == null) {
+		out.writeInt(NULL);
+	    } else {
+		String runtimeName = node.getRuntimeClassName();
+		out.writeInt(runtimeClassNames.getIndex(runtimeName));
+	    }
         }
-        
-        out.writeInt(nodes.length);    
-        for (SENode node : nodes) {
-            if (node == null) {
-                out.writeInt(NULL);
-            }
-            String runtimeName = node.getRuntimeClassName();
-            out.writeInt(runtimeClassNames.getIndex(runtimeName));
-        }
-    }   
+    }
     
     private void writeContents(GrinDataOutputStream out, SENode[] nodes) 
-       throws IOException {
+	   throws IOException 
+    {
 	
-        if (nodes == null) 
+        if (nodes == null) {
             return;
-		
-        for (SENode node: nodes) {          
-            if (node != null) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-                node.writeInstanceData(dos);
-                out.writeInt(baos.size());
-                baos.writeTo(out);      
-                dos.close();
-            }
+	}
+
+	for (SENode node : nodes) {
+	    if (node != null) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
+		node.writeInstanceData(dos);
+		out.writeInt(baos.size());
+		baos.writeTo(out);      
+		dos.close();
+	    }
         }
     }
 
     private void writeStringConstants(DataOutputStream out, String[] list) 
-        throws IOException {
+        throws IOException 
+    {
         out.writeByte(STRING_CONSTANTS_IDENTIFIER);     
         out.writeInt(list.length);
-        for (String str : list) {
+	assert list[0] == null;
+	for (int i = 1; i < list.length; i++) {
+	    String str = list[i];
+	    assert str != null;
             out.writeUTF(str);
         }
     }
     
     private void writeIntArrayConstants(DataOutputStream out, IntArray[] list) 
-        throws IOException {
+        throws IOException 
+    {
         out.writeByte(INT_ARRAY_CONSTANTS_IDENTIFIER);     
         out.writeInt(list.length);
-        for (IntArray intArray : list) {
-            int[] array = intArray.array;
-            if (array == null) {
-                out.writeByte(Constants.NULL);
-            } else {
-                out.writeByte(Constants.NON_NULL);
-                out.writeInt(array.length);
-                for (int j = 0; j < array.length; j++) {
-                    out.writeInt(array[j]);
-                }
-            }
+	assert list[0].array == null;
+	for (int i = 1; i < list.length; i++) {
+            int[] array = list[i].array;
+	    assert array != null;
+	    out.writeInt(array.length);
+	    for (int j = 0; j < array.length; j++) {
+		out.writeInt(array[j]);
+	    }
+        }
+    }
+
+    private void writeRectangleConstants(DataOutputStream out, Rectangle[] list)
+        throws IOException 
+    {
+        out.writeByte(RECTANGLE_CONSTANTS_IDENTIFIER);     
+        out.writeInt(list.length);
+	assert list[0] == null;
+	for (int i = 1; i < list.length; i++) {
+            Rectangle r = list[i];
+	    assert r != null;
+	    out.writeInt(r.x);
+	    out.writeInt(r.y);
+	    out.writeInt(r.width);
+	    out.writeInt(r.height);
+        }       
+    }
+    
+    private void writeRectangleArrayConstants
+    		(DataOutputStream out, ObjectArray<Rectangle>[] list) 
+        throws IOException 
+    {
+        out.writeByte(RECTANGLE_ARRAY_CONSTANTS_IDENTIFIER);     
+        out.writeInt(list.length);
+	assert list[0].array == null;
+	for (int i = 1; i < list.length; i++) {
+	    ObjectArray<Rectangle> ra = list[i];
+	    assert ra != null;
+            Rectangle[] array = list[i].array;
+	    assert array != null;
+	    out.writeInt(array.length);
+	    for (int j = 0; j < array.length; j++) {
+		out.writeInt(getRectangleIndex(array[j]));
+	    }
         }       
     }
    
@@ -557,10 +637,36 @@ public class GrinBinaryWriter {
            return hashcode;
        }
    }
+
+   private class ObjectArray<T> {
+       T[] array;
+       int hashcode = 0;
+       boolean isHashComputed = false;
+       public ObjectArray(T[] array) {
+           this.array = array;
+       }
+       public boolean equals(Object other) {
+           if (!(other instanceof ObjectArray)) {
+               return false;
+           }
+           return Arrays.equals(array, ((ObjectArray) other).array);
+       }
+       public synchronized int hashCode() {
+           if (!isHashComputed) {
+              hashcode = Arrays.hashCode(array);
+              isHashComputed = true;
+           }
+           return hashcode;
+       }
+   }
    
    private class IndexedSet<T> {
 
-        HashMap<T, Integer> mapTToInt = new HashMap();
+        HashMap<T, Integer> mapTToInt;
+
+	public IndexedSet() {
+	    mapTToInt = new HashMap();
+	}
         
         public synchronized int getIndex(T element) {
             Integer i = mapTToInt.get(element);
@@ -587,5 +693,4 @@ public class GrinBinaryWriter {
             return mapTToInt.size();
         }
     }
-    
 }

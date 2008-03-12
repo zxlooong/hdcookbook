@@ -184,7 +184,10 @@ public class Lexer {
      * @return an int.  It's an error to see EOF.
      */
     public int getInt() throws IOException {
-	String tok = getString();
+	return convertToInt(getString());
+    }
+
+    public int convertToInt(String tok) throws IOException {
 	if (tok == null) {
 	    reportError("int expected, EOF seen");
 	}
@@ -294,6 +297,16 @@ public class Lexer {
      **/
     public void parseExpected(String expected) throws IOException {
 	String tok = getString();
+	expectString(expected, tok);
+    }
+
+    /**
+     * Expect to see a certain string.  The token passed in is checked, and
+     * if it's not the expected token, an IOException is generated.
+     * This can be useful for things like parsing the ";" at the
+     * end of various constructs.
+     **/
+    public void expectString(String expected, String tok) throws IOException {
 	if (!(expected.equals(tok))) {
 	   reportError("\"" + expected + "\" expected, \"" + tok 
 	   		     + "\" seen");

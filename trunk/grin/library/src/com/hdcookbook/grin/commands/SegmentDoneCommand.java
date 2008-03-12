@@ -56,8 +56,8 @@
 package com.hdcookbook.grin.commands;
 
 import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.IOException;
 

@@ -59,8 +59,10 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.SEVisualRCHandler;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 
@@ -75,7 +77,7 @@ import java.util.Map;
 public class VisualRCHandlerHelper {
 
     private String handlerName;
-    private List<List<VisualRCHandlerCell>> grid;
+    private ArrayList<ArrayList<VisualRCHandlerCell>> grid;
     private Map<String, Integer> states = new HashMap<String, Integer>();
     	// Maps state name to number, counting from 0
     private Map<String, VisualRCHandlerCell> stateToCell
@@ -107,7 +109,7 @@ public class VisualRCHandlerHelper {
      * @return null 	if all goes well, or an error message if there's
      *			a problem.
      **/
-    public String setGrid(List<List<VisualRCHandlerCell>> grid) {
+    public String setGrid(ArrayList<ArrayList<VisualRCHandlerCell>> grid) {
 	this.grid = grid;
 	if (grid.size() == 0) {
 	    return "Empty grid";
@@ -116,6 +118,12 @@ public class VisualRCHandlerHelper {
 	int columns = grid.get(0).size();
 	if (columns == 0) {
 	    return "Empty grid";
+	}
+	for (int y = 1; y < grid.size(); y++) {
+	    if (grid.get(y).size() != columns) {
+		return "Grid row " + y 
+			+ " (counting from 0) has a different length.";
+	    }
 	}
 
 	    // Set up the cells with us (the handler) and the x,y pos
@@ -128,49 +136,37 @@ public class VisualRCHandlerHelper {
 	    }
 	}
 
-	    // Set the state at (0,0) to be state 0 numerically.  This
-	    // is the default state of the handler.
-	String msg;
-	assert states.size() == 0;
-	msg = grid.get(0).get(0).addState(states, stateToCell);
-	if (msg != null) {
-	    return msg;
-	}
-	assert states.size() == 1;
-
-
-	    // Do two consistency checks:  Make sure that all rows
-	    // are the same width, and make sure that a cell doesn't
-	    // refer to a cell that itself refers to a cell.
-	    //
 	    // For each cell, populate the states map
 
 	for (int y = 0; y < grid.size(); y++) {
-	    List<VisualRCHandlerCell> row = grid.get(y);
-	    if (row.size() != columns) {
-		return "Grid row " + y 
-			+ " (counting from 0) has a different length.";
-	    }
-	    for (int x = 0; x < row.size(); x++) {
-		VisualRCHandlerCell cell = row.get(x);
-		VisualRCHandlerCell to = cell.getRefersTo();
-		if (to != null && to.getRefersTo() != null) {
-		    return "Grid refers to cell that refers to cell at x,y "
-		    	   + x + ", " + y + " (counting from 0)";
-		}
-		msg = cell.addState(states, stateToCell);
+	    for (int x = 0; x < columns; x++) {
+		VisualRCHandlerCell cell = grid.get(y).get(x);
+		String msg = cell.addState(states, stateToCell);
 		if (msg != null) {
 		    return msg;
 		}
 	    }
 	}
 
+	    // Make sure that a cell doesn't
+	    // refer to a cell that itself refers to a cell.
+
+	for (int y = 0; y < grid.size(); y++) {
+	    for (int x = 0; x < columns; x++) {
+		VisualRCHandlerCell cell = grid.get(y).get(x);
+		VisualRCHandlerCell to = cell.getRefersTo();
+		if (to != null && to.getRefersTo() != null) {
+		    return "Grid refers to cell that refers to cell at x,y "
+		    	   + x + ", " + y + " (counting from 0)";
+		}
+	    }
+	}
+
 	    // Now check all the cells
 	for (int y = 0; y < grid.size(); y++) {
-	    List<VisualRCHandlerCell> row = grid.get(y);
-	    for (int x = 0; x < row.size(); x++) {
-		VisualRCHandlerCell cell = row.get(x);
-		msg = cell.check();
+	    for (int x = 0; x < columns; x++) {
+		VisualRCHandlerCell cell = grid.get(y).get(x);
+		String msg = cell.check();
 		if (msg != null) {
 		    return msg;
 		}
@@ -180,7 +176,7 @@ public class VisualRCHandlerHelper {
 	return null;	// null means "no error to report"
     }
 
-    List<List<VisualRCHandlerCell>> getGrid() {
+    ArrayList<ArrayList<VisualRCHandlerCell>> getGrid() {
 	return grid;
     }
 

@@ -186,10 +186,10 @@ Here's BNF describing the syntax of a show file:
 		  | gurantee_fill | set_target
 		  | extension_feature | extension_modifier
 
-    fixed_image ::= "feature" "fixed_image" name x y file_name 
+    fixed_image ::= "feature" "fixed_image" name image_placement file_name 
     		        [ "scaling_model" name ] ";"
 
-    image_sequence ::= "feature" "image_sequence" name x y
+    image_sequence ::= "feature" "image_sequence" name image_seq_placement
 		         file_name "{" name_or_continuation * "}" 
 			 	   extension [ "repeat" ]
     		       [ "scaling_model" name ]
@@ -197,6 +197,18 @@ Here's BNF describing the syntax of a show file:
 	    # "linked_to" is accepted for "model", for backwards compatibility.
 	    # In both cases, the model, if specified,  must be a different 
 	    # image_sequence with the same number of images in the sequence.
+
+    image_seq_placement ::= image_placement | "{" image_placement* "}"
+    	    # if there is a list of image placements in a fixed_image,
+	    # it must have the same length as the images array.
+
+    image_placement ::= x y | "(" im_x im_y [ "scale" x y "mills" ] ")"
+	    # A scale factor or -1000 in either or both directions can be
+	    # used to filp the image.  A scale factor other than 1000 
+	    # or -1000 may be slow at runtime on some players.
+
+    im_x ::= ( "left" | "middle" | "right" ) x
+    im_y ::= ( "top" | "middle" | "bottom" ) y
 
     box ::= "feature" "box" name rectangle
     		[ "outline" width color_value ]

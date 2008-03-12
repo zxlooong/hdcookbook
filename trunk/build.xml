@@ -12,6 +12,10 @@
        as well as the hdcookbook sample disc image --> 
       <ant dir="grin" antfile="scripts/ant/build_hdcookbook_xlets.xml"/>
       <!-- Build the GRIN sample xlets -->
+  </target>
+
+  <target name="samples" depends="bd-tools">
+      <!-- Build the GRIN sample xlets -->
       <ant dir="grin/samples"/>
   </target>
   
@@ -22,7 +26,7 @@
   </target>
   
   <!-- A target for doing everything -->
-  <target name="all" depends="main, javadoc">
+  <target name="all" depends="main, javadoc, samples">
         <!-- Runs autotest -->
         <ant dir="grin" antfile="scripts/ant/run_jdktools.xml" target="autotest-grinview"/>
         <ant dir="grin/samples" target="autotest-grinview"/>

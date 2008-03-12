@@ -56,10 +56,10 @@ package com.hdcookbook.grin.input;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 import java.awt.Rectangle;

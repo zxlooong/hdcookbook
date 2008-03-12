@@ -54,26 +54,32 @@
 
 package com.hdcookbook.grin.features;
 
-import com.hdcookbook.grin.*;
+import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
+import com.hdcookbook.grin.features.parts.SEImagePlacement;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import com.hdcookbook.grin.util.ManagedImage;
 import java.awt.Rectangle;
 import java.io.IOException;
 
 public class SEFixedImage extends FixedImage implements SENode {
+
+    private SEImagePlacement sePlacement;
     
     public SEFixedImage(SEShow show) {
         super(show);
     }
     
-    public SEFixedImage(SEShow show, String name, int x, int y, String fileName) 
+    public SEFixedImage(SEShow show, String name, SEImagePlacement sePlacement, 
+    			String fileName) 
     		throws IOException 
     {
 	super(show);
         this.name = name;
-	this.x = x;
-	this.y = y;
+	this.sePlacement = sePlacement;
 	this.fileName = fileName;
+	this.placement = sePlacement.getImagePlacementRect(fileName);
     }
 
     public void setScalingModel(InterpolatedModel model) {
@@ -94,20 +100,6 @@ public class SEFixedImage extends FixedImage implements SENode {
         return fileName;
     }
     
-    /**
-     * Internal use only
-     **/
-    public void setX(int x) {
-	this.x = x;
-    }
-
-    /**
-     * Internal use only
-     **/
-    public void setY(int y) {
-	this.y = y;
-    }
-
     /* 
      * Internal use only 
      */
@@ -121,13 +113,15 @@ public class SEFixedImage extends FixedImage implements SENode {
     public void setImage(ManagedImage image) {
 	this.image = image;
     }
+
+    public void setPlacement(Rectangle placement) {
+	this.placement = placement;
+    }
     
-    public void writeInstanceData(GrinDataOutputStream out) 
-            throws IOException {    
-        
+    public void writeInstanceData(GrinDataOutputStream out) throws IOException
+    {
         out.writeSuperClassData(this);
-        out.writeInt(getX());
-        out.writeInt(getY());
+        out.writeSharedRectangle(placement);
         out.writeString(getFileName());
         out.writeBoolean(scalingModel != null);
         if (scalingModel != null) {

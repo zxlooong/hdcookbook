@@ -57,7 +57,7 @@ package com.hdcookbook.grin.io.binary;
 import java.io.InputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.awt.Rectangle;
 import java.util.Hashtable;
 
 import com.hdcookbook.grin.Feature;
@@ -160,9 +160,9 @@ public class GrinBinaryReader {
 
     private Show show;
     
-    private ArrayList featureList;
-    private ArrayList rcHandlerList;
-    private ArrayList segmentList;
+    private Feature[] featureList;
+    private RCHandler[] rcHandlerList;
+    private Segment[] segmentList;
     Hashtable publicSegments = new Hashtable();
     Hashtable publicFeatures= new Hashtable();
     Hashtable publicRCHandlers = new Hashtable();
@@ -171,6 +171,9 @@ public class GrinBinaryReader {
     private Class showCommandsClass = null;
     private String[] stringConstants = null;
     private int[][]  intArrayConstants = null;
+    private Rectangle[] rectangleConstants;
+    private Rectangle[][] rectangleArrayConstants;
+
     private GrinXHelper showCommands = null;
     
     /*
@@ -205,12 +208,11 @@ public class GrinBinaryReader {
      * @see GrinBinaryWriter#getFeatureIndex(Feature)
      */
      Feature getFeatureFromIndex(int index) throws IOException {
-        if (index == -1 || index > featureList.size()) {
+        if (index < 0 || index > featureList.length) {
             throw new IOException("non-existing feature reference");
         }  else {
-            return (Feature) featureList.get(index);
+            return  featureList[index];
         }
-        
     }
  
     /**
@@ -224,12 +226,11 @@ public class GrinBinaryReader {
      * @see GrinBinaryWriter#getSegmentIndex(Segment)
      */
      Segment getSegmentFromIndex(int index) throws IOException {
-        if (index == -1 || index > segmentList.size()) {
+        if (index < 0 || index > segmentList.length) {
             throw new IOException("non-existing segment reference");
         }  else {
-            return (Segment) segmentList.get(index);
+            return segmentList[index];
         } 
-        
     }
     
     /**
@@ -243,32 +244,44 @@ public class GrinBinaryReader {
      * @see GrinBinaryWriter#getRCHandlerIndex(RCHandler)
      */
     RCHandler getRCHandlerFromIndex(int index) throws IOException {
-        if (index == -1 || index > rcHandlerList.size()) {
+        if (index < 0 || index > rcHandlerList.length) {
             throw new IOException("non-existing rchandler reference");
         }  else {
-            return (RCHandler) rcHandlerList.get(index);
+            return rcHandlerList[index];
         }
         
     }
 
-    int[] readIntArrayFromReference(int index) {
-        if (index == -1 || index > intArrayConstants.length) {
-            //return null;
+    int[] getIntArrayFromReference(int index) throws IOException {
+        if (index < 0 || index > intArrayConstants.length) {
+            throw new IOException("non-existing int array reference");
         }  else {
-            return intArrayConstants[index];
-        }
-        
-            throw new RuntimeException("wrong int array reference");
+	    return intArrayConstants[index];
+	}
     }
 
-    String readStringFromReference(int index) {
-        if (index == -1 || index > stringConstants.length) {
-            //return null;
+    String getStringFromReference(int index) throws IOException {
+        if (index < 0 || index > stringConstants.length) {
+	    throw new IOException("wrong string reference ");
         }  else {
             return stringConstants[index];
         }
-        
-            throw new RuntimeException("wrong string reference");
+    }
+
+    Rectangle getRectangleFromReference(int index) throws IOException {
+	if (index < 0 || index > rectangleConstants.length) {
+	    throw new IOException("bad rectangle reference");
+	} else {
+	    return rectangleConstants[index];
+	}
+    }
+    
+    Rectangle[] getRectangleArrayFromReference(int index) throws IOException {
+	if (index < 0 || index > rectangleArrayConstants.length) {
+	    throw new IOException("bad rectangle array reference");
+	} else {
+	    return rectangleArrayConstants[index];
+	}
     }
     
     private void checkValue(int x, int y, String message) throws IOException {
@@ -281,7 +294,8 @@ public class GrinBinaryReader {
        checkValue(in.readInt(), Constants.GRINSCRIPT_IDENTIFIER, "Script identifier");
        int version = in.readInt();
        checkValue(version, Constants.GRINSCRIPT_VERSION, 
-           "Script version mismatch, expects " + Constants.GRINSCRIPT_VERSION + ", found " + version);       
+           "Script version mismatch, expects " + Constants.GRINSCRIPT_VERSION 
+	   + ", found " + version);       
     }
     
     /**
@@ -300,6 +314,8 @@ public class GrinBinaryReader {
 
         stringConstants = readStringConstants(in);
         intArrayConstants = readIntArrayConstants(in);
+	rectangleConstants = readRectangleConstants(in);
+	rectangleArrayConstants = readRectangleArrayConstants(in);
         
         int showSegmentStackDepth = in.readInt();
 	String[] showDrawTargets = in.readStringArray();
@@ -311,35 +327,25 @@ public class GrinBinaryReader {
 	readShowCommandsClass(in);
         showCommands = instantiateShowCommandsCmd();
         
-        featureList = new ArrayList();
-        rcHandlerList = new ArrayList();
-        segmentList = new ArrayList();
-        
+	featureList = new Feature[in.readInt()];
         readDeclarations(in, featureList);
+	rcHandlerList = new RCHandler[in.readInt()];
         readDeclarations(in, rcHandlerList);
+	segmentList = new Segment[in.readInt()];
         readDeclarations(in, segmentList);  
         readContents(in, featureList);
         readContents(in, rcHandlerList);
         readContents(in, segmentList);
         
-        Feature[] features = 
-                (Feature[]) featureList.toArray(new Feature[featureList.size()]);
-        RCHandler[] rcHandlers = 
-                (RCHandler[]) rcHandlerList.toArray(new RCHandler[rcHandlerList.size()]);
-        Segment[] segments = 
-                (Segment[]) segmentList.toArray(new Segment[segmentList.size()]);        
-
-	show.buildShow(segments, features, rcHandlers, 
+	show.buildShow(segmentList, featureList, rcHandlerList, 
 		       publicSegments, publicFeatures, publicRCHandlers);
     }
 
-    private void readDeclarations(GrinDataInputStream in, ArrayList list)
-            throws IOException {
-
-        int length = in.readInt();
+    private void readDeclarations(GrinDataInputStream in, Object[] list)
+            throws IOException 
+    {
         Node node;
-
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < list.length; i++) {
             int identifier = in.readInt();
             switch (identifier) {
                 case Constants.ASSEMBLY_IDENTIFIER:
@@ -412,21 +418,64 @@ public class GrinBinaryReader {
                     break;
                 }
 
-            list.add(node);
+            list[i] = node;
         }
 
     }
     
     private int[][] readIntArrayConstants(GrinDataInputStream in) 
-        throws IOException {
-        
+	    throws IOException 
+    {
         checkValue(in.readByte(),
                 Constants.INT_ARRAY_CONSTANTS_IDENTIFIER,
                 "Integer array constants identifier");        
         int length = in.readInt();
         int[][] array = new int[length][];
-        for (int i = 0; i < length; i++) {
-            array[i] = in.readIntArray();
+	array[0] = null;
+        for (int i = 1; i < length; i++) {
+            array[i] = new int[in.readInt()];
+	    for (int j = 0; j < array[i].length; j++) {
+		array[i][j] = in.readInt();
+	    }
+        }
+        return array;
+    }
+
+    private Rectangle[] readRectangleConstants(GrinDataInputStream in) 
+	    throws IOException 
+    {
+        checkValue(in.readByte(),
+                Constants.RECTANGLE_CONSTANTS_IDENTIFIER,
+                "Rectangle constants identifier");        
+        int length = in.readInt();
+        Rectangle[] array = new Rectangle[length];
+	array[0] = null;
+        for (int i = 1; i < length; i++) {
+	    Rectangle r = new Rectangle();
+	    r.x = in.readInt();
+	    r.y = in.readInt();
+	    r.width = in.readInt();
+	    r.height = in.readInt();
+            array[i] = r;
+        }
+        return array;
+    }
+
+    private Rectangle[][] readRectangleArrayConstants(GrinDataInputStream in) 
+	    throws IOException 
+    {
+        checkValue(in.readByte(),
+                Constants.RECTANGLE_ARRAY_CONSTANTS_IDENTIFIER,
+                "Rectangle array constants identifier");        
+        int length = in.readInt();
+        Rectangle[][] array = new Rectangle[length][];
+	array[0] = null;
+        for (int i = 1; i < length; i++) {
+	    Rectangle[] row = new Rectangle[in.readInt()];
+	    array[i] = row;
+	    for (int j = 0; j < row.length; j++) {
+		row[j] = getRectangleFromReference(in.readInt());
+	    }
         }
         return array;
     }
@@ -446,11 +495,11 @@ public class GrinBinaryReader {
 	}
     }
 
-    private void readContents(GrinDataInputStream in, ArrayList list) 
-       throws IOException {
-        
-        for (int i = 0; i < list.size(); i++) {  
-            Node node = (Node) list.get(i);
+    private void readContents(GrinDataInputStream in, Object[] list) 
+       throws IOException 
+    {
+        for (int i = 0; i < list.length; i++) {  
+            Node node = (Node) list[i];
             if (node != null) {
                 int length = in.readInt();
                 if (Debug.ASSERT) {
@@ -471,7 +520,8 @@ public class GrinBinaryReader {
                 "String array identifier");
         
         String[] strings = new String[in.readInt()];
-        for (int i = 0; i < strings.length; i++) {
+	// strings[0] is null
+        for (int i = 1; i < strings.length; i++) {
             strings[i] = in.readUTF();
         }
         return strings;
@@ -484,11 +534,11 @@ public class GrinBinaryReader {
            return null;
         }
 
-        ArrayList commands = new ArrayList();
+	Command[] commands = new Command[in.readInt()];
         readDeclarations(in, commands);
         readContents(in, commands);
        
-        return (Command[]) commands.toArray(new Command[commands.size()]);
+        return commands;
     }
 
     private GrinXHelper instantiateShowCommandsCmd() 

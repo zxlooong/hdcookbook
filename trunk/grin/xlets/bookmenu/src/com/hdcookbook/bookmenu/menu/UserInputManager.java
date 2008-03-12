@@ -134,7 +134,6 @@ public class UserInputManager {
 	tries++;
 	if ("BLURAY".equals(ourMessage[0])) {
 	    xlet.show.activateSegment(bonusSegment);
-	    xlet.navigator.startVideoAt(xlet.navigator.bonusVideoStartPL);
 	} else if (tries > 2) {
 	    ourMessage[0] = "The code is \"BLURAY\"";
 	    firstChar = true;

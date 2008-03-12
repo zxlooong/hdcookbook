@@ -77,10 +77,7 @@ import java.awt.Rectangle;
  **/
 public class FixedImage extends Feature implements Node {
 
-    protected int x;
-    protected int y;
-    private int width = 0;
-    private int height = 0;
+    protected Rectangle placement;
     protected String fileName;
     protected InterpolatedModel scalingModel = null;
     protected Rectangle scaledBounds = null;
@@ -109,14 +106,14 @@ public class FixedImage extends Feature implements Node {
      * @inheritDoc
      **/
     public int getX() {
-	return x;
+	return placement.x;
     }
 
     /**
      * @inheritDoc
      **/
     public int getY() {
-	return y;
+	return placement.y;
     }
     
     /**
@@ -176,8 +173,6 @@ public class FixedImage extends Feature implements Node {
 	synchronized(setupMonitor) {
 	    if (setupMode) {
 		imageSetup = true;
-		width = image.getWidth();
-		height = image.getHeight();
 	    } else {
 		image.unprepare();
 	    }
@@ -202,7 +197,7 @@ public class FixedImage extends Feature implements Node {
 	    return;
 	}
 	if (scalingModel == null) {
-	    image.draw(gr, x, y, show.component);
+	    image.drawScaled(gr, placement, show.component);
 	} else {
 	    image.drawScaled(gr, scaledBounds, show.component);
 	}
@@ -213,10 +208,13 @@ public class FixedImage extends Feature implements Node {
      **/
     public void addDisplayAreas(RenderContext context) {
 	if (scalingModel == null) {
-	    drawRecord.setArea(x, y, width, height);
+	    drawRecord.setArea(placement.x, placement.y, 
+	    		       placement.width, placement.height);
 	} else {
 	    boolean changed 
-		= scalingModel.scaleBounds(x, y, width, height, scaledBounds);
+		= scalingModel.scaleBounds(placement.x, placement.y, 
+					   placement.width, placement.height, 
+					   scaledBounds);
 		    // When newly activated, we might get a false positive
 		    // on changed, but that's OK because our draw area is
 		    // changed anyway.
@@ -240,8 +238,7 @@ public class FixedImage extends Feature implements Node {
             throws IOException {
                 
         in.readSuperClassData(this);
-        this.x = in.readInt();
-        this.y = in.readInt();
+        this.placement = in.readSharedRectangle();
         this.fileName = in.readString();    
         if (in.readBoolean()) {
             this.scalingModel = (InterpolatedModel) in.readFeatureReference();                    

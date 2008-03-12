@@ -185,20 +185,22 @@ public class GrinDataOutputStream extends DataOutputStream {
    }
    
    public void writeSharedIntArray(int[] array) throws IOException {
-        if (array == null) {
-           writeNull();
-           return;
-       } else {
-           writeNonNull();
-       }  
-       
        int index = binaryWriter.getIntArrayIndex(array);      
-       if (index < 0) {
-	    throw new IOException("Invalid integer array index");
-       }
-       
+       assert index >= 0;
        writeInt(index);      
    }
+
+    public void writeSharedRectangle(Rectangle r) throws IOException {
+        int index = binaryWriter.getRectangleIndex(r);      
+        assert index >= 0;
+        writeInt(index);      
+    }
+
+    public void writeSharedRectangleArray(Rectangle[] r) throws IOException {
+        int index = binaryWriter.getRectangleArrayIndex(r);      
+        assert index >= 0;
+        writeInt(index);      
+    }
 
    /**
     * Writes out a reference to a String instance.
@@ -212,15 +214,6 @@ public class GrinDataOutputStream extends DataOutputStream {
     * @throws java.io.IOException if IO error occurs.
     */ 
    public void writeString(String string) throws IOException {
-       if (string == null) {
-           writeNull();
-       } else {
-           writeNonNull();
-           writeStringReference(string);
-       }
-   }
-   
-   private void writeStringReference(String string) throws IOException {
        writeInt(binaryWriter.getStringIndex(string));
    }
   
@@ -417,8 +410,8 @@ public class GrinDataOutputStream extends DataOutputStream {
     * @see GrinDataInputStream#readSuperClassData(Feature)
     */    
     public void writeSuperClassData(Feature feature) 
-            throws IOException {
-        
+            throws IOException 
+    {
         boolean isPublic = binaryWriter.show.isPublic((SENode)feature);
         String name = feature.getName();
         writeBoolean(isPublic);

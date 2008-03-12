@@ -82,6 +82,12 @@
                     <location>grin/samples/CustomFeature</location>
                     <excludes>**/assets/**</excludes>
                 </source-folder>
+                <source-folder>
+                    <label>grin/scripts/ant</label>
+                    <type>java</type>
+                    <location>grin/scripts/ant</location>
+                    <excludes>**/assets/**</excludes>
+                </source-folder>
             </folders>
             <ide-actions>
                 <action name="build">
@@ -157,6 +163,11 @@
                         <location>grin/samples/CustomFeature</location>
                         <excludes>**/assets/**</excludes>
                     </source-folder>
+                    <source-folder style="packages">
+                        <label>grin/scripts/ant</label>
+                        <location>grin/scripts/ant</location>
+                        <excludes>**/assets/**</excludes>
+                    </source-folder>
                     <source-file>
                         <location>build.xml</location>
                     </source-file>
@@ -183,6 +194,7 @@
                 <package-root>grin/xlets/tools/shared/src</package-root>
                 <package-root>grin/xlets/tools/jdk/src</package-root>
                 <package-root>grin/samples/CustomFeature</package-root>
+                <package-root>grin/scripts/ant</package-root>
                 <classpath mode="compile">../bd-j/references/enhanced/classes.zip</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>

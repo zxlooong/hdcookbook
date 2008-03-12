@@ -229,8 +229,8 @@ public class Fade extends Modifier implements Node {
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 
-            throws IOException {
-                
+            throws IOException 
+    {
         in.readSuperClassData(this);
         this.srcOver = in.readBoolean();
         this.keyframes = in.readSharedIntArray();

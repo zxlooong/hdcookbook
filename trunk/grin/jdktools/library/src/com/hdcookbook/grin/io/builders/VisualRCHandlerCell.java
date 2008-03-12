@@ -60,6 +60,7 @@ import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
 import com.hdcookbook.grin.input.RCKeyEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -152,7 +153,7 @@ public abstract class VisualRCHandlerCell {
 
     private int getStateFor(String overrideKey, int x, int y) {
 	Map<String, String> overrides = helper.getRCOverrides();
-	List<List<VisualRCHandlerCell>> grid = helper.getGrid();
+	ArrayList<ArrayList<VisualRCHandlerCell>> grid = helper.getGrid();
 	Map<String, Integer> states = helper.getStates();
 
 	String state = overrides.get(overrideKey);
@@ -238,7 +239,8 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public String addState(Map<String, Integer> stateMap,
-			       Map<String, VisualRCHandlerCell> cellMap) {
+			       Map<String, VisualRCHandlerCell> cellMap) 
+	{
 	    if (added) {
 		return null;
 	    }
@@ -273,7 +275,8 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public String addState(Map<String, Integer> stateMap,
-			       Map<String, VisualRCHandlerCell> cellMap) {
+			       Map<String, VisualRCHandlerCell> cellMap) 
+	{
 	    // do nothing
 	    return null;
         }
@@ -307,7 +310,8 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public String addState(Map<String, Integer> stateMap,
-			       Map<String, VisualRCHandlerCell> cellMap) {
+			       Map<String, VisualRCHandlerCell> cellMap) 
+	{
 	    // do nothing
 	    return null;
         }
@@ -317,7 +321,7 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public String check() {
-	    List<List<VisualRCHandlerCell>> grid = helper.getGrid();
+	    ArrayList<ArrayList<VisualRCHandlerCell>> grid = helper.getGrid();
 	    if (x < 0 || x >= grid.get(0).size() || y < 0 || y >= grid.size()) {
 		return "" + x + ", " + y + " is an illegal cell.  "
 		       + "Cell numbers count from zero.";
