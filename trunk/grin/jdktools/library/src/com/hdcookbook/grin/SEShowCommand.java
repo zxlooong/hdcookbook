@@ -118,6 +118,14 @@ public class SEShowCommand extends Command implements SENode {
     public void setGrinviewMethodBody(String methodBody) throws IOException {
         this.grinviewMethodBody = methodBody.trim();
     }
+
+    /**
+     * Returns Grinview method body for this command.
+     */
+    public String getGrinviewMethodBody() {
+        return grinviewMethodBody;
+    }
+
         
     /**
      * Sets the java source of the body of the method for the JavaSE version.  
@@ -130,6 +138,13 @@ public class SEShowCommand extends Command implements SENode {
         this.xletMethodBody = methodBody.trim();
     }
     
+    /**
+     * Returns Xlet method body for this command.
+     */
+    public String getXletMethodBody() {
+        return xletMethodBody;
+    }
+
     public String getJavaSource(boolean xlet) {
         if (xlet) {
             return xletMethodBody;

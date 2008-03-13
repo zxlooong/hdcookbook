@@ -62,6 +62,9 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.SEInterpolatedModel;
+import com.hdcookbook.grin.features.SEScalingModel;
+import com.hdcookbook.grin.features.SETimer;
+import com.hdcookbook.grin.features.SETranslatorModel;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.io.builders.DeferredBuilder;
 import com.hdcookbook.grin.io.text.ExtensionParser;
@@ -331,7 +334,7 @@ public class ShowBuilder {
 	} else {
 	    repeatFrame = Integer.MAX_VALUE;
 	}
-	return makeInterpolatedModel(name, frames, values,repeatFrame,commands);
+	return makeInterpolatedModel(name, frames, values,repeatFrame,commands, SETimer.class);
 	    // Timer can be implemented as a degenerate case of 
 	    // InterpolatedModel.  It's just a model that interpolates zero
 	    // data values between frame 0 and frame numFrames.
@@ -342,7 +345,7 @@ public class ShowBuilder {
     			  int repeatFrame, Command[] commands) 
     {
 	return makeInterpolatedModel(name, frames, values, repeatFrame, 
-				     commands);
+				     commands, SETranslatorModel.class);
     }
 
     public InterpolatedModel 
@@ -350,12 +353,12 @@ public class ShowBuilder {
     		     int repeatFrame, Command[] commands) 
     {
 	return makeInterpolatedModel(name, frames, values, repeatFrame, 
-				     commands);
+				     commands, SEScalingModel.class);
     }
 
     private InterpolatedModel 
     makeInterpolatedModel(String name, int[] frames, int[][] values, 
-    			  int repeatFrame, Command[] commands)
+    			  int repeatFrame, Command[] commands, Class clazz)
     {
 	int[] currValues = new int[values.length];
 	for (int i = 0; i < values.length; i++) {
@@ -372,7 +375,19 @@ public class ShowBuilder {
 		    // list of values for this parameter.
 	    }
 	}
-	return new SEInterpolatedModel(show, name, frames, currValues, values,
+
+        if (clazz == SETimer.class) {
+            return new SETimer(show, name, frames, currValues, values,
 				     repeatFrame, commands);
+        } else if (clazz == SETranslatorModel.class) {
+            return new SETranslatorModel(show, name, frames, currValues, values,
+				     repeatFrame, commands);
+        } else if (clazz == SEScalingModel.class) {
+            return new SEScalingModel(show, name, frames, currValues, values,
+				     repeatFrame, commands);
+        } else {
+            return new SEInterpolatedModel(show, name, frames, currValues, values,
+				     repeatFrame, commands);
+        }
     }
 }

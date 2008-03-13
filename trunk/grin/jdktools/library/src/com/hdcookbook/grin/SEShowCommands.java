@@ -156,6 +156,13 @@ public class SEShowCommands  {
         checkForJavaCommandBody(classBody);
         this.grinviewClassBody = classBody;        
     }
+
+    /**
+     * Returns grinview class body string.
+     */
+    public String getGrinviewClassBody() {
+        return this.grinviewClassBody;
+    } 
         
     /**
      * Adds to the java source of the body of the class for the JavaSE version.  
@@ -170,6 +177,13 @@ public class SEShowCommands  {
         checkForJavaCommandBody(classBody);
         this.xletClassBody = classBody;
     }
+    
+    /**
+     * Returns xlet class body string.
+     */
+    public String getXletClassBody() {
+        return this.xletClassBody;
+    } 
     
     private void checkForJavaCommandBody(String classBody) throws IOException {
         if (!classBody.contains("JAVA_COMMAND_BODY")) {
