@@ -56,6 +56,7 @@ package com.hdcookbook.grin.features.parts;
 
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.List;
 import java.util.ArrayList;
 
 /**
@@ -68,6 +69,13 @@ public class SEImagePlacementList implements SEImageSeqPlacement {
 
     public SEImagePlacementList(ArrayList<SEImagePlacement> placements) {
 	this.placements = placements;
+    }
+
+    /*
+     * Internal use only.
+     */
+    public List<SEImagePlacement> getPlacements() {
+      return placements;
     }
 
     /**

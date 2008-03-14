@@ -94,6 +94,10 @@ public class SEImageSequence extends ImageSequence implements SENode {
 	this.placements = sePlacement.getImageSeqPlacementRects(fileNames);
     }
     
+    public SEImageSeqPlacement getPlacement() {
+       return sePlacement;
+    }
+
     public boolean getRepeat() {
        return repeat;
     }

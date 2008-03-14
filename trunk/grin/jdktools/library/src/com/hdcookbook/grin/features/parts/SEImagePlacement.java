@@ -89,26 +89,50 @@ public class SEImagePlacement implements SEImageSeqPlacement {
         this.scaleX = scaleX;
     }
 
+    public double getScaleX() {
+        return this.scaleX;
+    }
+
     public void setScaleY(double scaleY) {
         this.scaleY = scaleY;
+    }
+
+    public double getScaleY() {
+        return this.scaleY;
     }
 
     public void setX(int x) {
         this.x = x;
     }
 
+    public int getX() {
+        return this.x;
+    }
+
     public void setXAlign(HorizontalAlignment xAlign) {
         this.xAlign = xAlign;
+    }
+
+    public HorizontalAlignment getXAlign() {
+        return this.xAlign;
     }
 
     public void setY(int y) {
         this.y = y;
     }
 
+    public int getY() {
+        return this.y;
+    }
+
     public void setYAlign(VerticalAlignment yAlign) {
         this.yAlign = yAlign;
     }
     
+    public VerticalAlignment getYAlign() {
+        return this.yAlign;
+    }
+
     
     /**
      * @inheritDoc

@@ -93,6 +93,13 @@ public class SEFixedImage extends FixedImage implements SENode {
 	return scalingModel;
     }
     
+    /*
+     * Internal use only
+     */
+    public SEImagePlacement getPlacement() {
+        return sePlacement;
+    }
+
     /* 
      * Internal use only 
      */
