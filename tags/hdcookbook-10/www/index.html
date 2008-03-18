@@ -1,0 +1,100 @@
+<html>
+<head>
+<title>HDCookbook for BD-J</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+</head>
+<body>
+<h2>HDcookbook - a place for Blu-ray Disc Java and GEM</h2>
+<p>&nbsp;</p>
+<div style="text-align: center">
+<img width="238" height="200" border="0" src="images/Cookbook200.gif" />
+</div>
+<p>&nbsp;</p> 
+<h2>Welcome!</h2>
+<p> Welcome to the HD Cookbook source repository!  This is an open, 
+collaborative place to gather useful code for Blu-ray Java, and other 
+GEM terminal specifications like MHP, OCAP, and GEM-IPTV. If you 
+have something you'd like to contribute, please do!  All we ask 
+is a little bit of coordination on package names, and a few simple 
+formatting conventions.  Here's what we have so far: </p>
+<ul> 
+    <li> <a href="animator.html">Animator</a>, a lightweight animation package.
+         This package manages the animation loop, drawing optimization, 
+	 and double-buffering for a Java Xlet, such as a BD-J application.
+    <li> <a href="grin.html">GRIN -
+	a framework for Graphical Interactivity.</a>  This framework uses the
+	animation framework described above, and adds a "scene graph" to it.
+	A scene graph is the thing that, at runtime, represents what gets
+	built with a visual design tool.  It's a tree of objects that 
+	represents drawing operations, much like an HTML document or a 
+	Flash file.
+    <li>A set of three Blu-ray Java xlets that can be used in a BD disc 
+        image.  There's a main menu xlet that uses GRIN in the package
+    <strong>com.hdcookbook.bookmenu.menu</strong>, a game 
+    called &quot;Gun Bunny&quot; in <strong>com.hdcookbook.gunbunny</strong>, 
+    and a &quot;monitor xlet&quot; to control
+    the other apps in <strong>com.hdcookbook.bookmenu.monitor</strong>.
+
+
+    <li>A BD disc image with A/V assets, ready to have the three xlets
+        described above added to it.  Put these together on a BD-RE disc,
+	and you have a disc image you can play on an off-the-shelf
+	Blu-Ray Disc player, like the PS/3!
+    <li>A tool to build a Blu-ray Disc BDJO file 
+    in <strong>net.java.bd.tools.bdjo</strong>, under the tools directory.
+    <li>A tool to sign a Blu-ray Disc jar files 
+    in <strong>net.java.bd.tools.bdsigner</strong>, under the tools directory.
+    <li>A set of ant scripts you can use to build the tools and the xlets. 
+    <li>A set of shell scripts you can use as a starting point to set up a 
+build environment.  These can be found in the &quot;scripts&quot; directory.
+</ul> 
+<p>
+This code is being used in production Blu-ray titles, including
+major studio releases.
+</p>
+
+<h2>Playing a Blu-ray Disc Image at Home</h2>
+<p>
+By assembling the parts available here, you can build your own
+Blu-ray disc image, and burn it to a rewritable BD-RE disc.  This
+disc can be played almost all consumer players, including the PS/3.
+You can also modify the BD-J code provided, or write your own.  Soon,
+we hope to assmeble enough tools so you can build a disc image from
+scratch:  We'd like it to be possible for folks who are interested to
+shoot their own HD footage, edit it with something like Final Cut,
+build the disc data structures, write code for the interactivity, and
+emerge with a BD-RE disc that will work on a normal Blu-ray player.
+<p>For everything but the disc image, you'll need to hook up to 
+the SVN repository and 
+do a bringover.  That process is described in the java.net pages.  When 
+I wrote this, there was a link for &quot;Subversion&quot; under 
+&quot;Project tools&quot; that explained how to do this.  We 
+keep milestone snapshots in the archived_versions directory of the 
+SVN repository.  Each is in a zip file with a long, descriptive name. </p>
+<p>
+For the disc image, look under "Documents &amp; Files" on the menu bar
+on the right, then grab the file 2007_10_hdcookbook_disc_image_no_jar_bdjo.zip.
+An earlier version from August is also available, but that version has
+an AACS directory and has content protection flags set in the transport
+streams.  This was fixed in the October disc image, which is known to
+play correctly on a PS/3 (once the xlets are compiled and added to the
+image).
+</p>
+<p> By the way, the name &quot;HD Cookbook&quot; is inspired by the title of a
+book on developing interactive applications for Blu-ray Java and the other 
+HD optical media format.  
+See <a href="http://hdcookbook.com">http://hdcookbook.com</a> for 
+more about this book, and a list of other Blu-ray resources. </p>
+<p> A discussion forum for BD-J is 
+available <a href="http://forums.java.net/jive/forum.jspa?forumID=117">here</a>,
+with a linked mailing list. 
+<a href="https://hdcookbook.dev.java.net/servlets/SummarizeList?listName=bd-j-dev">Join 
+the discussion here!</a> </p> 
+<h2>License</h2>
+<p> The contents of hdcookbook.dev.java.net are covered  
+by <a href="misc/license.html">this license</a>. </p>                                   
+
+<p><font size="-4">13949712720901ForOSX</font></p>
+</body>
+<html>

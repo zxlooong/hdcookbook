@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="GRIN HelloWorld sample" default="all" basedir=".">
+	
+    <!-- NOTE: This example does not use grin compiler optimization during 
+    the conversion from the text show file to the binary show file, for simplicity,
+    while other show files in this Samples directory do. -->
+    
+	<!-- Property Definitions -->
+        <property file="../../scripts/ant/grin.properties"/>
+        
+	<property name="bdj.classes"  value="${HDC_BDJ_PLATFORM_CLASSES}"/>
+	<property name="grin.classes"  value="../../${GRIN_VIEWER_JAR}"/>
+        <property name="converter.classes" value="../../${GRIN_COMPILER_JAR}"/>
+	<property name="builddir" value="build"/>
+        <property name="xlet.jar" value="${builddir}/00000.jar"/>
+        <property name="script.name" value="tumblingduke"/>	
+        
+	<target name="all" depends="jar"/>
+	
+	<target name="compile" description="Compile the xlet">
+		<mkdir dir="build"/>
+		<javac srcdir="."
+		       classpath="${bdj.classes}"
+		       source="1.3" target="1.3"
+		       debug="on" deprecation="on"
+		       destdir="${builddir}" >
+		    <src path="../../library/src" />
+		    <src path="." />
+		</javac>
+	</target>
+	
+	<target name="jar" depends="compile, generate_binary_script" description="Creates a jar file">
+		<jar destfile="${xlet.jar}">	     
+                   <fileset dir="${builddir}" excludes="*.jar"/>	
+		   <fileset dir="." includes="images/**"/> 
+		</jar>
+	   
+	    <ant antfile="generate-bdjo-desc.xml"/>   
+        </target>
+        
+        <target name="generate_binary_script">
+            <java fork="true" jar="${converter.classes}">
+                <!-- Don't optimize, since this is supposed to be the simplest sample.  -->
+                <arg line="-asset_dir . -asset_dir ${builddir} -out ${builddir} -avoid_optimization ${script.name}.txt"/>
+            </java>
+        </target>
+	
+	<target name="run_grinview">
+		<java fork="true" jar="${grin.classes}">
+			<arg line="-asset_dir . ${script.name}.txt"/>
+		</java>
+	</target>
+	
+	<target name="run_grinview_binary" depends="generate_binary_script">
+            <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+                <classpath>
+                    <pathelement path="${grin.classes}"/>
+                    <pathelement path="${xlet.jar}"/>
+                </classpath>       
+                <arg line="-assets / ${script.name}.grin"/>
+            </java>
+	</target>   
+        
+        <target name="test" depends="jar">
+            <java fork="true" classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+                <classpath>
+                    <pathelement path="${grin.classes}"/>
+                    <pathelement path="${xlet.jar}"/>
+                </classpath>       
+                <arg line="-assets / -automate ${script.name}.grin"/>
+            </java>
+	</target>        
+        
+        
+	<target name="debug_grinview">
+                <nbjpdastart addressproperty="jpda.address" name="hdcookbook" transport="dt_socket">
+			<classpath path="${grin.classes}"/>
+		</nbjpdastart>	
+	        <java fork="true" jar="${grin.classes}">
+			<arg line="-asset_dir . ${script.name}.txt"/>
+			<jvmarg value="-Xdebug"/>
+			<jvmarg value="-Xnoagent"/>
+			<jvmarg value="-Djava.compiler=none"/>
+			<jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+		</java>	
+	</target>
+	
+	<target name="clean">
+		<delete dir="${builddir}"/>
+	</target>
+</project>

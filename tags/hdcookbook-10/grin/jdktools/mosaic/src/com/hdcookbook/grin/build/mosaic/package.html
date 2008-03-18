@@ -1,0 +1,61 @@
+<html>
+<body>
+<p>
+This package contains a program that reads a show file, and
+transforms all image assets to a mosaic.  It does this using a
+fairly brute-force "first fit" algorithm that's almost certainly
+non-optimal, but is sufficient at least to demonstrate the concept
+of a mosaic.  When run, this program produces a modified set of assets 
+to be used with the show file.  The show file itself doesn't need to
+be modified, because a "map" file is produced that maps the filename
+of the original image to a set of coordinates within a matrix file.  Just
+package up the map file and the matrixes, and leave out the original
+images in the disc image.
+</p><p>
+This is a build-time tool that runs with the JDK.  It requires parts
+of the GRIN library to run, so you should probably just build the
+whole thing.  In order to test this with Ryan's Life, you can try
+something like this:
+</p>
+<pre>
+
+    rm -rf build/classes/compiled_assets
+    java -Xmx512m -cp build/classes com.hdcookbook.grin.build.mosaic.Main \
+	    -assets /com/hdcookbook/grin/test/assets/ \
+	    -show ryan_show.txt  \
+	    -out build/classes/compiled_assets
+
+    java -cp build/classes com.hdcookbook.grin.test.bigjdk.GrinTestRyan \
+	    -assets /com/hdcookbook/grin/test/assets/ -assets /compiled_assets \
+	    -imagemap images.map
+
+</pre>
+<p>
+In your application, you need to tell GRIN where the image map file
+is.  For debugging purposes, It's sometimes handy to set an xlet up so
+that it will work with either the discrete images or the mosaic, to
+speed build times.  In the HD cookbook menu, I did this, right after
+setting <code>AssetFinder</code>'s search path:
+</p>
+<pre>
+        if (AssetFinder.tryURL("images.map") != null) { 
+            if (Debug.LEVEL > 0) {
+                Debug.println("Found images.map, using mosaic.");
+            }
+            AssetFinder.setImageMap("images.map"); 
+        } else if (Debug.LEVEL > 0) {
+                Debug.println("No images.map, not using mosaic.");
+        }
+</pre>
+<p>
+As of this writing, the mosaic construction algorithm isn't highly
+optimized, and the mosaic image
+can only be in PNG.  Some players decode JPEG faster than PNG, but
+JPEG doesn't support alpha and you have to worry about setting the
+quality of JPEG output if you go that route.  This tool presently
+doesn't have a way of grouping related images together, which would
+be important for managing image loading and unloading if you can't
+just keep everything in memory.
+</p>
+</body>
+</html>
