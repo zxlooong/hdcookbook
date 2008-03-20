@@ -167,6 +167,7 @@ public class SecurityUtil {
    
     private KeyStore store; 
     private BigInteger appCertSerNo;
+    private boolean ksInitialized = false;
    
     /*
      * Using the Builder pattern from Effective Java Reloaded. The arguments
@@ -305,13 +306,38 @@ public class SecurityUtil {
         }
     }
     
-    public void createCertificates() throws Exception {
+    public void createCerts() throws Exception {
+        createRootCert();
+        if (!isBindingUnitCert)
+            createAppCert();
+    }
+    
+    public void createRootCert() throws Exception {
+         boolean failed = false;
+         cleanup();  // Get rid of any previous key aliases first.
+         try {
+             initKeyStore();
+             generateSelfSignedCertificate(rootCertDN, rootCertAlias,
+                                           rootKeyPassword, true);
+             exportRootCertificate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            failed = true;
+        }
+        if (failed) {
+            System.exit(1); // VM exit with an error code+
+        }
+    }
+    
+     public void createAppCert() throws Exception {
         boolean failed = false;
-        cleanup();  // Get rid of any previous key aliases first.
         try {
             initKeyStore();
-            generateKeys();
-            exportRootCertificate();
+            generateSelfSignedCertificate(appCertDN, appCertAlias,
+                                          appKeyPassword, false);
+            generateCSR();
+            generateCSRResponse();
+            importCSRResponse();
             if (debug) {
                 verifyCertificates();
             }
@@ -319,21 +345,19 @@ public class SecurityUtil {
             e.printStackTrace();
             failed = true;
         }
+        if (!debug) {
+            new File(APPCSRFILE).delete();
+            new File(APPCERTFILE).delete();
+        }
         if (failed) {
-            System.exit(1); // VM exit with an error code
+             System.exit(1); // VM exit with an error code
         }
-    }
-
-    private void generateKeys() throws Exception {
-        generateCertificates(); 
-        if (!isBindingUnitCert) {
-            generateCSR();
-            generateCSRResponse();
-            importCSRResponse();
-        }
-    }
-  
+     }
+    
     private void initKeyStore() throws Exception {
+        if (ksInitialized)
+            return;
+        ksInitialized = true;
         Security.addProvider(new BouncyCastleProvider());	  
         char[] password = keystorePassword.toCharArray();
         store = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -349,18 +373,11 @@ public class SecurityUtil {
         store.load(is, password);
         is.close();
     }
-    
-    private void generateCertificates() throws Exception {
-        generateSelfSignedCertificate(rootCertDN, rootCertAlias, rootKeyPassword, true);
-        if (!isBindingUnitCert) {
-            generateSelfSignedCertificate(appCertDN, appCertAlias, appKeyPassword, false);
-        }
-    }
 
     private void generateCSR() throws Exception {
-        String[] appCSRRequestArgs = {"-certreq", "-alias", appCertAlias, "-keypass", appKeyPassword, 
-                                   "-keystore", keystoreFile, "-storepass", keystorePassword, 
-				   "-debug", "-file", APPCSRFILE};
+        String[] appCSRRequestArgs = {"-certreq", "-alias", appCertAlias,
+            "-keypass", appKeyPassword, "-keystore", keystoreFile, "-storepass",
+             keystorePassword, "-debug", "-file", APPCSRFILE};
        
        KeyTool.main(appCSRRequestArgs);	    
     }
@@ -370,10 +387,9 @@ public class SecurityUtil {
     }
     
     private void importCSRResponse() throws Exception {
-       String[] responseImportArgs = {"-import", "-alias", appCertAlias, "-keypass", appKeyPassword, 
-                                      "-keystore", keystoreFile, "-storepass", keystorePassword,
-                                      "-debug", "-file", APPCERTFILE}; 
-       
+       String[] responseImportArgs = {"-import", "-alias", appCertAlias,
+                "-keypass", appKeyPassword, "-keystore", keystoreFile,
+                "-storepass", keystorePassword, "-debug", "-file", APPCERTFILE}; 
        KeyTool.main(responseImportArgs);
     }
     
@@ -381,7 +397,8 @@ public class SecurityUtil {
        for (String jfile:jarfiles) {
           String[] jarSigningArgs = {"-sigFile", "SIG-BD00",
                                      "-keypass", appKeyPassword, 
-                                     "-keystore", keystoreFile, "-storepass", keystorePassword,
+                                     "-keystore", keystoreFile,
+                                     "-storepass", keystorePassword,
                                      "-debug", jfile, appCertAlias};
           JarSigner.main(jarSigningArgs);
           signWithBDJHeader(jfile);

@@ -116,7 +116,7 @@ public class BDCertGenerator {
             printUsageAndExit("Please enter an orgid");
         }
         SecurityUtil util = builder.build();
-        util.createCertificates();
+        util.createCerts();
     }
 
     static private void tinyHelp() {
