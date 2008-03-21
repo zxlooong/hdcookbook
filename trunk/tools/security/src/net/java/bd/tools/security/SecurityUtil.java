@@ -296,9 +296,6 @@ public class SecurityUtil {
     public void signJars() {
         try {               
             initKeyStore();
-            if (debug) {
-                verifyCertificates();
-            }
             signJarFile();
         } catch (Exception e) {
             e.printStackTrace();

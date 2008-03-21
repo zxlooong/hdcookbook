@@ -63,8 +63,9 @@ information or have any questions.
             <pathelement location="${java.home}/../lib/tools.jar"/>   
         </path>	   
         <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
+	    <arg value="-debug"/>
 	    <arg value="56789abc"/>
-            <classpath refid="sec.tools.path"/>
+	    <classpath refid="sec.tools.path"/>
         </jdktools.java>
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
             <arg value="-debug"/>
