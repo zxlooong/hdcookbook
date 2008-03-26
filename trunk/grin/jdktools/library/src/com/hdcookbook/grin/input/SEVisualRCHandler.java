@@ -61,14 +61,17 @@ import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
+import com.hdcookbook.grin.io.builders.VisualRCHandlerHelper;
 import java.awt.Rectangle;
 import java.io.IOException;
 
 public class SEVisualRCHandler extends VisualRCHandler implements SENode {
-    
-    public SEVisualRCHandler(SEShow show) {
+    private VisualRCHandlerHelper helper;
+
+    public SEVisualRCHandler(SEShow show, VisualRCHandlerHelper helper) {
         super();
         setShow(show);
+        this.helper = helper;
     }
 
     public SEVisualRCHandler(String name, String[] stateNames,
@@ -76,7 +79,8 @@ public class SEVisualRCHandler extends VisualRCHandler implements SENode {
 			   Command[][] selectCommands, 
 			   Command[][] activateCommands, 
 			   Rectangle[] mouseRects, int[] mouseRectStates,
-			   int timeout, Command[] timeoutCommands) 
+			   int timeout, Command[] timeoutCommands,
+			   VisualRCHandlerHelper helper) 
     {
         super();
 	this.name = name;
@@ -89,8 +93,13 @@ public class SEVisualRCHandler extends VisualRCHandler implements SENode {
 	this.mouseRectStates = mouseRectStates;
 	this.timeout = timeout;
 	this.timeoutCommands = timeoutCommands;
+        this.helper = helper;
     }
-    
+
+    public VisualRCHandlerHelper getHelper() {
+        return helper;
+    }
+
     /** used by the binaryconverter */  
     public int[] getUpDown() {
         return upDown;

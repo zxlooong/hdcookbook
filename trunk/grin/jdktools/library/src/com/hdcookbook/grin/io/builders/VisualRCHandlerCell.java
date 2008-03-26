@@ -95,7 +95,6 @@ public abstract class VisualRCHandlerCell {
 	this.yCoord = y;
     }
 
-
     /**
      * Get the cell that this cell refers to.  Returns null if this
      * cell doesn't refer to another cell, e.g. because it's a state
@@ -227,7 +226,7 @@ public abstract class VisualRCHandlerCell {
 	return new ActivateCell();
     }
 
-    private static class StateCell extends VisualRCHandlerCell {
+    public static class StateCell extends VisualRCHandlerCell {
 	private String name;
 	private boolean added = false;
 	StateCell(String name) {
@@ -262,7 +261,7 @@ public abstract class VisualRCHandlerCell {
 	}
     }
 
-    private static class StateRefCell extends VisualRCHandlerCell {
+    public static class StateRefCell extends VisualRCHandlerCell {
 	private String name;
 	StateRefCell(String name) {
 	    this.name = name;
@@ -281,6 +280,10 @@ public abstract class VisualRCHandlerCell {
 	    return null;
         }
 
+        public String getName() {
+            return name;
+        }
+
 	public String getState() {
 	    return getRefersTo().getState();
 	}
@@ -295,13 +298,21 @@ public abstract class VisualRCHandlerCell {
 	}
     }
 
-    private static class LocationRefCell extends VisualRCHandlerCell {
+    public static class LocationRefCell extends VisualRCHandlerCell {
 	private int x;
 	private int y;
 	LocationRefCell(int x, int y) {
 	    this.x = x;
 	    this.y = y;
 	}
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
 
 	public VisualRCHandlerCell getRefersTo() {
 	    VisualRCHandlerCell result = helper.getGrid().get(y).get(x);
@@ -330,7 +341,7 @@ public abstract class VisualRCHandlerCell {
 	}
     }
 
-    private static class ActivateCell extends VisualRCHandlerCell {
+    public static class ActivateCell extends VisualRCHandlerCell {
 	ActivateCell() {
 	}
 

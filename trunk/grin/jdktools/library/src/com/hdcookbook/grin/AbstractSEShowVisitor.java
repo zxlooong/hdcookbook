@@ -71,6 +71,7 @@ import com.hdcookbook.grin.features.SEGroup;
 import com.hdcookbook.grin.features.SEGuaranteeFill;
 import com.hdcookbook.grin.features.SEImageSequence;
 import com.hdcookbook.grin.features.SEInterpolatedModel;
+import com.hdcookbook.grin.features.SEMenuAssembly;
 import com.hdcookbook.grin.features.SEScalingModel;
 import com.hdcookbook.grin.features.SETimer;
 import com.hdcookbook.grin.features.SETranslatorModel;
@@ -113,6 +114,9 @@ public abstract class AbstractSEShowVisitor implements SEShowVisitor {
     }
     public void visitTranslatorModel(SETranslatorModel feature) {
         visitInterpolatedModel(feature);
+    }
+    public void visitMenuAssembly(SEMenuAssembly feature) {
+        visitAssembly(feature);
     }
 
     public void visitCommandRCHandler(SECommandRCHandler handler) {}

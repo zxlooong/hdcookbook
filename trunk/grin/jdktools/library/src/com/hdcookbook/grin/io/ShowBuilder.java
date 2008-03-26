@@ -127,7 +127,11 @@ public class ShowBuilder {
     public ExtensionParser getExtensionParser() {
         return extensionParser;
     }
- 
+
+    public void addSyntheticFeature(int line, Feature f) throws IOException {
+        addFeature(null, line, f);
+    }
+
     /** 
      * Called when a new feature is encountered.
      **/

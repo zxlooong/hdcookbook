@@ -176,7 +176,7 @@ public class VisualRCHandlerHelper {
 	return null;	// null means "no error to report"
     }
 
-    ArrayList<ArrayList<VisualRCHandlerCell>> getGrid() {
+    public ArrayList<ArrayList<VisualRCHandlerCell>> getGrid() {
 	return grid;
     }
 
@@ -194,7 +194,7 @@ public class VisualRCHandlerHelper {
 	this.rcOverrides = rcOverrides;
     }
 
-    Map<String, String> getRCOverrides() {
+    public Map<String, String> getRCOverrides() {
 	return rcOverrides;
     }
 
@@ -260,7 +260,7 @@ public class VisualRCHandlerHelper {
 	    = new SEVisualRCHandler(handlerName,  stateNames, upDown, rightLeft,
 	    			  selectCommands, activateCommands,
 				  mouseRects, mouseRectStates,
-				  timeout, timeoutCommands);
+				  timeout, timeoutCommands, this);
 	return result;
     }
 }

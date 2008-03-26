@@ -80,6 +80,7 @@ import com.hdcookbook.grin.features.SEFixedImage;
 import com.hdcookbook.grin.features.SEGroup;
 import com.hdcookbook.grin.features.SEGuaranteeFill;
 import com.hdcookbook.grin.features.SEImageSequence;
+import com.hdcookbook.grin.features.SEMenuAssembly;
 import com.hdcookbook.grin.features.SESetTarget;
 import com.hdcookbook.grin.features.SESrcOver;
 import com.hdcookbook.grin.features.SEText;
@@ -737,7 +738,7 @@ public class ShowParser {
 	    helper.parts.add(parseMenuAssemblyFeatures());
 	}
 	parseExpected(";");
-	SEAssembly a = new SEAssembly(show);
+	SEAssembly a = new SEMenuAssembly(show, helper);
         a.setName(name);
 	helper.assembly = a;
 	builder.addFeature(name, line, a);
@@ -745,7 +746,7 @@ public class ShowParser {
 	    void resolve() throws IOException {
 		Iterable<Feature> syntheticFeatures = helper.setupAssembly();
 		for (Feature f: syntheticFeatures) {
-		    builder.addFeature(null, line, f);
+		    builder.addSyntheticFeature(line, f);
 		}
 	    }
 	};

@@ -53,42 +53,22 @@
  */
 package com.hdcookbook.grin.features;
 
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
-import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
-import java.io.IOException;
+import com.hdcookbook.grin.io.builders.MenuAssemblyHelper;
 
-public class SEAssembly extends Assembly implements SENode {
-
-    public SEAssembly(SEShow show) {
+public class SEMenuAssembly extends SEAssembly {
+    private MenuAssemblyHelper helper;
+    public SEMenuAssembly(SEShow show, MenuAssemblyHelper helper) {
         super(show);
+	this.helper = helper;
     }
-    
-    public void writeInstanceData(GrinDataOutputStream out) 
-            throws IOException {     
+
+    public MenuAssemblyHelper getHelper() {
+	return helper;
+    }
         
-        out.writeSuperClassData(this);
-        out.writeStringArray(getPartNames());
-        out.writeFeaturesArrayReference(getParts());       
-    }
-
-    public String getRuntimeClassName() {
-        return Assembly.class.getName();
-    }
-    
     public void accept(SEShowVisitor visitor) {
-        visitor.visitAssembly(this);
-    }
-
-    public String getPartName(Feature feature) {
-        Feature[] parts = getParts();
-        for (int i = 0; i < parts.length; i++) {
-            if (parts[i] == feature) {
-                return getPartNames()[i];
-            }
-        }
-        return null;
+        visitor.visitMenuAssembly(this);
     }
 }
