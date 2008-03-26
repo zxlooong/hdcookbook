@@ -63,6 +63,9 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.BorderLayout;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.dvb.ui.FontFactory;
 import org.havi.ui.HSceneFactory;
@@ -74,7 +77,7 @@ import org.havi.ui.HSceneFactory;
 public class WriteToStorageXlet extends Container implements Xlet {
 	
     Container rootContainer = null;
-    String status = "Not yet run";
+    List multiLineStatus = new ArrayList();
     XletContext context;
     Font font;
     
@@ -108,7 +111,7 @@ public class WriteToStorageXlet extends Container implements Xlet {
 
 	if (font == null) {
 	   try {
-              font = new FontFactory().createFont("Arial", Font.BOLD, 64);
+              font = new FontFactory().createFont("Curior", Font.BOLD, 26);
 	   } catch (Exception e) {
 	      e.printStackTrace();
 	      font = g.getFont();
@@ -118,9 +121,16 @@ public class WriteToStorageXlet extends Container implements Xlet {
 	g.setColor(new Color(100,100,10));
         g.fillRect(20,20,getWidth()-40,getHeight()-40);
 	g.setColor(new Color(245,245,0));   
-    	int message_width = g.getFontMetrics().stringWidth(status);
-    	g.drawString(status, (WINDOW_WIDTH-message_width)/2, 500);
-	
+        Iterator iter = multiLineStatus.iterator();
+        int fontSize  = font.getSize();
+        int lineNo = 0;
+        while(iter.hasNext()) {
+            String statusLine = (String) iter.next();   
+            int message_width = g.getFontMetrics().stringWidth(statusLine);
+            g.drawString(statusLine,((WINDOW_WIDTH-message_width)/4),
+                         (200 + 2 * fontSize * lineNo));
+            lineNo++;
+        }
     }
     
     public void accessPersistantStorage() {
@@ -142,17 +152,17 @@ public class WriteToStorageXlet extends Container implements Xlet {
 		os.write(i);
            }
 	   os.close();
-           status = "WRITER Test passed, accessed filesystem without SecurityException";
+           multiLineStatus.add("WRITER Test passed");
+           multiLineStatus.add("wrote to a file:" + filename);
+           File f = new File(filename);
+           multiLineStatus.add((f.canRead() ? "true" : "false"));
 	   System.out.println("Test passed, accessed filesystem without SecurityException");
 	} catch (SecurityException ex) {
 		ex.printStackTrace();
-		System.out.println();
-		System.out.println("***  No permission to write to the persistant storage ***");
-		System.out.println();
-		status = "Test Failed, SecurityException";	    
+		fillStatus(ex);    
 	} catch (IOException ex) {
 		ex.printStackTrace();  
-		status = "Test Failed with IOException";
+		fillStatus(ex);
         } finally {
 	    if (os != null) {
 		try {
@@ -161,6 +171,23 @@ public class WriteToStorageXlet extends Container implements Xlet {
 		}
 	    }
 	}
+    }
+    
+     void fillStatus(Exception ex) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        pw.close();
+        String stat = sw.toString();
+        
+        // writes to the debug output
+        System.out.println("status:" + stat);
+        int newline;
+        int from  = 0;
+        while((newline = stat.indexOf("\n", from)) != -1) {
+            multiLineStatus.add(stat.substring(from, newline));
+            from = newline + 1;
+        }
     }
     
     public static void main(String[] args) {

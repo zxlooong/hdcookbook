@@ -111,6 +111,7 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.math.BigInteger;
 
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.Signature;
 import java.security.KeyStore;
@@ -149,6 +150,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import sun.misc.HexDumpEncoder;
 import sun.security.util.DerInputStream;
 import sun.security.util.DerOutputStream;
 import sun.security.util.DerValue;
@@ -269,7 +271,7 @@ class CredentialUtil {
         }
     }
     
-    private void printDebugMsg(String msg) {
+    static void printDebugMsg(String msg) {
         System.out.println("[debug]:" + msg);
     }
     
@@ -324,7 +326,7 @@ class CredentialUtil {
         removeEntityReference(permReqFile);
     }
     
-     private Node getNodeWithTag(Node node, String tag) throws Exception {
+    static Node getNodeWithTag(Node node, String tag) throws Exception {
 	NodeList nl = node.getChildNodes();
 
         for (int i = 0; i < nl.getLength(); i++) {
@@ -333,8 +335,7 @@ class CredentialUtil {
 		if (n.getNodeName().equals(tag)) 
 		    return n;
 	}
-        if (debug)
-	    printDebugMsg("No elements with tag:" + tag);
+	printDebugMsg("No elements with tag:" + tag);
         return null;
     }
     
@@ -413,7 +414,7 @@ class CredentialUtil {
 	int granteeOrgId = Integer.parseInt(granteeOrgIdStr.substring(2), 16);
 
 	// get the grantee app_id 16 bits
-	short granteeAppId = (short) Integer.parseInt(granteeOrgIdStr.substring(2), 16);
+	short granteeAppId = (short) Integer.parseInt(granteeAppIdStr.substring(2), 16);
 
 	// get grantee certificate digest.
         KeyStore gs = KeyStore.getInstance("JKS");
@@ -421,10 +422,20 @@ class CredentialUtil {
                 	granteeStorePass.toCharArray());
         Certificate[] granteeCerts = gs.getCertificateChain(granteeRootAlias);
 	
-	byte[] granteeCertDigest = getCertDigest(granteeCerts[0]);	
+	byte[] granteeCertDigest = getCertDigest(granteeCerts[0]);
+        HexDumpEncoder hexDump = null;
+        if (debug) {
+            printDebugMsg("GranteeCertDigest:");
+            hexDump = new HexDumpEncoder();
+            System.out.println(hexDump.encodeBuffer(granteeCertDigest));
+        }
 	int grantorOrgId = Integer.parseInt(grantorOrgIdStr.substring(2), 16);
-	byte[] grantorCertDigest = getCertDigest(grantorCerts.get(
-                                        grantorCerts.size() - 1));
+	byte[] grantorRootCertDigest = getCertDigest(grantorCerts.
+                                        get(grantorCerts.size() - 1));
+        if (debug) {
+           printDebugMsg("GrantorRootCertDigest:");
+           System.out.println(hexDump.encodeBuffer(grantorRootCertDigest));
+        }
 	byte[] expiryDate = getAscii(expDateStr);
 
 	// binary concatenation of the fields to be signed
@@ -435,7 +446,7 @@ class CredentialUtil {
 	dos.writeShort(granteeAppId);
 	dos.write(granteeCertDigest, 0, granteeCertDigest.length);
 	dos.writeInt(grantorOrgId);
-	dos.write(grantorCertDigest, 0, grantorCertDigest.length);
+	dos.write(grantorRootCertDigest, 0, grantorRootCertDigest.length);
 	dos.write(expiryDate, 0, expiryDate.length);
         
         // file related attributes
@@ -451,9 +462,12 @@ class CredentialUtil {
         }
 	dos.close();
         byte[] data = baos.toByteArray();
-        if (debug)
-	    printDebugMsg("To be signed data length:" + data.length);
-        
+    
+        if (debug) {
+            printDebugMsg("Concatenated binary data to be signed (length: " +
+                            data.length + " bytes) is:");
+            System.out.println(hexDump.encodeBuffer(data));
+        }
         PrivateKey grantorKey = getGrantorKey();
         Signature sig = Signature.getInstance(SIG_ALGO);
         sig.initSign(grantorKey);
@@ -465,6 +479,18 @@ class CredentialUtil {
 	BASE64Encoder base64 = new BASE64Encoder();
         base64.encode(signature, out);
 	return out.toString("US-ASCII");
+    }
+    
+    static void printHex(byte[] value) {
+        int count = 0;
+        for (int i = 0; i < value.length; i++, count++) {
+            System.out.format("%2x ", value[i]);
+            if (count == 20) {
+                count = 0;
+                System.out.println();
+            }
+        }
+        System.out.println();
     }
     
      static class Files {
@@ -486,7 +512,6 @@ class CredentialUtil {
             return sb.toString();
         }
     };
-    
     
     public void updateCerts() throws Exception {
 	JarFile jf = new JarFile(jarFileName);
@@ -538,117 +563,18 @@ class CredentialUtil {
         String[] jarArgs = {"-uvf", jarFileName, SIG_BLOCK_FILE};
         Main jar = new Main(System.out, System.err, "jar");
         jar.run(jarArgs);
-        if (debug) {
-            verify();
-        }
     }
     
-    private byte[] getAscii(String str) throws Exception {
-	//return str.getBytes(Charset.forName("US-ASCII"));
+   static byte[] getAscii(String str) throws Exception {
         return str.getBytes("US-ASCII");
     }
 
-    private byte[] getCertDigest(Certificate cert) throws Exception {
+    static byte[] getCertDigest(Certificate cert) throws Exception {
 	byte[] encCertInfo = cert.getEncoded();
         MessageDigest md = MessageDigest.getInstance("SHA1");
         return md.digest(encCertInfo);
     }
-    
-    public void verify() throws Exception {
-        X509Certificate grantorRootCert = verifyCertChainFileId(permReqFile, jarFileName);
-        if (grantorRootCert == null) {
-            verifyError("Unable to find the grantor cert");
-        }
-        System.out.println("<certchainfileid> Verification PASSED.");
-        
-        // TODO: A better mechanism independent of the way the signture is generated
-        // is required here
-        // verifySignature(permReqFile, grantorRootCert, "app.discroot.crt");
-    }
-    
-    private void verifyError(String errMsg) {
-        System.out.println("===========================");
-        System.out.println("VERFICATION FAILED:" + errMsg);
-        System.out.println("===========================");
-        System.exit(1);
-    }
-    
-    public X509Certificate verifyCertChainFileId(String permReqFile, String jarFileName) throws Exception {
-        JarFile jf = new JarFile(jarFileName);
-        ZipEntry je = jf.getEntry(permReqFile);
-        if (je == null) {
-            verifyError("Jar Entry:" + permReqFile + " not found.");
-        }     
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();    
-	Document doc = factory.newDocumentBuilder().parse(jf.getInputStream(je));
-        Element e = doc.getDocumentElement();;
-        Node credNode = getNodeWithTag(e, FILE_CRED_TAG);
-        Node grantorNode = getNodeWithTag(credNode, GRANTOR_ID_TAG);
-        String gaOrgId = ((Element) grantorNode).getAttribute("id");
-        if (debug) {
-            printDebugMsg("Grantor's orgId:" + gaOrgId);
-        }
-        // remove 0x suffix from the orgId field of the permission request file
-        gaOrgId = gaOrgId.substring(2);
-        int gaOid = Integer.parseInt(gaOrgId, 16);
-        Node fileIdNode = getNodeWithTag(credNode, FILE_ID_TAG);  
-        if(fileIdNode == null) {
-            verifyError("No elements in the permission request file with tag: " + FILE_ID_TAG);
-        }
-        String base64Data = fileIdNode.getTextContent();
-        BASE64Decoder decoder = new BASE64Decoder();
-        byte[] derData = decoder.decodeBuffer(base64Data);
-
-        // issuerAndSerialNumber
-        DerInputStream derin = new DerInputStream(derData);
-        DerValue[] issuerAndSerialNumber = derin.getSequence(2);
-        byte[] issuerBytes = issuerAndSerialNumber[0].toByteArray();
-        //X500Name issuerName = new X500Name(new DerValue(DerValue.tag_Sequence,
-        //                                        issuerBytes));
-        X500Principal issuerName = new X500Principal(issuerBytes);
-        BigInteger certificateSerialNumber = issuerAndSerialNumber[1].getBigInteger();
-     
-        System.out.println("Looking for cert with issuerName:" + issuerName);
-        System.out.println(" and cert serial no:" + Integer.toHexString(certificateSerialNumber.intValue()));
-        
-        // retrieve the cert from the jarfile
-        Collection certs = retrieveCerts(jarFileName);
-        Iterator i = certs.iterator();
-        X509Certificate cert = null;
-        while (i.hasNext()) {
-            cert = (X509Certificate) i.next();
-            if (issuerName.equals(cert.getIssuerX500Principal())) {
-                
-                // check for the org id in the issuer name
-                LdapName dn = new LdapName(issuerName.toString());
-               
-                // assumes the RDN second from left is the organization
-                String org = (String) dn.getRdn(dn.size() - 2).getValue();
-                int indexOrgId = org.lastIndexOf(".");
-                String orgId = null;
-                if (indexOrgId != -1) {
-                    orgId = org.substring(indexOrgId + 1);
-                    //System.out.println("orgId:" + orgId);
-                } else {
-                    System.out.println("Could not retrieve the orgId");
-                    continue;
-                }
-                int certOid = Integer.parseInt(orgId, 16);
-                if (gaOid != certOid) {
-                    System.out.println("grantor org Id with that in the certificate did not match");
-                    continue;
-                }
-                if (!certificateSerialNumber.equals(cert.getSerialNumber())) {
-                    System.out.println("Certificate Serial Number did not match");
-                    continue;
-                }
-                System.out.println("Found the grantor's certificate:" + cert);
-                return cert;
-            }
-       }
-       return cert;
-    }
-    
+  
     /**
      * This method explicitly removes the character references from the PRF file
      * that were generated after updating the PRF file with credentials. The XML
@@ -679,65 +605,5 @@ class CredentialUtil {
         FileWriter fw = new FileWriter(fileName);
         fw.write(caw.toCharArray());
         fw.close();
-    }
-    
-    // XXX This method's implementation is incomplete.
-    public void verifySignature(String permReqFileName, X509Certificate grantorRootCert,
-            String granteeRootCertName) throws Exception {
-        byte credentialUsage = 0x00;
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();    
-	Document doc = factory.newDocumentBuilder().parse(new File(permReqFile));
-        Element e = doc.getDocumentElement();
-        String granteeOrgId = e.getAttribute("orgid");
-        granteeOrgId = granteeOrgId.substring(2);
-        int geOId = Integer.parseInt(granteeOrgId, 16);
-        String granteeAppId = e.getAttribute("appid");
-        granteeAppId = granteeAppId.substring(2);
-        int geAppId = Short.parseShort(granteeAppId, 16);
-        
-        // compute grantee root cert digest
-        FileInputStream fis = new FileInputStream(granteeRootCertName);
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        X509Certificate granteeRootCert = (X509Certificate) cf.generateCertificate(bis);
-        byte[] granteeCertDigest = getCertDigest(granteeRootCert);
-        
-        // get grantor org  id;
-        Node credNode = getNodeWithTag(e, FILE_CRED_TAG);
-        Node grantorNode = getNodeWithTag(credNode, GRANTOR_ID_TAG);
-        String gaOrgId = ((Element) grantorNode).getAttribute("id");
-        
-        // remove 0x suffix from the orgId field of the permission request file
-        gaOrgId = gaOrgId.substring(2);
-        int gaOId = Integer.parseInt(gaOrgId, 16);
-        
-        // compute grantor root cert digest
-        byte[] grantorCertDigest = getCertDigest(grantorRootCert);
-        ArrayList fileList = new ArrayList();
-        Node expDateNode = getNodeWithTag(credNode, EXP_DATE_TAG);
-        String expDate = ((Element) expDateNode).getAttribute("date");
-        Node fileNode = getNodeWithTag(credNode, FILE_NAME_TAG);
-        String filePath = fileNode.getTextContent();
-        NamedNodeMap fileAttrs = fileNode.getAttributes();
-        String read = fileAttrs.getNamedItem("read").getNodeValue();
-        String write = fileAttrs.getNamedItem("write").getNodeValue();
-        Files f = new Files(read, write, filePath);
-        fileList.add(f);
-        
-        // This code is yet to be completed. The verification process here is
-        // getting very close to the way signture was generated in the first place
-        // we need a better verifation mechanism
-    }
-        
-    private Collection retrieveCerts(String jarFileName) throws Exception {
-        JarFile jf = new JarFile(jarFileName);
-        //System.out.println("sig block file" + SIG_BLOCK_FILE);
-        JarEntry jarEntry = (JarEntry) jf.getEntry("META-INF/SIG-BD00.RSA");
-        InputStream in = jf.getInputStream(jarEntry);
-        CertificateFactory cf = CertificateFactory.getInstance("X509");
-        Collection certs = cf.generateCertificates(in);
-        System.out.println("# of certs in the signed Jar File:" + certs.size());
-        jf.close();      
-        return certs;
     }
 }

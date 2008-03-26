@@ -104,6 +104,10 @@ public class BDCredentialSigner {
             System.out.println("[Debug] Updating the signed jar file with grantor's certs....");
         }
         cUtil.updateCerts();
+        
+        if (debug) {
+            CredentialVerifier.verify(jarFileName, permReqFileName, "app.discroot.crt");
+        }
     }
     
     private static void extractFile(String jarFileName, String fileToExtract) {

@@ -62,6 +62,11 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.BorderLayout;
+import java.security.AccessControlException;
+import java.security.Permission;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.dvb.ui.FontFactory;
 import org.havi.ui.HSceneFactory;
@@ -88,7 +93,9 @@ import org.havi.ui.HSceneFactory;
 public class ReadFromStorageXlet extends Container implements Xlet {
 	
     Container rootContainer = null;
-    String status = "Not yet run";
+
+    // For displaying the stacktrace.
+    List multiLineStatus = new ArrayList();
     XletContext context;
     Font font;
     
@@ -122,7 +129,7 @@ public class ReadFromStorageXlet extends Container implements Xlet {
 
 	if (font == null) {
 	   try {
-              font = new FontFactory().createFont("Arial", Font.BOLD, 64);
+              font = new FontFactory().createFont("Curior", Font.BOLD, 26);
 	   } catch (Exception e) {
 	      e.printStackTrace();
 	      font = g.getFont();
@@ -132,20 +139,26 @@ public class ReadFromStorageXlet extends Container implements Xlet {
 	g.setColor(new Color(100,100,10));
         g.fillRect(20,20,getWidth()-40,getHeight()-40);
 	g.setColor(new Color(245,245,0));   
-    	int message_width = g.getFontMetrics().stringWidth(status);
-    	g.drawString(status, (WINDOW_WIDTH-message_width)/2, 500);
-	
+        Iterator iter = multiLineStatus.iterator();
+        int fontSize  = font.getSize();
+        int lineNo = 0;
+        while(iter.hasNext()) {
+            String statusLine = (String) iter.next();   
+            int message_width = g.getFontMetrics().stringWidth(statusLine);
+            g.drawString(statusLine,((WINDOW_WIDTH-message_width)/4),
+                         (200 + 2 * fontSize * lineNo));
+            lineNo++;
+        }
     }
     
     public void accessPersistantStorage() {
-	String root = System.getProperty("dvb.persistent.root");
 	String filename = System.getProperty("dvb.persistent.root")
-               + "/" + context.getXletProperty("dvb.org.id")
-	       + "/" + context.getXletProperty("dvb.app.id")
-	       + "/tmp.txt";
+              + "/7fff3456/4001/tmp.txt";
         System.out.println("Filename:" + filename);
+        multiLineStatus.add("File:" + filename);
         // BufferedReader br = null;
         FileInputStream fis = null;
+        
 	try {
            // The BufferedReader does not work on PS-3;throws an IOException
 	   // br = new BufferedReader(new FileReader(filename));
@@ -153,19 +166,22 @@ public class ReadFromStorageXlet extends Container implements Xlet {
            //  br.close();
            fis = new FileInputStream(filename);
 	   for (int i = 0; i < 10; i++) {
-		System.out.println(fis.read());
+	  	System.out.println(fis.read());
            }
 	   System.out.println("Test passed, accessed filesystem without SecurityException");
-           status = "READER test passed, accessed filesystem without SecurityException";
-	} catch (SecurityException ex) {
-		ex.printStackTrace();
-		System.out.println();
-		System.out.println("***  No permission to write to the persistant storage ***");
-		System.out.println();
-		status = "Test Failed, SecurityException";	    
+           multiLineStatus.add("READER test passed, accessed filesystem without SecurityException");
+	} catch (AccessControlException ex) {
+                ex.printStackTrace();
+                fillStatus(ex);
+                Permission perm = ex.getPermission();
+                if (perm != null)
+                    multiLineStatus.add(perm.toString());
 	} catch (IOException ex) {
-		ex.printStackTrace();  
-		status = "Test Failed with IOException";
+		ex.printStackTrace();
+                fillStatus(ex);
+        } catch (Exception ex) {
+              ex.printStackTrace();
+              fillStatus(ex);
         } finally {
 	    if (fis != null) {
 		try {
@@ -174,6 +190,23 @@ public class ReadFromStorageXlet extends Container implements Xlet {
 		}
 	    }
 	}
+    }
+    
+    void fillStatus(Exception ex) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        pw.close();
+        String stat = sw.toString();
+        
+        // writes to the debug output
+        System.out.println("status:" + stat);
+        int newline;
+        int from  = 0;
+        while((newline = stat.indexOf("\n", from)) != -1) {
+            multiLineStatus.add(stat.substring(from, newline));
+            from = newline + 1;
+        }
     }
     
     public static void main(String[] args) {
