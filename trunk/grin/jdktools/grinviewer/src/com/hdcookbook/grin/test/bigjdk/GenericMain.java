@@ -100,9 +100,6 @@ import com.hdcookbook.grin.util.ImageWaiter;
  */
 public class GenericMain extends Frame implements AnimationContext {
     
-    static int BUF_WIDTH = 1920;
-    static int BUF_HEIGHT = 1080;
-
     protected SEShow show;
     private GenericDirector director;
     
@@ -114,9 +111,10 @@ public class GenericMain extends Frame implements AnimationContext {
 
     private ScalingDirectDrawEngine engine;
     
+    private DeviceConfig deviceConfig = new DeviceConfig(1920, 1080);
     private int scaleDivisor = 2;
-    private int screenWidth= 1920 / scaleDivisor;
-    private int screenHeight = 1080 / scaleDivisor;
+    private int screenWidth  = deviceConfig.width / scaleDivisor;
+    private int screenHeight = deviceConfig.height / scaleDivisor;
 
     private boolean debugWaiting = false;
     private String initialSegmentName = null;
@@ -142,19 +140,25 @@ public class GenericMain extends Frame implements AnimationContext {
     }
    
     /**
-     * Adjust the scaling factor used to display the show.
-     * This can only be called before init()
+     * Adjust the scaling factor and the screen size used to display the show.
+     * This can only be called before init().
      **/
-    protected void adjustScreenSize(String scale) {
-        try {
-	   scaleDivisor = Integer.parseInt(scale);	
-	} catch (NumberFormatException e) {
-	   System.out.println("Could not reset the scaling factor " + scale);
-	   return;
-	}
+    protected void adjustScreenSize(String scale, DeviceConfig config) {
+        if (scale != null) {
+           try {
+	      scaleDivisor = Integer.parseInt(scale);	
+   	   } catch (NumberFormatException e) {
+	      System.out.println("Could not reset the scaling factor " + scale);
+	      return;
+	   }
+        }   
 
-        screenWidth = 1920 / scaleDivisor;
-        screenHeight = 1080 / scaleDivisor;
+        if (config != null) {
+            deviceConfig = config;
+        } 
+               
+        screenWidth = config.width / scaleDivisor;
+        screenHeight = config.height / scaleDivisor;
     }
     
     
@@ -328,9 +332,9 @@ public class GenericMain extends Frame implements AnimationContext {
     public void snapshot() {
 	BufferedImage snapshot;
 	BufferedImage framebuffer;
-	snapshot = new BufferedImage(BUF_WIDTH, BUF_HEIGHT, 
+	snapshot = new BufferedImage(deviceConfig.width, deviceConfig.height, 
 					 BufferedImage.TYPE_INT_ARGB);
-	framebuffer = new BufferedImage(BUF_WIDTH, BUF_HEIGHT, 
+	framebuffer = new BufferedImage(deviceConfig.width, deviceConfig.height, 
 					 BufferedImage.TYPE_INT_ARGB);
 	Graphics2D g = framebuffer.createGraphics();
 	try {
@@ -342,7 +346,7 @@ public class GenericMain extends Frame implements AnimationContext {
 	g.setComposite(AlphaComposite.Src);
 	if (background == null) {
 	    g.setColor(new Color(0,0,0,0));
-	    g.fillRect(0, 0, BUF_WIDTH, BUF_HEIGHT);
+	    g.fillRect(0, 0, deviceConfig.width, deviceConfig.height);
 	} else {
 	    g.drawImage(background, 0, 0, null, null);
 	}
@@ -513,6 +517,16 @@ public class GenericMain extends Frame implements AnimationContext {
                 }
             }.start();
         }
+    } 
+    
+    static class DeviceConfig {
+       public int width;
+       public int height;
+    
+       public DeviceConfig(int w, int h) {
+          width  = w;
+          height = h;
+       }
     }
     
     public static void main(String[] args) {
@@ -525,5 +539,4 @@ public class GenericMain extends Frame implements AnimationContext {
         
 	System.exit(0);
     }
-    
 }

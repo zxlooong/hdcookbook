@@ -58,7 +58,6 @@ package com.hdcookbook.grin.test.bigjdk;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.Segment;
 
-import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.text.ExtensionParser;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -83,7 +82,15 @@ public class GrinView extends GenericMain {
 
     private IdentityHashMap lineNumberMap = new IdentityHashMap();
     private GrinViewScreen screen;
-    
+            
+     // Possible screen sizes supported.
+    static final DeviceConfig NTSC = new DeviceConfig(720, 480);
+    static final DeviceConfig PAL  = new DeviceConfig(720, 576);
+    static final DeviceConfig P720 = new DeviceConfig(1280, 720);
+    static final DeviceConfig QHD  = new DeviceConfig(960, 540);
+    static final DeviceConfig FOURTHREE = new DeviceConfig(1440, 1080);
+    static final DeviceConfig FULLHD = new DeviceConfig(1920, 1080);  
+        
     public GrinView() {
     }
 
@@ -279,7 +286,45 @@ public class GrinView extends GenericMain {
 	    });
 	}
     }
-
+    
+    /**
+     * Supported synonyms are
+     *     720x480, 480, 480i, 480p, ntsc
+     *     720x576, 576, 576i, 576p, pal, secam
+     *     1280x720, 720, 720p
+     *     960x540, 960, qhd
+     *     1440x1080, 1440
+     *     1920x1080, 1080, 1080p, 1080i, fullhd 
+     * @param arg one of the element in the set.
+     * @return 480, 576, 720, 960, 960, or 1080, to discribe the screen size.
+     */
+    private static DeviceConfig getDeviceConfig(String arg) {
+        if ("720x480".equals(arg) || "480".equals(arg) || 
+            "480i".equals(arg) || "ntsc".equalsIgnoreCase(arg)) {
+            return NTSC;
+        } else if ("720x576".equals(arg) || "576".equals(arg) ||
+            "576p".equals(arg) || "pal".equalsIgnoreCase(arg) ||
+            "secam".equalsIgnoreCase(arg)) {
+            return PAL;
+        } else if ("1280x720".equals(arg) || "720".equals(arg) ||
+            "720p".equals(arg)) {
+            return P720;
+        } else if ("960x540".equals(arg) || "960".equals(arg) ||
+            "qhd".equalsIgnoreCase(arg)) {
+            return QHD;
+        } else if ("1440x1080".equals(arg) || "1440".equals(arg)) {
+            return FOURTHREE;
+        } else if ("1920x1080".equals(arg) || "1080".equals(arg) ||
+            "1080p".equals(arg) || "1080i".equals(arg) || 
+            "fullhd".equalsIgnoreCase(arg)) {
+            return FULLHD;
+        }
+        
+        // Nothing matched... print usage and exit.
+        usage();
+        return null; // Never reaches here
+    }
+    
     private static void usage() {
 	System.out.println();
 	System.out.println("Usage:  java com.hdcookbook.grin.test.bigjdk.GrinView <option> <show file>\\");
@@ -291,13 +336,16 @@ public class GrinView extends GenericMain {
         System.out.println("                -assets <asset path in jar file>");
         System.out.println("                -asset_dir <directory in filesystem>");
         System.out.println("                -imagemap <mapfile>");
-        System.out.println("                -background <image>");
+        System.out.println("                -background <image>");        
+        System.out.println("                -screensize <keyword>");
         System.out.println("                -scale <number>");
         System.out.println("                -segment <segment name to activate>");      
         System.out.println("                -extension_parser <a fully qualified classname>");       
         System.out.println("                -automate");
         System.out.println("");
         System.out.println("            -assets and -asset_dir may be repeated to form a search path.");
+        System.out.println("            -screensize keyword includes items like fullhd, pal, ntsc, 1080i, 720p, 960x520.");
+        System.out.println("                        Default screen size is 1920x1080, with a scale factor 2.");
         System.out.println("            -automate option will launch a testing thread which activates");       
         System.out.println("            every named segment in a given show with an 1 second interval.");
         System.out.println("            -extension_parser is needed when the show is a text file and");
@@ -315,6 +363,7 @@ public class GrinView extends GenericMain {
 	String fps = null;
 	String segment = null;
 	String scaleDivisor = null;
+        DeviceConfig deviceConfig = null;
         String extensionParserName = null;
         boolean doAutoTest = false;
 	while (argsUsed < args.length - 1) {
@@ -365,7 +414,14 @@ public class GrinView extends GenericMain {
                     usage();
                 }
 		scaleDivisor = args[argsUsed];
-		argsUsed++;	               
+		argsUsed++;	
+	    } else if ("-screensize".equals(args[argsUsed])) {
+		argsUsed++;
+                if (deviceConfig != null) {
+                    usage();
+                }
+		deviceConfig = getDeviceConfig(args[argsUsed]);
+		argsUsed++;                
 	    } else if ("-extension_parser".equals(args[argsUsed])) {
                 if (extensionParserName != null) {
                     usage();
@@ -416,8 +472,8 @@ public class GrinView extends GenericMain {
 	    m.setBackground(background);
 	}
 	
-	if (scaleDivisor != null) {
-	    m.adjustScreenSize(scaleDivisor);
+	if (scaleDivisor != null || deviceConfig != null) {
+	    m.adjustScreenSize(scaleDivisor, deviceConfig);
 	}
         
         ExtensionParser reader = null;
@@ -443,5 +499,7 @@ public class GrinView extends GenericMain {
 	m.inputLoop();
         
 	System.exit(0);
-    }   
+    } 
+    
+    
 }
