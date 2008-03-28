@@ -113,6 +113,9 @@ public class MenuExtensionParser implements ExtensionParser {
         final String arg = (String) args.get(0);
         
         return new SEGenericCommand(show) {
+            public String getArgument() {
+                return arg;
+            }
             public void execute() { // nothing to do.
             }
             public void writeInstanceData(GrinDataOutputStream out) 

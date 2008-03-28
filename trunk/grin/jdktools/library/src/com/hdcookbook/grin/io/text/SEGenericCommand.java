@@ -61,11 +61,16 @@ import com.hdcookbook.grin.commands.Command;
 /**
  * This is a generic SECommand class in which the ExtensionParser implementation
  * can choose to subclass.  This is meant to be used for the show compiled time only.
+ * Optionally, supports a single String type argument.
  */
 public abstract class SEGenericCommand extends Command 
         implements SENode {
     public SEGenericCommand(Show show) {
         super(show);
+    }
+    
+    public String getArgument() {
+        return null;
     }
     
     public void accept(SEShowVisitor visitor) {
