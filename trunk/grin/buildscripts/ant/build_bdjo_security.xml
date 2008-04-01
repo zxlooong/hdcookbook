@@ -72,7 +72,8 @@ information or have any questions.
             <arg value="${HDC_DISC_BDMV}/JAR/00001.jar"/>
             <arg value="${HDC_DISC_BDMV}/JAR/00002.jar"/>
             <classpath refid="sec.tools.path"/>	   
-        </jdktools.java>	
+        </jdktools.java>	      
+        <copy file="app.discroot.crt" todir="${HDC_DISC_BDMV}/../CERTIFICATE/BACKUP/"/>
         <move file="app.discroot.crt" todir="${HDC_DISC_BDMV}/../CERTIFICATE/"/>
         
     </target>

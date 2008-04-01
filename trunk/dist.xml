@@ -12,20 +12,28 @@
     <property file="user.vars.properties"/>	
     <property file="vars.properties"/>	
     
-    <!-- Creates a binary bundle for the distribution -->
-    <target name="bundle">
+    <target name="bundle" 
+            description="Creates a binary bundle for the distribution">
+                
         <tstamp/>
-        <mkdir dir="${RELEASE_BUNDLE}"/>
         
-        <copy todir="${RELEASE_BUNDLE}/HDCookbook-DiscImage">
+        <mkdir dir="${RELEASE_BUNDLE}"/>      
+        <mkdir dir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage"/>
+        
+        <copy todir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage/BDMV">
             <fileset dir="${HDC_DISC_BDMV}">      
                 <include name="**/*.jar"/>
                 <include name="**/*.bdjo"/>
             </fileset>
-            <fileset dir="${HDC_DISC_BDMV}/..">  
+        </copy>
+        <copy todir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage/CERTIFICATE">   
+            <fileset dir="${HDC_DISC_BDMV}/../CERTIFICATE">  
                 <include name="**/*.crt"/>
             </fileset>
         </copy>        
+
+        <zip destfile="${RELEASE_BUNDLE}/HDCookbook-DiscImage.zip"
+              basedir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage/"/>
         
         <copy todir="${RELEASE_BUNDLE}/BDTools" flatten="true">
             <fileset dir="tools">
@@ -69,6 +77,7 @@
              <fileset dir="." includes="${RELEASE_BUNDLE}*"/>
         </delete>
         <delete dir="${RELEASE_BUNDLE}"/>
+        <delete dir="${RELEASE_BUNDLE}.tmp"/>
     </target>
     
 </project>

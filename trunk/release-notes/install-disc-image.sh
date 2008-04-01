@@ -5,11 +5,14 @@
 # Adjust "nojar_image" to the root of the hdcookbook disc image downloaded
 # from http://hdcookbook.dev.java.net/servlets/ProjectDocumentList.
 
+nojar_image_name=2008_03_hdcookbook_disc_image_no_jar_bdjo
 
-bundle=`pwd`/HDCookbook-DiscImage
-nojar_image=c:/2007_10_hdcookbook_disc_image_no_jar_bdjo.zip
+bundle=HDCookbook-DiscImage.zip
 
-dist_dir=`pwd`/HDCookbook-DiscImage-complete
+#CHANGE THIS TO SUIT YOUR NEED
+nojar_image=C:/"$nojar_image_name".zip
+
+dist_dir=HDCookbook-DiscImage-complete
 
 if [ ! -f $bundle ] ; then
 	echo "File not found: $bundle ";
@@ -22,16 +25,10 @@ if [ ! -f $nojar_image ]  ; then
         exit 1;
 fi
 
-
 mkdir -p $dist_dir
 cd $dist_dir
 jar xvf $nojar_image
-jar xvf $bundle
-cd 2007_10_hdcookbook_disc_image_no_jar_bdjo/CERTIFICATE
-cp ../../discroot/CERTIFICATE/*.crt .
-cp ../../discroot/CERTIFICATE/*.crt BACKUP
-cd ../BDMV
-cp -r ../../discroot/JAR .
-cp ../../discroot/BDJO/* BDJO
+cd $nojar_image_name
+jar xvf ../../$bundle
 
-echo "Created disc image at $dist_dir."
+echo "Created a complete disc image at $dist_dir."
