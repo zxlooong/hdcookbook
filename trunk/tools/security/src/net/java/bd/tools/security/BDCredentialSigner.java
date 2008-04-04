@@ -171,7 +171,7 @@ public class BDCredentialSigner {
                cBuilder = cBuilder.granteeRootAlias(args[i]);
             } else if (opt.equals("-alias")) {
                 if (++i == args.length) errorNeedArgument(opt);
-               sBuilder = sBuilder.appAlias(args[i]);
+               sBuilder = sBuilder.jarSignerAlias(args[i]);
             } else if (opt.equals("-keypass")) {
                if (++i == args.length) errorNeedArgument(opt);
                sBuilder = sBuilder.appPassword(args[i]);

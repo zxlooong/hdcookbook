@@ -64,6 +64,13 @@ information or have any questions.
         </path>	   
         <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
 	    <arg value="-debug"/>
+            <arg value="-root"/>
+	    <arg value="56789abc"/>
+	    <classpath refid="sec.tools.path"/>
+        </jdktools.java>
+        <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
+	    <arg value="-debug"/>
+            <arg value="-app"/>
 	    <arg value="56789abc"/>
 	    <classpath refid="sec.tools.path"/>
         </jdktools.java>

@@ -34,13 +34,17 @@ depends="security.check">
        <pathelement location="${java.home}/../lib/tools.jar"/>
     </path>
     <java classname="net.java.bd.tools.security.BDCertGenerator" fork="true">
-	    <arg line="-rootdn &quot;CN=ReaderRoot, OU=Studio, O=BDJCompany, C=US&quot; -appdn &quot;CN=ReaderApp, OU=Production, O=BDJCompany, C=US&quot; 7fff1234"/>
+	<arg line="-root -dn &quot;CN=ReaderRoot, OU=Studio, O=BDJCompany, C=US&quot; 7fff1234"/>
         <classpath refid="sec.tools.path"/> 
-    </java>	
+    </java>
+    <java classname="net.java.bd.tools.security.BDCertGenerator" fork="true">
+	<arg line="-app -dn &quot;CN=ReaderApp, OU=Production, O=BDJCompany, C=US&quot; 7fff1234"/>
+        <classpath refid="sec.tools.path"/> 
+    </java>
     <delete file="${basedir}/grantor.store"/>
     <copy file="../Writer/keystore.store" tofile="${basedir}/grantor.store"/>
     <java classname="net.java.bd.tools.security.BDCredentialSigner" fork="true">
-	    <arg line="-debug storage/bluray.ReadFromStorageXlet.perm ${HDC_DISK_BDMV}/JAR/${bdjo-name}.jar"/>
+       <arg line="-debug storage/bluray.ReadFromStorageXlet.perm ${HDC_DISK_BDMV}/JAR/${bdjo-name}.jar"/>
        <classpath refid="sec.tools.path"/>    
     </java>	
     <copy file="app.discroot.crt" todir="${HDC_DISK_BDMV}/../CERTIFICATE/"/>
