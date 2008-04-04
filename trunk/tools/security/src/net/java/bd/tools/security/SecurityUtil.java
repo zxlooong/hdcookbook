@@ -204,9 +204,9 @@ public class SecurityUtil {
          String keystoreFile = DEF_KEYSTORE_FILE;
          String keystorePassword = DEF_KEYSTORE_PASSWORD;
          String appKeyPassword = DEF_APPKEY_PASSWORD;
-         String jarSignerAlias = DEF_APPCERT_ALIAS;
+         String jarSignerAlias; // initialized based on jar or bumf file
          String certSignerAlias = DEF_ROOTCERT_ALIAS;;
-         String newCertAlias;
+         String newCertAlias;  // initialized based on root/app/binding cert
         
          // Certificate data.
          String dn;
@@ -299,10 +299,16 @@ public class SecurityUtil {
         }
         public Builder bumf(String file) {
             this.BUMFile = file;
+            if (jarSignerAlias == null) {
+                jarSignerAlias = DEF_ROOTCERT_ALIAS;
+            }
             return this;
         } 
         public Builder jarfiles(List<String> files) {
             this.jarfiles = files;
+            if (jarSignerAlias == null) {
+                jarSignerAlias = DEF_APPCERT_ALIAS;
+            }
             return this;
         }
         public SecurityUtil build() throws Exception {
@@ -453,7 +459,10 @@ public class SecurityUtil {
         try {            
             initKeyStore();
             Signature signer = Signature.getInstance(SIG_ALG);
-            PrivateKey key = (PrivateKey) store.getKey(newCertAlias,
+            if (debug) {
+                System.out.println("Signer of bumf.xml file is:" + jarSignerAlias);
+            }
+            PrivateKey key = (PrivateKey) store.getKey(jarSignerAlias,
                               rootKeyPassword.toCharArray());
             signer.initSign(key);
             byte[] data = readIntoBuffer(BUMFile);
@@ -466,7 +475,7 @@ public class SecurityUtil {
             if ((extIndex = BUMFile.lastIndexOf(".")) != -1) {
                 prefix = BUMFile.substring(0, extIndex);
             }
-            String sigFile = prefix + ".busf";
+            String sigFile = prefix + ".sf";
             BufferedOutputStream bos = new BufferedOutputStream(
                                        new FileOutputStream(sigFile));
             dos.derEncode(bos);
@@ -483,7 +492,10 @@ public class SecurityUtil {
     
      private void verifySignatureFile(String sigFile) throws Exception {
         Signature verifier = Signature.getInstance(SIG_ALG);
-        Certificate cert =  store.getCertificate(newCertAlias);
+        if (debug) {
+                System.out.println("Verifier of bumf.xml file is:" + jarSignerAlias);
+        }
+        Certificate cert =  store.getCertificate(jarSignerAlias);
         verifier.initVerify(cert);
         
         byte[] derData = readIntoBuffer(sigFile);
@@ -494,6 +506,7 @@ public class SecurityUtil {
         verifier.update(data);
         if (verifier.verify(signature)) {
             System.out.println("BUSF Verification PASSED..");
+            System.out.println("The signed file is written into:" + sigFile);
         } else {
              System.out.println("BUSF Verification FAILED..");
         }

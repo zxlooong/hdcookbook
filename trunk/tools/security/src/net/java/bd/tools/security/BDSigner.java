@@ -93,7 +93,7 @@ public class BDSigner {
             } else if (opt.equals("-debug")) {
                  builder = builder.debug();
             } else {
-                  if (args[i].endsWith(".bumf")) {
+                  if (args[i].endsWith("bumf.xml")) {
                       builder = builder.bumf(args[i]);
                       isBUMF = true;
                   } else {
