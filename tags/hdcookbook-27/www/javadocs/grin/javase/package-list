@@ -1,0 +1,17 @@
+com.hdcookbook.grin
+com.hdcookbook.grin.animator
+com.hdcookbook.grin.binaryconverter
+com.hdcookbook.grin.build.mosaic
+com.hdcookbook.grin.commands
+com.hdcookbook.grin.compiler
+com.hdcookbook.grin.features
+com.hdcookbook.grin.features.parts
+com.hdcookbook.grin.input
+com.hdcookbook.grin.io
+com.hdcookbook.grin.io.binary
+com.hdcookbook.grin.io.builders
+com.hdcookbook.grin.io.text
+com.hdcookbook.grin.mosaic
+com.hdcookbook.grin.test
+com.hdcookbook.grin.test.bigjdk
+com.hdcookbook.grin.util
