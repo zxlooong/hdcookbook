@@ -235,7 +235,7 @@ public class SecurityUtil {
             return this;
         }
         public Builder setRootCert() {
-            isRootCert = true;
+            this.isRootCert = true;
             setRootDefaults();
             return this;
         }
