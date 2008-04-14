@@ -57,18 +57,13 @@ package storage;
 import java.io.*;
 import javax.tv.xlet.Xlet;
 import javax.tv.xlet.XletContext;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.BorderLayout;
 import java.security.AccessControlException;
 import java.security.Permission;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
 
-import org.dvb.ui.FontFactory;
+import net.java.bd.tools.logger.HarnessLogDialog;
+import net.java.bd.tools.logger.Logger;
+import net.java.bd.tools.logger.Screen;
+import org.havi.ui.HScene;
 import org.havi.ui.HSceneFactory;
 
 /**
@@ -90,92 +85,68 @@ import org.havi.ui.HSceneFactory;
  *                              {persistent root value of reader}/4001/2 
  * that this test tries to read from.
  */
-public class ReadFromStorageXlet extends Container implements Xlet {
-	
-    Container rootContainer = null;
-
-    // For displaying the stacktrace.
-    List multiLineStatus = new ArrayList();
-    XletContext context;
-    Font font;
+public class ReadFromStorageXlet implements Xlet {
     
-    static final int WINDOW_WIDTH = 1920;
-    static final int WINDOW_HEIGHT = 1080;
+    // For displaying the stacktrace.
+    //List multiLineStatus = new ArrayList();
+    XletContext context;
 
     public void initXlet(XletContext context) {       
 	this.context = context;
 	
-        rootContainer = HSceneFactory.getInstance().getDefaultHScene();
-        rootContainer.add(this, BorderLayout.CENTER);
-        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        rootContainer.validate();
-        rootContainer.setVisible(true);
+        HScene rootContainer = HSceneFactory.getInstance().getDefaultHScene();
+        rootContainer.setBackgroundMode(HScene.BACKGROUND_FILL);
+        
+        // initialize Logger
+        Logger.initialize(System.getProperty("dvb.persistent.root")
+	       + "/" + context.getXletProperty("dvb.org.id")
+	       + "/" + context.getXletProperty("dvb.app.id"));
+        
+    	// initiate LogDialog component to display log on the screen.
+	Screen.setRootContainer(rootContainer);  
+	HarnessLogDialog logDialog = new HarnessLogDialog();
+        logDialog.compose();
+        Screen.setLogComponent(logDialog);	
+        Screen.setShowLogMode(true);  // Show logging component by default
     }
     
     public void startXlet() {	    
-	setVisible(true);
+	Screen.setVisible(true);
         accessPersistantStorage();
-	repaint();
     }
     
     public void pauseXlet() {
-	setVisible(false);   
+	Screen.setVisible(false);   
     }
     public void destroyXlet(boolean unconditional) {
-	    rootContainer.remove(this);
-    }
-    
-    public void paint(Graphics g) {
-
-	if (font == null) {
-	   try {
-              font = new FontFactory().createFont("Curior", Font.BOLD, 26);
-	   } catch (Exception e) {
-	      e.printStackTrace();
-	      font = g.getFont();
-      	   }
-	}
-	g.setFont(font);
-	g.setColor(new Color(100,100,10));
-        g.fillRect(20,20,getWidth()-40,getHeight()-40);
-	g.setColor(new Color(245,245,0));   
-        Iterator iter = multiLineStatus.iterator();
-        int fontSize  = font.getSize();
-        int lineNo = 0;
-        while(iter.hasNext()) {
-            String statusLine = (String) iter.next();   
-            int message_width = g.getFontMetrics().stringWidth(statusLine);
-            g.drawString(statusLine,((WINDOW_WIDTH-message_width)/4),
-                         (200 + 2 * fontSize * lineNo));
-            lineNo++;
-        }
     }
     
     public void accessPersistantStorage() {
 	String filename = System.getProperty("dvb.persistent.root")
               + "/7fff3456/4001/tmp.txt";
         System.out.println("Filename:" + filename);
-        multiLineStatus.add("File:" + filename);
+        Logger.log("File:" + filename);
         // BufferedReader br = null;
         FileInputStream fis = null;
         
 	try {
            // The BufferedReader does not work on PS-3;throws an IOException
-	   // br = new BufferedReader(new FileReader(filename));
-           // status = br.readLine();
-           //  br.close();
+	   //BufferedReader br = new BufferedReader(new FileReader(filename));
+           //Logger.log("READ: " + br.readLine());
+           //br.close();
+           
            fis = new FileInputStream(filename);
 	   for (int i = 0; i < 10; i++) {
 	  	System.out.println(fis.read());
            }
 	   System.out.println("Test passed, accessed filesystem without SecurityException");
-           multiLineStatus.add("READER test passed, accessed filesystem without SecurityException");
+           Logger.log("READER test passed, accessed filesystem without SecurityException");
 	} catch (AccessControlException ex) {
                 ex.printStackTrace();
                 fillStatus(ex);
                 Permission perm = ex.getPermission();
                 if (perm != null)
-                    multiLineStatus.add(perm.toString());
+                    Logger.log(perm.toString());
 	} catch (IOException ex) {
 		ex.printStackTrace();
                 fillStatus(ex);
@@ -204,7 +175,7 @@ public class ReadFromStorageXlet extends Container implements Xlet {
         int newline;
         int from  = 0;
         while((newline = stat.indexOf("\n", from)) != -1) {
-            multiLineStatus.add(stat.substring(from, newline));
+            Logger.log(stat.substring(from, newline));
             from = newline + 1;
         }
     }

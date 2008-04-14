@@ -58,26 +58,22 @@ package storage;
 import java.io.*;
 import javax.tv.xlet.Xlet;
 import javax.tv.xlet.XletContext;
-import java.awt.Color;
-import java.awt.Container;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.BorderLayout;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
 
-import org.dvb.ui.FontFactory;
+import net.java.bd.tools.logger.HarnessLogDialog;
+import net.java.bd.tools.logger.Logger;
+import net.java.bd.tools.logger.Screen;
+
+import org.havi.ui.HScene;
 import org.havi.ui.HSceneFactory;
 
 /**
  * A test xlet that accesses persistant storage.
  * Need to be signed to work.
  */
-public class WriteToStorageXlet extends Container implements Xlet {
+public class WriteToStorageXlet implements Xlet {
 	
-    Container rootContainer = null;
-    List multiLineStatus = new ArrayList();
+    //List multiLineStatus = new ArrayList();
     XletContext context;
     Font font;
     
@@ -87,51 +83,34 @@ public class WriteToStorageXlet extends Container implements Xlet {
     public void initXlet(XletContext context) {       
 	this.context = context;
 	
-        rootContainer = HSceneFactory.getInstance().getDefaultHScene();
-        rootContainer.add(this, BorderLayout.CENTER);
-        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        rootContainer.validate();
-        rootContainer.setVisible(true);
+        HScene rootContainer = HSceneFactory.getInstance().getDefaultHScene();
+        // Fill the background - HScene doesn't do this by default.
+        rootContainer.setBackgroundMode(HScene.BACKGROUND_FILL);
+        
+        // initialize Logger
+        Logger.initialize(System.getProperty("dvb.persistent.root")
+	       + "/" + context.getXletProperty("dvb.org.id")
+	       + "/" + context.getXletProperty("dvb.app.id"));
+        
+    	// initiate LogDialog component to display log on the screen.
+	Screen.setRootContainer(rootContainer);  
+	HarnessLogDialog logDialog = new HarnessLogDialog();
+        logDialog.compose();
+        Screen.setLogComponent(logDialog);	
+        Screen.setShowLogMode(true);  // Show logging component by default
     }
     
-    public void startXlet() {	    
-	setVisible(true);
+    public void startXlet() {	
+        Screen.setVisible(true);
         accessPersistantStorage();
-	repaint();
     }
     
     public void pauseXlet() {
-	setVisible(false);   
-    }
-    public void destroyXlet(boolean unconditional) {
-	    rootContainer.remove(this);
+	Screen.setVisible(false);   
     }
     
-    public void paint(Graphics g) {
-
-	if (font == null) {
-	   try {
-              font = new FontFactory().createFont("Curior", Font.BOLD, 26);
-	   } catch (Exception e) {
-	      e.printStackTrace();
-	      font = g.getFont();
-      	   }
-	}
-	g.setFont(font);
-	g.setColor(new Color(100,100,10));
-        g.fillRect(20,20,getWidth()-40,getHeight()-40);
-	g.setColor(new Color(245,245,0));   
-        Iterator iter = multiLineStatus.iterator();
-        int fontSize  = font.getSize();
-        int lineNo = 0;
-        while(iter.hasNext()) {
-            String statusLine = (String) iter.next();   
-            int message_width = g.getFontMetrics().stringWidth(statusLine);
-            g.drawString(statusLine,((WINDOW_WIDTH-message_width)/4),
-                         (200 + 2 * fontSize * lineNo));
-            lineNo++;
-        }
-    }
+    public void destroyXlet(boolean unconditional) {
+    } 
     
     public void accessPersistantStorage() {
         String root = System.getProperty("dvb.persistent.root");
@@ -152,11 +131,11 @@ public class WriteToStorageXlet extends Container implements Xlet {
 		os.write(i);
            }
 	   os.close();
-           multiLineStatus.add("WRITER Test passed");
-           multiLineStatus.add("wrote to a file:" + filename);
+           Logger.log("WRITER Test passed");
+           Logger.log("wrote to a file:" + filename);
            File f = new File(filename);
-           multiLineStatus.add((f.canRead() ? "true" : "false"));
-	   System.out.println("Test passed, accessed filesystem without SecurityException");
+           Logger.log((f.canRead() ? "true" : "false"));
+	   Logger.log("Test passed, accessed filesystem without SecurityException");
 	} catch (SecurityException ex) {
 		ex.printStackTrace();
 		fillStatus(ex);    
@@ -185,7 +164,7 @@ public class WriteToStorageXlet extends Container implements Xlet {
         int newline;
         int from  = 0;
         while((newline = stat.indexOf("\n", from)) != -1) {
-            multiLineStatus.add(stat.substring(from, newline));
+            Logger.log(stat.substring(from, newline));
             from = newline + 1;
         }
     }
