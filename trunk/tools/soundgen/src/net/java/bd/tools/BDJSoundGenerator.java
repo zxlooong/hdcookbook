@@ -119,16 +119,16 @@ public final class BDJSoundGenerator {
         }
 
 
-        AudioFileFormat[] inputFormats = new AudioFileFormat[files.length];
+        // check format convertibility and number of channels
         for (int i = 0; i < files.length; i++) {
             try {
-                inputFormats[i] = AudioSystem.getAudioFileFormat(files[i]);
+                AudioFormat format = AudioSystem.getAudioFileFormat(files[i]).getFormat();
                 if (! AudioSystem.isConversionSupported(
-                    AudioFormat.Encoding.PCM_SIGNED, inputFormats[i].getFormat())) {
+                    AudioFormat.Encoding.PCM_SIGNED, format)) {
                     errorExit("format conversion not supported for : " + files[i], 2);
                 }
 
-                if (inputFormats[i].getFormat().getChannels() > 2) {
+                if (format.getChannels() > 2) {
                     errorExit("only mono and stereo are supported in BD-J", 2);
                 }
             } catch (UnsupportedAudioFileException uafe) {
@@ -139,28 +139,51 @@ public final class BDJSoundGenerator {
         }
 
         File outputFile = new File(args[args.length - 1]);    
-        try {
+        try {          
+            // channel count in each audio input
+            int[] channels = new int[numInputs];
+            // frame length for each audio input   
+            int[] frameLengths = new int[numInputs];
+            /*
+             * See section 5.6.2 of BDROM Part 3_v2.02D specification.
+             * sound.bdmv format of data samples:
+             *
+             *    Sampling frequency 48 kHz
+             *    Bits per sample 16
+             *    Both mono, stero accepted
+             */
+             AudioFormat bdjFormat = new AudioFormat(
+                 BD_J_SAMPLING_FREQUENCY ,
+                 BD_J_SAMPLE_SIZE,
+                 /* mono or stereo */ AudioSystem.NOT_SPECIFIED, 
+                 /* signed */ true,  
+                 /* big-endian */ true);
+
+            /*
+             * We need to get the PCM converted frame length and not from input!
+             * For example, input may not be 48KHz sampled and/or 16 bits-per-sample.
+             * We get info for each input audio file and close the stream so that 
+             * we don't have to keep all input file streams open at the same time.
+             */
+            for (int i = 0; i < files.length; i++) {                
+                AudioInputStream ais = AudioSystem.getAudioInputStream(bdjFormat, 
+                    AudioSystem.getAudioInputStream(files[i]));
+
+                // collect channel count and frame length.
+                channels[i] = ais.getFormat().getChannels();
+                frameLengths[i] = (int) ais.getFrameLength();
+ 
+                ais.close();
+            }
+
+
             FileOutputStream fos = new FileOutputStream(outputFile);
             DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fos));
 
             writeSoundHeader(out, numInputs);
-            writeSoundAttributes(out, inputFormats);
-            
+            writeSoundAttributes(out, channels, frameLengths);
+
             for (int i = 0; i < files.length; i++) {
-                /*
-                 * See section 5.6.2 of BDROM Part 3_v2.02D specification.
-                 * sound.bdmv format of data samples:
-                 *
-                 *    Sampling frequency 48 kHz
-                 *    Bits per sample 16
-                 *    Both mono, stero accepted
-                 */
-                AudioFormat bdjFormat = new AudioFormat(
-                    BD_J_SAMPLING_FREQUENCY ,
-                    BD_J_SAMPLE_SIZE,
-                    /* mono or stereo */ inputFormats[i].getFormat().getChannels(), 
-                    /* signed */ true,  
-                    /* big-endian */ true);
                 AudioInputStream ais = AudioSystem.getAudioInputStream(bdjFormat, 
                     AudioSystem.getAudioInputStream(files[i]));
                 byte[] buf = new byte[8*1024]; // 8K at a time
@@ -168,9 +191,11 @@ public final class BDJSoundGenerator {
                 while ((numBytes = ais.read(buf, 0, buf.length)) > 0) {
                     out.write(buf, 0, numBytes);
                 }
+                // close current input file
                 ais.close();
             }
 
+            // close output file
             out.close();
             fos.close();
         } catch (FileNotFoundException fnfe) {
@@ -237,15 +262,16 @@ public final class BDJSoundGenerator {
         dos.write(numInputs);
     }
 
-    private static void writeSoundAttributes(DataOutputStream dos, AudioFileFormat[] affs) throws IOException {
+    private static void writeSoundAttributes(DataOutputStream dos, int[] channels, int[] frameLengths) 
+        throws IOException {
         /*
          * Refer to table 5.6.4.1 SoundIndex() - Syntax
          */
         int totalSize = 0;
-        for (int i = 0; i < affs.length; i++) {
-            AudioFormat af = affs[i].getFormat();
-            int currentSize = affs[i].getFrameLength() * af.getFrameSize();
-            boolean isStereo = af.getChannels() > 1;
+        for (int i = 0; i < channels.length; i++) {
+            int outputFrameSize = channels[i] * BD_J_SAMPLE_SIZE/8;
+            int currentSize = frameLengths[i] * outputFrameSize;
+            boolean isStereo = channels[i] > 1;
 
             // channel configuration (4 bits): 1=mono, 3=stereo
             // sampling frequency (4 bits): must be 1=48 kHz
