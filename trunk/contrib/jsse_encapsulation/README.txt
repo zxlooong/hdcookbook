@@ -34,21 +34,21 @@ provide wrapper classes for JSSE functionality.  The wrapper classes
 use reflection instead of the direct access to invoke the methods in
 the JSSE API.
 
-If the JSSE API is not presented on card, then
+If the JSSE API is not presented on a player, then
 UnsupportedOperationException is thrown during the method or
 constructor invocation.
 
 The library guarantee that NoClassDefFoundError or other LinkageErrors
-are never thrown of the JSSE API is absent.
+are never thrown if the JSSE API is absent.
 
 II. Library Overview
 --------------------
 
-The librray defines the classes with the same names and with the same
-methods name as JSSE API, but it is defined in the separate
+The library defines the classes with the same names and with the same
+methods names as JSSE API, but they are defined in the separate
 package. In most cases you only need replace the imports in your
 application from javax.net and javax.net.ssl to the
-com.sun.blurayx.jsse and com.hdcookbook.contrib.jsse accordingly.
+com.hdcookbook.contrib.jsse and com.hdcookbook.contrib.jsse.ssl accordingly.
 
 Every time when you are trying to access functionality which is absent
 underneath, the UnsupportedOperationException is thrown.
@@ -59,8 +59,8 @@ III. Library limitations
 The library defined almost complete set of the JSSE functionality with
 the following exceptions:
 
-1. Accessing of the fields from JSSE API is not supported unles it is
-supported by th methods in JSSE API.
+1. Accessing of the fields from JSSE API is not supported unless it is
+supported by the methods in JSSE API.
 
 2. Protected API and API extending is not supported.
 
@@ -71,7 +71,7 @@ protected to the public (in subclass) may breaks access control
 principles, which were put in the JSSE API design and it is too risky
 without case by case basis evaluation.
 
-Also miximg of the inheritance ans encapsulation in one place without
+Also mixing of the inheritance ans encapsulation in one place without
 case by case basis evaluation is too risky too.
 Therefore we do not support protected JSSE API support and creation of
 the subclasses and subinterfaces, except, the places where it was
@@ -115,22 +115,22 @@ instances should be enough.
 
 5. javax.net.ssl.ManagerFactoryParameters is not supported.
 
-The reason for unsupporting of the ManagerFactoryParameters is the
-same as for unsupporting of the custom TrustManagers. The only
+The reason for not supporting of the ManagerFactoryParameters is the
+same as for not supporting of the custom TrustManagers. The only
 difference is that the JSSE API does not provide mechanisms for
 ManagerFactoryParameters instantiation.  Therefore the wrapper for
 ManagerFactoryParameters is not included to the current library.
 
 6. javax.net.ssl.SSLPermission is not supported.
 
-7. Subsetting of the following classes is not supported:
+7. Extending of the following classes and interfaces is not supported:
 
  - javax.net.ssl.SSLSocket
  - javax.net.ssl.SSLServerSocket
  - javax.net.ssl.SSLSession
  - javax.net.ssl.SSLContext
 
-8. Limited support of the exception defined in the javax.net.ssl package.
+8. Limited support of the exceptions defined in the javax.net.ssl package.
 
 The library defines wrappers for the exceptions, but most of these
 exception are subclasses of the IOException and they are thrown during
@@ -147,32 +147,39 @@ clause. Only the following methods can throw wrapper exceptions:
 9. javax.net.ssl.HttpsURLConnection is supported, but you need create
 a wrapper class by yourself.
 
-javax.net.ssl.HttpsURLConnection is created via classes, which are bot
-part of the javax.net.ssl package.  The HttpsURLConnection is create
-either via java.net.URL.openConnection() or via
-javax.microedition.io.Connector.
+javax.net.ssl.HttpsURLConnection is created via java.net.URL class,
+and this library does not provide wrapper for the java.net.URL.
 
-In both cases the instance of the javax.net.ssl.HttpsURLConnection is
-created. It does cause any linking problem unless you cat it to the
+The java.net.URL.openConnection() creates a instance of the
+javax.net.ssl.HttpsURLConnection.
+
+It does not cause any linking problem unless you cast it to the
 javax.net.ssl.HttpsURLConnection to access HttpsURLConnection
 functionality.
 
-This behavior is not controlled by the library.
-
 To avoid the casting to the javax.net.ssl.HttpsURLConnection, you can
-use create a instance com.hdcookbook.contrib.jsse.HttpsURLConnection
-passing javax.net.ssl.HttpsURLConnection as constructor parameter and
-access javax.net.ssl.HttpsURLConnection using
-com.hdcookbook.contrib.jsse.HttpsURLConnection methods.
+create a instance com.hdcookbook.contrib.jsse.HttpsURLConnection.
+
+For example:
+  import com.hdcookbook.contrib.jsse.HttpsURLConnection;
+
+  ...
+
+  HttpsURLConnection https = new HttpsURLConnection(<your url>.openConnection());
+
+Using created instance of com.hdcookbook.contrib.jsse.HttpsURLConnection
+you can access javax.net.ssl.HttpsURLConnection functionality
+including functionality inherited from the java.net.HttpURLConnection.
+
 
 JSSE 1.0.3 Support
 ------------------
 
-The JSSE 1.0.3 is subset of the Security OP JSSE 1.0 byt because the
+The JSSE 1.0.3 is subset of the Security OP JSSE 1.0 but because the
 library implements full set of the Security OP JSSE 1.0 your
 application compilation can pass even if your are using API, which is
 not defined in the JSSE 1.0.3. As result these methods will throw
 UnsupportedOperationException at run-time.
 
-In futurewe are going to create JSSE 1.0.3 wrapper library for the
-application, whihc want to use JSSE 1.0.3 API only.
+In future we are going to create JSSE 1.0.3 wrapper library for the
+application, which want to use JSSE 1.0.3 API only.
