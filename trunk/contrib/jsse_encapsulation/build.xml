@@ -6,12 +6,12 @@
     <description>Build for JSSE Encapsulation Library</description>
 
   <property name="bundle-basedir" value="${basedir}/dist"/>
-  <property name="bundle-name"    value="jsse_encaptulation"/>
+  <property name="bundle-name"    value="jsse_encapsulation"/>
       
   <target name="build" depends="compile-all, create-jar-file"/>
   <target name="create-jar-file" depends="compile-all">
     <mkdir dir="${basedir}/lib"/>
-    <jar destfile="${basedir}/lib/jsse_encaptulation.jar"
+    <jar destfile="${basedir}/lib/jsse_encapsulation.jar"
          basedir="${basedir}/classes"/>
   </target>
   <target name="compile-all">
