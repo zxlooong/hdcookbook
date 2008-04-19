@@ -5,6 +5,9 @@
 <project name="JSSE_Encapsulation_Library" default="build" basedir=".">
     <description>Build for JSSE Encapsulation Library</description>
 
+  <property name="bundle-basedir" value="${basedir}/dist"/>
+  <property name="bundle-name"    value="jsse_encaptulation"/>
+      
   <target name="build" depends="compile-all, create-jar-file"/>
   <target name="create-jar-file" depends="compile-all">
     <mkdir dir="${basedir}/lib"/>
@@ -18,9 +21,24 @@
            destDir="${basedir}/classes"/>
 
   </target>
+  
+  <target name="bundle" depends="build"
+          description="makes a release bundle">
+              
+      <mkdir dir="${bundle-basedir}/${bundle-name}"/>
+      <copy todir="${bundle-basedir}/${bundle-name}">
+            <fileset dir="${basedir}" includes="lib/**"/>
+            <fileset file="README.txt"/>
+      </copy>
+      <zip destfile="${bundle-name}.zip"
+             basedir="${bundle-basedir}"
+             includes="${bundle-name}/"/>
+  </target>
 
   <target name="clean">
     <delete dir="${basedir}/classes"/>
     <delete dir="${basedir}/lib"/>
+    <delete dir="${basedir}/dist"/>
+    <delete file="${bundle-name}.zip"/>
   </target>
 </project>
