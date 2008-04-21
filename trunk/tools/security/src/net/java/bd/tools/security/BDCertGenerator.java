@@ -150,9 +150,8 @@ public class BDCertGenerator {
             System.err.println("\nFailed: " + reason + "\n");
         }
         System.err.println("***This tool generates keystore/certificates for securing BD-J applications***\n");
-        System.err.println("usage: BDCertGenerator [options] cert_type organization_id\n");
+        System.err.println("usage: BDCertGenerator -root|-app|-binding [options] organization_id\n");
         System.err.println("Valid Options:");
-        System.err.println(" -root|-app|-binding  \t:Type of the Certificate");
         System.err.println(" -keystore    filename\t:Create a keystore file with the given filename");
         System.err.println(" -dn          name    \t:Distinguished name of the certificate");
         System.err.println("                      \t Note: The organization_id is appended to the org name");

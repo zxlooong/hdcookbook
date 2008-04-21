@@ -135,11 +135,14 @@ public class SecurityUtil {
    static final String DEF_APPCERT_ALIAS = "appcert";
    static final String DEF_ROOTKEY_PASSWORD = "rootcertpassword"; 
    static final String DEF_ROOTCERT_ALIAS = "rootcert";
+   static final String DEF_BUCERT_ALIAS = "bucert";
    static final String DEF_APP_ALT_NAME = "app@producer.com";
    static final String DEF_ROOT_ALT_NAME = "root@studio.com";
    static final String DEF_APP_CERT_DN = "CN=Producer, OU=Codesigning Department, O=BDJCompany, C=US";
    static final String DEF_ROOT_CERT_DN = "CN=Studio, OU=Codesigning Department, O=BDJCompany, C=US";
    static final String SIG_ALG = "SHA1WithRSA";
+   static final String APP_ROOT_DISC_FILE = "app.discroot.crt";
+   static final String BU_ROOT_DISC_FILE = "bu.discroot.crt";
     
    // Intermediate files to create, will be deleted at the tool exit time;
    // XXX Make sure they are always deleted.
@@ -150,7 +153,7 @@ public class SecurityUtil {
     String keystoreFile;
     String keystorePassword;
     String appKeyPassword;
-    String jarSignerAlias;
+    String contentSignerAlias;
     String certSignerAlias;
     String newCertAlias;
     List<String> jarfiles;
@@ -184,7 +187,7 @@ public class SecurityUtil {
         this.keystorePassword = b.keystorePassword;
         this.appKeyPassword = b.appKeyPassword;
         this.newCertAlias = b.newCertAlias;
-        this.jarSignerAlias = b.jarSignerAlias;
+        this.contentSignerAlias = b.contentSignerAlias;
         this.certSignerAlias = b.certSignerAlias;
         this.dn = b.dn;
         this.altName = b.altName;
@@ -204,8 +207,8 @@ public class SecurityUtil {
          String keystoreFile = DEF_KEYSTORE_FILE;
          String keystorePassword = DEF_KEYSTORE_PASSWORD;
          String appKeyPassword = DEF_APPKEY_PASSWORD;
-         String jarSignerAlias; // initialized based on jar or bumf file
-         String certSignerAlias = DEF_ROOTCERT_ALIAS;;
+         String contentSignerAlias; // initialized based on jar or bumf file
+         String certSignerAlias = DEF_ROOTCERT_ALIAS;
          String newCertAlias;  // initialized based on root/app/binding cert
         
          // Certificate data.
@@ -248,7 +251,11 @@ public class SecurityUtil {
                 altName = DEF_ROOT_ALT_NAME;
             }
             if (newCertAlias == null) {
-                newCertAlias = DEF_ROOTCERT_ALIAS;
+                if (isRootCert) {
+                   newCertAlias = DEF_ROOTCERT_ALIAS;
+                } else {
+                   newCertAlias = DEF_BUCERT_ALIAS;
+                }
             }
         }
         public Builder setAppCert() {
@@ -277,8 +284,8 @@ public class SecurityUtil {
             this.certSignerAlias = alias;
             return this;
         }
-        public Builder jarSignerAlias(String alias) {
-            this.jarSignerAlias = alias;
+        public Builder contentSignerAlias(String alias) {
+            this.contentSignerAlias = alias;
             return this;
         }
         public Builder appPassword(String password) {
@@ -299,15 +306,15 @@ public class SecurityUtil {
         }
         public Builder bumf(String file) {
             this.BUMFile = file;
-            if (jarSignerAlias == null) {
-                jarSignerAlias = DEF_ROOTCERT_ALIAS;
+            if (contentSignerAlias == null) {
+                contentSignerAlias = DEF_BUCERT_ALIAS;
             }
             return this;
         } 
         public Builder jarfiles(List<String> files) {
             this.jarfiles = files;
-            if (jarSignerAlias == null) {
-                jarSignerAlias = DEF_APPCERT_ALIAS;
+            if (contentSignerAlias == null) {
+                contentSignerAlias = DEF_APPCERT_ALIAS;
             }
             return this;
         }
@@ -385,6 +392,7 @@ public class SecurityUtil {
             if (debug) {
                 verifyCertificates();
             }
+            exportRootCertificate();
         } catch (Exception e) {
             e.printStackTrace();
             failed = true;
@@ -443,7 +451,7 @@ public class SecurityUtil {
                                      "-keypass", appKeyPassword, 
                                      "-keystore", keystoreFile,
                                      "-storepass", keystorePassword,
-                                     "-verbose", jfile, jarSignerAlias};
+                                     "-verbose", jfile, contentSignerAlias};
           JarSigner.main(jarSigningArgs);
           signWithBDJHeader(jfile);
        }
@@ -460,9 +468,9 @@ public class SecurityUtil {
             initKeyStore();
             Signature signer = Signature.getInstance(SIG_ALG);
             if (debug) {
-                System.out.println("Signer of bumf.xml file is:" + jarSignerAlias);
+                System.out.println("Signer of bumf.xml file is:" + contentSignerAlias);
             }
-            PrivateKey key = (PrivateKey) store.getKey(jarSignerAlias,
+            PrivateKey key = (PrivateKey) store.getKey(contentSignerAlias,
                               rootKeyPassword.toCharArray());
             signer.initSign(key);
             byte[] data = readIntoBuffer(BUMFile);
@@ -493,9 +501,9 @@ public class SecurityUtil {
      private void verifySignatureFile(String sigFile) throws Exception {
         Signature verifier = Signature.getInstance(SIG_ALG);
         if (debug) {
-                System.out.println("Verifier of bumf.xml file is:" + jarSignerAlias);
+                System.out.println("Verifier of bumf.xml file is:" + contentSignerAlias);
         }
-        Certificate cert =  store.getCertificate(jarSignerAlias);
+        Certificate cert =  store.getCertificate(contentSignerAlias);
         verifier.initVerify(cert);
         
         byte[] derData = readIntoBuffer(sigFile);
@@ -595,7 +603,7 @@ public class SecurityUtil {
         
         // Re-sign the signature file after adding the BD-J header
         Signature signer = Signature.getInstance(SIG_ALG);
-        PrivateKey key = (PrivateKey) store.getKey(jarSignerAlias,
+        PrivateKey key = (PrivateKey) store.getKey(contentSignerAlias,
                               appKeyPassword.toCharArray());
         signer.initSign(key);
         byte[] newContent = sw.toString().getBytes();
@@ -604,7 +612,7 @@ public class SecurityUtil {
         
         ContentInfo newContentInfo = new ContentInfo(ContentInfo.DATA_OID, null);
         SignerInfo[]  signerInfos =  signBlock.getSignerInfos();
-        Certificate signerCert = store.getCertificate(jarSignerAlias);
+        Certificate signerCert = store.getCertificate(contentSignerAlias);
         SignerInfo newSignerInfo = null;
         
         // Note, BD-J allows only one signerInfo, but let's have this loop since
@@ -658,11 +666,14 @@ public class SecurityUtil {
     }
     
     private void exportRootCertificate() throws Exception {
-	String exportFileName = "app.discroot.crt";
-        if (isBindingUnitCert)
-            exportFileName = "bu.discroot.crt";
+	String exportFileName = APP_ROOT_DISC_FILE;
+        String exportAlias = certSignerAlias;
+        if (isBindingUnitCert) {
+            exportFileName = BU_ROOT_DISC_FILE;
+            exportAlias = newCertAlias;
+        }
         String[] exportRootCertificateArgs = {
-		"-export", "-alias", newCertAlias, "-keypass", rootKeyPassword, 
+		"-export", "-alias", exportAlias, "-keypass", rootKeyPassword, 
 		"-keystore", keystoreFile, "-storepass", keystorePassword,
 		"-v", "-file", exportFileName};
 	KeyTool.main(exportRootCertificateArgs);

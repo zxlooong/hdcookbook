@@ -84,7 +84,7 @@ public class BDSigner {
                  builder = builder.storepass(args[i]);
             } else if (opt.equals("-alias")) {
                if (++i == args.length) errorNeedArgument(opt);
-                builder = builder.jarSignerAlias(args[i]);
+                builder = builder.contentSignerAlias(args[i]);
             } else if (opt.equals("-keypass")) {
                if (++i == args.length) errorNeedArgument(opt);
                builder = builder.appPassword(args[i]);
