@@ -551,7 +551,7 @@ public class SecurityUtil {
      */
     private void signWithBDJHeader(String jarFile) throws Exception {
         String SIG_FILE = "META-INF/SIG-BD00.SF";
-        String SIG_BLOCK_FILE = "META-INF/SIG-BD00.RSA";
+        String SIG_BLOCK_FILE = "META-INF/SIG-BD00.RSA";    
         if (debug) {
             System.out.println("Adding BD header to:" + jarFile);
         }
@@ -578,7 +578,7 @@ public class SecurityUtil {
             
             if (addBDLine) {
                 // the BD-J header already exists;stop here.
-                if (line.startsWith("BDJ-Signature_Version")) {
+                if (line.startsWith("BDJ-Signature-Version")) {
                     br.close();
                     jf.close();
                     return;
@@ -588,8 +588,6 @@ public class SecurityUtil {
             } 
             
             // BD-J doesn't mandate this attribute; keeping it should be fine
-            // Lets just be on the safer side and take it out since it's not required by
-            // BD-J
             if (!line.startsWith("SHA1-Digest-Manifest-Main-Attributes:")) {
                 sw.write(line);
                 sw.write("\n");
@@ -727,7 +725,7 @@ public class SecurityUtil {
         calendar.set(1949, 1, 1);
         validFrom = calendar.getTime();
         calendar.clear();
-        calendar.set(2055, 1, 1);
+        calendar.set(9999, 1, 1);
         validTo = calendar.getTime();
 
         // Generate a new keypair for this certificate
