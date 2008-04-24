@@ -51,7 +51,6 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package net.java.bd.tools.logger;
 
 import java.awt.Color;
@@ -74,79 +73,75 @@ import org.havi.ui.event.HRcEvent;
  * screens.
  *
  */
-public abstract class BaseLogDialog extends Container 
-    implements KeyListener, FocusListener {
-	
-	private static final long serialVersionUID = 1935060115870298485L;
+public abstract class BaseLogDialog extends Container
+        implements KeyListener, FocusListener {
+
+    private static final long serialVersionUID = 1935060115870298485L;
     public static final int KEEP_POSITION = 0;
     public static final int BOTTOM_POSITION = 1;
     public static final int TOP_POSITION = 2;
-
-	protected String logTitle;
-	protected String logLegend;
+    protected String logTitle;
+    protected String logLegend;
     protected int position;
-	
     protected Vector data;
-	protected Font font;
-	protected LwText legendText;
-	protected LwLog  lLog;
-	
-	// whether the Log Dialog is visible or pseudo-hidden
-	protected boolean visible = true;
-	
-	/** 
-	 * Constructor for the screen called from a prev component
-	 * @param prev
-	 * @param lp
-	 */
-	public BaseLogDialog(String logTitle, String logLegend, int position) {
-		this.logTitle = logTitle;
-		this.logLegend = logLegend;
-		this.position = position;
-		data = new Vector();
-	}
-	
-	public void compose() {
-		setSize(Screen.getVisibleWidth(), Screen.getVisibleHeight());
-		
-		// set the font size for the resolution
-		font = Screen.getDefaultFont();
-		setFont(font);
-		FontMetrics fm = getFontMetrics(font);
-		int stringHeight = fm.getHeight();
+    protected Font font;
+    protected LwText legendText;
+    protected LwLog lLog;
+    // whether the Log Dialog is visible or pseudo-hidden
+    protected boolean visible = true;
 
-		LwText lTitle = new LwText(logTitle, Color.blue, Color.white);
-		add(lTitle);
-		lTitle.setLocation(0, 0);
-		lTitle.setSize(Screen.getVisibleWidth(), stringHeight);
+    /** 
+     * Constructor for the screen called from a prev component
+     * @param prev
+     * @param lp
+     */
+    public BaseLogDialog(String logTitle, String logLegend, int position) {
+        this.logTitle = logTitle;
+        this.logLegend = logLegend;
+        this.position = position;
+        data = new Vector();
+    }
 
-		lLog = new LwLog(data, (Screen.getVisibleHeight() - 2*stringHeight)/fm.getHeight(), position);
-		add(lLog);
-		lLog.setLocation(0, stringHeight);
-		lLog.setSize(Screen.getVisibleWidth(), Screen.getVisibleHeight() - 2*stringHeight);
+    public void compose() {
+        setSize(Screen.getVisibleWidth(), Screen.getVisibleHeight());
 
-		legendText = new LwText(logLegend, Color.black, Color.white);
-		add(legendText);
-		legendText.setLocation(0, Screen.getVisibleHeight() - stringHeight);
-		legendText.setSize(Screen.getVisibleWidth(), stringHeight);
-		
+        // set the font size for the resolution
+        font = Screen.getDefaultFont();
+        setFont(font);
+        FontMetrics fm = getFontMetrics(font);
+        int stringHeight = fm.getHeight();
+
+        LwText lTitle = new LwText(logTitle, Color.blue, Color.white);
+        add(lTitle);
+        lTitle.setLocation(0, 0);
+        lTitle.setSize(Screen.getVisibleWidth(), stringHeight);
+
+        lLog = new LwLog(data, (Screen.getVisibleHeight() - 2 * stringHeight) / fm.getHeight(), position);
+        add(lLog);
+        lLog.setLocation(0, stringHeight);
+        lLog.setSize(Screen.getVisibleWidth(), Screen.getVisibleHeight() - 2 * stringHeight);
+
+        legendText = new LwText(logLegend, Color.black, Color.white);
+        add(legendText);
+        legendText.setLocation(0, Screen.getVisibleHeight() - stringHeight);
+        legendText.setSize(Screen.getVisibleWidth(), stringHeight);
+
         addKeyListener(this);
         addFocusListener(this);
-	}
+    }
 
-	
-	/**
-	 * Loads text strings into the data Vector
-	 */
-	protected abstract void loadData();
-	
-	/**
-	 * 
-	 * @param f
-	 */
-	protected void loadFromFile(File f) {
+    /**
+     * Loads text strings into the data Vector
+     */
+    protected abstract void loadData();
+
+    /**
+     * 
+     * @param f
+     */
+    protected void loadFromFile(File f) {
         String fileName = f.getName();
-        
+
         // try to read the specified files
         String s = null;
         FileReader fr = null;
@@ -154,82 +149,86 @@ public abstract class BaseLogDialog extends Container
         try {
             fr = new FileReader(f);
             br = new BufferedReader(fr);
-            while ( (s = br.readLine()) != null) {
+            while ((s = br.readLine()) != null) {
                 addString(s);
             }
-        }
-        catch (Exception e) {
-            s = "Error reading " + fileName + "\n"
-                + e.getMessage();
+        } catch (Exception e) {
+            s = "Error reading " + fileName + "\n" + e.getMessage();
             Logger.log(s, e);
-        }
-        finally {
-            try { if(br!=null) br.close(); } catch(Exception e) {
+        } finally {
+            try {
+                if (br != null) {
+                    br.close();
+                }
+            } catch (Exception e) {
                 Logger.log("Exception when closing BufferedReader.", e);
             }
-            try { if(fr!=null) fr.close(); } catch(Exception e) {
+            try {
+                if (fr != null) {
+                    fr.close();
+                }
+            } catch (Exception e) {
                 Logger.log("Exception when closing FileReader.", e);
             }
         }
-        
+
         addString(s);
     }
-    
-	/**
-	 * Adds a string argument to the data vector
-	 * @param s
-	 */
-	public void addString(String s) {
-	    if (s != null) {
-	        data.add(s.getBytes());
-	    }
-	}
-	
-	
-	// -------- KeyListener interface methods ------------
+
+    /**
+     * Adds a string argument to the data vector
+     * @param s
+     */
+    public void addString(String s) {
+        if (s != null) {
+            data.add(s.getBytes());
+        }
+    }
+
+    // -------- KeyListener interface methods ------------
     /**
      * Invoked when a key has been typed.
      * This event occurs when a key press is followed by a key release.
      */
-	public void keyTyped(KeyEvent e) {
-	}
+    public void keyTyped(KeyEvent e) {
+    }
 
     /**
      * Invoked when a key has been pressed.
      */
     public synchronized void keyPressed(KeyEvent e) {
-    	switch(e.getKeyCode()) {
-    	case KeyEvent.VK_0:
-    	case KeyEvent.VK_NUMPAD0: // show/hide xlet container toggle
-    	    visible = !visible;
-    	    Screen.setVisible(visible);
-    	    break;
-    	case KeyEvent.VK_DOWN:
-    	case KeyEvent.VK_KP_DOWN:
-    		lLog.moveDown();
-    		break;
-    	case KeyEvent.VK_UP:
-    	case KeyEvent.VK_KP_UP:
-    		lLog.moveUp();
-    		break;
-    	case KeyEvent.VK_LEFT:
-    	case KeyEvent.VK_KP_LEFT:
-    		lLog.moveLeft();
-    		break;
-    	case KeyEvent.VK_RIGHT:
-    	case KeyEvent.VK_KP_RIGHT:
-    		lLog.moveRight();
-    		break;
-        case KeyEvent.VK_PAGE_DOWN:
-        case HRcEvent.VK_TRACK_NEXT:
-            lLog.movePageDown();
-            break;
-        case KeyEvent.VK_PAGE_UP:
-        case HRcEvent.VK_TRACK_PREV:
-            lLog.movePageUp();
-            break;
-    	}
-    	notifyAll();
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_0:
+            case KeyEvent.VK_NUMPAD0: // show/hide xlet container toggle
+                visible = !visible;
+                Screen.setVisible(visible);
+                break;
+            case KeyEvent.VK_DOWN:
+            case KeyEvent.VK_KP_DOWN:
+                lLog.moveDown();
+                break;
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_KP_UP:
+                lLog.moveUp();
+                break;
+            case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_KP_LEFT:
+                lLog.moveLeft();
+                break;
+            case KeyEvent.VK_RIGHT:
+            case KeyEvent.VK_KP_RIGHT:
+                lLog.moveRight();
+                break;
+            case KeyEvent.VK_PAGE_DOWN:
+            case HRcEvent.VK_TRACK_NEXT:
+                lLog.movePageDown();
+                break;
+            case KeyEvent.VK_PAGE_UP:
+            case HRcEvent.VK_TRACK_PREV:
+                lLog.movePageUp();
+                break;
+        }
+        notifyAll();
     }
 
     /**
@@ -238,14 +237,13 @@ public abstract class BaseLogDialog extends Container
     public void keyReleased(KeyEvent e) {
     }
 
-	// --------------------------- FocusListener interface -----------------
+    // --------------------------- FocusListener interface -----------------
     public void focusLost(FocusEvent e) {
-        data.clear();
+        //data.clear();
     }
-    
+
     public void focusGained(FocusEvent e) {
-        loadData();
-    	lLog.initPosition();
+        //loadData();
+        //lLog.initPosition();
     }
-	
 }

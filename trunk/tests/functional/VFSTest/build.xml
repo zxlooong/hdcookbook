@@ -129,12 +129,7 @@
             <arg value="-binding"/>   
             <arg value="${orgid}"/>
             <classpath refid="sec.tools.path"/>	   
-        </jdktools.java>        
-        
-        <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg value="src/budafiles/bumf.xml"/>
-            <classpath refid="sec.tools.path"/>	   
-        </jdktools.java>   
+        </jdktools.java>         
         
     </target>
     
@@ -146,6 +141,11 @@
             <arg value="${build.dir}/${logger-name}.jar"/>
             <classpath refid="sec.tools.path"/>	   
         </jdktools.java>
+        
+        <jdktools.java classname="net.java.bd.tools.security.BDSigner">
+            <arg value="src/budafiles/bumf.xml"/>
+            <classpath refid="sec.tools.path"/>	   
+        </jdktools.java>          
         
     </target>  
     

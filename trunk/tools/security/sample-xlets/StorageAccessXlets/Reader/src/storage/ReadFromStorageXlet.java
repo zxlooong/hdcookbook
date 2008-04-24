@@ -60,9 +60,7 @@ import javax.tv.xlet.XletContext;
 import java.security.AccessControlException;
 import java.security.Permission;
 
-import net.java.bd.tools.logger.HarnessLogDialog;
-import net.java.bd.tools.logger.Logger;
-import net.java.bd.tools.logger.Screen;
+import net.java.bd.tools.logger.XletLogger;
 import org.havi.ui.HScene;
 import org.havi.ui.HSceneFactory;
 
@@ -93,30 +91,20 @@ public class ReadFromStorageXlet implements Xlet {
 
     public void initXlet(XletContext context) {       
 	this.context = context;
-	
-        HScene rootContainer = HSceneFactory.getInstance().getDefaultHScene();
-        rootContainer.setBackgroundMode(HScene.BACKGROUND_FILL);
         
         // initialize Logger
-        Logger.initialize(System.getProperty("dvb.persistent.root")
+        XletLogger.setLogFile(System.getProperty("dvb.persistent.root")
 	       + "/" + context.getXletProperty("dvb.org.id")
 	       + "/" + context.getXletProperty("dvb.app.id"));
-        
-    	// initiate LogDialog component to display log on the screen.
-	Screen.setRootContainer(rootContainer);  
-	HarnessLogDialog logDialog = new HarnessLogDialog();
-        logDialog.compose();
-        Screen.setLogComponent(logDialog);	
-        Screen.setShowLogMode(true);  // Show logging component by default
     }
     
     public void startXlet() {	    
-	Screen.setVisible(true);
+	XletLogger.setVisible(true);
         accessPersistantStorage();
     }
     
     public void pauseXlet() {
-	Screen.setVisible(false);   
+	XletLogger.setVisible(false);   
     }
     public void destroyXlet(boolean unconditional) {
     }
@@ -124,8 +112,7 @@ public class ReadFromStorageXlet implements Xlet {
     public void accessPersistantStorage() {
 	String filename = System.getProperty("dvb.persistent.root")
               + "/7fff3456/4001/tmp.txt";
-        System.out.println("Filename:" + filename);
-        Logger.log("File:" + filename);
+        XletLogger.log("File:" + filename);
         // BufferedReader br = null;
         FileInputStream fis = null;
         
@@ -139,20 +126,16 @@ public class ReadFromStorageXlet implements Xlet {
 	   for (int i = 0; i < 10; i++) {
 	  	System.out.println(fis.read());
            }
-	   System.out.println("Test passed, accessed filesystem without SecurityException");
-           Logger.log("READER test passed, accessed filesystem without SecurityException");
+           XletLogger.log("READER test passed, accessed filesystem without SecurityException");
 	} catch (AccessControlException ex) {
-                ex.printStackTrace();
-                fillStatus(ex);
+		XletLogger.log("Error in reading file", ex);
                 Permission perm = ex.getPermission();
                 if (perm != null)
-                    Logger.log(perm.toString());
+                    XletLogger.log(perm.toString());
 	} catch (IOException ex) {
-		ex.printStackTrace();
-                fillStatus(ex);
+		XletLogger.log("Error in reading file", ex);
         } catch (Exception ex) {
-              ex.printStackTrace();
-              fillStatus(ex);
+		XletLogger.log("Error in reading file", ex);
         } finally {
 	    if (fis != null) {
 		try {
@@ -161,23 +144,6 @@ public class ReadFromStorageXlet implements Xlet {
 		}
 	    }
 	}
-    }
-    
-    void fillStatus(Exception ex) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        ex.printStackTrace(pw);
-        pw.close();
-        String stat = sw.toString();
-        
-        // writes to the debug output
-        System.out.println("status:" + stat);
-        int newline;
-        int from  = 0;
-        while((newline = stat.indexOf("\n", from)) != -1) {
-            Logger.log(stat.substring(from, newline));
-            from = newline + 1;
-        }
     }
     
     public static void main(String[] args) {

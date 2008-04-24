@@ -60,7 +60,6 @@ import java.awt.Font;
 import java.util.EmptyStackException;
 import java.util.Stack;
 
-import org.havi.ui.event.HRcEvent;
 
 /**
  * Contains static methods to provide various settings about the
@@ -77,12 +76,6 @@ public class Screen {
     
     private static Font defaultFont = getFont(Screen.getDefaultFontSize());
     private static boolean showLogMode = false;
-    
-    // Listens to certain RCEvents to switch between log component and the
-    // user component.
-    static { 
-        new BDJUserEventListener().setListener(HRcEvent.VK_COLORED_KEY_0);
-    }
     
     /**
      * Sets the root container given by Xlet.
@@ -129,7 +122,11 @@ public class Screen {
      * @return
      */
     public static Component getCurrentComponent() {
-        return (Component)stack.peek();
+        try {
+            return (Component)stack.peek();
+        } catch (EmptyStackException e) {
+            return null;
+        }
     }
 
     /**

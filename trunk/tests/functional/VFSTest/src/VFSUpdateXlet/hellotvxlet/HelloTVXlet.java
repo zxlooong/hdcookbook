@@ -1,5 +1,5 @@
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -72,9 +72,7 @@ import org.bluray.vfs.VFSManager;
 import org.havi.ui.HScene;
 import org.havi.ui.HSceneFactory;
 
-import net.java.bd.tools.logger.HarnessLogDialog;
-import net.java.bd.tools.logger.Logger;
-import net.java.bd.tools.logger.Screen;
+import net.java.bd.tools.logger.XletLogger;
 
 
 /**
@@ -97,47 +95,41 @@ public class HelloTVXlet implements javax.tv.xlet.Xlet, Runnable {
         String orgID = (String) context.getXletProperty("dvb.org.id");
         String discID = DiscManager.getDiscManager().getCurrentDisc().getId();
         //String discID = Integer.toHexString(Integer.parseInt(discID0, 16));
-
-        HScene scene = HSceneFactory.getInstance().getDefaultHScene();
-        scene.setBackgroundMode(HScene.BACKGROUND_FILL);
-
-        // initialize Logger
-        Logger.initialize(System.getProperty("dvb.persistent.root")
+        
+        //Set the logging output file
+        XletLogger.setLogFile(System.getProperty("dvb.persistent.root")
 	       + "/" + context.getXletProperty("dvb.org.id")
 	       + "/" + context.getXletProperty("dvb.app.id"));
 
-        // initiate LogDialog component to display log on the screen
-        Screen.setRootContainer(scene);
-        HarnessLogDialog logDialog = new HarnessLogDialog();
-        logDialog.compose();
-        Screen.setLogComponent(logDialog);
-        Screen.setShowLogMode(true);
-
         bindingUnitDir = root + File.separator + orgID + File.separator + discID;
-        Logger.log("BindingRoot: " + bindingUnitDir);
+        XletLogger.log("BindingRoot: " + bindingUnitDir);
     } 
     
     public void startXlet() {
-        Logger.log("Starting the xlet...");        
-        Screen.setVisible(true); 
+        XletLogger.log("Starting the xlet...");        
+        XletLogger.setVisible(true); 
         
         // Check that this player is supporting VFS.
         String lsLevel = System.getProperty("bluray.localstorage.level");
         if (lsLevel.equals("-1")) {
-            System.out.println("VFS is not supported");
-            Logger.log("VFS is not supported");
+            XletLogger.log("VFS is not supported");
             return;
         } else if (lsLevel.equals("0")) {
-            System.out.println("No storage device");
-            Logger.log("No storage device");
+            XletLogger.log("No storage device");
+            return;
+        }
+        
+        // Check that this player supports network access.
+        if (!"YES".equals(System.getProperty("bluray.profile.2"))) {
+            XletLogger.log("Not a profile 2 player, stopping the test run");
             return;
         }
         
         if (new File(bindingUnitDir, downloads[0]).exists()) {
             // If files are found from a previous run, just clean up and exit.
-            Logger.log("Downloaded files found, deleting them.");
+            XletLogger.log("Downloaded files found, deleting them.");
             cleanup();
-            Logger.log("Cleanup finished, restart the xlet to run the test.");
+            XletLogger.log("Cleanup finished, restart the xlet to run the test.");
             return;
         }
         
@@ -150,49 +142,45 @@ public class HelloTVXlet implements javax.tv.xlet.Xlet, Runnable {
             for (int i = 0; i < downloads.length; i++) {
                 URL  url  = new URL(host, downloads[i]);
                 File file = new File(bindingUnitDir, downloads[i]);
-                Logger.log("Downloading " + downloads[i] + " to " + bindingUnitDir);
+                XletLogger.log("Downloading " + downloads[i] + " to " + bindingUnitDir);
                 downloadFile(url.openStream(), new FileOutputStream(file));
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            Logger.log("Download failed", e);
+            XletLogger.log("Download failed", e);
             return;
         }
 
         VFSManager manager = VFSManager.getInstance();
-        Logger.log("Finished downloading, calling VFS update");
+        XletLogger.log("Finished downloading, calling VFS update");
         try {
             manager.requestUpdating(bindingUnitDir + File.separator + "sample.xml",
                     bindingUnitDir + File.separator + "sample.sf",
                     true);
         } catch (Exception e) {
-            Logger.log("Failed to request VFS update", e);
-            e.printStackTrace();
+            XletLogger.log("Failed to request VFS update", e);
             return;
         }
         
-        Logger.log("Getting TitleContext");
+        XletLogger.log("Getting TitleContext");
         TitleContext titleContext;
         
         try {
             titleContext = 
                     (TitleContext) ServiceContextFactory.getInstance().getServiceContext(context);
         } catch (SecurityException ex) {
-            ex.printStackTrace();
-            Logger.log("Can't get TitleContext", ex);
+            XletLogger.log("Can't get TitleContext", ex);
             return;
         } catch (ServiceContextException ex) {
-            ex.printStackTrace();     
-            Logger.log("Can't get TitleContext", ex);
+            XletLogger.log("Can't get TitleContext", ex);
             return;
         }
         Title title = (Title) titleContext.getService();
-        Logger.log("Restarting the title " + title.getLocator());
+        XletLogger.log("Restarting the title " + title.getLocator());
         titleContext.start(title, true); // this should terminate this xlet.  
     }
     
     public void pauseXlet() {
-        Screen.setVisible(false);
+        XletLogger.setVisible(false);
     }
     
     public void destroyXlet(boolean unconditional) {

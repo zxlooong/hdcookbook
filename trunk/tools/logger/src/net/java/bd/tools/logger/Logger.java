@@ -62,37 +62,55 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Vector;
 
 public class Logger {
     
     private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss ");
     private static final String lineSep = System.getProperty("line.separator");
+    private static File[] logFiles = null;
+    
+    /**
     private static String WORK_DIR = System.getProperty("bluray.bindingunit.root");
     private static File[] logFiles = { 
         new File(WORK_DIR, "logA.txt"),               
         new File(WORK_DIR, "logB.txt")
     };
+     **/
 
     public static final int MAX_FILE_LENGTH = 5120; // in bytes
 
     /**
-     * Sets the output file directory name.
-     * @param workdir The directory to store the log files to.
+     * Sets the logging output file.
      */
-    public static void initialize(String workdir) {
-        WORK_DIR = workdir;
-        logFiles = new File[] {      
-            new File(WORK_DIR, "logA.txt"),
-            new File(WORK_DIR, "logB.txt")    
-        };                  
-                          
+    public static void setLogFile(String file) {
+        
+        File log = new File(file);
+        /**
+        if (!log.canWrite()) {
+            log("ERROR: Log file " + file + " is not writable.");
+            return;
+        }
+        **/
+        
+        String path = log.getPath();
+        String backupFileName = log.getName().concat(".bak");
+        logFiles = new File[] {
+                log, new File(path, backupFileName) 
+        };
+        
+        Logger.log("Setting the log file to " + file);
     }
+   
     /**
      * Returns log files in proper order: the recent one comes first 
      * @return
      */
     public static File[] getLogFiles() {
-
+        if (logFiles == null) {
+            return null;
+        }
+        
         if (logFiles[0].lastModified() < logFiles[1].lastModified()) {
             File t = logFiles[0];
             logFiles[0] = logFiles[1];
@@ -127,30 +145,34 @@ public class Logger {
         if (s == null || s.length() == 0) {
             return;
         }
-
-        if (observer != null) {
-            observer.output(s);
+        
+        if (observers != null) {
+            for (int i = 0; i < observers.size(); i++) {
+               ((Observer)observers.elementAt(i)).output(s);
+            }
         }
 
         File[] ff = getLogFiles();
-        int freeSpace = MAX_FILE_LENGTH - (int) ff[0].length();
+        if (ff != null) {
+            int freeSpace = MAX_FILE_LENGTH - (int) ff[0].length();
 
-        String logRecord = sdf.format(new Date()) + s + lineSep;
+            String logRecord = sdf.format(new Date()) + s + lineSep;
 
-        if (logRecord.length() <= freeSpace) {
-            output(logRecord, ff[0]);
-        } else {
-            output(logRecord.substring(0, freeSpace), ff[0]);
-            activateNextFile(ff);
-            String tail = logRecord.substring(freeSpace);
-
-            while (tail.length() > MAX_FILE_LENGTH) {
-                output(tail.substring(0, MAX_FILE_LENGTH), ff[0]);
+            if (logRecord.length() <= freeSpace) {
+                output(logRecord, ff[0]);
+            } else {
+                output(logRecord.substring(0, freeSpace), ff[0]);
                 activateNextFile(ff);
-                tail = tail.substring(MAX_FILE_LENGTH);
-            }
+                String tail = logRecord.substring(freeSpace);
 
-            output(tail, ff[0]);
+                while (tail.length() > MAX_FILE_LENGTH) {
+                    output(tail.substring(0, MAX_FILE_LENGTH), ff[0]);
+                    activateNextFile(ff);
+                    tail = tail.substring(MAX_FILE_LENGTH);
+                }
+
+                output(tail, ff[0]);
+            }
         }
     }
 
@@ -226,15 +248,17 @@ public class Logger {
      */
     public static void clearLog() {
         File[] ff = getLogFiles();
-        ff[0].delete();
-        ff[1].delete();
+        if (ff != null) {
+            ff[0].delete();
+            ff[1].delete();
+        }
 
-        if (observer != null) {
-            observer.clearLog();
+        if (observers != null) {
+            for (int i = 0; i < observers.size(); i++) {
+               ((Observer)observers.elementAt(i)).clearLog();
+            }
         }
     }
-    // if we want to output our records somewhere else, we create an observer 
-    private static Observer observer;
 
     public static interface Observer {
 
@@ -243,11 +267,21 @@ public class Logger {
         public void clearLog();
     }
 
-    public static void setObserver(Observer obs) {
-        observer = obs;
+    private static Vector observers;
+    public static void addObserver(Observer obs) {
+        synchronized(Logger.class) {
+           if (observers == null) {
+              observers = new Vector(); 
+           }
+           observers.add(obs);
+        }
     }
 
-    public static void removeObserver() {
-        observer = null;
+    public static void removeObserver(Observer obs) {
+        synchronized(Logger.class) {
+            if (observers != null) {
+                observers.remove(obs);
+            }
+        }
     }
 }

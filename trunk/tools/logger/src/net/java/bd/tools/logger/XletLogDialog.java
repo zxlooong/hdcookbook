@@ -56,15 +56,16 @@ package net.java.bd.tools.logger;
 
 import java.awt.event.KeyEvent;
 import java.io.File;
+import net.java.bd.tools.logger.Logger.Observer;
 
-public class HarnessLogDialog extends BaseLogDialog {
+public class XletLogDialog extends BaseLogDialog implements Observer {
 
     /**
      * 
      */
-    public HarnessLogDialog() {
+    public XletLogDialog() {
         super("XLET LOG", 
-            "1 | 2 | 3 Refresh | 4 | 5 | 6 | 7 | 8 | 9 Clear Log | 0 Hide/Show",
+            "1 | 2 | 3 Reload From File | 4 | 5 | 6 | 7 | 8 | 9 Clear Log | 0 Hide/Show",
             BOTTOM_POSITION);
     }
     
@@ -73,13 +74,16 @@ public class HarnessLogDialog extends BaseLogDialog {
      * 
      */
     protected void loadData() {
-        data.clear();
-        
         File[] ff = Logger.getLogFiles();
-        for (int i = ff.length -1; i >= 0; i--) {
-            if (ff[i] != null && ff[i].exists() && ff[i].canRead()) {
-                loadFromFile(ff[i]);
+        if (ff != null) {
+            data.clear();
+            for (int i = ff.length - 1; i >= 0; i--) {
+                if (ff[i] != null && ff[i].exists() && ff[i].canRead()) {
+                    loadFromFile(ff[i]);
+                }
             }
+        } else {
+            Logger.log("Error in loading data from file.  No log file location set.");
         }
     }
     
@@ -97,9 +101,7 @@ public class HarnessLogDialog extends BaseLogDialog {
             
         case KeyEvent.VK_9:
         case KeyEvent.VK_NUMPAD9:
-            Logger.clearLog();
-            data.clear();
-            lLog.initPosition();
+            Logger.clearLog(); // Will invoke clearLog() of this class.
             break;
             
         default:
@@ -107,5 +109,14 @@ public class HarnessLogDialog extends BaseLogDialog {
             break;
         }
         notifyAll();
+    }
+
+    public void output(String s) {
+        addString(s);
+    }
+
+    public void clearLog() {
+        data.clear();
+        lLog.initPosition();
     }
 }

@@ -60,12 +60,7 @@ import javax.tv.xlet.Xlet;
 import javax.tv.xlet.XletContext;
 import java.awt.Font;
 
-import net.java.bd.tools.logger.HarnessLogDialog;
-import net.java.bd.tools.logger.Logger;
-import net.java.bd.tools.logger.Screen;
-
-import org.havi.ui.HScene;
-import org.havi.ui.HSceneFactory;
+import net.java.bd.tools.logger.XletLogger;
 
 /**
  * A test xlet that accesses persistant storage.
@@ -82,31 +77,21 @@ public class WriteToStorageXlet implements Xlet {
 
     public void initXlet(XletContext context) {       
 	this.context = context;
-	
-        HScene rootContainer = HSceneFactory.getInstance().getDefaultHScene();
-        // Fill the background - HScene doesn't do this by default.
-        rootContainer.setBackgroundMode(HScene.BACKGROUND_FILL);
-        
+	   
         // initialize Logger
-        Logger.initialize(System.getProperty("dvb.persistent.root")
+        XletLogger.setLogFile(System.getProperty("dvb.persistent.root")
 	       + "/" + context.getXletProperty("dvb.org.id")
 	       + "/" + context.getXletProperty("dvb.app.id"));
         
-    	// initiate LogDialog component to display log on the screen.
-	Screen.setRootContainer(rootContainer);  
-	HarnessLogDialog logDialog = new HarnessLogDialog();
-        logDialog.compose();
-        Screen.setLogComponent(logDialog);	
-        Screen.setShowLogMode(true);  // Show logging component by default
     }
     
     public void startXlet() {	
-        Screen.setVisible(true);
+        XletLogger.setVisible(true);
         accessPersistantStorage();
     }
     
     public void pauseXlet() {
-	Screen.setVisible(false);   
+	XletLogger.setVisible(false);   
     }
     
     public void destroyXlet(boolean unconditional) {
@@ -119,7 +104,7 @@ public class WriteToStorageXlet implements Xlet {
 	       + "/" + context.getXletProperty("dvb.app.id")
 	       + "/tmp.txt";
 	
-	System.out.println("FileName = " + filename);
+	XletLogger.log("FileName = " + filename);
 	FileOutputStream os = null;
 	try {
           /* BufferedWriter bw = new BufferedWriter(new FileWriter(filename));
@@ -131,17 +116,15 @@ public class WriteToStorageXlet implements Xlet {
 		os.write(i);
            }
 	   os.close();
-           Logger.log("WRITER Test passed");
-           Logger.log("wrote to a file:" + filename);
+           XletLogger.log("WRITER Test passed");
+           XletLogger.log("wrote to a file:" + filename);
            File f = new File(filename);
-           Logger.log((f.canRead() ? "true" : "false"));
-	   Logger.log("Test passed, accessed filesystem without SecurityException");
+           XletLogger.log((f.canRead() ? "true" : "false"));
+	   XletLogger.log("Test passed, accessed filesystem without SecurityException");
 	} catch (SecurityException ex) {
-		ex.printStackTrace();
-		fillStatus(ex);    
+		XletLogger.log("Error in writing", ex);
 	} catch (IOException ex) {
-		ex.printStackTrace();  
-		fillStatus(ex);
+		XletLogger.log("Error in writing", ex);
         } finally {
 	    if (os != null) {
 		try {
@@ -150,23 +133,6 @@ public class WriteToStorageXlet implements Xlet {
 		}
 	    }
 	}
-    }
-    
-     void fillStatus(Exception ex) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        ex.printStackTrace(pw);
-        pw.close();
-        String stat = sw.toString();
-        
-        // writes to the debug output
-        System.out.println("status:" + stat);
-        int newline;
-        int from  = 0;
-        while((newline = stat.indexOf("\n", from)) != -1) {
-            Logger.log(stat.substring(from, newline));
-            from = newline + 1;
-        }
     }
     
     public static void main(String[] args) {

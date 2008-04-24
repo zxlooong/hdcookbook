@@ -51,9 +51,7 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package net.java.bd.tools.logger;
-
 
 import java.awt.Color;
 import java.awt.Component;
@@ -63,19 +61,17 @@ import java.util.Vector;
 
 public class LwLog extends Component {
 
-	private static final long serialVersionUID = 3314375418166592663L;
-	private Color back = Color.white;
-	private Color front = Color.black;
-	private Color selected = Color.gray;
-
-	private Vector data = null;  // vector of byte[]
+    private static final long serialVersionUID = 3314375418166592663L;
+    private Color back = Color.white;
+    private Color front = Color.black;
+    private Color selected = Color.gray;
+    private Vector data = null;  // vector of byte[]
     private int firstDisplayedItem = 0;
     private int numberOfLinesDisplayed = 0;
-    private int horizontalScrollingStep = Screen.getVisibleWidth()/2; 
+    private int horizontalScrollingStep = Screen.getVisibleWidth() / 2;
     private int xPos = 0;
     private int maxRecordLength = 0; // on the rendered area
     private int position;
-    
     private static final int littleGap = 6;
     private static final int scrollPaneWidth = 20;
 
@@ -95,105 +91,105 @@ public class LwLog extends Component {
             throw new RuntimeException(
                     "Can't instantiate LwLog when number of lines displayed is <= 0");
         }
-        
+
         this.position = position;
     }
-	
-	public void setBackgroundColor(Color b) {
-	    this.back = b;
-	}
-	
-	public void setForegroundColor(Color f) {
-	    this.front = f;
-	}
-	
-	public void setSelectedColor(Color s) {
-	    this.selected = s;
-	}
-	
-	public void initPosition() {
-	    switch (position) {
-	    case BaseLogDialog.BOTTOM_POSITION:
-            firstDisplayedItem = data.size() - numberOfLinesDisplayed + 1;
-            if (firstDisplayedItem < 0) {
-            	firstDisplayedItem = 0;
-            }
-	        break;
-        case BaseLogDialog.TOP_POSITION:
-            firstDisplayedItem = 0;
-            break;
-        case BaseLogDialog.KEEP_POSITION:
-            // don't change
-            break;
-	    }
-	    
+
+    public void setBackgroundColor(Color b) {
+        this.back = b;
+    }
+
+    public void setForegroundColor(Color f) {
+        this.front = f;
+    }
+
+    public void setSelectedColor(Color s) {
+        this.selected = s;
+    }
+
+    public void initPosition() {
+        switch (position) {
+            case BaseLogDialog.BOTTOM_POSITION:
+                firstDisplayedItem = data.size() - numberOfLinesDisplayed + 1;
+                if (firstDisplayedItem < 0) {
+                    firstDisplayedItem = 0;
+                }
+                break;
+            case BaseLogDialog.TOP_POSITION:
+                firstDisplayedItem = 0;
+                break;
+            case BaseLogDialog.KEEP_POSITION:
+                // don't change
+                break;
+        }
+
         repaint();
-	}
-	
+    }
+
     public void paint(Graphics g) {
-    	maxRecordLength = 0;
+        maxRecordLength = 0;
         FontMetrics fm = g.getFontMetrics(Screen.getDefaultFont());
 
         // background
         g.setColor(back);
         g.fillRect(0, 0, getWidth(), getHeight());
-        
+
         // item list
-        for (int i = 0; (i < numberOfLinesDisplayed) && (i + firstDisplayedItem < data.size()) ; i++) {
+        for (int i = 0; (i < numberOfLinesDisplayed) && (i + firstDisplayedItem < data.size()); i++) {
             g.setColor(front);
-            
-            String s = new String((byte[])data.elementAt(i + firstDisplayedItem));
-            g.drawString(s, 
-            		xPos + fm.getHeight()/3, 
-            		i * fm.getHeight() + fm.getMaxAscent());
-            
-            int len = fm.stringWidth(s); 
+
+            String s = new String((byte[]) data.elementAt(i + firstDisplayedItem));
+            g.drawString(s,
+                    xPos + fm.getHeight() / 3,
+                    i * fm.getHeight() + fm.getMaxAscent());
+
+            int len = fm.stringWidth(s);
             if (len > maxRecordLength) {
-            	maxRecordLength = len;
+                maxRecordLength = len;
             }
         }
-        
+
         // draw the scroll stripe
         if (data.size() > numberOfLinesDisplayed) {
             g.setColor(front);
-            g.fillRect(getWidth()-littleGap-scrollPaneWidth, 0, littleGap, getHeight());
+            g.fillRect(getWidth() - littleGap - scrollPaneWidth, 0, littleGap, getHeight());
 
             g.setColor(back);
-            g.fillRect(getWidth()-scrollPaneWidth, 0, scrollPaneWidth, getHeight());
-        
+            g.fillRect(getWidth() - scrollPaneWidth, 0, scrollPaneWidth, getHeight());
+
             int markTop = getHeight() * firstDisplayedItem / data.size();
             int markHeight = getHeight() * numberOfLinesDisplayed / data.size();
             if (markHeight > getHeight()) {
                 markHeight = getHeight();
             }
-            
+
             g.setColor(selected);
-            g.fillRect(getWidth()-scrollPaneWidth, markTop, scrollPaneWidth, markHeight);
+            g.fillRect(getWidth() - scrollPaneWidth, markTop, scrollPaneWidth, markHeight);
         }
-   }
+    }
 
     /**
      * Move the screen one line up.
      *
      */
     public void moveUp() {
-    	if (firstDisplayedItem > 0){
-    		firstDisplayedItem--;
+        if (firstDisplayedItem > 0) {
+            firstDisplayedItem--;
             repaint();
-    	}
+        }
     }
-    
+
     /**
      * Move the screen one line down
      *
      */
     public void moveDown() {
-    	if (firstDisplayedItem < data.size()-numberOfLinesDisplayed) {
-        	firstDisplayedItem++;
+        if (firstDisplayedItem < data.size() - numberOfLinesDisplayed) {
+            firstDisplayedItem++;
             repaint();
-    	}
+        }
     }
-    
+
     /**
      * Move the selection pointer one page up
      *
@@ -207,17 +203,17 @@ public class LwLog extends Component {
             repaint();
         }
     }
-    
+
     /**
      * Move the selection pointer one page down
      *
      */
     public void movePageDown() {
-        if (firstDisplayedItem < data.size()-numberOfLinesDisplayed) {
+        if (firstDisplayedItem < data.size() - numberOfLinesDisplayed) {
             firstDisplayedItem = Math.min(
-                    data.size() - numberOfLinesDisplayed, 
+                    data.size() - numberOfLinesDisplayed,
                     firstDisplayedItem + numberOfLinesDisplayed);
-            
+
             repaint();
         }
     }
@@ -226,21 +222,20 @@ public class LwLog extends Component {
      * Move the screen half screen left 
      */
     public void moveLeft() {
-    	if (xPos < 0) {
-    		xPos += horizontalScrollingStep;
-    		repaint();
-    	}
+        if (xPos < 0) {
+            xPos += horizontalScrollingStep;
+            repaint();
+        }
     }
-    
+
     /**
      * Move the screen half screen right
      */
     public void moveRight() {
-    	if (maxRecordLength + xPos > 
-    	        Screen.getVisibleWidth()-littleGap-scrollPaneWidth) {
-    		xPos -= horizontalScrollingStep;
-    		repaint();
-    	}
+        if (maxRecordLength + xPos >
+                Screen.getVisibleWidth() - littleGap - scrollPaneWidth) {
+            xPos -= horizontalScrollingStep;
+            repaint();
+        }
     }
-    
 }
