@@ -66,6 +66,7 @@ import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.AssetFinder;
 
 import org.dvb.ui.FontFactory;
+import org.dvb.ui.DVBBufferedImage;
 
 /**
  * This class lets us hook in "under" GRIN, to tell GRIN where
@@ -116,4 +117,29 @@ public class MenuAssetFinder extends AssetFinder {
 	}
 	return null;
     }
+
+    /**
+     * @inheritDoc
+     **/
+    protected Image createCompatibleImageBufferHelper(Component c,
+						      int width, int height) 
+    {
+	return new DVBBufferedImage(width, height);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    protected Graphics2D createGraphicsFromImageBufferHelper(Image buffer) {
+	Object g = ((DVBBufferedImage) buffer).createGraphics();
+	return (Graphics2D) g;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    protected void destroyImageBufferHelper(Image buffer) {
+	    ((DVBBufferedImage) buffer).dispose();
+    }
+
 }

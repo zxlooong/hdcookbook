@@ -55,6 +55,7 @@
 
 package com.hdcookbook.grin.animator;
 
+import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 import java.awt.AlphaComposite;
 import java.awt.Container;
@@ -63,7 +64,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
+import java.awt.Image;
 
 /**
  * A double-buffered animation engine that uses direct draw.  
@@ -90,7 +91,7 @@ public class DirectDrawEngine extends ClockBasedEngine {
 
     private Container container;
     private Component ddComponent;
-    private BufferedImage buffer;
+    private Image buffer;
     private Graphics2D bufferG;
     private Graphics2D componentG;
 
@@ -124,9 +125,9 @@ public class DirectDrawEngine extends ClockBasedEngine {
 	ddComponent.setBounds(bounds);
 	container.add(ddComponent);
 	ddComponent.setVisible(true);
-	buffer = container.getGraphicsConfiguration()
-			.createCompatibleImage(bounds.width, bounds.height);
-	bufferG = buffer.createGraphics();
+	buffer = AssetFinder.createCompatibleImageBuffer(
+				container, bounds.width, bounds.height);
+	bufferG = AssetFinder.createGraphicsFromImageBuffer(buffer);
 	bufferG.setComposite(AlphaComposite.Src);
 	bufferG.setColor(transparent);
 	bufferG.fillRect(0, 0, bounds.width, bounds.height);
@@ -142,14 +143,14 @@ public class DirectDrawEngine extends ClockBasedEngine {
      * @inheritDoc
      **/
     public int getWidth() {
-	return buffer.getWidth();
+	return ddComponent.getWidth();
     }
 
     /** 
      * @inheritDoc
      **/
     public int getHeight() {
-	return buffer.getHeight();
+	return ddComponent.getHeight();
     }
 
     /**
@@ -209,7 +210,10 @@ public class DirectDrawEngine extends ClockBasedEngine {
      **/
     protected void terminatingEraseScreen() {
 	componentG.setColor(transparent);
-	componentG.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
+	componentG.fillRect(0, 0, getWidth(), getHeight());
 	Toolkit.getDefaultToolkit().sync();
+	AssetFinder.destroyImageBuffer(buffer);
+	buffer = null;
+	bufferG = null;
     }
 }

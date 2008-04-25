@@ -58,7 +58,10 @@ package com.hdcookbook.grin.util;
 import java.awt.Toolkit;
 import java.awt.Image;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.io.File;
@@ -272,6 +275,103 @@ public class AssetFinder  {
      **/
     protected Font getFontHelper(String fontName, int style, int size) {
 	return null;
+    }
+
+    /**
+     * Get an image buffer that's suitable for use double-buffering
+     * drawing to the componet c.  This is functionally equivalent to
+     * a java.awt.BufferedImage obtained from:
+     * <pre>
+     *
+     *    c.getGraphicsConfiguration().createCompatibleImage(width, height)
+     *
+     * </pre>
+     * In GEM-based systems, it is recommended that this be a
+     * <code>DVBBufferedImage</code>, for improved native memory management.  See
+     * <a href="http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement">http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement</a>
+     * for a discussion of why.
+     *
+     * @return an off-screen image buffer
+     *
+     * @see #createCompatibleImageBufferHelper(java.awt.Component, int, int)
+     * @see #createGraphicsFromImageBuffer(java.awt.Image)
+     * @see #destroyImageBuffer(java.awt.Image)
+     **/
+    public static Image createCompatibleImageBuffer(Component c, 
+						    int width, int height) 
+    {
+	if (helper != null) {
+	    Image im = helper.createCompatibleImageBufferHelper(c,width,height);
+	    if (im != null) {
+		return im;
+	    }
+	}
+	return c.getGraphicsConfiguration().createCompatibleImage(width,height);
+    }
+
+    /**
+     * Subclasses can override this to return a different kind of buffered
+     * image, e.g. <code>DVBBufferedImage</code>
+     *
+     * @see #createCompatibleImageBufferHelper(java.awt.Component, int, int)
+     **/
+    protected Image createCompatibleImageBufferHelper(Component c,
+    					             int width, int height)
+    {
+	return null;
+    }
+
+    /**
+     * Create a Graphic2D image for drawing into the given image buffer.
+     * This image buffer must have been obtained from
+     * <code>createCompatibleImageBuffer()</code>.
+     *
+     * @see #createCompatibleImageBuffer(java.awt.Component, int, int)
+     **/
+    public static Graphics2D createGraphicsFromImageBuffer(Image buffer) {
+	if (helper != null) {
+	    Graphics2D g = helper.createGraphicsFromImageBufferHelper(buffer);
+	    if (g != null) {
+		return g;
+	    }
+	}
+	return ((BufferedImage) buffer).createGraphics();
+    }
+
+    /**
+     * Subclasses can override this to work with a different kind of buffered
+     * image, e.g. <code>DVBBufferedImage</code>
+     *
+     * @see #createGraphicsFromImageBuffer(java.awt.Image)
+     **/
+    protected Graphics2D createGraphicsFromImageBufferHelper(Image buffer) {
+	return null;
+    }
+
+    /**
+     * Destroy an image buffer, freeing native resources that it uses
+     * (such as native memory used to hold a pixmap).  In Desktop java,
+     * this does nothing, because this is left to the garbage collector.
+     * In GEM-based systems, it should be equivalent to
+     * DVBBufferedImage.dispose(). See
+     * <a href="http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement">http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement</a>
+     * for a discussion of images and memory management.
+     *
+     * @see #createCompatibleImageBuffer(java.awt.Component, int, int)
+     **/
+    public static void destroyImageBuffer(Image buffer) {
+	if (helper != null) {
+	    helper.destroyImageBufferHelper(buffer);
+	}
+    }
+
+    /**
+     * Subclasses can override this to work with a different kind of buffered
+     * image, e.g. <code>DVBBufferedImage</code>
+     *
+     * @see #destroyImageBuffer(java.awt.Image)
+     **/
+    protected void destroyImageBufferHelper(Image buffer) {
     }
     
     /**

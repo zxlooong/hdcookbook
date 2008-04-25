@@ -55,6 +55,7 @@
 
 package com.hdcookbook.grin.animator;
 
+import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 import java.awt.AlphaComposite;
 import java.awt.Container;
@@ -63,7 +64,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
+import java.awt.Image;
 
 /**
  * An animation engine that uses repaint draw.  Repaint draw
@@ -93,7 +94,7 @@ public class RepaintDrawEngine extends ClockBasedEngine {
     private Container container;
     private Component rdComponent;
     private Rectangle bounds;
-    private BufferedImage buffer = null;
+    private Image buffer = null;
     private Graphics2D bufferG = null;
     private Object repaintMonitor = new Object();
     private boolean repaintPending = false;
@@ -129,9 +130,9 @@ public class RepaintDrawEngine extends ClockBasedEngine {
 	if (container.isDoubleBuffered()) {
 	    // buffer and bufferG will be null
 	} else {
-	    buffer = container.getGraphicsConfiguration()
-			    .createCompatibleImage(bounds.width, bounds.height);
-	    bufferG = buffer.createGraphics();
+	    buffer = AssetFinder.createCompatibleImageBuffer(
+				    container, bounds.width, bounds.height);
+	    bufferG = AssetFinder.createGraphicsFromImageBuffer(buffer);
 	    bufferG.setComposite(AlphaComposite.Src);
 	    bufferG.setColor(transparent);
 	    bufferG.fillRect(0, 0, bounds.width, bounds.height);
