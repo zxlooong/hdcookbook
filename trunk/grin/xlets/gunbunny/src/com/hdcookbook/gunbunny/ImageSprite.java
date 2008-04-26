@@ -59,7 +59,7 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
+import org.dvb.ui.DVBBufferedImage;
 
 import com.hdcookbook.gunbunny.util.ImageUtil;
 import com.hdcookbook.gunbunny.util.Debug;
@@ -260,7 +260,7 @@ public class ImageSprite extends Sprite {
 		r.x = lastX;
 		r.y = lastY;
 	    }
-	    BufferedImage buf = animator.getDoubleBuffer(r.width, r.height);
+	    DVBBufferedImage buf = animator.getDoubleBuffer(r.width, r.height);
 	    Graphics2D bufG;
 	    if (buf == null) {
 		g.setColor(ImageUtil.colorTransparent);

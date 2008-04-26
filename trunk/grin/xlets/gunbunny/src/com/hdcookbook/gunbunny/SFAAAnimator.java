@@ -63,7 +63,7 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
+import org.dvb.ui.DVBBufferedImage;
 
 import org.bluray.ui.SyncFrameAccurateAnimation;
 import org.bluray.ui.AnimationParameters;
@@ -133,7 +133,8 @@ public class SFAAAnimator extends Animator {
      * Get a buffer for double-buffered drawing.  If one is not needed
      * for this style of animation, return null.
      **/
-    public synchronized BufferedImage getDoubleBuffer(int width, int height) {
+    public synchronized DVBBufferedImage getDoubleBuffer(int width, int height) 
+    {
 	return null;
     }
 

@@ -60,7 +60,7 @@ import java.awt.Container;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
+import org.dvb.ui.DVBBufferedImage;
 
 /**
  * An Animator is something that repeatedly repaints a set of sprites in
@@ -90,7 +90,7 @@ public abstract class Animator {
      * Get a buffer for double-buffered drawing.  If one is not needed
      * for this style of animation, return null.
      **/
-    public abstract BufferedImage getDoubleBuffer(int width, int height);
+    public abstract DVBBufferedImage getDoubleBuffer(int width, int height);
 
     /**
      * Get the graphics for drawing into the buffer returned by the last

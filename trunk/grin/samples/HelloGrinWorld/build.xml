@@ -7,7 +7,7 @@
     while other show files in this Samples directory do. -->
     
 	<!-- Property Definitions -->
-        <property file="../../scripts/ant/grin.properties"/>
+        <property file="../../buildscripts/ant/grin.properties"/>
         
 	<property name="bdj.classes"  value="${HDC_BDJ_PLATFORM_CLASSES}"/>
 	<property name="grin.classes"  value="../../${GRIN_VIEWER_JAR}"/>

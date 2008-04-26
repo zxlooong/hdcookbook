@@ -63,7 +63,6 @@ import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.Iterator;

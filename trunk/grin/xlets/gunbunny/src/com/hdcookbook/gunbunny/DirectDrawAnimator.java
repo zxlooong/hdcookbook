@@ -62,7 +62,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
+import org.dvb.ui.DVBBufferedImage;
 
 import com.hdcookbook.gunbunny.util.Debug;
 import com.hdcookbook.gunbunny.util.ImageUtil;
@@ -78,7 +78,7 @@ public class DirectDrawAnimator extends Animator {
     private Rectangle position;
     private boolean firstFrame;
     private Container component;
-    private BufferedImage buffer;
+    private DVBBufferedImage buffer;
     private Graphics2D bufferG;
     private Graphics2D componentG;
     private long startTime;
@@ -114,9 +114,12 @@ public class DirectDrawAnimator extends Animator {
     }
 
     private synchronized void createNewBuffer(int width, int height) {
-	buffer = component.getGraphicsConfiguration()
-			.createCompatibleImage(width, height);
-	bufferG = buffer.createGraphics();
+	if (buffer != null) {
+	    buffer.dispose();
+	}
+	buffer = new DVBBufferedImage(width, height);
+	Object g = buffer.createGraphics();
+	bufferG = (Graphics2D) g;
 	bufferG.setComposite(AlphaComposite.Src);
     }
 
@@ -124,14 +127,16 @@ public class DirectDrawAnimator extends Animator {
      * See superclass definition.
      **/
     public void destroy() {
-	// nothing needed for a DirectDrawAnimator
+	if (buffer != null) {
+	    buffer.dispose();
+	}
     }
 
     /**
      * Get a buffer for double-buffered drawing.  If one is not needed
      * for this style of animation, return null.
      **/
-    public synchronized BufferedImage getDoubleBuffer(int width, int height) {
+    public synchronized DVBBufferedImage getDoubleBuffer(int width, int height) {
 	if (width > buffer.getWidth() || height > buffer.getHeight()) {
 	    if (buffer.getWidth() > width) {
 		width = buffer.getWidth();

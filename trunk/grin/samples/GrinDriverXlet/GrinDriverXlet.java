@@ -53,6 +53,10 @@
  */
 
 import java.awt.Container;
+import java.awt.Component;
+import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.io.IOException;
 import javax.tv.xlet.Xlet;
@@ -65,7 +69,9 @@ import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
-	
+
+import org.dvb.ui.DVBBufferedImage;
+
 /** 
  * An xlet example that displays GRIN script.
  */
@@ -113,6 +119,25 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
             try {
  
                 show = new Show(null);
+
+		// Set up AssetFinder so we use DVBBufferedImage.
+		// See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
+		AssetFinder.setHelper(new AssetFinder() {
+		    protected Image createCompatibleImageBufferHelper
+		    			(Component c, int width, int height) 
+		    {
+			return new DVBBufferedImage(width, height);
+		    }
+		    protected Graphics2D createGraphicsFromImageBufferHelper
+		    			(Image buffer) 
+		    {
+			Object g = ((DVBBufferedImage) buffer).createGraphics();
+			return (Graphics2D) g;
+		    }
+		    protected void destroyImageBufferHelper(Image buffer) {
+			((DVBBufferedImage) buffer).dispose();
+		    }
+		});
                 
                 AssetFinder.setSearchPath(new String[]{""}, null);  
                 if (AssetFinder.tryURL("images.map") != null) {

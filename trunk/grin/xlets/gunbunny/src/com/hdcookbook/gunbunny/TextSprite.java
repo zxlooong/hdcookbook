@@ -63,7 +63,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
+import org.dvb.ui.DVBBufferedImage;
 
 import com.hdcookbook.gunbunny.util.ImageUtil;
 
@@ -151,7 +151,7 @@ public class TextSprite extends Sprite {
 	    r.setBounds(pos);
 	    r.add(lastPos.x, lastPos.y);
 	    r.add(lastPos.x+lastPos.width, lastPos.y+lastPos.height);
-	    BufferedImage buf = animator.getDoubleBuffer(r.width, r.height);
+	    DVBBufferedImage buf = animator.getDoubleBuffer(r.width, r.height);
 	    if (buf == null) {
 		g.setColor(ImageUtil.colorTransparent);
 		g.fillRect(r.x, r.y, r.width, r.height);

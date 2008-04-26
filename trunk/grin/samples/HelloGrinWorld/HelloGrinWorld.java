@@ -59,6 +59,9 @@ import javax.tv.xlet.XletContext;
 import javax.tv.graphics.TVContainer;
 
 import java.awt.Container;
+import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.Image;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
@@ -73,7 +76,7 @@ import org.dvb.event.UserEvent;
 import org.dvb.event.UserEventListener;
 import org.dvb.event.UserEventRepository;
 import org.bluray.ui.event.HRcEvent;
-
+import org.dvb.ui.DVBBufferedImage;
 /** 
  * An xlet example that displays GRIN script.
  */
@@ -119,7 +122,25 @@ public class HelloGrinWorld implements Xlet, AnimationContext, UserEventListener
 	   Director director = new Director(){};
            
            try {
-               
+		// Set up AssetFinder so we use DVBBufferedImage.
+		// See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
+		AssetFinder.setHelper(new AssetFinder() {
+		    protected Image createCompatibleImageBufferHelper
+		    			(Component c, int width, int height) 
+		    {
+			return new DVBBufferedImage(width, height);
+		    }
+		    protected Graphics2D createGraphicsFromImageBufferHelper
+		    			(Image buffer) 
+		    {
+			Object g = ((DVBBufferedImage) buffer).createGraphics();
+			return (Graphics2D) g;
+		    }
+		    protected void destroyImageBufferHelper(Image buffer) {
+			((DVBBufferedImage) buffer).dispose();
+		    }
+		});
+
                AssetFinder.setSearchPath(new String[]{""}, null);      
 	       GrinBinaryReader reader = 
                        new GrinBinaryReader(AssetFinder.getURL(grinScriptName).openStream());
