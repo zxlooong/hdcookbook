@@ -1,6 +1,6 @@
 
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -56,59 +56,111 @@
 package com.hdcookbook.grin.mosaic;
 
 import java.awt.Rectangle;
-import com.hdcookbook.grin.util.ManagedImage;
 
 /**
- * A part of a mosaic.  When a small image is put into a mosaic, it
- * is represented as a part.  A part knows the name of the original
- * image, its placement on the mosaic, and the mosaic it's placed in.
+ * Represents an arrangement of mosaic parts within a mosaic.
+ * A Mosaic is compiled by creating several arrangements at different
+ * widths, and picking the best one.  
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class MosaicPart {
+class Arrangement {
 
-    private Mosaic mosaic;
-    private ManagedImage image;
-    private Rectangle placement;
+    private int maxHeight;
+    private Rectangle[] pos;	// The positon of each part
+    private int widthUsed = 0;
+    private int heightUsed = 0;
+    private int pixelsUsed;     // Integer.MAX_VALUE means "impossible"
+    private int placed;		// # of rectangles fixed in place so far
 
-    public MosaicPart(ManagedImage image, Mosaic mosaic) {
-	this.image = image;
-	this.mosaic = mosaic;
-	this.placement = new Rectangle();
-	placement.width = image.getWidth();
-	placement.height = image.getHeight();
-	placement.x = 0;
-	placement.y = 0;
+    Arrangement(int maxHeight, MosaicPart[] parts) {
+	this.maxHeight = maxHeight;
+	pos = new Rectangle[parts.length];
+	for (int i = 0; i < parts.length; i++) {
+	    pos[i] = new Rectangle(parts[i].getPlacement());
+	}
     }
 
-    /** 
-     * Get the name of the original image for this part
-     **/
-    public String getName() {
-	return image.getName();
+    void arrangeWithin(int maxWidth) {
+	for (placed = 0; placed < pos.length; placed++) {
+	    Rectangle curr = pos[placed];
+	    curr.x = 0;
+	    curr.y = 0;
+	    if (curr.width > maxWidth) {	// Can't fit
+		pixelsUsed = Integer.MAX_VALUE;
+		return;
+	    }
+	    int nextY = maxHeight;
+	    boolean found = false;
+	    while (!found && curr.y + curr.height <= maxHeight) {
+		found = true;
+		for (int i = 0; found && i < placed; i++) {
+		    Rectangle other = pos[i];
+		    if (curr.intersects(other)) {
+			found = false;
+			curr.x = other.x + other.width;
+			int y = other.y + other.height;
+			if (y < nextY) {
+			    nextY = y;
+			}
+			if (curr.x + curr.width > maxWidth) {
+			    curr.x = 0;
+			    assert curr.y < nextY;
+			    curr.y = nextY;
+			    nextY = maxHeight;
+			}
+		    }
+		}
+	    }
+	    if (!found) {
+		pixelsUsed = Integer.MAX_VALUE;
+		return;
+	    }
+	}
+	widthUsed = 0;
+	heightUsed = 0;
+	for (Rectangle r : pos) {
+	    int w = r.x + r.width;
+	    if (w > widthUsed) {
+		widthUsed = w;
+	    }
+	    int h = r.y + r.height;
+	    if (h > heightUsed) {
+		heightUsed = h;
+	    }
+	}
+	pixelsUsed = widthUsed * heightUsed;
     }
 
-    /**
-     * Get the area where the original image was placed within the mosaic.
-     **/
-    public Rectangle getPlacement() {
-	return placement;
+    //
+    // Set the positions of the parts to correspond to the current
+    // arrangement
+    //
+    void positionParts(MosaicPart[] parts) {
+	for (int i = 0; i < parts.length; i++) {
+	    parts[i].setPosition(pos[i].x, pos[i].y);
+	}
     }
 
-    public ManagedImage getImage() {
-	return image;
+    //
+    // Return how many pixels current arrangement uses, Integer.MAX_VALUE
+    // if no viable arrangement exists.
+    //
+    int getPixelsUsed() {
+	return pixelsUsed;
     }
 
-    void setPosition(int x, int y) {
-	placement.x = x;
-	placement.y = y;
+    //
+    // Return the width used in the current arrangement
+    //
+    int getWidthUsed() {
+	return widthUsed;
     }
 
-    /**
-     * Get the mosaic we're contained within.
-     **/
-    public Mosaic getMosaic() {
-	return mosaic;
+    //
+    // Return the height used in the current arrangement
+    //
+    int getHeightUsed() {
+	return heightUsed;
     }
-
 }

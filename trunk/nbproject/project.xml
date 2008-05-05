@@ -91,45 +91,52 @@
             </folders>
             <ide-actions>
                 <action name="build">
-                    <target>main</target>
+                    <target>grin</target>
                 </action>
                 <action name="clean">
                     <target>clean</target>
                 </action>
                 <action name="rebuild">
                     <target>clean</target>
-                    <target>main</target>
+                    <target>grin</target>
+                </action>
+                <action name="run">
+                    <target>tmp</target>
+                </action>
+                <action name="debug">
+                    <script>nbproject/ide-targets.xml</script>
+                    <target>debug-nb</target>
                 </action>
             </ide-actions>
             <export>
                 <type>jar</type>
                 <location>grin/build/jdktools/grin_viewer/grinviewer.jar</location>
-                <build-target>main</build-target>
+                <build-target>grin</build-target>
             </export>
             <export>
                 <type>folder</type>
                 <location>grin/build/jdktools/library</location>
-                <build-target>main</build-target>
+                <build-target>grin</build-target>
             </export>
             <export>
                 <type>jar</type>
                 <location>grin/build/jdktools/compiler/compiler.jar</location>
-                <build-target>main</build-target>
+                <build-target>grin</build-target>
             </export>
             <export>
                 <type>jar</type>
                 <location>grin/build/xlets/gamexlet/00003.jar</location>
-                <build-target>main</build-target>
+                <build-target>grin</build-target>
             </export>
             <export>
                 <type>folder</type>
                 <location>grin/build/xlets/menuxlet/classes</location>
-                <build-target>main</build-target>
+                <build-target>grin</build-target>
             </export>
             <export>
                 <type>jar</type>
                 <location>grin/build/xlets/monitorxlet/00001.jar</location>
-                <build-target>main</build-target>
+                <build-target>grin</build-target>
             </export>
             <view>
                 <items>
@@ -206,6 +213,8 @@
                     <ide-action name="build"/>
                     <ide-action name="rebuild"/>
                     <ide-action name="clean"/>
+                    <ide-action name="run"/>
+                    <ide-action name="debug"/>
                 </context-menu>
             </view>
             <subprojects/>

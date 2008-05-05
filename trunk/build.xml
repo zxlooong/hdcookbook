@@ -5,13 +5,19 @@
   <property file="${os.name}.user.vars.properties"/>
   <property file="user.vars.properties"/>	
   <property file="vars.properties"/>	
-                              
+
   <!-- This will create a hdcookbook disc image and the tools required for it -->
   <target name="main" depends="bd-tools">
       <!-- Build Grin's compile-time (javase-based) library and tools,
        as well as the hdcookbook sample disc image --> 
       <ant dir="grin" antfile="buildscripts/ant/build_hdcookbook_xlets.xml"/>
   </target>
+
+  <target name="grin">
+      <!-- Build GRIN library and tools, including the mosaic builder -->
+      <ant dir="grin" antfile="buildscripts/ant/build_library.xml" />
+      <ant dir="grin" antfile="buildscripts/ant/build_jdktools.xml" />
+   </target>
   
   <!-- Build just the tools needed for making a BD disc image -->
   <target name="bd-tools">

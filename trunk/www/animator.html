@@ -12,7 +12,10 @@
 <p>
 This project includes a well-developed animation framework
 that's well suited to the needs of Blu-ray, and other television
-platforms based on PBP, like OCAP and MHP.  The 
+platforms based on PBP, like OCAP and MHP.  This framework
+gives the programmer and author the tools needed to create
+time-based animation withoptimized drawing, where only the areas
+of the screen that have changed are re-drawn.  The 
 <a href="grin.html"><u>GRIN scene graph</u></a>
 uses this animation framework, but the animation framework can also
 be used in a stand-alone fashion.  It features an open architecture that
@@ -52,7 +55,7 @@ that an author can use to visualize and tune the drawing operations
 performed in an animation.  An author can group together related sets
 of drawings (perhaps those co-located on the screen), and can provide
 other information that helps the drawing engine to minimize the drawing
-that needs to be done.  In the screen grab, thh areas to be erased are
+that needs to be done.  In the screen grab, the areas to be erased are
 showin in red.  The turtles are moving to the right, but because they fill
 a rectangular area with opaque pixels, only the left side of the previous
 image needs to be erased.  The GRIN show that produced this frame is in the

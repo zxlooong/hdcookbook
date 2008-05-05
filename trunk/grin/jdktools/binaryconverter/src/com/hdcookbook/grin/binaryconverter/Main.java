@@ -192,7 +192,7 @@ public class Main {
         try {
            Main.convert(assetPath, assetDirs, textFile, 
                    extensionParser, outputDir, debug, optimize);
-        } catch (IOException e) {           
+        } catch (Throwable e) {           
             e.printStackTrace();
             System.exit(1);
         }

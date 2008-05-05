@@ -60,11 +60,14 @@ import com.hdcookbook.grin.util.ManagedImage;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
@@ -77,102 +80,131 @@ import javax.imageio.ImageIO;
  **/
 public class Mosaic {
 
-    private LinkedList parts = new LinkedList();
+    private AbstractList<MosaicPart> partsList = new LinkedList<MosaicPart>();
+    MosaicPart[] parts = null;
 
-    private int width = 0;
-    private int height = 0;
+    private Component progressComponent = null;
+    private int maxWidth;
+    private int maxHeight;
+    private int minWidth = 128;
     private String outputName;
     private int position;
+    private int currPixels = Integer.MAX_VALUE;	// # pixels occupied
+    private int currWidth = 0;
+    private int currHeight = 0;
 
     private BufferedImage buffer;
     private Graphics2D graphics;	// into buffer
 
+    /**
+     * Create a new mosaic with generous maximum dimensions
+     **/
     public Mosaic() {
-	this(2048, 1024);
+	this(4196, 16384);
     }
 
     /** 
      * Create a new mosaic, with the given maximum dimensions.
      **/
-    public Mosaic(int width, int height) {
-	buffer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-	graphics  = (Graphics2D)  buffer.getGraphics();
-	graphics.setComposite(AlphaComposite.Src);
-	graphics.setColor(Color.yellow);
-	graphics.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
-    }
-
-
-    /**
-     * Get the image buffer we use to store our contents.
-     **/
-    public BufferedImage getBuffer() {
-	return buffer;
-    }
-
-    public int getHeight() {
-	return buffer.getHeight();
-    }
-
-    public int getWidth() {
-	return buffer.getWidth();
+    public Mosaic(int maxWidth, int maxHeight) {
+	this.maxWidth = maxWidth;
+	this.maxHeight = maxHeight;
+	if (minWidth > maxWidth) {
+	    minWidth = maxWidth;
+	}
     }
 
     public int getHeightUsed() {
-	return height;
+	return currHeight;
     }
 
     public int getWidthUsed() {
-	return width;
+	return currWidth;
     }
 
     /**
-     * Put the image represented by mi and im into the mosaic buffer,
-     * if possible.  Otherwise return null.
+     * Put the image represented by mi and im into the mosaic.
+     * This always works, and returns a MosaicPart.
      **/
     public MosaicPart putImage(ManagedImage mi, BufferedImage im) {
-	// Use a fairly simple brute-force first-fit algorithm.
+	MosaicPart part = new MosaicPart(mi, this);
+	partsList.add(part);
+	return part;
+    }
 
-	Rectangle placement = new Rectangle(im.getWidth(), im.getHeight());
-	if (placement.width > buffer.getWidth()) {
-	    return null;	// It can't fit
-	}
-	int nextY = buffer.getHeight();
-	while (placement.y + placement.height <= buffer.getHeight()) {
-	    boolean found = true;
-	    for (Iterator it = parts.iterator(); found && it.hasNext(); ) {
-		MosaicPart part = (MosaicPart) it.next();
-		if (part.intersects(placement)) {
-		    found = false;
-		    placement.x = part.nextX();
-		    int y = part.nextY();
-		    if (y < nextY) {
-			nextY = y;
-		    }
-		    if (placement.x + placement.width > buffer.getWidth()) {
-			placement.x = 0;
-			if (Debug.ASSERT && placement.y >= nextY) {
-			    Debug.assertFail();
-			}
-			placement.y = nextY;
-                        nextY = buffer.getHeight();
-                    }
-		}
-	    }
-	    if (found) {
-		MosaicPart part = new MosaicPart(mi.getName(), this, placement);
-		parts.add(part);
-		graphics.drawImage(im, placement.x, placement.y, null);
-		if (part.nextX() > width) {
-		    width = part.nextX();
-		}
-		if (part.nextY() > height) {
-		    height = part.nextY();
-		}
-		return part;
+    /**
+     * Compile this mosaic into an optimal arrangement.
+     *
+     * @return if this mosaic is used for images, false if it's empty
+     **/
+    public boolean compile(Component progressComponent) {
+	this.progressComponent = progressComponent;
+	parts = partsList.toArray(new MosaicPart[partsList.size()]);
+	Arrangement arrangement = new Arrangement(maxHeight, parts);
+	for (int width = minWidth; width <= maxWidth; width++) {
+	    arrangement.arrangeWithin(width);
+	    int pixels = arrangement.getPixelsUsed();
+	    if (pixels < currPixels) {
+		setBestArrangement(arrangement);
 	    }
 	}
-	return null;
+	return currPixels > 0;
+    }
+
+    //
+    // Sets the best arrangement seen so far to the argument.
+    // Copies all needed data from arrangement, so that Arrangement
+    // can be subsequently modified.
+    //
+    void setBestArrangement(Arrangement arrangement) {
+	currPixels = arrangement.getPixelsUsed();
+	synchronized(parts) {
+	    arrangement.positionParts(parts);
+	    currWidth = arrangement.getWidthUsed();
+	    currHeight = arrangement.getHeightUsed();
+	}
+	Component c = progressComponent;
+	if (c != null) {
+	    // System.out.println("--> p: " + currPixels + "  w: " + currWidth
+	    //			 + "  h: " + currHeight);
+	    c.repaint(100L);
+	    // c.repaint(); try { Thread.sleep(4000); } catch (Throwable t) { }
+	}
+    }
+
+    int getCurrPixels() {
+	return currPixels;
+    }
+
+    void paintStatus(Graphics2D g) {
+	if (parts == null) {
+	    return;
+	}
+	g.setComposite(AlphaComposite.Src);
+	synchronized(parts) {
+	    if (currWidth == 0 || currHeight == 0 || progressComponent==null) {
+		return;
+	    }
+	    float scaleX = ((float) progressComponent.getWidth()) / currWidth;
+	    float scaleY = ((float) progressComponent.getHeight()) / currHeight;
+	    if (scaleX < scaleY) {
+		scaleY = scaleX;
+	    } else {
+		scaleX = scaleY;
+	    }
+	    g.setColor(Color.yellow);
+	    g.fillRect(0, 0, (int) (currWidth * scaleX), 
+	    		     (int) (currHeight * scaleY));
+	    Rectangle p = new Rectangle();
+	    for (MosaicPart part : parts) {
+		Rectangle r = part.getPlacement();
+		p.x = (int) (r.x * scaleX);
+		p.y = (int) (r.y * scaleY);
+		p.width = (int) (r.width * scaleX);
+		p.height = (int) (r.height * scaleY);
+		part.getImage().drawScaled(g, p, progressComponent);
+	    }
+	}
     }
 
     /**
@@ -208,9 +240,21 @@ public class Mosaic {
     /**
      * Write out our image buffer as a PNG image.
      **/
-    public void writeBuffer(File out) throws IOException {
-	BufferedImage used = buffer.getSubimage(0, 0, width, height);
-	boolean ok = ImageIO.write(used, "PNG", out);
+    public void writeMosaicImage(File out) throws IOException {
+	if (currPixels == Integer.MAX_VALUE) {
+	    throw new IOException("Unable to create mosaic " + out);
+	}
+	BufferedImage buffer = new BufferedImage(currWidth, currHeight, 
+					BufferedImage.TYPE_INT_ARGB);
+	Graphics2D graphics  = (Graphics2D)  buffer.getGraphics();
+	graphics.setComposite(AlphaComposite.Src);
+	graphics.setColor(Color.yellow);
+	graphics.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
+	for (MosaicPart part : parts) {
+	    Rectangle r = part.getPlacement();
+	    part.getImage().draw(graphics, r.x, r.y, null);
+	}
+	boolean ok = ImageIO.write(buffer, "PNG", out);
 	if (!ok) {
 	    throw new IOException("No writer found");
 	}

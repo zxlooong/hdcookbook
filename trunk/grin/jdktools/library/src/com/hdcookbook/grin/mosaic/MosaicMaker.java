@@ -66,6 +66,7 @@ import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.AssetFinder;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -81,6 +82,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.Comparator;
 import javax.imageio.ImageIO;
@@ -103,12 +105,16 @@ import javax.imageio.ImageIO;
     private String[] assetPath;
     private SEShow[] showTrees;
 
-    private ArrayList images = new ArrayList();
-    private LinkedList mosaics = new LinkedList();
-    private HashMap partsByName = new HashMap();
-    private HashMap mosaicHint = new HashMap();  // file name to mosaic name
-    private HashMap specialMosaics = new HashMap(); // mosaic name to Mosaic
+    private ArrayList<ManagedImage> images = new ArrayList<ManagedImage>();
+    private Mosaic defaultMosaic = new Mosaic();
+    private HashMap<String, MosaicPart> partsByName 
+    		= new HashMap<String, MosaicPart>();
+    private HashMap<String, String> mosaicHint 
+    		= new HashMap<String, String>();  // file name to mosaic name
+    private HashMap<String, Mosaic> specialMosaics
+                = new HashMap<String, Mosaic>(); // mosaic name to Mosaic
     Graphics2D frameG;
+    private Mosaic currentMosaic = null;
 
     /**
      * Create a mosaic maker
@@ -138,11 +144,10 @@ import javax.imageio.ImageIO;
                 for (String imageName : mosaicImages) {
                     mosaicHint.put(imageName, name);
                 }
-                specialMosaics.put(name, new Mosaic(width, height));                         
+                specialMosaics.put(name, new Mosaic(width, height));
             }
         }
 
-        
 	setLayout(null);
 	setSize(960, 570);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -152,7 +157,8 @@ import javax.imageio.ImageIO;
                 } catch (InterruptedException ex) {
                 }
                 destroy();
-                System.exit(0);
+		System.out.println("Window closed; compilation aborted.");
+                System.exit(1);
             }
         });
 	setVisible(true);
@@ -164,14 +170,20 @@ import javax.imageio.ImageIO;
         // close the window
         dispose();
     }
+
     /**
-     * Paint a little image.  We don't really show our state
-     * here, because our frame is really just a bit of eye candy
-     * so you can see what's going on.  The interesting stuff is
-     * just blasted to the framebufer using direct draw.
+     * Paint something.  
      **/
     public void paint(Graphics g) {
-	g.drawString("Making mosaics...", 30, 16);
+	g.setColor(Color.black);
+	g.fillRect(0, 0, getWidth(), getHeight());
+	g.setColor(Color.white);
+	Mosaic m = currentMosaic;
+	if (m == null) {
+	    g.drawString("Making mosaics...", 30, 16);
+	} else {
+	    m.paintStatus((Graphics2D) g);
+	}
     }
 
     private void addImage(ManagedImage mi) {
@@ -180,69 +192,42 @@ import javax.imageio.ImageIO;
 	mi.draw(frameG, 0, 30, null);
     }
 
-    private void addAllToMosaic() throws IOException {
-	// Sort by tallest first.  I think this probably helps pack
-	// images a little better.
-	Collections.sort(images, new Comparator() {
-	    public int compare(Object o1, Object o2) {
-		int h1 = ((ManagedImage) o1).getHeight();
-		int h2 = ((ManagedImage) o2).getHeight();
-		return h2 - h1;
+    private void addAllToMosaics() throws IOException {
+	// Sort by maximum dimension, since the maximum dimension of a
+	// rectangle constrains the placement of subsequent rectangles
+	// more.
+	Collections.sort(images, new Comparator<ManagedImage>() {
+	    public int compare(ManagedImage m1, ManagedImage m2) {
+		int d1 = Math.max(m1.getWidth(), m1.getHeight());
+		int d2 = Math.max(m2.getWidth(), m2.getHeight());
+		return d2 - d1;
 	    }
 	});
 
 
 	for (int i = 0; i < images.size(); i++) {
-	    addToMosaic((ManagedImage) images.get(i));
+	    addToMosaic(images.get(i));
 	}
     }
 
     private void addToMosaic(ManagedImage mi) throws IOException {
 	String name = mi.getName();
-	MosaicPart part = (MosaicPart) partsByName.get(name);
-	BufferedImage imAdded = null;
-	if (part == null) {
-	    imAdded = ImageIO.read(AssetFinder.getURL(mi.getName()));
+	MosaicPart part = partsByName.get(name);
+	if (part != null) {
+	    return;
 	}
-	boolean already = part != null;
-	if (part == null) {
-	    String special = (String) mosaicHint.get(mi.getName());
-	    if (special != null) {
-		Mosaic m = (Mosaic) specialMosaics.get(special);
-		assert m != null;
-		part = m.putImage(mi, imAdded);  // null if doesn't fit
-		if (part == null) {
-		    System.out.println("***  Warning:  " + mi.getName()
-		    		       + " did not fit in mosaic " + special
-				       + ".");
-		}
-	    }
-	}
-	for (Iterator it = mosaics.iterator(); part == null && it.hasNext(); ) {
-	    Mosaic m = (Mosaic) it.next();
+	BufferedImage imAdded = ImageIO.read(AssetFinder.getURL(mi.getName()));
+	String special = (String) mosaicHint.get(mi.getName());
+	if (special != null) {
+	    mosaicHint.remove(mi.getName());	// hint has been taken
+	    Mosaic m = specialMosaics.get(special);
+	    assert m != null;
 	    part = m.putImage(mi, imAdded);
+	} else {
+	    part = defaultMosaic.putImage(mi, imAdded);
 	}
-	if (part == null) {
-	    Mosaic m = new Mosaic();
-	    part = m.putImage(mi, imAdded);
-	    if (part == null) {
-		System.out.println();
-		System.out.println("Unable to add an image.  Perhaps it's too big?");
-		System.out.println("It has a width of " + mi.getWidth() + " and a height of " + mi.getHeight() + ".");
-		System.out.println("You might want to make a mosaic_hint for it.");
-		System.out.println();
-		throw new IOException("Unable to add image " + mi);
-	    }
-            mosaics.add(m);
-	}
-	if (imAdded != null) {
-	    partsByName.put(name, part);
-	    Mosaic m = part.getMosaic();
-	    frameG.drawImage(m.getBuffer(), 0, 30, 960, 540, 
-			      0, 0, m.getWidth(), m.getHeight(),
-                              null);
-	    Toolkit.getDefaultToolkit().sync();
-	}
+	assert part != null;
+	partsByName.put(name, part);
     }
 
     /**
@@ -270,10 +255,29 @@ import javax.imageio.ImageIO;
 		}
 	    }
 	}
-	addAllToMosaic();
-	mosaics.addAll(specialMosaics.values());
+	frameG.setColor(Color.black);
+	frameG.fillRect(0, 0, getWidth(), getHeight());
+	addAllToMosaics();
+	LinkedList<Mosaic> mosaics = new LinkedList<Mosaic>();
+	if (compile(defaultMosaic)) {
+	    mosaics.add(defaultMosaic);
+	}
+        for (Map.Entry<String, Mosaic> special : specialMosaics.entrySet()) {
+            Mosaic m = special.getValue();
+            if (compile(m)) {
+                mosaics.add(m);
+            } else {
+                System.out.println("Warning:  None of the images in mosaic \"" 
+			+ special.getKey()
+                        + "\" were used in show.  Discarding empty mosaic.");
+            }
+        }
+	for (Map.Entry<String, String> unused : mosaicHint.entrySet()) {
+	    System.out.println("Warning:  Image \"" +  unused.getKey() 
+	    		       + "\" in mosaic_hint \"" + unused.getValue()
+			       + "\" was never used in a show.  Discarded.");
+	}
 	System.out.println(mosaics.size() + " mosaics created.");
-        Iterator it = mosaics.iterator();
 	File mapFile = new File(outputDir, "images.map");
             // This file is read by 
             // com.hdcookbook.grin.util.ImageManager.readImageMap()
@@ -281,22 +285,23 @@ import javax.imageio.ImageIO;
 				  new FileOutputStream(mapFile)));
 	mapOS.writeInt(mosaics.size());
 	int totalPixels = 0;
-	for (int i = 0; it.hasNext(); i++) {
-	    Mosaic m = (Mosaic) it.next();
+        Iterator<Mosaic> mit = mosaics.iterator();
+	for (int i = 0; mit.hasNext(); i++) {
+	    Mosaic m = mit.next();
 	    String name = "im" + i + ".png";
 	    m.setOutputName(name);
 	    m.setPosition(i);
 	    File out = new File(outputDir, "im" + i + ".png");
-	    m.writeBuffer(out);
+	    m.writeMosaicImage(out);
 	    totalPixels += m.getWidthUsed() * m.getHeightUsed();
 	    System.out.println("    Wrote " + out);
 	    mapOS.writeUTF(name);
 	}
 
 	mapOS.writeInt(partsByName.size());
-	it = partsByName.values().iterator();
-	while (it.hasNext()) {
-	    MosaicPart part = (MosaicPart) it.next();
+	Iterator<MosaicPart> mpit = partsByName.values().iterator();
+	while (mpit.hasNext()) {
+	    MosaicPart part = mpit.next();
 	    mapOS.writeUTF(part.getName());
 	    mapOS.writeInt(part.getMosaic().getPosition());
 	    Rectangle pl = part.getPlacement();
@@ -310,4 +315,10 @@ import javax.imageio.ImageIO;
 	System.out.printf("Mosaics occupy a total of %,d pixels.\n",
 			   totalPixels);
     }
- }
+
+    private boolean compile(Mosaic m) {
+	currentMosaic = m;
+	boolean result = m.compile(this);
+	return result;
+    }
+}

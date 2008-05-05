@@ -63,8 +63,6 @@ import java.io.IOException;
  */
 public class GrinCompiler {
     
-    //private SEShow show;
-    
     public GrinCompiler() {
     }
 
