@@ -81,7 +81,8 @@ public class WriteToStorageXlet implements Xlet {
         // initialize Logger
         XletLogger.setLogFile(System.getProperty("dvb.persistent.root")
 	       + "/" + context.getXletProperty("dvb.org.id")
-	       + "/" + context.getXletProperty("dvb.app.id"));
+	       + "/" + context.getXletProperty("dvb.app.id") 
+               + "/" + "log.txt");
         
     }
     

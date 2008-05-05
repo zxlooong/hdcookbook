@@ -99,7 +99,8 @@ public class HelloTVXlet implements javax.tv.xlet.Xlet, Runnable {
         //Set the logging output file
         XletLogger.setLogFile(System.getProperty("dvb.persistent.root")
 	       + "/" + context.getXletProperty("dvb.org.id")
-	       + "/" + context.getXletProperty("dvb.app.id"));
+	       + "/" + context.getXletProperty("dvb.app.id")
+               + "/" + "log.txt");
 
         bindingUnitDir = root + File.separator + orgID + File.separator + discID;
         XletLogger.log("BindingRoot: " + bindingUnitDir);

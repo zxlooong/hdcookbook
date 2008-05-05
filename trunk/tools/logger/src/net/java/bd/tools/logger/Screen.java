@@ -200,6 +200,14 @@ public class Screen {
         }
     }
     
+     /**
+     * Repaints the log component if it's visible on the screen.
+     */   
+    public static synchronized void repaintLogScreen() {
+        if (showLogMode) {
+            logComponent.repaint();
+        }
+    } 
     
     // ========================= Screen sizes ==========================
     public static int getScreenWidth() {

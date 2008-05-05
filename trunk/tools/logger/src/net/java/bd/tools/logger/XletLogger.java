@@ -80,6 +80,7 @@ public class XletLogger {
     public static void log(String s) {
         checkInitialized();
         Logger.log(s);
+        Screen.repaintLogScreen();
     }
     
     /**
@@ -90,6 +91,7 @@ public class XletLogger {
     public static void log(String s, Throwable t) {
         checkInitialized();
         Logger.log(s, t);
+        Screen.repaintLogScreen();
     }
     
     /**
