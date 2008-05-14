@@ -33,6 +33,17 @@
 			  <!-- attribute name="Class-Path" value="lib/script.jar"/ -->
 		  </manifest>
     </jar>
+    <!-- use schemagen to generate XML schema from BDJO class -->
+    <exec executable="schemagen">
+        <arg value="-cp"/>
+        <arg value="${bdjo-dist}/bdjo.jar"/>
+        <arg value="net.java.bd.tools.bdjo.BDJO"/>
+        <arg value="-d"/>
+        <arg value="${bdjo-dist}"/>
+    </exec>
+    <!-- rename schemagen output to bdjo.xsd -->
+    <move file="${bdjo-dist}/schema1.xsd" 
+          tofile="${bdjo-dist}/bdjo.xsd"/>
   </target>
 
   <target name="bdjo-clean"
