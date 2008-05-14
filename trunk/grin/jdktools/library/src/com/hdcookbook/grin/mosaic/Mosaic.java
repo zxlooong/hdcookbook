@@ -87,6 +87,7 @@ public class Mosaic {
     private int maxWidth;
     private int maxHeight;
     private int minWidth = 128;
+    private int numWidths = 65;
     private String outputName;
     private int position;
     private int currPixels = Integer.MAX_VALUE;	// # pixels occupied
@@ -100,7 +101,7 @@ public class Mosaic {
      * Create a new mosaic with generous maximum dimensions
      **/
     public Mosaic() {
-	this(4196, 16384);
+	this(4096, 16384);
     }
 
     /** 
@@ -141,7 +142,17 @@ public class Mosaic {
 	this.progressComponent = progressComponent;
 	parts = partsList.toArray(new MosaicPart[partsList.size()]);
 	Arrangement arrangement = new Arrangement(maxHeight, parts);
-	for (int width = minWidth; width <= maxWidth; width++) {
+	int lastWidth = -1;
+	double widthFactor = Math.log(((double) maxWidth) / minWidth);
+	for (int i = 0; i < numWidths; i++) {
+	    // Increase width geometrically from minWidth to maxWidth
+	    double f = widthFactor * ((double) i) / (numWidths - 1);
+	    f = Math.exp(f) * minWidth;
+	    int width = (int) (f + 0.5);
+	    if (width == lastWidth) {
+		continue;	// Don't try same width twice
+	    }
+	    lastWidth = width;
 	    arrangement.arrangeWithin(width);
 	    int pixels = arrangement.getPixelsUsed();
 	    if (pixels < currPixels) {
