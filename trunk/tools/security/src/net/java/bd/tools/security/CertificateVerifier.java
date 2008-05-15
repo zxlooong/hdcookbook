@@ -72,8 +72,8 @@ import sun.security.util.*;
 
 /* 
  * A poor man's certificate verifier for BD-J.
- * This tool checks for items below.  Pass in the application certificate and the root certificate
- * to the command line.
+ * This tool checks for items below.  Pass in the application certificate, root certificate
+ * or the binding unit certificate to the command line.
  * 
  * The certificate:
  * 1. Need to be in SHA1WithRSA signature format,
@@ -82,7 +82,7 @@ import sun.security.util.*;
  * 4. Need IssuerAlternative and SubjectAlternative extensions set, MHP 12.5.9,
  * 
  * For the root cert:
- * 5. Need KeyUsage extension, marked critical, keyCertSign turned on.   MHP 12.5.9,
+ * 5. Need KeyUsage extension, marked critical, KeyUsage and keyCertSign turned on.   MHP 12.5.9,
  * 6. Need BasicConstraints extension, marked critical, MHP 12.11.2.10,
  *
  * For the app cert:
@@ -105,16 +105,15 @@ public class CertificateVerifier {
             printUsage();
             return;
         }
+        String type = args[0];
+        File certFile = new File(args[1]);
         
-        File appCertFile = new File(args[0]);
-        File rootCertFile = new File(args[1]);
-        if (!appCertFile.exists() || !rootCertFile.exists()) {
-            System.out.println("File not found " + appCertFile.getAbsolutePath() + ", " + rootCertFile.getAbsolutePath());
+        if (!certFile.exists()) {
+            System.out.println("File not found " + certFile.getAbsolutePath());
             printUsage();
             return;
-        }
-        
-        new CertificateVerifier().runTest(appCertFile, rootCertFile);
+        }   
+        new CertificateVerifier().runTest(type, certFile);
     }
     
     private String errorString = null;
@@ -123,19 +122,15 @@ public class CertificateVerifier {
      * Check two certificate files according to the bd-j specification.
      * @return true if the check passes, false if either certificate check results in an error.
      */
-    public boolean runTest(File appCertFile, File rootCertFile) {
+    public boolean runTest(String type, File certFile) {
      
         boolean failed = false;
-        
-        System.out.println("Starting the verfication");
-        
-        X509Certificate appCert = null;
-        X509Certificate rootCert = null;
+        System.out.println("Starting the verfication for certificate file:" + certFile);
+        X509Certificate cert = null;
         
         try {
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
-            rootCert = (X509Certificate)factory.generateCertificate(new FileInputStream(rootCertFile));   
-            appCert = (X509Certificate)factory.generateCertificate(new FileInputStream(appCertFile));
+            cert = (X509Certificate)factory.generateCertificate(new FileInputStream(certFile));   
         } catch (Exception e) {
             System.out.println("Error in creating certificate from a file");
             e.printStackTrace();
@@ -143,44 +138,19 @@ public class CertificateVerifier {
         }
         
         if (!failed) {
-        
-            System.out.println("Checking the application certiticate");
+            System.out.println("Checking the certiticate");
             try {
-                checkCert(appCert, false);
-                doParsingChecks(appCertFile);
+                checkCert(cert, type);
+                doParsingChecks(certFile);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            if (errorString != null){
-                System.out.println(errorString);
-                failed = true;
-            }
-            
-            errorString = null;
-            System.out.println("Checking the root certificate");
-            
-            try {
-                checkCert(rootCert, true);
-                doParsingChecks(rootCertFile);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            // checking the serial number
-            if (appCert.getSerialNumber().equals(rootCert.getSerialNumber())) {
-                errorString += ("Two certificates have the same serial number");
-            }
-            
             if (errorString != null){
                 System.out.println(errorString);
                 failed = true;
             }
         }
-        
-        
-        System.out.println("Done with the verification");
-        
-        
+        System.out.println("Done with the verification for the certificate file:" + certFile);
         return !failed;
     }   
     
@@ -241,7 +211,6 @@ public class CertificateVerifier {
                 errorString+= "\nCheckFormat, validity not in GeneralizedTime format, tag = " + Integer.toHexString(values[i].tag);
             }
         }
-        
     }
     
     private void checkForUTF8String(byte[] names) throws IOException {
@@ -257,9 +226,12 @@ public class CertificateVerifier {
         }
     }
     
-    private void checkCert(X509Certificate cert, boolean isRootCertificate) 
+    private void checkCert(X509Certificate cert, String type) 
        throws CertificateParsingException {
-            
+       
+        boolean isRootCert = type.equalsIgnoreCase("root");
+        boolean isBindingCert = type.equalsIgnoreCase("binding");
+        
         // 1, check algorithm
         String certAlg = cert.getSigAlgName();
         if (!certAlg.equalsIgnoreCase("SHA1withRSA")) {
@@ -281,9 +253,9 @@ public class CertificateVerifier {
         boolean[] keyUsage = cert.getKeyUsage();
         boolean[] expected;
         
-        if (isRootCertificate) {
-            // the 6th bit, keyCertSign, should be set        
-            expected = new boolean[]{false, false, false, false, false, true, false, false, false};
+        if (isRootCert) {
+            // the 1st bit, digitalSignature, the 6th bit, keyCertSign should be set        
+            expected = new boolean[]{true, false, false, false, false, true, false, false, false};
         } else {
             // the 1st bit, digitalSignature, should be set  
             expected = new boolean[]{true, false, false, false, false, false, false, false, false };            
@@ -305,7 +277,7 @@ public class CertificateVerifier {
             errorString += "\nCheckExtensions, no SubjectAlternativeName set";
         }
 
-        if (isRootCertificate) {
+        if (isRootCert || isBindingCert) {
             int basicConstraints = cert.getBasicConstraints();
             if (basicConstraints == 1) {
                 errorString += "\nCheckExtensions, root certificate missing or having non-critical BasicConstraints";
@@ -314,7 +286,6 @@ public class CertificateVerifier {
     }
     
     public static void printUsage() {
-        System.out.println("Certificate Verififer <application certificate> <root certificate>");
+        System.out.println("Certificate Verififer <root|app|binding> <certificate>");
     }
-
 }

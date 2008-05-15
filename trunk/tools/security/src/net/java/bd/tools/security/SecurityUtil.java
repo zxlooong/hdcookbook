@@ -143,6 +143,7 @@ public class SecurityUtil {
    static final String SIG_ALG = "SHA1WithRSA";
    static final String APP_ROOT_DISC_FILE = "app.discroot.crt";
    static final String BU_ROOT_DISC_FILE = "bu.discroot.crt";
+   static final int KEY_LENGTH = 1024;
     
    // Intermediate files to create, will be deleted at the tool exit time;
    // XXX Make sure they are always deleted.
@@ -390,7 +391,7 @@ public class SecurityUtil {
             generateCSRResponse();
             importCSRResponse();
             if (debug) {
-                verifyCertificates();
+               verifyCertificate("app", APPCERTFILE);
             }
             exportRootCertificate();
         } catch (Exception e) {
@@ -666,21 +667,25 @@ public class SecurityUtil {
     private void exportRootCertificate() throws Exception {
 	String exportFileName = APP_ROOT_DISC_FILE;
         String exportAlias = certSignerAlias;
+        String type = "root";
         if (isBindingUnitCert) {
             exportFileName = BU_ROOT_DISC_FILE;
             exportAlias = newCertAlias;
+            type = "binding";
         }
         String[] exportRootCertificateArgs = {
 		"-export", "-alias", exportAlias, "-keypass", rootKeyPassword, 
 		"-keystore", keystoreFile, "-storepass", keystorePassword,
 		"-v", "-file", exportFileName};
 	KeyTool.main(exportRootCertificateArgs);
+        if (debug) {
+            verifyCertificate(type, exportFileName);
+        }
     }
     
-    private void verifyCertificates() {
-        File appCert = new File(APPCERTFILE);
-        File rootCert = new File("app.discroot.crt");
-        boolean check = new CertificateVerifier().runTest(appCert, rootCert);
+    private void verifyCertificate(String type, String filename) {
+        File cert = new File(filename);
+        boolean check = new CertificateVerifier().runTest(type, cert);
         if (!check) {
             throw new RuntimeException("Problem with the certification generation");
         }
@@ -719,10 +724,11 @@ public class SecurityUtil {
              String keyPassword, boolean isRootCert) throws Exception { 
         Date validFrom, validTo;
         
-        // For forcing GeneralizedTime DER encoding, 
-        // make the range before 1950 and after 2050.
+        // For forcing GeneralizedTime DER encoding, with Bouncy Castle Provider 
+        // make the range before 1950 and after 2050. The BD-J spec recommends
+        // using the default validity period used below
         Calendar calendar = Calendar.getInstance();
-        calendar.set(1949, 1, 1);
+        calendar.set(0000, 1, 1);
         validFrom = calendar.getTime();
         calendar.clear();
         calendar.set(9999, 1, 1);
@@ -751,14 +757,15 @@ public class SecurityUtil {
         if (isRootCert) {
             // Need to add root cert extensions.
             if (isBindingUnitCert) { 
-                // This certificate is used for signing
+                // This certificate is used only for signing
                 cg.addExtension(X509Extensions.KeyUsage.getId(), true,
         		new X509KeyUsage(X509KeyUsage.digitalSignature));
             } else {
+                int usage = X509KeyUsage.digitalSignature +
+                            X509KeyUsage.keyCertSign;
                 cg.addExtension(X509Extensions.KeyUsage.getId(), true,
-        		new X509KeyUsage(X509KeyUsage.keyCertSign));
+        		new X509KeyUsage(usage));
             }
-            
             cg.addExtension(X509Extensions.IssuerAlternativeName.getId(), false,
             	getRfc822Name(altName));    
             cg.addExtension(X509Extensions.BasicConstraints.getId(), true, 
@@ -780,7 +787,7 @@ public class SecurityUtil {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         SecureRandom random =
            SecureRandom.getInstance("SHA1PRNG", "SUN");
-        keyGen.initialize(1024, random);      
+        keyGen.initialize(KEY_LENGTH, random);      
         KeyPair keyPair = keyGen.generateKeyPair();
         return keyPair;
     }
