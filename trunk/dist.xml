@@ -39,6 +39,10 @@
             <fileset dir="tools">
                 <include name="**/bdjo.jar"/>
                 <include name="**/security.jar"/>
+                <include name="**/cpistrip.jar"/>
+                <include name="**/logger.jar"/>          
+                <include name="**/soundgen.jar"/>
+                <include name="**/soundsplit.jar"/>
                 <include name="README.*"/>
             </fileset>
         </copy>

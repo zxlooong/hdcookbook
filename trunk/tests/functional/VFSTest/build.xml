@@ -8,22 +8,22 @@
     
     <!-- xlet source dir, build dir, and a distribution dir for a disc image 
       -->
-    <property name="testxlet.src.dir"       value="src/VFSUpdateXlet"/> 
-    <property name="downloadxlet.src.dir"   value="src/DownloadedXlet"/>  
+    <property name="testxlet.src.dir"       value="src/VFSUpdateXlet"/>
+    <property name="downloadxlet.src.dir"   value="src/DownloadedXlet"/>
     <property name="build.dir"              value="build"/>
     <property name="testxlet.build.dir"     value="${build.dir}/testxlet/classes"/>
     <property name="downloadxlet.build.dir" value="${build.dir}/upload-bundle/classes"/>
     <property name="dist.dir"    value="dist"/>  
+    <property name="upload.dir" value="${dist.dir}/Upload"/>
     
     <!-- properties for the xlet -->
     <property name="xlet.name"      value="hellotvxlet.HelloTVXlet" />
     
-    <!-- disc image related properties -->   
+    <!-- disc image related properties -->
     <property name="premade.bdmv"   value="tools/DiscImage"/>
     <property name="bdjo-name"      value="00000"/>
     <property name="logger-name"    value="99999"/>
     <property name="orgid"          value="56789abc"/>
-    <property name="bdtools.dir"    value="tools/BDTools"/>
     <property name="bdjo-desc-file" value="${build.dir}/${bdjo-name}.xml"/>
     <property name="xlet.jar"       value="${bdjo-name}.jar"/>
     
@@ -32,9 +32,10 @@
     
     <target name="init">
         <tstamp/>
-        <mkdir dir="${testxlet.build.dir}"/>         
-        <mkdir dir="${downloadxlet.build.dir}"/> 
-        <mkdir dir="${dist.dir}/DiscImage"/>     
+        <mkdir dir="${testxlet.build.dir}"/>
+        <mkdir dir="${downloadxlet.build.dir}"/>
+        <mkdir dir="${dist.dir}/DiscImage"/>
+        <mkdir dir="${upload.dir}"/>
     </target>
     
     <target name="clean">
@@ -45,13 +46,20 @@
     </target>
     
     <target name="deploy" depends="bundle">
-        <zip destfile="${xlet.name}.zip"
-             basedir="${dist.dir}"/>
+        <scp todir="${hostdir}" password="${password}" 
+             trust="true">
+            <fileset dir="${upload.dir}"/>
+        </scp>
     </target>
          
     <target name="bundle" depends="jar, gen-bdjo-desc-file, 
-                                   sign-jars, copy-to-bdmv"
-            description="Make an blu-ray disc image"/>
+                                   sign-jars, copy-to-bdmv, make-upload-bundle"
+            description="Make an blu-ray disc image">
+                
+        <zip destfile="${xlet.name}.zip"
+             basedir="${dist.dir}"/>
+  
+    </target>         
     
     <target name="compile"
             depends="init" description="Compiles the sources">
@@ -68,7 +76,7 @@
             <fileset dir="${testxlet.src.dir}">
                 <include name="**/*.perm"/>
             </fileset>
-        </copy>    
+        </copy>
         
         <javac srcdir="${downloadxlet.src.dir}"
                bootclasspath="${bdj.classes}"
@@ -82,7 +90,7 @@
             <fileset dir="${downloadxlet.src.dir}">
                 <include name="**/*.perm"/>
             </fileset>
-        </copy>           
+        </copy>
     </target>
     
     <target name="jar"
@@ -92,23 +100,23 @@
         <jar jarfile="${build.dir}/${xlet.jar}"
              basedir="${testxlet.build.dir}"/>
         <jar jarfile="${downloadxlet.build.dir}/../${xlet.jar}"
-             basedir="${downloadxlet.build.dir}"/>     
+             basedir="${downloadxlet.build.dir}"/>
  
         <copy tofile = "${build.dir}/${logger-name}.jar" 
-              file="${logger.jar}"/>            
+              file="${logger.jar}"/>
     </target>
     
     <presetdef name="jdktools.java">
         <java fork="true" failOnError="true"/>
-    </presetdef>    
+    </presetdef>
 
     <target name="init-security-tools">
         <available file="keystore.store" property="keystore.exists"/>
         <path id="sec.tools.path">
             <pathelement location="${security.jar}"/>
             <pathelement location="${bouncycastle.jar}"/>
-            <pathelement location="${java.home}/../lib/tools.jar"/>   
-        </path>	           
+            <pathelement location="${java.home}/../lib/tools.jar"/>
+        </path>
     </target>
     
     <target name="generate-certs" unless="keystore.exists">
@@ -126,42 +134,40 @@
         </jdktools.java>
         
         <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
-            <arg value="-binding"/>   
+            <arg value="-binding"/>
             <arg value="${orgid}"/>
-            <classpath refid="sec.tools.path"/>	   
-        </jdktools.java>         
+            <classpath refid="sec.tools.path"/>
+        </jdktools.java>
         
     </target>
     
-    <target name="sign-jars" depends="init-security-tools, generate-certs">    
+    <target name="sign-jars" depends="init-security-tools, generate-certs">
          
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg value="${build.dir}/${xlet.jar}"/>    
-            <arg value="${downloadxlet.build.dir}/../${xlet.jar}"/>    
+            <arg value="${build.dir}/${xlet.jar}"/>
+            <arg value="${downloadxlet.build.dir}/../${xlet.jar}"/>
             <arg value="${build.dir}/${logger-name}.jar"/>
-            <classpath refid="sec.tools.path"/>	   
+            <classpath refid="sec.tools.path"/>
         </jdktools.java>
         
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
             <arg value="src/budafiles/bumf.xml"/>
-            <classpath refid="sec.tools.path"/>	   
-        </jdktools.java>          
+            <classpath refid="sec.tools.path"/>
+        </jdktools.java>
         
-    </target>  
+    </target>
     
     <target name="make-upload-bundle" depends="generate-certs">
-        
-        <property name="upload.dir" value="${dist.dir}/Upload"/>
         
         <copy todir="${upload.dir}"
               file="${downloadxlet.build.dir}/../${xlet.jar}"/>
         <copy tofile="${upload.dir}/sample.xml"
               file="src/budafiles/bumf.xml"/>
         <move tofile="${upload.dir}/sample.sf"
-              file="src/budafiles/bumf.sf"/>      
+              file="src/budafiles/bumf.sf"/>
     </target>
         
-    <target name="run" depends="bundle">
+    <target name="run" depends="deploy">
         <available property="windvd.exists" file="${WinDVD}"/>
         <fail unless="windvd.exists" message="WinDVD executable not found at ${WinDVD}."/>
         <exec executable="${WinDVD}">
@@ -177,14 +183,14 @@
         
         <java  
             fork="true" failOnError="true"
-            jar="${bdtools.dir}/bdjo.jar">
+            jar="${bdjo.jar}">
             <arg value="${bdjo-desc-file}"/>
             <arg value="${build.dir}/${bdjo-name}.bdjo"/>
         </java>
     </target>
     
     <target name="copy-to-bdmv" 
-            depends="jar, gen-bdjo-desc-file, sign-jars, make-upload-bundle">
+            depends="jar, gen-bdjo-desc-file, sign-jars">
         
         <property name="target.dir" value="${dist.dir}/DiscImage"/>
         
@@ -199,16 +205,16 @@
         <copy tofile = "${target.dir}/BDMV/JAR/${logger-name}.jar" 
               file="${build.dir}/${logger-name}.jar"/>
         <copy todir = "${target.dir}/BDMV/BDJO" 
-              file="${build.dir}/${bdjo-name}.bdjo"/>           
+              file="${build.dir}/${bdjo-name}.bdjo"/>
         <copy todir = "${target.dir}/CERTIFICATE" 
               file="app.discroot.crt"/>
         <copy todir = "${target.dir}/CERTIFICATE" 
-              file="bu.discroot.crt"/>              
+              file="bu.discroot.crt"/>
         <copy todir = "${target.dir}/CERTIFICATE/BACKUP" 
-              file="app.discroot.crt"/>    
+              file="app.discroot.crt"/>
         <copy todir = "${target.dir}/CERTIFICATE/BACKUP" 
-              file="bu.discroot.crt"/>  
-    </target>    
+              file="bu.discroot.crt"/>
+    </target>
     
     <target name="gen-bdjo-desc.tmp">
         
@@ -268,8 +274,8 @@
     <version>V_0200</version>
 </bdjo>
 
-        ]]></concat>
-        
+        ]]>
+        </concat>
         <condition property="update-bdjo-desc.file">
             <not>
                 <filesmatch

@@ -7,7 +7,7 @@
   <property file="vars.properties"/>	
 
   <!-- This will create a hdcookbook disc image and the tools required for it -->
-  <target name="main" depends="bd-tools">
+  <target name="main" depends="bd-tools-hdcookbook">
       <!-- Build Grin's compile-time (javase-based) library and tools,
        as well as the hdcookbook sample disc image --> 
       <ant dir="grin" antfile="buildscripts/ant/build_hdcookbook_xlets.xml"/>
@@ -20,13 +20,17 @@
    </target>
   
   <!-- Build just the tools needed for making a BD disc image -->
-  <target name="bd-tools">
-	  <ant dir="tools/bdjo"/> 
-	  <ant dir="tools/security/make"/> 
+  <target name="bd-tools-hdcookbook">
+	  <ant dir="tools" target="bdtools-hdcookbook-example"/> 
+  </target>
+  
+  <!-- Build all the tools under the tools dir -->
+  <target name="bd-tools-all">
+	  <ant dir="tools"/> 
   </target>
   
   <!-- A target for doing everything, except for putting javadoc to the www directory-->
-  <target name="all" depends="main, javadoc">
+  <target name="all" depends="main, javadoc, bd-tools-all">
         <!-- Runs autotest -->
         <ant dir="grin" antfile="buildscripts/ant/run_jdktools.xml" target="autotest-grinview"/>
         <ant dir="grin/samples" target="autotest-grinview"/>
@@ -51,8 +55,7 @@
   </target>
   
   <target name="clean"> 	  
-	  <ant dir="tools/bdjo" target="bdjo-clean"/>
-	  <ant dir="tools/security/make" target="clean"/>
+	  <ant dir="tools" target="clean"/>
 	  <ant dir="grin" antfile="buildscripts/ant/build_hdcookbook_xlets.xml" target="clean"/>
 	  <ant dir="grin" antfile="buildscripts/ant/build_grin_javadoc.xml" target="clean"/>        
 	  <ant dir="grin/samples" target="clean"/>

@@ -62,6 +62,27 @@ import org.havi.ui.HSceneFactory;
 
 /**
  * Provide static methods useful for general xlet logging need.
+ * The log goes to System.out, the logging screen, and to the file if the file location is set
+ * by the user.
+ * 
+ * Below are some sample code for using the XletLogger.
+ * 
+ *      .....
+ *       
+ *       java.awt.Container gui = new MyXletContainer(); // xlet root container for displaying gui
+ *       String ada = System.getProperty("dvb.persistent.root")
+ *	       + "/" + context.getXletProperty("dvb.org.id")
+ *	       + "/" + context.getXletProperty("dvb.app.id");
+ *       
+ *       XletLogger.setXletContainer(gui);  // Adds the xlet gui to the default HScene.
+ *       XletLogger.setLogFile(ada + "/" + "log.txt");  // logfile goes to ADA
+ *       XletLogger.setToggleKey(HRcEvent.VK_1); // VK_1 to toggle logging screen
+ * 
+ *       XletLogger.log("Starting the xlet..."); 
+ *       XletLogger.log("xlet's message is \" " + message + " \"");
+ *       XletLogger.setVisible(true); // this shows xlet root container (gui) on the screen
+ *
+ *   
  */
 
 public class XletLogger {
