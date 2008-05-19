@@ -469,7 +469,8 @@ public class SecurityUtil {
             initKeyStore();
             Signature signer = Signature.getInstance(SIG_ALG);
             if (debug) {
-                System.out.println("Signer of bumf.xml file is:" + contentSignerAlias);
+                System.out.println("Signer of " + BUMFile + " file is:" +
+                                  contentSignerAlias);
             }
             PrivateKey key = (PrivateKey) store.getKey(contentSignerAlias,
                               rootKeyPassword.toCharArray());
@@ -502,7 +503,7 @@ public class SecurityUtil {
      private void verifySignatureFile(String sigFile) throws Exception {
         Signature verifier = Signature.getInstance(SIG_ALG);
         if (debug) {
-                System.out.println("Verifier of bumf.xml file is:" + contentSignerAlias);
+                System.out.println("Verifier of " + sigFile + " file is:" + contentSignerAlias);
         }
         Certificate cert =  store.getCertificate(contentSignerAlias);
         verifier.initVerify(cert);

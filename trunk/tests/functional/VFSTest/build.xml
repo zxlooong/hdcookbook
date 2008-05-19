@@ -151,7 +151,7 @@
         </jdktools.java>
         
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg value="src/budafiles/bumf.xml"/>
+            <arg value="src/budafiles/sample.xml"/>
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
         
@@ -161,10 +161,10 @@
         
         <copy todir="${upload.dir}"
               file="${downloadxlet.build.dir}/../${xlet.jar}"/>
-        <copy tofile="${upload.dir}/sample.xml"
-              file="src/budafiles/bumf.xml"/>
-        <move tofile="${upload.dir}/sample.sf"
-              file="src/budafiles/bumf.sf"/>
+        <copy todir="${upload.dir}"
+              file="src/budafiles/sample.xml"/>
+        <copy todir="${upload.dir}"
+              file="src/budafiles/sample.sf"/>
     </target>
         
     <target name="run" depends="deploy">
