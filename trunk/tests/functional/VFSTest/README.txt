@@ -6,5 +6,7 @@ To try this test:
 
 1. Before building, adjust the variables in build.properties.
 2. Open src/VFSUpdateXlet/hellotvxlet/HelloTVXlet.java and adjust the HOSTDIR value.
-3. After building the test with ant, upload three files (sample.xml, sample.sf and 00000.jar) created in "dist/Upload" directory to the http server you've specified at step 2.
-4. The disc image is created in the "dist/DiscImage" dir.  
+3. The disc image is created in the "dist/DiscImage" dir.  
+
+Note that one might need to install jsch.jar 0.1.29 or later (http://www.jcraft.com/jsch/index.html) for the ant's scp task.  
+For more information, see http://ant.apache.org/manual/OptionalTasks/scp.html.
