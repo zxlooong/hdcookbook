@@ -56,12 +56,14 @@
 package net.java.bd.tools.bdjo;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * Application descriptor syntax - section 10.2.6.2
  *
  * @author A. Sundararajan
  */
+@XmlType(propOrder={})
 public class AppName {
     // application_name_length is specified in 8 bits
     public static final int NUM_NAME_BITS = 8;

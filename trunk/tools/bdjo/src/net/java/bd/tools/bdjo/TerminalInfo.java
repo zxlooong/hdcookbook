@@ -55,10 +55,13 @@
 
 package net.java.bd.tools.bdjo;
 
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * TerminalInfo - sections 10.2.2.2 and 10.2.2.3
  * @author A. Sundararajan
  */
+@XmlType(propOrder={})
 public class TerminalInfo {
     // default_font_file_name
     private String defaultFontFile;

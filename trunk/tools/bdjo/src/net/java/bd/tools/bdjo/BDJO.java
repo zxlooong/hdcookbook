@@ -56,6 +56,7 @@
 package net.java.bd.tools.bdjo;
 
 import java.io.UnsupportedEncodingException;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -65,6 +66,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * @author A. Sundararajan
  */
 @XmlRootElement
+@XmlType(propOrder={})
 public class BDJO {
     public static final int FILE_MAX = 99999;
     public static final String type = "BDJO";

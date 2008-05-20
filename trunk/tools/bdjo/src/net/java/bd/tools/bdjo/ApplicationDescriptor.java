@@ -56,13 +56,20 @@
 package net.java.bd.tools.bdjo;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * ApplicationDescriptor - section 10.2.6
  *
  * @author A. Sundararajan
  */
+@XmlType(
+  propOrder= {
+      "profiles","priority", "binding", "visibility", "names",
+      "iconLocator", "iconFlags", "baseDirectory", "classpathExtension",
+      "initialClassName", "parameters"
+  }
+)
 public class ApplicationDescriptor {
     // Application_profiles_count is specified in 4 bits
     public static final int NUM_PROFILES_BITS = 4;

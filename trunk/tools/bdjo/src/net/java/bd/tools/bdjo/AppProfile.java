@@ -55,6 +55,7 @@
 
 package net.java.bd.tools.bdjo;
 
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * Application descriptor - section 10.2.6.2. 
@@ -62,6 +63,7 @@ package net.java.bd.tools.bdjo;
  * 
  * @author A. Sundararajan
  */
+@XmlType(propOrder={})
 public class AppProfile {
     private int profile;
     private short majorVersion;

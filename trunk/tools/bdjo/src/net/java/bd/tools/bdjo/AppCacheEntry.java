@@ -55,10 +55,13 @@
 
 package net.java.bd.tools.bdjo;
 
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * AppCacheInfo entries - section 10.2.3.2
  * @author A. Sundararajan
  */
+@XmlType(propOrder={})
 public class AppCacheEntry {
     // Table 10.4 of section 10.2.3.3
     public static final byte TYPE_JAR_FILE = 0;

@@ -55,11 +55,19 @@
 
 package net.java.bd.tools.bdjo;
 
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * TableOfAccessiblePlayLists - section 10.2.4
  * @author A. Sundararajan
  */
+@XmlType(
+    propOrder = {
+        "accessToAllFlag", 
+        "autostartFirstPlayListFlag",
+        "playListFileNames"
+    }
+)
 public class TableOfAccessiblePlayLists {
     // TableOfAccessiblePlayLists syntax - section 10.2.4.2
     // number_of_acc_PlayLists is specified in 11 bits

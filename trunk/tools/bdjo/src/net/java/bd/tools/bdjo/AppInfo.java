@@ -54,12 +54,16 @@
  */
 
 package net.java.bd.tools.bdjo;
+
+
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * ApplicationManagementTable syntax - section 10.2.5.2
  * @author A. Sundararajan
  */
+@XmlType(propOrder={})
 public class AppInfo {
     // Table 10.5 - Application Types
     public static final byte MAX_APPLICATION_TYPE = 0xF;
