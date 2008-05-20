@@ -242,6 +242,10 @@ class CredentialUtil {
             this.grantorAlias = alias;
             return this;
         }
+        public Builder grantorPassword(String password) {
+            this.grantorPassword = password;
+            return this;
+        }
         public Builder granteeKeyStore(String storefile) {
             this.granteeKeyStore = storefile;
             return this;
@@ -385,7 +389,7 @@ class CredentialUtil {
     	ks.load(new FileInputStream(keystore), storepass.toCharArray());
 
 	// fetch certificate chain stored with the given alias
-    	 return ks.getCertificateChain(alias);
+    	return ks.getCertificateChain(alias);
     }
     
      private PrivateKey getGrantorKey () throws Exception {

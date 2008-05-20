@@ -158,6 +158,9 @@ public class BDCredentialSigner {
             } else if (opt.equals("-gaalias")) {
                 if (++i == args.length) errorNeedArgument(opt);
                 cBuilder = cBuilder.grantorAlias(args[i]);
+            } else if (opt.equals("-gakeypass")) {
+                if (++i == args.length) errorNeedArgument(opt);
+                cBuilder = cBuilder.grantorPassword(args[i]);
             } else if (opt.equals("-gestore")) {
                  if (++i == args.length) errorNeedArgument(opt);
                  cBuilder = cBuilder.granteeKeyStore(args[i]);
@@ -214,6 +217,7 @@ public class BDCredentialSigner {
         System.err.println("                      \t from the current working directory");
         System.err.println(" -gastorepass password\t:Grantor's keystore password");
         System.err.println(" -gaalias alias       \t:Grantor's alias");
+        System.err.println(" -gakeypass password  \t:Grantor's key password;used for signing credentials");
         System.err.println(" -gestore filename \t:Grantee's keystore;default used:\"keystore.store\"");
         System.err.println("                      \t from the current working directory");
         System.err.println(" -gestorepass password\t:Grantee's keystore password");
