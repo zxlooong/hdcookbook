@@ -136,7 +136,8 @@ public class GunBunnyXlet extends BaseXlet {
 	synchronized(this) {
 	    game = gm;
 	}
-	startVideo("bd://0.PLAYLIST:00003");
+        //Disabling since the standalone BDMV doesn't have any video assets.
+	//startVideo("bd://0.PLAYLIST:00003");
 	try {
 	    for (;;) {
 		if (getDestroyed()) {
