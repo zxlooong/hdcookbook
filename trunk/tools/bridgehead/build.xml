@@ -24,7 +24,7 @@
     <property name="orgid"                        value="56789abc"/>
     <property name="bdjo-desc-file"               value="${build.dir}/${bdjo-name}.xml"/>
     <property name="bridgeheadxlet.jar"           value="${bdjo-name}.jar"/>
-    <property name="keystore"                     value="tools/Keystore/keystore.store"/>
+    <property name="keystore"                     value="tools/keystore/keystore.store"/>
     
     <!-- WinDVD executable default location -->
     <property name="WinDVD"         value="c:/Program Files/InterVideo/DVD8/WinDVD.exe"/>
