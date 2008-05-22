@@ -43,6 +43,7 @@
                 <include name="**/logger.jar"/>          
                 <include name="**/soundgen.jar"/>
                 <include name="**/soundsplit.jar"/>
+                <include name="**/bridgehead.BridgeeheadXlet.zip"/>
                 <include name="README.*"/>
             </fileset>
         </copy>

@@ -7,6 +7,7 @@
           <ant dir="logger"/>
           <ant dir="soundgen"/>
           <ant dir="soundsplit"/>
+          <ant dir="bridgehead"/>
         </target>        
         
         <target name="bdtools-hdcookbook-example">
@@ -21,5 +22,6 @@
 	  <ant dir="security/make" target="clean"/> 
           <ant dir="soundgen" target="soundgen-clean"/>
           <ant dir="soundsplit" target="soundsplit-clean"/>
+          <ant dir="bridgehead" target="clean"/>
 	</target>
 </project>
