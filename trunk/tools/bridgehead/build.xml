@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="BridgeheadXlet" default="deploy" basedir=".">
+    
+    <!-- Property Definitions -->
+    <property file="build.properties"/>	
+    
+    <!-- xlet source dir, build dir, and a distribution dir for a disc image 
+      -->
+    <property name="bridgeheadxlet.src.dir"       value="src/BridgeheadXlet"/>
+    <property name="build.dir"                    value="build"/>
+    <property name="bridgeheadxlet.build.dir"     value="${build.dir}/bridgeheadxlet/classes"/>
+    <property name="dist.dir"                     value="dist"/>
+    
+    <!-- properties for the xlet -->
+    <property name="xlet.name"                    value="bridgehead.BridgeheadXlet" />
+    
+    <!-- disc image related properties -->
+    <property name="premade.bdmv"                 value="tools/DiscImage"/>
+    <property name="bdjo-name"                    value="00000"/>
+    <property name="logger-name"                  value="99999"/>
+    <property name="orgid"                        value="56789abc"/>
+    <property name="bdjo-desc-file"               value="${build.dir}/${bdjo-name}.xml"/>
+    <property name="bridgeheadxlet.jar"           value="${bdjo-name}.jar"/>
+    <property name="keystore"                     value="tools/Keystore/keystore.store"/>
+    
+    <!-- WinDVD executable default location -->
+    <property name="WinDVD"         value="c:/Program Files/InterVideo/DVD8/WinDVD.exe"/>
+    <presetdef name="jdktools.java">
+        <java fork="true" failOnError="true"/>
+    </presetdef>    
+    
+    <import   file="build-uploader.xml"/>    
+    
+    <target name="init">
+        <tstamp/>
+        <mkdir dir="${bridgeheadxlet.build.dir}"/>
+        <mkdir dir="${dist.dir}/DiscImage"/>
+    </target>
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete file="${xlet.name}.zip"/>
+    </target>
+    <target name="deploy" depends="bundle">
+    </target>
+    <target name="bundle" depends="jar, gen-bdjo-desc-file, 
+                                   sign-jars, copy-to-bdmv, make-client-jar"
+            description="Make an blu-ray disc image">
+        <zip destfile="${xlet.name}.zip"
+             basedir="${dist.dir}"/>
+    </target>
+    <target name="compile"
+            depends="init" description="Compiles the sources">
+        <javac srcdir="${bridgeheadxlet.src.dir}"
+               bootclasspath="${bdj.classes}"
+               classpath="${logger.jar}"
+               destdir="${bridgeheadxlet.build.dir}"
+               source="1.3" target="1.3"
+               debug="on" deprecation="on">
+        </javac>
+        <copy todir="${bridgeheadxlet.build.dir}">
+            <fileset dir="${bridgeheadxlet.src.dir}">
+                <include name="**/*.perm"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="jar"
+            depends="compile" 
+            description="Creates an xlet jar file">
+        <jar jarfile="${build.dir}/${bridgeheadxlet.jar}"
+             basedir="${bridgeheadxlet.build.dir}"/>
+        <copy tofile = "${build.dir}/${logger-name}.jar" 
+              file="${logger.jar}"/>
+    </target>
+    <target name="init-security-tools">
+        <path id="sec.tools.path">
+            <pathelement location="${security.jar}"/>
+            <pathelement location="${bouncycastle.jar}"/>
+            <pathelement location="${java.home}/../lib/tools.jar"/>
+        </path>
+    </target>
+    <target name="export-certs">
+        <macrodef name="bd.keytool.export">
+            <attribute name="keypass"/>
+            <attribute name="certalias"/>
+            <attribute name="file"/>
+            <sequential>
+                <jdktools.java classname="sun.security.tools.KeyTool"> 
+                    <classpath refid="sec.tools.path"/>
+                    <arg value="-export"/>
+                    <arg value="-keystore"/>
+                    <arg value="${keystore}"/>
+                    <arg value="-storepass"/>
+                    <arg value="keystorepassword"/>
+                    <arg value="-v"/>
+                    <arg value="-keypass"/>
+                    <arg value="@{keypass}"/>
+                    <arg value="-alias"/>
+                    <arg value="@{certalias}"/>
+                    <arg value="-file"/>
+                    <arg value="@{file}"/>
+                </jdktools.java>
+            </sequential>
+        </macrodef>
+        <bd.keytool.export
+            keypass="rootcertpassword" 
+            certalias="rootcert" 
+            file="${build.dir}/app.discroot.crt"/>
+        <bd.keytool.export
+            keypass="rootcertpassword" 
+            certalias="bucert" 
+            file="${build.dir}/bu.discroot.crt"/>
+    </target>
+    <target name="sign-jars" depends="init-security-tools, export-certs">
+        <jdktools.java classname="net.java.bd.tools.security.BDSigner">
+            <arg value="-keystore"/>
+            <arg value="${keystore}"/>
+            <arg value="${build.dir}/${bridgeheadxlet.jar}"/>
+            <arg value="${build.dir}/${logger-name}.jar"/>
+            <classpath refid="sec.tools.path"/>
+        </jdktools.java>
+    </target>
+    <target name="run" depends="deploy">
+        <available property="windvd.exists" file="${WinDVD}"/>
+        <fail unless="windvd.exists" message="WinDVD executable not found at ${WinDVD}."/>
+        <exec executable="${WinDVD}">
+            <arg value="${basedir}\${dist.dir}\DiscImage\BDMV"/>
+        </exec>
+    </target>
+    <target name="gen-bdjo-desc-file"
+            depends="gen-bdjo-desc.tmp"
+            if="update-bdjo-desc.file">
+        <move file="${bdjo-desc-file}.tmp" tofile="${bdjo-desc-file}"/>
+        <java  
+            fork="true" failOnError="true"
+            jar="${bdjo.jar}">
+            <arg value="${bdjo-desc-file}"/>
+            <arg value="${build.dir}/${bdjo-name}.bdjo"/>
+        </java>
+    </target>
+    <target name="copy-to-bdmv" 
+            depends="jar, gen-bdjo-desc-file, sign-jars">
+        <property name="target.dir" value="${dist.dir}/DiscImage"/>
+        <copy todir="${target.dir}">
+            <fileset dir="${premade.bdmv}">
+                <exclude name="**/.svn/**"/>
+            </fileset>
+        </copy>
+        <copy todir = "${target.dir}/BDMV/JAR" 
+              file="${build.dir}/${bdjo-name}.jar"/>
+        <copy tofile = "${target.dir}/BDMV/JAR/${logger-name}.jar" 
+              file="${build.dir}/${logger-name}.jar"/>
+        <copy todir = "${target.dir}/BDMV/BDJO" 
+              file="${build.dir}/${bdjo-name}.bdjo"/>
+        <copy todir = "${target.dir}/CERTIFICATE" 
+              file="${build.dir}/app.discroot.crt"/>
+        <copy todir = "${target.dir}/CERTIFICATE" 
+              file="${build.dir}/bu.discroot.crt"/>
+        <copy todir = "${target.dir}/CERTIFICATE/BACKUP" 
+              file="${build.dir}/app.discroot.crt"/>
+        <copy todir = "${target.dir}/CERTIFICATE/BACKUP" 
+              file="${build.dir}/bu.discroot.crt"/>
+    </target>
+    <target name="gen-bdjo-desc.tmp">
+        <concat destfile="${bdjo-desc-file}.tmp"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- This file contains information determined at a build time -->
+<!-- AUTO-GENERATED - DO NOT EDIT -->
+
+<bdjo>
+    <appCacheInfo>
+        <entries>
+            <language>*.*</language>
+            <name>${bdjo-name}</name>
+            <type>1</type>
+        </entries>
+        <entries>
+            <language>*.*</language>
+            <name>${logger-name}</name>
+            <type>1</type>
+        </entries>
+    </appCacheInfo>
+    <applicationManagementTable>
+        <applications>
+            <applicationDescriptor>
+                <profiles>
+                    <majorVersion>1</majorVersion>
+                    <microVersion>0</microVersion>
+                    <minorVersion>0</minorVersion>
+                    <profile>2</profile>
+                </profiles>            
+                <baseDirectory>${bdjo-name}</baseDirectory>
+                <binding>TITLE_BOUND_DISC_BOUND</binding>
+                <classpathExtension>/${logger-name}</classpathExtension>
+                <iconFlags>0x0</iconFlags>
+                <iconLocator></iconLocator>
+                <initialClassName>${xlet.name}</initialClassName>
+                <priority>3</priority>
+                <visibility>V_01</visibility>
+            </applicationDescriptor>
+            <applicationId>0x4000</applicationId>
+            <controlCode>0x1</controlCode>
+            <organizationId>0x${orgid}</organizationId>
+            <type>0x1</type>
+        </applications>
+    </applicationManagementTable>
+    <fileAccessInfo>.</fileAccessInfo>
+    <keyInterestTable>0x0</keyInterestTable>
+    <tableOfAccessiblePlayLists>
+        <accessToAllFlag>false</accessToAllFlag>
+        <autostartFirstPlayListFlag>false</autostartFirstPlayListFlag>
+    </tableOfAccessiblePlayLists>
+    <terminalInfo>
+        <defaultFontFile>00000</defaultFontFile>
+        <initialHaviConfig>HD_1920_1080</initialHaviConfig>
+        <menuCallMask>false</menuCallMask>
+        <titleSearchMask>false</titleSearchMask>
+    </terminalInfo>
+    <version>V_0200</version>
+</bdjo>
+
+        ]]>
+        </concat>
+        <condition property="update-bdjo-desc.file">
+            <not>
+                <filesmatch
+                    file1="${bdjo-desc-file}.tmp"
+                    file2="${bdjo-desc-file}"/>
+            </not>
+        </condition>
+    </target>
+</project>
