@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="BridgeheadXlet-Uploader" default="make-client-jar" basedir=".">
+<project name="BridgeheadXlet-Client" default="make-client-jar" basedir=".">
 
-    <property name="client.src.dir"               value="src/UploadApplication"/>
+    <property name="client.src.dir"               value="src/Client"/>
     <property name="client.dist.dir"              value="${dist.dir}/Client"/>
     <property name="client.build.dir"             value="${build.dir}/client/classes"/>    
     <property name="client.jar"                   value="client.jar"/>

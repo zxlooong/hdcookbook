@@ -29,7 +29,7 @@
         <java fork="true" failOnError="true"/>
     </presetdef>    
     
-    <import   file="build-uploader.xml"/>    
+    <import   file="build-client.xml"/>    
     
     <target name="init">
         <tstamp/>
