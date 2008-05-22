@@ -2,6 +2,9 @@
 <project name="BridgeheadXlet" default="deploy" basedir=".">
     
     <!-- Property Definitions -->
+    <property file="../../${os}.user.vars.properties"/>
+    <property file="../../user.vars.properties"/>
+    <property file="../../vars.properties"/>
     <property file="build.properties"/>	
     
     <!-- xlet source dir, build dir, and a distribution dir for a disc image 
