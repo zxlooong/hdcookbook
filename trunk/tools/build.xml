@@ -8,6 +8,8 @@
           <ant dir="soundgen"/>
           <ant dir="soundsplit"/>
           <ant dir="bridgehead"/>
+          <ant dir="id"/>
+          <ant dir="library/bumf"/>
         </target>        
         
         <target name="bdtools-hdcookbook-example">
@@ -23,5 +25,7 @@
           <ant dir="soundgen" target="soundgen-clean"/>
           <ant dir="soundsplit" target="soundsplit-clean"/>
           <ant dir="bridgehead" target="clean"/>
+          <ant dir="id" target="clean"/>
+          <ant dir="library/bumf" target="clean"/>
 	</target>
 </project>
