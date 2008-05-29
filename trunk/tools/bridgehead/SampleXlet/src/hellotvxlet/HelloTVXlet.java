@@ -63,25 +63,36 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.Graphics;
 
+import javax.tv.service.selection.ServiceContextFactory;
+import org.bluray.ti.Title;
+import org.bluray.ti.selection.TitleContext;
+import org.bluray.ui.event.HRcEvent;
+import org.bluray.vfs.VFSManager;
+import org.dvb.event.EventManager;
+import org.dvb.event.UserEvent;
+import org.dvb.event.UserEventListener;
+import org.dvb.event.UserEventRepository;
 import org.havi.ui.HScene;
 import org.havi.ui.HSceneFactory;
 
 /**
  * This xlet will be downloaded and launched after the VFS update.
  */
-public class HelloTVXlet implements Xlet {
+public class HelloTVXlet implements Xlet, UserEventListener {
 
     private static Font font;
     private HScene scene;
     private Container gui;
-    private static final String message = "Hello, I'm a downloaded xlet!";
+    private XletContext context;
+    private static String message = "Hello, I'm a downloaded xlet!";
 
     /** Creates a new instance of HelloTVXlet */
     public HelloTVXlet() {
     }
 
     public void initXlet(XletContext context) {
-
+        this.context = context;
+        
         font = new Font(null, Font.PLAIN, 48);
 
         scene = HSceneFactory.getInstance().getDefaultHScene();
@@ -100,11 +111,16 @@ public class HelloTVXlet implements Xlet {
         gui.setSize(1920, 1080);  // BD screen size
         scene.add(gui, BorderLayout.CENTER);
         scene.validate();
+        
+        UserEventRepository userEventRepo = new UserEventRepository("x");     
+        userEventRepo.addKey(HRcEvent.VK_ENTER);      
+        EventManager.getInstance().addUserEventListener(this, userEventRepo);       
     }
 
     public void startXlet() {
         gui.setVisible(true);
         scene.setVisible(true);
+        gui.requestFocus();
     }
 
     public void pauseXlet() {
@@ -114,6 +130,20 @@ public class HelloTVXlet implements Xlet {
     public void destroyXlet(boolean unconditional) {
         scene.remove(gui);
         scene = null;
+    }
+
+    public void userEventReceived(UserEvent e) {
+        // Revert back any VFS update.  This method terminates the xlet.
+        try {
+            VFSManager.getInstance().requestUpdating(null, null, true);
+            ServiceContextFactory factory = ServiceContextFactory.getInstance();
+            TitleContext titleContext = (TitleContext) factory.getServiceContext(context);
+            Title title = (Title) titleContext.getService();
+            titleContext.start(title, true);
+        } catch (Exception ex) {
+            message = "failed to do VFS revert, error=" + ex.toString();
+            gui.repaint();
+        }
     }
        
 }

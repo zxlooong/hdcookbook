@@ -4,6 +4,7 @@
     <applifecyclecontrol value="true"></applifecyclecontrol>
     <servicesel value="true"></servicesel>
     <userpreferences read="true" write="false"></userpreferences>
+    <bd-vfs value="true"></bd-vfs>
     <network>
 	<host action="connect">*</host>
     </network>

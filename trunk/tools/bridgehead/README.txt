@@ -25,6 +25,5 @@ A step-by-step instruction on how to use this tool.
 Run the client application:
 "java -jar  <path to client.jar>"
 
-5) You should now have either the sample Xlet (HelloTVXlet) or your own Xlet
-running on your player.
+5) You should now have either the sample Xlet (HelloTVXlet) or your own Xlet running on your player.
 -------

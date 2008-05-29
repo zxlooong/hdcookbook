@@ -2,6 +2,10 @@
 
 <project name="HelloTVXlet" default="deploy" basedir=".">
     
+    <!-- Property Definitions -->
+    <property file="../../../${os}.user.vars.properties"/>
+    <property file="../../../user.vars.properties"/>
+    <property file="../../../vars.properties"/>
     <property file="build.properties"/>
     
     <!-- xlet source dir, build dir, and a distribution dir for a disc image 
@@ -15,7 +19,7 @@
     
     <!-- disc image related properties -->   
     <property name="premade.bdmv"   value="../tools/DiscImage"/>   
-    <property name="target.dir"     value="${dist.dir}/DiscImage"/>
+    <property name="target.dir"     value="${dist.dir}"/>
     <property name="bdjo.name"      value="00000"/>
     <property name="xletjar.name"   value="00000"/>
     <property name="orgid"          value="56789abc"/>
@@ -24,11 +28,12 @@
     <property name="xlet.jar"       value="${build.dir}/${xletjar.name}.jar"/>
         
     <property name="keystore"    value="../tools/keystore/keystore.store"/>
+    <property name="bumfgen.jar"    value="../BumfGenerator/dist/bumfgen.jar"/>
 
     <target name="init">
         <tstamp/>
         <mkdir dir="${build.dir}/classes"/> 
-        <mkdir dir="${dist.dir}/DiscImage"/>     
+        <mkdir dir="${dist.dir}"/>     
         
         <presetdef name="jdktools.java">
             <java fork="true" failOnError="true"/>
@@ -53,7 +58,8 @@
             description="Make an blu-ray disc image bundle">
                 
         <zip destfile="${xlet.name}.zip"
-             basedir="${dist.dir}"/>
+             basedir="${dist.dir}"     
+             excludes="CERTIFICATE/**"/>
     </target>    
     
     <target name="compile"
@@ -89,8 +95,15 @@
         </jdktools.java>
     </target>
     
-    <target name="sign-buda">
-        <copy todir="${dist.dir}" file="budafiles/sample.xml"/>
+    <target name="generate-bumf-xml" depends="copy-to-bdmv">
+        <jdktools.java jar="${bumfgen.jar}">
+            <arg value="${premade.bdmv}/CERTIFICATE/id.bdmv"/>
+            <arg value="${target.dir}/BDMV"/>
+            <arg value="${dist.dir}/sample.xml"/>
+        </jdktools.java>    
+    </target>
+    
+    <target name="sign-buda" depends="generate-bumf-xml">
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
             <arg value="-keystore"/>
             <arg value="${keystore}"/>
@@ -98,6 +111,7 @@
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
     </target>
+    
     
     <target name="gen-bdjo-desc-file"
             depends="gen-bdjo-desc.tmp"

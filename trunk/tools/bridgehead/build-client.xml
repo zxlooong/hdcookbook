@@ -2,24 +2,30 @@
 
 <project name="BridgeheadXlet-Client" default="make-client-jar" basedir=".">
 
-    <property name="client.src.dir"               value="src/Client"/>
-    <property name="client.dist.dir"              value="${dist.dir}/Client"/>
-    <property name="client.build.dir"             value="${build.dir}/client/classes"/>    
+    <property name="client.src.dir"               value="Client/src"/>
+    <property name="client.dist.dir"              value="Client/dist/"/>
+    <property name="client.build.dir"             value="Client/build"/>    
     <property name="client.jar"                   value="client.jar"/>
     
-    <target name="make-client-jar">
+    <target name="client-compile">
         <mkdir dir="${client.build.dir}"/>
         <mkdir dir="${client.dist.dir}"/>
         <javac srcdir="${client.src.dir}"
                destdir="${client.build.dir}"
                debug="on" deprecation="on">
         </javac>
+   </target>
+   <target name="make-client-jar" depends="client-compile">
         <jar jarfile="${client.dist.dir}/${client.jar}"
              basedir="${client.build.dir}">
             <manifest>
                 <attribute name="Main-Class" value="client.ClientFrame"/>
             </manifest>
         </jar>        
+    </target>   
+    <target name="client-clean">
+        <delete dir="${client.dist.dir}"/>
+        <delete dir="${client.build.dir}"/>
     </target>
 
 </project>

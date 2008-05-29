@@ -10,10 +10,14 @@
 
   <target name="compile" depends="init"
         description="compile the source">
-    <javac srcdir="${src}" destdir="${build}"/>
-    <!-- copy todir="${build}">
+ 
+    <!-- bootclasspath for NamespacePrefixMapper.  See CR 6476630 -->             
+    <javac srcdir="${src}" 
+           destdir="${build}"
+           bootclasspath="${java.home}/lib/rt.jar"/> 
+    <copy todir="${build}">
        <fileset dir="${src}" includes="**/jaxb.index"/>
-    </copy -->
+    </copy>
   </target>
 
   <target name="clean">

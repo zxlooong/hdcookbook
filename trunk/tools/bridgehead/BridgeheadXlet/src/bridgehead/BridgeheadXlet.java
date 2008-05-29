@@ -89,7 +89,8 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable {
     private XletContext  context;
     private String       bindingUnitDir;    
     private Thread       thread;
-
+    private ServerSocket ssocket;
+    
     public void initXlet(XletContext context) {
         this.context = context;
         
@@ -154,6 +155,12 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable {
             thread.interrupt(); 
             thread = null;
         }
+        if (ssocket != null) {
+            try {
+              ssocket.close();  
+            } catch (IOException e) {             
+            }
+        }
     }
 
     // Check that this player is supporting VFS.
@@ -186,11 +193,11 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable {
     
     public void doDownload(String downloadDir) throws IOException {
 
-        ServerSocket serverSocket = new ServerSocket(PORT);
+        ssocket = new ServerSocket(PORT);
 
         XletLogger.log("*** Host IP is " + getHostIP() + ", listening on port " + PORT);
 
-        Socket clientSocket = serverSocket.accept();
+        Socket clientSocket = ssocket.accept();
         XletLogger.log("Accepted connection, start downloading");
 
         ZipInputStream zin = new ZipInputStream(
@@ -205,7 +212,7 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable {
         zin.close();
 
         clientSocket.close();
-        serverSocket.close();
+        ssocket.close();
 
     }
 
