@@ -6,8 +6,7 @@
           <ant dir="cpistrip"/>  
           <ant dir="logger"/>
           <ant dir="soundgen"/>
-          <ant dir="soundsplit"/>
-          <ant dir="id"/>           
+          <ant dir="soundsplit"/> 
           <ant dir="library/bumf"/>         
           <ant dir="bridgehead"/>   
         </target>        
@@ -15,6 +14,7 @@
         <target name="bdtools-hdcookbook-example">
             <ant dir="bdjo"/>
             <ant dir="security/make"/>
+            <ant dir="id"/>          
         </target>
         
 	<target name="clean">         

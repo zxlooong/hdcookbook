@@ -23,10 +23,11 @@ Clara, CA 95054 or visit www.sun.com if you need additional
 information or have any questions.
 -->
 
-<project name="Generate a bdjo file and sign xlets" default="generate-bdjo">
+<project name="Generate a bdjo file, an id file and sign xlets" default="generate-bdjo">
     
     <property name="HDC_BDJO_CONVERTER" value="../tools/bdjo"/>
     <property name="HDC_BDJ_SIGNER" value="../tools/security"/>
+    <property name="HDC_ID_CONVERTER" value="../tools/id"/>
     
     <target name="generate-bdjo" depends="check-bdjoconverter">    
         <fail unless="bdjoconverter.ok" message="Could not find the bdjoconverter tool at ${HDC_BDJO_CONVERTER}"/>
@@ -40,21 +41,11 @@ information or have any questions.
         </java>	
     </target>	
     
-    <target name="check-bdjoconverter" depends="check-exists-bdjoconverter, compile-bdjoconverter">
-    </target>
-    
-    <target name="check-exists-bdjoconverter">
+    <target name="check-bdjoconverter">
         <available file="${HDC_BDJO_CONVERTER}/dist/bdjo.jar" type="file"
                    property="bdjoconverter.ok"/>
     </target>
-    
-    <target name="compile-bdjoconverter" unless="bdjoconverter.ok">	
-        <ant dir="${HDC_BDJO_CONVERTER}"/>
-        
-        <available file="${HDC_BDJO_CONVERTER}/dist/bdjo.jar" type="file"
-                   property="bdjoconverter.ok"/>
-    </target>
-    
+
     <target name="sign-xlets" depends="check-bdsigner">
         <fail unless="bdsigner.ok" message="Could not find the bdsigner tool at ${HDC_BDJ_SIGNER}"/>
         <path id="sec.tools.path">
@@ -85,19 +76,24 @@ information or have any questions.
         
     </target>
     
-    <target name="check-bdsigner" depends="check-exists-bdsigner, compile-bdsigner">
-    </target>
-    
-    <target name="check-exists-bdsigner">
+    <target name="check-bdsigner">
         <available file="${HDC_BDJ_SIGNER}/build/security.jar" type="file"
                    property="bdsigner.ok"/>
     </target>
     
-    <target name="compile-bdsigner" unless="bdsigner.ok">	
-        <ant dir="${HDC_BDJ_SIGNER}/make"/>    
-        <available file="${HDC_BDJ_SIGNER}/build/security.jar" type="file"
-                   property="bdsigner.ok"/>
+    <target name="generate-id" depends="check-idconverter">    
+        <fail unless="idconverter.ok" message="Could not find the idconverter tool at ${HDC_ID_CONVERTER}"/>
+        
+        <java jar="${HDC_ID_CONVERTER}/dist/id.jar"  
+              fork="true">
+            <arg value="xlets/id/id.xml"/>
+            <arg value="${HDC_DISC_BDMV}/../CERTIFICATE/id.bdmv"/>
+        </java>	
+    </target>	
+    
+    <target name="check-idconverter">
+        <available file="${HDC_ID_CONVERTER}/dist/id.jar" type="file"
+                   property="idconverter.ok"/>
     </target> 
- 
 </project>
            

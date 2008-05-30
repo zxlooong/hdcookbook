@@ -44,6 +44,7 @@
                 <include name="**/soundgen.jar"/>
                 <include name="**/soundsplit.jar"/>
                 <include name="**/bridgehead.BridgeheadXlet.zip"/>
+                <include name="**/id.jar"/>
                 <include name="README.*"/>
             </fileset>
         </copy>
