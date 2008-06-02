@@ -88,6 +88,8 @@ public class BDSigner {
             } else if (opt.equals("-keypass")) {
                if (++i == args.length) errorNeedArgument(opt);
                builder = builder.appPassword(args[i]);
+            } else if (opt.equals("-original-only")) {
+                builder = builder.originalOnly();
             } else if (opt.equals("-help")) {
                 printUsageAndExit("");
             } else if (opt.equals("-debug")) {
@@ -141,6 +143,7 @@ public class BDSigner {
 	 System.err.println(" -storepass password \t:Keystore password");
          System.err.println(" -alias alias        \t:Alias for the signing key");
          System.err.println(" -keypass password   \t:Password for accessing the signing key");
+         System.err.println(" -original-only      \t:During re-signing only include files that were orginally signed");
          System.err.println(" -debug              \t:Prints debug messages");
          System.err.println(" -help               \t:Prints this message");
          System.err.println("\nExample: java -cp security.jar:tools.jar:bcprov-jdk15-137.jar net.java.bd.tools.security.BDSigner 00000.jar\n");

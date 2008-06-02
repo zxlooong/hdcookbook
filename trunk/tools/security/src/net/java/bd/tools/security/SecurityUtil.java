@@ -64,6 +64,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.net.URL;
@@ -80,10 +81,15 @@ import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.naming.InvalidNameException;
@@ -166,6 +172,11 @@ public class SecurityUtil {
     boolean isRootCert = false;
     boolean isAppCert = false;
     boolean isBindingUnitCert = false;
+    
+    // This is a special flag indicating newly added
+    // jar entries (not present in the signature file of an already
+    // signed jar) should be excluded from signing. 
+    boolean signOriginalOnly = false;
     boolean debug = false;
    
     // non-optional fields
@@ -197,6 +208,7 @@ public class SecurityUtil {
         this.isRootCert = b.isRootCert;
         this.isBindingUnitCert = b.isBindingUnitCert;
         this.BUMFile = b.BUMFile;
+        this.signOriginalOnly = b.signOriginalOnly;
         this.jarfiles = b.jarfiles;
         
         // Minor processing;append the orgid to the names
@@ -222,6 +234,7 @@ public class SecurityUtil {
          boolean isRootCert = false;
          boolean isAppCert = false;
          boolean isBindingUnitCert = false;
+         boolean signOriginalOnly = false;
          String BUMFile;
          
         public Builder() { }
@@ -301,6 +314,10 @@ public class SecurityUtil {
             this.altName = name;
             return this;
         }
+        public Builder originalOnly() {
+            this.signOriginalOnly = true;
+            return this;
+        }
         public Builder debug() {
             this.debug = true;
             return this;
@@ -349,7 +366,14 @@ public class SecurityUtil {
     public void signJars() {
         try {               
             initKeyStore();
-            signJarFile();
+            for (String jfile:jarfiles) {
+                if (signOriginalOnly) {
+                  signOrginalJarFile(jfile);  
+                }
+                else {
+                  signJarFile(jfile);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1); // VM exit with an error code
@@ -446,16 +470,14 @@ public class SecurityUtil {
        KeyTool.main(responseImportArgs);
     }
     
-    private void signJarFile() throws Exception {
-       for (String jfile:jarfiles) {
-          String[] jarSigningArgs = {"-sigFile", "SIG-BD00",
-                                     "-keypass", appKeyPassword, 
-                                     "-keystore", keystoreFile,
-                                     "-storepass", keystorePassword,
-                                     "-verbose", jfile, contentSignerAlias};
-          JarSigner.main(jarSigningArgs);
-          signWithBDJHeader(jfile);
-       }
+    private void signJarFile(String jfile) throws Exception {
+      String[] jarSigningArgs = {"-sigFile", "SIG-BD00",
+                                 "-keypass", appKeyPassword, 
+                                 "-keystore", keystoreFile,
+                                 "-storepass", keystorePassword,
+                                 "-verbose", jfile, contentSignerAlias};
+      JarSigner.main(jarSigningArgs);
+      signWithBDJHeader(jfile);
     }
     
     /**
@@ -871,5 +893,115 @@ public class SecurityUtil {
         }
         BASE64Decoder decoder = new BASE64Decoder();
         return decoder.decodeBuffer(buf.toString());
+    }
+    
+    /**
+     * This method works on only signed jar file that is now being resigned by
+     * invalidating the previous signature.
+     * This method signs only the jar entries that are part of the orginal
+     * signature. The files that were bundled later (after the jar was signed)
+     * will continue to remain unsigned.
+     * @param jfile
+     * @throws java.lang.Exception
+     */
+    private void signOrginalJarFile(String jfile) throws Exception {
+        JarFile jf = new JarFile (jfile);
+        String SIG_FILE = "META-INF/SIG-BD00.SF";
+	JarEntry sigFile = (JarEntry) jf.getJarEntry(SIG_FILE);
+        if (sigFile == null) {
+            System.err.println("ERROR: The jar file is not already signed:" + jfile +
+                               " do not use -original-only option");
+            System.exit(1);
+        }
+        
+        //
+        // Seperate out the signed and unsigned files into temporary jar files.
+        // They are merged after signing.
+        // It is required to carry forward jar attributes (such as compression
+        // method) for unsigned jar entries, for reason put them in another jar
+        // instead of extracting them as regular files.
+        //
+        String tmpSignedJar   = "tmp-signed-files.jar";
+        String tmpUnsignedJar = "tmp-unsigned-files.jar";
+        JarOutputStream signedOut = new JarOutputStream(
+                                    new FileOutputStream(tmpSignedJar));        
+        JarOutputStream unsignedOut = new JarOutputStream(
+                                      new FileOutputStream(tmpUnsignedJar));
+
+        // jar seperation is done based on the files listed in the signature file
+        Manifest man = new Manifest(jf.getInputStream(sigFile));
+        Map<String,Attributes> sigEntries = man.getEntries();
+        Enumeration<JarEntry> jarEntries = jf.entries();
+
+        while (jarEntries.hasMoreElements()) {
+            JarEntry je = jarEntries.nextElement();
+            String filename = je.getName();
+            
+            if (filename.startsWith("META-INF/")) {
+                continue;
+	    }
+            if (sigEntries.containsKey(filename)) {
+
+                // this file is signed
+                signedOut.putNextEntry(je);
+                InputStream jin = jf.getInputStream(je);
+                copyfile(signedOut, jin);
+                jin.close();
+            } else { // this file was added after the jarfile was signed
+                unsignedOut.putNextEntry(je);
+                InputStream jin = jf.getInputStream(je);
+                copyfile(unsignedOut, jin);
+                jin.close();
+            }
+        }
+        // close all the files
+	signedOut.closeEntry();
+        signedOut.close();
+        unsignedOut.closeEntry();
+        unsignedOut.close();
+        jf.close();
+
+	// resign the signed jar
+        signJarFile(tmpSignedJar);
+        
+        // The next step is to merge the signed and unsigned jars
+        JarOutputStream jout = new JarOutputStream(
+                               new FileOutputStream(jfile));
+        copyJarFile(tmpSignedJar, jout);
+        copyJarFile(tmpUnsignedJar, jout);
+        jout.close();
+        
+        // attempt cleanup
+        File signedJar = new File(tmpSignedJar);
+        File unsignedJar = new File(tmpUnsignedJar);
+        if ( !signedJar.delete() || !unsignedJar.delete()) {
+            System.out.println("Unable to delete temporary jars:" +
+			tmpSignedJar + ", " + tmpUnsignedJar +
+                    	" Please try deleting them manually");
+            System.exit(1);
+        }       
+    }
+    
+    private void copyfile(OutputStream out, InputStream in)
+            throws IOException {
+        int len;
+        byte[] buf = new byte[32768];
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+    }
+    
+    private void copyJarFile(String jarName, JarOutputStream jout)
+            throws IOException {
+        JarFile jf = new JarFile(jarName);
+        Enumeration<JarEntry> jarEntries = jf.entries();
+        while (jarEntries.hasMoreElements()) {
+            JarEntry je = jarEntries.nextElement();
+            jout.putNextEntry(je);
+            InputStream jin = jf.getInputStream(je);
+            copyfile(jout, jin);
+            jin.close();
+        }
+	jf.close();
     }
 }
