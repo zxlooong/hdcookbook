@@ -54,30 +54,19 @@
 
 package net.java.bd.tools.id;
 
-import java.math.BigInteger;
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-public class HexStringByteArrayAdapter extends XmlAdapter<String, byte[]> {     
+public class HexStringBinaryAdapter extends XmlAdapter<String, byte[]> {     
 
     public byte[] unmarshal(String str) throws Exception {
-
-        BigInteger bi;
-
-        // handle non-hex input as well.
         if (str.startsWith("0x") || str.startsWith("0X")) {
-            bi= new BigInteger(str.substring(2), 16);
-        } else {
-            bi = new BigInteger(str, 16);
+            return DatatypeConverter.parseHexBinary(str.substring(2));
         }
-   
-        String filler ="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-        BigInteger b16 = new BigInteger(filler, 16);
-
-        return b16.and(bi).toByteArray();
+        return DatatypeConverter.parseHexBinary(str);
     }
     
-    // we always marshal as hex string
     public String marshal(byte[] value) throws Exception {
-        return "0x" + new BigInteger(value).toString(16);
+        return "0x" + DatatypeConverter.printHexBinary(value);
     }
 }

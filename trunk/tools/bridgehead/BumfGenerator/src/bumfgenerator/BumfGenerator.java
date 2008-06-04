@@ -73,6 +73,7 @@ import net.java.bd.tools.bumf.ObjectFactory;
 import net.java.bd.tools.bumf.NamespacePrefixMapperImpl;
 import net.java.bd.tools.id.IdReader;
 import net.java.bd.tools.id.Id;
+import net.java.bd.tools.id.HexStringBinaryAdapter;
 
 /**
  * This tool generates a binding unit manifest file which can be used with
@@ -80,6 +81,8 @@ import net.java.bd.tools.id.Id;
  */
 
 public class BumfGenerator {
+    
+   private static final String MANIFEST_ID = "0x00000001";
     
    public static void main(String[] args) throws Exception {
        if (args.length < 3) {
@@ -120,10 +123,23 @@ public class BumfGenerator {
         FileInputStream fin = new FileInputStream(idFile);
         DataInputStream din = new DataInputStream(new BufferedInputStream(fin)); 
         Id idObject = new IdReader().readId(din);  
-        String discId = new BigInteger(idObject.getDiscId()).toString(16);
-        String orgId  = Integer.toHexString(idObject.getOrgId());
-        m.setDiscID("0x" + discId);
-        m.setOrgID("0x"+ orgId);
+        
+        /**
+         * Note: 
+         * The discID and the orgID entries in the bumf.xml's manifest element need "0x" prefix followed by 
+         * 32 chars and 8 chars in hex, whereas the discID and the orgID used in the buda directory path
+         * are expected to have no leading zeros.  Ex. for disc ID "0", the manifest should use 
+         * discID "0x00000000000000000000000000000000", and the buda directory path should use discID "0".
+         */
+        BigInteger bi = new BigInteger(idObject.getDiscId());
+        String discId     = bi.toString(16); 
+        String fullDiscId = String.format("%032x", bi);
+        String orgId      = String.format("%x", idObject.getOrgId());  // same as Integer.toHexString(int)
+        String fullOrgId  = String.format("%08x", idObject.getOrgId());
+
+        m.setID(MANIFEST_ID);
+        m.setDiscID("0x" + fullDiscId); 
+        m.setOrgID("0x" + fullOrgId);
     
         int index = input.indexOf("BDMV");      
         File[] fs = new File[]{ new File(input) };
@@ -133,7 +149,7 @@ public class BumfGenerator {
         AssetsType assetsType = factory.createAssetsType();
         for(int i = 0; i < list.size(); i++) {
             String filename = list.get(i).getPath().substring(index).replace('\\', '/');
-            String buFilename = orgId + '/' + discId + '/' + filename;
+            String buFilename = orgId + '/' + discId + '/' + filename;  
             AssetType assetType = factory.createAssetType();
             FileType fileType  = factory.createFileType();
             assetType.setVPFilename(filename);

@@ -69,7 +69,7 @@ public class Id {
         setVersion(version);
         setOrgId(orgId);
         try {
-           setDiscId(new HexStringByteArrayAdapter().unmarshal(discId));
+           setDiscId(new HexStringBinaryAdapter().unmarshal(discId));
         } catch (Exception e) {
            throw new RuntimeException("disc ID format error: " + discId, e);
         }
@@ -87,7 +87,7 @@ public class Id {
         this.discId = b;
     }
   
-    @XmlJavaTypeAdapter(HexStringByteArrayAdapter.class)
+    @XmlJavaTypeAdapter(HexStringBinaryAdapter.class)
     public byte[] getDiscId() {
         return discId;
     }
