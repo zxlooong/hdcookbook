@@ -368,7 +368,7 @@ public class SecurityUtil {
             initKeyStore();
             for (String jfile:jarfiles) {
                 if (signOriginalOnly) {
-                  signOrginalJarFile(jfile);  
+                  signOriginalJarFile(jfile);  
                 }
                 else {
                   signJarFile(jfile);
@@ -898,28 +898,42 @@ public class SecurityUtil {
     /**
      * This method works on only signed jar file that is now being resigned by
      * invalidating the previous signature.
-     * This method signs only the jar entries that are part of the orginal
+     * This method signs only the jar entries that are part of the original
      * signature. The files that were bundled later (after the jar was signed)
      * will continue to remain unsigned.
      * @param jfile
      * @throws java.lang.Exception
      */
-    private void signOrginalJarFile(String jfile) throws Exception {
-        JarFile jf = new JarFile (jfile);
+    private void signOriginalJarFile(String jfile) throws Exception {
+        JarFile jf = new JarFile (jfile, false); // jar file need not be verified.
         String SIG_FILE = "META-INF/SIG-BD00.SF";
 	JarEntry sigFile = (JarEntry) jf.getJarEntry(SIG_FILE);
         if (sigFile == null) {
             System.err.println("ERROR: The jar file is not already signed:" + jfile +
                                " do not use -original-only option");
+            jf.close();
             System.exit(1);
         }
         
+        // jar seperation is done based on the files listed in the signature file
+        Manifest man = new Manifest(jf.getInputStream(sigFile));
+        Map<String,Attributes> sigEntries = man.getEntries();
+        if (jf.size() == sigEntries.size()) { // no updates were made to the jar file
+            jf.close();
+            signJarFile(jfile);
+            return;
+        }
+        Enumeration<JarEntry> jarEntries = jf.entries();
+      
         //
         // Seperate out the signed and unsigned files into temporary jar files.
         // They are merged after signing.
         // It is required to carry forward jar attributes (such as compression
-        // method) for unsigned jar entries, for reason put them in another jar
-        // instead of extracting them as regular files.
+        // method) for unsigned jar entries, for that reason put them in another jar
+        // file instead of extracting them as regular files.
+        // The java.util.jar APIs do not allow updates to the exisiting jar file,
+        // hence we end up copying all the entries back and forth the original
+        // jar file
         //
         String tmpSignedJar   = "tmp-signed-files.jar";
         String tmpUnsignedJar = "tmp-unsigned-files.jar";
@@ -927,12 +941,7 @@ public class SecurityUtil {
                                     new FileOutputStream(tmpSignedJar));        
         JarOutputStream unsignedOut = new JarOutputStream(
                                       new FileOutputStream(tmpUnsignedJar));
-
-        // jar seperation is done based on the files listed in the signature file
-        Manifest man = new Manifest(jf.getInputStream(sigFile));
-        Map<String,Attributes> sigEntries = man.getEntries();
-        Enumeration<JarEntry> jarEntries = jf.entries();
-
+        
         while (jarEntries.hasMoreElements()) {
             JarEntry je = jarEntries.nextElement();
             String filename = je.getName();
