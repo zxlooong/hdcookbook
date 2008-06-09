@@ -66,12 +66,17 @@ import java.io.File;
  * are used during the run.  bdprov-jdk15-137.jar is a bouncycastle distribution; a copy can be bound at "resources" dir.
  */
 public class BDSigner {
+    
+    // Represents the input file types for signing
+    enum FileType {NONE, JAR, BUMF, DISCROOT};
+    
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
             printUsageAndExit("No arguments specified");
         }
         List<String> jarfiles = new ArrayList<String>();
         boolean isBUMF = false;
+        FileType fileType = FileType.NONE;
         SecurityUtil.Builder builder = new SecurityUtil.Builder();
         
         for(int i = 0; i < args.length; i++) {
@@ -87,7 +92,7 @@ public class BDSigner {
                 builder = builder.contentSignerAlias(args[i]);
             } else if (opt.equals("-keypass")) {
                if (++i == args.length) errorNeedArgument(opt);
-               builder = builder.appPassword(args[i]);
+               builder = builder.contentSignerPassword(args[i]);
             } else if (opt.equals("-original-only")) {
                 builder = builder.originalOnly();
             } else if (opt.equals("-help")) {
@@ -97,25 +102,36 @@ public class BDSigner {
             } else {
                   if (args[i].endsWith(".xml")) {
                       builder = builder.bumf(args[i]);
-                      isBUMF = true;
+                      fileType = FileType.BUMF;
+                  } else if (args[i].endsWith("app.discroot.crt")) {
+                      builder = builder.discRootFile(args[i]);
+                      fileType = FileType.DISCROOT;
                   } else {
-	              jarfiles.add(args[i]);
+                      fileType = FileType.JAR;
+                      jarfiles.add(args[i]);
                   }
 	          if (!new File(args[i]).exists()) {
-		    printUsageAndExit("File " + args[i] + " not found.");
+                      printUsageAndExit("File " + args[i] + " not found.");
                   } 
              } 
         }
-        if (!isBUMF && jarfiles.isEmpty()) {
-           printUsageAndExit("No BUMF or jar files to sign..");
-        } else if (!isBUMF) {
+        if (fileType == FileType.JAR) {
             builder = builder.jarfiles(jarfiles);
         }
         SecurityUtil util = builder.build();
-        if (isBUMF) {
-            util.signBUMF();
-        } else {
-            util.signJars();
+        
+        // Data required for signing is now populated through the builder
+        // class. Lets proceed with signing.
+        switch (fileType) {
+            case NONE:
+                printUsageAndExit("No BUMF, jar files or app.discroot.crt to sign..");
+                break;
+            case JAR:
+                util.signJars(); break;
+            case BUMF:
+                util.signBUMF(); break;
+            case DISCROOT:
+                util.generateOnlineSigFile(); break;
         }
     }
      
@@ -134,16 +150,20 @@ public class BDSigner {
     private static void printUsageAndExit(String reason) {
          if (!reason.isEmpty())
 	     System.err.println("\nFailed: " + reason);
-	 System.err.println("\n***This is a tool for signing jar files or the Binding Unit Manifest File(BUMF) according to the bd-j specification***\n");
-         System.err.println("usage: BDSigner [options] BUMF or jarfiles..\n");
-          System.err.println("Valid Options:");
+         System.err.println("\n***This is a tool for signing jar files, Binding" +
+                            " Unit Manifest File(BUMF) or");
+         System.err.println(" app.discroot.crt file to generate \"online.sig\" file" +
+                            " according to the bd-j specification***\n");
+         System.err.println("usage: BDSigner [options] BUMF, or app.discroot.crt, or jarfiles..\n");
+         System.err.println("Valid Options:");
          System.err.println(" -keystore filename  \t:Keystore containing the key used in signing");
          System.err.println("                     \tIn the absense of this option, a default store:\"keystore.store\"");
          System.out.println("                     \tis used from the current working directory.");
 	 System.err.println(" -storepass password \t:Keystore password");
          System.err.println(" -alias alias        \t:Alias for the signing key");
          System.err.println(" -keypass password   \t:Password for accessing the signing key");
-         System.err.println(" -original-only      \t:During re-signing only include files that were orginally signed");
+         System.err.println(" -original-only      \t:During re-signing of the jar only include files");
+         System.err.println("                     \tthat were orginally signed (as listed in signature file)");
          System.err.println(" -debug              \t:Prints debug messages");
          System.err.println(" -help               \t:Prints this message");
          System.err.println("\nExample: java -cp security.jar:tools.jar:bcprov-jdk15-137.jar net.java.bd.tools.security.BDSigner 00000.jar\n");

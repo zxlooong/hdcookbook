@@ -177,7 +177,7 @@ public class BDCredentialSigner {
                sBuilder = sBuilder.contentSignerAlias(args[i]);
             } else if (opt.equals("-keypass")) {
                if (++i == args.length) errorNeedArgument(opt);
-               sBuilder = sBuilder.appPassword(args[i]);
+               sBuilder = sBuilder.contentSignerPassword(args[i]);
             }  else if (opt.equals("-help")) {
                 printUsageAndExit("");
             } else {
