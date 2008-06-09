@@ -7,5 +7,5 @@ Using this tool, you can write bdjo description as an XML document and convert
 the same into a binary .bdjo file.
 
 When using XML Schema aware editor like NetBeans 6.0+, you can use the XML
-schema document "./dist/bdjo.xsd" to edit/validate your BDJO XML document. NetBeans 
+schema document "bdjo.xsd" to edit/validate your BDJO XML document. NetBeans 
 6.0+ Schema-aware XML completion feature is very handy.
