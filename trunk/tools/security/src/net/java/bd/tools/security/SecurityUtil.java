@@ -1047,16 +1047,7 @@ public class SecurityUtil {
         // jar seperation is done based on the files listed in the signature file
         Manifest man = new Manifest(jf.getInputStream(sigFile));
         Map<String,Attributes> sigEntries = man.getEntries();
-        if (jf.size() == sigEntries.size()) { // no updates were made to the jar file
-            jf.close();
-            if (debug) {
-                System.out.println("No new files are present in the jar");
-            }
-            signJarFile(jfile);
-            return;
-        }
-        Enumeration<JarEntry> jarEntries = jf.entries();
-      
+        
         //
         // Seperate out the signed and unsigned files into temporary jar files.
         // They are merged after signing.
@@ -1070,55 +1061,84 @@ public class SecurityUtil {
         String tmpSignedJar   = "tmp-signed-files.jar";
         String tmpUnsignedJar = "tmp-unsigned-files.jar";
         JarOutputStream signedOut = new JarOutputStream(
-                                    new FileOutputStream(tmpSignedJar));        
-        JarOutputStream unsignedOut = new JarOutputStream(
-                                      new FileOutputStream(tmpUnsignedJar));
-        
+                                    new FileOutputStream(tmpSignedJar));
+
+        // If the jar is empty it cannot be closed; however, the
+        // file handle it's accessing needs to be closed.
+        FileOutputStream fout =  new FileOutputStream(tmpUnsignedJar);
+        JarOutputStream unsignedOut = new JarOutputStream(fout);
+                                     
+        Enumeration<JarEntry> jarEntries = jf.entries();
+        boolean isEmptyUnsigned = true;
         while (jarEntries.hasMoreElements()) {
             JarEntry je = jarEntries.nextElement();
             String filename = je.getName();
             
-            if (filename.startsWith("META-INF/") || 
-                    sigEntries.containsKey(filename)) {
-
-                // this file is signed
+            /**
+             * "META-INF/" contents are re-generated during signing. The directory
+             * entries (new or old) are not signed. To preserve the order of
+             * the entries in the original jar we add them to the
+             * to-be signed jar
+             */
+            if (filename.startsWith("META-INF/") ||
+                    filename.endsWith("/") ||
+                    sigEntries.containsKey(filename)) { // this file is signed
                 signedOut.putNextEntry(je);
                 InputStream jin = jf.getInputStream(je);
                 copyfile(signedOut, jin);
                 jin.close();
             } else { // this file was added after the jarfile was signed
+                isEmptyUnsigned = false;
                 unsignedOut.putNextEntry(je);
                 InputStream jin = jf.getInputStream(je);
                 copyfile(unsignedOut, jin);
                 jin.close();
             }
         }
+        
         // close all the files
+        jf.close();
 	signedOut.closeEntry();
         signedOut.close();
-        unsignedOut.closeEntry();
-        unsignedOut.close();
-        jf.close();
+        if (isEmptyUnsigned) {
+            fout.close();
+            if (debug) {
+                System.out.println(
+                "No new files are present in the jar; Signing without splitting");
+            }
+            signJarFile(jfile);
+        } else {
+            unsignedOut.closeEntry();
+            unsignedOut.close();  
+ 
+            // resign the signed jar
+            signJarFile(tmpSignedJar);
         
-	// resign the signed jar
-        signJarFile(tmpSignedJar);
-        
-        // The next step is to merge the signed and unsigned jars
-        JarOutputStream jout = new JarOutputStream(
+            // The next step is to merge the signed and unsigned jars
+            JarOutputStream jout = new JarOutputStream(
                                new FileOutputStream(jfile));
-        copyJarFile(tmpSignedJar, jout);
-        copyJarFile(tmpUnsignedJar, jout);
-        jout.close();
+            copyJarFile(tmpSignedJar, jout);
+            copyJarFile(tmpUnsignedJar, jout);
+            jout.close();
+        }
+       
+        if (debug) {
+            return;
+        } 
         
         // attempt cleanup
         File signedJar = new File(tmpSignedJar);
         File unsignedJar = new File(tmpUnsignedJar);
-        if ( !signedJar.delete() || !unsignedJar.delete()) {
-            System.out.println("Unable to delete temporary jars:" +
-			tmpSignedJar + ", " + tmpUnsignedJar +
-                    	" Please try deleting them manually");
+        if (!signedJar.delete()) {
+            System.out.println("Unable to delete temporary jar:" +
+			tmpSignedJar + " Please try deleting it manually");
             System.exit(1);
-        }       
+        }  
+        if (unsignedJar.exists() && !unsignedJar.delete()) {
+            System.out.println("Unable to delete temporary jar:" + 
+                    tmpUnsignedJar + " Please try deleting it manually");
+            System.exit(1);
+        }
     }
     
     private void copyfile(OutputStream out, InputStream in)
