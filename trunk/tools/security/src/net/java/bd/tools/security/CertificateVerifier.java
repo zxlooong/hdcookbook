@@ -286,6 +286,6 @@ public class CertificateVerifier {
     }
     
     public static void printUsage() {
-        System.out.println("Certificate Verififer <root|app|binding> <certificate>");
+        System.out.println("Certificate Verifier <root|app|binding> <certificate>");
     }
 }

@@ -371,6 +371,9 @@ public class SecurityUtil {
         if (dn == null) {
             return null;
         }
+        if (orgId == null) {
+            return dn;
+        }
         LdapName name = new LdapName(dn);
         List<Rdn> rdns = name.getRdns();
         List<Rdn> newRdns = new ArrayList<Rdn>();
@@ -944,7 +947,13 @@ public class SecurityUtil {
         // Generate the app certificate
         X509V3CertificateGenerator cg = new X509V3CertificateGenerator();
         cg.reset();
-        X509Certificate rootCert = (X509Certificate)store.getCertificate(alias);
+        X509Certificate rootCert = (X509Certificate) store.getCertificate(alias);
+        if (rootCert == null) {
+            System.out.println("ERROR: Aborting application certificate creation." +
+                            " No root certificate to sign.");
+            cleanup(); // removes the self signed certificate from the keystore
+            System.exit(1);
+        }
         cg.setIssuerDN(new X509Name(true, rootCert.getSubjectDN().getName(), 
                                     new X509BDJEntryConverter()));
         cg.setSubjectDN(new X509Name(subject, new X509BDJEntryConverter()));
@@ -1038,8 +1047,11 @@ public class SecurityUtil {
         // jar seperation is done based on the files listed in the signature file
         Manifest man = new Manifest(jf.getInputStream(sigFile));
         Map<String,Attributes> sigEntries = man.getEntries();
-        if (jf.size() == sigEntries.size()) {// no updates were made to the jar file
+        if (jf.size() == sigEntries.size()) { // no updates were made to the jar file
             jf.close();
+            if (debug) {
+                System.out.println("No new files are present in the jar");
+            }
             signJarFile(jfile);
             return;
         }

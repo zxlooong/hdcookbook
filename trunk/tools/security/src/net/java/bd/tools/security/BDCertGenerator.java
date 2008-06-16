@@ -65,13 +65,16 @@ package net.java.bd.tools.security;
  * the "resources" dir.
  */
 public class BDCertGenerator {
+     // Represents the certificate type that is being created
+    enum CertType {NONE, ROOT, APP, BINDING};
+    
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
-            printUsageAndExit("Please enter an orgid");
+            printUsageAndExit("Please enter certificate type");
         }
         SecurityUtil.Builder builder = new SecurityUtil.Builder();
         boolean setOrgId = false;
-        boolean setCertType = false;
+        CertType certType = CertType.NONE;
         for (int i = 0; i < args.length; i++) {
             String opt = args[i];
             if (opt.equals("-keystore")) {
@@ -81,13 +84,13 @@ public class BDCertGenerator {
                 builder = builder.keystoreFile(args[i]);
             } else if (opt.equals("-root")) {
                 builder = builder.setRootCert();
-                setCertType = true;
+                certType = CertType.ROOT;
             } else if (opt.equals("-app")) {
                 builder = builder.setAppCert();
-                setCertType = true;
+                certType = CertType.APP;
             } else if (opt.equals("-binding")) {
                 builder = builder.setBindingUnitCert();
-                setCertType = true;
+                certType = CertType.BINDING;
             } else if (opt.equals("-dn")) {
                  if (++i == args.length) {
                     errorNeedArgument(opt);
@@ -121,14 +124,28 @@ public class BDCertGenerator {
                 setOrgId = true;
             }          
         }
-        if (!setOrgId) {
-            printUsageAndExit("Please enter an orgid");
-        }
-        if (!setCertType) {
+        if (certType == CertType.NONE) {
             printUsageAndExit("Please enter type of the certificate to generate:" +
                     "root/app/binding");
         }
-        
+        if (!setOrgId) {
+            switch (certType) {
+                case ROOT: break; // It's okay not have the orgID
+                case APP:  // May not be okay. But acceptable for non-leaf certs
+                    System.err.println(
+                    "============================================================");
+                    System.err.println(
+                    "WARNING: orgID is optional only for the non-leaf certificate.");
+                    System.err.println(
+                    "You may want specify an orgID for this certificate");
+                    System.err.println(
+                    "============================================================");
+                    break;
+                case BINDING:
+                    printUsageAndExit("orgID that matches the orgID in the BUMF must be specified");
+                    break; 
+            }
+        }
         SecurityUtil util = builder.build();
         util.createCerts();
     }
@@ -150,7 +167,7 @@ public class BDCertGenerator {
             System.err.println("\nFailed: " + reason + "\n");
         }
         System.err.println("***This tool generates keystore/certificates for securing BD-J applications***\n");
-        System.err.println("usage: BDCertGenerator -root|-app|-binding [options] organization_id\n");
+        System.err.println("usage: BDCertGenerator -root|-app|-binding [options] [organization_id]\n");
         System.err.println("Valid Options:");
         System.err.println(" -keystore    filename\t:Create a keystore file with the given filename");
         System.err.println(" -dn          name    \t:Distinguished name of the certificate");
