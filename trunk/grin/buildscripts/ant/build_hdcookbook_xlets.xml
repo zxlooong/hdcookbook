@@ -56,7 +56,7 @@ information or have any questions.
     
     <target name="build-xlets" depends="compile-me-library,
             build-monitor-xlet, build-game-xlet, build-menu-xlet, 
-            sign-xlets, generate-bdjo, generate-id"/>
+            sign-xlets, generate-bdjo, generate-id, generate-index"/>
     
     <target name="build-menu-xlet" depends="init-xlet-dirs, build-menu-assets, compile-me-library">
         <xlets.javac    
@@ -188,6 +188,10 @@ information or have any questions.
     
     <target name="generate-id">
         <ant antfile="buildscripts/ant/build_bdjo_security.xml" target="generate-id"/>        
-    </target>    
+    </target>   
+
+    <target name="generate-index">
+        <ant antfile="buildscripts/ant/build_bdjo_security.xml" target="generate-index"/>        
+    </target>        
 
 </project>

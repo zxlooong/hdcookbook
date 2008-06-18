@@ -23,11 +23,12 @@ Clara, CA 95054 or visit www.sun.com if you need additional
 information or have any questions.
 -->
 
-<project name="Generate a bdjo file, an id file and sign xlets" default="generate-bdjo">
+<project name="Generate a bdjo file, an id file, an index file, and sign xlets" default="generate-bdjo">
     
     <property name="HDC_BDJO_CONVERTER" value="../tools/bdjo"/>
     <property name="HDC_BDJ_SIGNER" value="../tools/security"/>
-    <property name="HDC_ID_CONVERTER" value="../tools/id"/>
+    <property name="HDC_ID_CONVERTER" value="../tools/id"/>   
+    <property name="HDC_INDEX_CONVERTER" value="../tools/index"/>
     
     <target name="generate-bdjo" depends="check-bdjoconverter">    
         <fail unless="bdjoconverter.ok" message="Could not find the bdjoconverter tool at ${HDC_BDJO_CONVERTER}"/>
@@ -95,5 +96,20 @@ information or have any questions.
         <available file="${HDC_ID_CONVERTER}/dist/id.jar" type="file"
                    property="idconverter.ok"/>
     </target> 
+    
+    <target name="generate-index" depends="check-indexconverter">    
+        <fail unless="indexconverter.ok" message="Could not find the indexconverter tool at ${HDC_INDEX_CONVERTER}"/>
+        
+        <java jar="${HDC_INDEX_CONVERTER}/dist/index.jar"  
+              fork="true">
+            <arg value="xlets/index/index.xml"/>
+            <arg value="${HDC_DISC_BDMV}/index.bdmv"/>
+        </java>	
+    </target>	
+    
+    <target name="check-indexconverter">
+        <available file="${HDC_INDEX_CONVERTER}/dist/index.jar" type="file"
+                   property="indexconverter.ok"/>
+    </target>     
 </project>
            
