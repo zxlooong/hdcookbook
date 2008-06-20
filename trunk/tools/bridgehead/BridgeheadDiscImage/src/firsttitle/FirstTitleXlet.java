@@ -52,7 +52,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package hellotvxlet;
+package firsttitle;
 
 import javax.tv.xlet.Xlet;
 import javax.tv.xlet.XletContext;
@@ -63,23 +63,33 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.Graphics;
 
+import javax.tv.service.SIManager;
+import javax.tv.service.selection.ServiceContextFactory;
+import org.bluray.net.BDLocator;
+import org.bluray.ti.Title;
+import org.bluray.ti.selection.TitleContext;
+import org.bluray.ui.event.HRcEvent;
+import org.dvb.event.EventManager;
+import org.dvb.event.UserEvent;
+import org.dvb.event.UserEventListener;
+import org.dvb.event.UserEventRepository;
 import org.havi.ui.HScene;
 import org.havi.ui.HSceneFactory;
 
 /**
- * This xlet will be downloaded and launched after the VFS update.
+ * This xlet is the defealt first title on the Bridgehead Disc Image.
  */
-public class HelloTVXlet implements Xlet {
+public class FirstTitleXlet implements Xlet {
 
     private static Font font;
     private HScene scene;
     private Container gui;
     private XletContext context;
-    private static String message = "Hello, I'm a downloaded xlet!";
-
-    /** Creates a new instance of HelloTVXlet */
-    public HelloTVXlet() {
-    }
+    private static String[] message = {
+        "I'm a default 1st title on the Bridgehead Disc Image,",
+        "which is meant to be replaced by the code uploaded by you.",
+        "Please restart the disc to get back to the Bridgehead Xlet."
+        };
 
     public void initXlet(XletContext context) {
         this.context = context;
@@ -94,14 +104,17 @@ public class HelloTVXlet implements Xlet {
                 g.setColor(new Color(10, 10, 10));
                 g.fillRect(20, 20, getWidth() - 40, getHeight() - 40);
                 g.setColor(new Color(245, 245, 245));
-                int message_width = g.getFontMetrics().stringWidth(message);
-                g.drawString(message, (getWidth() - message_width) / 2, 500);
+                int top = 200;
+                for (int i = 0; i < message.length; i++) {
+                   int message_width = g.getFontMetrics().stringWidth(message[i]);
+                   g.drawString(message[i], (getWidth() - message_width) / 2, top + (i*50));
+                }
             }
         };
 
         gui.setSize(1920, 1080);  // BD screen size
         scene.add(gui, BorderLayout.CENTER);
-        scene.validate();   
+        scene.validate();    
     }
 
     public void startXlet() {
@@ -117,5 +130,6 @@ public class HelloTVXlet implements Xlet {
     public void destroyXlet(boolean unconditional) {
         scene.remove(gui);
         scene = null;
-    }  
+    }
+       
 }

@@ -20,7 +20,7 @@
     <import   file="build-bridgehead.xml"/>
     <import   file="build-bumf-generator.xml"/>
 
-    <property name="zipfile" value="${xlet.name}.zip"/>
+    <property name="zipfile" value="${discimage.name}.zip"/>
     
     <target name="clean" depends="client-clean, bumfgen-clean, bridgehead-clean">
         <delete file="${zipfile}"/>

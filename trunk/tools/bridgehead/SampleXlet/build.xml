@@ -58,8 +58,7 @@
             description="Make an blu-ray disc image bundle">
                 
         <zip destfile="${xlet.name}.zip"
-             basedir="${dist.dir}"     
-             excludes="CERTIFICATE/**"/>
+             basedir="${dist.dir}"/>
     </target>    
     
     <target name="compile"
@@ -132,6 +131,8 @@
         <copy todir="${target.dir}">
             <fileset dir="${premade.bdmv}">
                 <exclude name="**/.svn/**"/>
+                <exclude name="CERTIFICATE/**"/>
+                <!-- exclude name="BDMV/**/index.bdmv"/ -->
             </fileset>
         </copy>
         

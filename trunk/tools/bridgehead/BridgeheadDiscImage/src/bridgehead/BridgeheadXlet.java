@@ -54,6 +54,7 @@
 
 package bridgehead;
 
+import java.awt.event.KeyEvent;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,6 +66,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.tv.service.SIManager;
 import javax.tv.service.selection.ServiceContextFactory;
 import javax.tv.service.selection.ServiceContextException;
 import javax.tv.xlet.XletContext;
@@ -75,6 +77,12 @@ import org.bluray.vfs.VFSManager;
 import org.bluray.vfs.PreparingFailedException;
 
 import net.java.bd.tools.logger.XletLogger;
+import org.bluray.net.BDLocator;
+import org.bluray.ui.event.HRcEvent;
+import org.dvb.event.EventManager;
+import org.dvb.event.UserEvent;
+import org.dvb.event.UserEventListener;
+import org.dvb.event.UserEventRepository;
 
 /**
  * A bootstrap xlet that opens up a ServerSocket,
@@ -82,7 +90,7 @@ import net.java.bd.tools.logger.XletLogger;
  * and performs VFS update with the new disc image.
  */
 
-public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable {
+public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventListener {
 
     public static final int PORT = 4444;
     
@@ -90,6 +98,8 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable {
     private String       bindingUnitDir;    
     private Thread       thread;
     private ServerSocket ssocket;
+    
+    private int options = 0; // 0 for title select, 1 for new upload, 2 for VFS cancel.
     
     public void initXlet(XletContext context) {
         this.context = context;
@@ -107,43 +117,90 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable {
         //Set the logging output file
         XletLogger.setLogFile(ada + "/" + "log.txt");
         XletLogger.log("BindingRoot: " + bindingUnitDir);
+        
+        UserEventRepository uer = new UserEventRepository("BridgeheadXlet");
+        uer.addKey(KeyEvent.VK_ENTER);
+        uer.addKey(KeyEvent.VK_1);
+        uer.addKey(KeyEvent.VK_2);        
+        EventManager em = EventManager.getInstance();
+        em.addUserEventListener(this, uer);        
     } 
     
     public void startXlet() {
-        
-        XletLogger.log("Starting the xlet...");        
-        XletLogger.setVisible(true); 
-        
+  
+        XletLogger.setVisible(true);  
+  
         // If the player doesn't support VFS, stop.
         if (!isPlayerCompatible()) {
             return;
         }
         
-        thread = new Thread(this);
-        thread.start();
+        showIntroMessage();
     }
     
-    public void run() {        
+    public void showIntroMessage() {
+        
+        XletLogger.log("*******************************************");
+        XletLogger.log("***** Welcome to the Bridgehead Xlet ******");
+        XletLogger.log("Reinsert the disc anytime to get back to this screen.");
+        XletLogger.log(" ");
+        XletLogger.log("Press Enter to start Title 1.");    
+        XletLogger.log("Press 1 to upload a new disc image and do VFS update.");
+        XletLogger.log("Press 2 to cancel previous VFS updates and go back to the optical disc.");
+        XletLogger.log("*******************************************");      
+        XletLogger.log("*******************************************");
+        XletLogger.log("");
+               
+    }
+     
+    public void userEventReceived(UserEvent ue) {   
+        
+        if (ue.getType()==HRcEvent.KEY_PRESSED) {
+            switch (ue.getCode()) {
+                case KeyEvent.VK_1:
+                    options = 1;
+                    break;
+                case KeyEvent.VK_2:
+                    options = 2;
+                    break;
+                case KeyEvent.VK_ENTER:
+                    options = 0;
+                    break;
+                default:
+                    return; // don't do anything if the keyevent is none of the above.
+            }
+            
+            synchronized(this) {
+                if (thread == null) {
+                    XletLogger.log("Entered option " + options + ".");
+                    thread = new Thread(this);
+                    thread.start();
+                }
+            }
+        }
+    }
+    
+    public void run() {  
+        String bumfxml = null;
+        String bumfsf = null;
         
         try {
-            
-            XletLogger.log("Waiting for the client connect.");
-            doDownload(bindingUnitDir);
-          
-            XletLogger.log("Calling VFS update");
-            doVFSUpdate(bindingUnitDir + "/" + "sample.xml", 
-                        bindingUnitDir + "/" + "sample.sf");
-            
-            XletLogger.log("Restarting the current title");
-            doTitleRestart();
-            
-        } catch (IOException ie) {
-            XletLogger.log("", ie); 
-        } catch (PreparingFailedException pfe) {
-            XletLogger.log("", pfe);
-        } catch (ServiceContextException sce) {
-            XletLogger.log("", sce);
-        } 
+            switch (options) {
+                case 1:
+                    doDownload(bindingUnitDir);
+                    bumfxml = bindingUnitDir + "/" + "sample.xml";
+                    bumfsf = bindingUnitDir + "/" + "sample.sf";
+                case 2:
+                    doVFSUpdate(bumfxml, bumfsf);
+                case 0:
+                    doTitleSelection();
+                    break;
+            }
+        } catch (Exception e) {
+            XletLogger.log("", e);
+            cleanup();
+            showIntroMessage();
+        }
     }
     
     public void pauseXlet() {
@@ -151,6 +208,10 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable {
     }
     
     public void destroyXlet(boolean unconditional) {
+        cleanup();
+    }
+    
+    public void cleanup() {
         if (thread != null) {
             thread.interrupt(); 
             thread = null;
@@ -191,29 +252,29 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable {
         }
     }
     
-    public void doDownload(String downloadDir) throws IOException {
-
+    public void doDownload(String downloadDir) throws IOException, 
+           DiscImageContentException {
+        XletLogger.log("Waiting for the client connect.");
         ssocket = new ServerSocket(PORT);
-
-        XletLogger.log("*** Host IP is " + getHostIP() + ", listening on port " + PORT);
-
+        
+        XletLogger.log("*** Host IP is " + getHostIP() + ", listening on port " + PORT);        
         Socket clientSocket = ssocket.accept();
+        
         XletLogger.log("Accepted connection, start downloading");
 
         ZipInputStream zin = new ZipInputStream(
                 new BufferedInputStream(clientSocket.getInputStream()));
-
         ZipEntry e;
 
         while ((e = zin.getNextEntry()) != null) {
             XletLogger.log(e.getName());
-            unzip(zin, e, downloadDir);
+            unzip(zin, e, downloadDir);    
+            ContentChecker.checkFile(new File(downloadDir, e.getName()));
         }
         zin.close();
 
         clientSocket.close();
         ssocket.close();
-
     }
 
     private void unzip(InputStream zin, ZipEntry e, String dir)
@@ -244,21 +305,27 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable {
     
     public void doVFSUpdate(String xmlFile, String sigFile) 
             throws PreparingFailedException {
-     
+        XletLogger.log("Calling VFS update");     
         VFSManager.getInstance().requestUpdating(xmlFile, sigFile, true);           
     }
     
-    public void doTitleRestart() 
+    public void doTitleSelection() 
             throws ServiceContextException {
         
         try {
+            XletLogger.log("Selecting title 1 on the disc.");
+            BDLocator loc = new BDLocator("bd://1");
             ServiceContextFactory factory = ServiceContextFactory.getInstance(); 
             TitleContext titleContext =(TitleContext) factory.getServiceContext(context);
-            Title title = (Title) titleContext.getService();
+            Title title = (Title) SIManager.createInstance().getService(loc);
             titleContext.start(title, true);        
         } catch (SecurityException ex) {
             XletLogger.log("Can't get TitleContext", ex);
             return;
-        } 
+        } catch (javax.tv.locator.InvalidLocatorException ex) {
+            XletLogger.log("Error in making locator", ex);
+        } catch (org.davic.net.InvalidLocatorException ex) {
+            XletLogger.log("Error in making locator", ex);
+        }
     }
 }
