@@ -1,7 +1,6 @@
 com.hdcookbook.grin
 com.hdcookbook.grin.animator
 com.hdcookbook.grin.binaryconverter
-com.hdcookbook.grin.build.mosaic
 com.hdcookbook.grin.commands
 com.hdcookbook.grin.compiler
 com.hdcookbook.grin.features

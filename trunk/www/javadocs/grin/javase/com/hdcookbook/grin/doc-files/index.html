@@ -406,6 +406,7 @@ Here's BNF describing the syntax of a show file:
     color_value ::= "{" red_int green_int blue_int alpha_int "}"
 
     mosaic_hint ::= "mosaic_hint" name width height "{" file_name * "}" ";"
+	# mosaic_hint is deprecated.  See "mosaics"
 
     sub_feature ::= feature_name
     		    | sub_feature feature_without_name
