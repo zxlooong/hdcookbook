@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="BridgeheadXlet" default="deploy" basedir=".">
+    
+    <!-- Property Definitions -->
+    <property file="../../${os}.user.vars.properties"/>
+    <property file="../../user.vars.properties"/>
+    <property file="../../vars.properties"/>
+    <property file="build.properties"/>	
+
+    <property name="keystore"                     value="tools/keystore/keystore.store"/>
+    
+    <!-- WinDVD executable default location -->
+    <property name="WinDVD"         value="c:/Program Files/InterVideo/DVD8/WinDVD.exe"/>
+    
+    <presetdef name="jdktools.java">
+        <java fork="true" failOnError="true"/>
+    </presetdef>    
+    
+    <import   file="build-client.xml"/>   
+    <import   file="build-bridgehead.xml"/>
+    <import   file="build-bumf-generator.xml"/>
+
+    <property name="zipfile" value="${discimage.name}.zip"/>
+    
+    <target name="clean" depends="client-clean, bumfgen-clean, bridgehead-clean">
+        <delete file="${zipfile}"/>
+    </target>
+    
+    <target name="deploy" depends="bridgehead-deploy, make-bumfgen-jar, make-client-jar"
+            description="Make an blu-ray disc image">
+        <zip destfile="${zipfile}">
+            <fileset dir="${bridgehead.dist.dir}"/>
+            <fileset dir="${client.dist.dir}"/>       
+            <fileset dir="${bumfgen.dist.dir}"/>     
+            <fileset file="${keystore}"/>
+        </zip>
+    </target>
+
+</project>
