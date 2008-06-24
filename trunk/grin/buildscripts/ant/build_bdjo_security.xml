@@ -23,12 +23,13 @@ Clara, CA 95054 or visit www.sun.com if you need additional
 information or have any questions.
 -->
 
-<project name="Generate a bdjo file, an id file, an index file, and sign xlets" default="generate-bdjo">
+<project name="Generate a bdjo file, various .bdmv files, and sign xlets" default="generate-bdjo">
     
     <property name="HDC_BDJO_CONVERTER" value="../tools/bdjo"/>
     <property name="HDC_BDJ_SIGNER" value="../tools/security"/>
     <property name="HDC_ID_CONVERTER" value="../tools/id"/>   
     <property name="HDC_INDEX_CONVERTER" value="../tools/index"/>
+    <property name="HDC_MOVIE_CONVERTER" value="../tools/movieobject"/>
     
     <target name="generate-bdjo" depends="check-bdjoconverter">    
         <fail unless="bdjoconverter.ok" message="Could not find the bdjoconverter tool at ${HDC_BDJO_CONVERTER}"/>
@@ -82,6 +83,8 @@ information or have any questions.
                    property="bdsigner.ok"/>
     </target>
     
+    <target name="generate-bdmv-files" depends="generate-id, generate-index, generate-movieobject"/>
+    
     <target name="generate-id" depends="check-idconverter">    
         <fail unless="idconverter.ok" message="Could not find the idconverter tool at ${HDC_ID_CONVERTER}"/>
         
@@ -102,7 +105,7 @@ information or have any questions.
         
         <java jar="${HDC_INDEX_CONVERTER}/dist/index.jar"  
               fork="true">
-            <arg value="xlets/index/index.xml"/>
+            <arg value="xlets/bdmv/index.xml"/>
             <arg value="${HDC_DISC_BDMV}/index.bdmv"/>
         </java>	
     </target>	
@@ -110,6 +113,21 @@ information or have any questions.
     <target name="check-indexconverter">
         <available file="${HDC_INDEX_CONVERTER}/dist/index.jar" type="file"
                    property="indexconverter.ok"/>
-    </target>     
+    </target>   
+    
+    <target name="generate-movieobject" depends="check-movieobjectconverter">    
+        <fail unless="movieobjectconverter.ok" message="Could not find the movie object tool at ${HDC_MOVIE_CONVERTER}"/>
+        
+        <java jar="${HDC_MOVIE_CONVERTER}/dist/movieobject.jar"  
+              fork="true">
+            <arg value="xlets/bdmv/MovieObject.xml"/>
+            <arg value="${HDC_DISC_BDMV}/MovieObject.bdmv"/>
+        </java>	
+    </target>	
+    
+    <target name="check-movieobjectconverter">
+        <available file="${HDC_MOVIE_CONVERTER}/dist/movieobject.jar" type="file"
+                   property="movieobjectconverter.ok"/>
+    </target>       
 </project>
            

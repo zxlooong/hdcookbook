@@ -5,7 +5,6 @@
     <indexes>
 
         <!-- NOTE: firstPlayback and topMenu points to HDMV titles that select title[0] (bdjo) right away.  see wiki.java.net/bin/view/Mobileandembedded/BDJTitleStructure for details.  -->
-
         <firstPlayback>
             <firstPlaybackObject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="HDMVIndexObject">
                 <HDMVName>0x0</HDMVName>

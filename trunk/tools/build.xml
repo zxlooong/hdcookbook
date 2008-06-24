@@ -16,6 +16,7 @@
             <ant dir="security/make"/>
             <ant dir="id"/>  
             <ant dir="index"/>
+            <ant dir="movieobject"/>
         </target>
         
 	<target name="clean">         
@@ -27,6 +28,7 @@
           <ant dir="soundsplit" target="soundsplit-clean"/>
           <ant dir="id" target="clean"/>
           <ant dir="index" target="clean"/>
+          <ant dir="movieobject" target="clean"/>
           <ant dir="library/bumf" target="clean"/>         
           <ant dir="bridgehead" target="clean"/>   
 	</target>
