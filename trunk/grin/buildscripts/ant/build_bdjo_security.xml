@@ -88,11 +88,10 @@ information or have any questions.
     <target name="generate-id" depends="check-idconverter">    
         <fail unless="idconverter.ok" message="Could not find the idconverter tool at ${HDC_ID_CONVERTER}"/>
         
-        <java jar="${HDC_ID_CONVERTER}/dist/id.jar"  
-              fork="true">
+        <jdktools.java jar="${HDC_ID_CONVERTER}/dist/id.jar">
             <arg value="xlets/id/id.xml"/>
             <arg value="${HDC_DISC_BDMV}/../CERTIFICATE/id.bdmv"/>
-        </java>	
+        </jdktools.java>	
     </target>	
     
     <target name="check-idconverter">
@@ -103,11 +102,10 @@ information or have any questions.
     <target name="generate-index" depends="check-indexconverter">    
         <fail unless="indexconverter.ok" message="Could not find the indexconverter tool at ${HDC_INDEX_CONVERTER}"/>
         
-        <java jar="${HDC_INDEX_CONVERTER}/dist/index.jar"  
-              fork="true">
+        <jdktools.java jar="${HDC_INDEX_CONVERTER}/dist/index.jar">
             <arg value="xlets/bdmv/index.xml"/>
             <arg value="${HDC_DISC_BDMV}/index.bdmv"/>
-        </java>	
+        </jdktools.java>	
     </target>	
     
     <target name="check-indexconverter">
@@ -118,11 +116,10 @@ information or have any questions.
     <target name="generate-movieobject" depends="check-movieobjectconverter">    
         <fail unless="movieobjectconverter.ok" message="Could not find the movie object tool at ${HDC_MOVIE_CONVERTER}"/>
         
-        <java jar="${HDC_MOVIE_CONVERTER}/dist/movieobject.jar"  
-              fork="true">
+        <jdktools.java jar="${HDC_MOVIE_CONVERTER}/dist/movieobject.jar">
             <arg value="xlets/bdmv/MovieObject.xml"/>
             <arg value="${HDC_DISC_BDMV}/MovieObject.bdmv"/>
-        </java>	
+        </jdktools.java>	
     </target>	
     
     <target name="check-movieobjectconverter">
