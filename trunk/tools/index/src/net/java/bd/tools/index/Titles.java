@@ -71,7 +71,7 @@ public class Titles {
     }
     
     public void readObject(DataInputStream din) throws IOException {
-        int titleCount = (int) din.readShort();
+        int titleCount = (int) din.readUnsignedShort();
         titles = new Title[titleCount];
         for (int i = 0; i < titleCount; i++) {
             titles[i] = new Title();

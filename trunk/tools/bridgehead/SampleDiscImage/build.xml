@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="HelloTVXlet" default="deploy" basedir=".">
+<project name="SampleDiscImage" default="deploy" basedir=".">
+    
+    <!-- This build file contains a standard build process for making a BD 
+    disc structure.  See build-zip.xml for how to convert the existing
+    disc structure to a zip file that BridgeheadDiscImage can upload.  -->
     
     <!-- Property Definitions -->
     <property file="../../../${os}.user.vars.properties"/>
     <property file="../../../user.vars.properties"/>
     <property file="../../../vars.properties"/>
-    <property file="build.properties"/>
+    <property file="build.properties"/>	
+    
+    <import   file="build-zip.xml"/>   
     
     <!-- xlet source dir, build dir, and a distribution dir for a disc image 
       -->
@@ -18,48 +24,33 @@
     <property name="xlet.name"      value="hellotvxlet.HelloTVXlet" />
     
     <!-- disc image related properties -->   
-    <property name="premade.bdmv"   value="../tools/DiscImage"/>   
-    <property name="target.dir"     value="${dist.dir}"/>
     <property name="bdjo.name"      value="00000"/>
     <property name="xletjar.name"   value="00000"/>
     <property name="orgid"          value="56789abc"/>
     <property name="bdtools.dir"    value="tools/BDTools"/>
     <property name="bdjo-desc-file" value="${build.dir}/${bdjo.name}.xml"/>
     <property name="xlet.jar"       value="${build.dir}/${xletjar.name}.jar"/>
-        
-    <property name="keystore"    value="../tools/keystore/keystore.store"/>
-    <property name="bumfgen.jar"    value="../BumfGenerator/dist/bumfgen.jar"/>
-
+    
+    <presetdef name="jdktools.java">
+        <java fork="true" failOnError="true"/>
+    </presetdef>
+    
     <target name="init">
         <tstamp/>
         <mkdir dir="${build.dir}/classes"/> 
-        <mkdir dir="${dist.dir}"/>     
-        
-        <presetdef name="jdktools.java">
-            <java fork="true" failOnError="true"/>
-        </presetdef> 
-    
-        <path id="sec.tools.path">
-            <pathelement location="${security.jar}"/>
-            <pathelement location="${bouncycastle.jar}"/>
-            <pathelement location="${java.home}/../lib/tools.jar"/>   
-        </path>	
+        <mkdir dir="${dist.dir}/DiscImage"/>     
     </target>
     
-    <target name="clean">
+    <target name="clean" depends="zip-clean">
         <delete dir="${build.dir}"/>
         <delete dir="${dist.dir}"/>
-        <delete file="${xlet.name}.zip"/>
     </target>
     
-    <target name="deploy" depends="bundle"/>
+    <target name="deploy" depends="bundle, make-zip"/>
+    
     <target name="bundle" depends="jar, gen-bdjo-desc-file, 
-                                   sign-xlet, copy-to-bdmv, sign-buda"
-            description="Make an blu-ray disc image bundle">
-                
-        <zip destfile="${xlet.name}.zip"
-             basedir="${dist.dir}"/>
-    </target>    
+                                   sign-xlet, copy-to-bdmv"
+            description="Make an blu-ray disc image bundle"/>
     
     <target name="compile"
             depends="init" description="Compiles the sources">
@@ -86,31 +77,31 @@
     </target>
     
     <target name="sign-xlet">    
+        
+        <path id="sec.tools.path">
+            <pathelement location="${security.jar}"/>
+            <pathelement location="${bouncycastle.jar}"/>
+            <pathelement location="${java.home}/../lib/tools.jar"/>   
+        </path>	   
+        
+        <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
+            <arg value="-root"/>
+            <arg value="${orgid}"/>
+            <classpath refid="sec.tools.path"/>
+        </jdktools.java>
+        
+        <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
+            <arg value="-app"/>
+            <arg value="${orgid}"/>
+            <classpath refid="sec.tools.path"/>
+        </jdktools.java>
+        
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg value="-keystore"/>
-            <arg value="${keystore}"/>
             <arg value="${xlet.jar}"/>
             <classpath refid="sec.tools.path"/>	   
         </jdktools.java>
-    </target>
-    
-    <target name="generate-bumf-xml" depends="copy-to-bdmv">
-        <jdktools.java jar="${bumfgen.jar}">
-            <arg value="${premade.bdmv}/CERTIFICATE/id.bdmv"/>
-            <arg value="${target.dir}/BDMV"/>
-            <arg value="${dist.dir}/sample.xml"/>
-        </jdktools.java>    
-    </target>
-    
-    <target name="sign-buda" depends="generate-bumf-xml">
-        <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg value="-keystore"/>
-            <arg value="${keystore}"/>
-            <arg value="${dist.dir}/sample.xml"/>
-            <classpath refid="sec.tools.path"/>
-        </jdktools.java>
-    </target>
-    
+        
+    </target>  
     
     <target name="gen-bdjo-desc-file"
             depends="gen-bdjo-desc.tmp"
@@ -118,28 +109,55 @@
         
         <move file="${bdjo-desc-file}.tmp" tofile="${bdjo-desc-file}"/>
         
-        <jdktools.java  
+        <jdktools.java
             jar="${bdjo.jar}">
             <arg value="${bdjo-desc-file}"/>
             <arg value="${build.dir}/${bdjo.name}.bdjo"/>
         </jdktools.java>
     </target>
     
+    <target name="gen-bdmv-files">
+        <jdktools.java jar="${id.jar}">
+            <arg value="bdmv/id.xml"/>
+            <arg value="${build.dir}/id.bdmv"/>              
+        </jdktools.java>
+        <jdktools.java jar="${index.jar}">
+            <arg value="bdmv/index.xml"/>
+            <arg value="${build.dir}/index.bdmv"/>              
+        </jdktools.java>
+        <jdktools.java jar="${movieobject.jar}">
+            <arg value="bdmv/MovieObject.xml"/>
+            <arg value="${build.dir}/MovieObject.bdmv"/>              
+        </jdktools.java>
+    </target>
+    
     <target name="copy-to-bdmv" 
-            depends="jar, gen-bdjo-desc-file, sign-xlet">
-        
-        <copy todir="${target.dir}">
-            <fileset dir="${premade.bdmv}">
-                <exclude name="**/.svn/**"/>
-                <exclude name="CERTIFICATE/**"/>
-                <!-- exclude name="BDMV/**/index.bdmv"/ -->
-            </fileset>
-        </copy>
-        
-        <copy todir = "${target.dir}/BDMV/JAR" 
+            depends="jar, gen-bdjo-desc-file, sign-xlet, gen-bdmv-files">
+             
+        <mkdir dir="${dist.dir}/BDMV/AUXDATA"/>    
+        <mkdir dir="${dist.dir}/BDMV/BACKUP"/>  
+        <mkdir dir="${dist.dir}/BDMV/BDJO"/>  
+        <mkdir dir="${dist.dir}/BDMV/CLIPINF"/>  
+        <mkdir dir="${dist.dir}/BDMV/JAR"/>  
+        <mkdir dir="${dist.dir}/BDMV/META"/>  
+        <mkdir dir="${dist.dir}/BDMV/PLAYLIST"/>     
+        <mkdir dir="${dist.dir}/BDMV/STREAM"/>      
+        <mkdir dir="${dist.dir}/CERTIFICATE/BACKUP"/>  
+           
+        <copy todir = "${dist.dir}/BDMV/JAR" 
               file="${xlet.jar}"/>
-        <copy todir = "${target.dir}/BDMV/BDJO" 
-              file="${build.dir}/${bdjo.name}.bdjo"/>          
+        <copy todir = "${dist.dir}/BDMV/BDJO" 
+              file="${build.dir}/${bdjo.name}.bdjo"/>           
+        <copy todir = "${dist.dir}/CERTIFICATE" 
+              file="app.discroot.crt"/>
+        <copy todir = "${dist.dir}/CERTIFICATE/BACKUP" 
+              file="app.discroot.crt"/>  
+        <copy todir="${dist.dir}/BDMV"
+              file="${build.dir}/index.bdmv"/>
+        <copy todir="${dist.dir}/BDMV"
+              file="${build.dir}/MovieObject.bdmv"/>
+        <copy todir="${dist.dir}/CERTIFICATE"
+              file="${build.dir}/id.bdmv"/>              
     </target>    
     
     <target name="gen-bdjo-desc.tmp">
@@ -159,12 +177,6 @@
     <applicationManagementTable>
         <applications>
             <applicationDescriptor>
-                <profiles>
-                    <majorVersion>1</majorVersion>
-                    <microVersion>0</microVersion>
-                    <minorVersion>0</minorVersion>
-                    <profile>1</profile>
-                </profiles>
                 <baseDirectory>${xletjar.name}</baseDirectory>
                 <binding>TITLE_BOUND_DISC_BOUND</binding>
                 <classpathExtension></classpathExtension>
@@ -172,6 +184,12 @@
                 <iconLocator></iconLocator>
                 <initialClassName>${xlet.name}</initialClassName>
                 <priority>3</priority>
+                <profiles>
+                    <majorVersion>1</majorVersion>
+                    <microVersion>0</microVersion>
+                    <minorVersion>0</minorVersion>
+                    <profile>1</profile>
+                </profiles>
                 <visibility>V_01</visibility>
             </applicationDescriptor>
             <applicationId>0x4000</applicationId>

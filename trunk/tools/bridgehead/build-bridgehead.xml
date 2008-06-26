@@ -97,7 +97,7 @@
                     <classpath refid="sec.tools.path"/>
                     <arg value="-export"/>
                     <arg value="-keystore"/>
-                    <arg value="${keystore}"/>
+                    <arg value="${keystore.dir}/keystore.store"/>
                     <arg value="-storepass"/>
                     <arg value="keystorepassword"/>
                     <arg value="-v"/>
@@ -122,7 +122,7 @@
     <target name="sign-jars" depends="init-security-tools, export-certs">
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
             <arg value="-keystore"/>
-            <arg value="${keystore}"/>
+            <arg value="${keystore.dir}/keystore.store"/>
             <arg value="${bridgehead.build.dir}/${bridgeheadxlet.jar}"/>
             <arg value="${bridgehead.build.dir}/${firsttitlexlet.jar}"/>         
             <arg value="${bridgehead.build.dir}/${logger-name}.jar"/>

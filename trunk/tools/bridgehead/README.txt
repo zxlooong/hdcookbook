@@ -4,7 +4,7 @@ This can simplify the development process by eliminating the need to burn a phys
 
 
 Use client.jar to initiate the download.
-See the SampleXlet directory for a sample zip file that can be downloaded.
+See the SampleDiscImage directory for a sample zip file that can be downloaded.
 
 A step-by-step instruction on how to use this tool.
 ----------
@@ -12,7 +12,7 @@ A step-by-step instruction on how to use this tool.
 
 2) Burn the bridgehead Disc image to a BD-RE and stick it in your Blu-ray player.  Press 1 to start the VFS update process.
 
-3) Build HelloTVXlet under the SampleXlet dir, which generates the zip file for download by the bridgehead Xlet on the player.  This is a sample disc image to be substituted with your own image.
+3) Build HelloTVXlet under the SampleDiscImage dir, which generates the zip file for download by the bridgehead Xlet on the player.  This is a sample disc image to be substituted with your own image.
 
 4) Use the client application in the "Client/dist" dir that sources sample (your) Xlet to the bridgehead xlet running on the player waiting for VFS update.  The IP address of the PS/3 can be found under it's system menu -> System information menu section.
 Run the client application:

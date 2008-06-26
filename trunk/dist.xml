@@ -21,15 +21,10 @@
         <mkdir dir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage"/>
         
         <copy todir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage/BDMV">
-            <fileset dir="${HDC_DISC_BDMV}">      
-                <include name="**/*.jar"/>
-                <include name="**/*.bdjo"/>
-            </fileset>
+            <fileset dir="${HDC_DISC_BDMV}"/> 
         </copy>
         <copy todir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage/CERTIFICATE">   
-            <fileset dir="${HDC_DISC_BDMV}/../CERTIFICATE">  
-                <include name="**/*.crt"/>
-            </fileset>
+            <fileset dir="${HDC_DISC_BDMV}/../CERTIFICATE"/>  
         </copy>        
 
         <zip destfile="${RELEASE_BUNDLE}/HDCookbook-DiscImage.zip"
