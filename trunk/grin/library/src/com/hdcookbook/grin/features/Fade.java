@@ -91,7 +91,7 @@ public class Fade extends Modifier implements Node {
     protected int[] keyframes;
     protected int[] keyAlphas;
     protected boolean srcOver;
-    protected int repeatFrame;
+    protected int repeatFrame;	// Integer.MAX_VALUE for "stick at end"
     private boolean isActivated = false;
     private int alphaIndex;
     protected Command[] endCommands;
@@ -190,6 +190,9 @@ public class Fade extends Modifier implements Node {
      **/
     public void nextFrame() {
 	super.nextFrame();
+	if (alphaIndex == Integer.MAX_VALUE) {
+	    return;
+	}
 	alphaIndex++;
 	if (alphaIndex == alphas.length) {
 	    for (int i = 0; i < endCommands.length; i++) {
@@ -199,8 +202,6 @@ public class Fade extends Modifier implements Node {
 	}
 	if (alphaIndex < alphas.length) {
 	    currAlpha = alphas[alphaIndex];
-	} else {
-	    currAlpha = null;
 	}
     }
 

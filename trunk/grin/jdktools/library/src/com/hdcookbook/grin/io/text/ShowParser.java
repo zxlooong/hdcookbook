@@ -875,7 +875,7 @@ public class ShowParser {
 	    repeatFrame = lexer.getInt();
 	    tok = lexer.getString();
 	} else {
-	    repeatFrame = keyframes.size(); 	// Off the end
+	    repeatFrame = Integer.MAX_VALUE; // Off the end
 	}
 	if ("end_commands".equals(tok)) {
 	    endCommands = parseCommands();
