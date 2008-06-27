@@ -55,6 +55,7 @@
 
 package com.hdcookbook.grin.mosaic;
 
+import com.hdcookbook.grin.MosaicSpec;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ManagedImage;
 
@@ -86,9 +87,11 @@ public class Mosaic {
     private Component progressComponent = null;
     private int maxWidth;
     private int maxHeight;
-    private int minWidth = 128;
-    private int numWidths = 65;
+    private int minWidth;
+    private int numWidths;
+    private int maxPixels;	
     private String outputName;
+
     private int position;
     private int currPixels = Integer.MAX_VALUE;	// # pixels occupied
     private int currWidth = 0;
@@ -97,22 +100,16 @@ public class Mosaic {
     private BufferedImage buffer;
     private Graphics2D graphics;	// into buffer
 
-    /**
-     * Create a new mosaic with generous maximum dimensions
-     **/
-    public Mosaic() {
-	this(4096, 16384);
-    }
-
     /** 
-     * Create a new mosaic, with the given maximum dimensions.
+     * Create a new mosaic, with the given parameters
      **/
-    public Mosaic(int maxWidth, int maxHeight) {
-	this.maxWidth = maxWidth;
-	this.maxHeight = maxHeight;
-	if (minWidth > maxWidth) {
-	    minWidth = maxWidth;
-	}
+    public Mosaic(MosaicSpec spec) {
+	maxWidth = spec.maxWidth;
+	maxHeight = spec.maxHeight;
+	minWidth = spec.minWidth;
+	numWidths = spec.numWidths;
+	maxPixels = spec.maxPixels;
+	outputName = spec.name;
     }
 
     public int getHeightUsed() {
@@ -136,7 +133,7 @@ public class Mosaic {
     /**
      * Compile this mosaic into an optimal arrangement.
      *
-     * @return if this mosaic is used for images, false if it's empty
+     * @return true if this mosaic is used for images, false if it's empty
      **/
     public boolean compile(Component progressComponent) {
 	this.progressComponent = progressComponent;
@@ -145,10 +142,15 @@ public class Mosaic {
 	int lastWidth = -1;
 	double widthFactor = Math.log(((double) maxWidth) / minWidth);
 	for (int i = 0; i < numWidths; i++) {
-	    // Increase width geometrically from minWidth to maxWidth
-	    double f = widthFactor * ((double) i) / (numWidths - 1);
-	    f = Math.exp(f) * minWidth;
-	    int width = (int) (f + 0.5);
+	    int width;
+	    if (numWidths > 1) {
+		// Increase width geometrically from minWidth to maxWidth
+		double f = widthFactor * ((double) i) / (numWidths - 1);
+		f = Math.exp(f) * minWidth;
+		width = (int) (f + 0.5);
+	    } else {
+		width = maxWidth;
+	    }
 	    if (width == lastWidth) {
 		continue;	// Don't try same width twice
 	    }
@@ -176,10 +178,7 @@ public class Mosaic {
 	}
 	Component c = progressComponent;
 	if (c != null) {
-	    // System.out.println("--> p: " + currPixels + "  w: " + currWidth
-	    //			 + "  h: " + currHeight);
 	    c.repaint(100L);
-	    // c.repaint(); try { Thread.sleep(4000); } catch (Throwable t) { }
 	}
     }
 
@@ -218,12 +217,6 @@ public class Mosaic {
 	}
     }
 
-    /**
-     * Set the name of the file we'll be written to.
-     **/
-    public void setOutputName(String outputName) {
-	this.outputName = outputName;
-    }
 
     /**
      * Get the name of the file we'll be written to.
@@ -253,7 +246,13 @@ public class Mosaic {
      **/
     public void writeMosaicImage(File out) throws IOException {
 	if (currPixels == Integer.MAX_VALUE) {
-	    throw new IOException("Unable to create mosaic " + out);
+	    throw new IOException("Unable to create arrange images in mosaic " 
+	    			   + out);
+	}
+	if (currPixels > maxPixels) {
+	    throw new IOException("Image too big (" + currPixels + " > "
+	    			  + maxPixels + ") -- see part 3.2 section G.5 "
+				  + "table G-4 \"Image size\".\n");
 	}
 	BufferedImage buffer = new BufferedImage(currWidth, currHeight, 
 					BufferedImage.TYPE_INT_ARGB);

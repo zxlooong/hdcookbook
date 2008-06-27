@@ -57,7 +57,7 @@ package com.hdcookbook.grin.mosaic;
 
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.MosaicHint;
+import com.hdcookbook.grin.MosaicSpec;
 import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.io.ShowBuilder;
@@ -106,12 +106,12 @@ import javax.imageio.ImageIO;
     private SEShow[] showTrees;
 
     private ArrayList<ManagedImage> images = new ArrayList<ManagedImage>();
-    private Mosaic defaultMosaic = new Mosaic();
+    private Mosaic defaultMosaic = null;
     private HashMap<String, MosaicPart> partsByName 
     		= new HashMap<String, MosaicPart>();
-    private HashMap<String, String> mosaicHint 
+    private HashMap<String, String> imageToMosaic 
     		= new HashMap<String, String>();  // file name to mosaic name
-    private HashMap<String, Mosaic> specialMosaics
+    private HashMap<String, Mosaic> nameToMosaic
                 = new HashMap<String, Mosaic>(); // mosaic name to Mosaic
     Graphics2D frameG;
     private Mosaic currentMosaic = null;
@@ -133,18 +133,19 @@ import javax.imageio.ImageIO;
         
         for (SEShow show: showTrees) {
             
-            MosaicHint[] hints = show.getMosaicHints();
+            MosaicSpec[] specs = show.getMosaicSpecs();
             
-            for (MosaicHint hint : hints) {
-                String name = hint.getName();
-                String[] mosaicImages = hint.getImages();
-                int width = hint.getWidth();
-                int height = hint.getHeight();
-                
-                for (String imageName : mosaicImages) {
-                    mosaicHint.put(imageName, name);
+            for (MosaicSpec spec : specs) {
+                String name = spec.name;
+               
+		for (String imageName : spec.imagesToConsider) {
+		    imageToMosaic.put(imageName, name);
                 }
-                specialMosaics.put(name, new Mosaic(width, height));
+		Mosaic m = new Mosaic(spec);
+		if (spec.takeAllImages) {
+		    defaultMosaic = m;
+		}
+		addMosaic(name, m);
             }
         }
 
@@ -217,17 +218,28 @@ import javax.imageio.ImageIO;
 	    return;
 	}
 	BufferedImage imAdded = ImageIO.read(AssetFinder.getURL(mi.getName()));
-	String special = (String) mosaicHint.get(mi.getName());
+	String special = (String) imageToMosaic.get(mi.getName());
 	if (special != null) {
-	    mosaicHint.remove(mi.getName());	// hint has been taken
-	    Mosaic m = specialMosaics.get(special);
+	    imageToMosaic.remove(mi.getName());	  // image has been taken
+	    Mosaic m = nameToMosaic.get(special);
 	    assert m != null;
 	    part = m.putImage(mi, imAdded);
 	} else {
+	    if (defaultMosaic == null) {
+		defaultMosaic = new Mosaic(new MosaicSpec("im0.png"));
+		addMosaic("im0.png", defaultMosaic);
+	    }
 	    part = defaultMosaic.putImage(mi, imAdded);
 	}
 	assert part != null;
 	partsByName.put(name, part);
+    }
+
+    private void addMosaic(String name, Mosaic m) throws IOException {
+	if (nameToMosaic.get(name) != null) {
+	    throw new IOException("Duplicate mosaic \"" + name + "\".");
+	}
+	nameToMosaic.put(name, m);
     }
 
     /**
@@ -259,10 +271,7 @@ import javax.imageio.ImageIO;
 	frameG.fillRect(0, 0, getWidth(), getHeight());
 	addAllToMosaics();
 	LinkedList<Mosaic> mosaics = new LinkedList<Mosaic>();
-	if (compile(defaultMosaic)) {
-	    mosaics.add(defaultMosaic);
-	}
-        for (Map.Entry<String, Mosaic> special : specialMosaics.entrySet()) {
+        for (Map.Entry<String, Mosaic> special : nameToMosaic.entrySet()) {
             Mosaic m = special.getValue();
             if (compile(m)) {
                 mosaics.add(m);
@@ -272,9 +281,9 @@ import javax.imageio.ImageIO;
                         + "\" were used in show.  Discarding empty mosaic.");
             }
         }
-	for (Map.Entry<String, String> unused : mosaicHint.entrySet()) {
+	for (Map.Entry<String, String> unused : imageToMosaic.entrySet()) {
 	    System.out.println("Warning:  Image \"" +  unused.getKey() 
-	    		       + "\" in mosaic_hint \"" + unused.getValue()
+	    		       + "\" in mosaic \"" + unused.getValue()
 			       + "\" was never used in a show.  Discarded.");
 	}
 	System.out.println(mosaics.size() + " mosaics created.");
@@ -288,14 +297,12 @@ import javax.imageio.ImageIO;
         Iterator<Mosaic> mit = mosaics.iterator();
 	for (int i = 0; mit.hasNext(); i++) {
 	    Mosaic m = mit.next();
-	    String name = "im" + i + ".png";
-	    m.setOutputName(name);
 	    m.setPosition(i);
-	    File out = new File(outputDir, "im" + i + ".png");
+	    File out = new File(outputDir, m.getOutputName());
 	    m.writeMosaicImage(out);
 	    totalPixels += m.getWidthUsed() * m.getHeightUsed();
 	    System.out.println("    Wrote " + out);
-	    mapOS.writeUTF(name);
+	    mapOS.writeUTF(m.getOutputName());
 	}
 
 	mapOS.writeInt(partsByName.size());

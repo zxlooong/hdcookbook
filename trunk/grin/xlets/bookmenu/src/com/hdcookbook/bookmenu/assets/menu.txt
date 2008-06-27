@@ -2320,26 +2320,6 @@ rc_handler visual H:Bio.NotAvailable
 	}
 ;
 
-
-#
-#
-#  Finally, we group related images into mosaics.  In our case, we just
-#  make sure that the images we need for the loading image are all
-#  grouped together in one mosaic.  This makes it so that the
-#  "Loading" image can be spinning as we load the rest of our assets.
-#
-
-mosaic_hint loading 600 300 {
-	Graphics/Menu/Load_0000.png
-	Graphics/Menu/Load_0001.png
-	Graphics/Menu/Load_0002.png
-	Graphics/Menu/Load_0003.png
-	Graphics/Menu/Load_0004.png
-	Graphics/Menu/Load_0005.png
-	Graphics/Menu/Load_0006.png
-	Graphics/Menu/Load_0007.png
-} ;
-
 #
 # =====================
 #  End of Show

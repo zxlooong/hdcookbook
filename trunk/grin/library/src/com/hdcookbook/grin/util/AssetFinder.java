@@ -163,7 +163,8 @@ public class AssetFinder  {
     }
 
     /**
-     * Get a URL to an asset
+     * Get a URL to an asset.  If the asset doesn't exist, emits debug
+     * messages and returns null.
      *
      * @param path	A string, relative to the search path for assets
      *                  TODO: Maybe need to search locators, too
@@ -184,7 +185,6 @@ public class AssetFinder  {
             Debug.println();
             Debug.println("****  Resource " + path + " does not exist!  ****");
             Debug.println();
-	    Debug.assertFail();
         }
         return u;
     }

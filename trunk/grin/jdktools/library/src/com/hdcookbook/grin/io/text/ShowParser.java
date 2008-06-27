@@ -61,6 +61,7 @@ import com.hdcookbook.grin.SEShowCommands;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.MosaicSpec;
 import com.hdcookbook.grin.SESegment;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
@@ -192,6 +193,11 @@ public class ShowParser {
      **/
     public void parse() throws IOException {
 	String tok = lexer.getString();
+	if ("mosaics".equals(tok)) {
+	    MosaicsParser p = new MosaicsParser(show, lexer, builder);
+	    p.parse();
+	    return;
+	}
 	if (!"show".equals(tok)) {
 	    lexer.reportError("\"show\" expected");
 	}
@@ -266,12 +272,19 @@ public class ShowParser {
 		    lexer.reportError("Unrecognized token \"" + tok + "\"");
 		}
 	    } else if ("mosaic_hint".equals(tok)) {
+		lexer.reportWarning("mosaic_hint is deprecated; please use \"mosaics\" file instead.");
 		String name = lexer.getString();
-		int width = lexer.getInt();
-		int height = lexer.getInt();
-		String[] files = parseStrings();
+		MosaicSpec ms = null;
+		try {
+		    ms = show.newMosaicSpec(name);
+		} catch (IOException ex) {
+		    lexer.reportError(ex.getMessage());
+		}
+		ms.minWidth = lexer.getInt();
+		ms.maxWidth = ms.minWidth;
+		ms.maxHeight = lexer.getInt();
+		ms.imagesToConsider = parseStrings();
 		parseExpected(";");
-		show.takeMosaicHint(name, width, height, files);
 	    } else {
 		lexer.reportError("Unrecognized token \"" + tok + "\"");
 	    }

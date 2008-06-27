@@ -80,7 +80,8 @@ public class SEShow extends Show {
     private SEShowCommands showCommands = new SEShowCommands(this);
 
     // For mosaic building.
-    private ArrayList<MosaicHint> mosaicHints;
+    private ArrayList<MosaicSpec> mosaicSpecs = new ArrayList();
+    private boolean noShowFile = false;
     
     /**
      * Create a new SEShow.
@@ -90,6 +91,24 @@ public class SEShow extends Show {
      **/
     public SEShow(Director director) {
 	super(director);
+    }
+
+    /**
+     * Set a flag to indicate that no binary show file should be
+     * generated.  This is used for the synthetic show file that is
+     * used to collect mosaic definitions.
+     **/
+    public void setNoShowFile(boolean val) {
+	noShowFile = val;
+    }
+
+    /**
+     * Get a flag to indicate that no binary show file should be
+     * generated.  This is used for the synthetic show file that is
+     * used to collect mosaic definitions.
+     **/
+    public boolean getNoShowFile() {
+	return noShowFile;
     }
     
     /**
@@ -195,27 +214,27 @@ public class SEShow extends Show {
     }
 
     /**
-     * Called by the ShowParser when the mosaic_hint element is encountered.
+     * Called by the ShowParser when a new mosaic or mosaic_hint is found.
+     *
+     * @throws	IOException if name is a duplicate
      */
-    public void takeMosaicHint(String name, int width, 
-			 int height, String[] images) 
-    {    
-        if (mosaicHints == null) {
-            mosaicHints = new ArrayList();       
-        }  
-        
-        mosaicHints.add(new MosaicHint(name, width, height, images));        
+    public MosaicSpec newMosaicSpec(String name) throws IOException {
+	for (MosaicSpec s : mosaicSpecs) {
+	    if (name.equals(s.name)) {
+		throw new IOException("Duplicate mosaic \"" + name + "\".");
+	    }
+	}
+	MosaicSpec ms = new MosaicSpec(name);
+        mosaicSpecs.add(ms);
+	return ms;
     }
 
     /**
-     * Returns an array of MosaicHints associated with this show, or
+     * Returns an array of MosaicSpec instances associated with this show, or
      * an zero-length array if none is found.
      */
-    public MosaicHint[] getMosaicHints() {
-        if (mosaicHints == null) {
-            return new MosaicHint[0];
-        }    
-        return mosaicHints.toArray(new MosaicHint[mosaicHints.size()]);
+    public MosaicSpec[] getMosaicSpecs() {
+        return mosaicSpecs.toArray(new MosaicSpec[mosaicSpecs.size()]);
     }
     
 

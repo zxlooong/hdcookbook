@@ -1,11 +1,14 @@
 <html>
 <body>
 <p>
-This package contains a program that reads a show file, and
-transforms all image assets to a mosaic.  It does this using a
-fairly brute-force "first fit" algorithm that's almost certainly
-non-optimal, but is sufficient at least to demonstrate the concept
-of a mosaic.  When run, this program produces a modified set of assets 
+This package contains a program that compiles a show file.
+It reads it, generates a binary show file, and optionally
+transforms all image assets to a mosaic.
+</p><p>
+Mosaic making is done using a
+fairly brute-force "first fit" algorithm that isn't completely
+optimal, but seems to work quite well in practice.
+When run, this program produces a modified set of assets 
 to be used with the show file.  The show file itself doesn't need to
 be modified, because a "map" file is produced that maps the filename
 of the original image to a set of coordinates within a matrix file.  Just
@@ -14,22 +17,7 @@ images in the disc image.
 </p><p>
 This is a build-time tool that runs with the JDK.  It requires parts
 of the GRIN library to run, so you should probably just build the
-whole thing.  In order to test this with Ryan's Life, you can try
-something like this:
-</p>
-<pre>
-
-    rm -rf build/classes/compiled_assets
-    java -Xmx512m -cp build/classes com.hdcookbook.grin.build.mosaic.Main \
-	    -assets /com/hdcookbook/grin/test/assets/ \
-	    -show ryan_show.txt  \
-	    -out build/classes/compiled_assets
-
-    java -cp build/classes com.hdcookbook.grin.test.bigjdk.GrinTestRyan \
-	    -assets /com/hdcookbook/grin/test/assets/ -assets /compiled_assets \
-	    -imagemap images.map
-
-</pre>
+whole thing. 
 <p>
 In your application, you need to tell GRIN where the image map file
 is.  For debugging purposes, It's sometimes handy to set an xlet up so
@@ -48,7 +36,7 @@ setting <code>AssetFinder</code>'s search path:
         }
 </pre>
 <p>
-As of this writing, the mosaic construction algorithm isn't highly
+As of this writing, the mosaic construction algorithm isn't fully
 optimized, and the mosaic image
 can only be in PNG.  Some players decode JPEG faster than PNG, but
 JPEG doesn't support alpha and you have to worry about setting the

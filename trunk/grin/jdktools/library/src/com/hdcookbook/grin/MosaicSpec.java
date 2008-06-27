@@ -55,41 +55,40 @@
 package com.hdcookbook.grin;
 
 /**
- * MosaicHint provides hints to the Mosaic builder about how to group images when 
- * building a imaga mosaic.  This class is used only during the SEShow build time, in response to the "mosaic_hint" entry of the text-based show file.
+ * MosaicSpec provides a specification to the Mosaic builder about how to 
+ * group images when building a image mosaic.  This class is used only 
+ * during the SEShow build time, in response to the "mosaics" entry, or to the
+ * deprecated "mosaic_hint" entry of the text-based show file.
  */
 
-public class MosaicHint {    
+public class MosaicSpec {    
     
-    private String name;
-    private int width;
-    private int height;
-    private String[] images;
-    
-    public MosaicHint(String name, int width, 
-		      int height, String[] images) {
-        this.name = name;
-        this.width = width;
-        this.height = height;
-        this.images = images;
-    }
-    
-    public String getName() {
-        return name;
-    }
-    
-    public int getWidth() {
-        return width;
-    }
-    
-    public int getHeight() {
-        return height;        
-    }
-    
+    public String name;
+    public int minWidth = 128;
+    public int maxWidth = 4096;
+    public int maxHeight = 4096;
+    public int maxPixels = 4963776;
+    public int numWidths = 65;
+
     /**
-     * Returns the image names to be contained in a single image mosaic.
-     */
-    public String[] getImages() {
-        return images;
+     * If set true, this mosaic will accept all images used in shows
+     * that aren't part of another mosaic.
+     **/
+    public boolean takeAllImages = false;
+
+    /**
+     * The set of images to consider including.  Images are only included
+     * if they appear in a show.  In order to include images that aren't
+     * used in a show (e.g. because they're used directly in an xlet),
+     * we make a synthetic SEShow with noShowFile set, and put
+     * FixedImage features in that show.
+     **/
+    public String[] imagesToConsider = null;
+
+    /**
+     * @param name	The file name to put the mosaic in
+     **/
+    public MosaicSpec(String name) {
+        this.name = name;
     }
 }

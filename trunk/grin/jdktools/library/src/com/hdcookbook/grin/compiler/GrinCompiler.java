@@ -70,17 +70,20 @@ public class GrinCompiler {
      * Applies optimization to a given SEShow.
      * Currently this converts all images into larger image mosaics.
      * 
-     * @param show  The show object to transform.
+     * @param shows  The show objects to transform.
      * @param outputDir The directory name where various generated files
      * will be stored, such as the generated mosaic image files.
      */
-    public void optimizeShow(SEShow show, String outputDir) throws IOException {
+    public void optimizeShows(SEShow[] shows, String outputDir) 
+    		throws IOException 
+    {
         File f = new File(outputDir);
         if (!f.exists()) {
-            throw new IOException("output directory " + outputDir + " not found.");
+            throw new IOException("output directory " + outputDir 
+	    			+ " not found.");
         }
         
-        MosaicMaker mm = new MosaicMaker(new SEShow[] { show }, f);         
+        MosaicMaker mm = new MosaicMaker(shows, f);         
 	mm.init();
 	mm.makeMosaics();        
         mm.destroy();
