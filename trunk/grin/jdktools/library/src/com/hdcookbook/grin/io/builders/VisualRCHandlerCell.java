@@ -460,7 +460,7 @@ public abstract class VisualRCHandlerCell {
         }
 
 	public String getState() {
-	    return "<wall>";
+	    return "<null>";
 	}
     
 	public int getStateNumber(Map<String, Integer> states, String stateFrom)
