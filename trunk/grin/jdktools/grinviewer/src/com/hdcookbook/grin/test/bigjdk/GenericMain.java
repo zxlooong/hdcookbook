@@ -65,6 +65,7 @@ import java.awt.AlphaComposite;
 import java.awt.GraphicsConfiguration;
 import java.awt.Color;
 import java.awt.Insets;
+import java.awt.MediaTracker;
 import java.awt.Transparency;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -87,7 +88,6 @@ import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.util.AssetFinder;
-import com.hdcookbook.grin.util.ImageWaiter;
 
 /**
  * This is a generic test program for exercising a show file.  It
@@ -133,9 +133,12 @@ public class GenericMain extends Frame implements AnimationContext {
     protected void setBackground(String file) {
     	Toolkit tk = Toolkit.getDefaultToolkit();
 	background = tk.createImage(file);
-	ImageWaiter w = new ImageWaiter(background);
-	if (!prepareImage(background, w)) {
-	    w.waitForComplete();
+	MediaTracker tracker = new MediaTracker(this);
+	tracker.addImage(background, 0);
+	try {
+	    tracker.waitForAll();
+	} catch (InterruptedException ex) {
+	    Thread.currentThread().interrupt();
 	}
     }
    

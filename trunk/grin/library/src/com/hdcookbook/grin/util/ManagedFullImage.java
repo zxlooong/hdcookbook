@@ -58,6 +58,7 @@ package com.hdcookbook.grin.util;
 import java.awt.Image;
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.MediaTracker;
 import java.awt.Rectangle;
 
 /**
@@ -72,12 +73,10 @@ public class ManagedFullImage extends ManagedImage {
     private int numReferences = 0;
     private int numPrepares = 0;
     Image image;		// Accessed by ManagedSubImage
-    private ImageWaiter waiter;
 
     ManagedFullImage(String name) {
 	this.name = name;
 	this.image = AssetFinder.loadImage(name);
-	this.waiter = new ImageWaiter(this.image);
     }
 
     public String getName() {
@@ -124,11 +123,9 @@ public class ManagedFullImage extends ManagedImage {
 	    num = numPrepares;
 	    if (image == null) {
 		image = AssetFinder.loadImage(name);
-		waiter = new ImageWaiter(this.image);
 	    }
 	}
 	if (num == 1) {
-	    long tm = 0;
 	    //
 	    // The JDK seems to put the image fetching thread priority
 	    // really high, which is the opposite of what we want.  By
@@ -137,8 +134,12 @@ public class ManagedFullImage extends ManagedImage {
 	    // grabs the CPU with the image fetching thread.
 	    //
 	    Thread.currentThread().yield();
-	    if (!comp.prepareImage(image, waiter)) {
-		waiter.waitForComplete();
+	    MediaTracker tracker = new MediaTracker(comp);
+	    tracker.addImage(image, 0);
+	    try {
+		tracker.waitForAll();
+	    } catch (InterruptedException ex) {
+		Thread.currentThread().interrupt();
 	    }
 	    if (Debug.LEVEL > 1) {
 		Debug.println("Loaded image " + name);

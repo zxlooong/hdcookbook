@@ -60,10 +60,10 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.AssetFinder;
-import com.hdcookbook.grin.util.ImageWaiter;
 
 import java.awt.Toolkit;
 import java.awt.Image;
+import java.awt.MediaTracker;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.InputStreamReader;
@@ -330,9 +330,12 @@ public class BioUpdater implements Runnable {
 	}
 	if (imageData != null) {
 	    Image newImage = Toolkit.getDefaultToolkit().createImage(imageData);
-	    ImageWaiter w = new ImageWaiter(newImage);
-	    if (!xlet.scene.prepareImage(newImage, w)) {
-		w.waitForComplete();
+	    MediaTracker tracker = new MediaTracker(xlet.scene);
+	    tracker.addImage(newImage, 0);
+	    try {
+		tracker.waitForAll();
+	    } catch (InterruptedException ex) {
+		Thread.currentThread().interrupt();
 	    }
 	    synchronized(xlet.show) {
 		bioImageFeature.setImage(newImage);

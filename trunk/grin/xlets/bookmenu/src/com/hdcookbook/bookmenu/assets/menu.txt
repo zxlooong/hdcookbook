@@ -2218,9 +2218,9 @@ rc_handler visual H:UserInput
     grid { { [ close ]	  a 	    b 	      d 	[ h ] }
            {   [ d ]	  h 	    l 	      r 	[ u ] }
 	   {   [ r ]	  u 	    v 	      y	      [ enter ] }
-	   { [ enter ] [ enter ] [ enter ] [ enter ]  [ enter ] }
-	   { [ enter ] [ enter ]  [ v ]    [ enter ]  [ enter ] }
-	   { [ enter ]	[ y ]	  enter	   close	[ a ]   } }
+	   {  <null>   [ enter ] [ enter ] [ enter ]   <null>   }
+	   {  <null>    <null>    [ v ]    [ enter ]   <null>   }
+	   {  <null>  	[ y ]	  enter	   close	[ a ]   } }
     rc_override { { a up close }
                   { b up close }
 		  { d up close } }

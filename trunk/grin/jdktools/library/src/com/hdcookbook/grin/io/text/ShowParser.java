@@ -1421,7 +1421,13 @@ public class ShowParser {
 	if (!(";".equals(tok))) {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
-	final SEVisualRCHandler hand = helper.getFinishedHandler();
+	SEVisualRCHandler handler = null;
+	try {
+	    handler = helper.getFinishedHandler();
+	} catch (IOException ex) {
+	    lexer.reportError(ex.getMessage());
+	}
+	final SEVisualRCHandler hand = handler;
 	builder.addRCHandler(handlerName, lineStart, hand);
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
@@ -1442,8 +1448,7 @@ public class ShowParser {
     private ArrayList<ArrayList<VisualRCHandlerCell>> parseVisualGrid() 
     		throws IOException 
     {
-	ArrayList<ArrayList<VisualRCHandlerCell>>  result
-		= new ArrayList<ArrayList<VisualRCHandlerCell>>();
+	ArrayList<ArrayList<VisualRCHandlerCell>>  result = new ArrayList();
 	parseExpected("{");
 	for (;;) {
 	    String tok = lexer.getString();
@@ -1461,8 +1466,7 @@ public class ShowParser {
     private ArrayList<VisualRCHandlerCell> parseVisualGridRow() 
 	    throws IOException 
     {
-	ArrayList<VisualRCHandlerCell> result 
-	    = new ArrayList<VisualRCHandlerCell>();
+	ArrayList<VisualRCHandlerCell> result = new ArrayList();
 	for (;;) {
 	    String tok = lexer.getString();
 	    VisualRCHandlerCell cell = null;
@@ -1485,6 +1489,10 @@ public class ShowParser {
 		cell = VisualRCHandlerCell.newStateRef(name);
 	    } else if ("<activate>".equals(tok)) {
 		cell = VisualRCHandlerCell.newActivate();
+	    } else if ("<wall>".equals(tok)) {
+		cell = VisualRCHandlerCell.newWall();
+	    } else if ("<null>".equals(tok)) {
+		cell = VisualRCHandlerCell.newNull();
 	    } else {
 		cell = VisualRCHandlerCell.newState(tok);
 	    }

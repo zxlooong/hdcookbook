@@ -84,9 +84,11 @@ public class Lexer {
     private int putbackChar = -1;	// see nextChar, putbackChar
     private int lineNum = 1;
     private StringBuffer strBuf = new StringBuffer(512);
+    private String fileName;
 
     public Lexer (Reader input, String fileName) {
 	this.input = input;
+	this.fileName = fileName;
     }
 
     /**
@@ -121,7 +123,7 @@ public class Lexer {
      * Report a nice error message with the current line number.
      **/
     public void reportError(String msg) throws IOException {
-	throw new IOException(msg + " on line " + lineNum);
+	throw new IOException(msg + " on line " + lineNum + " of " + fileName);
     }
 
     /**

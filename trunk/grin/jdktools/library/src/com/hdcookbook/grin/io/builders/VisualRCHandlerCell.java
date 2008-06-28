@@ -113,10 +113,19 @@ public abstract class VisualRCHandlerCell {
 
     /**
      * Get the name of the state of this cell, or that this cell refers
-     * to.  Return null if it's an activate cell.
+     * to.  Returns a synthetic value for activate, wall or null cells.
      **/
     abstract public String getState();
 
+    /**
+     * Get the integer number of this state within the states map when
+     * navigating to this cell from the numbered state.
+     *
+     * @throws IOException if there's an error in the grid construction
+     **/
+    abstract public int 
+    getStateNumber(Map<String, Integer> states, String stateFrom)
+    		throws IOException;
     /** 
      * Check that this cell is OK.  This is called after the cell is
      * completely initialized.
@@ -129,11 +138,13 @@ public abstract class VisualRCHandlerCell {
      * Get the value for the upDown parameter of VisualRCHandler.  This has
      * the state to go to on up encoded in the first 16 bits, and the
      * state to go to on down encoded in the last 16 bits.
+     *
+     * @throws IOException if there's an inconsistency in the handler
      **/
-    public int getUpDown() {
+    public int getUpDown() throws IOException {
 	String state = getState();
-	int up = getStateFor("up:" + state, xCoord, yCoord-1);;
-	int down = getStateFor("down:" + state, xCoord, yCoord+1);;
+	int up = getStateFor("up:" + state, xCoord, yCoord-1, state);
+	int down = getStateFor("down:" + state, xCoord, yCoord+1, state);
 	return (up << 16) | down;
     }
 
@@ -142,15 +153,19 @@ public abstract class VisualRCHandlerCell {
      * the state to go to on right encoded in the first 16 bits, and the
      * state to go to on left encoded in the last 16 bits.  This can only be
      * called on cells that map to a state.
+     *
+     * @throws IOException if there's an inconsistency in the handler
      **/
-    public int getRightLeft() {
+    public int getRightLeft() throws IOException {
 	String state = getState();
-	int right = getStateFor("right:" + state, xCoord+1, yCoord);;
-	int left = getStateFor("left:" + state, xCoord-1, yCoord);;
+	int right = getStateFor("right:" + state, xCoord+1, yCoord, state);
+	int left = getStateFor("left:" + state, xCoord-1, yCoord, state);
 	return (right << 16) | left;
     }
 
-    private int getStateFor(String overrideKey, int x, int y) {
+    private int getStateFor(String overrideKey, int x, int y, String stateFrom) 
+    		throws IOException
+    {
 	Map<String, String> overrides = helper.getRCOverrides();
 	ArrayList<ArrayList<VisualRCHandlerCell>> grid = helper.getGrid();
 	Map<String, Integer> states = helper.getStates();
@@ -177,12 +192,8 @@ public abstract class VisualRCHandlerCell {
 	if (y >= grid.size()) {
 	    y = grid.size() - 1;
 	}
-	state = grid.get(y).get(x).getState();
-	if (state == null) {
-	    return VisualRCHandler.GRID_ACTIVATE;
-	} else {
-	    return states.get(state).intValue();
-	}
+	VisualRCHandlerCell cell = grid.get(y).get(x);
+	return cell.getStateNumber(states, stateFrom);
     }
 
     /**
@@ -226,6 +237,23 @@ public abstract class VisualRCHandlerCell {
 	return new ActivateCell();
     }
 
+    /**
+     * Create a cell that acts as a "wall".  When you navigate to a wall
+     * cell using the arrow keys, you "bounce off", that is, you stay
+     * in whatever state you were in before.
+     **/
+    public static VisualRCHandlerCell newWall() {
+	return new WallCell();
+    }
+
+    /**
+     * Create a null cell.  If you can navigate to a null cell, then
+     * it's an error, and compilation fails.
+     **/
+    public static VisualRCHandlerCell newNull() {
+	return new NullCell();
+    }
+
     public static class StateCell extends VisualRCHandlerCell {
 	private String name;
 	private boolean added = false;
@@ -254,6 +282,12 @@ public abstract class VisualRCHandlerCell {
 
 	public String getState() {
 	    return name;
+	}
+    
+	public int getStateNumber(Map<String, Integer> states, String stateFrom)
+    		throws IOException
+	{
+	    return states.get(name).intValue();
 	}
 
 	public String check() {
@@ -286,6 +320,12 @@ public abstract class VisualRCHandlerCell {
 
 	public String getState() {
 	    return getRefersTo().getState();
+	}
+    
+	public int getStateNumber(Map<String, Integer> states, String stateFrom)
+    		throws IOException
+	{
+	    return getRefersTo().getStateNumber(states, stateFrom);
 	}
 
 	public String check() {
@@ -330,6 +370,12 @@ public abstract class VisualRCHandlerCell {
 	public String getState() {
 	    return getRefersTo().getState();
 	}
+    
+	public int getStateNumber(Map<String, Integer> states, String stateFrom)
+    		throws IOException
+	{
+	    return getRefersTo().getStateNumber(states, stateFrom);
+	}
 
 	public String check() {
 	    ArrayList<ArrayList<VisualRCHandlerCell>> grid = helper.getGrid();
@@ -356,7 +402,72 @@ public abstract class VisualRCHandlerCell {
         }
 
 	public String getState() {
+	    return "<activate>";
+	}
+    
+	public int getStateNumber(Map<String, Integer> states, String stateFrom)
+    		throws IOException
+	{
+	    return VisualRCHandler.GRID_ACTIVATE;
+	}
+
+	public String check() {
 	    return null;
+	}
+    }
+
+    public static class WallCell extends VisualRCHandlerCell {
+	WallCell() {
+	}
+
+	public VisualRCHandlerCell getRefersTo() {
+	    return null;
+	}
+
+	public String addState(Map<String, Integer> stateMap,
+			       Map<String, VisualRCHandlerCell> cellMap) {
+	    // do nothing
+	    return null;
+        }
+
+	public String getState() {
+	    return "<wall>";
+	}
+    
+	public int getStateNumber(Map<String, Integer> states, String stateFrom)
+    		throws IOException
+	{
+	    return states.get(stateFrom).intValue();
+	}
+
+	public String check() {
+	    return null;
+	}
+    }
+
+    public static class NullCell extends VisualRCHandlerCell {
+	NullCell() {
+	}
+
+	public VisualRCHandlerCell getRefersTo() {
+	    return null;
+	}
+
+	public String addState(Map<String, Integer> stateMap,
+			       Map<String, VisualRCHandlerCell> cellMap) {
+	    // do nothing
+	    return null;
+        }
+
+	public String getState() {
+	    return "<wall>";
+	}
+    
+	public int getStateNumber(Map<String, Integer> states, String stateFrom)
+    		throws IOException
+	{
+	    throw new IOException(
+	    	"Illegal grid:  <null> cell can be navigated to");
 	}
 
 	public String check() {

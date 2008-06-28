@@ -59,6 +59,7 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.SEVisualRCHandler;
 
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -245,7 +246,10 @@ public class VisualRCHandlerHelper {
 	return states.get(name).intValue();
     }
 
-    public SEVisualRCHandler getFinishedHandler() {
+    /**
+     * @throws IOException if there's an inconsistency in the handler
+     **/
+    public SEVisualRCHandler getFinishedHandler() throws IOException {
 	int[] upDown = new int[states.size()];
 	int[] rightLeft = new int[states.size()];
 	String[] stateNames = new String[states.size()];

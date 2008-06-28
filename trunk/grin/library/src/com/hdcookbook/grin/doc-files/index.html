@@ -356,6 +356,10 @@ Here's BNF describing the syntax of a show file:
 
     visual_grid_entry ::= state_name | "[" state_name "]" 
     			  | "(" x y ")" | "<activate>"
+			  | "<wall>" | "<null>"
+	    # <activate> means "make the assembly activated"
+	    # <wall> means "if cell navigated to, stay in current state"
+	    # <null> means "it's an error if this cell can be navigated to"
 
     visual_overrides ::= "{" visual_override * "}"
 
