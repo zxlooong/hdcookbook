@@ -67,6 +67,7 @@ import java.net.URL;
 import java.io.File;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.util.Hashtable;
 
 
 /**
@@ -134,17 +135,20 @@ public class AssetFinder  {
      * into a tuple (mosaic image, rect within mosaic).  This
      * must be set after the search path, since the search path
      * is used to load the image map.
+     * <p>
+     * If an image map was previously in place, it will be replaced
+     * with the new map as an atomic operation when the image map file
+     * has been completely read.
+     * 
+     * @param	mapFile The name of an image map file produced by MosaicMaker 
+     * 
+     * @see #setImageMap(String[])
      **/
-    public static void setImageMap(String imageMap) {
-	DataInputStream dis = null;
+    public static void setImageMap(String mapFile) {
+	Hashtable map = new Hashtable();
 	try {
-	    URL u = getURL(imageMap);
-	    if (u == null) {
-		throw new IOException();
-	    }
-	    dis = new DataInputStream(new BufferedInputStream(u.openStream()));
-	    ImageManager.readImageMap(dis);
-	    // dis.close is in the finally block
+	    ImageManager.readImageMap(mapFile, map);
+	    ImageManager.setImageMap(map);
 	} catch (IOException ex) {
 	    if (Debug.LEVEL > 0) {
 		ex.printStackTrace();
@@ -152,13 +156,39 @@ public class AssetFinder  {
 	    if (Debug.ASSERT) {
 		Debug.assertFail();
 	    }
-	} finally {
-	    if (dis != null) {
-		try {
-		    dis.close();
-		} catch (IOException ignored) {
-		}
+	}
+    }
+
+    /**
+     * Sets the image map to the concatination of the maps in the given
+     * files.  This is used for mosaic
+     * images:  The image map translates a logical image name
+     * into a tuple (mosaic image, rect within mosaic).  This
+     * must be set after the search path, since the search path
+     * is used to load the image map.
+     * <p>
+     * If an image map was previously in place, it will be replaced
+     * with the new map as an atomic operation when the image map file
+     * has been completely read.
+     * <p>
+     * It is up to the callee to make sure that there are no name
+     * collisions, either in the name of the source images, or in the
+     * names of the mosaics.
+     * 
+     * @param	mapFiles The name of image map files produced by MosaicMaker 
+     *
+     * @see #setImageMap(String)
+     **/
+    public static void setImageMap(String[] mapFiles) {
+	Hashtable map = new Hashtable();
+	try {
+	    for (int i = 0; i < mapFiles.length; i++) {
+		ImageManager.readImageMap(mapFiles[i], map);
 	    }
+	    ImageManager.setImageMap(map);
+	} catch (IOException ex) {
+	    ex.printStackTrace();
+	    Debug.assertFail();
 	}
     }
 

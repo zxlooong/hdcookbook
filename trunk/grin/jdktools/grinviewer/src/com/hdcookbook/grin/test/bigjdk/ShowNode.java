@@ -192,11 +192,12 @@ public class ShowNode implements TreeNode {
 	if (contents instanceof Segment) {
 	    Segment seg = (Segment) contents;
 	    leaf = false;
-	    ShowNode[] newChildren = new ShowNode[4];
+	    ShowNode[] newChildren = new ShowNode[5];
 	    newChildren[0] = makeNode("active", seg.getActiveFeatures());
 	    newChildren[1] = makeNode("setup", seg.getSetupFeatures());
 	    newChildren[2] = makeNode("rc_handlers", seg.getRCHandlers());
-	    newChildren[3] = makeNode("next", seg.getNextCommands());
+	    newChildren[3] = makeNode("on_entry", seg.getOnEntryCommands());
+	    newChildren[4] = makeNode("next", seg.getNextCommands());
 	    setChildren(newChildren);
 	} else if (contents instanceof Assembly) {
 	    Assembly a = (Assembly) contents;

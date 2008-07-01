@@ -67,6 +67,7 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.commands.ResetFeatureCommand;
 import com.hdcookbook.grin.commands.SegmentDoneCommand;
 import com.hdcookbook.grin.commands.SetVisualRCStateCommand;
 import com.hdcookbook.grin.GrinXHelper;
@@ -401,6 +402,9 @@ public class GrinBinaryReader {
                     break;
                 case Constants.ACTIVATESEGMENT_CMD_IDENTIFIER:
                     node = new ActivateSegmentCommand(show);
+                    break;
+                case Constants.RESETFEATURE_CMD_IDENTIFIER:
+                    node = new ResetFeatureCommand(show);
                     break;
                 case Constants.SEGMENTDONE_CMD_IDENTIFIER:
                     node = new SegmentDoneCommand(show);

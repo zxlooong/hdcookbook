@@ -106,6 +106,7 @@ public class ImageSequence extends Feature implements Node {
     private int nextFrameCalls = 0;
     	// How many times we've been called without advancing currFrame;
     private int currFrame = 0;	// Frame of our animation
+    private boolean atEnd;	// At end of animation
 
     private ManagedImage lastImage = null;
     private ManagedImage currImage = null;
@@ -188,6 +189,7 @@ public class ImageSequence extends Feature implements Node {
 	    if (mode) {
 		if (!model.isActivated && model.activeModelCount == 0) {
 		    model.currFrame = 0;
+		    model.atEnd = false;
 		}
 		model.activeModelCount++;
 	    } else {
@@ -197,6 +199,7 @@ public class ImageSequence extends Feature implements Node {
 	    if (mode) {
                 if (activeModelCount == 0) {
                     currFrame = 0;
+		    atEnd = false;
                 }
                 activeModelCount++;
 	    } else {
@@ -289,14 +292,21 @@ public class ImageSequence extends Feature implements Node {
 	    nextFrameCalls++;
 	    if (nextFrameCalls >= activeModelCount) {
 		nextFrameCalls = 0;	// We've got them all
-		currFrame++;
-		if (currFrame == images.length) {
-		    if (endCommands != null) {
-			for (int i = 0; i < endCommands.length; i++) {
-			    show.runCommand(endCommands[i]);
+		if (!atEnd) {
+		    currFrame++;
+		    if (currFrame == images.length) {
+			if (endCommands != null) {
+			    for (int i = 0; i < endCommands.length; i++) {
+				show.runCommand(endCommands[i]);
+			    }
+			}
+			if (repeat)  {
+			    currFrame = 0;
+			} else {
+			    atEnd = true;
+			    currFrame--;
 			}
 		    }
-		    currFrame = 0;
 		}
 	    }
         }

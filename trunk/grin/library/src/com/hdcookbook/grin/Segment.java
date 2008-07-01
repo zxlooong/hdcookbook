@@ -84,6 +84,7 @@ public class Segment implements Node {
     protected Feature[] activeFeatures;
     private boolean[] featureWasActivated;
     protected Feature[] settingUpFeatures;
+    protected Command[] onEntryCommands;
     protected boolean nextOnSetupDone;
     protected Command[] nextCommands;
     protected RCHandler[] rcHandlers;
@@ -119,43 +120,6 @@ public class Segment implements Node {
 	return show;
     }
 
-    public Feature[] getActiveFeatures() {
-	return activeFeatures;
-    }
-
-    public Feature[] getSetupFeatures() {
-	return settingUpFeatures;
-    }
-
-    /**
-     * Do we trigger the commands in our next clause when all of the
-     * features in our setup clause have finished loading? 
-     *
-     * @return the answer to that question.
-     **/
-
-    public boolean getNextOnSetupDone() {
-	return nextOnSetupDone;
-    }
-
-    /**
-     * Give the commands in our next clause.  This can be triggered
-     * by setup being done, or by a segment_done command.
-     *
-     * @see #getNextOnSetupDone()
-     * @see com.hdcookbook.grin.commands.SegmentDoneCommand
-     **/
-    public Command[] getNextCommands() {
-	return nextCommands;
-    }
-
-    /**
-     * Give the set of remote control handlers for this segment
-     **/
-    public RCHandler[] getRCHandlers() {
-	return rcHandlers;
-    }
-
     /**
      * Initialize up this segment.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
@@ -176,7 +140,7 @@ public class Segment implements Node {
     // times.
     //
     // This is synchronized, but Segment is an internal object that is
-    // only locked for bried periods of time, without making external
+    // only locked for brief periods of time, without making external
     // calls, so this is safe.  It's intentionally not synchronized on
     // show.
     //
@@ -261,6 +225,11 @@ public class Segment implements Node {
 	if (rcHandlers != null) {
 	    for (int i = 0; i < rcHandlers.length; i++) {
 		rcHandlers[i].activate(this);
+	    }
+	}
+	if (onEntryCommands != null) {
+	    for (int i = 0; i < onEntryCommands.length; i++) {
+		show.runCommand(onEntryCommands[i]);
 	    }
 	}
 	runFeatureSetup();
@@ -394,7 +363,49 @@ public class Segment implements Node {
         this.activeFeatures = in.readFeaturesArrayReference();
         this.settingUpFeatures = in.readFeaturesArrayReference();
         this.rcHandlers = in.readRCHandlersArrayReference();
+	this.onEntryCommands = in.readCommands();
         this.nextOnSetupDone = in.readBoolean();
         this.nextCommands = in.readCommands();
     }
+
+    public Feature[] getActiveFeatures() {
+	return activeFeatures;
+    }
+
+    public Feature[] getSetupFeatures() {
+	return settingUpFeatures;
+    }
+
+    public Command[] getOnEntryCommands() {
+	return onEntryCommands;
+    }
+
+    /**
+     * Do we trigger the commands in our next clause when all of the
+     * features in our setup clause have finished loading? 
+     *
+     * @return the answer to that question.
+     **/
+    public boolean getNextOnSetupDone() {
+	return nextOnSetupDone;
+    }
+
+    /**
+     * Give the commands in our next clause.  This can be triggered
+     * by setup being done, or by a segment_done command.
+     *
+     * @see #getNextOnSetupDone()
+     * @see com.hdcookbook.grin.commands.SegmentDoneCommand
+     **/
+    public Command[] getNextCommands() {
+	return nextCommands;
+    }
+
+    /**
+     * Give the set of remote control handlers for this segment
+     **/
+    public RCHandler[] getRCHandlers() {
+	return rcHandlers;
+    }
+
 }

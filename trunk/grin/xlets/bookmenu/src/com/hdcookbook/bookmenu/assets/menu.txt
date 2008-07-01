@@ -1785,6 +1785,12 @@ segment S:UserInput
     rc_handlers {
 	H:UserInput
     }
+    on_entry {
+	activate_part F:UserInput  a.selected ;
+	reset_feature F:UserInput ;
+	    # This reset_feature isn't needed here; it was just added
+	    # so the command would get tested regularly.
+    }
 ;
 
 segment S:StartBonusVideo
@@ -2197,7 +2203,6 @@ rc_handler visual H:BonusMenu
 				    setText("-init-");
 				]]
 				BOOK:PlayVideo nothing ;
-				activate_part F:UserInput  a.selected ;
 				activate_segment S:UserInput ;
 			} 
 	back_mouse	{
@@ -2225,7 +2230,8 @@ rc_handler visual H:UserInput
                   { b up close }
 		  { d up close } }
      
-    assembly F:UserInput
+    assembly F:UserInput 
+	start_selected true
     select {
 	a	a.selected
 	b	b.selected

@@ -78,6 +78,7 @@ import java.util.Map;
 public class VisualRCHandlerHelper {
 
     private String handlerName;
+    private boolean startSelected = false;
     private ArrayList<ArrayList<VisualRCHandlerCell>> grid;
     private Map<String, Integer> states = new HashMap<String, Integer>();
     	// Maps state name to number, counting from 0
@@ -102,6 +103,13 @@ public class VisualRCHandlerHelper {
      **/
     public void setHandlerName(String name) {
 	handlerName = name;
+    }
+
+    /**
+     * Sets the startSelected flag
+     **/
+    public void setStartSelected(boolean b) {
+	startSelected = b;
     }
 
     /**
@@ -264,7 +272,8 @@ public class VisualRCHandlerHelper {
 	    = new SEVisualRCHandler(handlerName,  stateNames, upDown, rightLeft,
 	    			  selectCommands, activateCommands,
 				  mouseRects, mouseRectStates,
-				  timeout, timeoutCommands, this);
+				  timeout, timeoutCommands, startSelected, 
+				  this);
 	return result;
     }
 }

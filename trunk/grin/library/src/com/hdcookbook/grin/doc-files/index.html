@@ -175,7 +175,8 @@ Here's BNF describing the syntax of a show file:
         #   GRIN_COMMAND_[[ java_source ]]
 
     segment ::= "segment" name ["active" feature_list] ["setup" feature_list]
-    			["rc_handlers" name_list]
+    			[ "rc_handlers" name_list ]
+			[ "on_entry" commands ]
 			[ ( "next" | "setup_done")  commands]  ";"
 
     feature_list ::= name_list
@@ -218,7 +219,7 @@ Here's BNF describing the syntax of a show file:
     name_or_continuation ::= "+" | "-" | name	# "+" means "repeat last frame",
      						# "-" means "empty"
 
-    assembly ::= "feature" "assembly" name "{" assembly_part * "}" ";"
+    assembly ::= "feature" "assembly" "{" assembly_part * "}" ";"
 
     assembly_part ::= name sub_feature
 
@@ -311,6 +312,7 @@ Here's BNF describing the syntax of a show file:
 
     command ::= activate_segment | activate_part | segment_done 
     		    | deprecated_invoke_assembly_cell | set_visual_rc_state
+		    | reset_feature
 		    | other_command | java_command
 
     activate_segment ::= "activate_segment" segment_name [ "&lt;push&gt;" ] ";"
@@ -330,6 +332,8 @@ Here's BNF describing the syntax of a show file:
 	        ("selected" | "activated") 
                 [ "run_commands" ] ";"
 
+    reset_feature ::= "reset_feature" feature_name ";"
+
     other_command ::= namespace:type_name
     				(syntax as determined by director) ";"
 	#  The custom command shouldn't include a ";" token.  If it does,
@@ -344,11 +348,14 @@ Here's BNF describing the syntax of a show file:
 	::= "rc_handler" "visual" name
 	        "grid" visual_grid
 		[ "rc_override" visual_overrides ]
-	        [ "assembly" assembly_name ]
+	        [ "assembly" assembly_name [ "start_selected" boolean ] ]
 	        "select" action_by_state
 	        "activate" action_by_state
 		[ "mouse" mouse_locations ]
 		[ "timeout" integer "frames" commands ]  ";"
+	# start_selected defaults false.  If true, when the handler is
+	# activated, if the assembly is in one of the activated states, it
+	# will be taken to the corresponding selected state.
 
     visual_grid ::= "{" visual_grid_row * "}"
 

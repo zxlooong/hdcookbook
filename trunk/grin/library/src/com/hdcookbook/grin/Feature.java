@@ -81,8 +81,6 @@ public abstract class Feature implements SetupClient {
     private int activateCount = 0;
     private int setupCount = 0;
 
-    boolean activated = false;	// Used by show, not by subfeatures
-
     protected Feature(Show show) {
 	this.show = show;
     }
@@ -146,9 +144,9 @@ public abstract class Feature implements SetupClient {
      * setup; each call to setup() shall be balanced by
      * a call to unsetup(), and they shall *not* be nested.  
      * <p>
-     * It's possible an active phase may be destroyed.  For example,
-     * the last phase a show is in when the show is destroyed will
-     * probably be active (and it will probably be an empty phase
+     * It's possible an active segment may be destroyed.  For example,
+     * the last segment a show is in when the show is destroyed will
+     * probably be active (and it will probably be an empty segment
      * too!).
      **/
     abstract public void destroy();
@@ -297,5 +295,16 @@ public abstract class Feature implements SetupClient {
      * the state we should be in for the next frame.
      **/
     public abstract void nextFrame();
+
+    /**
+     * Called from the ResetFeatureCommand, this should reset the internal
+     * state of the feature to what it was when first activated.
+     **/
+    public void resetFeature() {
+	if (activateCount > 0) {
+	    setActivateMode(false);
+	    setActivateMode(true);
+	}
+    }
  
 }

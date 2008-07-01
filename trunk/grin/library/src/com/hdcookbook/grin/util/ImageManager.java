@@ -58,8 +58,10 @@ package com.hdcookbook.grin.util;
 
 
 import java.awt.Rectangle;
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Hashtable;
 
 /**
@@ -122,38 +124,62 @@ public class ImageManager {
 	}
     }
 
-    static void readImageMap(DataInputStream is) throws IOException {
+    static void readImageMap(String fileName, Hashtable map) throws IOException 
+    {
 	// Reads the file written by 
 	// com.hdcookbook.grin.build.mosaic.MosaicMaker.makeMosaics()
 	// This maps the original image file name to the name of a
 	// mosaic image, and the position within that mosaic.
-
-	synchronized(lock) {
-	    if (Debug.ASSERT && imageMap != null) {
-		Debug.assertFail();
+	DataInputStream dis = null;
+	try {
+	    URL u = AssetFinder.getURL(fileName);
+	    if (u == null) {
+		throw new IOException("No image map " + fileName);
 	    }
-	    imageMap = new Hashtable();
-	    int n = is.readInt();
+	    dis = new DataInputStream(new BufferedInputStream(u.openStream()));
+
+	    int n = dis.readInt();
 	    String[] mosaics = new String[n];
 	    for (int i = 0; i < n; i++) {
-		mosaics[i] = is.readUTF();
+		mosaics[i] = dis.readUTF();
 	    }
 
-	    n = is.readInt();
+	    n = dis.readInt();
 	    for (int i = 0; i < n; i++) {
-		String tileName = is.readUTF();
+		String tileName = dis.readUTF();
 		MosaicTile t = new MosaicTile();
-		t.mosaicName = mosaics[is.readInt()];
+		t.mosaicName = mosaics[dis.readInt()];
 		t.placement = new Rectangle();
-		t.placement.x = is.readInt();
-		t.placement.y = is.readInt();
-		t.placement.width = is.readInt();
-		t.placement.height = is.readInt();
-		imageMap.put(tileName, t);
+		t.placement.x = dis.readInt();
+		t.placement.y = dis.readInt();
+		t.placement.width = dis.readInt();
+		t.placement.height = dis.readInt();
+		map.put(tileName, t);
 	    }
-	    if (Debug.ASSERT && is.read() != -1) {
+	    if (Debug.ASSERT && dis.read() != -1) {
 		Debug.assertFail();
 	    }
+	    // dis.close is in the finally block
+	} catch (IOException ex) {
+	    if (Debug.LEVEL > 0) {
+		ex.printStackTrace();
+	    }
+	    if (Debug.ASSERT) {
+		Debug.assertFail();
+	    }
+	} finally {
+	    if (dis != null) {
+		try {
+		    dis.close();
+		} catch (IOException ignored) {
+		}
+	    }
+	}
+    }
+
+    static void setImageMap(Hashtable map) {
+	synchronized(lock) {
+	    imageMap = map;
 	}
     }
 }

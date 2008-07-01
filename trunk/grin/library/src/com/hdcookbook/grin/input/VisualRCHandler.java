@@ -146,6 +146,14 @@ public class VisualRCHandler extends RCHandler implements Node {
     protected int timeout;	// -1 means "no timeout"
     protected Command[] timeoutCommands;
 
+    /**
+     * Flag that, if true, makes the handler start out in the selected
+     * state.  When the handler is activated, if the underlying assembly
+     * is found to be in an activated state, it is coerced into the 
+     * corresponding selected state.
+     **/
+    protected boolean startSelected = false;
+
     private boolean activated = false;
     private int currState = 0;
     private int currFrame;
@@ -333,7 +341,12 @@ public class VisualRCHandler extends RCHandler implements Node {
 		i = lookForFeature(curr, activateFeatures);
 		if (i != -1) {
 		    currState = i;
-		    activated = true;
+		    if (startSelected) {
+			assembly.setCurrentFeature(selectFeatures[i]);
+			activated = false;
+		    } else {
+			activated = true;
+		    }
 		} else if (Debug.LEVEL > 0) {
 		    Debug.println("Handler " + getName()
 		                  + " can't find current assembly state");
@@ -402,5 +415,6 @@ public class VisualRCHandler extends RCHandler implements Node {
         }    
         this.selectFeatures = in.readFeaturesArrayReference();
         this.activateFeatures = in.readFeaturesArrayReference();      
+	this.startSelected = in.readBoolean();
     }
 }

@@ -52,73 +52,39 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin;
+package com.hdcookbook.grin.commands;
 
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
-public class SESegment extends Segment implements SENode {
-    
-    public SESegment(String name, Feature[] active, Feature[] setup,
-    		 RCHandler[] rcHandlers, Command[] onEntryCommands,
-		 boolean nextOnSetupDone, Command[] nextCommands) 
-	    throws IOException 
-    {
-        super();
-	this.name = name;	// for debugging
-	this.activeFeatures = active;
-	this.settingUpFeatures = setup;
-	this.onEntryCommands = onEntryCommands;
-	this.nextOnSetupDone = nextOnSetupDone;
-	this.nextCommands = nextCommands;
-	this.rcHandlers = rcHandlers;
+public class SEResetFeatureCommand extends ResetFeatureCommand implements SENode
+{
+
+    public SEResetFeatureCommand(SEShow show) {
+        super(show);
     }
     
-   public void setName(String name) {
-        this.name = name;
-    }
-    
-    public void setActiveFeatures(Feature[] features) {
-        this.activeFeatures = features;
-    }
-    
-    public void setSettingUpFeatures(Feature[] features) {
-        this.settingUpFeatures = features;
-    }
-    
-    public void setNextOnSetupDone(boolean nextOnSetupDone) {
-        this.nextOnSetupDone = nextOnSetupDone;
-    }
-    
-    public void setNextCommands(Command[] commands) {
-        this.nextCommands = commands;
-    }
-    
-    public void setRCHandlers(RCHandler[] rcHandlers) {
-        this.rcHandlers = rcHandlers;
-    }
-    
-    
-    public void writeInstanceData(GrinDataOutputStream out) 
-            throws IOException 
-    {
-        out.writeSuperClassData(this);
-        out.writeFeaturesArrayReference(getActiveFeatures());
-        out.writeFeaturesArrayReference(getSetupFeatures());
-        out.writeRCHandlersArrayReference(getRCHandlers());
-        out.writeCommands(getOnEntryCommands());
-        out.writeBoolean(getNextOnSetupDone());
-        out.writeCommands(getNextCommands());        
+    public void setFeature(Feature feature) {
+	this.feature = feature;
     }
 
     public String getRuntimeClassName() {
-        return Segment.class.getName();
+        return ResetFeatureCommand.class.getName();
     }
-   
+
+    public void writeInstanceData(GrinDataOutputStream out) 
+            throws IOException 
+    { 
+        out.writeSuperClassData(this);
+        out.writeFeatureReference(feature);
+    }
+
     public void accept(SEShowVisitor visitor) {
-        visitor.visitSegment(this);
+        visitor.visitResetFeatureCommand(this);
     }
 
 }

@@ -61,7 +61,7 @@ package com.hdcookbook.grin.io.binary;
 class Constants {
  
 	static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
-	static final int GRINSCRIPT_VERSION = 14;
+	static final int GRINSCRIPT_VERSION = 15;
 	
         /**
          * Make sure to change BinaryWriter.recordBuiltInClasses()
@@ -80,13 +80,14 @@ class Constants {
 	static final int SRCOVER_IDENTIFIER                 = 10;        
         static final int ACTIVATEPART_CMD_IDENTIFIER        = 11;
         static final int ACTIVATESEGMENT_CMD_IDENTIFIER     = 12;
-        static final int SEGMENTDONE_CMD_IDENTIFIER         = 13;
-        static final int SETVISUALRCSTATE_CMD_IDENTIFIER    = 14;
-        static final int COMMAND_RCHANDLER_IDENTIFIER       = 15;
-        static final int VISUAL_RCHANDLER_IDENTIFIER        = 16;
-        static final int GUARANTEE_FILL_IDENTIFIER          = 17;
-	static final int SET_TARGET_IDENTIFIER              = 18;
-	static final int SEGMENT_IDENTIFIER                 = 19;
+        static final int RESETFEATURE_CMD_IDENTIFIER        = 13;
+        static final int SEGMENTDONE_CMD_IDENTIFIER         = 14;
+        static final int SETVISUALRCSTATE_CMD_IDENTIFIER    = 15;
+        static final int COMMAND_RCHANDLER_IDENTIFIER       = 16;
+        static final int VISUAL_RCHANDLER_IDENTIFIER        = 17;
+        static final int GUARANTEE_FILL_IDENTIFIER          = 18;
+	static final int SET_TARGET_IDENTIFIER              = 19;
+	static final int SEGMENT_IDENTIFIER                 = 20;
         
         static final byte STRING_CONSTANTS_IDENTIFIER      = (byte) 0xe0;
         static final byte INT_ARRAY_CONSTANTS_IDENTIFIER   = (byte) 0xe1;

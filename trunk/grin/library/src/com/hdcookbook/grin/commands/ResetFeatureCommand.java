@@ -1,3 +1,4 @@
+
 /*  
  * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
@@ -52,73 +53,39 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin;
+package com.hdcookbook.grin.commands;
 
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.input.RCHandler;
-import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.IOException;
 
-public class SESegment extends Segment implements SENode {
-    
-    public SESegment(String name, Feature[] active, Feature[] setup,
-    		 RCHandler[] rcHandlers, Command[] onEntryCommands,
-		 boolean nextOnSetupDone, Command[] nextCommands) 
-	    throws IOException 
-    {
-        super();
-	this.name = name;	// for debugging
-	this.activeFeatures = active;
-	this.settingUpFeatures = setup;
-	this.onEntryCommands = onEntryCommands;
-	this.nextOnSetupDone = nextOnSetupDone;
-	this.nextCommands = nextCommands;
-	this.rcHandlers = rcHandlers;
+/**
+ * A GRIN command to reset a feature to the state it is in when activated.
+ * Grouping features, like Group and Assembly, reset their children
+ * as appropriate (e.g. an Assembly resets its active sub-feature).
+ *
+ * @author Bill Foote (http://jovial.com)
+ */
+
+public class ResetFeatureCommand extends Command implements Node {
+
+    protected Feature feature;
+
+    public ResetFeatureCommand(Show show) {
+        super(show);
     }
     
-   public void setName(String name) {
-        this.name = name;
+    public void execute() {
+	feature.resetFeature();
     }
-    
-    public void setActiveFeatures(Feature[] features) {
-        this.activeFeatures = features;
-    }
-    
-    public void setSettingUpFeatures(Feature[] features) {
-        this.settingUpFeatures = features;
-    }
-    
-    public void setNextOnSetupDone(boolean nextOnSetupDone) {
-        this.nextOnSetupDone = nextOnSetupDone;
-    }
-    
-    public void setNextCommands(Command[] commands) {
-        this.nextCommands = commands;
-    }
-    
-    public void setRCHandlers(RCHandler[] rcHandlers) {
-        this.rcHandlers = rcHandlers;
-    }
-    
-    
-    public void writeInstanceData(GrinDataOutputStream out) 
+
+    public void readInstanceData(GrinDataInputStream in, int length) 
             throws IOException 
     {
-        out.writeSuperClassData(this);
-        out.writeFeaturesArrayReference(getActiveFeatures());
-        out.writeFeaturesArrayReference(getSetupFeatures());
-        out.writeRCHandlersArrayReference(getRCHandlers());
-        out.writeCommands(getOnEntryCommands());
-        out.writeBoolean(getNextOnSetupDone());
-        out.writeCommands(getNextCommands());        
+        in.readSuperClassData(this);
+     
+        this.feature = in.readFeatureReference();      
     }
-
-    public String getRuntimeClassName() {
-        return Segment.class.getName();
-    }
-   
-    public void accept(SEShowVisitor visitor) {
-        visitor.visitSegment(this);
-    }
-
 }

@@ -66,6 +66,7 @@ import com.hdcookbook.grin.SESegment;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
 import com.hdcookbook.grin.commands.SEActivatePartCommand;
+import com.hdcookbook.grin.commands.SEResetFeatureCommand;
 import com.hdcookbook.grin.commands.SESegmentDoneCommand;
 import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
 import com.hdcookbook.grin.features.Assembly;
@@ -342,6 +343,13 @@ public class ShowParser {
 	}
 	final String[] rcHandlers = sa;
 	Command[] ca;
+	if ("on_entry".equals(tok)) {
+	    ca = parseCommands();
+	    tok = lexer.getString();
+	} else {
+	    ca = emptyCommandArray;
+	}
+	final Command[] onEntry = ca;
 	final boolean nextOnSetupDone = "setup_done".equals(tok);
 	if (nextOnSetupDone || "next".equals(tok)) {
 	    ca = parseCommands();
@@ -359,7 +367,7 @@ public class ShowParser {
 		Feature[] s = makeFeatureList(setup);
 		RCHandler[] h = makeRCHandlerList(rcHandlers);
 		builder.addSegment(name,line,new SESegment(name, a, s, h,
-				   nextOnSetupDone, next));
+				   onEntry, nextOnSetupDone, next));
 	    }
 	};
 	deferred[0].addElement(fw);
@@ -1376,11 +1384,15 @@ public class ShowParser {
 	}
 	if ("assembly".equals(tok)) {
 	    tok = lexer.getString();	// Assembly name
-	    parseExpected("select");
-	} else if ("select".equals(tok)) {
-	    tok = null;		// Assembly name
+	    String next = lexer.getString();
+	    if ("start_selected".equals(next)) {
+		helper.setStartSelected(lexer.getBoolean());
+		next = lexer.getString();
+	    }
+	    lexer.expectString("select", next);
 	} else {
-	   lexer.reportError("\"select\" expected, \"" + tok + "\" seen");
+	    lexer.expectString("select", tok);
+	    tok = null;		// Assembly name
 	}
 	final String assemblyName = tok;
 
@@ -1702,6 +1714,8 @@ public class ShowParser {
             return parseInvokeAssembly();
         } else if ("set_visual_rc".equals(tok)) {
             return parseVisualRC();
+        } else if ("reset_feature".equals(tok)) {
+            return parseResetFeature();
         } else if ("java_command".equals(tok)) {
             return parseJavaCommand();
         } else if (extParser == null || tok == null || tok.indexOf(':') < 0) {
@@ -1865,6 +1879,20 @@ public class ShowParser {
 		    }
 		}
 		cmd.setup(activateF, state, handler, runCommandsF);
+	    }
+	};
+	deferred[0].addElement(fw);
+	return cmd;
+    }
+    
+    private Command parseResetFeature() throws IOException {
+	final String featureName = lexer.getString();
+	parseExpected(";");
+	final SEResetFeatureCommand cmd = new SEResetFeatureCommand(show);
+	ForwardReference fw = new ForwardReference(lexer) {
+	    void resolve() throws IOException {
+		Feature f = lookupFeatureOrFail(featureName);
+		cmd.setFeature(f);
 	    }
 	};
 	deferred[0].addElement(fw);

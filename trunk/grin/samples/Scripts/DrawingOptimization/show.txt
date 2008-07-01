@@ -62,6 +62,12 @@ segment S:DrawOpt.Unoptimized
     } setup {
 	F:DrawOpt.Everything
     }
+    on_entry {
+	reset_feature	F:DrawOpt.Troopers.Coords ;
+	reset_feature	F:DrawOpt.Bunny.Coords ;
+		# We reset the trooper and bunny coords on this segment only.
+		# This is done to test the "reset_feature" command.
+    }
 ;
 
 segment S:DrawOpt.Opt.Target

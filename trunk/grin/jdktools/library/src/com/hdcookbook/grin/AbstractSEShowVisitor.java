@@ -60,6 +60,7 @@ import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.SEActivatePartCommand;
 import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
+import com.hdcookbook.grin.commands.SEResetFeatureCommand;
 import com.hdcookbook.grin.commands.SESegmentDoneCommand;
 import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
 import com.hdcookbook.grin.features.SEAssembly;
@@ -126,6 +127,7 @@ public abstract class AbstractSEShowVisitor implements SEShowVisitor {
     public void visitActivateSegmentCommand(SEActivateSegmentCommand command) {}
     public void visitSegmentDoneCommand(SESegmentDoneCommand command) {}
     public void visitSetVisualRCStateCommand(SESetVisualRCStateCommand cmd) {}
+    public void visitResetFeatureCommand(SEResetFeatureCommand cmd) {}
     public void visitShowCommand(SEShowCommand command) {}
     public void visitUserDefinedCommand(Command command) {}
 }

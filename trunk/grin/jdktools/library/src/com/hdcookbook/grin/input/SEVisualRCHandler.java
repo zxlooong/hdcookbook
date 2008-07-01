@@ -80,6 +80,7 @@ public class SEVisualRCHandler extends VisualRCHandler implements SENode {
 			   Command[][] activateCommands, 
 			   Rectangle[] mouseRects, int[] mouseRectStates,
 			   int timeout, Command[] timeoutCommands,
+			   boolean startSelected,
 			   VisualRCHandlerHelper helper) 
     {
         super();
@@ -93,6 +94,7 @@ public class SEVisualRCHandler extends VisualRCHandler implements SENode {
 	this.mouseRectStates = mouseRectStates;
 	this.timeout = timeout;
 	this.timeoutCommands = timeoutCommands;
+	this.startSelected = startSelected;
         this.helper = helper;
     }
 
@@ -143,6 +145,11 @@ public class SEVisualRCHandler extends VisualRCHandler implements SENode {
     /** used by the binaryconverter */  
     public Command[] getTimeoutCommands() {
         return timeoutCommands;
+    }
+
+    /** used by the binaryconverter */
+    public boolean getStartSelected() {
+	return startSelected;
     }
     
     /* used by the binaryconverter */  
@@ -271,6 +278,7 @@ public class SEVisualRCHandler extends VisualRCHandler implements SENode {
         
         out.writeFeaturesArrayReference(getSelectFeatures());
         out.writeFeaturesArrayReference(getActivateFeatures());
+	out.writeBoolean(startSelected);
     }
 
     public String getRuntimeClassName() {
