@@ -73,14 +73,15 @@ public class SEImageSequence extends ImageSequence implements SENode {
     
     public SEImageSequence(SEShow show, String name, 
     			   SEImageSeqPlacement sePlacement, String fileName,
-    			 String[] middle, String extension, boolean repeat,
-			 Command[] endCommands) 
+    			   String[] middle, String extension, boolean repeat,
+			   int loopCount, Command[] endCommands) 
     		throws IOException {
 	super(show);
         this.name = name;
 	this.sePlacement = sePlacement;
 	this.repeat = repeat;
 	this.model = null;
+	this.loopCount = loopCount;
 	this.endCommands = endCommands;
         
         fileNames = new String[middle.length];
@@ -158,6 +159,7 @@ public class SEImageSequence extends ImageSequence implements SENode {
        if (model != null) {
            out.writeFeatureReference(model);
        }
+       out.writeInt(loopCount);
        out.writeCommands(endCommands);
        out.writeBoolean(scalingModel != null);
        if (scalingModel != null) {

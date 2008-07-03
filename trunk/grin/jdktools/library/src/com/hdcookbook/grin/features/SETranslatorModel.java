@@ -63,16 +63,9 @@ import com.hdcookbook.grin.commands.Command;
 
 public class SETranslatorModel extends SEInterpolatedModel {
 
-    public SETranslatorModel(SEShow show) {
-        super(show);        
+    public SETranslatorModel() {
     }
     
-    public SETranslatorModel (SEShow show, String name, int[] frames, 
-				int[] currValues, int[][] values,
-				int repeatFrame, Command[] endCommands) {
-        super(show, name, frames, currValues, values, repeatFrame, endCommands);	
-    }
-
     public int[] getXs() {
         return getArray(Translator.X_FIELD);
     }

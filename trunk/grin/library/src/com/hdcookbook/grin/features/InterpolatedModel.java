@@ -121,13 +121,22 @@ public class InterpolatedModel extends Feature implements Node {
     protected int repeatFrame;	// Frame to go to after the end.  
     				// Integer.MAX_VALUE means "stick at end"
 				// 0 will cause a cycle.
+    protected int loopCount;	
+    	// # of times to repeat images before sending end commands
+	// Integer.MAX_VALUE means "infinite"
 
     private boolean isActivated = false;
     private int currFrame;      // Current frame in cycle
     private int currIndex;      // frames[index] <= currFrame < frames[index+1]
     private int repeatIndex;	// Index when currFrame is repeatFrame-1
+    private int loopsRemaining;	// see loopCount
     protected Command[] endCommands;
 
+    /**
+     * @param show	The show this feature is attached to.  The value
+     *			can be null, as long as it's set to a real value
+     *			before the feature is used.
+     **/
     public InterpolatedModel(Show show) {
         super(show);
     }
@@ -138,6 +147,9 @@ public class InterpolatedModel extends Feature implements Node {
      * @param	fieldNum 	The field number, counting from 0
      **/
     public final int getCurrValue(int fieldNum) {
+	if (Debug.ASSERT && !isActivated) {
+	    Debug.assertFail("InterpolatedModel " + getName()+" not activated");
+	}
 	return currValues[fieldNum];
     }
 
@@ -206,6 +218,7 @@ public class InterpolatedModel extends Feature implements Node {
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
 	if (mode) {
+	    loopsRemaining = loopCount;
 	    if (frames.length <= 1) {
 		currFrame = Integer.MAX_VALUE;
 		currIndex = Integer.MAX_VALUE;
@@ -268,13 +281,30 @@ public class InterpolatedModel extends Feature implements Node {
 	if (distNext <= 0) {
 	    currIndex = nextIndex;
 	    if (currIndex+1 >= frames.length) {
-		currFrame = repeatFrame;
-		if (currFrame  != Integer.MAX_VALUE) {
-		    currFrame--;
+		if (loopCount != Integer.MAX_VALUE) {
+		    loopsRemaining--;
 		}
-		currIndex = repeatIndex;
-		for (int i = 0; i < endCommands.length; i++) {
-		    show.runCommand(endCommands[i]);
+		if (loopsRemaining > 0) {
+		    if (repeatFrame == Integer.MAX_VALUE) {
+			currFrame = 0;
+			currIndex = 0;
+		    } else {
+			currFrame = repeatFrame;
+			if (currFrame  != Integer.MAX_VALUE) {
+			    currFrame--;
+			}
+			currIndex = repeatIndex;
+		    }
+		} else {
+		    loopsRemaining = loopCount;
+		    currFrame = repeatFrame;
+		    if (currFrame  != Integer.MAX_VALUE) {
+			currFrame--;
+		    }
+		    currIndex = repeatIndex;
+		    for (int i = 0; i < endCommands.length; i++) {
+			show.runCommand(endCommands[i]);
+		    }
 		}
 	    }
 	}
@@ -295,8 +325,8 @@ public class InterpolatedModel extends Feature implements Node {
     }
     
     public void readInstanceData(GrinDataInputStream in, int length) 
-            throws IOException { 
-                
+            throws IOException 
+    { 
         in.readSuperClassData(this);
         
         this.frames = in.readSharedIntArray();
@@ -306,6 +336,7 @@ public class InterpolatedModel extends Feature implements Node {
 	    values[i] = in.readSharedIntArray();
 	}
         this.repeatFrame = in.readInt();
+	this.loopCount = in.readInt();
         this.endCommands = in.readCommands();       
     }
 
@@ -322,6 +353,10 @@ public class InterpolatedModel extends Feature implements Node {
     public boolean scaleBounds(int x, int y, int width, int height,
     			       Rectangle scaledBounds)
     {
+	if (Debug.ASSERT && !isActivated) {
+	    Debug.assertFail("InterpolatedModel " + getName()+" not activated");
+	}
+
 	int dx = getCurrValue(SCALE_X_FIELD);
 	int dy = getCurrValue(SCALE_Y_FIELD);
 	int xf = getCurrValue(SCALE_X_FACTOR_FIELD);

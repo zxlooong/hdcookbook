@@ -63,16 +63,9 @@ import com.hdcookbook.grin.commands.Command;
 
 public class SEScalingModel extends SEInterpolatedModel {
 
-    public SEScalingModel(SEShow show) {
-        super(show);        
+    public SEScalingModel() {
     }
     
-    public SEScalingModel(SEShow show, String name, int[] frames, 
-			int[] currValues, int[][] values,
-			int repeatFrame, Command[] endCommands) {
-        super(show, name, frames, currValues, values, repeatFrame, endCommands);	
-    }
- 
     public int[] getXs() {
         return getArray(InterpolatedModel.SCALE_X_FIELD);
     }

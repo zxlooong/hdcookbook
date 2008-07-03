@@ -63,20 +63,22 @@ import java.io.IOException;
 
 public class SEInterpolatedModel extends InterpolatedModel implements SENode {
 
-    public SEInterpolatedModel(SEShow show) {
-        super(show);        
+    public SEInterpolatedModel() {
+        super(null);        	// setup sets the value of show
     }
     
-    public SEInterpolatedModel(SEShow show, String name, int[] frames, 
-				int[] currValues, int[][] values,
-				int repeatFrame, Command[] endCommands) 
+    public void setup(SEShow show, String name, int[] frames, 
+		      int[] currValues, int[][] values,
+		      int repeatFrame, int loopCount, 
+		      Command[] endCommands) 
     {
-	this(show);
+	this.show = show;
         this.name = name;
 	this.frames = frames;
 	this.currValues = currValues;
 	this.values = values;
 	this.repeatFrame = repeatFrame;
+	this.loopCount = loopCount;
 	this.endCommands = endCommands;
     }
  
@@ -115,10 +117,14 @@ public class SEInterpolatedModel extends InterpolatedModel implements SENode {
     public int getRepeatFrame() {
         return repeatFrame;
     }
+
+    public int getLoopCount() {
+	return loopCount;
+    }
        
     public void writeInstanceData(GrinDataOutputStream out) 
-            throws IOException {
-        
+            throws IOException 
+    {
         out.writeSuperClassData(this);
         out.writeSharedIntArray(getFrames());
         out.writeIntArray(getCurrValues());
@@ -127,6 +133,7 @@ public class SEInterpolatedModel extends InterpolatedModel implements SENode {
 	    out.writeSharedIntArray(values[i]);
 	}
         out.writeInt(getRepeatFrame());
+	out.writeInt(getLoopCount());
         out.writeCommands(getEndCommands());       
     }
 

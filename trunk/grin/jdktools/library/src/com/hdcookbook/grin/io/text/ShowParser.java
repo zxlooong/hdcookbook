@@ -532,13 +532,19 @@ public class ShowParser {
 	}
 	String model = null;
 	Command[] endCommands = emptyCommandArray;
+	int loopCount = 1;
 	if ("model".equals(tok) || "linked_to".equals(tok)) {
 	    model = lexer.getString();
 	    tok = lexer.getString();
-	}
-	if ("end_commands".equals(tok)) {
-	    endCommands = parseCommands();
-	    tok = lexer.getString();
+	} else {
+	    if ("loop_count".equals(tok)) {
+		loopCount = lexer.getIntOrInfinite();
+		tok = lexer.getString();
+	    }
+	    if ("end_commands".equals(tok)) {
+		endCommands = parseCommands();
+		tok = lexer.getString();
+	    }
 	}
 	if (";".equals(tok)) {
 	} else {
@@ -546,7 +552,8 @@ public class ShowParser {
 	}
 	final SEImageSequence f 
                 = new SEImageSequence(show, name, placement, fileName, 
-                                      middle,  extension, repeat, endCommands);
+                                      middle,  extension, repeat, loopCount,
+				      endCommands);
 	builder.addFeature(name, line, f);
 	if (model != null) {
 	    final String mod = model;
@@ -885,6 +892,11 @@ public class ShowParser {
 	} else {
 	    repeatFrame = Integer.MAX_VALUE; // Off the end
 	}
+	int loopCount = 1;
+	if ("loop_count".equals(tok)) {
+	    loopCount = lexer.getIntOrInfinite();
+	    tok = lexer.getString();
+	}
 	if ("end_commands".equals(tok)) {
 	    endCommands = parseCommands();
 	    tok = lexer.getString();
@@ -912,7 +924,7 @@ public class ShowParser {
 	    lexer.reportError("Keyframes must start at frame 0");
 	}
 	SEFade fade = new SEFade(show, name, srcOver, fs, alphas, repeatFrame,
-			     endCommands);
+			         loopCount, endCommands);
 	builder.addFeature(name, line, fade);
 	resolveModifier(fade, part);
 	return fade;
@@ -1035,6 +1047,11 @@ public class ShowParser {
 	    repeatFrame = lexer.getInt();
 	    tok = lexer.getString();
 	}
+	int loopCount = 1;
+	if ("loop_count".equals(tok)) {
+	    loopCount = lexer.getIntOrInfinite();
+	    tok = lexer.getString();
+	}
 	Command[] endCommands = emptyCommandArray;
 	if ("end_commands".equals(tok)) {
 	    endCommands = parseCommands();
@@ -1069,7 +1086,7 @@ public class ShowParser {
 	}
 	InterpolatedModel trans 
 	    = builder.makeTranslatorModel(name, fs, values,
-				          repeatFrame, endCommands);
+				          repeatFrame, loopCount, endCommands);
 	builder.addFeature(name, line, trans);
 	return trans;
     }
@@ -1109,9 +1126,35 @@ public class ShowParser {
 
     private Feature parseText(boolean hasName, int line) throws IOException {
 	String name = parseFeatureName(hasName);
-	int x = lexer.getInt();
-	int y = lexer.getInt();
 	String tok = lexer.getString();
+	int xAlign = SEText.LEFT;
+	if ("left".equals(tok)) {
+	    xAlign = SEText.LEFT;
+	    tok = lexer.getString();
+	} else if ("middle".equals(tok)) {
+	    xAlign = SEText.MIDDLE;
+	    tok = lexer.getString();
+	} else if ("right".equals(tok)) {
+	    xAlign = SEText.RIGHT;
+	    tok = lexer.getString();
+	}
+	int x = lexer.convertToInt(tok);
+	tok = lexer.getString();
+	int yAlign = SEText.TOP;
+	if ("top".equals(tok)) {
+	    yAlign = SEText.TOP;
+	    tok = lexer.getString();
+	} else if ("baseline".equals(tok)) {
+	    yAlign = SEText.BASELINE;
+	    tok = lexer.getString();
+	} else if ("bottom".equals(tok)) {
+	    yAlign = SEText.BOTTOM;
+	    tok = lexer.getString();
+	}
+	int y = lexer.convertToInt(tok);
+	int alignment = xAlign | yAlign;
+
+	tok = lexer.getString();
 	String[] textStrings;
 	int vspace = 0;
 	if ("{".equals(tok)) {
@@ -1144,6 +1187,11 @@ public class ShowParser {
 	    colors.addElement(lastColor);
 	}
 	tok = lexer.getString();
+	int loopCount = 1;
+	if ("loop_count".equals(tok)) {
+	    loopCount = lexer.getIntOrInfinite();
+	    tok = lexer.getString();
+	}
 	Color background = null;
 	if ("background".equals(tok)) {
 	    background = parseColor();
@@ -1159,8 +1207,8 @@ public class ShowParser {
 	if (cols.length < 1) {
 	    lexer.reportError("At least one color needed");
 	}
-	SEText text = new SEText(show, name, x, y, textStrings, vspace, 
-			     font, cols, background);
+	SEText text = new SEText(show, name, x, y, alignment, textStrings, 
+				 vspace, font, cols, loopCount, background);
 	builder.addFeature(name, line, text);
 	return text;
     }
@@ -1193,6 +1241,11 @@ public class ShowParser {
 	int repeatFrame = -1;
 	if ("repeat".equals(tok)) {
 	    repeatFrame = lexer.getInt();
+	    tok = lexer.getString();
+	}
+	int loopCount = 1;
+	if ("loop_count".equals(tok)) {
+	    loopCount = lexer.getIntOrInfinite();
 	    tok = lexer.getString();
 	}
 	Command[] endCommands = emptyCommandArray;
@@ -1232,7 +1285,8 @@ public class ShowParser {
 	    lexer.reportError("repeat > max frame");
 	}
 	InterpolatedModel scaleModel 
-	    = builder.makeScalingModel(name, fs,values,repeatFrame,endCommands);
+	    = builder.makeScalingModel(name, fs, values, repeatFrame,
+	    			       loopCount, endCommands);
 	builder.addFeature(name, line, scaleModel);
 	return scaleModel;
     }

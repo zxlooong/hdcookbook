@@ -194,14 +194,16 @@ Here's BNF describing the syntax of a show file:
 		         file_name "{" name_or_continuation * "}" 
 			 	   extension [ "repeat" ]
     		       [ "scaling_model" name ]
-		       [ "model" feature_name | "end_commands" commands] ";"
+		       ( "model" feature_name | image_seq_end ) ";"
 	    # "linked_to" is accepted for "model", for backwards compatibility.
 	    # In both cases, the model, if specified,  must be a different 
 	    # image_sequence with the same number of images in the sequence.
 
     image_seq_placement ::= image_placement | "{" image_placement* "}"
-    	    # if there is a list of image placements in a fixed_image,
+    	    # if there is a list of image placements in a image_sequence,
 	    # it must have the same length as the images array.
+
+    image_seq_end ::= [ loop_count ] [ "end_commands" commands ]
 
     image_placement ::= x y | "(" im_x im_y [ "scale" x y "mills" ] ")"
 	    # A scale factor or -1000 in either or both directions can be
@@ -239,9 +241,12 @@ Here's BNF describing the syntax of a show file:
 	# A menu_assembly is converted into a normal assembly with a bunch
 	# of automatically-generated anonymous groups as its parts.
 
-    text ::= "feature" "text" name x y text_strings font_spec color_spec 
+    text ::= "feature" "text" name text_pos text_strings font_spec color_spec 
     		[ "background" color_entry ] ";"
-    
+
+    text_pos ::= [ "left" | "middle" | "right" ] x
+    		 [ "top" | "baseline" | "bottom" ] y
+
     text_strings ::= string | "{" string * "}" [ "vspace" integer ]
 
     font_spec ::= font_name font_style font_size 
@@ -250,9 +255,11 @@ Here's BNF describing the syntax of a show file:
 
     font_size ::= int		# Size in points (which is the same as pixels)
 
-    color_spec ::= "{" color_entry * "}" 
+    color_spec ::= "{" color_entry * "}"  [ loop_count ]
 
     color_entry ::= "+" | color_value
+
+    loop_count ::= "loop_count" ( "infinite" | integer )
 
     group ::= "feature" "group" name "{" sub_feature * "}" ";"
 
@@ -265,11 +272,13 @@ Here's BNF describing the syntax of a show file:
     fade ::= "feature" "fade" name sub_feature
     		[ "src_over" ] "{" ( frame_number alpha "linear" ) * "}" 
 		[ "repeat" frame_number ] 
+		[ loop_count ]
 		[ "end_commands" commands ] ";"
 
     scaling_model ::= "feature" "scaling_model" name 
 		"{" scale_key_frame* "}"
 		[ "repeat" frame_number ] 
+		[ loop_count ]
 		[ "end_commands" commands ] ";"
 	# There must be >= 1 scale_key_frame
     
@@ -289,6 +298,7 @@ Here's BNF describing the syntax of a show file:
     translator_model ::= "feature" "translator_model" name 
 			    "{" key_frame * "}" 
 			    [ "repeat" frame_number ] 
+			    [ loop_count ]
 			    [ "end_commands" commands ] ";"
 	# "translator_model" can be replaced by the old name "translation"
 

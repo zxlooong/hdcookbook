@@ -76,23 +76,72 @@ import java.io.IOException;
  * @author Bill Foote (http://jovial.com)
  */
 public class Text extends Feature implements Node {
-   
-    protected int x;
-    protected int y;
+ 
+    /**
+     * Value for alignment indicating that x refers to the left side
+     * of the text.
+     **/
+    public final static int LEFT = 0x01;
+
+    /**
+     * Value for alignment indicating that x refers to the middle
+     * of the text.
+     **/
+    public final static int MIDDLE = 0x02;
+
+    /**
+     * Value for alignment indicating that x refers to the right side
+     * of the text.
+     **/
+    public final static int RIGHT = 0x03;
+
+    /**
+     * Value for alignment indicating that y refers to the top side
+     * of the text.
+     **/
+    public final static int TOP = 0x04;
+
+    /**
+     * Value for alignment indicating that y refers to the baseline
+     * of the text.
+     **/
+    public final static int BASELINE = 0x08;
+
+    /**
+     * Value for alignment indicating that y refers to the baseline
+     * of the text.
+     **/
+    public final static int BOTTOM = 0x0c;
+
+    /**
+     * The alignment to apply to x and y.  The value is obtained by or-ing
+     * (or by adding) a horizontal value (LEFT, MIDDLE or RIGHT) with
+     * a vertical value (TOP, BASELINE or BOTTOM).
+     **/
+    protected int alignment;
+
+    protected int xArg;
+    protected int yArg;
     protected String[] strings;
     protected int vspace;
     protected Font font;
     protected Color[] colors;
     private Color currColor = null;
     private Color lastColor = null;
+    protected int loopCount;	
+    	// # of times to repeat images before sending end commands
+	// Integer.MAX_VALUE means "infinite"
     protected Color background;
 
     private boolean isActivated;
+    private int alignedX;
+    private int alignedY;
     private int ascent;
     private int descent;
     private int width = -1;
     private int height = -1;
     private int colorIndex;		// index into colors
+    private int loopsRemaining;	// see loopCount
 
     private boolean changed = false;
     private DrawRecord drawRecord = new DrawRecord();
@@ -105,14 +154,14 @@ public class Text extends Feature implements Node {
      * @inheritDoc
      **/
     public int getX() {
-	return x;
+	return alignedX;
     }
 
     /**
      * @inheritDoc
      **/
     public int getY() {
-	return y;
+	return alignedY;
     }
 
     /**
@@ -135,6 +184,22 @@ public class Text extends Feature implements Node {
 	descent = fm.getMaxDescent();
         height = vspace * (strings.length - 1)
 		 + strings.length * (ascent + descent + 1);
+	int a = (alignment & 0x03);
+	if (a == MIDDLE) {
+	    alignedX = xArg - (width / 2);
+	} else if (a == RIGHT) {
+	    alignedX = xArg - width;
+	} else {
+	    alignedX = xArg;
+	}
+	a = (alignment & 0x0c);
+	if (a == BASELINE) {
+	    alignedY = yArg - ascent;
+	} else if (a == BOTTOM) {
+	    alignedY = yArg - height;
+	} else {
+	    alignedY = yArg;
+	}
     }
 
     /**
@@ -149,6 +214,10 @@ public class Text extends Feature implements Node {
      * This should only be called with the show lock held, at an
      * appropriate time in the frame pump loop.  A good time to call
      * this is from within a command.
+     * <p>
+     * A good way to write this command that calls this is by using
+     * the java_command structure.  There's an example of this in the
+     * cookbook menu.
      **/
     public void setText(String[] newText) {
 	synchronized(show) {	// Shouldn't be necessary, but doesn't hurt
@@ -170,6 +239,7 @@ public class Text extends Feature implements Node {
 	    colorIndex = 0;
 	    lastColor = null;
 	    currColor = colors[colorIndex];
+	    loopsRemaining = loopCount;
 	}
     }
 
@@ -198,7 +268,15 @@ public class Text extends Feature implements Node {
     public void nextFrame() {
 	colorIndex++;
 	if (colorIndex >= colors.length) {
-	    colorIndex = colors.length - 1;
+	    if (loopCount != Integer.MAX_VALUE) {
+		loopsRemaining--;
+	    }
+	    if (loopsRemaining > 0) {
+		colorIndex = 0;
+	    } else {
+		loopsRemaining = loopCount;
+		colorIndex = colors.length - 1;
+	    }
 	}
 	currColor = colors[colorIndex];
     }
@@ -208,7 +286,7 @@ public class Text extends Feature implements Node {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(x, y, width, height);
+	drawRecord.setArea(alignedX, alignedY, width, height);
 	if (lastColor != currColor || changed) {
 	    drawRecord.setChanged();
 	}
@@ -227,13 +305,13 @@ public class Text extends Feature implements Node {
 	}
 	if (background != null) {
 	    gr.setColor(background);
-	    gr.fillRect(x, y, width, height);
+	    gr.fillRect(alignedX, alignedY, width, height);
 	}
 	gr.setFont(font);
 	gr.setColor(currColor);
-        int y2 = y + ascent;
+        int y2 = alignedY + ascent;
         for (int i = 0; i < strings.length; i++) {
-            gr.drawString(strings[i], x, y2);
+            gr.drawString(strings[i], alignedX, y2);
             y2 += ascent + descent + vspace;
         }
     }
@@ -242,8 +320,9 @@ public class Text extends Feature implements Node {
             throws IOException {
                 
         in.readSuperClassData(this);
-        this.x = in.readInt();
-        this.y = in.readInt();
+        this.xArg = in.readInt();
+        this.yArg = in.readInt();
+	this.alignment = in.readInt();
         this.strings = in.readStringArray();
         this.vspace = in.readInt();
         this.font = in.readFont();
@@ -251,6 +330,7 @@ public class Text extends Feature implements Node {
         for (int i = 0; i < colors.length; i++) {
             colors[i] = in.readColor();
         }
+	loopCount = in.readInt();
         this.background = in.readColor();        
     }
 }

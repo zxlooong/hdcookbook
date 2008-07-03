@@ -338,7 +338,9 @@ public class ShowBuilder {
 	} else {
 	    repeatFrame = Integer.MAX_VALUE;
 	}
-	return makeInterpolatedModel(name, frames, values,repeatFrame,commands, SETimer.class);
+	int loopCount = 1;
+	return makeInterpolatedModel(name, frames, values, repeatFrame,
+				     loopCount, commands, SETimer.class);
 	    // Timer can be implemented as a degenerate case of 
 	    // InterpolatedModel.  It's just a model that interpolates zero
 	    // data values between frame 0 and frame numFrames.
@@ -346,23 +348,25 @@ public class ShowBuilder {
 
     public InterpolatedModel 
     makeTranslatorModel(String name, int[] frames, int[][] values, 
-    			  int repeatFrame, Command[] commands) 
+    			  int repeatFrame, int loopCount, Command[] commands) 
     {
 	return makeInterpolatedModel(name, frames, values, repeatFrame, 
-				     commands, SETranslatorModel.class);
+				     loopCount, commands, 
+				     SETranslatorModel.class);
     }
 
     public InterpolatedModel 
     makeScalingModel(String name, int[] frames, int[][] values, 
-    		     int repeatFrame, Command[] commands) 
+    		     int repeatFrame, int loopCount, Command[] commands) 
     {
 	return makeInterpolatedModel(name, frames, values, repeatFrame, 
-				     commands, SEScalingModel.class);
+				     loopCount, commands, SEScalingModel.class);
     }
 
     private InterpolatedModel 
     makeInterpolatedModel(String name, int[] frames, int[][] values, 
-    			  int repeatFrame, Command[] commands, Class clazz)
+    			  int repeatFrame, int loopCount, Command[] commands, 
+			  Class clazz)
     {
 	int[] currValues = new int[values.length];
 	for (int i = 0; i < values.length; i++) {
@@ -379,19 +383,15 @@ public class ShowBuilder {
 		    // list of values for this parameter.
 	    }
 	}
-
-        if (clazz == SETimer.class) {
-            return new SETimer(show, name, frames, currValues, values,
-				     repeatFrame, commands);
-        } else if (clazz == SETranslatorModel.class) {
-            return new SETranslatorModel(show, name, frames, currValues, values,
-				     repeatFrame, commands);
-        } else if (clazz == SEScalingModel.class) {
-            return new SEScalingModel(show, name, frames, currValues, values,
-				     repeatFrame, commands);
-        } else {
-            return new SEInterpolatedModel(show, name, frames, currValues, values,
-				     repeatFrame, commands);
-        }
+	SEInterpolatedModel result = null;
+	try {
+	    result = (SEInterpolatedModel) clazz.newInstance();
+	} catch (Exception ex) {     // newInstance() throws checked exceptions
+	    ex.printStackTrace();
+	    assert false;
+	}
+	result.setup(show, name, frames, currValues, values, repeatFrame,
+		     loopCount, commands);
+	return result;
     }
 }

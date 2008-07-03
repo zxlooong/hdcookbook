@@ -86,6 +86,9 @@ public class ImageSequence extends Feature implements Node {
     protected boolean repeat;
     protected InterpolatedModel scalingModel = null;
     protected Rectangle scaledBounds = null;
+    protected int loopCount;	
+    	// # of times to repeat images before sending end commands
+	// Integer.MAX_VALUE means "infinite"
     protected Command[] endCommands;
 
     protected ManagedImage[] images;
@@ -107,6 +110,7 @@ public class ImageSequence extends Feature implements Node {
     	// How many times we've been called without advancing currFrame;
     private int currFrame = 0;	// Frame of our animation
     private boolean atEnd;	// At end of animation
+    private int loopsRemaining;	// see loopCount
 
     private ManagedImage lastImage = null;
     private ManagedImage currImage = null;
@@ -190,6 +194,7 @@ public class ImageSequence extends Feature implements Node {
 		if (!model.isActivated && model.activeModelCount == 0) {
 		    model.currFrame = 0;
 		    model.atEnd = false;
+		    model.loopsRemaining = model.loopCount;
 		}
 		model.activeModelCount++;
 	    } else {
@@ -200,6 +205,7 @@ public class ImageSequence extends Feature implements Node {
                 if (activeModelCount == 0) {
                     currFrame = 0;
 		    atEnd = false;
+		    loopsRemaining = loopCount;
                 }
                 activeModelCount++;
 	    } else {
@@ -295,16 +301,24 @@ public class ImageSequence extends Feature implements Node {
 		if (!atEnd) {
 		    currFrame++;
 		    if (currFrame == images.length) {
-			if (endCommands != null) {
-			    for (int i = 0; i < endCommands.length; i++) {
-				show.runCommand(endCommands[i]);
-			    }
+			if (loopCount != Integer.MAX_VALUE) {
+			    loopsRemaining--;
 			}
-			if (repeat)  {
+			if (loopsRemaining > 0) {
 			    currFrame = 0;
 			} else {
-			    atEnd = true;
-			    currFrame--;
+			    loopsRemaining = loopCount;
+			    if (endCommands != null) {
+				for (int i = 0; i < endCommands.length; i++) {
+				    show.runCommand(endCommands[i]);
+				}
+			    }
+			    if (repeat)  {
+				currFrame = 0;
+			    } else {
+				atEnd = true;
+				currFrame--;
+			    }
 			}
 		    }
 		}
@@ -375,6 +389,7 @@ public class ImageSequence extends Feature implements Node {
         if (in.readBoolean()) {
             this.model = (ImageSequence) in.readFeatureReference();
         }
+	loopCount = in.readInt();
         this.endCommands = in.readCommands();       
         if (in.readBoolean()) {
             this.scalingModel = (InterpolatedModel) in.readFeatureReference();

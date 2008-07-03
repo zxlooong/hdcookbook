@@ -61,7 +61,7 @@ package com.hdcookbook.grin.io.binary;
 class Constants {
  
 	static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
-	static final int GRINSCRIPT_VERSION = 15;
+	static final int GRINSCRIPT_VERSION = 16;
 	
         /**
          * Make sure to change BinaryWriter.recordBuiltInClasses()

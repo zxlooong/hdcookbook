@@ -65,17 +65,20 @@ import java.io.IOException;
 
 public class SEText extends Text implements SENode {
 
-    public SEText(SEShow show, String name, int x, int y, String[] strings, 
-    		int vspace, Font font, Color[] colors, Color background) 
+    public SEText(SEShow show, String name, int x, int y, int alignment,
+    		String[] strings, int vspace, Font font, Color[] colors, 
+		int loopCount, Color background) 
     {
 	super(show);
         this.name = name;
-	this.x = x;
-	this.y = y;
+	this.xArg = x;
+	this.yArg = y;
+	this.alignment = alignment;
 	this.strings = strings;
         this.vspace = vspace;
 	this.font = font;
 	this.colors = colors;
+	this.loopCount = loopCount;
 	this.background = background;
     }
     
@@ -123,20 +126,21 @@ public class SEText extends Text implements SENode {
         this.background = background;
     }    
     
-    public void setX(int x) {
-        this.x = x;
+    public void setXArg(int x) {
+        this.xArg = x;
     }
     
-    public void setY(int y) {
-        this.y = y;
+    public void setYArg(int y) {
+        this.yArg = y;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException {
         
        out.writeSuperClassData(this);
-       out.writeInt(getX());
-       out.writeInt(getY());
+       out.writeInt(xArg);
+       out.writeInt(yArg);
+       out.writeInt(alignment);
        out.writeStringArray(getStrings());
        out.writeInt(getVspace());
        out.writeFont(getFont());
@@ -144,6 +148,7 @@ public class SEText extends Text implements SENode {
        for (int i = 0; i < colors.length; i++) {
           out.writeColor(colors[i]);  
        }
+       out.writeInt(loopCount);
        out.writeColor(getBackground());                 
     }
 

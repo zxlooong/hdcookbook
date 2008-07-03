@@ -62,14 +62,7 @@ import com.hdcookbook.grin.commands.Command;
 
 public class SETimer extends SEInterpolatedModel {
 
-    public SETimer(SEShow show) {
-        super(show);        
-    }
-    
-    public SETimer(SEShow show, String name, int[] frames, 
-				int[] currValues, int[][] values,
-				int repeatFrame, Command[] endCommands) {
-        super(show, name, frames, currValues, values, repeatFrame, endCommands);	
+    public SETimer() {
     }
  
     public int getNumFrames() {

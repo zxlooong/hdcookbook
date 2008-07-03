@@ -68,12 +68,13 @@ public class SEFade extends Fade implements SENode {
     }
     
     public SEFade(SEShow show, String name, boolean srcOver, 
-    		int[] keyframes, int[] keyAlphas, int repeatFrame,
-		Command[] endCommands) 
+    		  int[] keyframes, int[] keyAlphas, int repeatFrame,
+		  int loopCount, Command[] endCommands) 
     {
 	super(show);
         this.name = name;
 	this.repeatFrame = repeatFrame;
+	this.loopCount = loopCount;
 	this.endCommands = endCommands;
         this.keyframes = keyframes;
         this.keyAlphas = keyAlphas;
@@ -157,6 +158,7 @@ public class SEFade extends Fade implements SENode {
        out.writeSharedIntArray(getKeyframes());
        out.writeSharedIntArray(getKeyAlphas());
        out.writeInt(getRepeatFrame());
+       out.writeInt(loopCount);
        out.writeCommands(getEndCommands());
     }
 

@@ -94,6 +94,10 @@ public class Fade extends Modifier implements Node {
     protected int repeatFrame;	// Integer.MAX_VALUE for "stick at end"
     private boolean isActivated = false;
     private int alphaIndex;
+    protected int loopCount;	
+    	// # of times to repeat images before sending end commands
+	// Integer.MAX_VALUE means "infinite"
+    private int loopsRemaining;	// see loopCount
     protected Command[] endCommands;
     private AlphaComposite currAlpha;
     private AlphaComposite lastAlpha;
@@ -182,6 +186,7 @@ public class Fade extends Modifier implements Node {
 	    alphaIndex = 0;
 	    lastAlpha = null;
 	    currAlpha = alphas[alphaIndex];
+	    loopsRemaining = loopCount;
 	}
     }
 
@@ -195,10 +200,22 @@ public class Fade extends Modifier implements Node {
 	}
 	alphaIndex++;
 	if (alphaIndex == alphas.length) {
-	    for (int i = 0; i < endCommands.length; i++) {
-		show.runCommand(endCommands[i]);
+	    if (loopCount != Integer.MAX_VALUE) {
+		loopsRemaining--;
 	    }
-	    alphaIndex = repeatFrame;
+	    if (loopsRemaining > 0) {
+		if (repeatFrame == Integer.MAX_VALUE) {
+		    alphaIndex = 0;
+		} else {
+		    alphaIndex = repeatFrame;
+		}
+	    } else {
+		loopsRemaining = loopCount;
+		for (int i = 0; i < endCommands.length; i++) {
+		    show.runCommand(endCommands[i]);
+		}
+		alphaIndex = repeatFrame;
+	    }
 	}
 	if (alphaIndex < alphas.length) {
 	    currAlpha = alphas[alphaIndex];
@@ -237,6 +254,7 @@ public class Fade extends Modifier implements Node {
         this.keyframes = in.readSharedIntArray();
         this.keyAlphas = in.readSharedIntArray();
 	this.repeatFrame = in.readInt();
+	loopCount = in.readInt();
         this.endCommands = in.readCommands();     
     }
 }

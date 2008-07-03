@@ -189,6 +189,18 @@ public class Lexer {
 	return convertToInt(getString());
     }
 
+    /**
+     * @return an int.  Integer.MAX_VALUE for "infinite".
+     */
+    public int getIntOrInfinite() throws IOException {
+	String tok = getString();
+	if ("infinite".equals(tok)) {
+	    return Integer.MAX_VALUE;
+	} else {
+	    return convertToInt(tok);
+	}
+    }
+
     public int convertToInt(String tok) throws IOException {
 	if (tok == null) {
 	    reportError("int expected, EOF seen");

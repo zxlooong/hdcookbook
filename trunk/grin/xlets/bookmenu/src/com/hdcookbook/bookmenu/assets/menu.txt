@@ -921,10 +921,32 @@ feature src_over F:ScenesMenu F:ScenesMenu.Assembly ;
 #  bookmark to the highest one.
 #
 
-feature text F:BookmarksMenu.HelpMessage 370 620 {
+feature text F:BookmarksMenu.HelpMessage left 370 top 620 {
 	"Press a color key while the video is playing"
 	"to set a bookmark."
-    } Lisa plain 60 { { 16 240 16 255 } } 
+    } Lisa plain 60 { 
+    	{ 16 240 16 255 } 
+    	{ 16 240 16 255 } 
+    	{ 16 230 36 255 } 
+    	{ 16 230 36 255 } 
+    	{ 16 220 56 255 } 
+    	{ 16 220 56 255 } 
+    	{ 16 210 76 255 } 
+    	{ 16 210 76 255 } 
+    	{ 16 200 96 255 } 
+    	{ 16 200 96 255 } 
+    	{ 16 200 116 255 } 
+    	{ 16 200 116 255 } 
+    	{ 16 200 96 255 } 
+    	{ 16 200 96 255 } 
+    	{ 16 210 76 255 } 
+    	{ 16 210 76 255 } 
+    	{ 16 220 56 255 } 
+    	{ 16 220 56 255 } 
+    	{ 16 240 36 255 } 
+    	{ 16 240 36 255 } 
+    } 
+    loop_count infinite
     background { 0 0 0 128 }
 ;
 

@@ -81,6 +81,11 @@ public abstract class Feature implements SetupClient {
     private int activateCount = 0;
     private int setupCount = 0;
 
+    /**
+     * @param show	The show this feature is attached to.  The value
+     *			can be null, as long as it's set to a real value
+     *			before the feature is used.
+     **/
     protected Feature(Show show) {
 	this.show = show;
     }
