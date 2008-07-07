@@ -19,10 +19,13 @@ different ways:
        o  In a directory named after the disc org ID
 
 It displays its results on the screen, for easy logging into a
-compatibility spreadsheet.
-
-Please see the wiki article at
+compatibility spreadsheet.  Please see the wiki article at
 http://wiki.java.net/bin/view/Mobileandembedded/BDJOrgIDDiscVsXlet
 for an authoring guideline related to this test.
 
+DISCLAIMER:  This test was written to test various players to test 
+compatibility.  It ran on enough players to answer the questions 
+that needed to be answered, but please be aware that it did fail 
+to run on some players.  Once the needed results were obtained, 
+we didn't investigate the problems on the other players.
 
