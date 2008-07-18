@@ -17,6 +17,7 @@
             <ant dir="id"/>  
             <ant dir="index"/>
             <ant dir="movieobject"/>
+            <ant dir="playlist"/>            
         </target>
         
 	<target name="clean">         
@@ -31,5 +32,6 @@
           <ant dir="movieobject" target="clean"/>
           <ant dir="library/bumf" target="clean"/>         
           <ant dir="bridgehead" target="clean"/>   
+          <ant dir="playlist" target="clean"/>             
 	</target>
 </project>

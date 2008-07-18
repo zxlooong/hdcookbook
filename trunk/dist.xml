@@ -42,6 +42,7 @@
                 <include name="**/id.jar"/>
                 <include name="**/index.jar"/>
                 <include name="**/movieobject.jar"/>
+                <include name="**/playlist.jar"/>
                 <include name="README.*"/>
             </fileset>
         </copy>

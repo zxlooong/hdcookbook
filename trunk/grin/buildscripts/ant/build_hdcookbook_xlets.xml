@@ -46,6 +46,7 @@ information or have any questions.
     
     <target name="init-xlet-dirs">
         <mkdir dir="${HDC_DISC_BDMV}/JAR"/>
+        <mkdir dir="${HDC_DISC_BDMV}/PLAYLIST"/>        
         <mkdir dir="${HDC_BUILD_DIR}"/>	
         <mkdir dir="${MENUXLET_DEST}/classes"/>
         <mkdir dir="${MENUASSETS_DEST}"/>
@@ -189,6 +190,5 @@ information or have any questions.
     
     <target name="generate-bdmv-files">
         <ant antfile="buildscripts/ant/build_bdjo_security.xml" target="generate-bdmv-files"/>        
-    </target>      
-
+    </target>       
 </project>

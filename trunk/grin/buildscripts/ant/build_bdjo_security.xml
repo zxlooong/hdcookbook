@@ -30,6 +30,7 @@ information or have any questions.
     <property name="HDC_ID_CONVERTER" value="../tools/id"/>   
     <property name="HDC_INDEX_CONVERTER" value="../tools/index"/>
     <property name="HDC_MOVIE_CONVERTER" value="../tools/movieobject"/>
+    <property name="HDC_PLAYLIST_CONVERTER" value="../tools/playlist"/>    
     
     <target name="generate-bdjo" depends="check-bdjoconverter">    
         <fail unless="bdjoconverter.ok" message="Could not find the bdjoconverter tool at ${HDC_BDJO_CONVERTER}"/>
@@ -83,7 +84,8 @@ information or have any questions.
                    property="bdsigner.ok"/>
     </target>
     
-    <target name="generate-bdmv-files" depends="generate-id, generate-index, generate-movieobject"/>
+    <target name="generate-bdmv-files" 
+            depends="generate-id, generate-index, generate-movieobject, generate-playlists"/>
     
     <target name="generate-id" depends="check-idconverter">    
         <fail unless="idconverter.ok" message="Could not find the idconverter tool at ${HDC_ID_CONVERTER}"/>
@@ -125,6 +127,35 @@ information or have any questions.
     <target name="check-movieobjectconverter">
         <available file="${HDC_MOVIE_CONVERTER}/dist/movieobject.jar" type="file"
                    property="movieobjectconverter.ok"/>
-    </target>       
+    </target>   
+    
+    <target name="generate-playlists" depends="check-playlist">    
+        <fail unless="playlistconverter.ok" message="Could not find the playlist object tool at ${HDC_PLAYLIST_CONVERTER}"/>
+          <jdktools.java jar="${HDC_PLAYLIST_CONVERTER}/dist/playlist.jar">
+            <arg value="xlets/playlists/00000.xml"/>
+            <arg value="${HDC_DISC_BDMV}/PLAYLIST/00000.mpls"/>
+        </jdktools.java>      
+        <jdktools.java jar="${HDC_PLAYLIST_CONVERTER}/dist/playlist.jar">
+            <arg value="xlets/playlists/00001.xml"/>
+            <arg value="${HDC_DISC_BDMV}/PLAYLIST/00001.mpls"/>
+        </jdktools.java>
+        <jdktools.java jar="${HDC_PLAYLIST_CONVERTER}/dist/playlist.jar">
+            <arg value="xlets/playlists/00002.xml"/>
+            <arg value="${HDC_DISC_BDMV}/PLAYLIST/00002.mpls"/>
+        </jdktools.java>
+        <jdktools.java jar="${HDC_PLAYLIST_CONVERTER}/dist/playlist.jar">
+            <arg value="xlets/playlists/00003.xml"/>
+            <arg value="${HDC_DISC_BDMV}/PLAYLIST/00003.mpls"/>
+        </jdktools.java>
+        <jdktools.java jar="${HDC_PLAYLIST_CONVERTER}/dist/playlist.jar">
+            <arg value="xlets/playlists/00004.xml"/>
+            <arg value="${HDC_DISC_BDMV}/PLAYLIST/00004.mpls"/>
+        </jdktools.java>        
+    </target>	
+    
+    <target name="check-playlist">
+        <available file="${HDC_PLAYLIST_CONVERTER}/dist/playlist.jar" type="file"
+                   property="playlistconverter.ok"/>
+    </target>      
 </project>
            
