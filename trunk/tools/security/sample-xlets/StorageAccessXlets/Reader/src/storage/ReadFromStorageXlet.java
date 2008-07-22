@@ -70,18 +70,13 @@ import org.havi.ui.HSceneFactory;
  * This Xlet reads from the persistent storage, that the writer (WriteToStorageXlet)
  * has written to. The filename is computed as below:
  * String filename = System.getProperty("dvb.persistent.root")
- *              + "/" + context.getXletProperty("dvb.org.id")
- *	        + "/" + context.getXletProperty("dvb.app.id")
+ *              + "/" + grantorOrgID
+ *	        + "/" + grantorAppID
  *	        + "/tmp.txt";
- * results in a filename: {persistent root value of reader}/4001/2 that is actually
- * mapped to --> {persistent root value of writer}/4000/1 as per the permission
- * request file that suggest file mapping using credentials.
- * Hence the contents of the file that the writer wrote to will be read. This mapping
- * takes place only if the file credential's authentication and authorization check
- * passes. If that fails, then the mapping won't happen and the test will fail with
- * java.io.FileNotFoundException as there is no file with the name:
- *                              {persistent root value of reader}/4001/2 
- * that this test tries to read from.
+ * This application is able to access the local file above which is owned by the
+ * grantor only if the credentials work. Note that the player maps the root digest
+ * value for this application to the grantor's root digest if valid credentials
+ * are provided in the PRF. 
  */
 public class ReadFromStorageXlet implements Xlet {
     

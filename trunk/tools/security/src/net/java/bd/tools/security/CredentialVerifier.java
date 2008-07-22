@@ -10,29 +10,41 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
+
 import java.math.BigInteger;
+
 import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+
 import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+
 import javax.security.auth.x500.X500Principal;
+
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import net.java.bd.tools.security.CredentialUtil.Files;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import sun.misc.BASE64Decoder;
 import sun.misc.HexDumpEncoder;
 import sun.security.util.DerInputStream;
 import sun.security.util.DerValue;
+
 import static net.java.bd.tools.security.CredentialUtil.*;
 
 /**
@@ -66,11 +78,11 @@ class CredentialVerifier {
         
         // remove 0x suffix from the orgId field of the permission request file
         grantorOrg = grantorOrg.substring(2);
-        int grantorId = Integer.parseInt(grantorOrg, 16);
-        X509Certificate[] grantorCerts = verifyCertChainFileId(credNode,
+        long grantorId = Long.parseLong(grantorOrg, 16);
+        List<X509Certificate> grantorCerts = verifyCertChainFileId(credNode,
                                             grantorId, jarfile);
-        if (grantorCerts.length < 2) {
-            verifyError("Unable to find grantor certs");
+        if (grantorCerts.size() < 2) {
+            verifyError("Unable to find grantor certificates");
         }
         System.out.println("####### <certchainfileid> Verification PASSED #######");  
         verifySignature(e, grantorId, jarfile, rootCert, grantorCerts);
@@ -84,8 +96,8 @@ class CredentialVerifier {
         System.exit(1);
     }
     
-    static private X509Certificate[] verifyCertChainFileId(Node credNode,
-                    int grantorId, String jarFileName) throws Exception {
+    static private List<X509Certificate> verifyCertChainFileId(Node credNode,
+                    long grantorId, String jarFileName) throws Exception {
         Node fileIdNode = getNodeWithTag(credNode, FILE_ID_TAG);  
         if(fileIdNode == null) {
             verifyError("No elements in the permission request file with tag: " +
@@ -103,65 +115,60 @@ class CredentialVerifier {
         X500Principal issuerName = new X500Principal(issuerBytes);
         BigInteger certificateSerialNumber = issuerAndSerialNumber[1].getBigInteger();
      
-        System.out.println("Looking for cert with issuerName:" + issuerName +
-                " and cert serial no:" + Integer.toHexString(
-                                            certificateSerialNumber.intValue()));
+        System.out.println("Looking for the certificate with issuerName:" +
+                issuerName + " and cert serial no:" + Integer.toHexString(
+                                       certificateSerialNumber.intValue()));
         
         // The return array below is for grantor's root cert and the
         // grantor cert.
-        X509Certificate[] returnCerts = new X509Certificate[2];
+        ArrayList<X509Certificate> returnCerts = new ArrayList<X509Certificate>();
         
         // retrieve the cert from the jarfile
         Collection certs = retrieveCerts(jarFileName);
         Iterator i = certs.iterator();
-        int found = 0;
-        while ((i.hasNext()) && (found < 2)) {
+        while ((i.hasNext()) && (returnCerts.size() < 2)) {
             X509Certificate cert = (X509Certificate) i.next();
             if (issuerName.equals(cert.getIssuerX500Principal())) {
-                
-                // check for the org id in the issuer name
-                LdapName dn = new LdapName(issuerName.toString());
-               
-                // assumes the RDN second from left is the organization
-                String org = (String) dn.getRdn(dn.size() - 2).getValue();
-                int indexOrgId = org.lastIndexOf(".");
+                String orgValue = getOrgValue(issuerName.toString());
+                int indexOfOrgId = orgValue.lastIndexOf(".");
                 String orgId = null;
-                if (indexOrgId != -1) {
-                    orgId = org.substring(indexOrgId + 1);
+                if (indexOfOrgId != -1) {
+                    orgId = orgValue.substring(indexOfOrgId + 1);
                 } else {
-                    System.out.println("Could not retrieve the orgId");
+                    System.out.println("Could not retrieve the orgId from the" +
+                                        " grantor certificate");
+                    continue;
                 }
-                int certOrgId = Integer.parseInt(orgId, 16);
+                long certOrgId = Long.parseLong(orgId, 16);
                 if (grantorId != certOrgId) {
                     System.out.println(
                     "grantor org Id with that in the certificate did not match");
+                    continue;
                 }
                 if (certificateSerialNumber.equals(cert.getSerialNumber())) {
                     System.out.println("Found the grantor's certificate:" +
                                             cert.getSubjectX500Principal());
-                    returnCerts[0] = cert;
-                    found++;
+                    returnCerts.add(cert);
                 }
             } if ((issuerName.equals(cert.getSubjectX500Principal())) &&
                       (issuerName.equals(cert.getIssuerX500Principal()))) {
                 // Self signed certificate must be the root.
-                returnCerts[1] = cert;
-                found++;
+                returnCerts.add(cert);
             }
        }
        return returnCerts;
     }
     
-    private static void verifySignature(Element e, int grantorId, String jarfile,
+    private static void verifySignature(Element e, long grantorId, String jarfile,
                                 String granteeRootCertName,
-                                X509Certificate[] grantorCerts) throws Exception {   
+                                List<X509Certificate> grantorCerts) throws Exception {   
         byte credentialUsage = 0x00;
         String geOrgId = e.getAttribute("orgid");
         geOrgId = geOrgId.substring(2);
-        int granteeOrgId = Integer.parseInt(geOrgId, 16);
+        long granteeOrgId = Long.parseLong(geOrgId, 16);
         String geAppId = e.getAttribute("appid");
         geAppId = geAppId.substring(2);
-        int granteeAppId = Short.parseShort(geAppId, 16);
+        int granteeAppId = Integer.parseInt(geAppId, 16);
         
         // compute grantee root cert digest
         FileInputStream fis = new FileInputStream(granteeRootCertName);
@@ -169,7 +176,7 @@ class CredentialVerifier {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         X509Certificate granteeRootCert = (X509Certificate) cf.generateCertificate(bis);
         byte[] granteeRootCertDigest = getCertDigest(granteeRootCert);
-        byte[] grantorRootCertDigest = getCertDigest(grantorCerts[1]);
+        byte[] grantorRootCertDigest = getCertDigest(grantorCerts.get(1));
         
         Node credNode = getNodeWithTag(e, FILE_CRED_TAG);
         NodeList credAttrs = credNode.getChildNodes();
@@ -194,10 +201,10 @@ class CredentialVerifier {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream(450);
 	DataOutputStream dos = new DataOutputStream(baos);
 	dos.writeByte(credentialUsage);
-	dos.writeInt(granteeOrgId);
+	dos.writeInt((int) granteeOrgId);
 	dos.writeShort(granteeAppId);
 	dos.write(granteeRootCertDigest, 0, granteeRootCertDigest.length);
-	dos.writeInt(grantorId);
+	dos.writeInt((int) grantorId);
 	dos.write(grantorRootCertDigest, 0, grantorRootCertDigest.length);
 	dos.write(expiryDate, 0, expiryDate.length);
         
@@ -227,7 +234,7 @@ class CredentialVerifier {
         BASE64Decoder decoder = new BASE64Decoder();
         byte[] signature = decoder.decodeBuffer(base64Data);
         Signature verifier = Signature.getInstance(SIG_ALGO);
-        verifier.initVerify(grantorCerts[0]);
+        verifier.initVerify(grantorCerts.get(0));
         verifier.update(data);
         boolean verified = verifier.verify(signature);
         if (verified)
@@ -245,5 +252,17 @@ class CredentialVerifier {
         System.out.println("# of certs in the signed Jar File:" + certs.size());
         jf.close();      
         return certs;
+    }
+    
+    private static String getOrgValue(String name) throws Exception {
+        LdapName dn = new LdapName(name);
+        List<Rdn> rdns = dn.getRdns();
+        for(Rdn rdn : rdns) {
+           String type = rdn.getType();
+           if (type.equalsIgnoreCase("O")) {
+               return (String) rdn.getValue();
+           } 
+        }
+        return null;
     }
 }

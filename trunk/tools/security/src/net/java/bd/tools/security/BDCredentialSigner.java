@@ -70,28 +70,44 @@ public class BDCredentialSigner {
     static String permReqFileName;
     static SecurityUtil.Builder sBuilder;
     static CredentialUtil.Builder cBuilder;
+    static boolean generateCred = true;
+    static boolean updateCerts = true;
     
     public static void main(String args[]) throws  Exception {   
         parseArgs(args);
-        if (debug) { 
-            System.out.println("[Debug] extracting permission request file from the jar ..");
-        }
-        extractFile(jarFileName, permReqFileName);
-        
-        // 2. Generate the credentials
-        if (debug) {
-            System.out.println("[Debug] Generating the credentials...");
-        }
         CredentialUtil cUtil = cBuilder.build();
-        cUtil.genCredentials();
-        
+        if (permReqFileName == null) {
+            printUsageAndExit("Please specify the permission request file " +
+                    " to be updated with signed credentials");
+        }
+        if (generateCred) {
+            // 1.
+            if (debug) { 
+                System.out.println("[Debug] extracting permission request file from the jar ..");
+            }
+            
+            if (jarFileName != null)
+                extractFile(jarFileName, permReqFileName);
+
+            // 2. Generate credentials
+            if (debug) {
+                System.out.println("[Debug] Generating the credentials...");
+            }
+            cUtil.genCredentials();
+        }
+        if (!updateCerts) {
+            return;
+        }
         // 3. Replace the permission request file with the one that is signed
         if (debug) {
             System.out.println("[Debug] Updating the jar file with permission" +
                     "request file that has credentials..");
         }
-        updateJar(jarFileName, permReqFileName); 
-        
+        if (jarFileName == null) {
+            printUsageAndExit("Please specify the jarfile tobe updated and signed");
+        } else
+            System.err.println("jarfilename:" + jarFileName);
+        updateJar(jarFileName, permReqFileName);
         // 4. sign the updated jar file
         if (debug) {
             System.out.println("[Debug] Signing the updated jar file...");
@@ -149,6 +165,10 @@ public class BDCredentialSigner {
                 debug = true;
                 cBuilder = cBuilder.debug();
                 sBuilder = sBuilder.debug();
+            } else if (opt.equals("-gencred")) {
+                updateCerts = false;
+            } else if (opt.equals("-updatecerts")) {
+                generateCred = false;
             } else if (opt.equals("-gastore")) {
                 if (++i == args.length) errorNeedArgument(opt);
                 cBuilder = cBuilder.grantorKeyStore(args[i]);
@@ -161,6 +181,9 @@ public class BDCredentialSigner {
             } else if (opt.equals("-gakeypass")) {
                 if (++i == args.length) errorNeedArgument(opt);
                 cBuilder = cBuilder.grantorPassword(args[i]);
+           } else if (opt.equals("-gecert")) {
+                if (++i == args.length) errorNeedArgument(opt);
+                cBuilder = cBuilder.granteeRootCert(args[i]);
             } else if (opt.equals("-gestore")) {
                  if (++i == args.length) errorNeedArgument(opt);
                  cBuilder = cBuilder.granteeKeyStore(args[i]);
@@ -178,6 +201,9 @@ public class BDCredentialSigner {
             } else if (opt.equals("-keypass")) {
                if (++i == args.length) errorNeedArgument(opt);
                sBuilder = sBuilder.contentSignerPassword(args[i]);
+            } else if (opt.equals("-gacerts")) {
+               if (++i == args.length) errorNeedArgument(opt);
+               cBuilder = cBuilder.grantorCertFile(args[i]);
             }  else if (opt.equals("-help")) {
                 printUsageAndExit("");
             } else {
@@ -198,32 +224,36 @@ public class BDCredentialSigner {
     
       private static void printUsageAndExit(String reason) {
         if (!reason.isEmpty()) {
-            System.err.println("Failed: " + reason);
+            System.err.println();
+            System.err.println("FAILED: " + reason);
         }
         System.err.println("\n-----------------------------------------------------------------------");
-        System.err.println("This tool is for generating credentials, signing the jar and updating\n" +
-                   "the signed jar with the grantor's certificates as per the BD-J specificiation.");
-        System.err.println("The permission request file should have all other fields\n" +
-                           "of persistent credentials but the <signature> and the <certchainfileid>\n" +
-                           "fields/elements. This tool generates the credentials using the keystores\n" +
-                           "of the grantor and the grantee and updates permission request file\n" +
-                           "in the given jar file with file credentials.");
-      
+        System.err.println("This tool is for generating credentials, updating and signing the jar file\n" +
+                           "with the new permission request file and grantor's certificates as per\n" +
+                           "the BD-J specificiation.");
+        System.err.println("For credential generation the input permission request file should have all\n" +
+                           "fields of persistent credentials but the <signature> and the <certchainfileid>\n" +
+                           "fields/elements. The grantor keystore is used for signing the credentials.\n" +
+                           "The grantee keystore is used for signing the final jar after it's updated with\n" +
+                           "credentials");  
         System.err.println("-----------------------------------------------------------------------\n");
 	
 	System.err.println("usage: BDCredentialSigner [options] permission-request-file jarfile\n");
         System.err.println("Valid Options:");
-	System.err.println(" -gastore filename \t:Grantor's keystore;default used:\"grantor.store\"");
+        System.err.println(" -gencred             \t:Generate credentials;Output:PRF with credentials");
+	System.err.println(" -gastore filename    \t:Grantor's keystore;default used:\"grantor.store\"");
         System.err.println("                      \t from the current working directory");
         System.err.println(" -gastorepass password\t:Grantor's keystore password");
         System.err.println(" -gaalias alias       \t:Grantor's alias");
         System.err.println(" -gakeypass password  \t:Grantor's key password;used for signing credentials");
-        System.err.println(" -gestore filename \t:Grantee's keystore;default used:\"keystore.store\"");
+        System.err.println(" -gecert              \t:File containing disc root certificate of the grantee");
+        System.err.println(" -updatecerts         \t:Update certificate chain and sign the jar");
+        System.err.println(" -gestore filename    \t:Grantee's keystore;default used:\"keystore.store\"");
         System.err.println("                      \t from the current working directory");
         System.err.println(" -gestorepass password\t:Grantee's keystore password");
-        System.err.println(" -gerootalias alias   \t:Grantee's root certificate alias");
         System.err.println(" -alias alias         \t:Alias for the signing key");
         System.err.println(" -keypass password    \t:Password for accessing the signing key");
+        System.err.println(" -gacerts             \t:File containing grantor certificate chain");
         System.err.println(" -debug               \t:Prints debug messages");
         System.err.println(" -help                \t:Prints this message");
         System.err.println();

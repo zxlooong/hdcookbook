@@ -155,6 +155,7 @@ import sun.security.util.DerInputStream;
 import sun.security.util.DerOutputStream;
 import sun.security.util.DerValue;
 import sun.security.util.ObjectIdentifier;
+import sun.security.tools.KeyTool;
 
 class CredentialUtil {
     
@@ -175,9 +176,11 @@ class CredentialUtil {
     String granteeKeyStore;
     String granteeStorePass; 
     String granteeRootAlias;
+    String grantorCertFile;
     String jarFileName;
     boolean debug;
     String permReqFile;
+    String discRootFile;
     
     List<? extends Certificate> grantorCerts;
     
@@ -194,6 +197,7 @@ class CredentialUtil {
     static final String FILE_NAME_TAG =  "filename";  
     static final String SIGNATURE_TAG =  "signature";
     static final String FILE_ID_TAG =    "certchainfileid";
+    static final String GRANTOR_CERT_FILE = "grantorchain.crt";
     
     private CredentialUtil(Builder b) {
         this.grantorKeyStore = b.grantorKeyStore;
@@ -203,9 +207,11 @@ class CredentialUtil {
         this.granteeKeyStore = b.granteeKeyStore;
         this.granteeStorePass = b.granteeStorePass; 
         this.granteeRootAlias = b.granteeRootAlias;
+        this.grantorCertFile = b.grantorCertFile;
         this.jarFileName = b.jarFileName;
         this.debug = b.debug;
         this.permReqFile = b.permReqFile;
+        this.discRootFile = b.discRootFile;
         if (debug) {
             printDebugMsg("grantor keystore:" + grantorKeyStore +
                                 ", grantor alias: " + grantorAlias +
@@ -225,8 +231,10 @@ class CredentialUtil {
         String granteeKeyStore = DEFAULT_GRANTEE_STORE;
         String granteeStorePass = DEFAULT_GRANTEE_STOREPASS; 
         String granteeRootAlias = DEFAULT_GRANTEE_ROOT_ALIAS;
+        String grantorCertFile;
         String jarFileName;
         String permReqFile;
+        String discRootFile;
         boolean debug = false;
         
         public Builder() {}
@@ -245,6 +253,10 @@ class CredentialUtil {
         public Builder grantorPassword(String password) {
             this.grantorPassword = password;
             return this;
+        }        
+        public Builder granteeRootCert(String filename) {
+            this.discRootFile = filename;
+            return this;
         }
         public Builder granteeKeyStore(String storefile) {
             this.granteeKeyStore = storefile;
@@ -256,6 +268,10 @@ class CredentialUtil {
         }
         public Builder granteeRootAlias(String alias) {
             this.granteeRootAlias = alias;
+            return this;
+        }
+        public Builder grantorCertFile(String certFile) {
+            this.grantorCertFile = certFile;
             return this;
         }
         public Builder permReqFile(String file) {
@@ -280,6 +296,7 @@ class CredentialUtil {
     }
     
     public void genCredentials() throws Exception {
+      
         // Read the permission request file
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();    
 	Document doc = factory.newDocumentBuilder().parse(new File(permReqFile));
@@ -328,6 +345,9 @@ class CredentialUtil {
         Transformer transformer = tfactory.newTransformer();
         transformer.transform(domSource, fileResult);
         removeEntityReference(permReqFile);
+        
+        // export the grantor's certificate chain
+        exportGrantorCert();
     }
     
     static Node getNodeWithTag(Node node, String tag) throws Exception {
@@ -371,6 +391,14 @@ class CredentialUtil {
         return out.toString("US-ASCII");
     }
     
+    void exportGrantorCert() throws Exception {
+        String[] exportRootCertificateArgs = {
+		"-export", "-alias", grantorAlias, "-keypass", grantorPassword, 
+		"-keystore", grantorKeyStore, "-storepass", grantorStorePass,
+		"-v", "-file", GRANTOR_CERT_FILE};
+	KeyTool.main(exportRootCertificateArgs);
+    }
+    
     // Lets build a certpath to ensure that the certificate chain 
     // forms a trusted certificate chain to the root.
     private List<? extends Certificate> getCertPath(Certificate[] certs) 
@@ -383,16 +411,24 @@ class CredentialUtil {
 
     private Certificate[] getCerts(String keystore, String storepass, String alias) 
 		throws Exception {
+        File f = new File(keystore);
+        if (!f.exists()) {
+            if (debug) {
+                System.out.println("The keystore file:" + keystore +
+                            " does not exists");
+            }
+            return null;
+        }
 	KeyStore ks = KeyStore.getInstance("JKS");
-
+        
     	// load the contents of the KeyStore
-    	ks.load(new FileInputStream(keystore), storepass.toCharArray());
+    	ks.load(new FileInputStream(f), storepass.toCharArray());
 
 	// fetch certificate chain stored with the given alias
     	return ks.getCertificateChain(alias);
     }
     
-     private PrivateKey getGrantorKey () throws Exception {
+    private PrivateKey getGrantorKey () throws Exception {
 	KeyStore ks = KeyStore.getInstance("JKS");
     	ks.load(new FileInputStream(grantorKeyStore), grantorStorePass.toCharArray());
         PrivateKey grantorKey = (PrivateKey) ks.getKey(grantorAlias,
@@ -400,6 +436,14 @@ class CredentialUtil {
         return grantorKey;
     }
 
+    private Certificate[] readCertsFromFile(String fileName) 
+            throws Exception {
+        FileInputStream fis = new FileInputStream(fileName);
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        Collection<? extends Certificate> c = cf.generateCertificates(fis);
+        return c.toArray(new Certificate[0]);
+    }        
+    
     private String genCredSignature(byte credentialUsage,
                                     String granteeOrgIdStr,
                                     String granteeAppIdStr,
@@ -415,17 +459,20 @@ class CredentialUtil {
                                 ", file permissions:" + fileList);
         }
         // get the grantee org_id, 32 bits, assuming the grantonIdStr begins with "0x"
-	int granteeOrgId = Integer.parseInt(granteeOrgIdStr.substring(2), 16);
+	long granteeOrgId = Long.parseLong(granteeOrgIdStr.substring(2), 16);
 
 	// get the grantee app_id 16 bits
-	short granteeAppId = (short) Integer.parseInt(granteeAppIdStr.substring(2), 16);
+	short granteeAppId = (short) Integer.parseInt(
+                                        granteeAppIdStr.substring(2), 16);
 
 	// get grantee certificate digest.
-        KeyStore gs = KeyStore.getInstance("JKS");
-        gs.load(new FileInputStream(granteeKeyStore),
-                	granteeStorePass.toCharArray());
-        Certificate[] granteeCerts = gs.getCertificateChain(granteeRootAlias);
-	
+        Certificate[] granteeCerts;
+        if (discRootFile != null) {
+            granteeCerts = readCertsFromFile(discRootFile);
+        } else {
+            granteeCerts = getCerts(granteeKeyStore,
+                                    granteeStorePass, granteeRootAlias);
+        }
 	byte[] granteeCertDigest = getCertDigest(granteeCerts[0]);
         HexDumpEncoder hexDump = null;
         if (debug) {
@@ -433,7 +480,7 @@ class CredentialUtil {
             hexDump = new HexDumpEncoder();
             System.out.println(hexDump.encodeBuffer(granteeCertDigest));
         }
-	int grantorOrgId = Integer.parseInt(grantorOrgIdStr.substring(2), 16);
+	long grantorOrgId = Long.parseLong(grantorOrgIdStr.substring(2), 16);
 	byte[] grantorRootCertDigest = getCertDigest(grantorCerts.
                                         get(grantorCerts.size() - 1));
         if (debug) {
@@ -446,10 +493,10 @@ class CredentialUtil {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream(450);
 	DataOutputStream dos = new DataOutputStream(baos);
 	dos.writeByte(credentialUsage);
-	dos.writeInt(granteeOrgId);
+	dos.writeInt((int) granteeOrgId);
 	dos.writeShort(granteeAppId);
 	dos.write(granteeCertDigest, 0, granteeCertDigest.length);
-	dos.writeInt(grantorOrgId);
+	dos.writeInt((int) grantorOrgId);
 	dos.write(grantorRootCertDigest, 0, grantorRootCertDigest.length);
 	dos.write(expiryDate, 0, expiryDate.length);
         
@@ -529,8 +576,12 @@ class CredentialUtil {
 	jf.close();
 	
 	X509Certificate[] certs = (X509Certificate[]) signBlockFile.getCertificates();
-	Certificate[] grantorCerts = getCerts(grantorKeyStore,
-					grantorStorePass, grantorAlias);
+        Certificate[] grantorCerts;
+        if (grantorCertFile != null) {
+            grantorCerts = readCertsFromFile(grantorCertFile);
+        } else {
+            grantorCerts = getCerts(grantorKeyStore, grantorStorePass, grantorAlias);
+        }
 	X509Certificate[] addedCerts =
 			new X509Certificate[certs.length + grantorCerts.length];	
 	int len = 0;
@@ -609,5 +660,5 @@ class CredentialUtil {
         FileWriter fw = new FileWriter(fileName);
         fw.write(caw.toCharArray());
         fw.close();
-    }
+    }     
 }
