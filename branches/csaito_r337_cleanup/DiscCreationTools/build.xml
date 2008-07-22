@@ -4,11 +4,9 @@
 
         <target name="all" depends="bdtools-hdcookbook-example">  
           <ant dir="cpistrip"/>  
-          <ant dir="logger"/>
           <ant dir="soundgen"/>
           <ant dir="soundsplit"/> 
-          <ant dir="library/bumf"/>         
-          <ant dir="bridgehead"/>   
+          <ant dir="xmldata/bumf"/>         
         </target>        
         
         <target name="bdtools-hdcookbook-example">
