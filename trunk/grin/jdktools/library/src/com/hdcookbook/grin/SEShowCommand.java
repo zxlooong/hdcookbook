@@ -110,7 +110,7 @@ public class SEShowCommand extends Command implements SENode {
     }
 
     /**
-     * Sets the java source of the body of the method for the GrinView version.  
+     * Sets the java source of the body of the method for the GrinView version.
      * 
      * @param methodBody
      * @throws java.io.IOException 
@@ -186,8 +186,8 @@ public class SEShowCommand extends Command implements SENode {
     }
 
     public void writeInstanceData(GrinDataOutputStream out) 
-            throws IOException {
-        
+            throws IOException 
+    {
         out.writeSuperClassData(this);
 	out.writeInt(getCommandNumber());
 	out.writeCommands(getSubCommands());

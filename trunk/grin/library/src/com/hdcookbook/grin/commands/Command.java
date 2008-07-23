@@ -82,15 +82,21 @@ public abstract class Command {
     public abstract void execute();
 
     /**
-     * Should the commands that follow this one be deferred unti after
-     * the frame pump has caught up?  If the command is time-consuming,
-     * like one that starts video presentation, then it could be a good
-     * idea to return true here.  This should be pretty rare.
+     * This method is obsolete, and should not be overridden by any
+     * subclass.  It has been kept and marked final so that a compilation
+     * error will be provoked if any subclass overrides it.
+     * <p>
+     * This method used to be defined so that returning true would have
+     * the effect of a sync_display command.  Now that there's a sync_display
+     * command, there's no need (see GrinXHelper.SYNC_DISPLAY).  Additionally,
+     * any command that wants to defer command execution until the display
+     * is caught up can call Show.deferNextCommands() in the body of the
+     * command's execute method.
      *
-     * @return true if the commands after this one should be deferred
-     *              until after the animation frame pump has caught up.
+     * @deprecated
+     * @see com.hdcookbook.grin.Show.deferNextCommands()
      **/
-    public boolean deferNextCommands() {
+    final public boolean deferNextCommands() {
 	return false;
     }
 

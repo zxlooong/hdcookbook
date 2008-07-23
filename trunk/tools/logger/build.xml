@@ -1,5 +1,6 @@
 <project name="logger" default="dist" basedir=".">
   
+  <property file="../../user.vars.properties"/>	
   <property file="../../vars.properties"/>	
   <!-- set global properties for this build -->
   <property name="src" location="src"/>

@@ -69,6 +69,7 @@ import com.hdcookbook.grin.commands.SEActivatePartCommand;
 import com.hdcookbook.grin.commands.SEResetFeatureCommand;
 import com.hdcookbook.grin.commands.SESegmentDoneCommand;
 import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
+import com.hdcookbook.grin.commands.SESyncDisplayCommand;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.InterpolatedModel;
@@ -1770,6 +1771,8 @@ public class ShowParser {
             return parseVisualRC();
         } else if ("reset_feature".equals(tok)) {
             return parseResetFeature();
+	} else if ("sync_display".equals(tok)) {
+	    return parseSyncDisplay();
         } else if ("java_command".equals(tok)) {
             return parseJavaCommand();
         } else if (extParser == null || tok == null || tok.indexOf(':') < 0) {
@@ -1952,6 +1955,12 @@ public class ShowParser {
 	deferred[0].addElement(fw);
 	return cmd;
     }
+
+    private Command parseSyncDisplay() throws IOException {
+	parseExpected(";");
+	return new SESyncDisplayCommand(show);
+    }
+
     
     private Command parseJavaCommand() throws IOException {
         SEShowCommands cmds = show.getShowCommands();

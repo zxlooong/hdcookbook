@@ -266,10 +266,6 @@ public abstract class Feature implements SetupClient {
             };
         }
 	show.runCommand(featureSetupCommand);
-	show.runPendingCommands();
-	    // It's safe to run the pending commands, because we're
-	    // in the setup thread...  If a frame is being painted,
-	    // we can wait.
     }
 
     /**

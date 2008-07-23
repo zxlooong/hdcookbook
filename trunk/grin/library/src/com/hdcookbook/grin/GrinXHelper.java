@@ -56,20 +56,58 @@ package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.util.Debug;
 import java.io.IOException;
 
 /**
- * Superclass for an automatically generated class that contains
- * methods that are defined as inline java_command objects in a Show file.
- * A show that uses these commands will have a single subclass generated
- * for the show, and an instance of that class will be generated for each
- * occurance of a command in the show.  In the show text file, this is done
- * with a "java_command".  To see how this gets generated, see
+ * This class has three distinct functions.  It's mostly a helper
+ * class that acts as a superclass for code that gets generated
+ * in a GRIN show file, for the java_command structures and for
+ * instantiating GRIN extensions.  This class is also used directly
+ * for some built-in GRIN commands.  Doing this kind of functional
+ * overloading in one class definition is admittedly not very OO,
+ * but experimental data shows that classloading is a moderately
+ * expensive operation, so we do this overloading to optimize
+ * xlet start-up time.
+ * <p>
+ * This class has three disctinct functions.  To illustrate, assume a
+ * show that defines a class called MenuShowCommands as the helper
+ * classname in the show file.  The functions of GrinXHelper are:
+ * <ul>
+ *     <li>There's one instance of MenuShowCommands that's not a 
+ *         command at all - it's really a factory object that's used 
+ *	   to call the instantiateXXX() method
+ *
+ *    <li>For each java_command in the show, there's an instance 
+ *	  of MenuShowCommands that's set up with the correct 
+ *	  commandNumber.  MenuShowCommands overrides execute(), 
+ *	  so the switch statement in the override determines
+ *	  the meaning of commandNumber, which is automatically generated
+ *	  by the show compiler.
+ *
+ *    <li>For each built-in GRIN command that uses GrinXHelper (that is, 
+ *	  each sync_display or segment_done command) becomes a direct 
+ *	  instance of GrinXHelper.  In this case, execute() isn't 
+ *	  overriden, so we get the built-in switch statement.
+ * </ul>
+ * <p>
+ * For the built-in GRIN commands, the direct instances of GrinXHelper
+ * get instantiated "automatically" by the GRIN binary reader.  The
+ * class GrinXHelper is registered as a built-in class, so that part 
+ * "just works" -- it's represented by the integer constant 
+ * GRINXHELPER_CMD_IDENTIFIER.  For the MenuShowCommands instances, 
+ * they're represented by the (interned) string that hold the 
+ * fully-qualified classname of MenuShowCommands, which the binary 
+ * reader feeds (once) into Class.forName() so that it can call
+ * newInstance().
+ * <p>
+ * To see how the java_command commands get compiled into the show's
+ * subclass of GrinXHelper, see
  * <code>com.hdcookbook.grin.SEShowCommands</code>
  *
  * <h2>Accessing Blu-ray Player Registers</h2>
  *
- * One thing you might want to do in a command is access a player register.
+ * One thing you might want to do in a java_command is access a player register.
  * That's easy to do, and there's even support in GrinView to emulate the
  * values of player registers, so you can do some testing of the control
  * logic of your show on a PC.  In a show file, you can do this by including
@@ -93,10 +131,20 @@ import java.io.IOException;
  *
  *  @author     Bill Foote (http://jovial.com)
  **/
-public abstract class GrinXHelper extends Command implements Node {
+public class GrinXHelper extends Command implements Node {
     
     protected int commandNumber;
     protected Command[] subCommands;
+
+    /**
+     * The commandNumber for a sync_display command
+     **/
+    protected final static int SYNC_DISPLAY = 0;
+
+    /**
+     * The commandNumber for a segment_done command
+     **/
+    protected final static int SEGMENT_DONE = 1;
     
     public GrinXHelper(Show show) {
         super(show);
@@ -123,13 +171,48 @@ public abstract class GrinXHelper extends Command implements Node {
     }
     
     public void readInstanceData(GrinDataInputStream in, int length) 
-            throws IOException {   
-                
+            throws IOException 
+    {
         in.readSuperClassData(this);
 	this.commandNumber = in.readInt();
 	this.subCommands = in.readCommands();
     }
-    
-    public abstract Node getInstanceOf(Show show, int id)
-            throws IOException;
+
+    /**
+     * Execute the command.  This method must be overridden in the show's
+     * subclass of GrinXHelper, and that override must not call this
+     * method.  The implementation of this method in GrinXHelper executes
+     * some built-in GRIN commands.
+     **/
+
+    public void execute() {
+	switch (commandNumber) {
+	    case SYNC_DISPLAY: {
+		show.deferNextCommands();
+		break;
+	    }
+	    case SEGMENT_DONE: {
+		// This command only makes sense inside a show, so
+		// we are being called within Show.nextFrame(),
+		// with the show lock held.  That means we don't have to
+		// worry about a race condition with the show moving to
+		// a different segment before this gets executed.
+		show.doSegmentDone();
+		break;
+	    }
+	    default: {
+		if (Debug.ASSERT) {
+		    Debug.assertFail();
+		}
+	    }
+	}
+    }
+   
+    /**
+     * Instantiate an extension class.  This method must be overridden
+     * by the show's sublcass of GrinXHelper.
+     **/
+    public Node getInstanceOf(Show show, int id) throws IOException {
+	throw new IOException();
+    }
 }

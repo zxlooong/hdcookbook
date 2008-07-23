@@ -1824,6 +1824,7 @@ segment S:StartBonusVideo
     }
     next {
 	activate_segment S:VideoBonusPlaying ;
+	sync_display ;
 	java_command [[ XLET_ONLY_[[ 
 	    MenuDiscNavigator nav = getMenuDirector().xlet.navigator;
 	    nav.startVideoAt(nav.bonusVideoStartPL);
@@ -1917,6 +1918,7 @@ rc_handler visual H:VideoMenu
 	activate { 
 	    play	play.activated		{ 
 			    activate_segment S:VideoMenuRollBack ;
+			    sync_display ;
 			    BOOK:PlayVideo movie ;
 			    java_command [[ playActivateSound(); ]]
 			}

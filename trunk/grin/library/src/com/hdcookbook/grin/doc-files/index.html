@@ -322,11 +322,11 @@ Here's BNF describing the syntax of a show file:
 
     command ::= activate_segment | activate_part | segment_done 
     		    | deprecated_invoke_assembly_cell | set_visual_rc_state
-		    | reset_feature
+		    | reset_feature | sync_display
 		    | other_command | java_command
 
     activate_segment ::= "activate_segment" segment_name [ "&lt;push&gt;" ] ";"
-    			 | "activate_segment" "&lt;pop&gt;" ";"
+    			 | "activate_segment" "&lt;pop&gt;"  ";"
 
     activate_part ::= "activate_part" assembly_name part_name ";"
 
@@ -343,6 +343,8 @@ Here's BNF describing the syntax of a show file:
                 [ "run_commands" ] ";"
 
     reset_feature ::= "reset_feature" feature_name ";"
+
+    sync_display ::= "sync_display" ";"
 
     other_command ::= namespace:type_name
     				(syntax as determined by director) ";"

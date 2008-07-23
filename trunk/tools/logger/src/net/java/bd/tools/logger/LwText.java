@@ -82,6 +82,12 @@ public class LwText extends Component {
         this.front = front;
     }
 
+    public LwText(String[] text, Color back, Color front) {
+        this(text);
+        this.back = back;
+        this.front = front;
+    }
+
     public void paint(Graphics g) {
         maxLineLength = 0;
         g.setColor(back);

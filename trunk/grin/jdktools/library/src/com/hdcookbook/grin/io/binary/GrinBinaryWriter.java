@@ -73,7 +73,6 @@ import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.ResetFeatureCommand;
-import com.hdcookbook.grin.commands.SegmentDoneCommand;
 import com.hdcookbook.grin.commands.SetVisualRCStateCommand;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.Box;
@@ -438,7 +437,7 @@ public class GrinBinaryWriter {
         registerBuiltInClass(ACTIVATEPART_CMD_IDENTIFIER, ActivatePartCommand.class.getName());
         registerBuiltInClass(ACTIVATESEGMENT_CMD_IDENTIFIER, ActivateSegmentCommand.class.getName());
         registerBuiltInClass(RESETFEATURE_CMD_IDENTIFIER, ResetFeatureCommand.class.getName());
-        registerBuiltInClass(SEGMENTDONE_CMD_IDENTIFIER, SegmentDoneCommand.class.getName());
+        registerBuiltInClass(GRINXHELPER_CMD_IDENTIFIER, GrinXHelper.class.getName());
         registerBuiltInClass(SETVISUALRCSTATE_CMD_IDENTIFIER, SetVisualRCStateCommand.class.getName());
         registerBuiltInClass(COMMAND_RCHANDLER_IDENTIFIER, CommandRCHandler.class.getName());
         registerBuiltInClass(VISUAL_RCHANDLER_IDENTIFIER, VisualRCHandler.class.getName());

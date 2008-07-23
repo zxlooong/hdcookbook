@@ -61,6 +61,7 @@ import java.awt.Rectangle;
 import java.util.Hashtable;
 
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.GrinXHelper;
 import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Show;
@@ -68,7 +69,6 @@ import com.hdcookbook.grin.commands.ActivatePartCommand;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.ResetFeatureCommand;
-import com.hdcookbook.grin.commands.SegmentDoneCommand;
 import com.hdcookbook.grin.commands.SetVisualRCStateCommand;
 import com.hdcookbook.grin.GrinXHelper;
 import com.hdcookbook.grin.features.Assembly;
@@ -406,8 +406,8 @@ public class GrinBinaryReader {
                 case Constants.RESETFEATURE_CMD_IDENTIFIER:
                     node = new ResetFeatureCommand(show);
                     break;
-                case Constants.SEGMENTDONE_CMD_IDENTIFIER:
-                    node = new SegmentDoneCommand(show);
+                case Constants.GRINXHELPER_CMD_IDENTIFIER:
+                    node = new GrinXHelper(show);
                     break;
                 case Constants.SETVISUALRCSTATE_CMD_IDENTIFIER:
                     node = new SetVisualRCStateCommand(show);
@@ -416,7 +416,7 @@ public class GrinBinaryReader {
                     node = null;
                 default:  // extensions  
                     if (showCommands == null) {
-                        throw new IOException("Missing GrinXHelper for instantiating extensions");
+                        throw new IOException("Missing GrinXHelper subclass for instantiating extensions");
                     }
                     node = showCommands.getInstanceOf(show, identifier);
                     break;

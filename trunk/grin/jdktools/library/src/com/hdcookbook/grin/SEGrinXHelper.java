@@ -51,23 +51,37 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-package com.hdcookbook.grin.commands;
+package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
-import com.hdcookbook.grin.SEGrinXHelper;
+import com.hdcookbook.grin.GrinXHelper;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
-public class SESegmentDoneCommand extends SEGrinXHelper {
+/**
+ * This is an abstract superclass of the built-in GRIN commands that
+ * are implemented at runtime as direct instances of GrinXHelper.  Note
+ * that the java_command structure produces commands that are
+ * instances of a subclass of GrinXHelper, but on the SE side these
+ * are represented using ShowCommand.
+ **/
+public abstract class SEGrinXHelper extends GrinXHelper implements SENode {
 
-    public SESegmentDoneCommand(SEShow show) {
+    public SEGrinXHelper(SEShow show) {
         super(show);
-	setCommandNumber(SEGMENT_DONE);
     }
     
-    public void accept(SEShowVisitor visitor) {
-        visitor.visitSegmentDoneCommand(this);
+    public void writeInstanceData(GrinDataOutputStream out) 
+            throws IOException 
+    {
+        out.writeSuperClassData(this);
+	out.writeInt(commandNumber);
+	out.writeCommands(subCommands);
+    }
+
+    public String getRuntimeClassName() {
+        return GrinXHelper.class.getName();
     }
 }

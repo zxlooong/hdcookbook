@@ -406,15 +406,29 @@ public class Show implements AnimationClient {
 	}
     }
 
-    synchronized void runPendingCommands() {
+    private synchronized void runPendingCommands() {
 	while (!deferringPendingCommands && !pendingCommands.isEmpty()) {
 	    Command c = (Command) pendingCommands.remove();
 	    if (c != null) {
-		c.execute();
-		deferringPendingCommands 
-		    = deferringPendingCommands || c.deferNextCommands();
+		c.execute();	// Can call deferNextCommands()
 	    }
 	}
+    }
+
+    /**
+     * This method, which should ONLY be called from the execute() method
+     * of a command, suspends processing of further queued commands until
+     * the display of the show has caught up with the screen.  This is done
+     * from the sync_display command, but can be done from any other command
+     * too.  It causes an effect like Toolkit.sync() or the old X-Windows
+     * XSync() command, whereby the screen is guaranteed to be up-to-date
+     * before further commands are processed.
+     * <p>
+     * Doing this can be useful, for example, just before an operation that
+     * is time-consuming and CPU-bound on some players, like JMF selection.
+     **/
+    public synchronized void deferNextCommands() {
+	deferringPendingCommands = true;
     }
 
     /**
@@ -494,8 +508,9 @@ public class Show implements AnimationClient {
 	if (currentSegment != null) {
 	    currentSegment.paintFrame(gr);
 	}
-	deferringPendingCommands = false; 	
-	    // If we've painted a frame, we're definitely caught up.
+	if (Debug.ASSERT && deferringPendingCommands) {
+	    Debug.assertFail();
+	}
     }
 
     /**
