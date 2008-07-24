@@ -268,7 +268,7 @@ public class STNTable {
         return pipPGTextSTStreamEntriesPlus;
     }
 
-    public void setPipPGTextSTStreamEntriesPlus(int pipPGTextSTStreamEntriesPlus) {
+    public void setPipPGTextSTStreamEntriesPlus(Integer pipPGTextSTStreamEntriesPlus) {
         this.pipPGTextSTStreamEntriesPlus = pipPGTextSTStreamEntriesPlus;
     }
 }
