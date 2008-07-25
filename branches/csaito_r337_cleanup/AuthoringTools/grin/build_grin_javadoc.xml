@@ -23,17 +23,16 @@ Clara, CA 95054 or visit www.sun.com if you need additional
 information or have any questions.
 -->
 
-<project name="Generates GRIN javadoc" basedir="../.." default="generate-grin-javadoc">
+<project name="Generates GRIN javadoc" basedir="." default="generate-grin-javadoc">
 
-<property file="${os.name}.user.vars.properties"/>
-<property file="user.vars.properties"/>	
-<property file="vars.properties"/>	
+<property file="../../user.vars.properties"/>	
+<property file="../../vars.properties"/>	
 
 <property name="HDC_BUILD_DIR" value="build"/>
 <property name="GRIN_JAVADOC_DEST" value="${HDC_BUILD_DIR}/grin_javadoc"/>
 <property name="GRIN_JAVADOC_JDK_DEST" value="${GRIN_JAVADOC_DEST}/javase"/>
 <property name="GRIN_JAVADOC_ME_DEST" value="${GRIN_JAVADOC_DEST}/javame"/>
-<property name="GRIN_JAVADOC_PUBLIC" value="../www/javadocs/grin"/>
+<property name="GRIN_JAVADOC_PUBLIC" value="../../www/javadocs/grin"/>
 
 <target name="generate-grin-javadoc">
 	<mkdir dir="${GRIN_JAVADOC_JDK_DEST}"/>
@@ -55,7 +54,7 @@ information or have any questions.
 	</javadoc>        
 </target>
 
-<target name="deploy" depends="generate-grin-javadoc">
+<target name="javadoc-deploy" depends="generate-grin-javadoc">
 	<copy todir="${GRIN_JAVADOC_PUBLIC}">
             <fileset dir="${GRIN_JAVADOC_DEST}"/>
 	</copy>

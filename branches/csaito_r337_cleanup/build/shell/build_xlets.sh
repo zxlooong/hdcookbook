@@ -1,5 +1,5 @@
 #!/bin/sh
 
-cd ../../..
+cd ../../
 ant clean
-ant
+ant 

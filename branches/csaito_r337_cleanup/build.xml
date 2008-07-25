@@ -1,62 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="hdcookbook" default="main" basedir=".">
-    <property file="${os.name}.user.vars.properties"/>
+
+<project name="hdcookbook" default="hdcookbook-discimage" basedir=".">
     <property file="user.vars.properties"/>
     <property file="vars.properties"/>	
 
   <!-- This will create a hdcookbook disc image and the tools required for it -->
-    <target name="main" depends="check-stubs, bd-tools-hdcookbook">
+    <target name="hdcookbook-discimage" depends="check-stubs, tools">
       <!-- Build Grin's compile-time (javase-based) library and tools,
        as well as the hdcookbook sample disc image -->
-        <ant dir="grin" antfile="buildscripts/ant/build_hdcookbook_xlets.xml"/>
+        <ant dir="xlets/hdcookbook_discimage"/>
     </target>
+    
     <target name="grin">
       <!-- Build GRIN library and tools, including the mosaic builder -->
-        <ant dir="grin" antfile="buildscripts/ant/build_library.xml" />
-        <ant dir="grin" antfile="buildscripts/ant/build_jdktools.xml" />
+        <ant dir="AuthoringTools/grin"/>
     </target>
-  
-  <!-- Build just the tools needed for making a BD disc image -->
-    <target name="bd-tools-hdcookbook">
-        <ant dir="tools" target="bdtools-hdcookbook-example"/>
+    
+  <!-- Build all the tools under the AuthoringTools and the DiscCreationTools -->
+    <target name="tools" depends="check-stubs">
+        <ant dir="DiscCreationTools"/>
+        <ant dir="AuthoringTools"/>
     </target>
-  
-  <!-- Build all the tools under the tools dir -->
-    <target name="bd-tools-all">
-        <ant dir="tools"/>
+
+    <target name="xlets" depends="tools"
+            description="build all xlets">
+        <ant dir="xlets"/>
     </target>
   
   <!-- A target for doing everything, except for putting javadoc to the www directory-->
-    <target name="all" depends="main, javadoc, bd-tools-all">
-        <!-- Runs autotest -->
-        <ant dir="grin" antfile="buildscripts/ant/run_jdktools.xml" target="autotest-grinview"/>
-        <ant dir="grin/samples" target="autotest-grinview"/>
-        
+    <target name="all" depends="xlets, javadoc">
         <!-- Creates a binary bundle -->
         <ant antfile="dist.xml"/>
     </target>
   
-   <!-- Build a GRIN javadoc -->
+    <!-- Build a GRIN javadoc -->
     <target name="javadoc">
-        <ant dir="grin" antfile="buildscripts/ant/build_grin_javadoc.xml"/>
+        <ant dir="AuthoringTools/grin" target="javadoc"/>
     </target>
-   
-   <!-- Build a GRIN javadoc and update the trunk/www directory with this javadoc -->
-    <target name="javadoc-deploy">
-        <ant dir="grin" antfile="buildscripts/ant/build_grin_javadoc.xml" target="deploy"/>
+
+    <!-- Deploy GRIN javadoc to the www area -->
+    <target name="javadoc-deploy" depends="javadoc">
+        <ant dir="AuthoringTools/grin" target="javadoc-deploy"/>
     </target>
-   
-  <!-- Build GRIN sample xlets -->
-    <target name="samples" depends="main">
-        <ant dir="grin/samples"/>
-    </target>
+
+
   
     <target name="clean">
-        <ant dir="tools" target="clean"/>
-        <ant dir="grin" antfile="buildscripts/ant/build_hdcookbook_xlets.xml" target="clean"/>
-        <ant dir="grin" antfile="buildscripts/ant/build_grin_javadoc.xml" target="clean"/>
-        <ant dir="grin/samples" target="clean"/>
-        <ant antfile="dist.xml" target="clean"/>
+        <ant dir="DiscCreationTools" target="clean"/>
+        <ant dir="AuthoringTools"    target="clean"/>
+        <ant dir="xlets"             target="clean"/>
+        <ant antfile="dist.xml"      target="clean"/>
+        <delete dir="bin"/>
     </target>
     
     <target name="check-stubs">

@@ -19,7 +19,7 @@
     <javac srcdir="${soundgen-src}" destdir="${soundgen-build}"/>
   </target>
 
-  <target name="soundgen-dist" depends="soundgen-compile"
+  <target name="soundgen-jar" depends="soundgen-compile"
         description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${soundgen-dist}"/>
@@ -29,6 +29,11 @@
         </manifest>
     </jar>
   </target>
+  
+  <target name="soundgen-dist" depends="soundgen-jar" if="hdc.distribution.dir"
+        description="copy the jar to the distribution dir">
+        <copy todir="${hdc.distribution.dir}" file="${soundgen-dist}/soundgen.jar"/>
+  </target>   
 
   <target name="soundgen-clean"
         description="clean up" >

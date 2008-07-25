@@ -1,4 +1,4 @@
-<project name="playlist" default="jar" basedir=".">
+<project name="playlist" default="dist" basedir=".">
 
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
@@ -39,7 +39,10 @@
           tofile="playlist.xsd"/>
           
   </target>
-  
+     <target name="dist" depends="jar" if="hdc.distribution.dir"
+        description="copy the jar to the distribution dir">
+        <copy todir="${hdc.distribution.dir}" file="${dist}/playlist.jar"/>
+    </target>   
   <target name="clean">
     <delete dir="${build}"/>
     <delete dir="${dist}"/>

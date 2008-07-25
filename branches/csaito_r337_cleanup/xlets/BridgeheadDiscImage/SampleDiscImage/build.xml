@@ -7,7 +7,6 @@
     disc structure to a zip file that BridgeheadDiscImage can upload.  -->
     
     <!-- Property Definitions -->
-    <property file="../../../${os}.user.vars.properties"/>
     <property file="../../../user.vars.properties"/>
     <property file="../../../vars.properties"/>
     <property file="build.properties"/>	

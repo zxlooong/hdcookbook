@@ -25,10 +25,8 @@ information or have any questions.
 
 <project name="Preset ant tasks">
     
-    <property file="../${os.name}.user.vars.properties"/>
-    <property file="../user.vars.properties"/>	
-    <property file="../vars.properties"/>	
-    <property file="buildscripts/ant/grin.properties"/>
+    <property file="../../user.vars.properties"/>	
+    <property file="../../vars.properties"/>	
      
     <target name="init-preset-defs" depends="set-javac, set-java">
         <tstamp/>
@@ -47,10 +45,11 @@ information or have any questions.
         
         <!-- all the classes destined to be on the blu-ray disc
              are compiled against jdk 1.3 -->
+             
+                   <!-- bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}" --> 
         <presetdef name="xlets.javac">
             <javac sourcepath=""
                    source="1.3" target="1.3"
-                   bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"  
                    debug="on" deprecation="on"
                           debuglevel="${JAVAC_DEBUG_OPTIONS}"> 
                    </javac>   

@@ -3,13 +3,9 @@
 <project name="run-grin-menu" default="all" basedir=".">
     
   <!-- This project runs MenuXlet's show text file on GrinView, our grin runtime tool on jdk -->
-
-  <property file="${os.name}.user.vars.properties"/>
-  <property file="user.vars.properties"/>	
-  <property file="vars.properties"/>	
   
   <target name="all">
-        <ant dir="grin" antfile="buildscripts/ant/run_jdktools.xml" target="run-grinview-menu"/>
+       <ant antfile="run_jdktools.xml" target="run-grinview-menu"/>
   </target>
 
 </project> 

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="HelloTVXlet" default="deploy" basedir=".">
+<project name="HelloTVXlet" default="bundle" basedir=".">
     
     <!-- Property Definitions -->
 
-    <property file="build.properties"/>	
-    
+    <property file="../../../../user.vars.properties"/>
+    <property file="../../../../vars.properties"/>
+    <xmlproperty file="properties.xml" semanticAttributes="true" keeproot="false"/>
+    <echo message="${bdjo.jar}"/>
     <!-- xlet source dir, build dir, and a distribution dir for a disc image 
       -->
     <property name="testxlet.src.dir"       value="src/VFSUpdateXlet"/>
@@ -30,12 +32,44 @@
     <!-- WinDVD executable default location -->
     <property name="WinDVD"         value="c:/Program Files/InterVideo/DVD8/WinDVD.exe"/>
     
-    <target name="init">
+    <target name="init" depends="check-tools">
         <tstamp/>
         <mkdir dir="${testxlet.build.dir}"/>
         <mkdir dir="${downloadxlet.build.dir}"/>
         <mkdir dir="${dist.dir}/DiscImage"/>
         <mkdir dir="${upload.dir}"/>
+    </target>
+    
+    <target name="check-tools">
+        <available file="${bdj.classes}" type="file"
+                   property="bdjstubs.ok"/>
+                   
+        <fail unless="bdjstubs.ok"> 
+              .
+        Could not find bd-j platform classes at ${bdj.classes}.
+        Please change the value of the "HDC_BDJ_PLATFORM_CLASSES" property 
+        in the ${basedir}/../../../../vars.properties file, or the value of the
+        "bdj.classes" in the ${basedir}/properties.xml file.
+                 
+        Don't be alarmed, this is a configuration error.
+        The HDCookbook source repository does not include BD-J platform classes
+        needed for compiling applications against.  These classes need to be
+        provided by you.
+        
+        </fail> 
+
+        <available file="${logger.jar}" type="file" property="logger.ok"/>
+                   
+        <fail unless="logger.ok"> 
+              .
+        Could not find the logger jar file at ${logger.jar}.
+        Please build all the tools under the "hdcookbook/trunk/DiscCreationTools" 
+        and "hdcookbook/trunk/AuthoringTools" dirs before building this xlet, 
+        by calling "ant tools" in the toplevel directory,
+        or modify ${basedir}/properties.xml so that various jar properties 
+        points to a pre-built hdcookbook tool jars.
+        
+        </fail>        
     </target>
     
     <target name="clean">
@@ -101,7 +135,6 @@
              basedir="${testxlet.build.dir}"/>
         <jar jarfile="${downloadxlet.build.dir}/../${xlet.jar}"
              basedir="${downloadxlet.build.dir}"/>
- 
         <copy tofile = "${build.dir}/${logger-name}.jar" 
               file="${logger.jar}"/>
     </target>

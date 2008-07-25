@@ -23,13 +23,20 @@ Clara, CA 95054 or visit www.sun.com if you need additional
 information or have any questions.
 -->
 
-<project name="Build GRIN libraries and tools" basedir="../.." default="all">
+<project name="Build GRIN libraries and tools" basedir="." default="jdktools-all">
    
     <import file="build_library.xml"/>
+   
+    <property name="JDKTOOLS_BUILD_DIR" location="${HDC_BUILD_DIR}/jdktools"/>
+    <property name="JDK_LIBRARY_DEST"   location="${JDKTOOLS_BUILD_DIR}/library"/>
+    <property name="GRIN_VIEWER_DEST"   location="${JDKTOOLS_BUILD_DIR}/grin_viewer"/>
+    <property name="GRIN_COMPILER_DEST" location="${JDKTOOLS_BUILD_DIR}/compiler"/>
+    <property name="GRIN_VIEWER_JAR"    value="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+    <property name="GRIN_COMPILER_JAR"  value="${GRIN_COMPILER_DEST}/grincompiler.jar"/>
     
-    <target name="all" depends="compile-grin-compiler, compile-grinview"/>
+    <target name="jdktools-all" depends="compile-grin-compiler, compile-grinview"/>
     
-    <target name="clean">
+    <target name="jdktools-clean">
         <delete dir="${JDKTOOLS_BUILD_DIR}"/>
     </target>
 

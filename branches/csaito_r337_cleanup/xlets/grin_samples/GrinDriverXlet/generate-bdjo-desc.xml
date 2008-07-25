@@ -24,8 +24,6 @@ information or have any questions.
 -->
 <project basedir="." default="gen-bdjo-desc">
 
-<property name="bdjoconverter.jar" value="${top.dir}/tools/bdjo/dist/bdjo.jar" />
-
 <target
     name="gen-bdjo-desc"
     depends="gen-bdjo-desc-file">
@@ -46,18 +44,7 @@ information or have any questions.
     
 </target>
 
-<target name="bdjoconverter.check">
-   <available file="${bdjoconverter.jar}" type="file"
-   property="bdjoconverter.ok"/>
-   
-   <fail unless="bdjoconverter.ok"
-       message="bdjoconverter.jar property(${bdjoconverter.jar}) seems to be invalid.  Please provide the location with the -D option to ant"/>
-       
-   <property name="bdjo-desc-file"
-             value="${build.dir}/00000.xml"/>
-</target>
-
-<target name="gen-bdjo-desc.tmp" depends="bdjoconverter.check">
+<target name="gen-bdjo-desc.tmp">
 
     <concat destfile="${bdjo-desc-file}.tmp"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!-- This file contains information determined at a build time -->

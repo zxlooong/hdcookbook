@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Disc image builds" default="all" basedir=".">
+
+        <target name="all">
+            <ant dir="hdcookbook_discimage"/>
+            <ant dir="BridgeheadDiscImage"/>
+            <ant dir="grin_samples"/>
+            <ant dir="tests/functional/DataAreaAccessTest"/>
+            <ant dir="tests/functional/VFSTest"/>
+        </target>           
+        
+	<target name="clean">         
+            <ant dir="hdcookbook_discimage" target="clean"/>
+            <ant dir="BridgeheadDiscImage" target="clean"/>
+            <ant dir="grin_samples" target="clean"/>
+            <ant dir="tests/functional/DataAreaAccessTest" target="clean"/>     
+            <ant dir="tests/functional/VFSTest" target="clean"/>     
+	</target>
+        
+</project>

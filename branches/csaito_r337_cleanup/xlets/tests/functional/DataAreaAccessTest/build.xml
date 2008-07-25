@@ -3,7 +3,8 @@
 <project name="DataAccessTest" default="deploy" basedir=".">
     
     <!-- Property Definitions -->
-    <property file="../../../vars.properties"/>	
+    <property file="../../../../user.vars.properties"/>	
+    <property file="../../../../vars.properties"/>	
     <property file="build.properties"/>	
     
     <!-- xlet source dir, build dir, and a distribution dir for a disc image 
@@ -57,8 +58,9 @@
         <fail unless="logger.ok"> 
               .
         Could not find the logger jar file at ${logger.jar}.
-        Please build all the tools under the "hdcookbook/trunk/tools" dir 
-        before building this xlet, by calling "ant" in the tools directory,
+        Please build all the tools under the "hdcookbook/trunk/DiscCreationTools" 
+        and "hdcookbook/trunk/AuthoringTools" dirs before building this xlet, 
+        by calling "ant tools" in the toplevel directory,
         or modify ${basedir}/build.properties so that various jar properties 
         points to a pre-built hdcookbook tool jars.
         

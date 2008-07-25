@@ -2,7 +2,6 @@
 
 <project name="Grin samples build" default="all" basedir=".">
 
-        <property file="../../${os.name}.user.vars.properties"/>
         <property file="../../user.vars.properties"/>	
         <property file="../../vars.properties"/>	
 

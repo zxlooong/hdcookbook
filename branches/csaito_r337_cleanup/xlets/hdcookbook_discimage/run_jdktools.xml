@@ -23,12 +23,12 @@ Clara, CA 95054 or visit www.sun.com if you need additional
 information or have any questions.
 -->
 
-<project name="Run GRIN tools used on Java SE" basedir="../.." default="run-grinview-menu">
+<project name="Run GRIN tools used on Java SE" basedir="." default="run-grinview-menu">
     
-    <import file="build_hdcookbook_xlets.xml"/>
+    <import file="build.xml"/>
     
-    <target name="prepare-all" depends=" 
-    copy-menu-assets, generate-binary-script, compile-grinview, 
+    <target name="prepare-all" depends="init-preset-defs, 
+    copy-menu-assets, generate-binary-script,  
     init-grinview-java"/>
     
     <target name="init-grinview-java">
@@ -36,7 +36,7 @@ information or have any questions.
         <path id="grinview_menuxlet_path">
             <pathelement path="${MENU_GENERATED}/grinview"/>
             <pathelement path="${MENUTOOLS_DEST}"/>                
-            <pathelement path="${GRIN_VIEWER_DEST}/grinviewer.jar"/>
+            <pathelement path="${grinviewer.jar}"/>
         </path>
         
         <presetdef name="menuxlet.grinview.jdktools.java">      

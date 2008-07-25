@@ -6,7 +6,6 @@
          in which Bridgehead Xlet can upload.  -->
     
     <!-- Property Definitions -->
-    <property file="../../../${os}.user.vars.properties"/>
     <property file="../../../user.vars.properties"/>
     <property file="../../../vars.properties"/>
     <property file="build.properties"/>	

@@ -6,8 +6,8 @@
     <property name="bumfgen.dist.dir"              value="BumfGenerator/dist"/>
     <property name="bumfgen.build.dir"             value="BumfGenerator/build"/>    
     <property name="bumfgen.jar"                   value="bumfgen.jar"/>
-    <property name="id.reference"   location="../id/build"/>
-    <property name="bumf.reference" location="../library/bumf/build"/>
+    <property name="id.reference"   location="../../DiscCreationTools/id/build"/>
+    <property name="bumf.reference" location="../../DiscCreationTools/xmldata/bumf/build"/>
     
     <target name="bumfgen-compile">
         <mkdir dir="${bumfgen.build.dir}"/>

@@ -12,5 +12,5 @@ fi
 
 echo ""
 echo "Built javadocs for all source files in the repository:"
-echo "../../../www/javadocs/grin"
+echo "../../www/javadocs/grin"
 

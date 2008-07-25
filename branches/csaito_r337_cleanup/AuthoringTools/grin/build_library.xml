@@ -23,13 +23,15 @@ Clara, CA 95054 or visit www.sun.com if you need additional
 information or have any questions.
 -->
 
-<project name="Build GRIN libraries for jdk and javame" basedir="../.." default="all">
+<project name="Build GRIN libraries for jdk and javame" basedir="." default="library-all">
    
     <import file="preset_defs.xml"/>
+    <property name="HDC_BUILD_DIR" location="build"/>
+    <property name="ME_LIBRARY_DEST" location="${HDC_BUILD_DIR}/grin_library"/> 
     
-    <target name="all" depends="compile-jdk-library, compile-me-library"/>
+    <target name="library-all" depends="compile-jdk-library, compile-me-library"/>
     
-    <target name="clean">
+    <target name="library-clean">
         <delete dir="${JDKTOOLS_BUILD_DIR}"/>
         <delete dir="${ME_LIBRARY_DEST}"/>
     </target>
