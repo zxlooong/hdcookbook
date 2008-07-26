@@ -8,9 +8,9 @@
   
 <project name="hdcookbook-bundle" default="bundle" basedir=".">
     
-    <property file="${os.name}.user.vars.properties"/>
     <property file="user.vars.properties"/>	
     <property file="vars.properties"/>	
+    <property name="RELEASE_BUNDLE" value="hdcookbook-bin-bindle"/>
     
     <target name="bundle" 
             description="Creates a binary bundle for the distribution">
@@ -20,50 +20,18 @@
         <mkdir dir="${RELEASE_BUNDLE}"/>      
         <mkdir dir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage"/>
         
-        <copy todir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage/BDMV">
-            <fileset dir="${HDC_DISC_BDMV}"/> 
-        </copy>
-        <copy todir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage/CERTIFICATE">   
-            <fileset dir="${HDC_DISC_BDMV}/../CERTIFICATE"/>  
-        </copy>        
-
-        <zip destfile="${RELEASE_BUNDLE}/HDCookbook-DiscImage.zip"
-              basedir="${RELEASE_BUNDLE}.tmp/HDCookbook-DiscImage/"/>
+        <copy tofile="${RELEASE_BUNDLE}/HDCookbook-DiscImage.zip"
+              file="xlets/hdcookbook_discimage/HDCookbookDiscImage.zip"/>
         
-        <copy todir="${RELEASE_BUNDLE}/BDTools" flatten="true">
-            <fileset dir="tools">
-                <include name="**/bdjo.jar"/>
-                <include name="**/security.jar"/>
-                <include name="**/cpistrip.jar"/>
-                <include name="**/logger.jar"/>          
-                <include name="**/soundgen.jar"/>
-                <include name="**/soundsplit.jar"/>
-                <include name="**/BridgeheadDiscImage.zip"/>
-                <include name="**/id.jar"/>
-                <include name="**/index.jar"/>
-                <include name="**/movieobject.jar"/>
-                <include name="**/playlist.jar"/>
-                <include name="README.*"/>
-            </fileset>
+        <copy tofile="${RELEASE_BUNDLE}/BridgeheadDiscImage.zip"
+              file="xlets/BridgeheadDiscImage/BridgeheadDiscImage.zip"/>
+              
+        <copy todir="${RELEASE_BUNDLE}/Tools">
+            <fileset dir="bin"/>
         </copy>
         
         <copy todir="${RELEASE_BUNDLE}/GrinJavadocs">
-            <fileset dir="grin/build/grin_javadoc"/>
-        </copy>
-        
-        <copy todir="${RELEASE_BUNDLE}/GrinTools" flatten="true">
-            <fileset dir="grin/build/jdktools">
-                <include name="**/grinviewer.jar"/>
-                <include name="**/compiler.jar"/>
-            </fileset>
-        </copy>
-        
-        <copy todir="${RELEASE_BUNDLE}/GrinLibraries/javase">
-            <fileset dir="grin/build/jdktools/library"/>
-        </copy>
-        
-        <copy todir="${RELEASE_BUNDLE}/GrinLibraries/javame">
-            <fileset dir="grin/build/library"/>
+            <fileset dir="AuthoringTools/grin/build/grin_javadoc"/>
         </copy>
         
         <copy todir="${RELEASE_BUNDLE}">
