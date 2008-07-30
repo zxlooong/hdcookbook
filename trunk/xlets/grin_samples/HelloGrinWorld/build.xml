@@ -108,5 +108,7 @@
     </target>
     <target name="clean">
         <delete dir="${builddir}"/>
+	<delete file="00000.xml"/>
+	<delete file="00000.xml.tmp"/>
     </target>
 </project>

@@ -237,6 +237,39 @@ public class RenderContextBase extends RenderContext {
 	lastFrameList.prev = prev;
     }
 
+    //
+    // Empty out the lastFrameList.  This removes the DrawRecord
+    // instances from lastFrameList, and re-initialize them.  This
+    // needs to be called if a new RenderContext is created for use
+    // with DrawTarget instances that have been previously used.
+    //
+    // This is called from AnimationEngine when a new list of
+    // animation clients is given to a running animation engine
+    // (see checkNewClients() and resetAnimationClients() in
+    // AnimationEngine).  This method is called at the beginning of
+    // a frame of animation, so only the last frame list has DrawRecord
+    // instance on it -- thisFrameList is empty.
+    //
+    // This reset is needed because the RenderContext's list of DrawRecord
+    // instances is held as an old-style linked list held in data members
+    // of DrawRecord.
+    // 
+    void resetLastFrameList() {
+	if (Debug.ASSERT && thisFrameList != null) {
+	    Debug.assertFail();
+	}
+	DrawRecord n = lastFrameList.next;
+	while (n != lastFrameList) {
+	    n.resetPreviousFrame();
+	    DrawRecord tmp = n.next;
+	    n.next = null;
+	    n.prev = null;
+	    n = tmp;
+	}
+	lastFrameList.next = lastFrameList;
+	lastFrameList.prev = lastFrameList;
+    }
+    
     static void setEmpty(Rectangle r) {
 	r.width = 0;
 	r.height = 0;

@@ -86,6 +86,7 @@ public abstract class AnimationEngine implements Runnable {
     protected RenderContextBase renderContext;
 
     private AnimationClient[] clients;
+    private AnimationClient[] newClients;	// cf. resetAnimationClients
     private Thread worker;
 
     private static final int STATE_NOT_STARTED = 0;
@@ -127,6 +128,16 @@ public abstract class AnimationEngine implements Runnable {
      * @see com.hdcookbook.grin.animator.AnimationContext#animationInitialize()
      **/
     public synchronized void initClients(AnimationClient[] clients) {
+	if (Debug.ASSERT && this.clients != null) {
+	    Debug.assertFail();
+	}
+	doInitClients(clients);
+    }
+
+    //
+    // This is also called from checkNewClients
+    //
+    private synchronized void doInitClients(AnimationClient[] clients) {
 	this.clients = clients;
 	Hashtable targets = new Hashtable(); // <String, Integer>
 	int num = 0;
@@ -141,6 +152,50 @@ public abstract class AnimationEngine implements Runnable {
 	}
 	renderContext = new RenderContextBase(targets.size());
     }
+
+    /**
+     * Reset the set of clients being rendered by a running animation
+     * engine.  This method simply notes the request to reset the list
+     * of clients and returns.  After the current frame of animation is
+     * finished, the engine will asynchronously initialize any new clients
+     * (clients on the new list but not the old), then destroy any old
+     * clients (clients on the old list but not the new).  It will re-calculate
+     * the render targets for all clients at this time, and it will cause
+     * a full screen repaint for the first frame of animation.
+     * <p>
+     * The framework takes ownership of the array that's passed in, so
+     * the caller should not modify that array after calling this method.
+     **/
+    public synchronized void resetAnimationClients(AnimationClient[] clients) {
+	newClients = clients;
+    }
+
+    /**
+     * Return a copy of the list of animation clients that were last
+     * set for this animation engine.  These clients might not be
+     * active yet, if the engine is finishing up a frame of animation
+     * right after the list of clients was reset.
+     * <p>
+     * Note that the old animation clients are destroyed, and not put
+     * into a quiescent state.  In the case of a GRIN show, this means
+     * that if you want to later add the show back, you'll need to re-read
+     * it from the .grin file.
+     **/
+    public synchronized AnimationClient[] getAnimationClients() {
+	AnimationClient[] src;
+	if (newClients == null) {
+	    src = clients;
+	} else {
+	    src = newClients;
+	}
+	AnimationClient[] result = new AnimationClient[src.length];
+	for (int i = 0; i < src.length; i++) {
+	    result[i] = src[i];
+	}
+	return result;
+    }
+
+
 
     /**
      * Set the priority of the thread that runs the animation loop.
@@ -521,6 +576,10 @@ public abstract class AnimationEngine implements Runnable {
      * be sure to look inside this method, and obey the same semantic
      * contract.
      * <p>
+     * This method must call checkNewClients() outside of any synchronized
+     * block at least once per frame.  This should be done at the beginning
+     * of the frame before any model updates or animation work is done.
+     * <p>
      * This method must check destroyRequested() at least once per frame,
      * and if it's true, bail out of the loop.  
      * To advance the model by one frame, it should call
@@ -537,6 +596,58 @@ public abstract class AnimationEngine implements Runnable {
      * @see #callPaintTargets()
      **/
     abstract protected void runAnimationLoop() throws InterruptedException;
+
+    /**
+     * Check to see if we have new animation clients.  This method must
+     * be called from runAnimationLoop once per frame, at the beginning.
+     * It should be called outside of any synchronized block, because
+     * it potentially makes calls out to client code to initialize and
+     * destroy animation clients.
+     **/
+    protected final void checkNewClients() throws InterruptedException {
+	AnimationClient[] oldClients = null;
+	AnimationClient[] localNew = null;
+	synchronized(this) {
+	    if (newClients == null) {
+		return;
+	    }
+	    oldClients = clients;
+	    localNew = newClients;
+	    newClients = null;
+	}
+
+	// Initialize the ones that are new.  For clients that aren't
+	// new, remove them from oldClients so we don't destroy them
+	// later.
+	for (int i = 0; i < localNew.length; i++) {
+	    boolean found = false;
+	    for (int j = 0; !found && j < oldClients.length; j++) {
+		if (localNew[i] == oldClients[j]) {
+		    found = true;
+		    oldClients[j] = null;
+		}
+	    }
+	    if (!found) {
+		localNew[i].initialize(getComponent());
+	    }
+	}
+
+	// Next, destroy the old one's that aren't on the new list
+	for (int i = 0; i < oldClients.length; i++) {
+	    AnimationClient c = oldClients[i];
+	    if (c != null) {
+		c.destroy();
+	    }
+	}
+
+	//
+	// Finally, set the clients data member, and set up the draw targets
+	// This also creates a new renderContext.
+	//
+	renderContext.resetLastFrameList();
+	doInitClients(localNew);
+	paintNextFrameFully();
+    }
     
     protected final void advanceModel() throws InterruptedException {
 	synchronized(repaintLock) {

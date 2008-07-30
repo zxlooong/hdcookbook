@@ -202,6 +202,8 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 	boolean wasPaused = false;
 
 	for (;;) {
+	    checkNewClients();
+
 	    synchronized_block:  synchronized(this) {
 
 		// If we're being destroyed, bail out of the loop

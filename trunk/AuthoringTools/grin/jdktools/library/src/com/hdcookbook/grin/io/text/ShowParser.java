@@ -1965,7 +1965,7 @@ public class ShowParser {
     private Command parseJavaCommand() throws IOException {
         SEShowCommands cmds = show.getShowCommands();
         if (cmds.getClassName() == null) {
-            lexer.reportError("java_command seen, but java_command_class not set");
+            lexer.reportError("java_command seen, but java_generated_class not set");
         }
         parseExpected("[[");
         StringBuffer xletBody = new StringBuffer();

@@ -1,5 +1,5 @@
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -52,48 +52,83 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+import java.awt.Rectangle;
+import java.io.IOException;
+import javax.tv.xlet.Xlet;
+import javax.tv.xlet.XletContext;
+import javax.tv.graphics.TVContainer;
 
-/**
- * Defines constants used for the binary format of the Show file.
+import java.awt.Container;
+import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.Image;
+
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.animator.AnimationClient; 
+import com.hdcookbook.grin.animator.AnimationContext;
+import com.hdcookbook.grin.animator.AnimationEngine;
+import com.hdcookbook.grin.io.binary.GrinBinaryReader;
+import com.hdcookbook.grin.util.AssetFinder;
+
+import org.dvb.event.EventManager;
+import org.dvb.event.UserEvent;
+import org.dvb.event.UserEventListener;
+import org.dvb.event.UserEventRepository;
+import org.bluray.ui.event.HRcEvent;
+import org.dvb.ui.DVBBufferedImage;
+
+/** 
+ * The main class for the Playground project
  */
 
-class Constants {
- 
-	static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
-	static final int GRINSCRIPT_VERSION = 18;
-	
-        /**
-         * Make sure to change BinaryWriter.recordBuiltInClasses()
-         * when the constants are updated.
-         */
-	static final int ASSEMBLY_IDENTIFIER                = 0;
-	static final int BOX_IDENTIFIER                     = 1;
-	static final int FIXEDIMAGE_IDENTIFIER              = 2; 
-	static final int GROUP_IDENTIFIER                   = 3;
-	static final int IMAGESEQUENCE_IDENTIFIER           = 4;
-	static final int TEXT_IDENTIFIER                    = 5;
-	static final int INTERPOLATED_MODEL_IDENTIFIER      = 6;
-	static final int TRANSLATOR_IDENTIFIER              = 7;
-	static final int CLIPPED_IDENTIFIER                 = 8;
-	static final int FADE_IDENTIFIER                    = 9;
-	static final int SRCOVER_IDENTIFIER                 = 10;        
-        static final int ACTIVATEPART_CMD_IDENTIFIER        = 11;
-        static final int ACTIVATESEGMENT_CMD_IDENTIFIER     = 12;
-        static final int RESETFEATURE_CMD_IDENTIFIER        = 13;
-        static final int GRINXHELPER_CMD_IDENTIFIER         = 14;
-        static final int SETVISUALRCSTATE_CMD_IDENTIFIER    = 15;
-        static final int COMMAND_RCHANDLER_IDENTIFIER       = 16;
-        static final int VISUAL_RCHANDLER_IDENTIFIER        = 17;
-        static final int GUARANTEE_FILL_IDENTIFIER          = 18;
-	static final int SET_TARGET_IDENTIFIER              = 19;
-	static final int SEGMENT_IDENTIFIER                 = 20;
-        
-        static final byte STRING_CONSTANTS_IDENTIFIER      = (byte) 0xe0;
-        static final byte INT_ARRAY_CONSTANTS_IDENTIFIER   = (byte) 0xe1;
-        static final byte RECTANGLE_CONSTANTS_IDENTIFIER   = (byte) 0xe2;
-        static final byte RECTANGLE_ARRAY_CONSTANTS_IDENTIFIER = (byte) 0xe3;
+public class MainDirector extends Director {
 
-        static final byte NULL = (byte) 0xff;
-        static final byte NON_NULL = (byte) 0xee;
-}	
+    private AnimationEngine engine;
+
+    public MainDirector(AnimationEngine engine) {
+	this.engine = engine;
+    }
+
+    public void restoreNormalMenu() {
+	AnimationClient[] clients = new AnimationClient[] { getShow() };
+	engine.resetAnimationClients(clients);
+    }
+
+    public void putNewShowOnTopOfMenu() {
+
+	    // First we print out the old clients.  This is only done
+	    // as a minimal test of engine.getAnimationClients()
+	AnimationClient[] clients = engine.getAnimationClients();
+	System.out.println();
+	System.out.println("Old animation clients:");
+	for (int i = 0; i < clients.length; i++) {
+	    System.out.println("    [" + i + "]:  " + clients[i]);
+	}
+	System.out.println();
+
+	    // Now we create a new Show object, and set it to the
+	    // first segment.  It's OK to call activateSegment() before
+	    // the animation engine initializes the show.
+	Show newShow = null;
+	try {
+	    GrinBinaryReader reader = 
+	       new GrinBinaryReader(AssetFinder.getURL(
+			"second_show.grin").openStream());
+	    newShow = new Show(null);
+	    reader.readShow(newShow);
+	} catch (IOException e) {
+	    e.printStackTrace();
+	    System.err.println("Error in reading the show file");
+	    return;
+	}
+	newShow.activateSegment(newShow.getSegment("S:Initialize"));	
+
+	    // Finally, we get the animation engine to reset its list of
+	    // clients.  This won't take effect until the current frame of
+	    // animation is complete.
+	clients = new AnimationClient[] { getShow(), newShow };
+	engine.resetAnimationClients(clients);
+    }
+
+}

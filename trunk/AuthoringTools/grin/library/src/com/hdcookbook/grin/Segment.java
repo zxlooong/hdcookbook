@@ -120,13 +120,16 @@ public class Segment implements Node {
 	return show;
     }
 
+    void setShow(Show show) {
+	this.show = show;
+    }
+
     /**
      * Initialize up this segment.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
      * the segments.
      **/
-    public void initialize(Show show) {
-	this.show = show;
+    public void initialize() {
         featureWasActivated = new boolean[activeFeatures.length];
 	for (int i = 0; i < featureWasActivated.length; i++) {
 	    featureWasActivated[i] = false;

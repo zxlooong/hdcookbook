@@ -110,10 +110,8 @@ public class GrinDataOutputStream extends DataOutputStream {
            writeByte(Constants.NULL);
        } else {
            writeByte(Constants.NON_NULL);
-           writeInt(color.getRed());
-           writeInt(color.getGreen());
-           writeInt(color.getBlue());
-           writeInt(color.getAlpha()); 
+	   writeInt(color.getRGB());
+	   	// That method really gets RGBA
        }    
    }
    

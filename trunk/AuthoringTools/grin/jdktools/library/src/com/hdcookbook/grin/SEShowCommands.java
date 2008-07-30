@@ -188,7 +188,7 @@ public class SEShowCommands  {
     private void checkForJavaCommandBody(String classBody) throws IOException {
         if (!classBody.contains("JAVA_COMMAND_BODY")) {
             throw new IOException("Command class needs to contain "
-                                  + "JAVA_CLASS_BODY macro");
+                                  + "JAVA_COMMAND_BODY macro");
         }
     }
     

@@ -112,7 +112,7 @@ import java.io.IOException;
  * values of player registers, so you can do some testing of the control
  * logic of your show on a PC.  In a show file, you can do this by including
  * a static data member of your command subclass, as defined in the
- * java_command_class section of your show file:
+ * java_generated_class section of your show file:
  * 
  * <pre>
  *     XLET_ONLY [[

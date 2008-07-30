@@ -129,7 +129,7 @@ public class Show implements AnimationClient {
      * Create a new show.
      *
      * @param director  A Director helper class the xlet can use to control
-     *			the show.
+     *			the show.  May be null.
      **/
     public Show(Director director) {
 	this.director = director;
@@ -169,6 +169,9 @@ public class Show implements AnimationClient {
 	for (int i = 0; i < rcHandlers.length; i++) {
 	    rcHandlers[i].setShow(this);
 	}
+	for (int i = 0; i < segments.length; i++) {
+	    segments[i].setShow(this);
+	}
     }
 
     /**
@@ -190,7 +193,7 @@ public class Show implements AnimationClient {
     	setupManager = new SetupManager(features.length);
 	setupManager.start();
 	for (int i = 0; i < segments.length; i++) {
-	    segments[i].initialize(this);
+	    segments[i].initialize();
 	}
 	for (int i = 0; i < features.length; i++) {
 	    features[i].initialize();
@@ -281,6 +284,7 @@ public class Show implements AnimationClient {
     
     /**
      * Look up a public segment.  This is done without taking out the show lock.
+     * It's OK to call this before the show is initialized.
      *
      * @return segment, or null if not found.  
      * 	
@@ -306,7 +310,8 @@ public class Show implements AnimationClient {
      * <p>
      * This can be called from any thread; it does not take out the show
      * lock or any other global locks.  If the show has been destroyed, 
-     * calling this method has no effect.
+     * calling this method has no effect.  It's OK to call this before the
+     * show has been initialized.
      * <p>
      * The current segment is not pushed onto the segment activation stack.
      *
@@ -369,7 +374,8 @@ public class Show implements AnimationClient {
      * <p>
      * This can be called from any thread; it does not take out the show
      * lock or any other global locks.  If the show has been destroyed, 
-     * calling this method has no effect.
+     * calling this method has no effect.  It's OK to call this before
+     * the show has been initialized.
      **/
     public void runCommand(Command cmd) {
 	pendingCommands.add(cmd);

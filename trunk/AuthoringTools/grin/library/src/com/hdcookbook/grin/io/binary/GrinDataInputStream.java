@@ -100,12 +100,9 @@ public class GrinDataInputStream extends DataInputStream {
        if (b == Constants.NULL) {
            return null;
        }
-       
-       int red = readInt();
-       int green = readInt();
-       int blue = readInt();
-       int alpha = readInt();
-       return new Color(red, green, blue, alpha);
+      
+       int rgba = readInt();
+       return new Color(rgba, true);
    }
    
    /**
