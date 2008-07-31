@@ -1,0 +1,75 @@
+#
+#  The show file for the main menu
+#
+
+
+show
+
+java_generated_class MainShowCommands [[
+
+    import com.hdcookbook.grin.Show;
+    import com.hdcookbook.grin.GrinXHelper;
+
+    public class MainShowCommands extends GrinXHelper {
+
+	public MainShowCommands(Show show) {
+	    super(show);
+	}
+
+	XLET_ONLY_[[
+	    public MainDirector getMainDirector() {
+		return (MainDirector) show.getDirector();
+	    }
+	]]
+
+	JAVA_COMMAND_BODY 
+
+    }
+
+]]
+
+segment S:Initialize
+    setup {
+	F:Everything
+    } setup_done {
+	activate_segment S:Main ;
+    }
+;
+
+segment S:Main 
+    active {
+	F:MainText
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:1 H:2
+    }
+;
+
+feature group F:Everything {
+    F:MainText
+} ;
+
+feature text F:MainText
+	left 200 top 200 {
+	    "Press a number key..."
+	    "     1 - Restore Normal Menu"
+	    "     2 - Put new show on top of menu"
+	}
+	SansSerif plain 32 { { 255 255 255 255 } }
+	background { 0 0 0 255 } 
+;
+
+rc_handler key_pressed H:1 { 1 } execute {
+    java_command [[ XLET_ONLY_[[
+	getMainDirector().restoreNormalMenu();
+    ]] ]]
+} ;
+
+rc_handler key_pressed H:2 { 2 } execute {
+    java_command [[ XLET_ONLY_[[
+	getMainDirector().putNewShowOnTopOfMenu();
+    ]] ]]
+} ;
+
+end_show 

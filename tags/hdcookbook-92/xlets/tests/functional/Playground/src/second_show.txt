@@ -1,0 +1,104 @@
+#
+#  A second show file that just displays some text.  This is put above
+#  the first show file in the animator, in order to demonstrate that
+#  adding and removing shows from the animator works.
+#
+
+
+show
+
+segment S:Initialize
+    setup {
+	F:Everything
+    } setup_done {
+	sync_display ;
+	activate_segment S:Main ;
+    }
+;
+
+segment S:Main 
+    active {
+	F:MainText
+    } setup {
+	F:Everything
+    }
+;
+
+feature group F:Everything {
+    F:MainText
+} ;
+
+feature src_over F:MainText F:MainText.Text ;
+
+feature text F:MainText.Text
+	left 250 top 250 {
+	    "This text"
+	    "is displayed"
+	    "over the menu"
+	    "and is in a"
+	    "second show"
+	}
+	SansSerif plain 96 { 
+	    { 0 255 0 255 }
+	    + + + + + + + +
+	    + + + + + + + +
+	    + + + + + + + +
+	    + + + + + + + +
+	    { 0 255 0 250 }
+	    { 0 255 0 240 }
+	    { 0 255 0 230 }
+	    { 0 255 0 220 }
+	    { 0 255 0 210 }
+	    { 0 255 0 200 }
+	    { 0 255 0 190 }
+	    { 0 255 0 180 }
+	    { 0 255 0 170 }
+	    { 0 255 0 160 }
+	    { 0 255 0 150 }
+	    { 0 255 0 140 }
+	    { 0 255 0 130 }
+	    { 0 255 0 120 }
+	    { 0 255 0 110 }
+	    { 0 255 0 90 }
+	    { 0 255 0 80 }
+	    { 0 255 0 70 }
+	    { 0 255 0 60 }
+	    { 0 255 0 50 }
+	    { 0 255 0 40 }
+	    { 0 255 0 30 }
+	    { 0 255 0 20 }
+	    { 0 255 0 10 }
+	    { 0 255 0 0 }
+	    + + + + + + + +
+	    + + + + + + + +
+	    + + + + + + + +
+	    + + + + + + + +
+            { 0 255 0 10 }
+            { 0 255 0 20 }
+            { 0 255 0 30 }
+            { 0 255 0 40 }
+            { 0 255 0 50 }
+            { 0 255 0 60 }
+            { 0 255 0 70 }
+            { 0 255 0 80 }
+            { 0 255 0 90 }
+            { 0 255 0 110 }
+            { 0 255 0 120 }
+            { 0 255 0 130 }
+            { 0 255 0 140 }
+            { 0 255 0 150 }
+            { 0 255 0 160 }
+            { 0 255 0 170 }
+            { 0 255 0 180 }
+            { 0 255 0 190 }
+            { 0 255 0 200 }
+            { 0 255 0 210 }
+            { 0 255 0 220 }
+            { 0 255 0 230 }
+            { 0 255 0 240 }
+            { 0 255 0 250 }
+	} loop_count infinite
+	background { 0 0 200 50 } 
+;
+
+end_show 
