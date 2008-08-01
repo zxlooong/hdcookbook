@@ -7,7 +7,7 @@
     <property name="build.dir"  value="../build"/>
     <property name="dist.jar" value="${build.dir}/${app.name}.jar"/>
     <property name="classes.dir"  value="${build.dir}/classes"/>
-    <property name="bouncycastle.classes"  value="../resource/bcprov-jdk15-137.jar"/>
+    <property name="bouncycastle.classes"  value="../../BDTools/bcprov-jdk16-139.jar"/>
     <target name="prepare">
         <mkdir dir="${classes.dir}"/>
     </target>
