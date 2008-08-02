@@ -207,6 +207,15 @@ public interface AnimationClient {
     public void paintFrame(Graphics2D gr)
     	throws InterruptedException ;
 
+    /**
+     * Called when the animation framework is done painting the current
+     * frame.  In each frame, the animation framework calls addDisplayAreas
+     * once, paintFrame zero or more times, and it is guaranteed to
+     * call paintDone() exactly once, even if the thread is interrupted.
+     * Note that if the thread is interrupted, it's possible paintDone()
+     * might be called without addDisplayAreas() having been called first.
+     **/
+    public void paintDone();
 
     /**
      * Get the names of the draw targets used by this animation client.

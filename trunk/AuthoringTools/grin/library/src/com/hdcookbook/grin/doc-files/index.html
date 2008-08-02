@@ -172,7 +172,7 @@ Here's BNF describing the syntax of a show file:
         # May contain the special sequences:
         #   XLET_ONLY_[[ java_source ]]
         #   GRINVIEW_ONLY_[[ java_source ]]
-        #   GRIN_COMMAND_[[ java_source ]]
+        #   GRIN_COMMAND_[[ command ]]
 
     segment ::= "segment" name ["active" feature_list] ["setup" feature_list]
     			[ "rc_handlers" name_list ]
@@ -658,6 +658,7 @@ of garbage, and if you're going to pause for a bit, initialization is
 the time to do it.  For a show, this point comes after parsing the show
 file.
 </p>
+
 <h2>Animation Loop</h2>
 <p>
 For the animation loop GRIN relies on the 
@@ -667,6 +668,50 @@ implements the <code>AnimationClient</code> interface.  Because the
 framework's <code>AnimationEngine</code> can support multiple clients
 that draw in a defined stacking order, GRIN drawing can appear above or
 below drawing down by any other Java code.
+</p>
+
+<h2>Programmatically Controlling Show Nodes</h2>
+<p>
+GRIN is a declarative scene graph, but you can also programmatically
+set certain node values.  This, in effect, uses Java code in the way
+that scripting languages are commonly used.  When you do this, it's 
+very important to observe some strict rules around threading.  In 
+the GRIN model, you're only permitted to make changes to show 
+nodes with the Show lock held, either from the body of an executing 
+command, or from within the method
+<code>Director.notifyNextFrame()</code>.
+</p><p>
+An example of changing parameters of show nodes using Java is
+in the "Playground" test (xlets/tests/functional/Playground).  See
+the show <code>main_show.txt</code> for an example of a scene graph
+that's set up to be modified from Java.  This modification is done
+in the show file itself (inside a <code>java_command</code>), and in a
+method of <code>MainDirector</code> that's invoked from that
+<code>java_command</code>.  The <code>java_command</code> is
+invoked in every frame, by simply having a repeating timer of length 1.
+</p>
+<ul>
+    <li>The x and y position of the center point used for scaling in a
+        <code>scaling_model</code>.  A <code>scaling_model</code> can
+	be attached to features of type <code>fixed_image</code>, 
+	<code>image_sequence</code> or <code>box</code>.
+    <li>The x any y scale factor of a <code>scaling_model</code>.
+    <li>The x and y offset values int a <code>translator_model</code>
+        attached to one or more <code>translator</code> features.
+    <li>The text contents of a <code>text</code> feature.
+    <li>The AlphaComposite value of a <code>fade</code> feature.
+    <li>The currently active sub-feature of an <code>assembly</code>
+        feature.  You can change this with either an <code>activate_part</code>
+	command or by calling <code>Assembly.setCurrentFeature()</code>
+	directly.
+</ul>
+<p>
+Many of the nodes that can be programmed also do linear interpolation with
+built-in ranges.  As a rule, if you want to set a value from Java, you can't
+also be trying to change it with an active interpolation.  Further, when you
+set a value from Java, it stays set to that new value throughout the execution
+of the xlet; there is no mechanism to recover the default value set in the
+show file.
 </p>
 
 <h2>Building Notes</h2>

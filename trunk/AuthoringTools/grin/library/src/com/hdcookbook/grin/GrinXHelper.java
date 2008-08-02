@@ -146,14 +146,28 @@ public class GrinXHelper extends Command implements Node {
      **/
     protected final static int SEGMENT_DONE = 1;
     
+    /**
+     * The commandNumber for the GRIN-internal feature setup command
+     **/
+    final static int FEATURE_SETUP = 2;
+    
     public GrinXHelper(Show show) {
         super(show);
     }
-    
+  
+    /**
+     * Sets the command number for this class when used as a command.
+     * This should only be called as part of initializing this object.
+     */
     public void setCommandNumber(int commandNumber) {
         this.commandNumber = commandNumber;
     }
 
+    /**
+     * Sets the sub-commands array for this class when used as a
+     * java_command.  This should only be called as part of initializing
+     * the object.
+     */
     public void setSubCommands(Command[] subCommands) {
         this.subCommands = subCommands;
     }
@@ -170,6 +184,9 @@ public class GrinXHelper extends Command implements Node {
         subCommands[num].execute();
     }
     
+    /**
+     * @inheritDoc
+     **/
     public void readInstanceData(GrinDataInputStream in, int length) 
             throws IOException 
     {
@@ -200,6 +217,13 @@ public class GrinXHelper extends Command implements Node {
 		show.doSegmentDone();
 		break;
 	    }
+            case FEATURE_SETUP: {
+                Segment s = show.getCurrentSegment();
+                if (s != null) {
+                    s.runFeatureSetup();
+                }
+                break;
+            }
 	    default: {
 		if (Debug.ASSERT) {
 		    Debug.assertFail();

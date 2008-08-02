@@ -154,6 +154,29 @@ public class InterpolatedModel extends Feature implements Node {
     }
 
     /**
+     * Sets the value of a field to value.  This method may be called by
+     * xlet code, so long as it's called within a command body or inside
+     * of Director.notifyNextFrame().  It is an error to call this method
+     * for any field that is changed by the normal interpolation scheme,
+     * and trying to do so may result in an assertion failure.  In other
+     * words, if you want to programmatically control a value, make sure that
+     * every keyframe has the same (initial) value for that field.
+     *
+     * @see #SCALE_X_FIELD
+     * @see #SCALE_Y_FIELD
+     * @see #SCALE_X_FACTOR_FIELD
+     * @see #SCALE_Y_FACTOR_FIELD
+     * @see com.hdcookbook.grin.features.Translator#X_FIELD
+     * @see com.hdcookbook.grin.features.Translator#Y_FIELD
+     **/
+    public final void setField(int fieldNum, int value) {
+	if (Debug.ASSERT && values[fieldNum] != null) {
+	    Debug.assertFail();		// This is a value that is interpolated
+	}
+	currValues[fieldNum] = value;
+    }
+
+    /**
      * @inheritDoc
      * <p>
      * Since an InterpolatedModel is invisible, this returns a very large value

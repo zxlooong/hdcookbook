@@ -59,12 +59,10 @@ package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.SetupClient;
 
 import java.awt.Graphics2D;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 
 /**
  * Represents a feature.  A feature is a thing that presents some sort
@@ -76,6 +74,11 @@ import java.io.IOException;
 public abstract class Feature implements SetupClient {
 
     protected Show show;
+    
+    /**
+     * The name of this feature within the show.  This is set to null for
+     * private features in the binary file.
+     */
     protected String name = null;
 
     private int activateCount = 0;
@@ -93,7 +96,8 @@ public abstract class Feature implements SetupClient {
     /**
      * Sets a name for this feature.  All public features have a name.  
      * Private features might or might
-     * not have a name; if they do, it's just for debugging.
+     * not have a name; if they do, it's just for debugging.  This method
+     * should only be called when a feature is first created.
      **/    
     public void setName(String name) {
         this.name = name;
@@ -129,18 +133,23 @@ public abstract class Feature implements SetupClient {
      * @return a developer-friendly description of this feature, for debugging
      **/
     public String toString() {
-	String nm = getClass().getName();
-	int i = nm.lastIndexOf('.');
-	if (i >= 0) {
-	    nm = nm.substring(i+1, nm.length());
-	}
-	return nm + "(" + name + ")";
+        if (Debug.LEVEL > 0) {
+            String nm = getClass().getName();
+            int i = nm.lastIndexOf('.');
+            if (i >= 0) {
+                nm = nm.substring(i+1, nm.length());
+            }
+            return nm + "(" + name + ")";
+        } else {
+            return super.toString();
+        }
     }
 
     /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
-     * the phases.
+     * the segments.  Clients of the GRIN framework should never call this
+     * method directly.  Custom feature extensions must implement this method.
      **/
     abstract public void initialize();
 
@@ -153,6 +162,9 @@ public abstract class Feature implements SetupClient {
      * the last segment a show is in when the show is destroyed will
      * probably be active (and it will probably be an empty segment
      * too!).
+     * <p>
+     * Clients of the GRIN framework should never call this method directly.
+     * Custom feature extensions must implement this method.
      **/
     abstract public void destroy();
 
@@ -160,12 +172,16 @@ public abstract class Feature implements SetupClient {
     /**
      * Change the setup mode of this feature.  The new mode will always
      * be different than the old.
+     * Clients of the GRIN framework should never call this method directly.
+     * Custom feature extensions must implement this method.
      **/
     abstract protected void setSetupMode(boolean mode);
 
     /**
      * Change the activated mode of this feature.  The new mode will
      * always be different than the old.
+     * Clients of the GRIN framework should never call this method directly.
+     * Custom feature extensions must implement this method.
      **/
     abstract protected void setActivateMode(boolean mode);
 
@@ -173,6 +189,8 @@ public abstract class Feature implements SetupClient {
      * Do some setup work.  This is called from the SetupManager thread,
      * and is where time-consuming setup (like image loading) should
      * happen.
+     * Clients of the GRIN framework should never call this method directly.
+     * Custom feature extensions must implement this method.
      **/
     abstract public void doSomeSetup();
 
@@ -182,19 +200,23 @@ public abstract class Feature implements SetupClient {
      * to avoid race conditions.  The implementation of this method
      * must not call outside code or call any animation manager
      * methods.
+     * Clients of the GRIN framework should never call this method directly.
+     * Custom feature extensions must implement this method.
      **/
     abstract public boolean needsMoreSetup();
 
     /**
      * Called by the show when it's time to begin setting up this
-     * feature.  This can be called multiple times; each call will
-     * eventually be matched by a call to unsetup().
-     *
+     * feature.  This might be called from the who multiple times; each call 
+     * will eventually be matched by a call to unsetup().
+     * Clients of the GRIN framework should never call this method directly,
+     * and it should not be overridden.
+     * 
      * @see #unsetup()
      *
      * @return true if this call started setup being done
      **/
-    public boolean setup() {
+    final public boolean setup() {
 	setupCount++;
 	if (setupCount == 1) {
 	    setSetupMode(true);
@@ -212,7 +234,7 @@ public abstract class Feature implements SetupClient {
      *
      * @see #setup()
      **/
-    public void unsetup() {
+    final public void unsetup() {
 	setupCount--;
 	if (setupCount == 0) {
 	    setSetupMode(false);
@@ -225,6 +247,8 @@ public abstract class Feature implements SetupClient {
      * mutliple times.  When the last call to activate() is undone by
      * a call to deactivate(), that means this feature is no longer
      * being shown.
+     * Clients of the GRIN framework should never call this method directly,
+     * and it should not be overridden.
      *
      * @see #deactivate()
      **/
@@ -238,6 +262,8 @@ public abstract class Feature implements SetupClient {
     /**
      * Called by the show when this feature is no longer being presented
      * by whatever contains it.
+     * Clients of the GRIN framework should never call this method directly,
+     * and it should not be overridden.
      *
      * @see #activate()
      **/
@@ -256,14 +282,9 @@ public abstract class Feature implements SetupClient {
      **/
     protected void sendFeatureSetup() {
         if (featureSetupCommand == null) {
-            featureSetupCommand = new Command(show) {
-                public void execute() {
-                    Segment s = show.getCurrentSegment();
-                    if (s != null) {
-                        s.runFeatureSetup();
-                    }
-                }
-            };
+            GrinXHelper c = new GrinXHelper(show);
+            c.setCommandNumber(GrinXHelper.FEATURE_SETUP);
+            featureSetupCommand = c;
         }
 	show.runCommand(featureSetupCommand);
     }
@@ -276,6 +297,9 @@ public abstract class Feature implements SetupClient {
      * A feature that displays something needs to maintain a record
      * of it in a DrawRecord.  The animation framework uses this to
      * track what needs to be erased and drawn from frame to frame.
+     * <p>
+     * Clients of the GRIN framework should not call this method directly.
+     * Feature subclasses must implement this method.
      * 
      * @param	context	The context for tracking rendering state
      *
@@ -285,7 +309,9 @@ public abstract class Feature implements SetupClient {
 
 
     /**
-     * Paint the current state of this feature to gr
+     * Paint the current state of this feature to gr.
+     * Clients of the GRIN framework should not call this method directly.
+     * Feature subclasses must implement this method.
      *
      * @param gr  The place to paint to.
      **/
@@ -301,7 +327,7 @@ public abstract class Feature implements SetupClient {
      * Called from the ResetFeatureCommand, this should reset the internal
      * state of the feature to what it was when first activated.
      **/
-    public void resetFeature() {
+    public final void resetFeature() {
 	if (activateCount > 0) {
 	    setActivateMode(false);
 	    setActivateMode(true);

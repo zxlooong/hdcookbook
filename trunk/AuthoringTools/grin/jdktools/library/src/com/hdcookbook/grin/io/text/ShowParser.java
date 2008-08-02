@@ -88,6 +88,7 @@ import com.hdcookbook.grin.features.SESetTarget;
 import com.hdcookbook.grin.features.SESrcOver;
 import com.hdcookbook.grin.features.SEText;
 import com.hdcookbook.grin.features.SETranslator;
+import com.hdcookbook.grin.features.SETranslatorModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.parts.SEImagePlacement;
 import com.hdcookbook.grin.features.parts.SEImagePlacementList;
@@ -918,8 +919,8 @@ public class ShowParser {
 		lexer.reportError("Illegal alpha value:  " + alphas[i]);
 	    }
 	}
-	if (fs.length < 2) {
-	    lexer.reportError("Need at least two keyframes");
+	if (fs.length < 1) {
+	    lexer.reportError("Need at least one keyframe");
 	}
 	if (fs[0] != 0) { 
 	    lexer.reportError("Keyframes must start at frame 0");
@@ -1086,7 +1087,7 @@ public class ShowParser {
 	    lexer.reportError("repeat > max frame");
 	}
 	InterpolatedModel trans 
-	    = builder.makeTranslatorModel(name, fs, values,
+	    = builder.makeTranslatorModel(name, fs, values, isRelative,
 				          repeatFrame, loopCount, endCommands);
 	builder.addFeature(name, line, trans);
 	return trans;
@@ -1104,10 +1105,12 @@ public class ShowParser {
 	ForwardReference fw = new ForwardReference(lexer) {
 	    void resolve() throws IOException {
 		Feature t  = builder.getNamedFeature(translationName);
-		if (t == null || !(t instanceof InterpolatedModel)) {
+		if (t == null || !(t instanceof SETranslatorModel)) {
 		    lexer.reportError("Translation \"" + translationName 
 		    			+ "\" not found");
 		}
+		SETranslatorModel m = (SETranslatorModel) t;
+		trans.setupModelIsRelative(m.getIsRelative());
 		Feature[] fa = makeFeatureList(parts);
                 if (fa.length == 1) {
                     trans.setup((InterpolatedModel) t, fa[0]);

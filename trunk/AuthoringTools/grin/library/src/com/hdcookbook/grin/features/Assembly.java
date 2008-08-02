@@ -159,21 +159,27 @@ public class Assembly extends Feature implements Node {
 
     /**
      * This should not be directly called by clients of the GRIN
-     * framework.  Calls are synchronized to only occur within
-     * model updates, with the show lock held.  The current feature
-     * can be set with:  <pre>
+     * framework, unless it is done from the animation thread (within
+     * a command body, or inside an implementation of Director.nextFrame()).  
+     * Calls are synchronized to only occur within
+     * model updates, with the show lock held.  Normally, clients of
+     * the GRIN framewwork will want to set the current feature with: <pre>
      *     show.runCommand(new ActivatePartCommand(assembly, part))
      * </pre>
      **/
     public void setCurrentFeature(Feature feature) {
-	if (currentFeature == feature) {
-	    return;
+	synchronized(show) {	// It's already held, but this is harmless
+	    if (currentFeature == feature) {
+		return;
+	    }
+	    if (activated) {
+		feature.activate();
+		currentFeature.deactivate();
+		show.getDirector().notifyAssemblyPartSelected
+				    (this, feature,  currentFeature, activated);
+	    }
+	    currentFeature = feature;
 	}
-	if (activated) {
-	    feature.activate();
-	    currentFeature.deactivate();
-	}
-	currentFeature = feature;
     }
 
     /**

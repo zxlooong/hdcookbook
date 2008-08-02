@@ -112,6 +112,13 @@ public class Segment implements Node {
 	return name;
     }
     
+    /**
+     * Set this segment's name.  This should only be called when a Segment
+     * is first created, and should probably never be called by GRIN client
+     * code.
+     * 
+     * @param name  The segment's name (possibly null)
+     */
     public void setName(String name) {
         this.name = name;
     }
@@ -120,6 +127,7 @@ public class Segment implements Node {
 	return show;
     }
 
+    // package-private
     void setShow(Show show) {
 	this.show = show;
     }
@@ -164,20 +172,9 @@ public class Segment implements Node {
 	}
     }
 
-    /**
-     * Free any resources held by this segment.  It is the opposite of
-     * setup; each call to setup() shall be balanced by
-     * a call to unsetup(), and they shall *not* be nested.  
-     * <p>
-     * It's possible an active segment may be destroyed.  For example,
-     * the last segment a show is in when the show is destroyed will
-     * probably be active (and it will probably be an empty segment
-     * too!).
-     **/
-    public void destroy() {
-    }
 
-    /**
+    /* package-private
+     * 
      * Activate this segment, that is, cause it to start presenting.
      * This will not take long; all real work is deferred
      * to worker threads.
@@ -186,7 +183,7 @@ public class Segment implements Node {
      *
      * @param	lastSegment	The last segment we're coming from.
      **/
-    public void activate(Segment lastSegment) {
+    void activate(Segment lastSegment) {
 	if (Debug.LEVEL > 1) {
 	    Debug.println("Going from segment " + lastSegment + " to " + this);
 	}
@@ -371,14 +368,29 @@ public class Segment implements Node {
         this.nextCommands = in.readCommands();
     }
 
+    /**
+     * Get the list of active features of this segment.  Normally client
+     * code shouldn't call this, but it is needed for building debugging
+     * tools, like grinview.
+     **/
     public Feature[] getActiveFeatures() {
 	return activeFeatures;
     }
 
+    /**
+     * Get the list of features in the setup clause of this segment.
+     * Normally client code shouldn't call this, but it is needed for
+     * building debugging tools, like grinview.
+     **/
     public Feature[] getSetupFeatures() {
 	return settingUpFeatures;
     }
 
+    /**
+     * Get the list of commands that are called when this segment is activated.
+     * Normally client code shouldn't call this, but it is needed for
+     * building debugging tools, like grinview.
+     **/
     public Command[] getOnEntryCommands() {
 	return onEntryCommands;
     }
@@ -396,6 +408,8 @@ public class Segment implements Node {
     /**
      * Give the commands in our next clause.  This can be triggered
      * by setup being done, or by a segment_done command.
+     * Normally client code shouldn't call this, but it is needed for
+     * building debugging tools, like grinview.
      *
      * @see #getNextOnSetupDone()
      * @see com.hdcookbook.grin.commands.SegmentDoneCommand
@@ -405,7 +419,9 @@ public class Segment implements Node {
     }
 
     /**
-     * Give the set of remote control handlers for this segment
+     * Give the set of remote control handlers for this segment.
+     * Normally client code shouldn't call this, but it is needed for
+     * building debugging tools, like grinview.
      **/
     public RCHandler[] getRCHandlers() {
 	return rcHandlers;

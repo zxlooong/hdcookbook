@@ -84,6 +84,7 @@
             <arg value="src"/>
             <arg value="-out"/>
             <arg value="${build.dir}"/>
+	    <arg value="-avoid_optimization"/>
             <arg value="${script1.name}.txt"/>
             <arg value="${script2.name}.txt"/>
         </jdktools.java>
@@ -101,6 +102,19 @@
 		<pathelement path="${grinview.classes}"/>
 	    </classpath>
 	</javac>
+    </target>
+
+    <target name="run-grinview" depends="init, generate_binary_script"
+    		description="Run grinview on main menu">
+        <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+	    <classpath>
+		<pathelement path="${grinview.classes}"/>
+		<pathelement path="${build.dir}/gensrc/grinview"/>
+	    </classpath>
+	    <arg value="-asset_dir"/>
+	    <arg value="src"/>
+            <arg value="${script1.name}.txt"/>
+        </jdktools.java>
     </target>
 
     <target name="compile"
@@ -124,6 +138,7 @@
         <jar destfile="${xlet.jar}">
             <fileset dir="${build.dir}/classes"/>
             <fileset dir="${build.dir}" includes="*.grin"/>
+	    <fileset dir="${src.dir}" includes="images/**"/>
         </jar>
     </target>
     

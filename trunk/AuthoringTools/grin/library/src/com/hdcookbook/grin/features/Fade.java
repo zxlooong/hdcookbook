@@ -178,6 +178,23 @@ public class Fade extends Modifier implements Node {
     }
 
     /**
+     * Sets the value of this fade's AlpahComposite to value.  This method
+     * may be called by xlet code, so long as it's called within a 
+     * command body or inside of Director.notifyNextFrame().  It is 
+     * an error to call this method if more than one keyframe is defined
+     * for this fade, and trying to do so may result in an assertion 
+     * failure.  In other words, if you want to programmatically control a 
+     * value, don't also try to control it by defining multiple keyframes.
+     **/
+    public final void setAlpha(AlphaComposite ac) {
+	if (Debug.ASSERT && alphas.length != 1) {
+	    Debug.assertFail();		// This is a value that is interpolated
+	}
+	alphas[0] = ac;
+	currAlpha = ac;
+    }
+
+    /**
      * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {

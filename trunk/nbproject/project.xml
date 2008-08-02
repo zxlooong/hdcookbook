@@ -11,199 +11,244 @@
             <properties/>
             <folders>
                 <source-folder>
-                    <label>grin/library/src</label>
-                    <type>java</type>
-                    <location>grin/library/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <label>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</label>
+                    <location>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin/jdktools/library/src</label>
+                    <label>AuthoringTools/grin/library/src</label>
                     <type>java</type>
-                    <location>grin/jdktools/library/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>AuthoringTools/grin/library/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin/jdktools/grinviewer/src</label>
+                    <label>AuthoringTools/grin/jdktools/library/src</label>
                     <type>java</type>
-                    <location>grin/jdktools/grinviewer/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>AuthoringTools/grin/jdktools/library/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin/jdktools/binaryconverter/src</label>
+                    <label>AuthoringTools/grin/jdktools/binaryconverter/src</label>
                     <type>java</type>
-                    <location>grin/jdktools/binaryconverter/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>AuthoringTools/grin/jdktools/binaryconverter/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin/jdktools/mosaic/src</label>
+                    <label>AuthoringTools/grin/jdktools/grinviewer/src</label>
                     <type>java</type>
-                    <location>grin/jdktools/mosaic/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>AuthoringTools/grin/jdktools/grinviewer/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>tools\bdjo\src</label>
+                    <label>AuthoringTools/grin/jdktools/mosaic/src</label>
                     <type>java</type>
-                    <location>tools/bdjo/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>AuthoringTools/grin/jdktools/mosaic/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin/xlets/bookmenu/src</label>
+                    <label>AuthoringTools/grin/jdktools/test/src</label>
                     <type>java</type>
-                    <location>grin/xlets/bookmenu/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>AuthoringTools/grin/jdktools/test/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin/xlets/gunbunny/src</label>
+                    <label>AuthoringTools/logger/src</label>
                     <type>java</type>
-                    <location>grin/xlets/gunbunny/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>AuthoringTools/logger/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>tools\security\src</label>
+                    <label>xlets/BridgeheadDiscImage/BridgeheadDiscImage/src</label>
                     <type>java</type>
-                    <location>tools/security/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>xlets/BridgeheadDiscImage/BridgeheadDiscImage/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin\xlets\tools\shared\src</label>
+                    <label>xlets/BridgeheadDiscImage/BumfGenerator/src</label>
                     <type>java</type>
-                    <location>grin/xlets/tools/shared/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>xlets/BridgeheadDiscImage/BumfGenerator/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin\xlets\tools\jdk\src</label>
+                    <label>xlets/BridgeheadDiscImage/Client/src</label>
                     <type>java</type>
-                    <location>grin/xlets/tools/jdk/src</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>xlets/BridgeheadDiscImage/Client/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin\samples\CustomFeature</label>
+                    <label>xlets/BridgeheadDiscImage/SampleDiscImage/src</label>
                     <type>java</type>
-                    <location>grin/samples/CustomFeature</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>xlets/BridgeheadDiscImage/SampleDiscImage/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>grin/scripts/ant</label>
+                    <label>xlets/hdcookbook_discimage/bookmenu/src</label>
                     <type>java</type>
-                    <location>grin/scripts/ant</location>
-                    <excludes>**/assets/**</excludes>
+                    <location>xlets/hdcookbook_discimage/bookmenu/src</location>
                 </source-folder>
+                <source-folder>
+                    <label>xlets/hdcookbook_discimage/gunbunny/src</label>
+                    <type>java</type>
+                    <location>xlets/hdcookbook_discimage/gunbunny/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>xlets/hdcookbook_discimage/tools/jdk/src</label>
+                    <type>java</type>
+                    <location>xlets/hdcookbook_discimage/tools/jdk/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>xlets/hdcookbook_discimage/tools/shared/src</label>
+                    <type>java</type>
+                    <location>xlets/hdcookbook_discimage/tools/shared/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>xlets/tests/performance/classload/src</label>
+                    <type>java</type>
+                    <location>xlets/tests/performance/classload/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>DiscCreationTools/logger/src</label>
+                    <type>java</type>
+                    <location>DiscCreationTools/logger/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>xlets/tests/functional/DataAreaAccessTest/src</label>
+                    <type>java</type>
+                    <location>xlets/tests/functional/DataAreaAccessTest/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>xlets/tests/functional/Playground/src</label>
+                    <type>java</type>
+                    <location>xlets/tests/functional/Playground/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>xlets/tests/functional/VFSTest/src</label>
+                    <type>java</type>
+                    <location>xlets/tests/functional/VFSTest/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>DiscCreationTools/xmldata/bumf/src</label>
+                    <type>java</type>
+                    <location>DiscCreationTools/xmldata/bumf/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>DiscCreationTools/id/src</label>
+                    <type>java</type>
+                    <location>DiscCreationTools/id/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</label>
+                    <type>java</type>
+                    <location>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</location>
+                </source-folder>
+                <build-file>
+                    <location>/Users/billf/bd-j/references/interactive/classes.zip</location>
+                </build-file>
             </folders>
             <ide-actions>
                 <action name="build">
+                    <script>nbproject/nbjdk.xml</script>
                     <target>grin</target>
                 </action>
                 <action name="clean">
+                    <script>nbproject/nbjdk.xml</script>
                     <target>clean</target>
                 </action>
                 <action name="rebuild">
+                    <script>nbproject/nbjdk.xml</script>
                     <target>clean</target>
                     <target>grin</target>
                 </action>
                 <action name="run">
+                    <script>nbproject/nbjdk.xml</script>
                     <target>tmp</target>
                 </action>
                 <action name="debug">
-                    <script>nbproject/ide-targets.xml</script>
+                    <script>nbproject/nbjdk.xml</script>
                     <target>debug-nb</target>
                 </action>
             </ide-actions>
-            <export>
-                <type>jar</type>
-                <location>grin/build/jdktools/grin_viewer/grinviewer.jar</location>
-                <build-target>grin</build-target>
-            </export>
-            <export>
-                <type>folder</type>
-                <location>grin/build/jdktools/library</location>
-                <build-target>grin</build-target>
-            </export>
-            <export>
-                <type>jar</type>
-                <location>grin/build/jdktools/compiler/compiler.jar</location>
-                <build-target>grin</build-target>
-            </export>
-            <export>
-                <type>jar</type>
-                <location>grin/build/xlets/gamexlet/00003.jar</location>
-                <build-target>grin</build-target>
-            </export>
-            <export>
-                <type>folder</type>
-                <location>grin/build/xlets/menuxlet/classes</location>
-                <build-target>grin</build-target>
-            </export>
-            <export>
-                <type>jar</type>
-                <location>grin/build/xlets/monitorxlet/00001.jar</location>
-                <build-target>grin</build-target>
-            </export>
             <view>
                 <items>
                     <source-folder style="packages">
-                        <label>grin/library/src</label>
-                        <location>grin/library/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>AuthoringTools/grin/library/src</label>
+                        <location>AuthoringTools/grin/library/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin/jdktools/library/src</label>
-                        <location>grin/jdktools/library/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>AuthoringTools/grin/jdktools/library/src</label>
+                        <location>AuthoringTools/grin/jdktools/library/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin/jdktools/grinviewer/src</label>
-                        <location>grin/jdktools/grinviewer/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>AuthoringTools/grin/jdktools/binaryconverter/src</label>
+                        <location>AuthoringTools/grin/jdktools/binaryconverter/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin/jdktools/binaryconverter/src</label>
-                        <location>grin/jdktools/binaryconverter/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>AuthoringTools/grin/jdktools/grinviewer/src</label>
+                        <location>AuthoringTools/grin/jdktools/grinviewer/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin/jdktools/mosaic/src</label>
-                        <location>grin/jdktools/mosaic/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>AuthoringTools/grin/jdktools/mosaic/src</label>
+                        <location>AuthoringTools/grin/jdktools/mosaic/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>tools\bdjo\src</label>
-                        <location>tools/bdjo/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>AuthoringTools/grin/jdktools/test/src</label>
+                        <location>AuthoringTools/grin/jdktools/test/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin/xlets/bookmenu/src</label>
-                        <location>grin/xlets/bookmenu/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>AuthoringTools/logger/src</label>
+                        <location>AuthoringTools/logger/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin/xlets/gunbunny/src</label>
-                        <location>grin/xlets/gunbunny/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>xlets/BridgeheadDiscImage/BridgeheadDiscImage/src</label>
+                        <location>xlets/BridgeheadDiscImage/BridgeheadDiscImage/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>tools\security\src</label>
-                        <location>tools/security/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>xlets/BridgeheadDiscImage/BumfGenerator/src</label>
+                        <location>xlets/BridgeheadDiscImage/BumfGenerator/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin\xlets\tools\shared\src</label>
-                        <location>grin/xlets/tools/shared/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>xlets/BridgeheadDiscImage/Client/src</label>
+                        <location>xlets/BridgeheadDiscImage/Client/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin\xlets\tools\jdk\src</label>
-                        <location>grin/xlets/tools/jdk/src</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>xlets/BridgeheadDiscImage/SampleDiscImage/src</label>
+                        <location>xlets/BridgeheadDiscImage/SampleDiscImage/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin\samples\CustomFeature</label>
-                        <location>grin/samples/CustomFeature</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>xlets/hdcookbook_discimage/bookmenu/src</label>
+                        <location>xlets/hdcookbook_discimage/bookmenu/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>grin/scripts/ant</label>
-                        <location>grin/scripts/ant</location>
-                        <excludes>**/assets/**</excludes>
+                        <label>xlets/hdcookbook_discimage/gunbunny/src</label>
+                        <location>xlets/hdcookbook_discimage/gunbunny/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>xlets/hdcookbook_discimage/tools/jdk/src</label>
+                        <location>xlets/hdcookbook_discimage/tools/jdk/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>xlets/hdcookbook_discimage/tools/shared/src</label>
+                        <location>xlets/hdcookbook_discimage/tools/shared/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>xlets/tests/performance/classload/src</label>
+                        <location>xlets/tests/performance/classload/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>DiscCreationTools/logger/src</label>
+                        <location>DiscCreationTools/logger/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>xlets/tests/functional/DataAreaAccessTest/src</label>
+                        <location>xlets/tests/functional/DataAreaAccessTest/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>xlets/tests/functional/Playground/src</label>
+                        <location>xlets/tests/functional/Playground/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>xlets/tests/functional/VFSTest/src</label>
+                        <location>xlets/tests/functional/VFSTest/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>DiscCreationTools/xmldata/bumf/src</label>
+                        <location>DiscCreationTools/xmldata/bumf/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>DiscCreationTools/id/src</label>
+                        <location>DiscCreationTools/id/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</label>
+                        <location>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</location>
                     </source-folder>
                     <source-file>
                         <location>build.xml</location>
@@ -219,28 +264,126 @@
             </view>
             <subprojects/>
         </general-data>
-        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
-                <package-root>grin/library/src</package-root>
-                <package-root>grin/jdktools/library/src</package-root>
-                <package-root>grin/jdktools/grinviewer/src</package-root>
-                <package-root>grin/jdktools/binaryconverter/src</package-root>
-                <package-root>grin/jdktools/mosaic/src</package-root>
-                <package-root>tools/bdjo/src</package-root>
-                <package-root>grin/xlets/bookmenu/src</package-root>
-                <package-root>grin/xlets/gunbunny/src</package-root>
-                <package-root>tools/security/src</package-root>
-                <package-root>grin/xlets/tools/shared/src</package-root>
-                <package-root>grin/xlets/tools/jdk/src</package-root>
-                <package-root>grin/samples/CustomFeature</package-root>
-                <package-root>grin/scripts/ant</package-root>
-                <classpath mode="compile">../bd-j/references/enhanced/classes.zip;grin/build/jdktools/library;grin/build/library</classpath>
-                <built-to>grin/build/jdktools/grin_viewer/grinviewer.jar</built-to>
-                <built-to>grin/build/jdktools/library</built-to>
-                <built-to>grin/build/jdktools/compiler/compiler.jar</built-to>
-                <built-to>grin/build/xlets/gamexlet/00003.jar</built-to>
-                <built-to>grin/build/xlets/menuxlet/classes</built-to>
-                <built-to>grin/build/xlets/monitorxlet/00001.jar</built-to>
+                <package-root>AuthoringTools/grin/library/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/grin/jdktools/library/src</package-root>
+                <classpath mode="compile">AuthoringTools/grin/library/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/grin/jdktools/binaryconverter/src</package-root>
+                <classpath mode="compile">AuthoringTools/grin/jdktools/library/src:AuthoringTools/grin/library/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/grin/jdktools/grinviewer/src</package-root>
+                <classpath mode="compile">AuthoringTools/grin/jdktools/library/src:AuthoringTools/grin/library/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/grin/jdktools/mosaic/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/grin/jdktools/test/src</package-root>
+                <unit-tests/>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/logger/src</package-root>
+                <unit-tests/>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/BridgeheadDiscImage/BridgeheadDiscImage/src</package-root>
+                <unit-tests/>
+                <classpath mode="compile">AuthoringTools/grin/library/src:AuthoringTools/logger/src:DiscCreationTools/logger/src:/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/BridgeheadDiscImage/BumfGenerator/src</package-root>
+                <unit-tests/>
+                <classpath mode="compile">DiscCreationTools/xmldata/bumf/src:DiscCreationTools/id/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/BridgeheadDiscImage/Client/src</package-root>
+                <unit-tests/>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/BridgeheadDiscImage/SampleDiscImage/src</package-root>
+                <unit-tests/>
+                <classpath mode="compile">/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/hdcookbook_discimage/bookmenu/src</package-root>
+                <unit-tests/>
+                <classpath mode="compile">/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src:AuthoringTools/grin/library/src:xlets/hdcookbook_discimage/tools/shared/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/hdcookbook_discimage/gunbunny/src</package-root>
+                <unit-tests/>
+                <classpath mode="compile">/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/hdcookbook_discimage/tools/jdk/src</package-root>
+                <unit-tests/>
+                <classpath mode="compile">AuthoringTools/grin/library/src:AuthoringTools/grin/jdktools/library/src:xlets/hdcookbook_discimage/tools/shared/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/hdcookbook_discimage/tools/shared/src</package-root>
+                <unit-tests/>
+                <classpath mode="compile">AuthoringTools/grin/library/src:/Users/billf/bd-j/references/bdj_stubs/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/tests/performance/classload/src</package-root>
+                <unit-tests/>
+                <classpath mode="compile">/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src:DiscCreationTools/logger/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>DiscCreationTools/logger/src</package-root>
+                <classpath mode="compile">/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</classpath>
+                <built-to>/Users/billf/bd-j/references/interactive/classes.zip</built-to>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/tests/functional/DataAreaAccessTest/src</package-root>
+                <unit-tests/>
+                <classpath mode="compile">/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/tests/functional/Playground/src</package-root>
+                <unit-tests/>
+                <classpath mode="compile">/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src:AuthoringTools/grin/library/src</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>xlets/tests/functional/VFSTest/src</package-root>
+                <unit-tests/>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>DiscCreationTools/xmldata/bumf/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>DiscCreationTools/id/src</package-root>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>

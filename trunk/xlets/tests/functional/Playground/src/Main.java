@@ -115,6 +115,7 @@ public class Main implements Xlet, AnimationContext, UserEventListener {
 	public void destroyXlet(boolean unconditional) {
 	   rootContainer = null;
 	   animationEngine.destroy();
+	   EventManager.getInstance().removeUserEventListener(this);          
 	}
 	
 	public void animationInitialize() throws InterruptedException {

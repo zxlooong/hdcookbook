@@ -58,16 +58,22 @@ import javax.tv.xlet.Xlet;
 import javax.tv.xlet.XletContext;
 import javax.tv.graphics.TVContainer;
 
+import java.awt.AlphaComposite;
 import java.awt.Container;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.util.Random;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.animator.AnimationClient; 
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.AnimationEngine;
+import com.hdcookbook.grin.features.InterpolatedModel;
+import com.hdcookbook.grin.features.Translator;
+import com.hdcookbook.grin.features.Text;
+import com.hdcookbook.grin.features.Fade;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
 
@@ -86,6 +92,15 @@ public class MainDirector extends Director {
 
     private AnimationEngine engine;
 
+    private InterpolatedModel scaler;
+    private InterpolatedModel boxPos;
+    private Text myText;
+    private Fade boxedStuffFade;
+    private Random random;
+
+    private float fadeGoal = 1.0f;
+    private float fadeAlpha = 1.0f;
+
     public MainDirector(AnimationEngine engine) {
 	this.engine = engine;
     }
@@ -96,7 +111,6 @@ public class MainDirector extends Director {
     }
 
     public void putNewShowOnTopOfMenu() {
-
 	    // First we print out the old clients.  This is only done
 	    // as a minimal test of engine.getAnimationClients()
 	AnimationClient[] clients = engine.getAnimationClients();
@@ -131,4 +145,92 @@ public class MainDirector extends Director {
 	engine.resetAnimationClients(clients);
     }
 
+
+    /**
+     * This method is alled from main_show.txt before each frame when the
+     * S:S:ProgrammaticSceneGraphControl segment is showing.  This
+     * method does most of the control of the show, but a little bit
+     * of Java scripting is also done in-line in the show file, just
+     * to show what it looks like.  Note, however, that the Director
+     * is the natural place to store the state information you'll
+     * need for whatever you're doing, so it's probably easier to just
+     * call a method on your director most of the time.
+     **/
+    public void programmaticallyChageSceneGraph() {
+	if (scaler == null) {
+	    Show show = getShow();
+	    scaler = (InterpolatedModel) show.getFeature("F:MainScaler");
+	    boxPos = (InterpolatedModel)show.getFeature("F:BoxedStuffPosition");
+	    myText = (Text) show.getFeature("F:EnterText");
+	    boxedStuffFade = (Fade) show.getFeature("F:BoxedStuffFade");
+	    random = new Random();
+	}
+
+		// Mess around with the X,Y center of scaling, and the
+		// scale factors.
+
+	if (random.nextInt(48) == 42) {
+	    scaler.setField(scaler.SCALE_X_FIELD, 780 + random.nextInt(400));
+	}
+	if (random.nextInt(48) == 42) {
+	    scaler.setField(scaler.SCALE_Y_FIELD, 410 + random.nextInt(300));
+	}
+	if (random.nextInt(48) == 42) {
+	    scaler.setField(scaler.SCALE_X_FACTOR_FIELD, 
+	    			500 + random.nextInt(1000));
+	}
+	if (random.nextInt(48) == 42) {
+	    scaler.setField(scaler.SCALE_Y_FACTOR_FIELD, 
+	    			500 + random.nextInt(1000));
+	}
+
+		// Randomly change the translation of the boxed stuff
+
+	if (random.nextInt(48) == 42) {
+	    boxPos.setField(Translator.X_FIELD, -600 + random.nextInt(700));
+	}
+	if (random.nextInt(48) == 42) {
+	    boxPos.setField(Translator.Y_FIELD, -300 + random.nextInt(400));
+	}
+
+		// Scramble the text in entertaining ways
+
+	if (random.nextInt(30) == 21) {
+	    String[] result = new String[2];
+	    String[] src = { "Press", "enter", "to", "return" };
+	    result[0] = scrambleText(src, 4, result[0]);
+	    result[0] = scrambleText(src, 3, result[0]);
+	    result[1] = scrambleText(src, 2, result[1]);
+	    result[1] = scrambleText(src, 1, result[1]);
+	    myText.setText(result);
+	}
+
+		// Make the boxed stuff fade in and out, but mostly
+		// in, and make it smooth.
+	if (random.nextInt(50) == 42) {
+	    fadeGoal = random.nextFloat();
+	    fadeGoal = 1.0f - fadeGoal * fadeGoal;  // Bias toward visibility
+	}
+	fadeAlpha = 0.9f * fadeAlpha + 0.1f * fadeGoal;
+	if (fadeAlpha < 0f) {
+	    fadeAlpha = 0f;
+	} else if (fadeAlpha > 1f) {
+	    fadeAlpha = 1f;
+	}
+	AlphaComposite ac 
+	    = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, fadeAlpha);
+	boxedStuffFade.setAlpha(ac);
+    }
+
+    private String scrambleText(String[] src, int srcLen, String line) {
+	int i = random.nextInt(srcLen);
+	String tmp = src[i];
+	src[i] = src[srcLen-1];
+	src[srcLen-1] = null;
+	if (line == null) {
+	    return tmp;
+	} else {
+	    return line + " " + tmp;
+	}
+    }
 }

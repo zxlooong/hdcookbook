@@ -88,7 +88,7 @@ public class ActivatePartCommand extends Command implements Node {
     
     public Assembly getAssembly() {
         return assembly;
-    };
+    }
     
     public Feature getPart() {
         return part;

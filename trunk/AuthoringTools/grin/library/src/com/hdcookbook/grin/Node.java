@@ -69,11 +69,13 @@ public interface Node {
     
     /**
      * Reads in this node information from the binary file format.  
-     * 
+     * <p>
      * An implementation of this method is recommended to call 
      * in.readSuperClassData(this)
      * as the first line of the method to read in information
      * that is defined in the base class of this Node type. 
+     * <p>
+     * This should only be called while initializing this object.
      * 
      * @param in InputStream to read data from.
      * @param length the number of bytes that this node's information occupies

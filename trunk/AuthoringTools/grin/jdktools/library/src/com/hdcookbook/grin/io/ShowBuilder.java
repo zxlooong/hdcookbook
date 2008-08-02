@@ -348,11 +348,15 @@ public class ShowBuilder {
 
     public InterpolatedModel 
     makeTranslatorModel(String name, int[] frames, int[][] values, 
-    			  int repeatFrame, int loopCount, Command[] commands) 
+    			boolean isRelative, int repeatFrame, int loopCount, 
+			Command[] commands) 
     {
-	return makeInterpolatedModel(name, frames, values, repeatFrame, 
+	SETranslatorModel model = (SETranslatorModel)
+	       makeInterpolatedModel(name, frames, values, repeatFrame, 
 				     loopCount, commands, 
 				     SETranslatorModel.class);
+	model.setIsRelative(isRelative);
+	return model;
     }
 
     public InterpolatedModel 

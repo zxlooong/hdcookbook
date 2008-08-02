@@ -88,7 +88,8 @@ import java.io.IOException;
  * A handler can also optionally have commands associated with its
  * states.  These are invoked only when the handler changes state - a
  * command is <i>not</i> sent for the current state when the handler
- * is activated.  It's up to the application to ensure that the UI
+ * is activated.  When commands are used to maintain the scene graph's
+ * state, it's up to the application to ensure that the UI
  * is in a state that matches the handler's state before the handler
  * is activated.
  * <p>
@@ -215,7 +216,7 @@ public class VisualRCHandler extends RCHandler implements Node {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean handleRCEvent(RCKeyEvent ke) {
 	if ((ke.getBitMask() & MASK) == 0) {
@@ -250,7 +251,7 @@ public class VisualRCHandler extends RCHandler implements Node {
     }
     
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public boolean handleMouse(int x, int y, boolean activate) {
         if (mouseRects == null) {
@@ -324,7 +325,7 @@ public class VisualRCHandler extends RCHandler implements Node {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void activate(Segment s) {
 	timedOut = timeout <= -1;

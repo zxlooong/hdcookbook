@@ -344,6 +344,8 @@ public abstract class AnimationEngine implements Runnable {
      *                 call addDisplayAreas
      *             for each client
      *                 call paintFrame as many times as needed
+     *		   for each client
+     *			call paintDone
      *    }
      * </pre>
      * <p>
@@ -696,6 +698,12 @@ public abstract class AnimationEngine implements Runnable {
 	try {
 	    callPaintTargets();
 	} finally {
+	    for (int i = 0; i < clients.length; i++) {
+		try {
+		    clients[i].paintDone();
+		} catch (Throwable ignored) {
+		}
+	    }
 	    finishedFrame();
 	}
     }

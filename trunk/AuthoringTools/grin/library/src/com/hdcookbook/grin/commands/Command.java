@@ -60,8 +60,10 @@ import com.hdcookbook.grin.Show;
 /**
  * Common base class of all GRIN commands.  GRIN defers anything that
  * can change the state of a show to a command.  In this way, the
- * synchronization model is kept very simple.  Commands are executed
- * from within Show.nextFrame, with the show lock held.
+ * synchronization model is kept very simple.  Commands are always executed
+ * with the show lock held, at a time when it's OK to update the show's model.
+ * They can be executed from the animation thread within Show.nextFrame(), and
+ * the can also be executed from within a remote control key handler.
  *
  * @see com.hdcookbook.grin.Show#nextFrame()
  *

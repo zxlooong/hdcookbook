@@ -5,12 +5,27 @@
 
 show
 
+exports
+    segments { 
+	S:Initialize 
+    } features {
+	F:MainScaler
+	F:BoxedStuffPosition
+	F:BoxedStuffFade
+	F:EnterText
+    } handlers {
+    }
+;
+
 java_generated_class MainShowCommands [[
 
     import com.hdcookbook.grin.Show;
     import com.hdcookbook.grin.GrinXHelper;
+    import java.util.Random;
 
     public class MainShowCommands extends GrinXHelper {
+
+	private static Random random = new Random();
 
 	public MainShowCommands(Show show) {
 	    super(show);
@@ -36,18 +51,24 @@ segment S:Initialize
     }
 ;
 
+
+#########################################################
+#			MAIN MENU			#
+#########################################################
+
 segment S:Main 
     active {
 	F:MainText
     } setup {
 	F:Everything
     } rc_handlers {
-	H:1 H:2
+	H:1 H:2 H:3
     }
 ;
 
 feature group F:Everything {
     F:MainText
+    F:ProgrammaticDemo
 } ;
 
 feature text F:MainText
@@ -55,6 +76,7 @@ feature text F:MainText
 	    "Press a number key..."
 	    "     1 - Restore Normal Menu"
 	    "     2 - Put new show on top of menu"
+	    "     3 - Show programmatic control of scene graph"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
 	background { 0 0 0 255 } 
@@ -70,6 +92,160 @@ rc_handler key_pressed H:2 { 2 } execute {
     java_command [[ XLET_ONLY_[[
 	getMainDirector().putNewShowOnTopOfMenu();
     ]] ]]
+} ;
+
+rc_handler key_pressed H:3 { 3 } execute {
+    activate_segment S:ProgrammaticSceneGraphControl ;
+} ;
+
+#########################################################
+#	    PROGRAMMATIC SCENE GRAPH CONTROL		#
+#########################################################
+
+
+    # A scaling model to flip a couple of images and a box
+    # around.  To make a scaling_model programmable, you specify
+    # just one key frame, and then you programmatically set the
+    # values of the parameters to something different.
+
+feature scaling_model F:MainScaler 
+	    { 0 980 560 1000 1000 mills }
+;
+
+    # A box that gets scaled by our scaler
+
+feature box F:Box ( 800 440 1400 750 )
+	outline 30 { 0 0 255 255 }
+	scaling_model F:MainScaler 
+;
+
+    # A turtle that gets scaled by our scaler
+
+feature fixed_image F:TurtleSaucer ( left 1050 middle 580 )
+	"images/turtle_saucer.png"
+	scaling_model F:MainScaler 
+;
+
+    # An animated yin/yang that gets scaled by our scaler
+
+feature image_sequence F:YinYang ( left 900 middle 580 )
+	"images/yinyang/Load_" {
+		0000 0001 0002 0003 0004 0005 0006 0007
+		0008 0009 0010 0011 0012 0013 0014 0015
+	 } ".png"
+	 repeat
+	 scaling_model F:MainScaler 
+;
+
+    # A group containing the stuff in the box, all of which gets
+    # scaled
+
+feature group F:BoxedStuffGroup {
+	F:MainScaler 
+	F:Box 
+	F:TurtleSaucer 
+	F:YinYang
+} ;
+
+    # And a programmatically controlled fade that we use to make the
+    # box fade in and out randomly.
+
+feature fade F:BoxedStuffFade F:BoxedStuffGroup {
+	    0	255 linear		
+	    # 1 entry means "this is the default value for programmatic control"
+    }
+;
+
+
+    # A translator and translator_model to move F:BoxedStuffGroup around.
+    # The model only has one entry, because we set the value programmatically.
+
+feature translator_model F:BoxedStuffPosition {
+    	0 	0 0 	linear-relative
+} ;
+
+feature translator F:BoxTranslator F:BoxedStuffPosition {
+ 	F:BoxedStuffFade
+} ;
+
+    # Finally, some text (that we change programmatically), plus an
+    # assembly/fade combo we use to randomly make it fade out then in
+    # from time to time.
+
+feature text F:EnterText
+	middle 980 baseline 540 {
+	    "Press enter"
+	    "to return"
+	}
+	SansSerif plain 180 { { 0 255 0 255 } }
+	background { 0 0 0 255 } 
+;
+
+feature fade F:FadeText F:EnterText {
+	    0	255 linear
+	   11	  0 linear
+	   23	255 linear
+    } end_commands {
+	activate_part F:TextAssembly normal ;
+    }
+;
+
+feature assembly F:TextAssembly {
+	normal	F:EnterText
+	fading	F:FadeText
+    }
+;
+
+    # This is cute:  We make a timer on every frame that flips
+    # a coin, and sometimes makes the text fade out for a beat.
+    # If the text is already going through a fade, nothing happens,
+    # because we just re-select the assembly.
+    #
+    # This could could equally well have been put directly into
+    # the implementation of Director.notifyNextFrame(), or as a method
+    # of MainDirector, as is done for the other programmatic control 
+    # being shown.  These latter two are somewhat more elegant,
+    # since we have a natural place for the instance data member.
+    # Because many instances of MainShowCommands get created, we don't
+    # want to define any instance data members on this class.
+
+feature timer F:ChangeSceneGraphTimer 1 repeat {
+	java_command [[
+	    if (random.nextInt(50) == 42) {
+		GRIN_COMMAND_[[
+		    activate_part F:TextAssembly fading ;
+		]]
+	    }
+	    XLET_ONLY_[[
+		getMainDirector().programmaticallyChageSceneGraph();
+	    ]]
+	]]
+    }
+;
+
+    #  Finaly, we put the whole scene graph in one group, which makes
+    # it a bit easier to list in F:Everything.
+
+feature group F:ProgrammaticDemo {
+	F:TextAssembly
+	F:ChangeSceneGraphTimer
+    	F:BoxTranslator
+	F:BoxedStuffPosition
+} ;
+
+    # Then, a segment to show it, and an RC handler to get us back to the
+    # menu
+
+segment S:ProgrammaticSceneGraphControl
+	active { F:ProgrammaticDemo }
+	setup { F:Everything }
+	rc_handlers { H:ProgrammaticEscape }
+	on_entry {
+	}
+;
+
+rc_handler key_pressed H:ProgrammaticEscape { enter } execute {
+    activate_segment S:Main ;
 } ;
 
 end_show 

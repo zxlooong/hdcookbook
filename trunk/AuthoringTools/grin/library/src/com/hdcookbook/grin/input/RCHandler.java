@@ -60,6 +60,8 @@ import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Show;
 
 /**
+ * Superclass for remote control keypress handlers.  Some also handle
+ * mouse events.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -96,10 +98,19 @@ public abstract class RCHandler {
          this.name = name;
      }
     
+    /** 
+     * Handle a remote control keypress.  This is called on the remote
+     * control input thread, but Show ensures that it is called at a
+     * time when it's safe to modify the scene graph.  The show lock will
+     * be held, and the show won't be between a call to addDisplayAreas()
+     * and paintFrame().
+     *
+     * @return true if the keypress is used
+     **/
     abstract public boolean handleRCEvent(RCKeyEvent ke);
    
     /** 
-     * Returns true if something is done with the mouse
+     * @return true if something is done with the mouse
      **/
     abstract public boolean handleMouse(int x, int y, boolean activate);
 

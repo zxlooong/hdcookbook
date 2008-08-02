@@ -119,7 +119,7 @@ public class HelloGrinWorld implements Xlet, AnimationContext, UserEventListener
 	
 	public void animationInitialize() throws InterruptedException {
 
-	   Director director = new Director(){};
+	   Director director = new Director();
            
            try {
 		// Set up AssetFinder so we use DVBBufferedImage.

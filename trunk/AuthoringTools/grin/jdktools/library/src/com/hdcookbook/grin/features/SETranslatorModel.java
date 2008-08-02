@@ -63,7 +63,17 @@ import com.hdcookbook.grin.commands.Command;
 
 public class SETranslatorModel extends SEInterpolatedModel {
 
+    private boolean isRelative;
+
     public SETranslatorModel() {
+    }
+
+    public void setIsRelative(boolean isRelative) {
+	this.isRelative = isRelative;
+    }
+
+    public boolean getIsRelative() {
+	return isRelative;
     }
     
     public int[] getXs() {

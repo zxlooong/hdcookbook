@@ -84,21 +84,28 @@ import java.io.IOException;
 public class Show implements AnimationClient {
 
     private Director director;
+	// Never null
 
     /**
-     * Our helper that calls into us to load images and such
+     * Our helper that calls into us to load images and such.  This is
+     * for internal use only, and is public so that GRIN classes in
+     * other packages can access it efficiently.
      **/
     public SetupManager setupManager;
 
     /**
      * The component we're presented within.  This can be needed
      * for things like loading images via Component.prepareImage().
+     * This is for internal use only, and is public so that GRIN
+     * classes in other packages can access it efficiently.
      **/
     public Component component;
 
     /**
      * An object used to hold state during initializaition of a show.
      * This is nulled out after the show is initialized.
+     * This is for internal use only, and is public so that GRIN
+     * classes in other packages can access it efficiently.
      **/
     public ShowInitializer initializer = new ShowInitializer();
 
@@ -124,24 +131,29 @@ public class Show implements AnimationClient {
     private boolean deferringPendingCommands = false;
     private int numTargets = 1;	  // number of RenderContext targets needed 
     				  // by this show
+    private boolean inputOK = true;	
+	// Condition variable on this instance of show
 
     /** 
      * Create a new show.
      *
      * @param director  A Director helper class the xlet can use to control
-     *			the show.  May be null.
+     *			the show.  May be null, in which case a default
+     *			direct instance of Director will be assigned.
      **/
     public Show(Director director) {
+	if (director == null) {
+	    director = new Director();
+	}
 	this.director = director;
-        if (director != null) {
-	   director.setShow(this);
-        }   
+	director.setShow(this);
     }
 
     /**
-     * Get this show's director, if it has one.
+     * Get this show's director.  If the show was created without a director,
+     * a default one is created, and this will be returned.
      *
-     * @return our Director, or null
+     * @return our Director
      **/
     public Director getDirector() {
 	return director;
@@ -149,7 +161,8 @@ public class Show implements AnimationClient {
 
     /**
      * This is called to build the show.  This needs to be done before
-     * initialize is called.
+     * initialize is called.  Normally, clients of the GRIN framework
+     * shouldn't call this.
      *
      * @throws IOException if anything goes wrong.
      **/
@@ -177,7 +190,9 @@ public class Show implements AnimationClient {
     /**
      * @inheritDoc
      * <p>
-     * This should be called after the show has been built.
+     * This will  be called by the animation framework; clients of the GRIN
+     * framework should ensure a show has been built before handing it off
+     * to the animation framework.
      *
      * @param  component The component this show will eventually be displayed
      *                   in.  It's used for things like 
@@ -204,32 +219,36 @@ public class Show implements AnimationClient {
     /**
      * @inheritDoc
      * <p>
-     * Destroy a show.  This should be called when the Xlet is done with
-     * this show.
+     * Destroy a show.  This will be called by the animation framework
+     * when the animation engine is destroyed, or when this show is removed
+     * from the engine's list of shows.
      **/
     public synchronized void destroy() {
 	if (Debug.ASSERT && !initialized) {
 	    Debug.assertFail("Destroy of uninitialized show");
-	}
-	for (int i = 0; i < segments.length; i++) {
-	    segments[i].destroy();
 	}
 	for (int i = 0; i < features.length; i++) {
 	    features[i].destroy();
 	}
 	destroyed = true;
 	setupManager.stop();
+	notifyAll();
     }
 
     /** 
-     * Used to build the show
+     * Used to build the show.  Clients of the GRIN framework should not
+     * call this method directly.
      **/
     public void setSegmentStackDepth(int depth) {
 	segmentStack = new Segment[depth];
     }
 
     /**
-     * Used to build the show
+     * @inheritDoc
+     *
+     * Used to build the show, or to reinitialize it.  This method is
+     * called by the animation framework, and should not be directly called
+     * by client code.
      **/
     public void setDrawTargets(String[] drawTargets) {
 	this.drawTargets = drawTargets;
@@ -348,7 +367,8 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * Used by the activate segment command.
+     * Used by the activate segment command.  Clients of the GRIN framework
+     * should never call this method directly.
      **/
     public synchronized void pushCurrentSegment() {
 	segmentStack[segmentStackPos] = currentSegment;
@@ -356,7 +376,8 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * Used by the activate segment command
+     * Used by the activate segment command.  Clients of the GRIN framework
+     * should never call this method directly.
      **/
     public synchronized Segment popSegmentStack() {
 	segmentStackPos--;
@@ -384,9 +405,11 @@ public class Show implements AnimationClient {
     /**
      * @inheritDoc
      * <p>
-     * An xlet can call this method just before calling nextFrame() if
+     * The animation framework calls this method just before calling 
+     * nextFrame() if
      * the animation loop is caught up.  From time to time, pending commands
-     * will be deferred until animation has caught up.  GRIN knows we've
+     * will be deferred until animation has caught up - this is done by the
+     * sync_display command.  GRIN knows we've
      * caught up when we paint a frame, but calling this method can let
      * it know one frame earlier.
      *
@@ -404,15 +427,18 @@ public class Show implements AnimationClient {
      * @see #setCaughtUp()
      **/
     public synchronized void nextFrame() throws InterruptedException {
-	if (currentSegment == null) {
-	    runPendingCommands();
-	} else {
+	if (currentSegment != null) {
 	    currentSegment.nextFrame();
-	    runPendingCommands();
 	}
+	director.notifyNextFrame();
+	    // It's in Director's contract that this be called with the
+	    // show lock held.
     }
 
-    private synchronized void runPendingCommands() {
+    // 
+    // Called from Director.notifyNextFrame()
+    //
+    synchronized void runPendingCommands() {
 	while (!deferringPendingCommands && !pendingCommands.isEmpty()) {
 	    Command c = (Command) pendingCommands.remove();
 	    if (c != null) {
@@ -441,11 +467,12 @@ public class Show implements AnimationClient {
      * This is called from ActivateSegmentCommand, and should not be
      * called from anywhere else.
      **/
-    public void doActivateSegment(Segment newS) {
+    public synchronized void doActivateSegment(Segment newS) {
 	// We know the lock is being held, and a command is being executed
 	Segment old = currentSegment;
 	currentSegment = newS;
 	currentSegment.activate(old);
+	director.notifySegmentActivated(newS, old);
     }
 
     /**
@@ -459,32 +486,14 @@ public class Show implements AnimationClient {
 
 
     /**
-     * Get the current segment.  The caller should probably be
-     * synchronizing on the show when using this, so that the
+     * Get the current segment.  The caller may wish to
+     * synchronize on the show when using this, so that the
      * current segment doesn't change right after the call.
      **/
     public synchronized Segment getCurrentSegment() {
 	return currentSegment;
     }
     
-    /**
-     * Returns true if the node passed in is recorded as an public element
-     * in this show, false otherwise.
-     * 
-     * @throws RuntimeException if node is neither an instance of 
-     * Feature, RCHandler, nor Segment.
-     */
-    public boolean isPublic(Node node) {
-        if (node instanceof Feature) {
-            return publicFeatures.contains(node);
-        } else if (node instanceof RCHandler) {
-            return publicRCHandlers.contains(node);
-        } else if (node instanceof Segment) {
-            return publicSegments.contains(node);
-        } else {
-            throw new RuntimeException("Unknown node type " + node);
-        }
-    }
 
     /**
      * @inheritDoc
@@ -492,6 +501,9 @@ public class Show implements AnimationClient {
     public synchronized void addDisplayAreas(RenderContext context) 
 				throws InterruptedException 
     {
+	inputOK = false;
+	    // We could call notifyAll() here, but nobody waits for
+	    // inputOK to turn false, so there's no need.
 	if (currentSegment != null) {
 	    int old = context.setTarget(defaultDrawTarget);
 	    currentSegment.addDisplayAreas(context);
@@ -520,12 +532,39 @@ public class Show implements AnimationClient {
     }
 
     /**
+     * @inheritDoc
+     **/
+    public synchronized void paintDone() {
+	inputOK = true;
+	notifyAll();	// Remote control input might be waiting on inputOK
+    }
+    //
+    // Wait until it's safe to receive input.  Returns true if 
+    // it's OK to proceed, or false if we've been interrupted 
+    // and should bail out.
+    //
+    private synchronized boolean waitForInputOK() {
+	while ((!inputOK) && (!destroyed)) {
+	    try {
+		wait();
+	    } catch (InterruptedException ex) {
+		Thread.currentThread().interrupt();
+		return false;
+	    }
+	}
+	return !destroyed;
+    }
+
+    /**
      * Called by the xlet when a keypress is received.
      *
      * @return true	If the keypress is handled
      **/
     public synchronized boolean handleKeyPressed(int vkCode) {
 	if (currentSegment == null) {
+	    return false;
+	}
+	if (!waitForInputOK()) {
 	    return false;
 	}
 	RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
@@ -545,6 +584,9 @@ public class Show implements AnimationClient {
     public synchronized void handleMouseMoved(int x, int y) {
 	boolean used = false;
         if (currentSegment != null) {
+	    if (!waitForInputOK()) {
+		return;
+	    }
             used = currentSegment.handleMouse(x, y, false);
         }
 	Cursor c = used ? Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)
@@ -559,6 +601,9 @@ public class Show implements AnimationClient {
      **/
     public synchronized void handleMouseClicked(int x, int y) {
         if (currentSegment != null) {
+	    if (!waitForInputOK()) {
+		return;
+	    }
             currentSegment.handleMouse(x, y, true);
         }
 	Cursor c = Cursor.getDefaultCursor();
