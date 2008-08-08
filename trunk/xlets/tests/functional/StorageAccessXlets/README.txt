@@ -45,7 +45,7 @@ If the credentials do not work, then the test will fail displaying:
 
 	"Test Failed with IOException";
 
-See the notes in the ${HDCOOKBOOK}/tools/security/README-CREDENTIALS.txt for
+See the notes in the ${HDCOOKBOOK}/DiscCreationTools/security/README-CREDENTIALS.txt for
 the status of the credential signer tool.
 
 How to Build?

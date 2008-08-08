@@ -7,7 +7,8 @@
             <ant dir="BridgeheadDiscImage"/>
             <ant dir="grin_samples"/>
             <ant dir="tests/functional/DataAreaAccessTest"/>
-            <ant dir="tests/functional/Playground"/>
+            <ant dir="tests/functional/Playground"/>       
+            <ant dir="tests/functional/StorageAccessXlets"/>
             <ant dir="tests/functional/VFSTest"/>
             <ant dir="tests/performance/classload"/>
         </target>           
@@ -18,6 +19,7 @@
             <ant dir="grin_samples" target="clean"/>
             <ant dir="tests/functional/DataAreaAccessTest" target="clean"/>     
             <ant dir="tests/functional/Playground" target="clean"/>     
+            <ant dir="tests/functional/StorageAccessXlets" target="clean"/>            
             <ant dir="tests/functional/VFSTest" target="clean"/>     
             <ant dir="tests/performance/classload" target="clean"/>
 	</target>

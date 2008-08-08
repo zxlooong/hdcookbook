@@ -2,7 +2,7 @@
 <!-- You may freely edit this file. See commented blocks below for -->
 <!-- some examples of how to customize the build. -->
 <!-- (If you delete it and reopen the project it will be recreated.) -->
-<project name="SameAppAccess" default="default" basedir=".">
+<project name="WriterXlet" default="default" basedir=".">
     <description>Builds, tests, and runs the project SameAppAccess.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
@@ -66,6 +66,9 @@
     nbproject/build-impl.xml file. 
     -->
     
+    <!-- Property Definitions -->
+    <property file="../../../../../user.vars.properties"/>
+    <property file="../../../../../vars.properties"/>
     <property file="user.vars.properties"/>
     <property file="./vars.properties"/>
     <import file="build-bdjo-security.xml"/>
@@ -83,7 +86,7 @@
 
         <!-- Location of the bdjo converter jar file -->
         <property name="bdjoconverter.jar"
-		value="../../../../bdjo/dist/bdjo.jar"/>
+		value="${bdjo.jar}"/>
 
 	<!-- Location of the BDSigner tool workspace -->
         <property name="security.home"
@@ -94,12 +97,15 @@
                   value="${main.class}" />         
     </target>
     
-    <target name="-post-jar" depends="gen-bdjo-desc, sign-jars"/>
-    <target name="clean">
+    <target name="-post-jar" depends="sign-jars, copy-to-bdmv">
+        <zip destfile="./${ant.project.name}.zip"
+             basedir="${HDC_DISK_BDMV}/.."/>
+    </target>
+    <target name="-post-clean">
+	<delete dir="dist"/>
 	<delete dir="${HDC_DISK_BDMV}/JAR"/>	
         <delete dir="${HDC_DISK_BDMV}/BDJO"/>
         <delete dir="${HDC_DISK_BDMV}/BACKUP"/>
 	<delete dir="${HDC_DISK_BDMV}/../CERTIFICATE"/>
-	<delete dir="./build/classes"/>
     </target>
 </project>

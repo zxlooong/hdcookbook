@@ -24,7 +24,6 @@ information or have any questions.
 -->
 <project basedir=".">
 
-    <property name="logger" value="${basedir}/../../../../logger/dist/logger.jar"/>
     <presetdef name="java.tools">
         <java fork="true" failOnError="true"/>
     </presetdef>
@@ -32,52 +31,104 @@ information or have any questions.
 <target
 name = "sign-jars"
 depends="security.check">
-    <echo message="${java.home}/lib/tools.jar"/>
+
+    <copy file="${logger.jar}" tofile="${dist.dir}/99999.jar"/>
+
     <path id="sec.tools.path"> 
-       <pathelement location="${basedir}/${security.home}/build/security.jar"/>
-       <pathelement location="${basedir}/${security.home}/resource/bcprov-jdk15-137.jar"/>
+       <pathelement location="${security.jar}"/>
+       <pathelement location="${bouncycastle.jar}"/>
        <pathelement location="${java.home}/../lib/tools.jar"/>
     </path>
     <java.tools classname="net.java.bd.tools.security.BDCertGenerator">
-	<arg line="-root -dn &quot;CN=WriterRoot, OU=Studio, O=BDJCompany, C=US&quot; 7fff3456"/>
+	<arg value="-root"/>
+        <arg value="-dn"/>
+        <arg value="&quot;CN=WriterRoot, OU=Studio, O=BDJCompany, C=US&quot;"/>
+        <arg value="7fff3456"/>
         <classpath refid="sec.tools.path"/> 
     </java.tools>
     <java.tools classname="net.java.bd.tools.security.BDCertGenerator">
-	<arg line="-app -dn &quot;CN=WriterApp, OU=Production, O=BDJCompany, C=US&quot; 7fff3456"/>
+	<arg value="-app"/> 
+        <arg value="-dn"/> 
+        <arg value="&quot;CN=WriterApp, OU=Production, O=BDJCompany, C=US&quot;"/> 
+        <arg value="7fff3456"/>
         <classpath refid="sec.tools.path"/> 
     </java.tools>	
     <java.tools classname="net.java.bd.tools.security.BDSigner">
-	    <arg line="-debug ${HDC_DISK_BDMV}/JAR/${bdjo-name}.jar ${HDC_DISK_BDMV}/JAR/99999.jar"/>
+	    <arg value="-debug"/>
+            <arg value="${dist.dir}/${bdjo-name}.jar"/> 
+            <arg value="${dist.dir}/99999.jar"/>
        <classpath refid="sec.tools.path"/> 
     </java.tools>	
-    <copy file="app.discroot.crt" todir="${HDC_DISK_BDMV}/../CERTIFICATE/"/>
-    <copy file="app.discroot.crt" todir="${HDC_DISK_BDMV}/../CERTIFICATE/BACKUP/"/>
 </target>
 	
 <target name="security.check">
-   <available file="${security.home}/build/security.jar" type="file"
-   property="security.ok"/>
+   <available file="${security.jar}" type="file" property="security.ok"/>
    
    <fail unless="security.ok"
-       message="security.home property(${security.home}) seems to be invalid.  Please provide the location with the -D option to ant"/>       
+       message="security.jar property(${security.jar}) seems to be invalid.  Please provide the location with the -D option to ant"/>       
 </target>
 
 <target
     name="gen-bdjo-desc"
-    depends="gen-bdjo-desc-file, copy-bdmv-id">
+    depends="gen-bdjo-desc-file">
         
-    <copy file="${logger}" tofile="${HDC_DISK_BDMV}/JAR/99999.jar"/>
-    
-    <copy file="${dist.jar}" toDir="${HDC_DISK_BDMV}/JAR/"/>        
-    <copy file="${dist.jar}" toDir="${HDC_DISK_BDMV}/BACKUP/JAR/"/>
-    
-    <copy file="${dist.dir}/${bdjo-name}.bdjo" toDir="${HDC_DISK_BDMV}/BDJO/"/>
-    <copy file="${dist.dir}/${bdjo-name}.bdjo" toDir="${HDC_DISK_BDMV}/BACKUP/BDJO/"/>
 </target>    
 
-<target name="copy-bdmv-id">
-	<copy file="id.bdmv" toDir="${HDC_DISK_BDMV}/../CERTIFICATE/"/>
-	<copy file="id.bdmv" toDir="${HDC_DISK_BDMV}/../CERTIFICATE/BACKUP/"/>
+<target name="generate-bdmv-files">
+    <java.tools jar="${id.jar}">
+        <arg value="bdmv/id.xml"/>
+        <arg value="${dist.dir}/id.bdmv"/>
+    </java.tools>
+    <java.tools jar="${movieobject.jar}">
+        <arg value="bdmv/movieobject.xml"/>
+        <arg value="${dist.dir}/movieobject.bdmv"/>
+    </java.tools>
+    <java.tools jar="${index.jar}">
+        <arg value="bdmv/index.xml"/>
+        <arg value="${dist.dir}/index.bdmv"/>
+    </java.tools>
+</target>
+
+<target name="copy-to-bdmv"
+        depends="generate-bdmv-files, gen-bdjo-desc">
+    <mkdir dir="${HDC_DISK_BDMV}/AUXDATA"/>
+    <mkdir dir="${HDC_DISK_BDMV}/BDJO"/>
+    <mkdir dir="${HDC_DISK_BDMV}/CLIPINF"/>
+    <mkdir dir="${HDC_DISK_BDMV}/JAR"/>
+    <mkdir dir="${HDC_DISK_BDMV}/META"/>
+    <mkdir dir="${HDC_DISK_BDMV}/PLAYLIST"/>
+    <mkdir dir="${HDC_DISK_BDMV}/STREAM"/>
+    <mkdir dir="${HDC_DISK_BDMV}/../CERTIFICATE"/>
+
+    <copy todir = "${HDC_DISK_BDMV}/JAR">
+        <fileset dir="${dist.dir}">
+            <include name="*.jar"/>
+        </fileset>
+    </copy>
+    <copy todir = "${HDC_DISK_BDMV}/BDJO"
+          file="${dist.dir}/${bdjo-name}.bdjo"/>
+    <copy todir = "${HDC_DISK_BDMV}/../CERTIFICATE"
+          file="app.discroot.crt"/>
+    <copy todir="${HDC_DISK_BDMV}"
+          file="${dist.dir}/index.bdmv"/>
+    <copy todir="${HDC_DISK_BDMV}"
+          file="${dist.dir}/MovieObject.bdmv"/>
+    <copy todir="${HDC_DISK_BDMV}/../CERTIFICATE"
+          file="${dist.dir}/id.bdmv"/>
+
+    <copy todir="${HDC_DISK_BDMV}/../CERTIFICATE/BACKUP">
+        <fileset dir="${HDC_DISK_BDMV}/../CERTIFICATE"/>
+    </copy>
+    <copy todir="${HDC_DISK_BDMV}/BACKUP">
+        <fileset dir="${HDC_DISK_BDMV}">
+            <include name="index.bdmv"/>
+            <include name="MovieObject.bdmv"/>
+            <include name="BDJO/**"/>
+            <include name="CLIPINF/**"/>
+            <include name="JAR/**"/>
+            <include name="PLAYLIST/**"/>
+        </fileset>
+    </copy>
 </target>
     
 <target
@@ -88,9 +139,9 @@ depends="security.check">
 
     <move file="${bdjo-desc-file}.tmp" tofile="${bdjo-desc-file}"/>
     
-    <java.tools 
-        jar="${bdjoconverter.jar}">
-        <arg line="${bdjo-desc-file} ${dist.dir}/${bdjo-name}.bdjo"/>
+    <java.tools jar="${bdjoconverter.jar}">
+        <arg value="${bdjo-desc-file}"/> 
+        <arg value="${dist.dir}/${bdjo-name}.bdjo"/>
     </java.tools>
     
 </target>
