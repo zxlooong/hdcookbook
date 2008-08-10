@@ -42,14 +42,14 @@ depends="security.check">
     <java.tools classname="net.java.bd.tools.security.BDCertGenerator">
 	<arg value="-root"/>
         <arg value="-dn"/>
-        <arg value="&quot;CN=WriterRoot, OU=Studio, O=BDJCompany, C=US&quot;"/>
+        <arg value="CN=WriterRoot, OU=Production, O=BDJCompany"/>
         <arg value="7fff3456"/>
         <classpath refid="sec.tools.path"/> 
     </java.tools>
     <java.tools classname="net.java.bd.tools.security.BDCertGenerator">
 	<arg value="-app"/> 
         <arg value="-dn"/> 
-        <arg value="&quot;CN=WriterApp, OU=Production, O=BDJCompany, C=US&quot;"/> 
+        <arg value="CN=WriterApp, OU=Production, O=BDJCompany"/> 
         <arg value="7fff3456"/>
         <classpath refid="sec.tools.path"/> 
     </java.tools>	
@@ -80,8 +80,8 @@ depends="security.check">
         <arg value="${dist.dir}/id.bdmv"/>
     </java.tools>
     <java.tools jar="${movieobject.jar}">
-        <arg value="bdmv/movieobject.xml"/>
-        <arg value="${dist.dir}/movieobject.bdmv"/>
+        <arg value="bdmv/MovieObject.xml"/>
+        <arg value="${dist.dir}/MovieObject.bdmv"/>
     </java.tools>
     <java.tools jar="${index.jar}">
         <arg value="bdmv/index.xml"/>
