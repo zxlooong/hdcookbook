@@ -379,6 +379,10 @@ Here's BNF describing the syntax of a show file:
 	    # <activate> means "make the assembly activated"
 	    # <wall> means "if cell navigated to, stay in current state"
 	    # <null> means "it's an error if this cell can be navigated to"
+	    # The "( x y )" syntax is deprecated.  When such a cell is
+	    #   navigated to, it goes to the state that is located at
+	    #   the cell x,y (counting from 0).  The same effect can be
+	    #   achieved in a clearer way with the "[ state_name ]" syntax.
 
     visual_overrides ::= "{" visual_override * "}"
 
