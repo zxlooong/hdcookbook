@@ -82,7 +82,7 @@ setting sticky_images {
     "Graphics/Menu/Load_0006.png"
     "Graphics/Menu/Load_0007.png"
 	# We set the rotating yin/yang images to "sticky".  In this
-	# show, we just to this as a way of testing the sticky/unsticky
+	# show, we just do this as a way of testing the sticky/unsticky
 	# functionality.  Setting these images means that they won't
 	# be unloaded for as long as the show is active.  This can be
 	# tested by navigating to the S:NullSegment segment (which has
