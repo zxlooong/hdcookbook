@@ -110,6 +110,20 @@ public class SEShow extends Show {
     public boolean getNoShowFile() {
 	return noShowFile;
     }
+
+    /**
+     * Get the list of sticky images as a string array of the image file names.
+     **/
+    public String[] getStickyImages() {
+	if (stickyImages == null) {
+	    return null;
+	}
+	String[] result = new String[stickyImages.length];
+	for (int i = 0; i < result.length; i++) {
+	    result[i] = stickyImages[i].getName();
+	}
+	return result;
+    }
     
     /**
      * Get the object that represents the commands defined for this show
@@ -201,12 +215,12 @@ public class SEShow extends Show {
      **/
     @Override
     public void buildShow(Segment[] segments, Feature[] features, 
-    		          RCHandler[] rcHandlers,
+    		          RCHandler[] rcHandlers, String[] stickyImages,
 		          Hashtable publicSegments, Hashtable publicFeatures,
 		          Hashtable publicRCHandlers)
 	    throws IOException
     {
-	super.buildShow(segments, features, rcHandlers,
+	super.buildShow(segments, features, rcHandlers, stickyImages,
 		        publicSegments, publicFeatures, publicRCHandlers);
 	SEDoubleUseChecker checker = new SEDoubleUseChecker();
 	accept(checker);

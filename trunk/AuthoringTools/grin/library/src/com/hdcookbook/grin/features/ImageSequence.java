@@ -161,7 +161,6 @@ public class ImageSequence extends Feature implements Node {
                 images[i] = null;
             } else {
                 images[i] = ImageManager.getImage(fileNames[i]); 
-
             }
         }
     }

@@ -143,7 +143,6 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	registersButton = new JButton();
 	setTextFont(12);
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 	commandLabel.setText("Command:");
 
         commandText.addActionListener(new java.awt.event.ActionListener() {

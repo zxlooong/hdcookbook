@@ -184,11 +184,7 @@ public class GenericMain extends Frame implements AnimationContext {
         
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                }
-                System.exit(0);
+		exitGrinview();
             }
         });
 
@@ -231,6 +227,15 @@ public class GenericMain extends Frame implements AnimationContext {
         };
         addMouseMotionListener(mouseM);
         setVisible(true);
+    }
+
+    protected void exitGrinview() {
+	try {
+	    Thread.sleep(100);
+	} catch (InterruptedException ex) {
+	}
+	show.destroy();
+	System.exit(0);
     }
 
     protected float getFps() {

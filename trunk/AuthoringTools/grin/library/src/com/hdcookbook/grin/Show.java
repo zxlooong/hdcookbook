@@ -60,6 +60,8 @@ import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.SetTarget;
+import com.hdcookbook.grin.util.ImageManager;
+import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.SetupManager;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.Queue;
@@ -74,10 +76,11 @@ import java.io.IOException;
 
 
 /**
- * Represents a show.  A show is the top-level node in an enhancement.
+ * Represents a show.  A show is the top-level node in a scene graph.
  * It is composed of a number of segments.  A show progresses by moving
  * through segments; a show has exactly one active segment while it is
- * running.
+ * running.  A segment is composed of a number of visual features, plus
+ * a set of remote control handlers.
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
@@ -116,6 +119,17 @@ public class Show implements AnimationClient {
     protected Hashtable publicSegments;
     protected Hashtable publicFeatures;
     protected Hashtable publicRCHandlers;
+
+    /**
+     * This is the set of images that are "sticky".  Sticky images get
+     * loaded as normal (that is, by a feature that uses the image being 
+     * included in the setup clause of a segment), but they are never
+     * unloaded.  Thus, features that use sticky images will be
+     * prepared instantly if subsequently re-used.
+     * <p>
+     * This array may be null.
+     **/
+    protected ManagedImage[] stickyImages = null;
 
     private Segment currentSegment = null;
     private Segment[] segmentStack = new Segment[0];  // For push/pop
@@ -167,7 +181,7 @@ public class Show implements AnimationClient {
      * @throws IOException if anything goes wrong.
      **/
     public void buildShow(Segment[] segments, Feature[] features, 
-    		          RCHandler[] rcHandlers,
+    		          RCHandler[] rcHandlers, String[] stickyImages,
 		          Hashtable publicSegments, Hashtable publicFeatures,
 		          Hashtable publicRCHandlers)
 	    throws IOException 
@@ -175,6 +189,17 @@ public class Show implements AnimationClient {
 	this.segments = segments;
 	this.features = features;
 	this.rcHandlers = rcHandlers;
+	if (stickyImages != null) {
+	    this.stickyImages = new ManagedImage[stickyImages.length];
+	    for (int i = 0; i < stickyImages.length; i++) {
+		this.stickyImages[i] = ImageManager.getImage(stickyImages[i]);
+		    // This will never be null, even if the path doesn't refer
+		    // to a real image.  The library doesn't try to load images
+		    // until a feature that uses the image is prepared, so the
+		    // framework has no way of knowing if the image exists or
+		    // not at this time.
+	    }
+	}
 	this.publicSegments = publicSegments;
 	this.publicFeatures = publicFeatures;
 	this.publicRCHandlers = publicRCHandlers;
@@ -204,6 +229,14 @@ public class Show implements AnimationClient {
 	}
 	initialized = true;
 	this.component = component;
+	if (stickyImages != null) {
+	    for (int i = 0; i < stickyImages.length; i++) {
+		this.stickyImages[i].makeSticky();
+		    // This always succeeds, even if the actual image
+		    // file doesn't exist, because no attempt is made to
+		    // load the image here.
+	    }
+	}
 	popSegmentCommand = new ActivateSegmentCommand(this, false, true);
     	setupManager = new SetupManager(features.length);
 	setupManager.start();
@@ -229,6 +262,11 @@ public class Show implements AnimationClient {
 	}
 	for (int i = 0; i < features.length; i++) {
 	    features[i].destroy();
+	}
+	if (stickyImages != null) {
+	    for (int i = 0; i < stickyImages.length; i++) {
+		this.stickyImages[i].unmakeSticky();
+	    }
 	}
 	destroyed = true;
 	setupManager.stop();

@@ -105,14 +105,14 @@ public class ManagedSubImage extends ManagedImage {
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public void prepare(Component comp) {
 	mosaic.prepare(comp);
     }
 
     /**
-     * See superclass definition.
+     * @inheritDoc
      **/
     public synchronized void unprepare() {
 	mosaic.unprepare();

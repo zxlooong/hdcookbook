@@ -146,13 +146,22 @@ Here's BNF describing the syntax of a show file:
     	     (segment | feature | rc_handler | | mosaic_hint)* 
     	     "end_show"
 
-    setting ::= "setting" ( segment_stack_depth_setting | draw_targets_setting) 
-    		";"
+    setting ::=    segment_stack_depth_setting 
+                 | draw_targets_setting
+		 | sticky_images_setting
 
-    segment_stack_depth_setting := "segment_stack_depth" integer
+    segment_stack_depth_setting := "setting" "segment_stack_depth" integer ";"
 
-    draw_targets_setting ::= "draw_targets" "{" string* "}"
+    draw_targets_setting ::= "setting" "draw_targets" "{" string* "}" ";"
     	# If this isn't set, it defaults to { T:Default }
+
+    sticky_images_setting ::= "setting" "sticky_images" "{" string* "}" ";"
+	# This sets the list of file names for the images that are to be
+	# "sticky".  Sticky images aren't unloaded, even when no feature
+	# that uses them is in the the setup or active clause of the
+	# active segment.  Thus, the first time a sticky image is
+	# prepared it is loaded normally, but subsequent prepares happen
+	# instantly.
 
     exports ::= "exports" "segments" name_list
     			"features" name_list

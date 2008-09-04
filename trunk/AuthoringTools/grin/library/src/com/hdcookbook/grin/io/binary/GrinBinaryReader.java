@@ -317,9 +317,10 @@ public class GrinBinaryReader {
         intArrayConstants = readIntArrayConstants(in);
 	rectangleConstants = readRectangleConstants(in);
 	rectangleArrayConstants = readRectangleArrayConstants(in);
-        
+       
         int showSegmentStackDepth = in.readInt();
 	String[] showDrawTargets = in.readStringArray();
+        String[] stickyImages = in.readStringArray();
         show.setSegmentStackDepth(showSegmentStackDepth);
 	show.setDrawTargets(showDrawTargets);
         debuggable = in.readBoolean();
@@ -338,7 +339,7 @@ public class GrinBinaryReader {
         readContents(in, rcHandlerList);
         readContents(in, segmentList);
         
-	show.buildShow(segmentList, featureList, rcHandlerList, 
+	show.buildShow(segmentList, featureList, rcHandlerList, stickyImages,
 		       publicSegments, publicFeatures, publicRCHandlers);
     }
 

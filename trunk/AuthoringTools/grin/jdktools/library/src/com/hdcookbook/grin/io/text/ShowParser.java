@@ -218,6 +218,8 @@ public class ShowParser {
 		parseSegmentStackDepth();
 	    } else if ("draw_targets".equals(tok)) {
 		parseDrawTargets();
+	    } else if ("sticky_images".equals(tok)) {
+		parseStickyImages();
 	    } else {
 		lexer.reportError("Unrecognized setting \"" + tok + "\".");
 	    }
@@ -311,6 +313,12 @@ public class ShowParser {
 	}
 	parseExpected(";");
 	show.setDrawTargets(drawTargets);
+    }
+
+    private void parseStickyImages() throws IOException {
+	String[] stickyImages = parseStrings();
+	parseExpected(";");
+	builder.setStickyImages(stickyImages);
     }
 
     private void parseSegment(final int line) throws IOException {

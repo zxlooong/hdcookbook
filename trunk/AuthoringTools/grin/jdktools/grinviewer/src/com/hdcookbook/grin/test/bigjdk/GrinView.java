@@ -117,6 +117,11 @@ public class GrinView extends GenericMain {
 		screen.setLocation(x, y);
                 screen.setVisible(true);
 		screen.setFpsText("" + getFps());
+        	screen.addWindowListener(new java.awt.event.WindowAdapter() {
+		    public void windowClosing(java.awt.event.WindowEvent e) {
+			exitGrinview();
+		    }
+		});
             }
         });
     }
@@ -130,7 +135,7 @@ public class GrinView extends GenericMain {
         }
         
         return lines;
-    }     
+    }
 
     private String[] readShowText(String showName) throws IOException {
 	URL source = AssetFinder.getURL(showName);
@@ -496,8 +501,7 @@ public class GrinView extends GenericMain {
 	    m.doKeyboardCommand("f " + fps); // set fps	 
 	}
         
-	m.inputLoop();
-        
+	m.inputLoop();		// Never returns
 	System.exit(0);
     } 
     

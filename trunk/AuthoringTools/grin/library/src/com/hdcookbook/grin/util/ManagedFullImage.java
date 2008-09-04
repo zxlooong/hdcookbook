@@ -72,11 +72,10 @@ public class ManagedFullImage extends ManagedImage {
     private String name;
     private int numReferences = 0;
     private int numPrepares = 0;
-    Image image;		// Accessed by ManagedSubImage
+    Image image = null;		// Accessed by ManagedSubImage
 
     ManagedFullImage(String name) {
 	this.name = name;
-	this.image = AssetFinder.loadImage(name);
     }
 
     public String getName() {
@@ -84,14 +83,14 @@ public class ManagedFullImage extends ManagedImage {
     }
 
     public int getWidth() {
-	if (Debug.ASSERT && numPrepares < 1) {
+	if (Debug.ASSERT && image == null) {
 	    Debug.assertFail();
 	}
 	return image.getWidth(null);
     }
     
     public int getHeight() {
-	if (Debug.ASSERT && numPrepares < 1) {
+	if (Debug.ASSERT && image == null) {
 	    Debug.assertFail();
 	}
 	return image.getHeight(null);
@@ -110,28 +109,26 @@ public class ManagedFullImage extends ManagedImage {
     }
 
     /**
-     * Prepare this image for display in the given component, or any
-     * other component for the same graphics device.  This class reference
-     * counts, so there can be multiple calls to prepare.
-     *
-     * @see #unprepare()
+     * @inheritDoc
      **/
     public void prepare(Component comp) {
-	int num;
+	boolean load = false;
 	synchronized(this) {
 	    numPrepares++;
-	    num = numPrepares;
-	    if (image == null) {
+	    if (image == null && comp != null) {
 		image = AssetFinder.loadImage(name);
+		load = true;
 	    }
 	}
-	if (num == 1) {
+	if (load) {
 	    //
 	    // The JDK seems to put the image fetching thread priority
 	    // really high, which is the opposite of what we want.  By
 	    // yielding, we increase the odds that higher-priority animation
 	    // will be given a chance before our lower-priority setup thread
-	    // grabs the CPU with the image fetching thread.
+	    // grabs the CPU with the image fetching thread.  On all 
+	    // implementations, yielding in this manner should be at worst 
+	    // harmless.
 	    //
 	    Thread.currentThread().yield();
 	    MediaTracker tracker = new MediaTracker(comp);
@@ -148,14 +145,11 @@ public class ManagedFullImage extends ManagedImage {
     }
 
     /** 
-     * Undo a prepare.  We do reference counting; when the number of
-     * active prepares hits zero, we flush the image.
-     *
-     * @see #prepare(java.awt.Component)
+     * @inheritDoc
      **/
     public synchronized void unprepare() {
 	numPrepares--;
-	if (numPrepares == 0) {
+	if (numPrepares == 0 && image != null) {
 	    image.flush();
 	    image = null;
 	    if (Debug.LEVEL > 1) {

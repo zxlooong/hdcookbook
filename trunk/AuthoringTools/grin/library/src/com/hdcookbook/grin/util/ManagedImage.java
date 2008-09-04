@@ -83,16 +83,35 @@ abstract public class ManagedImage {
 
     abstract public int getHeight();
 
+    /**
+     * Add one to the reference count of this image.  This is unrelated
+     * to image loading and unloading.
+     **/
     abstract public void addReference();
 
+    /**
+     * Remove one from the reference count of this image.  This is unrelated
+     * to image loading and unloading.
+     **/
     abstract public void removeReference();
 
+    /**
+     * Determine if this image is referenced, by consulting its reference
+     * count.
+     **/
     abstract public boolean isReferenced();
 
     /**
      * Prepare this image for display in the given component, or any
      * other component for the same graphics device.  This class reference
      * counts, so there can be multiple calls to prepare.
+     * <p>
+     * Calling prepare(null) is equivalent to calling
+     * unprepare().  This is an implementation detail that is subject to change,
+     * and should not be relied upon by client code.
+     *
+     * @param  comp	A component to use for loading the image.  Clients
+     *			using ManagedImage should never pass in null.
      *
      * @see #unprepare()
      **/
@@ -100,11 +119,41 @@ abstract public class ManagedImage {
 
     /** 
      * Undo a prepare.  We do reference counting; when the number of
-     * active prepares hits zero, we flush the image.
+     * active prepares hits zero, and the "sticky" count reaches zero,
+     * we flush the image.
      *
      * @see #prepare(java.awt.Component)
+     * @see #makeSticky()
+     * @see #unmakeSticky()
      **/
     abstract public void unprepare();
+
+    /**
+     * Make this image "sticky".  An image that is sticky will be loaded the
+     * normal way when prepare(Component) is called, but it will not be unloaded
+     * when the count of active prepares reaches zero due to a call to
+     * unprepare().  The calls to makeSticky() are themselves reference-counted;
+     * an image is sticky until the sticky count reaches zero due to a call
+     * to unmakeSticky().
+     * <p>
+     * If an image is a tile within a mosaic, the entire mosaic will be held
+     * in memory as long as the mosaic tile is loaded.
+     **/
+    final public void makeSticky() {
+	prepare(null);
+    }
+
+    /**
+     * Undo the effects of one call to makeSticky().  This is described in
+     * more detail under makeSticky().
+     *
+     * @see #makeSticky()
+     * @see #unprepare()
+     * @see #prepare(java.awt.Component)
+     **/
+    final public void unmakeSticky() {
+	unprepare();
+    }
 
     public boolean equals(Object other) {
 	return this == other;

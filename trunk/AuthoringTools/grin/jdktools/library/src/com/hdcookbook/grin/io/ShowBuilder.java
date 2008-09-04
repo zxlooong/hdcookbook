@@ -107,6 +107,8 @@ public class ShowBuilder {
     private List<DeferredBuilder> deferredBuilders
     	= new ArrayList<DeferredBuilder>();
 
+    private String[] stickyImages = null;
+
     private ExtensionParser extensionParser;
     
     public ShowBuilder() {
@@ -217,6 +219,13 @@ public class ShowBuilder {
 	exportedRCHandlers = Arrays.asList(handlers);
     }
 
+    /**
+     * Called when a "sticky images" clause is enocuntered.
+     **/
+    public void setStickyImages(String[] stickyImages) {
+	this.stickyImages = stickyImages;
+    }
+
     /** 
      * Look up a segment in the list of all named segments.
      **/
@@ -258,7 +267,7 @@ public class ShowBuilder {
 	Hashtable publicRCHandlers 
 		= findPublic(namedRCHandlers, namedRCHandlers.keySet(),
 			     exportedRCHandlers, "RC Handler");
-	show.buildShow(segments, features, rcHandlers,
+	show.buildShow(segments, features, rcHandlers, stickyImages,
 		       publicSegments, publicFeatures, publicRCHandlers);
 	for (DeferredBuilder builder : deferredBuilders) {
 	    builder.finishBuilding(show);

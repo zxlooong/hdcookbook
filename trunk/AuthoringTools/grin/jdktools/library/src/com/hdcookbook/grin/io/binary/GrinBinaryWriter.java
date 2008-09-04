@@ -362,8 +362,8 @@ public class GrinBinaryWriter {
      * @throws IOException if writing to the DataOutputStream fails.
      */
     public void writeShow(DataOutputStream out) 
-            throws IOException {
-        
+            throws IOException 
+    {
         // The first item on the script should be a header.
         writeScriptIdentifier(out);
         
@@ -378,6 +378,7 @@ public class GrinBinaryWriter {
         // Write out information about the show itself.
         dos.writeInt(show.getSegmentStackDepth());
         dos.writeStringArray(show.getDrawTargets());
+	dos.writeStringArray(show.getStickyImages());
         dos.writeBoolean(isDebugging);
         dos.writeString(seShowCommands.getClassName());
         
