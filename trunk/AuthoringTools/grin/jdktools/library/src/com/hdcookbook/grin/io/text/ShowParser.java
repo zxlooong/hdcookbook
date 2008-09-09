@@ -1768,7 +1768,11 @@ public class ShowParser {
 	}
 	return result;
     }
-    
+   
+    //
+    // Parse a command.  The first token is passed in as argument, and
+    // remaining tokens are pulled from the lexer.
+    //
     private Command parseCommand(String tok) throws IOException {
         if ("activate_segment".equals(tok)) {
             return parseActivateSegment();
