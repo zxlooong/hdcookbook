@@ -87,8 +87,8 @@ public class SEShowCommand extends Command implements SENode {
     }
 
     /**
-     * Adds a sub-command to this command object.  Returns the index of this
-     * sub-command.  To execute it, run the java expression 
+     * Adds a sub-command to this command object.  To execute it, run 
+     * the java expression 
      * "runSubCommand(number);"
      * 
      * @param cmd   The command to add
