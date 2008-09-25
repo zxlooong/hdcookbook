@@ -74,6 +74,7 @@ public class SEShowCommand extends Command implements SENode {
     
     private SEShowCommands container;
     int commandNumber;
+    private String originalSource;
     private String grinviewMethodBody;
     private String xletMethodBody;
     private ArrayList<Command> subCommands = new ArrayList<Command>();
@@ -151,6 +152,20 @@ public class SEShowCommand extends Command implements SENode {
         } else {
             return grinviewMethodBody;
         }
+    }
+
+    /**
+     * Returns the original source as specified in Show script file.
+     */
+    public String getOriginalSource() {
+	 return originalSource;
+    }
+
+    /**
+     * Sets the original source as specified in Show file.
+     */
+    public void setOriginalSource(String originalSource) {
+	 this.originalSource = originalSource;
     }
     
     public void execute() {

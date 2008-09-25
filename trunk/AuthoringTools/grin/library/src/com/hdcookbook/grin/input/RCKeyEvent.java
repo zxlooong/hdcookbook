@@ -60,7 +60,10 @@ import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
+import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Vector;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 
@@ -271,6 +274,21 @@ public class RCKeyEvent {
      **/
     public static RCKeyEvent getKeyByName(String name) {
 	return (RCKeyEvent) keyByName.get(name);
+    }
+
+    /**
+     * Returns a vector of events turned-on by the given mask.
+     */
+    public static Vector getEventsFromMask(int mask) {
+        Collection values = keyByName.values();
+	Vector result = new Vector();
+        for (Iterator itr = values.iterator(); itr.hasNext();) {
+	    RCKeyEvent keyEvent = (RCKeyEvent)itr.next();
+            if ((mask & keyEvent.getBitMask()) != 0) {
+	        result.add(keyEvent);
+            }
+        }
+        return result;	
     }
 
     private static RCKeyEvent[] 

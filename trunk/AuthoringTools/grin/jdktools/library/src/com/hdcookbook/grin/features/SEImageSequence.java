@@ -114,7 +114,11 @@ public class SEImageSequence extends ImageSequence implements SENode {
     public String[] getFileNames() {
         return fileNames;
     }
-    
+
+    public int getLoopCount() {
+	return loopCount;
+    }
+
     public void setRepeat(boolean repeat) {
         this.repeat = repeat;
     }

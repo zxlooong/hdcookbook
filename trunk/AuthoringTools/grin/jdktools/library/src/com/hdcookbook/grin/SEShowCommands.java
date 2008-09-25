@@ -85,6 +85,7 @@ public class SEShowCommands  {
     private String className;   
     private String grinviewClassBody;
     private String xletClassBody;
+    private String originalSource;
     private Class showCommandsClass = null;
     private boolean triedShowCommandsClass = false;
     private SEShow show;
@@ -184,7 +185,15 @@ public class SEShowCommands  {
     public String getXletClassBody() {
         return this.xletClassBody;
     } 
-    
+
+    public void setOriginalSource(String originalSource) {
+	this.originalSource = originalSource;
+    }
+
+    public String getOriginalSource() {
+	return originalSource;
+    }
+
     private void checkForJavaCommandBody(String classBody) throws IOException {
         if (!classBody.contains("JAVA_COMMAND_BODY")) {
             throw new IOException("Command class needs to contain "

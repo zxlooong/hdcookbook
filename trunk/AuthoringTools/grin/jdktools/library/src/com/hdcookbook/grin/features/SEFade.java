@@ -101,6 +101,14 @@ public class SEFade extends Fade implements SENode {
     public boolean getSrcOver() {
        return srcOver;
     }
+
+    /**
+     * Internal use only
+     */
+    public int getLoopCount() {
+      return loopCount;
+    }
+
     
     /** 
      * Internal use only 

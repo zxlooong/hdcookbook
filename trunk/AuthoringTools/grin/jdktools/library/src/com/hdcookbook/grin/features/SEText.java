@@ -125,13 +125,29 @@ public class SEText extends Text implements SENode {
     public void setBackground(Color background) {
         this.background = background;
     }    
-    
+   
+    public int getXArg() {
+        return xArg;
+    }
+
     public void setXArg(int x) {
         this.xArg = x;
     }
-    
+
+    public int getYArg() {
+        return yArg;
+    }
+
     public void setYArg(int y) {
         this.yArg = y;
+    }
+
+    public int getAlignment() {
+	return alignment;
+    }
+
+    public int getLoopCount() {
+	return loopCount;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) 

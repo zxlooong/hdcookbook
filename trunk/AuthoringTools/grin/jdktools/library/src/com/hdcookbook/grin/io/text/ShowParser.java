@@ -243,11 +243,17 @@ public class ShowParser {
             parseExpected("[[");
             StringBuffer xletClassBody = new StringBuffer();
             StringBuffer grinviewClassBody = new StringBuffer();
-            readJavaSource(xletClassBody, grinviewClassBody, null);
+            StringBuffer originalSource = new StringBuffer();
+            originalSource.append("java_generated_class");
+            originalSource.append(" ");
+            originalSource.append(className);
+            originalSource.append(" [[\n");
+            readJavaSource(xletClassBody, grinviewClassBody, originalSource, null);
             SEShowCommands cmds = show.getShowCommands();
             cmds.setClassName(className);
             cmds.setXletClassBody(xletClassBody.toString());
             cmds.setGrinviewClassBody(grinviewClassBody.toString());
+            cmds.setOriginalSource(originalSource.toString());
             tok = lexer.getString();
         }
 
@@ -1985,10 +1991,14 @@ public class ShowParser {
         parseExpected("[[");
         StringBuffer xletBody = new StringBuffer();
         StringBuffer grinviewBody = new StringBuffer();
+	StringBuffer originalSource = new StringBuffer();
+        originalSource.append("java_command ");
+        originalSource.append("[[");
         SEShowCommand result = cmds.addNewCommand();
-        readJavaSource(xletBody, grinviewBody, result);
+        readJavaSource(xletBody, grinviewBody, originalSource, result);
         result.setXletMethodBody(xletBody.toString());
         result.setGrinviewMethodBody(grinviewBody.toString());
+        result.setOriginalSource(originalSource.toString());
         return result;
     }
 
@@ -2215,30 +2225,38 @@ public class ShowParser {
      * Read a java_source fragment.  This is terminated with a "]]", which
      * is consumed.  This recognizes the special sequences
      * XLET_ONLY_[[ java_source ]],  GRINVIEW_ONLY_[[ java_source ]]
-     * and GRIN_COMMAND_[[ java_source ]]
+     * and GRIN_COMMAND_[[ f ]]
      **/
     public void readJavaSource(StringBuffer xletSource, 
                                StringBuffer grinviewSource,
+                               StringBuffer originalSource,
                                SEShowCommand command)
                        throws IOException
     {
         for (;;) {
             String src = lexer.getStringExact();
+	    originalSource.append(src);
             if (src == null) {
                 lexer.reportError("EOF unexpected");
             } else if ("]]".equals(src)) {
                 return;
             } else if ("XLET_ONLY_[[".equals(src)) {
-                readJavaSource(xletSource, null, command);
+                readJavaSource(xletSource, null, originalSource, command);
             } else if ("GRINVIEW_ONLY_[[".equals(src)) {
-                readJavaSource(null, grinviewSource, command);
+                readJavaSource(null, grinviewSource, originalSource, command);
             } else {
                 if ("GRIN_COMMAND_[[".equals(src)) {
                     if (command == null) {
                         lexer.reportError("GRINVIEW_COMMAND_[[ unexpected");
                     }
-                    Command cmd = parseCommand(lexer.getString());
-                    parseExpected("]]");
+		    
+		    String cmdStr = lexer.getString();
+		    originalSource.append(' ');
+		    originalSource.append(cmdStr);
+		    originalSource.append(' ');
+                    Command cmd = parseCommand(cmdStr);
+		    parseExpected("]]");
+                    originalSource.append(" ]]");
                     src = command.addSubCommand(cmd);
                 }
                 if (xletSource != null) {

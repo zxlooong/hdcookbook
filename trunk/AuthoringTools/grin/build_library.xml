@@ -52,10 +52,22 @@ information or have any questions.
     </target>
     
     <target name="compile-jdk-library" depends="init-grin-jdk-library">
+        <!-- remove and re-create "generated_src" directory -->
+        <property name="gen_src_dir" value="${HDC_BUILD_DIR}/jdktools/generated_src"/>
+        <delete dir="${gen_src_dir}"/>
+        <mkdir dir="${gen_src_dir}"/>
+        <!-- use "xjc" tool to generate sources from XML schema -->
+        <exec executable="${java.home}/../bin/xjc">
+            <arg value="-d"/>
+            <arg value="${gen_src_dir}"/>
+            <arg value="jdktools/library/experimental/src/com/hdcookbook/grin/io/xml/show.xsd" />
+        </exec>
         <jdktools.javac
             destdir="${JDK_LIBRARY_DEST}">
+	    <src path="${gen_src_dir}" />     
             <src path="library/src" />                
-            <src path="jdktools/library/src" />
+            <src path="jdktools/library/src" />           
+	    <src path="jdktools/library/experimental/src" />           
         </jdktools.javac>    
     </target>
 

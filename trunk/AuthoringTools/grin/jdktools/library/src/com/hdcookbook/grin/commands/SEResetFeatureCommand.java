@@ -67,7 +67,11 @@ public class SEResetFeatureCommand extends ResetFeatureCommand implements SENode
     public SEResetFeatureCommand(SEShow show) {
         super(show);
     }
-    
+   
+    public Feature getFeature() {
+	   return feature;
+    }
+
     public void setFeature(Feature feature) {
 	this.feature = feature;
     }

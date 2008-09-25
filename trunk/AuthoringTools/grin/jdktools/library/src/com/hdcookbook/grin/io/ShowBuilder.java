@@ -376,7 +376,7 @@ public class ShowBuilder {
 				     loopCount, commands, SEScalingModel.class);
     }
 
-    private InterpolatedModel 
+    public InterpolatedModel 
     makeInterpolatedModel(String name, int[] frames, int[][] values, 
     			  int repeatFrame, int loopCount, Command[] commands, 
 			  Class clazz)
