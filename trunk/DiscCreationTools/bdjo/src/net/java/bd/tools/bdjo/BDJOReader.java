@@ -392,13 +392,13 @@ public final class BDJOReader {
             if (totalParamBytes > 0) {
                 int paramBytesRead = 0;
                 List<String> params = new ArrayList<String>();
-                while (paramBytesRead <= totalParamBytes) {
+                while (paramBytesRead < totalParamBytes) {
                     int paramLen = dis.readUnsignedByte();
                     paramBytesRead++;
-                    params.add(readUTF8String(dis, paramLen));
+		    params.add(readUTF8String(dis, paramLen));
                     paramBytesRead += paramLen;
                }
-                String[] paramsArr = new String[0];
+                String[] paramsArr = new String[params.size()];
                 params.toArray(paramsArr);
                 appDesc.setParameters(paramsArr);
             }
@@ -454,7 +454,6 @@ public final class BDJOReader {
         bdjo.setTableOfAccessiblePlayLists(readTableOfAccessiblePlayLists(dis));
         bdjo.setApplicationManagementTable(readApplicationManagementTable(dis));
         bdjo.setKeyInterestTable(dis.readInt());
-        
         int dirPathsLength = dis.readUnsignedShort();
         bdjo.setFileAccessInfo(readISO646String(dis, dirPathsLength));
         
