@@ -157,7 +157,7 @@ public class StreamAttribute {
             dout.writeByte(i);
             dout.write(new byte[3]);
         } else if (type.isAudioStream()) {
-            dout.write(1); // length
+            dout.write(5); // length
             dout.writeByte(getStreamCodingType()); 
             int i = getAudioPresentationType().ordinal() << 4 ;
             i |= getSamplingFrequency().ordinal();
