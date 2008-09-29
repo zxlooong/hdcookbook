@@ -310,10 +310,22 @@ Here's BNF describing the syntax of a show file:
 			    [ loop_count ]
 			    [ "end_commands" commands ] ";"
 	# "translator_model" can be replaced by the old name "translation"
+	#
+	# If you want to set the x,y position programmatically, just have
+	# one key frame.
 
     key_frame ::= frame_number x y interpolation_type
 
     interpolation_type ::= "linear" | "linear-relative"
+    	# linear is deprecated, and really means "position children so that
+	#	the upper-left hand corner is set to the absolute coordinates
+	#	presented here."
+	# linear-relative means "position children relative to the
+	#	position set within each child node"
+	# 
+	# non-relative positioning is deprecated because it requires GRIN
+	# to attempt to determine the upper-left hand corner of its children,
+	# which isn't always possible.
 
     translator ::= "feature" "translator" name translator_model_name 
     			"{" sub_feature "}" ";"

@@ -61,15 +61,18 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.util.Debug;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Color;
+import java.util.HashMap;
+import com.hdcookbook.grin.animator.RenderContext;
 
 
 /**
- * Display text.  LIke all features, the upper-left hand corner of
+ * Display text.  Like all features, the upper-left hand corner of
  * the visible text is given.
  *
  * @author Bill Foote (http://jovial.com)
@@ -91,6 +94,37 @@ public class Box extends Feature implements Node {
 
     public Box(Show show) {
         super(show);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup() || isActivated) {
+	    throw new IllegalStateException();
+	}
+	Box result = new Box(show);
+	result.x = x;
+	result.y = y;
+	result.width = width;
+	result.height = height;
+	result.outlineWidth = outlineWidth;
+	result.outlineColor = outlineColor;
+	result.fillColor = fillColor;
+	if (scaledBounds != null) {
+	    result.scaledBounds = new Rectangle(scaledBounds);
+	}
+	return result;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    protected void initializeClone(Feature original, HashMap clones) {
+	super.initializeClone(original, clones);
+	Box other = (Box) original;
+	scalingModel = (InterpolatedModel)
+                Feature.clonedReference(other.scalingModel, clones);
     }
 
     /**

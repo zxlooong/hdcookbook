@@ -63,12 +63,14 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.HashMap;
 
 /**
  * Represents a fixed image.
@@ -91,6 +93,38 @@ public class FixedImage extends Feature implements Node {
     
     public FixedImage(Show show) {
         super(show);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!setupMode || !imageSetup || isActivated) {
+	    throw new IllegalStateException();
+	}
+	FixedImage result = new FixedImage(show);
+	result.placement = placement;
+	result.fileName = fileName;
+	if (scaledBounds != null) {
+	    result.scaledBounds = new Rectangle(scaledBounds);
+	}
+	result.image = ImageManager.getImage(fileName);
+		// This increments the reference count of this ManagedImage,
+		// which is necessary because when the clone is destroyed,
+		// it will decrement that reference count.
+	result.imageSetup = true;
+	result.setupMode = true;
+	return result;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    protected void initializeClone(Feature original, HashMap clones) {
+	super.initializeClone(original, clones);
+	FixedImage other = (FixedImage) original;
+	scalingModel = (InterpolatedModel)
+                Feature.clonedReference(other.scalingModel, clones);
     }
 
     /**
@@ -125,8 +159,7 @@ public class FixedImage extends Feature implements Node {
     
     /**
      * Free any resources held by this feature.  It is the opposite of
-     * setup; each call to setup() shall be balanced by
-     * a call to unsetup(), and they shall *not* be nested.  
+     * initialize().
      * <p>
      * It's possible an active segment may be destroyed.  For example,
      * the last segment a show is in when the show is destroyed will

@@ -77,16 +77,21 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.net.URL;
 
 import javax.swing.JFileChooser;
 import javax.imageio.ImageIO;
 
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.binary.GrinBinaryReader;
+import com.hdcookbook.grin.io.text.ShowParser;
 import com.hdcookbook.grin.util.AssetFinder;
 
 /**
@@ -101,7 +106,7 @@ import com.hdcookbook.grin.util.AssetFinder;
 public class GenericMain extends Frame implements AnimationContext {
     
     protected SEShow show;
-    private GenericDirector director;
+    private Director director;
     
     private Graphics2D frameGraphics;
     private int frame;		// Current frame we're on
@@ -120,6 +125,8 @@ public class GenericMain extends Frame implements AnimationContext {
     private String initialSegmentName = null;
     private boolean doAutoTest = false;
     private Insets insets;
+
+    private String directorClassName = GenericDirector.class.getName();
 
     /**
      * Monitor to be held while coordinating a pause in the animation
@@ -160,8 +167,12 @@ public class GenericMain extends Frame implements AnimationContext {
             deviceConfig = config;
         } 
                
-        screenWidth = config.width / scaleDivisor;
-        screenHeight = config.height / scaleDivisor;
+        screenWidth = deviceConfig.width / scaleDivisor;
+        screenHeight = deviceConfig.height / scaleDivisor;
+    }
+
+    public void setDirectorClassName(String nm) {
+	directorClassName = nm;
     }
     
     
@@ -171,9 +182,15 @@ public class GenericMain extends Frame implements AnimationContext {
 
 	this.initialSegmentName = initialSegmentName;
         this.doAutoTest = doAutoTest;
-        
-	director = new GenericDirector(showName);
-	show = director.createShow(builder);
+      
+	try {
+	    Class cl = Class.forName(directorClassName);
+	    director = (Director) cl.newInstance();
+	} catch (Throwable t) {
+	    t.printStackTrace();
+	    System.exit(1);
+	}
+	show = createShow(showName, director, builder);
 
         setBackground(Color.black);
         setLayout(null);
@@ -228,6 +245,63 @@ public class GenericMain extends Frame implements AnimationContext {
         addMouseMotionListener(mouseM);
         setVisible(true);
     }
+
+    private SEShow createShow(String showName, Director director, 
+    			      ShowBuilder builder) 
+    {
+	SEShow show = new SEShow(director);
+	URL source = null;
+	BufferedReader rdr = null;
+        BufferedInputStream bis = null;
+	try {
+	    source = AssetFinder.getURL(showName);
+	    if (source == null) {
+		throw new IOException("Can't find resource " + showName);
+	    }
+            
+            if (!showName.endsWith(".grin")) {
+                rdr = new BufferedReader(
+                        new InputStreamReader(source.openStream(), "UTF-8"));
+                ShowParser p = new ShowParser(rdr, showName, show, builder);
+                p.parse();
+                rdr.close();
+            } else {
+                if (AssetFinder.tryURL("images.map") != null) {
+                    System.out.println("Found images.map, using mosaic.");
+                    AssetFinder.setImageMap("images.map");
+                } else {
+                    System.out.println("No images.map found");
+                }
+                bis = new BufferedInputStream(source.openStream());
+ 	        GrinBinaryReader reader = new GrinBinaryReader(bis);
+                reader.readShow(show);
+                bis.close();
+            }   
+	} catch (IOException ex) {
+	    ex.printStackTrace();
+	    System.out.println();
+	    System.out.println(ex.getMessage());
+	    System.out.println();
+	    System.out.println("Error trying to parse " + showName);
+            System.out.println("    URL:  " + source);
+	    System.exit(1);
+	} finally {
+	    if (rdr != null) {
+		try {
+		    rdr.close();
+		} catch (IOException ex) {
+		}
+	    }   
+            if (bis != null) {
+                try {
+                    bis.close();
+                } catch (IOException ex) {
+                }    
+            }
+	}
+        return show;
+    }
+
 
     protected void exitGrinview() {
 	try {

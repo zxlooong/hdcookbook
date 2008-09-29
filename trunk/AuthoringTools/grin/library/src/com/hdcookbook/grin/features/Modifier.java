@@ -61,6 +61,8 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.RenderContext;
 
+import java.util.HashSet;
+
 import java.awt.Graphics2D;
 
 /**
@@ -80,6 +82,14 @@ public abstract class Modifier extends Feature {
     
     public Modifier(Show show) {
         super(show);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addSubgraph(HashSet set) {
+	super.addSubgraph(set);
+	part.addSubgraph(set);
     }
 
     /**

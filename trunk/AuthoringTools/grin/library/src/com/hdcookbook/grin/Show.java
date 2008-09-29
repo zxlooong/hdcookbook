@@ -581,6 +581,17 @@ public class Show implements AnimationClient {
     // it's OK to proceed, or false if we've been interrupted 
     // and should bail out.
     //
+    // This is needed because the remote control key handlers execute
+    // show commands synchronously, in the AWT thread.  This means that
+    // the show must be in a safe state for the execution of commands
+    // before the keypress can be allowed in.
+    //
+    // Experiments were done with queuing the commands that result from
+    // keypresses to the command, but that caused problems, because 
+    // it meant that a command keypress might be processed resulting
+    // in a state-changing command (like activate_segment), and then
+    // another keypress might come in before that command runs.
+    //
     private synchronized boolean waitForInputOK() {
 	while ((!inputOK) && (!destroyed)) {
 	    try {

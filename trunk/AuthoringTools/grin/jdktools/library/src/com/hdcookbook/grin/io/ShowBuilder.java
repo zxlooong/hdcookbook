@@ -339,7 +339,10 @@ public class ShowBuilder {
     public InterpolatedModel makeTimer(String name, int numFrames, 
     				       boolean repeat, Command[] commands)
     {
-	int[] frames = new int[] { 0,  numFrames };
+	int[] frames = new int[] { 0,  numFrames-1 };
+		// That means keyframes from 0 through numFrames-1, which is
+		// a total of numFrames frames.  For example, a timer that's
+		// one frame long runs from frame 0 through frame 0.
 	int[][] values = new int[0][];
 	int repeatFrame;
 	if (repeat) {

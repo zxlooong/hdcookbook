@@ -59,13 +59,16 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Represents a clipped version of another feature.  When painting, a
@@ -78,7 +81,6 @@ public class Clipped extends Modifier implements Node {
     protected Rectangle clipRegion;
     protected Rectangle lastClipRegion = new Rectangle();
     private Rectangle tmpI = null;
-
 	//
 	// Here, we make an inner class of RenderContext.  We
 	// pass this instance to our child; it modifies calls to the
@@ -115,6 +117,22 @@ public class Clipped extends Modifier implements Node {
     
     public Clipped(Show show) {
         super(show);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup()) {
+	    throw new IllegalStateException();
+	}
+	Clipped result = new Clipped(show);
+	if (clipRegion != null) {
+	    result.clipRegion = new Rectangle(clipRegion);
+	}
+	result.part = part.makeNewClone(clones);
+	clones.put(part, result.part);
+	return result;
     }
 
     /**

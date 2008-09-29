@@ -59,14 +59,17 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Causes its child to be painted in SRC_OVER mode, that is, with
@@ -108,6 +111,20 @@ public class SrcOver extends Modifier implements Node {
     
     public SrcOver(Show show) {
         super(show);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup() || activated) {
+	    throw new IllegalStateException();
+	}
+	SrcOver result = new SrcOver(show);
+	result.part = part.makeNewClone(clones);
+	clones.put(part, result.part);
+	return result;
+	    // initializeClone() not needed
     }
 
     /**

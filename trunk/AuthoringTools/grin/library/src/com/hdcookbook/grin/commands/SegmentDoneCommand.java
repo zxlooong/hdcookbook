@@ -87,8 +87,8 @@ public class SegmentDoneCommand extends Command implements Node {
     }
  
     public void readInstanceData(GrinDataInputStream in, int length) 
-            throws IOException {
-                
+            throws IOException 
+    {
         in.readSuperClassData(this);
         // nothing to do...
     }

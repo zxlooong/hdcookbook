@@ -55,8 +55,11 @@
 
 package com.hdcookbook.grin.test.bigjdk;
 
-import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.util.AssetFinder;
 
 import com.hdcookbook.grin.io.text.ExtensionParser;
 import java.io.BufferedInputStream;
@@ -247,11 +250,30 @@ public class GrinView extends GenericMain {
 	}
     }
 
-    String getSegmentName(Object[] path) {
+    //
+    // Handles an "invoke" (a double-click) on a show node.  Returns
+    // a string describing the action performed.
+    //
+    String invokeShowNode(Object[] path) {
+	Feature part = null;
 	for (int i = path.length - 1; i >= 0; i--) {
 	    ShowNode node = (ShowNode) path[i];
 	    if (node.getContents() instanceof Segment) {
-		return ((Segment) node.getContents()).getName();
+		Segment s = (Segment) node.getContents();
+		show.activateSegment(s);
+		return "Activated segment " + s.getName() + ".";
+	    } else if (node.getContents() instanceof Assembly) {
+		if (part != null) {
+		    Assembly a = (Assembly) node.getContents();
+		    a.setCurrentFeature(part);
+		    return "Activated part " + part.getName()
+		    	   + " in assembly " + a.getName() + ".";
+		}
+		part = (Feature) node.getContents();
+	    } else if (node.getContents() instanceof Feature) {
+		part = (Feature) node.getContents();
+	    } else {
+		part = null;
 	    }
 	}
 	return null;
@@ -346,6 +368,7 @@ public class GrinView extends GenericMain {
         System.out.println("                -scale <number>");
         System.out.println("                -segment <segment name to activate>");      
         System.out.println("                -extension_parser <a fully qualified classname>");       
+        System.out.println("                -director <a fully qualified classname>");       
         System.out.println("                -automate");
         System.out.println("");
         System.out.println("            -assets and -asset_dir may be repeated to form a search path.");
@@ -355,6 +378,7 @@ public class GrinView extends GenericMain {
         System.out.println("            every named segment in a given show with an 1 second interval.");
         System.out.println("            -extension_parser is needed when the show is a text file and");
         System.out.println("            uses a custom feature or command subclass.");
+	System.out.println("            -director tells GrinView to instantiate the given class as Direcor.");
 	System.out.println();
 	System.exit(1);
     }
@@ -370,6 +394,7 @@ public class GrinView extends GenericMain {
 	String scaleDivisor = null;
         DeviceConfig deviceConfig = null;
         String extensionParserName = null;
+        String director = null;
         boolean doAutoTest = false;
 	while (argsUsed < args.length - 1) {
 	    if ("-fps".equals(args[argsUsed])) {
@@ -434,6 +459,13 @@ public class GrinView extends GenericMain {
 		argsUsed++;
 		extensionParserName = args[argsUsed];
 		argsUsed++; 
+	    } else if ("-director".equals(args[argsUsed])) {
+                if (director != null) {
+                    usage();
+                }
+		argsUsed++;
+		director = args[argsUsed];
+		argsUsed++; 
             } else if ("-automate".equals(args[argsUsed])) {
                 doAutoTest = true;
                 argsUsed++;
@@ -473,6 +505,9 @@ public class GrinView extends GenericMain {
             AssetFinder.setImageMap(imageMap);
         }
 	GrinView m = new GrinView();
+	if (director != null) {
+	    m.setDirectorClassName(director);
+	}
 	if (background != null) {
 	    m.setBackground(background);
 	}

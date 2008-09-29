@@ -57,6 +57,7 @@ package com.hdcookbook.grin.features;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -94,6 +95,36 @@ public class SETranslator extends Translator implements SENode {
     public void setModel(InterpolatedModel model) {
 	this.model = model;
     }
+
+    public void setup(InterpolatedModel model, Feature part) {
+	super.setup(part);
+	this.model = model;
+    }
+    
+    /**
+     * Called from the parser for the x offset, useful
+     * only when our model uses absolute coordinates
+     **/
+    public void setupAbsoluteXOffset(int x) {
+	this.fx = x;
+    }
+
+    /**
+     * Called from the parser for the y offset, useful
+     * only when our model uses absolute coordinates
+     **/
+    public void setupAbsoluteYOffset(int y) {
+	this.fy = y;
+    }
+
+    /**
+     * Called from the parser and binary reader to determine if our model
+     * uses absolute coordinates.  Absolute coordinates are deeprecated.
+     **/
+    public void setupModelIsRelative(boolean b) {
+	modelIsRelative = b;
+    }
+
 
     
     public void writeInstanceData(GrinDataOutputStream out) 

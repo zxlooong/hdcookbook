@@ -1049,13 +1049,23 @@ public class ShowParser {
 	    int y = lexer.getInt();
 	    keyframes.addElement(new int[] { frameNum, x, y } );
             String interpolation = lexer.getString();
+	    boolean thisIsRelative = false;
             if ("linear".equals(interpolation)) {
-                isRelative = false;
+                thisIsRelative = false;
             } else if ("linear-relative".equals(interpolation)) {
-                isRelative = true;
+                thisIsRelative = true;
             } else {
                 lexer.reportError("linear or linear-relative expected");
             }
+	    if (keyframes.size() == 1) {
+		if (!thisIsRelative) {
+		    lexer.reportWarning("Deprecated non-relative linear interpolation; consider linear-relative instead");
+		}
+	    } else if (thisIsRelative != isRelative) {
+		lexer.reportError("Inconsistent use of linear vs. linear-relative; all keyframes must be the same.");
+	    }
+	    isRelative = thisIsRelative;
+
 	}
 	String tok = lexer.getString();
 	int repeatFrame = -1;

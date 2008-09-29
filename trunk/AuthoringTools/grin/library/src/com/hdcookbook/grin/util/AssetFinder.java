@@ -247,6 +247,11 @@ public class AssetFinder  {
 		if (f.exists()) {
 		    try {
 			return f.toURL();
+                            // When compiled against desktop JDK, this will
+                            // generate a warning about the method being
+                            // deprecated.  Ignore that; the suggested
+                            // replacement is "f.toURI().toURL()", which
+                            // doesn't exist in PBP.
 		    } catch (Exception ex) {
 			// This should never happen
 			if (Debug.LEVEL > 0) {

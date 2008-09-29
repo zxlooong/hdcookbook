@@ -60,6 +60,7 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Graphics2D;
@@ -67,6 +68,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Color;
 import java.io.IOException;
+import java.util.HashMap;
 
 
 /**
@@ -133,7 +135,7 @@ public class Text extends Feature implements Node {
 	// Integer.MAX_VALUE means "infinite"
     protected Color background;
 
-    private boolean isActivated;
+    private boolean isActivated = false;
     private int alignedX;
     private int alignedY;
     private int ascent;
@@ -149,6 +151,39 @@ public class Text extends Feature implements Node {
     public Text(Show show) {
         super(show);
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup() || isActivated) {
+	    throw new IllegalStateException();
+	}
+	Text result = new Text(show);
+	result.alignment = alignment;
+	result.xArg = xArg;
+	result.yArg = yArg;
+	result.strings = strings;
+	result.vspace = vspace;
+	result.font = font;
+	result.colors = colors;
+	result.currColor = currColor;
+	result.lastColor = lastColor;
+	result.loopCount = loopCount;
+	result.background = background;
+	result.alignedX = alignedX;
+	result.alignedY = alignedY;
+	result.ascent = ascent;
+	result.descent = descent;
+	result.width = width;
+	result.height = height;
+	result.colorIndex = colorIndex;
+	result.loopsRemaining = loopsRemaining;
+	result.changed = changed;
+	return result;
+	    // initializeClone() not needed
+    }
+
     
     /**
      * @inheritDoc

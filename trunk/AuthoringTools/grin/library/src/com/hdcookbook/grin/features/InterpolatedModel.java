@@ -66,6 +66,7 @@ import com.hdcookbook.grin.util.Debug;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * An InterpolatedModel is a feature that controls one or more integer
@@ -140,13 +141,43 @@ public class InterpolatedModel extends Feature implements Node {
     public InterpolatedModel(Show show) {
         super(show);
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup() || isActivated) {
+	    throw new IllegalStateException();
+	}
+	InterpolatedModel result = new InterpolatedModel(show);
+	result.frames = frames;
+	result.currValues = new int[currValues.length];
+	System.arraycopy(currValues, 0, result.currValues, 0, currValues.length);
+	result.values = values;
+	result.repeatFrame = repeatFrame;
+	result.loopCount = loopCount;
+	result.currFrame = currFrame;
+	result.currIndex = currIndex;
+	result.repeatIndex = repeatIndex;
+	result.loopsRemaining = loopsRemaining;
+	return result;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    protected void initializeClone(Feature original, HashMap clones) {
+	super.initializeClone(original, clones);
+	InterpolatedModel other = (InterpolatedModel) original;
+	endCommands = Feature.cloneCommands(other.endCommands, clones);
+    }
  
     /**
      * Give the current value for the given field
      *
      * @param	fieldNum 	The field number, counting from 0
      **/
-    public final int getCurrValue(int fieldNum) {
+    public final int getField(int fieldNum) {
 	if (Debug.ASSERT && !isActivated) {
 	    Debug.assertFail("InterpolatedModel " + getName()+" not activated");
 	}
@@ -225,7 +256,7 @@ public class InterpolatedModel extends Feature implements Node {
 	    }
 	    // now repeatFrame-1 < frames[repeatIndex + 1]
 	    // and repeatFrame-1 >= frames[repeatIndex]
-	}       
+	}
     }
 
     /**
@@ -290,7 +321,13 @@ public class InterpolatedModel extends Feature implements Node {
 	int dist = frames[nextIndex] - frames[currIndex];
 	int distNext = frames[nextIndex] - currFrame;
 	int distLast = currFrame - frames[currIndex];
-	if (Debug.ASSERT && (distNext < 0 || distLast < 0)) {
+	if (Debug.ASSERT && (distLast < 0 
+			     || (distNext < 0 && frames[nextIndex] != 0))) 
+	{
+	    // Let me unpack that.  distNext, the distance to the next value,
+	    // should never be less than zero, except for one special
+	    // case.  That special case is a one-frame timer, because
+	    // the frames array for a one-frame timer contains { 0 , 0 }
 	    Debug.assertFail();
 	}
 	for (int i = 0; i < currValues.length; i++) {
@@ -302,6 +339,7 @@ public class InterpolatedModel extends Feature implements Node {
 	    }
 	}
 	if (distNext <= 0) {
+		// It will be -1 in the case of a one-frame timer
 	    currIndex = nextIndex;
 	    if (currIndex+1 >= frames.length) {
 		if (loopCount != Integer.MAX_VALUE) {
@@ -380,10 +418,10 @@ public class InterpolatedModel extends Feature implements Node {
 	    Debug.assertFail("InterpolatedModel " + getName()+" not activated");
 	}
 
-	int dx = getCurrValue(SCALE_X_FIELD);
-	int dy = getCurrValue(SCALE_Y_FIELD);
-	int xf = getCurrValue(SCALE_X_FACTOR_FIELD);
-	int yf = getCurrValue(SCALE_Y_FACTOR_FIELD);
+	int dx = getField(SCALE_X_FIELD);
+	int dy = getField(SCALE_Y_FIELD);
+	int xf = getField(SCALE_X_FACTOR_FIELD);
+	int yf = getField(SCALE_Y_FACTOR_FIELD);
 
 	x = (x - dx) * xf;
 	if (x < 0) {

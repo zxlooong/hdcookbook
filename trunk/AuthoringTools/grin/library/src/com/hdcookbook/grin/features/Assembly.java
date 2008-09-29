@@ -60,10 +60,13 @@ import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.RenderContext;
-
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.util.Debug;
+
 import java.io.IOException;
 import java.awt.Graphics2D;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * An assembly is a feature composed of other features.  It's a bit
@@ -89,6 +92,42 @@ public class Assembly extends Feature implements Node {
 	this.partNames = partNames;
 	this.parts = parts;
 	currentFeature = parts[0];
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup() || activated) {
+	    throw new IllegalStateException();
+	}
+	Assembly result = new Assembly(show);
+	int found = -1;
+	result.partNames = partNames;
+	result.parts = new Feature[parts.length];
+	for (int i = 0; i < parts.length; i++) {
+	    if (currentFeature == parts[i]) {
+		found = i;
+	    }
+	    result.parts[i] = parts[i].makeNewClone(clones);
+	    clones.put(parts[i], result.parts[i]);
+	}
+	if (found != -1) {
+	    result.currentFeature = result.parts[found];
+	}
+	// result.activated remains false
+	return result;
+	// No initializeClone() of this feature is needed.
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addSubgraph(HashSet set) {
+	super.addSubgraph(set);
+	for (int i = 0; i < parts.length; i++) {
+	    parts[i].addSubgraph(set);
+	}
     }
     
     /**
@@ -166,6 +205,11 @@ public class Assembly extends Feature implements Node {
      * the GRIN framewwork will want to set the current feature with: <pre>
      *     show.runCommand(new ActivatePartCommand(assembly, part))
      * </pre>
+     * <p>
+     * This really should have been called setCurrentPart() for symmetry
+     * with getCurrentPart().  Sorry about that!
+     *
+     * @see #getCurrentPart()
      **/
     public void setCurrentFeature(Feature feature) {
 	synchronized(show) {	// It's already held, but this is harmless
@@ -237,6 +281,8 @@ public class Assembly extends Feature implements Node {
 
     /** 
      * Get the currently active part within this assembly.
+     *
+     * @see setCurrentFeature(com.hdcookbook.grin.Feature)
      **/
     public Feature getCurrentPart() {
 	return currentFeature;

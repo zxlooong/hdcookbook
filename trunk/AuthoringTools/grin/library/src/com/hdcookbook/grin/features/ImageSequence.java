@@ -71,6 +71,7 @@ import com.hdcookbook.grin.util.Debug;
 import java.io.IOException;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.HashMap;
 
 /**
  * An image sequence does "cell" animation.  It consists of a number
@@ -120,7 +121,60 @@ public class ImageSequence extends Feature implements Node {
     public ImageSequence(Show show) {
         super(show);
     }
-    
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup() || isActivated) {
+	    throw new IllegalStateException();
+	}
+	ImageSequence result = new ImageSequence(show);
+	result.placements = placements;
+	result.fileNames = fileNames;
+	result.repeat = repeat;
+	if (scaledBounds != null) {
+	    result.scaledBounds = new Rectangle(scaledBounds);
+	}
+	result.loopCount = loopCount;
+	result.images = images;
+	for (int i = 0; i < images.length; i++) {
+	    ManagedImage mi = ImageManager.getImage(fileNames[i]); 
+		// This increments the reference count of this ManagedImage,
+		// which is necessary because when the clone is destroyed,
+		// it will decrement that reference count.
+	    if (Debug.ASSERT && mi != images[i]) {
+		Debug.assertFail();
+	    }
+	}
+	result.setupMode = true;
+	result.imagesSetup = imagesSetup;
+	result.nextFrameCalls = nextFrameCalls;
+	result.currFrame = currFrame;
+	result.activeModelCount = activeModelCount;	// 0
+	result.atEnd = atEnd;
+	result.loopsRemaining = loopsRemaining;
+	result.lastImage = lastImage;
+	result.currImage = currImage;
+	result.currPlacement = currPlacement;
+	return result;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    protected void initializeClone(Feature original, HashMap clones) {
+	super.initializeClone(original, clones);
+	ImageSequence other = (ImageSequence) original;
+	scalingModel = (InterpolatedModel)
+                Feature.clonedReference(other.scalingModel, clones);
+	endCommands = Feature.cloneCommands(other.endCommands, clones);
+	model = (ImageSequence) Feature.clonedReference(other.model, clones);
+		// Remeber, we're not active now, so it's OK for us to
+		// refer to a different ImageSequence as our model without
+		// worrying about activeModelCount.
+    }
+
     /**
      * @inheritDoc
      **/

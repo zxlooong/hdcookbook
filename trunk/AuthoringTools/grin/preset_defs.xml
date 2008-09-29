@@ -27,6 +27,7 @@ information or have any questions.
     
     <property file="../../user.vars.properties"/>	
     <property file="../../vars.properties"/>	
+    <property file="grin.properties"/>
      
     <target name="init-preset-defs" depends="set-javac, set-java">
         <tstamp/>

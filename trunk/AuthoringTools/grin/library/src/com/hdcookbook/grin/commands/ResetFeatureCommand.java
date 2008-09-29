@@ -60,6 +60,7 @@ import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * A GRIN command to reset a feature to the state it is in when activated.
@@ -75,6 +76,19 @@ public class ResetFeatureCommand extends Command implements Node {
 
     public ResetFeatureCommand(Show show) {
         super(show);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public Command cloneIfNeeded(HashMap featureClones) {
+	Feature featureClone = (Feature) featureClones.get(feature);
+	if (featureClone == null) {
+	    return this;
+	}
+	ResetFeatureCommand result = new ResetFeatureCommand(show);
+	result.feature = featureClone;
+	return result;
     }
     
     public void execute() {

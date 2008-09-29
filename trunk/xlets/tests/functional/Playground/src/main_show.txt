@@ -211,7 +211,7 @@ feature assembly F:TextAssembly {
 
 feature timer F:ChangeSceneGraphTimer 1 repeat {
 	java_command [[
-	    if (random.nextInt(50) == 42) {
+	    if (random.nextInt(80) == 42) {
 		GRIN_COMMAND_[[
 		    activate_part F:TextAssembly fading ;
 		]]

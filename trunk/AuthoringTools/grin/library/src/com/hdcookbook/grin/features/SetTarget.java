@@ -59,11 +59,14 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.HashMap;
 
 /**
  * Causes its child use a different target in its RenderContext.
@@ -82,6 +85,22 @@ public class SetTarget extends Modifier implements Node {
     
     public SetTarget(Show show) {
         super(show);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup()) {
+	    throw new IllegalStateException();
+	}
+	SetTarget result = new SetTarget(show);
+	result.part = part.makeNewClone(clones);
+	clones.put(part, result.part);
+	result.target = target;
+	result.targetName = targetName;
+	return result;
+	    // initializeClone() not needed
     }
     
     /**

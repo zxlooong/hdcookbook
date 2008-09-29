@@ -59,13 +59,16 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.HashMap;
 import java.io.IOException;
 
 /**
@@ -104,6 +107,22 @@ public class GuaranteeFill extends Modifier implements Node {
     
     public GuaranteeFill(Show show) {
         super(show);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup() || activated) {
+	    throw new IllegalStateException();
+	}
+        GuaranteeFill result = new GuaranteeFill(show);
+	result.part = part.makeNewClone(clones);
+	clones.put(part, result.part);
+	result.guaranteed = guaranteed;
+	result.fills = fills;
+	return result;
+	// No initializeClone() of this feature is needed.
     }
 
     /**

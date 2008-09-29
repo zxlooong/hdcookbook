@@ -82,9 +82,6 @@ public class Game {
     private final static int STATE_GAME_OVER = 2;
     private int state = STATE_INITIAL;
     
-    private long gameStartTime = 0;
-    private long gameCurrentTime = 0;
-    
     private GunBunnyXlet xlet;
 
     private Bunny bunny;

@@ -55,7 +55,10 @@
 
 package com.hdcookbook.grin.commands;
 
+import java.util.HashMap;
+
 import com.hdcookbook.grin.Show;
+
 
 /**
  * Common base class of all GRIN commands.  GRIN defers anything that
@@ -82,6 +85,40 @@ public abstract class Command {
      * whatever action it was created to do.
      **/
     public abstract void execute();
+
+    /**
+     * Return this command, or if needed, a copy of this command.
+     * <p>
+     * Most commands don't have any data members that contain mutable
+     * state, that is, data memebers whose values are modified (e.g.
+     * when the command is executed).  Also, most commands don't
+     * refer to part of a scene graph.  For this reason, when a subtree
+     * of a scene graph is cloned, most of the cloned features can
+     * just re-use the same Command objects in their endCommands
+     * arrays.
+     * <p>
+     * However, some commands to contain references to features.  If
+     * a command in a subtree being cloned refers to a feature in that
+     * subtree, then the cloned command should refer to the cloned feature.
+     * Commands that do this should override this method to provide a copy
+     * of the command, with the feature references mapeped over.
+     * <p>
+     * Further, it's possible that a command subclass might contain a
+     * data member that gets modified, e.g. during command execution.
+     * This is probably bad form, and none of the GRIN commands do this,
+     * but if you make a command subclass that does, you should override
+     * this method so that cloned commands get a new instance of your
+     * command subclass.
+     * <p>
+     * The default implementation of this method returns the current
+     * instances.
+     *
+     * @param featureClones HashMap<Feature, Feature> mapping an original
+     *				feature to its clone.
+     **/
+    public Command cloneIfNeeded(HashMap featureClones) {
+	return this;
+    }
 
     /**
      * This method is obsolete, and should not be overridden by any

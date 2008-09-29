@@ -65,6 +65,7 @@ import com.hdcookbook.grin.util.Debug;
 
 import java.awt.Graphics2D;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * A Translator wraps other features, and adds movement taken from a
@@ -115,11 +116,6 @@ public class Translator extends Modifier implements Node {
 	//
     private ChildContext childContext = new ChildContext();
 
-    public void setup(InterpolatedModel model, Feature part) {
-	super.setup(part);
-	this.model = model;
-    }
-    
     class ChildContext extends RenderContext {
 	RenderContext	parent;
 
@@ -146,27 +142,33 @@ public class Translator extends Modifier implements Node {
     }
 
     /**
-     * Called from the parser and binary reader for the x offset, useful
-     * only when our model uses absolute coordinates
+     * @inheritDoc
      **/
-    public void setupAbsoluteXOffset(int x) {
-	this.fx = x;
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup() || activated) {
+	    throw new IllegalStateException();
+	}
+	Translator result = new Translator(show);
+	result.part = part.makeNewClone(clones);
+	clones.put(part, result.part);
+	result.fx = fx;
+	result.fy = fy;
+	result.modelIsRelative = modelIsRelative;
+	result.dx = dx;
+	result.dy = dy;
+	result.lastDx = lastDx;
+	result.lastDy = lastDy;
+	return result;
     }
 
     /**
-     * Called from the parser and binary reader for the y offset, useful
-     * only when our model uses absolute coordinates
+     * @inheritDoc
      **/
-    public void setupAbsoluteYOffset(int y) {
-	this.fy = y;
-    }
-
-    /**
-     * Called from the parser and binary reader to determine if our model
-     * uses absolute coordinates.  Absolute coordinates are deeprecated.
-     **/
-    public void setupModelIsRelative(boolean b) {
-	modelIsRelative = b;
+    protected void initializeClone(Feature original, HashMap clones) {
+	super.initializeClone(original, clones);
+	Translator other = (Translator) original;
+	model = (InterpolatedModel)
+                Feature.clonedReference(other.model, clones);
     }
 
     /**
@@ -208,8 +210,8 @@ public class Translator extends Modifier implements Node {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	dx = model.getCurrValue(X_FIELD);
-	dy = model.getCurrValue(Y_FIELD);
+	dx = model.getField(X_FIELD);
+	dy = model.getField(Y_FIELD);
         if (!modelIsRelative) {
             dx -= fx;
             dy -= fy;
@@ -224,7 +226,7 @@ public class Translator extends Modifier implements Node {
      * @inheritDoc
      **/
     public int getX() {
-	int x = model.getCurrValue(X_FIELD);
+	int x = model.getField(X_FIELD);
 	if (!modelIsRelative) {
 	    x -= fx;
 	}
@@ -236,7 +238,7 @@ public class Translator extends Modifier implements Node {
      * @inheritDoc
      **/
     public int getY() {
-	int y = model.getCurrValue(Y_FIELD);
+	int y = model.getField(Y_FIELD);
 	if (!modelIsRelative) {
 	    y -= fy;
 	}

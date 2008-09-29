@@ -402,11 +402,10 @@ public class GrinViewScreen extends javax.swing.JFrame {
     // When a node is double-clicked inthe showTree
     //
     private void showTreeDoubleClick(Object[] path) {
-	String seg = main.getSegmentName(path);
-	if (seg != null) {
-	    commandText.setText("s " + seg);
-	    runTextCommand("s " + seg);
-	} 
+	String result = main.invokeShowNode(path);
+	if (result != null) {
+	    setResultText(result);
+	}
     }
 
     private void runTextCommand(String cmd) {

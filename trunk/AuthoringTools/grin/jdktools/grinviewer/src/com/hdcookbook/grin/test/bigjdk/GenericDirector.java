@@ -55,18 +55,8 @@
 
 package com.hdcookbook.grin.test.bigjdk;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.net.URL;
 
 import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.io.ShowBuilder;
-import com.hdcookbook.grin.io.binary.GrinBinaryReader;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.util.AssetFinder;
 
 /**
  * This is a subclass of the GRIN director class that fakes out
@@ -77,68 +67,7 @@ import com.hdcookbook.grin.util.AssetFinder;
  */
 public class GenericDirector extends Director {
    
-    private String showName;
-
-    public GenericDirector(String showName) {
-	this.showName = showName;
+    public GenericDirector() {
     }
   
-    /**
-     * Create a show.  This is called by the main control class of
-     * this debug tool.
-     **/
-    public SEShow createShow(ShowBuilder builder) {
-	SEShow show = new SEShow(this);
-	URL source = null;
-	BufferedReader rdr = null;
-        BufferedInputStream bis = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-            
-            if (!showName.endsWith(".grin")) {
-                rdr = new BufferedReader(
-                        new InputStreamReader(source.openStream(), "UTF-8"));
-                ShowParser p = new ShowParser(rdr, showName, show, builder);
-                p.parse();
-                rdr.close();
-            } else {
-                if (AssetFinder.tryURL("images.map") != null) {
-                    System.out.println("Found images.map, using mosaic.");
-                    AssetFinder.setImageMap("images.map");
-                } else {
-                    System.out.println("No images.map found");
-                }
-                bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(bis);
-                reader.readShow(show);
-                bis.close();
-            }   
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
-            System.out.println("    URL:  " + source);
-	    System.exit(1);
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }   
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException ex) {
-                }    
-            }
-	}
-        return show;
-    }
-
 }

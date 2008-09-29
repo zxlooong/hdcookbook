@@ -61,10 +61,13 @@ import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Graphics2D;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Represents a group of features that are all activated at the same
@@ -75,8 +78,18 @@ import java.io.IOException;
  *   @author     Bill Foote (http://jovial.com)
  **/
 public class Group extends Feature implements Node {
-    
-    protected Feature[] parts;
+   
+    // The parts of this group as present in the original scene graph:
+    private Feature[] parts;
+
+    // The parts that are currently visible within this group.  This
+    // will be identical to parts, unless it has been modified by
+    // a call from and xlet to resetVisibleParts().
+    //
+    // See the documentation of resetVisibleParts()
+    //
+    private Feature[] visibleParts;
+
     private boolean activated = false;
 
     public Group(Show show) {
@@ -84,10 +97,64 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * Get the parts that make up this group.
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (!isSetup() || activated) {
+	    throw new IllegalStateException();
+	}
+	Group result = new Group(show);
+	result.parts = new Feature[parts.length];
+	for (int i = 0; i < parts.length; i++) {
+	    result.parts[i] = parts[i].makeNewClone(clones);
+	    clones.put(parts[i], result.parts[i]);
+	}
+	// result.activated remains false
+	return result;
+	// No initializeClone() of this feature is needed.
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    protected void initializeClone(Feature original, HashMap clones) {
+	super.initializeClone(original, clones);
+	Group other = (Group) original;
+	if (other.visibleParts == other.parts) {
+	    visibleParts = parts;
+	} else {
+	    visibleParts = new Feature[other.visibleParts.length];
+	    for (int i = 0; i < visibleParts.length; i++) {
+	    	Feature f = other.visibleParts[i];
+		visibleParts[i] = Feature.clonedReference(f, clones);
+	    }
+	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addSubgraph(HashSet set) {
+	super.addSubgraph(set);
+	for (int i = 0; i < parts.length; i++) {
+	    parts[i].addSubgraph(set);
+	}
+    }
+
+    /**
+     * Get the parts that make up this group in the original scene graph.
      **/
     public Feature[] getParts() {
 	return parts;
+    }
+
+    /**
+     * Set the parts that make up this group.  This may only be
+     * called when the object is initially being populated.
+     **/
+    protected void setParts(Feature[] parts) {
+	this.parts = parts;
+	this.visibleParts = parts;
     }
 
     /**
@@ -95,8 +162,8 @@ public class Group extends Feature implements Node {
      **/
     public int getX() {
 	int x = Integer.MAX_VALUE;
-	for (int i = 0; i < parts.length; i++) {
-	    int val = parts[i].getX();
+	for (int i = 0; i < visibleParts.length; i++) {
+	    int val = visibleParts[i].getX();
 	    if (val < x) {
 		x = val;
 	    }
@@ -109,8 +176,8 @@ public class Group extends Feature implements Node {
      **/
     public int getY() {
 	int y = Integer.MAX_VALUE;
-	for (int i = 0; i < parts.length; i++) {
-	    int val = parts[i].getY();
+	for (int i = 0; i < visibleParts.length; i++) {
+	    int val = visibleParts[i].getY();
 	    if (val < y) {
 		y = val;
 	    }
@@ -144,18 +211,61 @@ public class Group extends Feature implements Node {
     }
 
     /**
+     * Re-sets the parts that are visible in this group to a new set.  
+     * This method may be used to make features created with cloneSubgraph()
+     * visible.  Indeed, with the feeatures built into GRIN, this is the only
+     * way to display a cloned feature.  Such features don't need to be set 
+     * up in the way  that normal features are (via Feature.setup() which is
+     * balanced by Feature.unsetup()), but they do need to be cloned from
+     * features that <i>have</i> been set up.
+     * <p>
+     * This method may be called by
+     * xlet code, but it <b>must only</b> be called within a command 
+     * body or inside of Director.notifyNextFrame().
+     * <p>
+     * If called with a non-null argument, then this group must be in
+     * the set up state.  If the argument is null and we're not set up,
+     * then we must also not be activated.
+     *
+     * @param visibleParts	An array of parts.  We take
+     *				ownership of the array.  A value of null
+     *				re-sets this group to its original state.
+     *
+     * @see com.hdcookbook.grin.Feature#cloneSubgraph()
+     **/
+    public void resetVisibleParts(Feature[] visibleParts) {
+	if (Debug.ASSERT && !isSetup()) {
+	    if (visibleParts != null || activated) {
+		Debug.assertFail();
+	    }
+	}
+	if (visibleParts == null) {
+	    visibleParts = parts;
+	}
+	if (activated) {
+	    for (int i = 0; i < visibleParts.length; i++) {
+		visibleParts[i].activate();
+	    }
+	    for (int i = 0; i < this.visibleParts.length; i++) {
+		this.visibleParts[i].deactivate();
+	    }
+	}
+	this.visibleParts = visibleParts;
+    }
+
+    /**
      * @inheritDoc
      **/
     protected void setActivateMode(boolean mode) {
 	// This is synchronized to only occur within model updates.
 	activated = mode;
 	if (mode) {
-	    for (int i = 0; i < parts.length; i++) {
-		parts[i].activate();
+	    for (int i = 0; i < visibleParts.length; i++) {
+		visibleParts[i].activate();
 	    }
 	} else {
-	    for (int i = 0; i < parts.length; i++) {
-		parts[i].deactivate();
+	    for (int i = 0; i < visibleParts.length; i++) {
+		visibleParts[i].deactivate();
 	    }
 	}
     }
@@ -164,6 +274,13 @@ public class Group extends Feature implements Node {
      * @inheritDoc
      **/
     protected void setSetupMode(boolean mode) {
+	//
+	// Note that setup is  only done on the original scene graph;
+	// cloned features are exempt from setup/unsetup.  This is
+	// enforced by only doing setup on the original scene graph,
+	// and by only setting cloned features into a scene graph by
+	// virtue of a group.
+	//
 	if (mode) {
 	    for (int i = 0; i < parts.length; i++) {
 		parts[i].setup();
@@ -179,6 +296,9 @@ public class Group extends Feature implements Node {
      * @inheritDoc
      **/
     public void doSomeSetup() {
+	//
+	// See note about cloned features in setSetupMode()
+	//
 	for (int i = 0; i < parts.length; i++) {
 	    if (parts[i].needsMoreSetup()) {
 		parts[i].doSomeSetup();
@@ -192,6 +312,9 @@ public class Group extends Feature implements Node {
      * @inheritDoc
      **/
     public boolean needsMoreSetup() {
+	//
+	// See note about cloned features in setSetupMode()
+	//
 	for (int i = 0; i < parts.length; i++) {
 	    if (parts[i].needsMoreSetup()) {
 		return true;
@@ -204,8 +327,8 @@ public class Group extends Feature implements Node {
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {
-	for (int i = 0; i < parts.length; i++) {
-	    parts[i].addDisplayAreas(context);
+	for (int i = 0; i < visibleParts.length; i++) {
+	    visibleParts[i].addDisplayAreas(context);
 	}
     }
 
@@ -213,8 +336,8 @@ public class Group extends Feature implements Node {
      * @inheritDoc
      **/
     public void paintFrame(Graphics2D gr) {
-	for (int i = 0; i < parts.length; i++) {
-	    parts[i].paintFrame(gr);
+	for (int i = 0; i < visibleParts.length; i++) {
+	    visibleParts[i].paintFrame(gr);
 	}
     }
 
@@ -222,15 +345,15 @@ public class Group extends Feature implements Node {
      * @inheritDoc
      **/
     public void nextFrame() {
-	for (int i = 0; i < parts.length; i++) {
-	    parts[i].nextFrame();
+	for (int i = 0; i < visibleParts.length; i++) {
+	    visibleParts[i].nextFrame();
 	}
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 
-            throws IOException {
-                
+            throws IOException 
+    {
         in.readSuperClassData(this);
-        this.parts = in.readFeaturesArrayReference();
+	setParts(in.readFeaturesArrayReference());
     }
 }

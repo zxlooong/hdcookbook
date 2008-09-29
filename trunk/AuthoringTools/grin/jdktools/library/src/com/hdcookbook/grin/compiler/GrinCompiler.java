@@ -82,7 +82,6 @@ public class GrinCompiler {
             throw new IOException("output directory " + outputDir 
 	    			+ " not found.");
         }
-        
         MosaicMaker mm = new MosaicMaker(shows, f);         
 	mm.init();
 	mm.makeMosaics();        

@@ -169,33 +169,33 @@ public class MainDirector extends Director {
 		// Mess around with the X,Y center of scaling, and the
 		// scale factors.
 
-	if (random.nextInt(48) == 42) {
+	if (random.nextInt(88) == 42) {
 	    scaler.setField(scaler.SCALE_X_FIELD, 780 + random.nextInt(400));
 	}
-	if (random.nextInt(48) == 42) {
+	if (random.nextInt(88) == 42) {
 	    scaler.setField(scaler.SCALE_Y_FIELD, 410 + random.nextInt(300));
 	}
-	if (random.nextInt(48) == 42) {
+	if (random.nextInt(88) == 42) {
 	    scaler.setField(scaler.SCALE_X_FACTOR_FIELD, 
 	    			500 + random.nextInt(1000));
 	}
-	if (random.nextInt(48) == 42) {
+	if (random.nextInt(88) == 42) {
 	    scaler.setField(scaler.SCALE_Y_FACTOR_FIELD, 
 	    			500 + random.nextInt(1000));
 	}
 
 		// Randomly change the translation of the boxed stuff
 
-	if (random.nextInt(48) == 42) {
+	if (random.nextInt(88) == 42) {
 	    boxPos.setField(Translator.X_FIELD, -600 + random.nextInt(700));
 	}
-	if (random.nextInt(48) == 42) {
+	if (random.nextInt(88) == 42) {
 	    boxPos.setField(Translator.Y_FIELD, -300 + random.nextInt(400));
 	}
 
 		// Scramble the text in entertaining ways
 
-	if (random.nextInt(30) == 21) {
+	if (random.nextInt(50) == 21) {
 	    String[] result = new String[2];
 	    String[] src = { "Press", "enter", "to", "return" };
 	    result[0] = scrambleText(src, 4, result[0]);
@@ -207,11 +207,11 @@ public class MainDirector extends Director {
 
 		// Make the boxed stuff fade in and out, but mostly
 		// in, and make it smooth.
-	if (random.nextInt(50) == 42) {
+	if (random.nextInt(100) == 42) {
 	    fadeGoal = random.nextFloat();
 	    fadeGoal = 1.0f - fadeGoal * fadeGoal;  // Bias toward visibility
 	}
-	fadeAlpha = 0.9f * fadeAlpha + 0.1f * fadeGoal;
+	fadeAlpha = 0.95f * fadeAlpha + 0.05f * fadeGoal;
 	if (fadeAlpha < 0f) {
 	    fadeAlpha = 0f;
 	} else if (fadeAlpha > 1f) {

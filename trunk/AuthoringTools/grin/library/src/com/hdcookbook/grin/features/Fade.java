@@ -59,6 +59,7 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
@@ -70,6 +71,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.AlphaComposite;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Modifies a child feature by applying an alpha value when drawing in
@@ -92,7 +94,6 @@ public class Fade extends Modifier implements Node {
     protected int[] keyAlphas;
     protected boolean srcOver;
     protected int repeatFrame;	// Integer.MAX_VALUE for "stick at end"
-    private boolean isActivated = false;
     private int alphaIndex;
     protected int loopCount;	
     	// # of times to repeat images before sending end commands
@@ -141,6 +142,38 @@ public class Fade extends Modifier implements Node {
     public Fade(Show show) {
         super(show);
     }  
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	if (activated || alphas == null) {
+	    throw new IllegalStateException();
+	}
+	Fade result = new Fade(show);
+	result.part = part.makeNewClone(clones);
+	clones.put(part, result.part);
+	result.alphas = alphas;
+	result.opaqueAlpha = opaqueAlpha;
+	result.srcOver = srcOver;
+	result.repeatFrame = repeatFrame;
+	result.alphaIndex = alphaIndex;
+	result.loopCount = loopCount;
+	result.loopsRemaining = loopsRemaining;
+	result.currAlpha = currAlpha;
+	result.lastAlpha = lastAlpha;
+	return result;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    protected void initializeClone(Feature original, HashMap clones) {
+	super.initializeClone(original, clones);
+	Fade other = (Fade) original;
+	endCommands = Feature.cloneCommands(other.endCommands, clones);
+    }
+
     
     /**
      * @inheritDoc

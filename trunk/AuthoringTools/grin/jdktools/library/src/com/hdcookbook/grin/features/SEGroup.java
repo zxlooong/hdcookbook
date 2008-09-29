@@ -74,7 +74,7 @@ public class SEGroup extends Group implements SENode {
      * Called from the parser
      **/
     public void setup(Feature[] parts) { 
-	this.parts = parts;
+	setParts(parts);
     }
     
     public void writeInstanceData(GrinDataOutputStream out) 

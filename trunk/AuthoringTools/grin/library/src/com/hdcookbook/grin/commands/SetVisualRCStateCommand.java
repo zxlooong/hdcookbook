@@ -60,6 +60,7 @@ import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.input.VisualRCHandler;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.util.Debug;
 import java.io.IOException;
 
 
@@ -117,10 +118,14 @@ public class SetVisualRCStateCommand extends Command implements Node {
     }
 
     public String toString() {
-	return super.toString() + " : " + handler 
-			        + " (" + activated + ", " 
-				+ handler.getStateName(state) + ", "
-                                + runCommands + " )";
+	if (Debug.LEVEL > 0) {
+	    return super.toString() + " : " + handler 
+				    + " (" + activated + ", " 
+				    + handler.getStateName(state) + ", "
+				    + runCommands + " )";
+	} else {
+	    return super.toString();
+        }
     }
     
     public void readInstanceData(GrinDataInputStream in, int length) 
