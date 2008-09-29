@@ -80,7 +80,7 @@ public class Main {
     * A driver method for the Main.convert(String, String).
     * 
     * @param args   Arguments. Requires the name of the text-based GRIN script to read.
-    * @see          #convert(String[], File[], String, ExtensionParser, String, boolean, boolean)
+    * @see          #convert(String[], File[], String[], ExtensionParser, String, boolean, boolean)
     **/
    public static void main(String[] args) {
        

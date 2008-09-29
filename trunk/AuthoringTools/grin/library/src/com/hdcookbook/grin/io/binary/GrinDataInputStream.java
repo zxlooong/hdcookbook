@@ -72,9 +72,10 @@ import java.io.InputStream;
  * that can handle certain Objects and Object arrays, including null.
  * This class is used by the GrinBinaryReader to read in information about the
  * show nodes.
+ * <p>
+ * See also GrinDataOutputStream in the JavaSE tools.
  * 
  * @see GrinBinaryReader
- * @see GrinDataOutputStream
  */
 public class GrinDataInputStream extends DataInputStream {
 
@@ -338,10 +339,11 @@ public class GrinDataInputStream extends DataInputStream {
     *    ....
     * }
     * </pre>
+    * <p>
+    * See also GrinDataOutputStream's writeNull and writeNonNull methods
+    * in the JavaSE tools.
     * @return boolean whether the object is null.
     * @throws java.io.IOException
-    * @see GrinDataOutputStream#writeNull
-    * @see GrinDataOutputStream#writeNonNull
     */
    public boolean isNull() throws IOException {
        return (readByte() == Constants.NULL);
@@ -355,10 +357,14 @@ public class GrinDataInputStream extends DataInputStream {
     *     <li>The name of a Feature
     *     <li>The sub-feature "part" of a Modifier if this Feature is a Modifier
     * </ul> 
+    * 
+    * <p>
+    * See also GrinDataOutputStream's writeSuperClassData(Feature) method
+    * in the JavaSE tools.
+    * 
     * @param feature the feature type of populate base data with.
     * @throws java.io.IOException
     * 
-    * @see GrinDataOutputStream#writeSuperClassData(Feature)
     */
     public void readSuperClassData(Feature feature) 
             throws IOException 
@@ -383,10 +389,14 @@ public class GrinDataInputStream extends DataInputStream {
     *     <li>Whether the node is public or private
     *     <li>The name of a RCHandler
     * </ul> 
+    * 
+    * <p>
+    * See also GrinDataOutputStream's writeSuperClassData(RCHandler)
+    * method in the JavaSE tools.
+    * 
     * @param  handler RCHandler instance to populate data.
     * @throws java.io.IOException
     * 
-    * @see GrinDataOutputStream#writeSuperClassData(RCHandler)
     */    
     public void readSuperClassData(RCHandler handler) 
             throws IOException {
@@ -407,10 +417,13 @@ public class GrinDataInputStream extends DataInputStream {
     *     <li>Whether the node is public or private
     *     <li>The name of a Segment
     * </ul> 
+    * 
+    * <p>
+    * See also GrinDataOutputStream's writeSuperClassData(Segment) method
+    * in the JavaSE tools.
+    * 
     * @param  segment RCHandler instance to populate data.
     * @throws java.io.IOException
-    * 
-    * @see GrinDataOutputStream#writeSuperClassData(Segment)
     */     
     public void readSuperClassData(Segment segment) 
             throws IOException {
@@ -428,11 +441,12 @@ public class GrinDataInputStream extends DataInputStream {
     * Reads in information common to all Command types.  
     * 
     * There is no shared data for Command class currently.
+    * <p>
+    * See also GrinDataOutputStream's writeSuperClassData(Command) method
+    * in the JavaSE tools.
     * 
     * @param  command Command instance to populate data.
     * @throws java.io.IOException
-    * 
-    * @see GrinDataOutputStream#writeSuperClassData(Command)
     */ 
     public void readSuperClassData(Command command) {
         // nothing to do for the command.

@@ -231,7 +231,7 @@ public class Group extends Feature implements Node {
      *				ownership of the array.  A value of null
      *				re-sets this group to its original state.
      *
-     * @see com.hdcookbook.grin.Feature#cloneSubgraph()
+     * @see com.hdcookbook.grin.Feature#cloneSubgraph(java.util.HashMap)
      **/
     public void resetVisibleParts(Feature[] visibleParts) {
 	if (Debug.ASSERT && !isSetup()) {

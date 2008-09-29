@@ -133,7 +133,7 @@ public abstract class Command {
      * command's execute method.
      *
      * @deprecated
-     * @see com.hdcookbook.grin.Show.deferNextCommands()
+     * @see com.hdcookbook.grin.Show#deferNextCommands()
      **/
     final public boolean deferNextCommands() {
 	return false;

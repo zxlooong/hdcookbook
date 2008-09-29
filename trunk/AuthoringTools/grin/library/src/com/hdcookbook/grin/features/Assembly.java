@@ -282,7 +282,7 @@ public class Assembly extends Feature implements Node {
     /** 
      * Get the currently active part within this assembly.
      *
-     * @see setCurrentFeature(com.hdcookbook.grin.Feature)
+     * @see #setCurrentFeature(com.hdcookbook.grin.Feature)
      **/
     public Feature getCurrentPart() {
 	return currentFeature;

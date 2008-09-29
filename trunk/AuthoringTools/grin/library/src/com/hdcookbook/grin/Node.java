@@ -62,8 +62,8 @@ import java.io.IOException;
  * All show elements (Segments, Features, Commands, RCHandlers) that
  * are constructed from the binary file are expected
  * to implement this interface.
- * 
- * @see SENode
+ * <p>
+ * See also the SENode interface for JavaSE-based tools.
  */
 public interface Node {
     

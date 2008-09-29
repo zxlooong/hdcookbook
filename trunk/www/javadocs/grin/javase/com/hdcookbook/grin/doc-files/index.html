@@ -146,13 +146,22 @@ Here's BNF describing the syntax of a show file:
     	     (segment | feature | rc_handler | | mosaic_hint)* 
     	     "end_show"
 
-    setting ::= "setting" ( segment_stack_depth_setting | draw_targets_setting) 
-    		";"
+    setting ::=    segment_stack_depth_setting 
+                 | draw_targets_setting
+		 | sticky_images_setting
 
-    segment_stack_depth_setting := "segment_stack_depth" integer
+    segment_stack_depth_setting := "setting" "segment_stack_depth" integer ";"
 
-    draw_targets_setting ::= "draw_targets" "{" string* "}"
+    draw_targets_setting ::= "setting" "draw_targets" "{" string* "}" ";"
     	# If this isn't set, it defaults to { T:Default }
+
+    sticky_images_setting ::= "setting" "sticky_images" "{" string* "}" ";"
+	# This sets the list of file names for the images that are to be
+	# "sticky".  Sticky images aren't unloaded, even when no feature
+	# that uses them is in the the setup or active clause of the
+	# active segment.  Thus, the first time a sticky image is
+	# prepared it is loaded normally, but subsequent prepares happen
+	# instantly.
 
     exports ::= "exports" "segments" name_list
     			"features" name_list
@@ -172,10 +181,11 @@ Here's BNF describing the syntax of a show file:
         # May contain the special sequences:
         #   XLET_ONLY_[[ java_source ]]
         #   GRINVIEW_ONLY_[[ java_source ]]
-        #   GRIN_COMMAND_[[ java_source ]]
+        #   GRIN_COMMAND_[[ command ]]
 
     segment ::= "segment" name ["active" feature_list] ["setup" feature_list]
-    			["rc_handlers" name_list]
+    			[ "rc_handlers" name_list ]
+			[ "on_entry" commands ]
 			[ ( "next" | "setup_done")  commands]  ";"
 
     feature_list ::= name_list
@@ -193,14 +203,16 @@ Here's BNF describing the syntax of a show file:
 		         file_name "{" name_or_continuation * "}" 
 			 	   extension [ "repeat" ]
     		       [ "scaling_model" name ]
-		       [ "model" feature_name | "end_commands" commands] ";"
+		       ( "model" feature_name | image_seq_end ) ";"
 	    # "linked_to" is accepted for "model", for backwards compatibility.
 	    # In both cases, the model, if specified,  must be a different 
 	    # image_sequence with the same number of images in the sequence.
 
     image_seq_placement ::= image_placement | "{" image_placement* "}"
-    	    # if there is a list of image placements in a fixed_image,
+    	    # if there is a list of image placements in a image_sequence,
 	    # it must have the same length as the images array.
+
+    image_seq_end ::= [ loop_count ] [ "end_commands" commands ]
 
     image_placement ::= x y | "(" im_x im_y [ "scale" x y "mills" ] ")"
 	    # A scale factor or -1000 in either or both directions can be
@@ -218,7 +230,7 @@ Here's BNF describing the syntax of a show file:
     name_or_continuation ::= "+" | "-" | name	# "+" means "repeat last frame",
      						# "-" means "empty"
 
-    assembly ::= "feature" "assembly" name "{" assembly_part * "}" ";"
+    assembly ::= "feature" "assembly" "{" assembly_part * "}" ";"
 
     assembly_part ::= name sub_feature
 
@@ -238,9 +250,12 @@ Here's BNF describing the syntax of a show file:
 	# A menu_assembly is converted into a normal assembly with a bunch
 	# of automatically-generated anonymous groups as its parts.
 
-    text ::= "feature" "text" name x y text_strings font_spec color_spec 
+    text ::= "feature" "text" name text_pos text_strings font_spec color_spec 
     		[ "background" color_entry ] ";"
-    
+
+    text_pos ::= [ "left" | "middle" | "right" ] x
+    		 [ "top" | "baseline" | "bottom" ] y
+
     text_strings ::= string | "{" string * "}" [ "vspace" integer ]
 
     font_spec ::= font_name font_style font_size 
@@ -249,9 +264,11 @@ Here's BNF describing the syntax of a show file:
 
     font_size ::= int		# Size in points (which is the same as pixels)
 
-    color_spec ::= "{" color_entry * "}" 
+    color_spec ::= "{" color_entry * "}"  [ loop_count ]
 
     color_entry ::= "+" | color_value
+
+    loop_count ::= "loop_count" ( "infinite" | integer )
 
     group ::= "feature" "group" name "{" sub_feature * "}" ";"
 
@@ -264,11 +281,13 @@ Here's BNF describing the syntax of a show file:
     fade ::= "feature" "fade" name sub_feature
     		[ "src_over" ] "{" ( frame_number alpha "linear" ) * "}" 
 		[ "repeat" frame_number ] 
+		[ loop_count ]
 		[ "end_commands" commands ] ";"
 
     scaling_model ::= "feature" "scaling_model" name 
 		"{" scale_key_frame* "}"
 		[ "repeat" frame_number ] 
+		[ loop_count ]
 		[ "end_commands" commands ] ";"
 	# There must be >= 1 scale_key_frame
     
@@ -288,12 +307,25 @@ Here's BNF describing the syntax of a show file:
     translator_model ::= "feature" "translator_model" name 
 			    "{" key_frame * "}" 
 			    [ "repeat" frame_number ] 
+			    [ loop_count ]
 			    [ "end_commands" commands ] ";"
 	# "translator_model" can be replaced by the old name "translation"
+	#
+	# If you want to set the x,y position programmatically, just have
+	# one key frame.
 
     key_frame ::= frame_number x y interpolation_type
 
     interpolation_type ::= "linear" | "linear-relative"
+    	# linear is deprecated, and really means "position children so that
+	#	the upper-left hand corner is set to the absolute coordinates
+	#	presented here."
+	# linear-relative means "position children relative to the
+	#	position set within each child node"
+	# 
+	# non-relative positioning is deprecated because it requires GRIN
+	# to attempt to determine the upper-left hand corner of its children,
+	# which isn't always possible.
 
     translator ::= "feature" "translator" name translator_model_name 
     			"{" sub_feature "}" ";"
@@ -311,10 +343,11 @@ Here's BNF describing the syntax of a show file:
 
     command ::= activate_segment | activate_part | segment_done 
     		    | deprecated_invoke_assembly_cell | set_visual_rc_state
+		    | reset_feature | sync_display
 		    | other_command | java_command
 
     activate_segment ::= "activate_segment" segment_name [ "&lt;push&gt;" ] ";"
-    			 | "activate_segment" "&lt;pop&gt;" ";"
+    			 | "activate_segment" "&lt;pop&gt;"  ";"
 
     activate_part ::= "activate_part" assembly_name part_name ";"
 
@@ -330,6 +363,10 @@ Here's BNF describing the syntax of a show file:
 	        ("selected" | "activated") 
                 [ "run_commands" ] ";"
 
+    reset_feature ::= "reset_feature" feature_name ";"
+
+    sync_display ::= "sync_display" ";"
+
     other_command ::= namespace:type_name
     				(syntax as determined by director) ";"
 	#  The custom command shouldn't include a ";" token.  If it does,
@@ -344,11 +381,14 @@ Here's BNF describing the syntax of a show file:
 	::= "rc_handler" "visual" name
 	        "grid" visual_grid
 		[ "rc_override" visual_overrides ]
-	        [ "assembly" assembly_name ]
+	        [ "assembly" assembly_name [ "start_selected" boolean ] ]
 	        "select" action_by_state
 	        "activate" action_by_state
 		[ "mouse" mouse_locations ]
 		[ "timeout" integer "frames" commands ]  ";"
+	# start_selected defaults false.  If true, when the handler is
+	# activated, if the assembly is in one of the activated states, it
+	# will be taken to the corresponding selected state.
 
     visual_grid ::= "{" visual_grid_row * "}"
 
@@ -356,6 +396,14 @@ Here's BNF describing the syntax of a show file:
 
     visual_grid_entry ::= state_name | "[" state_name "]" 
     			  | "(" x y ")" | "<activate>"
+			  | "<wall>" | "<null>"
+	    # <activate> means "make the assembly activated"
+	    # <wall> means "if cell navigated to, stay in current state"
+	    # <null> means "it's an error if this cell can be navigated to"
+	    # The "( x y )" syntax is deprecated.  When such a cell is
+	    #   navigated to, it goes to the state that is located at
+	    #   the cell x,y (counting from 0).  The same effect can be
+	    #   achieved in a clearer way with the "[ state_name ]" syntax.
 
     visual_overrides ::= "{" visual_override * "}"
 
@@ -436,6 +484,8 @@ Here's BNF describing the syntax of a show file:
     y_scale ::= integer
     x ::= integer
     y ::= integer
+    boolean ::= "true" | "false"
+
 </pre>
 <p>
 A string can be a sequence of characters delimited by whitespace,
@@ -536,6 +586,92 @@ up a command to activate the given segment when the frame pump is in
 the right state.  By the way, it doesn't allocate a new command object
 to do this - again, we're careful about generating heap traffic.
 </p>
+
+<h2>Image Mosaics</h2>
+<p>
+Image loading can take a significant part of the start-up time of
+an xlet.  With typical players, it's faster to load one big image
+rather than several small images.  Thus, it's a good idea to combine
+several images into an "image mosaic".  The GRIN scene graph can use
+an image within a mosaic anywhere an image can be used.  At runtime, you 
+can use images
+within an image mosaic even if you don't use the rest of the GRIN
+library, by just using the image classes 
+in <code>com.hdcookbook.grin.util</code>.  At compile time, you can combine
+images into one or more mosaics by making a special "mosaics" file.
+This file is compiled just like a GRIN show file.
+</p>
+<p>
+In your xlet, you might want to have more than one show file.  If you
+do this, you might want to have multiple show files pool their images
+in one set of mosaics, or you might want to have seperate sets of mosaics.
+You can do either with the show compiler <code>GrinCompiler</code>.  If
+you want a set of shows to share mosaic defintions, simply compile them
+all at the same time, by passing in the different show files on the
+command line in one compiler run.  Even if you only have one show file,
+you'll probably want to also have a mosaics file, so you can control
+the name of the generated mosaics file, and its parameters.  Just pass
+the mosaics defintion file on the command line along with the show
+files, and <code>GrinCompiler</code> will build up a set of image
+mosaics for the show(s) according to the declarations in the mosaics
+file.
+</p>
+<p>
+A mosaics file has the following syntax:
+</p>
+<pre>
+
+    mosaics ::= "mosaics" mosaic* "end_mosaics"
+
+    mosaic ::= "mosaic" file_name mosaic_part* ";"
+    	# file_name is the name of tne PNG image that will contain the mosaic.
+	# If the same mosaic_part is repeated, the result is undefined.
+
+    mosaic_part ::=   max_width | max_height | max_pixels
+    		    | min_width | num_widths | take_all_images
+    		    | image_files | add_image_files
+
+    max_width ::= "max_width" integer	
+    	# <= 4096 recommended, cf. 3-2 G.6
+
+    max_height ::= "max_height" integer 
+    	# <= 4096 recommended, cf. 3-2 G.6
+
+    max_pixels ::= "max_pixels" integer
+	# Total <= 5,963,776 (profile 1) or <= 8,060,928 (profile2)
+	# recommended, cf. 3-2 G.6
+
+    min_width ::= "min_width" integer
+    	# Minimum width to consider using for mosaic
+
+    num_widths ::= "num_width" integer
+    	# Number of different widths to consider when looking for 
+	# best mosaic.  See com.hdcookbook.grin.mosaic.Mosaic.
+
+    take_all_images ::= "take_all_images" boolean
+	# If set to true, this mosaic will include all images that aren't
+	# part of another mosaic.
+
+    image_files ::= "{" file_name* "}"
+    	# A list of the image files to consider for inclusion in this
+	# mosaic.  An image file is only included if it is actually used
+	# in a show.
+
+    add_image_files ::= "{" file_name* "}"
+	# A list of image files to include in the mosaic, whether or not
+	# it's actually used in a show.  Use this for images you want
+	# to include to use from your xlet, using the ManagedImage class.
+	# Each image will appear in only one mosaic, even if it's listed in
+	# the add_image_files part of multiple mosaics.
+
+</pre>
+<p>
+For brevity, the lower-level syntax elements of the show file are used
+in this BNF, and not repeated here.
+</p>
+<p>
+
+
 <h2>Memory Management and GC</h2>
 <p>
 As was alluded to above, the GRIN framework tries very hard to avoid
@@ -547,6 +683,7 @@ of garbage, and if you're going to pause for a bit, initialization is
 the time to do it.  For a show, this point comes after parsing the show
 file.
 </p>
+
 <h2>Animation Loop</h2>
 <p>
 For the animation loop GRIN relies on the 
@@ -556,6 +693,50 @@ implements the <code>AnimationClient</code> interface.  Because the
 framework's <code>AnimationEngine</code> can support multiple clients
 that draw in a defined stacking order, GRIN drawing can appear above or
 below drawing down by any other Java code.
+</p>
+
+<h2>Programmatically Controlling Show Nodes</h2>
+<p>
+GRIN is a declarative scene graph, but you can also programmatically
+set certain node values.  This, in effect, uses Java code in the way
+that scripting languages are commonly used.  When you do this, it's 
+very important to observe some strict rules around threading.  In 
+the GRIN model, you're only permitted to make changes to show 
+nodes with the Show lock held, either from the body of an executing 
+command, or from within the method
+<code>Director.notifyNextFrame()</code>.
+</p><p>
+An example of changing parameters of show nodes using Java is
+in the "Playground" test (xlets/tests/functional/Playground).  See
+the show <code>main_show.txt</code> for an example of a scene graph
+that's set up to be modified from Java.  This modification is done
+in the show file itself (inside a <code>java_command</code>), and in a
+method of <code>MainDirector</code> that's invoked from that
+<code>java_command</code>.  The <code>java_command</code> is
+invoked in every frame, by simply having a repeating timer of length 1.
+</p>
+<ul>
+    <li>The x and y position of the center point used for scaling in a
+        <code>scaling_model</code>.  A <code>scaling_model</code> can
+	be attached to features of type <code>fixed_image</code>, 
+	<code>image_sequence</code> or <code>box</code>.
+    <li>The x any y scale factor of a <code>scaling_model</code>.
+    <li>The x and y offset values int a <code>translator_model</code>
+        attached to one or more <code>translator</code> features.
+    <li>The text contents of a <code>text</code> feature.
+    <li>The AlphaComposite value of a <code>fade</code> feature.
+    <li>The currently active sub-feature of an <code>assembly</code>
+        feature.  You can change this with either an <code>activate_part</code>
+	command or by calling <code>Assembly.setCurrentFeature()</code>
+	directly.
+</ul>
+<p>
+Many of the nodes that can be programmed also do linear interpolation with
+built-in ranges.  As a rule, if you want to set a value from Java, you can't
+also be trying to change it with an active interpolation.  Further, when you
+set a value from Java, it stays set to that new value throughout the execution
+of the xlet; there is no mechanism to recover the default value set in the
+show file.
 </p>
 
 <h2>Building Notes</h2>

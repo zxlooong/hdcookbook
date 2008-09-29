@@ -373,7 +373,7 @@ public abstract class Feature implements SetupClient {
      * carries state (like a translation's model) should be in the set of
      * features being cloned.
      *
-     * @param	map	A map from original feature to its clone, which should
+     * @param	clones  A map from original feature to its clone, which should
      *			initially be empty.  When this method completes it
      *			will be populated with all cloned features, including
      *			the top node of the cloned subgraph.  You can use
