@@ -70,7 +70,7 @@
     
     <target name="generate-binary-script" depends="check-tools">
 	<mkdir dir="${build.dir}"/>
-        <jdktools.java fork="true" jar="${converter.jar}">
+        <jdktools.java jar="${converter.jar}">
             <arg value="-asset_dir"/>
             <arg value="src"/>
             <arg value="-out"/>
@@ -87,9 +87,7 @@
 	<move file="${build.dir}/grinbunny_show.xlet.java"
 	      tofile="${build.dir}/gensrc/xlet/ShowCommands.java"/>
 	<javac destdir="${build.dir}/gensrc/grinview" debug="on"
-		includes="ShowCommands.java \
-			  GrinBunnyDirector.java"
-	>
+		excludes="GrinBunnyXlet.java">
 	    <src path="${build.dir}/gensrc/grinview" />
 	    <src path="src"/>
 	    <classpath>
