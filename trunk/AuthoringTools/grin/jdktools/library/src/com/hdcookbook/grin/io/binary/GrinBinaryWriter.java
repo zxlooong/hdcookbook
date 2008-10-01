@@ -215,8 +215,10 @@ public class GrinBinaryWriter {
     /**
      * An index indicating the beginning of the extension
      * classses in the runtimeClassNames IndexedSet above.
-     * We want to auto-generate the code for instantiating
-     * extensions but not for the built-time classes.
+     * We want to record the class names of extension classes
+     * but not for the built-time classes.  The class names are
+     * recorded either in a generated class, or in a table in the
+     * show file.
      */
     private int extensionIndex = 0;
     
@@ -412,6 +414,7 @@ public class GrinBinaryWriter {
         writeRectangleArrayConstants(out, (ObjectArray<Rectangle>[]) 
 				    sharedRectangleArrays.toArray(
 					ObjectArray.class));
+	writeExtensionClassNames(out);
         baos.writeTo(out);
         dos.close();  
     }
@@ -448,9 +451,49 @@ public class GrinBinaryWriter {
     }
 
     private void registerBuiltInClass(int identifier, String className) 
-        throws IOException {
-        if (runtimeClassNames.getIndex(className) != identifier)
-            throw new IOException("Built-in class ID mismatch for " + className);
+	    throws IOException 
+    {
+        if (runtimeClassNames.getIndex(className) != identifier) {
+		// getIndex() also registers it
+            throw new IOException("Built-in class ID mismatch for " + 
+	    			   className);
+	}
+    }
+
+    //
+    // Write the table of extension class names, if we have extension
+    // classes and if there's no java_generated_class
+    //
+    private void writeExtensionClassNames(DataOutputStream out) 
+            throws IOException 
+    {
+        out.writeByte(EXTENSION_CLASSES_IDENTIFIER);     
+	String[] list = (String[]) runtimeClassNames.toArray(String.class);
+	assert (extensionIndex <= list.length);
+	if (list.length == extensionIndex) {
+	    out.writeInt(-1);
+	    return;
+	}
+	SEShowCommands cmds = show.getShowCommands();
+	if (cmds.getClassName() != null) {
+	    out.writeInt(-1);
+	    return;
+	}
+	out.writeInt(extensionIndex);
+	out.writeInt(list.length - extensionIndex);
+	System.err.println();
+	System.err.println("Warning:  Extension featues or commands are present, but no java generated");
+	System.err.println("          class was specified in the show.  This means that the following");
+	System.err.println("          class name(s) will be recorded in the binary grin show file:");
+	for (int i = extensionIndex; i < list.length; i++) {
+	    System.err.println("              " + list[i]);
+	}
+	System.err.println("          Be sure your obfuscator is set to preserve these class names.");
+	System.err.println();
+
+	for (int i = extensionIndex; i < list.length; i++) {
+	    out.writeUTF(list[i]);
+	}
     }
 
     private void writeDeclarations(GrinDataOutputStream out, SENode[] nodes) 
@@ -566,7 +609,7 @@ public class GrinBinaryWriter {
        for (int i = 0; i < nodes.length; i++) {
            nodes[i] = (SENode) commands[i];
        }
-       
+      
        writeDeclarations(out, nodes);
        writeContents(out, nodes);
        
@@ -585,7 +628,7 @@ public class GrinBinaryWriter {
        SEShowCommands cmds = show.getShowCommands();
        if (cmds.getClassName() == null) {
            file.delete();  // Just in case an old version was there
-           return;      // No commands class
+           return;      // No java generated class
        }
        FileWriter w = new FileWriter(file);
        String extensionCode = generateExtensionCode();

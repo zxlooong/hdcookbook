@@ -1,5 +1,5 @@
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -52,49 +52,93 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
 
-/**
- * Defines constants used for the binary format of the Show file.
+/** 
+ * The extensions parser for the Playground project
  */
 
-class Constants {
- 
-	static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
-	static final int GRINSCRIPT_VERSION = 20;
-	
-        /**
-         * Make sure to change BinaryWriter.recordBuiltInClasses()
-         * when the constants are updated.
-         */
-	static final int ASSEMBLY_IDENTIFIER                = 0;
-	static final int BOX_IDENTIFIER                     = 1;
-	static final int FIXEDIMAGE_IDENTIFIER              = 2; 
-	static final int GROUP_IDENTIFIER                   = 3;
-	static final int IMAGESEQUENCE_IDENTIFIER           = 4;
-	static final int TEXT_IDENTIFIER                    = 5;
-	static final int INTERPOLATED_MODEL_IDENTIFIER      = 6;
-	static final int TRANSLATOR_IDENTIFIER              = 7;
-	static final int CLIPPED_IDENTIFIER                 = 8;
-	static final int FADE_IDENTIFIER                    = 9;
-	static final int SRCOVER_IDENTIFIER                 = 10;        
-        static final int ACTIVATEPART_CMD_IDENTIFIER        = 11;
-        static final int ACTIVATESEGMENT_CMD_IDENTIFIER     = 12;
-        static final int RESETFEATURE_CMD_IDENTIFIER        = 13;
-        static final int GRINXHELPER_CMD_IDENTIFIER         = 14;
-        static final int SETVISUALRCSTATE_CMD_IDENTIFIER    = 15;
-        static final int COMMAND_RCHANDLER_IDENTIFIER       = 16;
-        static final int VISUAL_RCHANDLER_IDENTIFIER        = 17;
-        static final int GUARANTEE_FILL_IDENTIFIER          = 18;
-	static final int SET_TARGET_IDENTIFIER              = 19;
-	static final int SEGMENT_IDENTIFIER                 = 20;
-        
-        static final byte STRING_CONSTANTS_IDENTIFIER      = (byte) 0xe0;
-        static final byte INT_ARRAY_CONSTANTS_IDENTIFIER   = (byte) 0xe1;
-        static final byte RECTANGLE_CONSTANTS_IDENTIFIER   = (byte) 0xe2;
-        static final byte RECTANGLE_ARRAY_CONSTANTS_IDENTIFIER = (byte) 0xe3;
-        static final byte EXTENSION_CLASSES_IDENTIFIER = (byte) 0xe4;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Modifier;
+import com.hdcookbook.grin.io.text.ExtensionParser;
+import com.hdcookbook.grin.io.text.Lexer;
 
-        static final byte NULL = (byte) 0xff;
-        static final byte NON_NULL = (byte) 0xee;
-}	
+import java.awt.Color;
+import java.io.IOException;
+
+public class PlaygroundExtensionParser implements ExtensionParser {
+
+
+    /**
+     * @inheritDoc
+     **/
+    public Feature getFeature(Show show, String typeName,
+    			      String name, Lexer lexer)
+		   throws IOException
+    {
+	if ("Playground:Arc".equals(typeName)) {
+	    return parseArc(show, name, lexer);
+	} else {
+	    return null;
+	}
+    }
+
+    private Feature parseArc(Show show, String name, Lexer lexer)
+    		throws IOException
+    {
+	lexer.parseExpected("{");
+	int r = lexer.getInt();
+	int g = lexer.getInt();
+	int b = lexer.getInt();
+	int a = lexer.getInt();
+	lexer.parseExpected("}");
+	checkColorValue("r", r);
+	checkColorValue("g", r);
+	checkColorValue("b", r);
+	checkColorValue("alpha", r);
+	Color color = new Color(r, g, b, a);
+	lexer.parseExpected("x");
+	int x = lexer.getInt();
+	lexer.parseExpected("y");
+	int y = lexer.getInt();
+	lexer.parseExpected("width");
+	int width = lexer.getInt();
+	lexer.parseExpected("height");
+	int height = lexer.getInt();
+	lexer.parseExpected("startAngle");
+	int startAngle = lexer.getInt();
+	lexer.parseExpected("arcAngle");
+	int arcAngle = lexer.getInt();
+	lexer.parseExpected(";");
+	return new SEArc(show, name, x, y, width, height, startAngle, arcAngle,
+			 color);
+    }
+
+    private void checkColorValue(String name, int value) throws IOException {
+	if (value < 0 || value > 255) {
+	    throw new IOException("Illegal color value for " + name + ":  "
+	    			  + value);
+	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public Modifier getModifier(Show show, String typeName,
+				String name, Lexer lexer) 
+		throws IOException
+    {
+	return null;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public Command getCommand(Show show, String typeName, Lexer lexer)
+                           throws IOException
+    {
+	return null;
+    }
+
+}

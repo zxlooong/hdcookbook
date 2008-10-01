@@ -245,7 +245,10 @@ public class Main {
 			baseName = baseName.substring(0, 
 						baseName.lastIndexOf('.'));
 		    }
-		    String fileName = baseName + ".grin";
+		    String fileName = shows[i].getBinaryGrinFileName();;
+		    if (fileName == null) {
+			fileName = baseName + ".grin";
+		    }
 		    File f = new File(outputDir, fileName);
 		    files.add(f);
 		    DataOutputStream dos 

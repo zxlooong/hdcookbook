@@ -149,6 +149,7 @@ Here's BNF describing the syntax of a show file:
     setting ::=    segment_stack_depth_setting 
                  | draw_targets_setting
 		 | sticky_images_setting
+		 | binary_grin_file_setting 
 
     segment_stack_depth_setting := "setting" "segment_stack_depth" integer ";"
 
@@ -162,6 +163,11 @@ Here's BNF describing the syntax of a show file:
 	# active segment.  Thus, the first time a sticky image is
 	# prepared it is loaded normally, but subsequent prepares happen
 	# instantly.
+
+    binary_grin_file_setting ::= "setting" "binary_grin_file" string ";"
+	# Sets the file name of the binary grin file that's produced by
+	# the compiler.  This can be used to make the extension be ".grn"
+	# instead of ".grin".
 
     exports ::= "exports" "segments" name_list
     			"features" name_list

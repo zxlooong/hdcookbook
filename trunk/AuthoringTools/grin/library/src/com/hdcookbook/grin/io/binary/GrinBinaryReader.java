@@ -57,6 +57,7 @@ package com.hdcookbook.grin.io.binary;
 import java.io.InputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.awt.Rectangle;
 import java.util.Hashtable;
 
@@ -106,6 +107,9 @@ import com.hdcookbook.grin.util.Debug;
  *      version_number                     integer
  *      StringArray_info()
  *      IntArrays_info()
+ *      Rectangles_info()
+ *      Rectangle_Arrays_info()
+ *      ExtensionClasses_info()
  *      Show_Setup_info()
  *      Nodes_declarations()
  *      Nodes_contents()
@@ -154,12 +158,15 @@ import com.hdcookbook.grin.util.Debug;
  *      }
  *  }
  *
+ *  For the types that aren't defined here, please refer to the code :-)
+ *
  *  --------------------------------      
  */
 
 public class GrinBinaryReader {
 
     private Show show;
+    private Object[] showInArray;
     
     private Feature[] featureList;
     private RCHandler[] rcHandlerList;
@@ -176,6 +183,9 @@ public class GrinBinaryReader {
     private Rectangle[][] rectangleArrayConstants;
 
     private GrinXHelper showCommands = null;
+
+    private int extensionStartIndex; 	// -1 if no extensions recorded
+    private Constructor[] extensionConstructors = null;
     
     /*
      * If true, the binary file contains some debugging information.
@@ -309,6 +319,7 @@ public class GrinBinaryReader {
     public void readShow(Show show) throws IOException {
 
         this.show = show;
+	this.showInArray = new Show[] { show } ;
         
         GrinDataInputStream in = new GrinDataInputStream(stream, this);       
         checkScriptHeader(in);
@@ -317,6 +328,7 @@ public class GrinBinaryReader {
         intArrayConstants = readIntArrayConstants(in);
 	rectangleConstants = readRectangleConstants(in);
 	rectangleArrayConstants = readRectangleArrayConstants(in);
+	extensionConstructors = readExtensionConstructors(in);
        
         int showSegmentStackDepth = in.readInt();
 	String[] showDrawTargets = in.readStringArray();
@@ -416,16 +428,30 @@ public class GrinBinaryReader {
                 case Constants.NULL: // happens for commands
                     node = null;
                 default:  // extensions  
-                    if (showCommands == null) {
-                        throw new IOException("Missing GrinXHelper subclass for instantiating extensions");
-                    }
-                    node = showCommands.getInstanceOf(show, identifier);
+		    node = instantiateExtension(identifier);
                     break;
                 }
 
             list[i] = node;
         }
 
+    }
+
+    private Node instantiateExtension(int typeIdentifier) throws IOException {
+	if (extensionConstructors == null) {
+	    if (showCommands == null) {
+		throw new IOException("Missing GrinXHelper subclass for "
+				      + "instantiating extensions");
+	    }
+	    return showCommands.getInstanceOf(show, typeIdentifier);
+	} else {
+	    int i = typeIdentifier - extensionStartIndex;
+	    try {
+		return (Node) extensionConstructors[i].newInstance(showInArray);
+	    } catch (Exception ex) {
+		throw new IOException("Error instantiating extension:  " + ex);
+	    }
+	}
     }
     
     private int[][] readIntArrayConstants(GrinDataInputStream in) 
@@ -483,6 +509,35 @@ public class GrinBinaryReader {
 	    }
         }
         return array;
+    }
+
+    private Constructor[] readExtensionConstructors(GrinDataInputStream in) 
+    		throws IOException 
+    {
+        checkValue(in.readByte(),
+                Constants.EXTENSION_CLASSES_IDENTIFIER,
+                "Extension classes identifier");        
+	extensionStartIndex = in.readInt();
+	if (extensionStartIndex == -1) {
+	    return null;
+	}
+        int length = in.readInt();
+	Constructor[] result = new Constructor[length];
+	Class[] paramTypes = { Show.class };
+	for (int i = 0; i <length; i++) {
+	    String name = in.readUTF();
+	    try {
+		Class cl = Class.forName(name);
+		result[i] = cl.getDeclaredConstructor(paramTypes);
+	    } catch (ClassNotFoundException ex) {
+		throw new IOException("Extension class " + name 
+				       + " is missing:  " + ex);
+	    } catch (NoSuchMethodException ex) {
+		throw new IOException("Extension class " + name 
+				       + " missing constructor:  " + ex);
+	    }
+	}
+	return result;
     }
 
     
@@ -562,4 +617,5 @@ public class GrinBinaryReader {
 	}
         return result;
     }  
+
 }

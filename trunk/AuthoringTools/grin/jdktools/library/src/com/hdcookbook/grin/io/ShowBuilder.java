@@ -108,6 +108,7 @@ public class ShowBuilder {
     	= new ArrayList<DeferredBuilder>();
 
     private String[] stickyImages = null;
+    private String binaryGrinFileName = null;
 
     private ExtensionParser extensionParser;
     
@@ -220,6 +221,13 @@ public class ShowBuilder {
     }
 
     /**
+     * Called when a "binary_grin_file_setting" clause is enocuntered.
+     **/
+    public void setBinaryGrinFileName(String fileName) {
+	this.binaryGrinFileName = fileName;
+    }
+
+    /**
      * Called when a "sticky images" clause is enocuntered.
      **/
     public void setStickyImages(String[] stickyImages) {
@@ -269,6 +277,9 @@ public class ShowBuilder {
 			     exportedRCHandlers, "RC Handler");
 	show.buildShow(segments, features, rcHandlers, stickyImages,
 		       publicSegments, publicFeatures, publicRCHandlers);
+	if (binaryGrinFileName != null) {
+	    show.setBinaryGrinFileName(binaryGrinFileName);
+	}
 	for (DeferredBuilder builder : deferredBuilders) {
 	    builder.finishBuilding(show);
 	}

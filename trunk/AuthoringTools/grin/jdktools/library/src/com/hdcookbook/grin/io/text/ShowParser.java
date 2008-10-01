@@ -220,6 +220,8 @@ public class ShowParser {
 		parseDrawTargets();
 	    } else if ("sticky_images".equals(tok)) {
 		parseStickyImages();
+	    } else if ("binary_grin_file".equals(tok)) {
+		parseBinaryGrinFile();
 	    } else {
 		lexer.reportError("Unrecognized setting \"" + tok + "\".");
 	    }
@@ -325,6 +327,12 @@ public class ShowParser {
 	String[] stickyImages = parseStrings();
 	parseExpected(";");
 	builder.setStickyImages(stickyImages);
+    }
+
+    private void parseBinaryGrinFile() throws IOException {
+	String fileName = lexer.getString();
+	parseExpected(";");
+	builder.setBinaryGrinFileName(fileName);
     }
 
     private void parseSegment(final int line) throws IOException {
@@ -450,8 +458,6 @@ public class ShowParser {
 	    if ("modifier".equals(tok)) {
 		sub = parseSubFeature(lexer.getString());
 	    }
-	    //String arg = lexer.getString();
-	    //parseExpected(";");
 	    Feature f;
 	    if (typeName.indexOf(':') < 0) {
 		lexer.reportError(typeName + " doesn't contain \":\"");

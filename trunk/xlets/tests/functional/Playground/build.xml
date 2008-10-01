@@ -77,21 +77,33 @@
     
     <target name="generate_binary_script">
 	<mkdir dir="${build.dir}"/>
-        <jdktools.java fork="true" jar="${converter.classes}">
+	<delete dir="${build.dir}/gensrc"/>
+	<mkdir dir="${build.dir}/gensrc"/>
+	<mkdir dir="${build.dir}/gensrc/grinview"/>
+	<mkdir dir="${build.dir}/gensrc/xlet"/>
+	<javac destdir="${build.dir}/gensrc/grinview" debug="on">
+	    <src path="se_src"/>
+	    <classpath>
+		<pathelement path="${converter.classes}"/>
+	    </classpath>
+	</javac>
+        <jdktools.java fork="true" classname="com.hdcookbook.grin.binaryconverter.Main">
+	    <classpath>
+		<pathelement path="${converter.classes}"/>
+		<pathelement path="${build.dir}/gensrc/grinview"/>
+	    </classpath>
             <arg value="-asset_dir"/>
             <arg value="."/>
             <arg value="-asset_dir"/>
             <arg value="src"/>
+	    <arg value="-extension_parser"/>
+	    <arg value="PlaygroundExtensionParser"/>
             <arg value="-out"/>
             <arg value="${build.dir}"/>
 	    <arg value="-avoid_optimization"/>
             <arg value="${script1.name}.txt"/>
             <arg value="${script2.name}.txt"/>
         </jdktools.java>
-	<delete dir="${build.dir}/gensrc"/>
-	<mkdir dir="${build.dir}/gensrc"/>
-	<mkdir dir="${build.dir}/gensrc/grinview"/>
-	<mkdir dir="${build.dir}/gensrc/xlet"/>
 	<move file="${build.dir}/${script1.name}.grinview.java"
 	      tofile="${build.dir}/gensrc/grinview/${script1.commands}.java"/>
 	<move file="${build.dir}/${script1.name}.xlet.java"
@@ -104,6 +116,7 @@
 	</javac>
     </target>
 
+    <target name="grinview" depends="run-grinview"/>
     <target name="run-grinview" depends="init, generate_binary_script"
     		description="Run grinview on main menu">
         <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
@@ -114,6 +127,37 @@
 	    <arg value="-asset_dir"/>
 	    <arg value="src"/>
             <arg value="${script1.name}.txt"/>
+        </jdktools.java>
+    </target>
+
+    <target name="grinview2" depends="run-grinview2"/>
+    <target name="run-grinview2" depends="init, generate_binary_script"
+    		description="Run grinview on main menu">
+        <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+	    <classpath>
+		<pathelement path="${grinview.classes}"/>
+		<pathelement path="${build.dir}/gensrc/grinview"/>
+	    </classpath>
+	    <arg value="-asset_dir"/>
+	    <arg value="src"/>
+	    <arg value="-extension_parser"/>
+	    <arg value="PlaygroundExtensionParser"/>
+            <arg value="${script2.name}.txt"/>
+        </jdktools.java>
+    </target>
+    <target name="run-grinview2-binary" depends="init, generate_binary_script"
+    		description="Run grinview on main menu">
+        <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+	    <classpath>
+		<pathelement path="${grinview.classes}"/>
+		<pathelement path="${build.dir}/gensrc/grinview"/>
+	    </classpath>
+	    <arg value="-asset_dir"/>
+	    <arg value="src"/>
+	    <arg value="-asset_dir"/>
+	    <arg value="build"/>
+	    <arg value="-binary"/>
+            <arg value="${script2.name}.grn"/>
         </jdktools.java>
     </target>
 
@@ -138,6 +182,7 @@
         <jar destfile="${xlet.jar}">
             <fileset dir="${build.dir}/classes"/>
             <fileset dir="${build.dir}" includes="*.grin"/>
+            <fileset dir="${build.dir}" includes="*.grn"/>
 	    <fileset dir="${src.dir}" includes="images/**"/>
         </jar>
     </target>

@@ -175,9 +175,10 @@ public class GenericMain extends Frame implements AnimationContext {
 	directorClassName = nm;
     }
     
-    
-    protected void init(String showName, ShowBuilder builder, 
-    			String initialSegmentName, boolean doAutoTest) 
+   
+    protected void init(String showName, boolean isBinary, 
+    			ShowBuilder builder, 
+			String initialSegmentName, boolean doAutoTest) 
     {
 
 	this.initialSegmentName = initialSegmentName;
@@ -190,7 +191,7 @@ public class GenericMain extends Frame implements AnimationContext {
 	    t.printStackTrace();
 	    System.exit(1);
 	}
-	show = createShow(showName, director, builder);
+	show = createShow(showName, director, builder, isBinary);
 
         setBackground(Color.black);
         setLayout(null);
@@ -247,7 +248,7 @@ public class GenericMain extends Frame implements AnimationContext {
     }
 
     private SEShow createShow(String showName, Director director, 
-    			      ShowBuilder builder) 
+    			      ShowBuilder builder, boolean isBinary) 
     {
 	SEShow show = new SEShow(director);
 	URL source = null;
@@ -259,7 +260,7 @@ public class GenericMain extends Frame implements AnimationContext {
 		throw new IOException("Can't find resource " + showName);
 	    }
             
-            if (!showName.endsWith(".grin")) {
+            if (!isBinary) {
                 rdr = new BufferedReader(
                         new InputStreamReader(source.openStream(), "UTF-8"));
                 ShowParser p = new ShowParser(rdr, showName, show, builder);
@@ -615,7 +616,7 @@ public class GenericMain extends Frame implements AnimationContext {
 	String[] path = new String[] { "/assets/" };
 	AssetFinder.setSearchPath(path, null);
 	GenericMain m = new GenericMain();
-        m.init(args[0], null, null, false);
+        m.init(args[0], false, null, null, false);
 
 	m.inputLoop();
         

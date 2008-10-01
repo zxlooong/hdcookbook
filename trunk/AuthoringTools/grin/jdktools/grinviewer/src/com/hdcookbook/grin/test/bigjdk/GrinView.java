@@ -97,13 +97,13 @@ public class GrinView extends GenericMain {
     public GrinView() {
     }
 
-    private void buildControlGUI(String showName) {
+    private void buildControlGUI(String showName, boolean isBinary) {
 	screen = new GrinViewScreen(this, new ShowNode(show, showName));
 	screen.setNameText("GRIN show viewer:  " + showName);
 	screen.setResultText("Double-click in the tree to activate a segment.");
 
 	try {
-            String[] lines = readShowFile(showName);
+            String[] lines = readShowFile(showName, isBinary);
 	    screen.setShowText(lines);            
 	} catch (IOException ex) {
 	    System.out.println();
@@ -129,12 +129,14 @@ public class GrinView extends GenericMain {
         });
     }
     
-    private String[] readShowFile(String showName) throws IOException {
+    private String[] readShowFile(String showName, boolean isBinary) 
+    		throws IOException 
+    {
         String[] lines;
-        if (!showName.endsWith(".grin")) {
-	    lines = readShowText(showName);
-        } else {
+        if (isBinary) {
             lines = readShowBinary(showName);
+        } else {
+	    lines = readShowText(showName);
         }
         
         return lines;
@@ -369,6 +371,7 @@ public class GrinView extends GenericMain {
         System.out.println("                -segment <segment name to activate>");      
         System.out.println("                -extension_parser <a fully qualified classname>");       
         System.out.println("                -director <a fully qualified classname>");       
+        System.out.println("                -binary");
         System.out.println("                -automate");
         System.out.println("");
         System.out.println("            -assets and -asset_dir may be repeated to form a search path.");
@@ -378,6 +381,7 @@ public class GrinView extends GenericMain {
         System.out.println("            every named segment in a given show with an 1 second interval.");
         System.out.println("            -extension_parser is needed when the show is a text file and");
         System.out.println("            uses a custom feature or command subclass.");
+	System.out.println("            -director tells GrinView to read a binary .grin file.");
 	System.out.println("            -director tells GrinView to instantiate the given class as Direcor.");
 	System.out.println();
 	System.exit(1);
@@ -394,6 +398,7 @@ public class GrinView extends GenericMain {
 	String scaleDivisor = null;
         DeviceConfig deviceConfig = null;
         String extensionParserName = null;
+	boolean isBinary = false;
         String director = null;
         boolean doAutoTest = false;
 	while (argsUsed < args.length - 1) {
@@ -466,6 +471,9 @@ public class GrinView extends GenericMain {
 		argsUsed++;
 		director = args[argsUsed];
 		argsUsed++; 
+            } else if ("-binary".equals(args[argsUsed])) {
+                isBinary = true;
+                argsUsed++;
             } else if ("-automate".equals(args[argsUsed])) {
                 doAutoTest = true;
                 argsUsed++;
@@ -529,9 +537,9 @@ public class GrinView extends GenericMain {
         
 	GuiShowBuilder builder = new GuiShowBuilder(m);
         builder.setExtensionParser(reader);
-        m.init(showFile, builder, segment, doAutoTest);
+        m.init(showFile, isBinary, builder, segment, doAutoTest);
 
-	m.buildControlGUI(showFile);
+	m.buildControlGUI(showFile, isBinary);
 	if (fps != null) {
 	    m.doKeyboardCommand("f " + fps); // set fps	 
 	}

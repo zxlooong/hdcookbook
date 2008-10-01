@@ -61,7 +61,7 @@ import com.hdcookbook.grin.features.Modifier;
 import java.io.IOException;
 
 /**
- * The ExtensionParser defines methods that handle parsing of the
+ * The ExtensionParser interface defines methods that handle parsing of the
  * custom (user-defined) GRIN features, modifiers and commands  
  * from text-based GRIN script. These who are defining the custom GRIN subclasses 
  * and reading them from a text GRIN file should implement these methods accordingly.

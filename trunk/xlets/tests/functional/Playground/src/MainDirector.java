@@ -110,7 +110,7 @@ public class MainDirector extends Director {
 	engine.resetAnimationClients(clients);
     }
 
-    public void putNewShowOnTopOfMenu() {
+    public void putNewShowOnTopOfMenu(String segmentName) {
 	    // First we print out the old clients.  This is only done
 	    // as a minimal test of engine.getAnimationClients()
 	AnimationClient[] clients = engine.getAnimationClients();
@@ -128,7 +128,7 @@ public class MainDirector extends Director {
 	try {
 	    GrinBinaryReader reader = 
 	       new GrinBinaryReader(AssetFinder.getURL(
-			"second_show.grin").openStream());
+			"second_show.grn").openStream());
 	    newShow = new Show(null);
 	    reader.readShow(newShow);
 	} catch (IOException e) {
@@ -136,7 +136,7 @@ public class MainDirector extends Director {
 	    System.err.println("Error in reading the show file");
 	    return;
 	}
-	newShow.activateSegment(newShow.getSegment("S:Initialize"));	
+	newShow.activateSegment(newShow.getSegment(segmentName));	
 
 	    // Finally, we get the animation engine to reset its list of
 	    // clients.  This won't take effect until the current frame of

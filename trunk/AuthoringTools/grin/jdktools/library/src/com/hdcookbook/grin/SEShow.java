@@ -82,6 +82,8 @@ public class SEShow extends Show {
     // For mosaic building.
     private ArrayList<MosaicSpec> mosaicSpecs = new ArrayList();
     private boolean noShowFile = false;
+
+    private String binaryGrinFileName = null;	// null means "use default"
     
     /**
      * Create a new SEShow.
@@ -126,7 +128,9 @@ public class SEShow extends Show {
     }
     
     /**
-     * Get the object that represents the commands defined for this show
+     * Get the object that represents the commands defined for this show.
+     * If no show commands class has been defined, this will return an
+     * unpopulated SEShowCommands object.
      */
     public SEShowCommands getShowCommands() {
         return showCommands;
@@ -225,6 +229,24 @@ public class SEShow extends Show {
 	SEDoubleUseChecker checker = new SEDoubleUseChecker();
 	accept(checker);
 	checker.reportAnyProblems();
+    }
+
+    /**
+     * Sets the name of the file that the GRIN compiler should generate,
+     * if you want to override the default.
+     *
+     * @param name  The file name, including any extension
+     **/
+    public void setBinaryGrinFileName(String name) {
+	binaryGrinFileName = name;
+    }
+
+    /**
+     * Gets the name of the file that the GRIN compiler should generate.
+     * Gives null if the default file name should be used.
+     **/
+    public String getBinaryGrinFileName() {
+	return binaryGrinFileName;
     }
 
     /**

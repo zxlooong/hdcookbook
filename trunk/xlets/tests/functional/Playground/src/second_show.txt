@@ -7,6 +7,17 @@
 
 show
 
+setting binary_grin_file second_show.grn ;
+
+exports
+    segments { 
+	S:Initialize 
+	S:ExtensionTest
+    } features {
+    } handlers {
+    }
+;
+
 segment S:Initialize
     setup {
 	F:Everything
@@ -100,5 +111,33 @@ feature text F:MainText.Text
 	} loop_count infinite
 	background { 0 0 200 50 } 
 ;
+
+
+#
+#  Now, a test of an extension feature without a java_command_class
+#  in the show.  This forces the .grin file to contain the
+#  fully-qualified name of the extension class.
+#
+
+segment S:ExtensionTest 
+    setup {
+	F:ExtensionTest
+    } setup_done {
+	activate_segment S:ExtensionTest.Showing ;
+    }
+;
+
+segment S:ExtensionTest.Showing
+    active {
+	F:ExtensionTest
+    }
+;
+
+feature extension Playground:Arc F:ExtensionTest
+	{ 255 0 0 255 }		# Red
+	x 400 y 400 width 800 height 400 startAngle 45 arcAngle 315
+;
+
+
 
 end_show 

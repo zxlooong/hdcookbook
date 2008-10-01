@@ -82,7 +82,7 @@
                 <pathelement path="${grin.classes}"/>
                 <pathelement path="${xlet.jar}"/>
             </classpath>
-            <arg line="-assets / -asset_dir build ${script.name}.grin"/>
+            <arg line="-assets / -asset_dir build -binary ${script.name}.grin"/>
         </java>
     </target>
     <target name="test" depends="jar">
