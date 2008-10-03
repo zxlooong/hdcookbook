@@ -191,7 +191,8 @@ public class Box extends Feature {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
+	return 0;
     }
 
     /**

@@ -145,6 +145,18 @@ public class ManagedFullImage extends ManagedImage {
 	}
     }
 
+    /**
+     * @inheritDoc
+     **/
+    public synchronized boolean incrementIfPrepared() {
+	if (numPrepares > 0) {
+	    numPrepares++;
+	    return true;
+	} else {
+	    return false;
+	}
+    }
+
     /** 
      * Undo a prepare.  We do reference counting; when the number of
      * active prepares hits zero, we flush the image.

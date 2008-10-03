@@ -97,6 +97,14 @@ abstract public class ManagedImage {
      **/
     abstract public void prepare(Component comp);
 
+    /**
+     * If this image is already prepared, increment the count of 
+     * prepares.  If this method returns true, then the count should
+     * be balanced by a call to unprepare().  If this method returns false,
+     * you'll probably want to call prepare(Component).
+     **/
+    abstract public boolean incrementIfPrepared();
+
     /** 
      * Undo a prepare.  We do reference counting; when the number of
      * active prepares hits zero, we flush the image.

@@ -132,6 +132,7 @@ public class GenericMain extends Frame implements AnimationContext {
     private int screenHeight = 1080 / scaleDivisor;
 
     private boolean debugWaiting = false;
+    private boolean initialized = false;
 
     /**
      * Monitor to be held while coordinating a pause in the animation
@@ -245,13 +246,16 @@ public class GenericMain extends Frame implements AnimationContext {
 	System.out.println();
     }
 
+    protected void startEngine () {
+	engine = new ScalingDirectDrawEngine(scaleDivisor,FRAME_CHEAT,this);
+	setFps(fps);
+	engine.initialize(this);	// Calls animationInitialize() and
+				    // animationFinishInitialiation()
+	engine.start();
+    }
+
     protected void inputLoop() {
 	try {
-	    engine = new ScalingDirectDrawEngine(scaleDivisor,FRAME_CHEAT,this);
-	    setFps(fps);
-	    engine.initialize(this);	// Calls animationInitialize() and
-	    				// animationFinishInitialiation()
-	    engine.start();
 	    BufferedReader in 
 		= new BufferedReader(new InputStreamReader(System.in));
 	    printHelpMessage();
@@ -377,10 +381,39 @@ public class GenericMain extends Frame implements AnimationContext {
     }
 
     public String doKeyboardCommand (String s) {
+	if (!initialized) {
+	    synchronized(this) {
+		while (!initialized) {
+		    try {
+			wait();
+		    } catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+			return null;
+		    }
+		}
+	    }
+	}
 	try {
 	    if (s.startsWith("s")) {
 		s = s.substring(1).trim();
 		return gotoSegment(s);
+	    } else if (s.startsWith("w")) {
+		s = s.substring(1).trim();
+		float tm = 0f;
+		try {
+		    tm = Float.parseFloat(s);
+		} catch (NumberFormatException ex) {
+		    System.out.println(ex);
+		}
+		long ltm = (long) (tm * 1000);
+		System.out.println("Sleeping " + ltm + " ms.");
+		try {
+		    Thread.sleep(ltm);
+		} catch (InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		    return null;
+		}
+		return "Slept " + tm + " seconds.";
 	    } else if (s.startsWith("+")) {
 		s = s.substring(1).trim();
 		int num = 0;
@@ -489,6 +522,10 @@ public class GenericMain extends Frame implements AnimationContext {
     public void animationFinishInitialization() throws InterruptedException {
 	System.out.println("Starting frame pump...");
 	// Can call Show.activateSegment here.
+	synchronized(this) {
+	    initialized = true;
+	    notifyAll();
+	}
     }
     
     public static void main(String[] args) {
@@ -497,6 +534,7 @@ public class GenericMain extends Frame implements AnimationContext {
 	GenericMain m = new GenericMain();
         m.init(args[0], null);
 
+	m.startEngine();
 	m.inputLoop();
         
 	System.exit(0);

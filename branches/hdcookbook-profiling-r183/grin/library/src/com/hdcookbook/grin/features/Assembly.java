@@ -181,15 +181,18 @@ public class Assembly extends Feature {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
 	if (mode) {
+	    int num = 0;
 	    for (int i = 0; i < parts.length; i++) {
-		parts[i].setup();
+		num += parts[i].setup();
 	    }
+	    return num;
 	} else {
 	    for (int i = 0; i < parts.length; i++) {
 		parts[i].unsetup();
 	    }
+	    return 0;
 	}
     }
 

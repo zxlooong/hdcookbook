@@ -57,6 +57,7 @@ package com.hdcookbook.grin.test.bigjdk;
 
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.io.ShowBuilder;
 
 import com.hdcookbook.grin.io.ExtensionsBuilderFactory;
 import com.hdcookbook.grin.io.binary.ExtensionsReader;
@@ -296,6 +297,7 @@ public class GrinView extends GenericMain {
         System.out.println("                -segment <segment name to activate>");
         System.out.println("                -extensions_factory <a fully qualified classname>");       
         System.out.println("                -extensions_reader <a fully qualified classname>");
+        System.out.println("                -noui");
         System.out.println("");
         System.out.println("            -assets and -asset_dir may be repeated to form a search path.lll");
 	System.out.println();
@@ -313,6 +315,7 @@ public class GrinView extends GenericMain {
 	String scaleDivisor = null;
         String extensionsFactoryName = null;
         String extensionsReaderName = null;
+	boolean noUI = false;
 	while (argsUsed < args.length - 1) {
 	    if ("-fps".equals(args[argsUsed])) {
 		argsUsed++;
@@ -376,6 +379,9 @@ public class GrinView extends GenericMain {
 		argsUsed++;
 		extensionsReaderName = args[argsUsed];
 		argsUsed++; 
+	    } else if ("-noui".equals(args[argsUsed])) {
+		argsUsed++; 
+		noUI = true;
             } else {
 		break;
 	    }
@@ -451,15 +457,23 @@ public class GrinView extends GenericMain {
             reader = new GenericExtensionsReader();
         }
         
-	GuiShowBuilder builder = new GuiShowBuilder(m);
+	ShowBuilder builder;
+	if (noUI) {
+	    builder = new ShowBuilder();
+	} else {
+	    builder = new GuiShowBuilder(m);
+	}
         builder.setExtensionsBuilderFactory(factory);
         builder.setExtensionsReader(reader);
         m.init(showFile, builder);
 
-	m.buildControlGUI(showFile);
+	if (!noUI) {
+	    m.buildControlGUI(showFile);
+	}
 	if (fps != null) {
 	    m.doKeyboardCommand("f " + fps); // set fps	 
 	}
+	m.startEngine();
 	if (segment != null) {
 	    m.doKeyboardCommand("s " + segment); // activate segment
 	}

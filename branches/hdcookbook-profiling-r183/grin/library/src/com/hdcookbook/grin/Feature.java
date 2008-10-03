@@ -147,8 +147,13 @@ public abstract class Feature implements SetupClient {
     /**
      * Change the setup mode of this feature.  The new mode will always
      * be different than the old.
+     * <p>
+     * This method must return the number of times it will send a feature setup
+     * command as a result of this call.  Obviously, that's 0 if mode is false.
+     *
+     * @see sendFeatureSetup()
      **/
-    abstract protected void setSetupMode(boolean mode);
+    abstract protected int setSetupMode(boolean mode);
 
     /**
      * Change the activated mode of this feature.  The new mode will
@@ -177,17 +182,18 @@ public abstract class Feature implements SetupClient {
      * feature.  This can be called multiple times; each call will
      * eventually be matched by a call to unsetup().
      *
-     * @see #unsetup()
+     * @return the number of feature setup commands that will be generated
+     *	       due to this call.
      *
-     * @return true if this call started setup being done
+     * @see #unsetup()
+     * @see #sendFeatureSetup()
      **/
-    public boolean setup() {
+    public final int setup() {
 	setupCount++;
 	if (setupCount == 1) {
-	    setSetupMode(true);
-	    return true;
+	    return setSetupMode(true);
 	} else {
-	    return false;
+	    return 0;
 	}
     }
 
@@ -248,13 +254,14 @@ public abstract class Feature implements SetupClient {
     /**
      * When a feature finishes its setup, it should call this to
      * tell the show about it.  This happens in the setup thread.
+     * If this is done, then the feature must return a number from
+     * setSetupMode(), and it must send the feature setup command exactly
+     * that many times.
+     *
+     * @see #setSetupMode(boolean)
      **/
     protected void sendFeatureSetup() {
 	show.runCommand(featureSetupCommand);
-	show.runPendingCommands();
-	    // It's safe to run the pending commands, because we're
-	    // in the setup thread...  If a frame is being painted,
-	    // we can wait.
     }
 
     /**

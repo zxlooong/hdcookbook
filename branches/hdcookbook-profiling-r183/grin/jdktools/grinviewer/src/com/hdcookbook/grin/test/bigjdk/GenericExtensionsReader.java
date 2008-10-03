@@ -84,7 +84,8 @@ public class GenericExtensionsReader implements ExtensionsReader {
             }
             public void destroy() {
             }
-            protected void setSetupMode(boolean mode) {
+            protected int setSetupMode(boolean mode) {
+		return 0;
             }
             protected void setActivateMode(boolean mode) {
             }

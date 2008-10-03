@@ -101,7 +101,8 @@ public class GenericExtensionsBuilderFactory extends ExtensionsBuilderFactory {
                     }
 
                     @Override
-                    protected void setSetupMode(boolean mode) {
+                    protected int setSetupMode(boolean mode) {
+			return 0;
                     }
 
                     @Override

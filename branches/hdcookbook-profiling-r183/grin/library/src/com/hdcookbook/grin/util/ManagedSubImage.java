@@ -112,6 +112,13 @@ public class ManagedSubImage extends ManagedImage {
     }
 
     /**
+     * @inheritDoc
+     **/
+    public boolean incrementIfPrepared() {
+	return mosaic.incrementIfPrepared();
+    }
+
+    /**
      * See superclass definition.
      **/
     public synchronized void unprepare() {

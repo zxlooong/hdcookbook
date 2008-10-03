@@ -92,6 +92,8 @@ public class Segment {
     private ActivateSegmentCommand cmdToActivate;
     private ActivateSegmentCommand cmdToActivatePush;
 
+    private int outstandingSetups = 0;
+
     public Segment(String name, Feature[] active, Feature[] setup,
     		 RCHandler[] rcHandlers, boolean nextOnSetupDone, 
 		 Command[] nextCommands) 
@@ -233,10 +235,12 @@ public class Segment {
 	}
 	active = true;
 	nextCommandSent = false;
+	outstandingSetups = 0;
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    boolean wasNeeded = activeFeatures[i].setup();
+	    int needed = activeFeatures[i].setup();
+	    outstandingSetups += needed;
 	    if (Debug.LEVEL > 0 
-	        && (wasNeeded || activeFeatures[i].needsMoreSetup())) 
+	        && (needed > 0 || activeFeatures[i].needsMoreSetup())) 
 	    {
 		Debug.println("WARNING:  Feature " + activeFeatures[i]
 			      + " in segment " + name 
@@ -248,7 +252,11 @@ public class Segment {
 	    }
 	}
 	for (int i = 0; i < settingUpFeatures.length; i++) {
-	    settingUpFeatures[i].setup();
+	    outstandingSetups += settingUpFeatures[i].setup();
+		// Our count of outstanding setups might be low, if some
+		// features had already started setting up in a previous
+		// segment, but it will never be high.  If it's low, the
+		// result will be some wasted CPU time, but correct behavior.
 	}
 	if (lastSegment != null) {
 	    lastSegment.active = false;
@@ -282,7 +290,8 @@ public class Segment {
     // This is externally synchronized by show, and must be.
     //
     void runFeatureSetup() {
-	if (!active) {
+	outstandingSetups--;
+	if (!active || outstandingSetups > 0) {
 	    return;
 	}
 	for (int i = 0; i < activeFeatures.length; i++) {

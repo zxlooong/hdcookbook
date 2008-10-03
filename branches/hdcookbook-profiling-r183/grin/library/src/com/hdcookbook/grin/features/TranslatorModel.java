@@ -229,7 +229,8 @@ public class TranslatorModel extends Feature {
 	}
     }
 
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
+	return 0;
     }
 
     /**

@@ -95,7 +95,7 @@ public class ImageSequence extends Feature {
     	// The images in this sequence.  A null image is simply not
 	// painted, thus leaving the previous image in place.
     private boolean setupMode = false;
-    private int imagesSetup = 0;
+    private boolean imagesSetup = false;
     private Object setupMonitor = new Object();
     private boolean isActivated = false;
 
@@ -293,57 +293,87 @@ public class ImageSequence extends Feature {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
 	synchronized(setupMonitor) {
 	    setupMode = mode;
 	    if (setupMode) {
-		show.setupManager.scheduleSetup(this);
-	    } else {
-		for (int i = 0; i < imagesSetup; i++) {
+		if (prepareAllNow()) {
+		    imagesSetup = true;
+		    return 0;
+		} else {
+		    show.setupManager.scheduleSetup(this);
+		    return 1;
+		}
+	    } else if (imagesSetup) {
+		for (int i = 0; i < images.length; i++) {
 		    if (images[i] != null) {
 			images[i].unprepare();
 		    }
 		}
-		imagesSetup = 0;
+		imagesSetup = false;
+	    }
+	    return 0;
+	}
+    }
+
+    private boolean prepareAllNow() {
+	int num;
+	for (num = 0; num < images.length; num++) {
+	    ManagedImage mi = images[num];
+	    if (mi != null) {
+		if (!mi.incrementIfPrepared()) {
+		    break;
+		}
 	    }
 	}
+	if (num == images.length) {
+	    return true;
+	}
+	for (int i = 0; i < num; i++) {
+	    images[i].unprepare();
+	}
+	return false;
     }
 
     /**
      * @inheritDoc
      **/
     public void doSomeSetup() {
-	ManagedImage im;
-	synchronized(setupMonitor) {
-	    if (!setupMode) {
-		return;
-	    }
-	    im = images[imagesSetup];
-	    while (im == null && (imagesSetup+1) < images.length) {
-		imagesSetup++;
-		im = images[imagesSetup];
-	    }
-	}
-	if (im != null) {
-	    im.prepare(show.component);
+	for (int i = 0; i < images.length; i++) {
 	    synchronized(setupMonitor) {
-		if (setupMode) {
-		    int w = images[imagesSetup].getWidth();
-		    int h = images[imagesSetup].getHeight();
-		    if (w > width) {
-			width = w;
+		if (!setupMode) {
+		    for (int j = 0; j < i; j++) {
+			ManagedImage mi = images[j];
+			if (mi != null)  {
+			    images[i].unprepare();
+			}
 		    }
-		    if (h > height) {
-			height = h;
-		    }
-		    imagesSetup++;
-		} else {
-		    im.unprepare();
+		    return;
 		}
 	    }
+	    ManagedImage mi = images[i];
+	    mi.prepare(show.component);
+	    int w = mi.getWidth();
+	    int h = mi.getHeight();
+	    if (w > width) {
+		width = w;
+	    }
+	    if (h > height) {
+		height = h;
+	    }
 	}
-	if (!needsMoreSetup()) {
-	    sendFeatureSetup();
+	synchronized(setupMonitor) {
+	    if (setupMode) {
+		imagesSetup = true;
+		sendFeatureSetup();
+	    } else {
+		for (int j = 0; j < images.length; j++) {
+		    ManagedImage mi = images[j];
+		    if (mi != null)  {
+			mi.unprepare();
+		    }
+		}
+	    }
 	}
     }
 
@@ -352,7 +382,7 @@ public class ImageSequence extends Feature {
      **/
     public boolean needsMoreSetup() {
 	synchronized (setupMonitor) {
-	    return setupMode && (imagesSetup < images.length);
+	    return setupMode && !imagesSetup;
 	}
     }
 

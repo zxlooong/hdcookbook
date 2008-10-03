@@ -187,14 +187,21 @@ public class FixedImage extends Feature {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
 	synchronized(setupMonitor) {
 	    setupMode = mode;
 	    if (setupMode) {
-		show.setupManager.scheduleSetup(this);
+		if (image.incrementIfPrepared()) {
+		    imageSetup = true;
+		    return 0;
+		} else {
+		    show.setupManager.scheduleSetup(this);
+		    return 1;
+		}
 	    } else {
 		image.unprepare();
 		imageSetup = false;
+		return 0;
 	    }
 	}
     }

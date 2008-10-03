@@ -80,6 +80,7 @@ information or have any questions.
 
 	<target name="build-menu-xlet" depends="generate-binary-script">
 		<echo message="*************  Menu xlet  *****************"/>
+		<echo message="${HDC_BDJ_PLATFORM_CLASSES}"/>
 		<mkdir dir="${MENUXLET_DEST}/classes"/>
 	
 		<javac sourcepath=""
