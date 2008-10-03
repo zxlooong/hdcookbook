@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!--
+Copyright  1990-2006 Sun Microsystems, Inc. All Rights Reserved.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version
+2 only, as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License version 2 for more details (a copy is
+included at /legal/license.txt).
+
+You should have received a copy of the GNU General Public License
+version 2 along with this work; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+02110-1301 USA
+
+Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
+Clara, CA 95054 or visit www.sun.com if you need additional
+information or have any questions.
+-->
+
+<project name="Generate a bdjo file" basedir=".">
+
+<target name="generate-bdjo" depends="check-bdjoconverter">    
+	<fail unless="bdjoconverter.ok" message="Could not find the bdjoconverter tool at ${HDC_BDJO_CONVERTER}"/>
+	
+	<mkdir dir="${HDC_DISC_BDMV}/BDJO"/>	
+	<java classpath="${HDC_BDJO_CONVERTER}/dist/bdjo.jar"  
+	      fork="true"
+	      classname="net.java.bd.tools.bdjo.Converter">
+		<arg line="xlets/bdjo/main_bdjo.xml 
+			${HDC_DISC_BDMV}/BDJO/00000.bdjo"/>
+	</java>	
+</target>	
+
+<target name="check-bdjoconverter" depends="check-exists-bdjoconverter, compile-bdjoconverter">
+</target>
+
+<target name="check-exists-bdjoconverter">
+	<available file="${HDC_BDJO_CONVERTER}/dist/bdjo.jar" type="file"
+	    property="bdjoconverter.ok"/>
+</target>
+
+<target name="compile-bdjoconverter" unless="bdjoconverter.ok">	
+   <ant dir="${HDC_BDJO_CONVERTER}"/>
+
+   <available file="${HDC_BDJO_CONVERTER}/dist/bdjo.jar" type="file"
+	    property="bdjoconverter.ok"/>
+</target>
+
+</project>
