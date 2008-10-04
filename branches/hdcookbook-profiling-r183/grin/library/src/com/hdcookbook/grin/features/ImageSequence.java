@@ -330,7 +330,10 @@ public class ImageSequence extends Feature {
 	    return true;
 	}
 	for (int i = 0; i < num; i++) {
-	    images[i].unprepare();
+	    ManagedImage mi = images[i];
+	    if (mi != null) {
+		mi.unprepare();
+	    }
 	}
 	return false;
     }
