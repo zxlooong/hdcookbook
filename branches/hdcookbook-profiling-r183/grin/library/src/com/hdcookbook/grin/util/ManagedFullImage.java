@@ -119,14 +119,13 @@ public class ManagedFullImage extends ManagedImage {
     public void prepare(Component comp) {
 	int num;
 	synchronized(this) {
-	    numPrepares++;
 	    num = numPrepares;
 	    if (image == null) {
 		image = AssetFinder.loadImage(name);
 		waiter = new ImageWaiter(this.image);
 	    }
 	}
-	if (num == 1) {
+	if (num == 0) {
 	    long tm = 0;
 	    //
 	    // The JDK seems to put the image fetching thread priority
@@ -142,6 +141,9 @@ public class ManagedFullImage extends ManagedImage {
 	    if (Debug.LEVEL > 1) {
 		Debug.println("Loaded image " + name);
 	    }
+	}
+	synchronized(this) {
+	    numPrepares++;
 	}
     }
 
