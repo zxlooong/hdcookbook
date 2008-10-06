@@ -105,10 +105,22 @@ for details. When you edit a Show XML document, you can right click
 and use "Check XML" and "Validate XML" options to check the document 
 for well-formedness and validity.
 
+* To build "ShowXML" experimental feature, please use the ant 
+build file in the current directory:
+
+   ant 
+
+This build file uses "xjc" tool to generate Java classes from the
+XML schema file "show.xsd". The "xjc" tool is in the "bin" directory 
+of JDK 6 or above. Please make sure that your JAVA_HOME points to a 
+JDK 6 installation directory on your machine.
+
 * To convert a Show XML document to a GRIN binary file, please 
 use the following command:
 
-java -cp <path-of-grincompiler.jar> com.hdcookbook.grin.io.xml.Main...
+  java \
+    -cp <path-of-grincompiler.jar>:build/showxml.jar \
+    com.hdcookbook.grin.io.xml.Main...
 
 The command line options accepted are same as that of the GRIN text 
 to binary converter.

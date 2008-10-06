@@ -52,13 +52,8 @@ information or have any questions.
     </target>
     
     <target name="compile-jdk-library" depends="init-grin-jdk-library">
-        <!-- remove and re-create "generated_src" directory -->
-        <property name="gen_src_dir" value="${HDC_BUILD_DIR}/jdktools/generated_src"/>
-        <delete dir="${gen_src_dir}"/>
-        <mkdir dir="${gen_src_dir}"/>
         <jdktools.javac
             destdir="${JDK_LIBRARY_DEST}">
-	    <src path="${gen_src_dir}" />     
             <src path="library/src" />                
             <src path="jdktools/library/src" />           
         </jdktools.javac>    
