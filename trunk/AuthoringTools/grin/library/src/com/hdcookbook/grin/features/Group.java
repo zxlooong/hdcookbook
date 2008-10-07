@@ -92,6 +92,11 @@ public class Group extends Feature implements Node {
 
     private boolean activated = false;
 
+    // 
+    // Number of features checked so far for needsMoreSetup()
+    //
+    private int numSetupChecked;
+
     public Group(Show show) {
         super(show);
     }
@@ -105,6 +110,7 @@ public class Group extends Feature implements Node {
 	}
 	Group result = new Group(show);
 	result.parts = new Feature[parts.length];
+	result.numSetupChecked = numSetupChecked;
 	for (int i = 0; i < parts.length; i++) {
 	    result.parts[i] = parts[i].makeNewClone(clones);
 	    clones.put(parts[i], result.parts[i]);
@@ -282,6 +288,7 @@ public class Group extends Feature implements Node {
 	// virtue of a group.
 	//
 	if (mode) {
+	    numSetupChecked = 0;
 	    int num = 0;
 	    for (int i = 0; i < parts.length; i++) {
 		num += parts[i].setup();
@@ -302,10 +309,23 @@ public class Group extends Feature implements Node {
 	//
 	// See note about cloned features in setSetupMode()
 	//
-	for (int i = 0; i < parts.length; i++) {
-	    if (parts[i].needsMoreSetup()) {
+	while (numSetupChecked < parts.length) {
+	    if (parts[numSetupChecked].needsMoreSetup()) {
 		return true;
 	    }
+	    numSetupChecked++;
+	    	// Once a part doesn't need more setup, it will never go
+		// back to needing setup until we call unsetup() then
+		// setup().  numSetupChecked is re-set to 0 just before
+		// callin setup() on our part, so this is safe.  Note
+		// that the contract of Feature requires that setup()
+		// be called before needsMoreSetup() is consulted.
+		//
+		// This optimization helps speed the calculation of
+		// needsMoreSetup() in the case where a group or an
+		// assembly is the child of multiple parts of an assembly.
+		// With this optimization, a potential O(n^2) is turned
+		// into O(n) (albeit typically with a small n).
 	}
 	return false;
     }

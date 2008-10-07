@@ -32,6 +32,13 @@
         <!-- Creates a binary bundle -->
         <ant antfile="dist.xml"/>
     </target>
+
+  <!-- A target for running the automated tests that we have -->
+    <target name="test">
+        <ant dir="xlets/hdcookbook_discimage" antfile="run_jdktools.xml"
+	     target="autotest-grinview"/>
+        <ant dir="xlets/grin_samples" target="autotest-grinview"/>
+    </target>
   
     <!-- Build a GRIN javadoc -->
     <target name="javadoc">

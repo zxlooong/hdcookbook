@@ -73,6 +73,7 @@ information or have any questions.
     <target name="autotest-grinview" depends="prepare-all">
         <menuxlet.grinview.jdktools.java> 
             <arg value="-automate"/>
+            <arg value="-binary"/>
             <arg value="menu.grin"/>  
         </menuxlet.grinview.jdktools.java>
     </target>

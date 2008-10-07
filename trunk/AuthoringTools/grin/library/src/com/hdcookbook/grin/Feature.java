@@ -202,7 +202,8 @@ public abstract class Feature {
      * setup.  Calls to this are synchronized within the init manager
      * to avoid race conditions.  The implementation of this method
      * must not call outside code or call any animation manager
-     * methods.
+     * methods.  For a given setup cycle, this method is called only
+     * after setup().
      * Clients of the GRIN framework should never call this method directly.
      * Custom feature extensions must implement this method.
      *
