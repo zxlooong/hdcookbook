@@ -205,7 +205,7 @@ abstract public class ManagedImage {
 
     /**
      * Make this image "sticky".  An image that is sticky will be loaded the
-     * normal way when prepare(Component) is called, but it will not be unloaded
+     * normal way when prepare()/load() are called, but it will not be unloaded
      * when the count of active prepares reaches zero due to a call to
      * unprepare().  The calls to makeSticky() are themselves reference-counted;
      * an image is sticky until the sticky count reaches zero due to a call
@@ -213,6 +213,10 @@ abstract public class ManagedImage {
      * <p>
      * If an image is a tile within a mosaic, the entire mosaic will be held
      * in memory as long as the mosaic tile is loaded.
+     *
+     * @see #unmakeSticky()
+     * @see #unprepare()
+     * @see #prepare()
      **/
     final public void makeSticky() {
 	prepare();
@@ -224,7 +228,7 @@ abstract public class ManagedImage {
      *
      * @see #makeSticky()
      * @see #unprepare()
-     * @see #prepare(java.awt.Component)
+     * @see #prepare()
      **/
     final public void unmakeSticky() {
 	unprepare();
