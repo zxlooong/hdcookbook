@@ -1072,24 +1072,43 @@ public class SecurityUtil {
         boolean isEmptyUnsigned = true;
         while (jarEntries.hasMoreElements()) {
             JarEntry je = jarEntries.nextElement();
+            /**
+             * Issue 111.  Do a copy operation on a new JarEntry with 
+             * unknown compressed size (-1), to account for a jar file
+             * created with a different flavor of zip algorithm.
+             * Copy to this new JarEntry relaxes the check for 
+             * the compressed data size differece between the original JarEntry 
+             * and the new JarEntry that jdk creates.
+             */
+            JarEntry jeOut = (JarEntry) je.clone(); 
+            jeOut.setCompressedSize(-1);  
             String filename = je.getName();
+            
+            /** 
+             * Issue 112.  Do not include signing related files;
+             * these are re-generated during signing.
+             */
+            if (filename.equals(JarFile.MANIFEST_NAME) ||
+                filename.equals("META-INF/SIG-BD00.RSA") ||
+                filename.equals("META-INF/SIG-BD00.SF")) {
+                continue;
+            }
             
             /**
              * "META-INF/" contents are re-generated during signing. The directory
              * entries (new or old) are not signed. To preserve the order of
              * the entries in the original jar we add them to the
              * to-be signed jar
-             */
-            if (filename.startsWith("META-INF/") ||
-                    filename.endsWith("/") ||
-                    sigEntries.containsKey(filename)) { // this file is signed
-                signedOut.putNextEntry(je);
+             */                
+            if (filename.endsWith("/") ||
+                sigEntries.containsKey(filename)) { // this file is signed
+                signedOut.putNextEntry(jeOut);
                 InputStream jin = jf.getInputStream(je);
                 copyfile(signedOut, jin);
                 jin.close();
             } else { // this file was added after the jarfile was signed
                 isEmptyUnsigned = false;
-                unsignedOut.putNextEntry(je);
+                unsignedOut.putNextEntry(jeOut);
                 InputStream jin = jf.getInputStream(je);
                 copyfile(unsignedOut, jin);
                 jin.close();
@@ -1140,6 +1159,7 @@ public class SecurityUtil {
             System.exit(1);
         }
     }
+    
     
     private void copyfile(OutputStream out, InputStream in)
             throws IOException {
