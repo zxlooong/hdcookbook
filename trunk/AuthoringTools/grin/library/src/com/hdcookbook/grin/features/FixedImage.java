@@ -66,6 +66,7 @@ import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
+import com.hdcookbook.grin.util.SetupClient;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
@@ -77,7 +78,7 @@ import java.util.HashMap;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class FixedImage extends Feature implements Node {
+public class FixedImage extends Feature implements Node, SetupClient {
 
     protected Rectangle placement;
     protected String fileName;
@@ -181,14 +182,22 @@ public class FixedImage extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
 	synchronized(setupMonitor) {
 	    setupMode = mode;
 	    if (setupMode) {
-		show.setupManager.scheduleSetup(this);
+		image.prepare();
+		if (image.isLoaded()) {
+		    imageSetup = true;
+		    return 0;
+		} else {
+		    show.setupManager.scheduleSetup(this);
+		    return 1;
+		}
 	    } else {
 		image.unprepare();
 		imageSetup = false;
+		return 0;
 	    }
 	}
     }
@@ -202,13 +211,12 @@ public class FixedImage extends Feature implements Node {
 		return;
 	    }
 	}
-	image.prepare(show.component);
+	image.load(show.component);
 	synchronized(setupMonitor) {
-	    if (setupMode) {
-		imageSetup = true;
-	    } else {
-		image.unprepare();
+	    if (!setupMode) {
+		return;
 	    }
+	    imageSetup = true;
 	}
 	sendFeatureSetup();
     }

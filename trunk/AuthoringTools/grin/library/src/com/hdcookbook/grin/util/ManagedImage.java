@@ -64,7 +64,40 @@ import java.awt.Rectangle;
  * An image that is managed by the GRIN utilities.  Managed images
  * have reference counts, and a count of how many clients have asked
  * it to be prepared.  This is used to flush images once they're
- * no longer needed.
+ * no longer needed.  A ManagedImage instance is obtained from
+ * ImageManager.
+ *
+ * <h2>ManagedImage contract - image loading and unloading</h2>
+ *
+ * The second level of reference counting is for tracking whether the 
+ * underlying image asset is not loaded, loading, or loaded.  Every client
+ * of an image that wants the image to be loaded should <code>prepare()</code>
+ * the image, and each prepare call must eventually be balanced by a call 
+ * to <code>unprepare()</code>
+ * the image.  Because image loading is a time-consuming information, it's
+ * useful to do as the GRIN scene graph does, and use a seperate thread
+ * (like the SetupManager thread) to do the actual image loading.  However,
+ * queueing a task for another thread is somewhat expensive, so if an image
+ * is already loaded, it's good to skip that step.  This can be done with
+ * the following client code:
+ * <pre>
+ *
+ *        ManagedImage mi = ...
+ *        mi.prepare();
+ *        if (!mi.isLoaded()) {
+ *            Queue a task for another thread to call load() on this image
+ *        }
+ *
+ * </pre>
+ * Eventually, when the client no longer wants the image to be loaded, 
+ * it must call <code>unprepare()</code>.
+ *
+ * <h2>Sticky Images</h2>
+ *
+ * An image can be marked as "sticky" by calling <code>makeSticky()</code>,
+ * and unmarked with <code>unmakeSticky()</code>.  A sticky image won't
+ * be unloaded when the count of prepares reaches zero.
+ * 
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
@@ -85,46 +118,88 @@ abstract public class ManagedImage {
 
     /**
      * Add one to the reference count of this image.  This is unrelated
-     * to image loading and unloading.
+     * to image loading and unloading.  It's package-private, because it's
+     * used by ImageManager only.
      **/
-    abstract public void addReference();
+    abstract void addReference();
 
     /**
      * Remove one from the reference count of this image.  This is unrelated
-     * to image loading and unloading.
+     * to image loading and unloading.  It's package-private, because it's
+     * used by ImageManager only.
      **/
-    abstract public void removeReference();
+    abstract void removeReference();
 
     /**
      * Determine if this image is referenced, by consulting its reference
-     * count.
+     * count.  It's package-private, because it's
+     * used by ImageManager only.
      **/
-    abstract public boolean isReferenced();
+    abstract boolean isReferenced();
 
     /**
-     * Prepare this image for display in the given component, or any
-     * other component for the same graphics device.  This class reference
-     * counts, so there can be multiple calls to prepare.
+     * Prepare this image for display, by registering interest in having
+     * the image be loaded.  In order to actually load the image,
+     * <code>load(Component)</code> must be called.
+     * for a call to <code>load(Component)</code>.
      * <p>
-     * Calling prepare(null) is equivalent to calling
-     * unprepare().  This is an implementation detail that is subject to change,
-     * and should not be relied upon by client code.
+     * See ManagedImage's main class documentation under
+     * "ManagedImage contract - image loading and unloading".
+     *
+     * @see #isLoaded()
+     * @see #load(Component)
+     * @see #unprepare()
+     * @see ManagedImage
+     **/
+    abstract public void prepare();
+
+    /**
+     * Determine whether or not the image is currently loaded.  After a
+     * call to prepare(), this method can be used to query whether or not
+     * it's necessary to arrange for load(Component) to be called.
+     * <p>
+     * See ManagedImage's main class documentation under
+     * "ManagedImage contract - image loading and unloading".
+     * 
+     * @see ManagedImage
+     **/
+    abstract public boolean isLoaded();
+
+    /**
+     * Load this image for display in the given component, or any
+     * other component for the same graphics device.  The image will
+     * only be loaded if an interest in loading this ManagedImage has
+     * been registered by calling <code>prepare()</code>.  If no interest
+     * has been registered, or if this image is already loaded, then this
+     * method will return immediately.  If another thread is loading this
+     * same image, this method will wait until that image load is complete
+     * before it returns.
+     * <p>
+     * See ManagedImage's main class documentation under
+     * "ManagedImage contract - image loading and unloading".
      *
      * @param  comp	A component to use for loading the image.  Clients
      *			using ManagedImage should never pass in null.
      *
+     * @see #prepare()
      * @see #unprepare()
+     * @see ManagedImage
      **/
-    abstract public void prepare(Component comp);
+    abstract public void load(Component comp);
 
     /** 
      * Undo a prepare.  We do reference counting; when the number of
      * active prepares hits zero, and the "sticky" count reaches zero,
      * we flush the image.
+     * <p>
+     * See ManagedImage's main class documentation under
+     * "ManagedImage contract - image loading and unloading".
      *
-     * @see #prepare(java.awt.Component)
+     * @see #prepare()
+     * @see #load()
      * @see #makeSticky()
      * @see #unmakeSticky()
+     * @see ManagedImage
      **/
     abstract public void unprepare();
 
@@ -140,7 +215,7 @@ abstract public class ManagedImage {
      * in memory as long as the mosaic tile is loaded.
      **/
     final public void makeSticky() {
-	prepare(null);
+	prepare();
     }
 
     /**

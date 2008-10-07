@@ -99,7 +99,9 @@ import com.hdcookbook.grin.util.AssetFinder;
  * accepts commands to boss the show around on stdin.  Probably
  * more interesting is the subclass of this, GrinView.
  * This command-line version came first, but I pretty quickly got
- * tired of it and made the GUI instead.
+ * tired of it and made the GUI instead.  Because it fell out of
+ * use, this class no longer has a main method; for the old
+ * gui-less tool, use "GrinView -noui".
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -122,6 +124,7 @@ public class GenericMain extends Frame implements AnimationContext {
     private int screenHeight = deviceConfig.height / scaleDivisor;
 
     private boolean debugWaiting = false;
+    private boolean initialized = false;
     private String initialSegmentName = null;
     private boolean doAutoTest = false;
     private Insets insets;
@@ -324,19 +327,23 @@ public class GenericMain extends Frame implements AnimationContext {
 	System.out.println("    s<segment>   Go to named segment");
 	System.out.println("    +<number>    Advance that many frames");
 	System.out.println("    +            Advance one frame");
+	System.out.println("    w<number>    Wait this many seconds");
 	System.out.println("    ? or h       Get this help message");
 	System.out.println();
 	System.out.println("Currently displaying " + fps + " fps.");
 	System.out.println();
     }
 
+    protected void startEngine() {
+	engine = new ScalingDirectDrawEngine(scaleDivisor, this);
+	setFps(fps);
+	engine.initialize(this);	// Calls animationInitialize() and
+				        // animationFinishInitialiation()
+	engine.start();
+    }
+
     protected void inputLoop() {
 	try {
-	    engine = new ScalingDirectDrawEngine(scaleDivisor, this);
-	    setFps(fps);
-	    engine.initialize(this);	// Calls animationInitialize() and
-	    				// animationFinishInitialiation()
-	    engine.start();
 	    BufferedReader in 
 		= new BufferedReader(new InputStreamReader(System.in));
 	    printHelpMessage();
@@ -462,10 +469,40 @@ public class GenericMain extends Frame implements AnimationContext {
     }
 
     public String doKeyboardCommand (String s) {
+        if (!initialized) {
+            synchronized(this) {
+                while (!initialized) {
+                    try {
+                        wait();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        return null;
+                    }
+                }
+            }
+        }
+
 	try {
 	    if (s.startsWith("s")) {
 		s = s.substring(1).trim();
 		return gotoSegment(s);
+            } else if (s.startsWith("w")) {
+                s = s.substring(1).trim();
+                float tm = 0f;
+                try {
+                    tm = Float.parseFloat(s);
+                } catch (NumberFormatException ex) {
+                    System.out.println(ex);
+                }
+                long ltm = (long) (tm * 1000);
+                System.out.println("Sleeping " + ltm + " ms.");
+                try {
+                    Thread.sleep(ltm);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    return null;
+                }
+                return "Slept " + tm + " seconds.";
 	    } else if (s.startsWith("+")) {
 		s = s.substring(1).trim();
 		int num = 0;
@@ -577,6 +614,10 @@ public class GenericMain extends Frame implements AnimationContext {
                 // Calls Show.activateSegment
 	}
 	System.out.println("Starting frame pump...");
+        synchronized(this) {
+            initialized = true;
+            notifyAll();
+        }
         
         if (doAutoTest) {
             new Thread() {
@@ -610,16 +651,5 @@ public class GenericMain extends Frame implements AnimationContext {
           width  = w;
           height = h;
        }
-    }
-    
-    public static void main(String[] args) {
-	String[] path = new String[] { "/assets/" };
-	AssetFinder.setSearchPath(path, null);
-	GenericMain m = new GenericMain();
-        m.init(args[0], false, null, null, false);
-
-	m.inputLoop();
-        
-	System.exit(0);
     }
 }

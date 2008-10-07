@@ -162,23 +162,13 @@ public abstract class Modifier extends Feature {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
 	if (mode) {
-	    part.setup();
+	    return part.setup();
 	} else {
 	    part.unsetup();
+	    return 0;
 	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void doSomeSetup() {
-	if (part.needsMoreSetup()) {
-	    part.doSomeSetup();
-	    return;
-	}
-	// None needed
     }
 
     /**

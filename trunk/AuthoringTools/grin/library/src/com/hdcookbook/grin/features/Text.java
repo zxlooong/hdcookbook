@@ -281,13 +281,8 @@ public class Text extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void doSomeSetup() {
+    protected int setSetupMode(boolean mode) {
+	return 0;
     }
 
     /**

@@ -156,7 +156,7 @@
             <classpath>
                 <pathelement path="${xlet.jar}"/>
             </classpath>               
-            <arg line="-assets / -automate ${script.name}.grin"/>                
+            <arg line="-assets / -binary -automate ${script.name}.grin"/>                
         </grinview.java>
     </target>
     

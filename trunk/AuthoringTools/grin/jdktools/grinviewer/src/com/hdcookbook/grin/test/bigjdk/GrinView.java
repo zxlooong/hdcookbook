@@ -57,6 +57,7 @@ package com.hdcookbook.grin.test.bigjdk;
 
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.util.AssetFinder;
@@ -367,17 +368,19 @@ public class GrinView extends GenericMain {
         System.out.println("                -imagemap <mapfile>");
         System.out.println("                -background <image>");        
         System.out.println("                -screensize <keyword>");
+        System.out.println("                -automate");
+        System.out.println("                -noui");
         System.out.println("                -scale <number>");
         System.out.println("                -segment <segment name to activate>");      
         System.out.println("                -extension_parser <a fully qualified classname>");       
         System.out.println("                -director <a fully qualified classname>");       
         System.out.println("                -binary");
-        System.out.println("                -automate");
         System.out.println("");
         System.out.println("            -assets and -asset_dir may be repeated to form a search path.");
         System.out.println("            -screensize keyword includes items like fullhd, pal, ntsc, 1080i, 720p, 960x520.");
         System.out.println("                        Default screen size is 1920x1080, with a scale factor 2.");
         System.out.println("            -automate option will launch a testing thread which activates");       
+        System.out.println("            -noui option will suppress the GrinView UI, which is good for profiling");       
         System.out.println("            every named segment in a given show with an 1 second interval.");
         System.out.println("            -extension_parser is needed when the show is a text file and");
         System.out.println("            uses a custom feature or command subclass.");
@@ -399,6 +402,7 @@ public class GrinView extends GenericMain {
         DeviceConfig deviceConfig = null;
         String extensionParserName = null;
 	boolean isBinary = false;
+	boolean noUI = false;
         String director = null;
         boolean doAutoTest = false;
 	while (argsUsed < args.length - 1) {
@@ -477,6 +481,9 @@ public class GrinView extends GenericMain {
             } else if ("-automate".equals(args[argsUsed])) {
                 doAutoTest = true;
                 argsUsed++;
+            } else if ("-noui".equals(args[argsUsed])) {
+                noUI = true;
+                argsUsed++;
             } else {
 		break;
 	    }
@@ -535,11 +542,19 @@ public class GrinView extends GenericMain {
             }
         }
         
-	GuiShowBuilder builder = new GuiShowBuilder(m);
+	ShowBuilder builder;
+	if (noUI) {
+	    builder = new ShowBuilder();
+	} else {
+	    builder = new GuiShowBuilder(m);
+	}
         builder.setExtensionParser(reader);
         m.init(showFile, isBinary, builder, segment, doAutoTest);
 
-	m.buildControlGUI(showFile, isBinary);
+	if (!noUI) {
+	    m.buildControlGUI(showFile, isBinary);
+	}
+	m.startEngine();
 	if (fps != null) {
 	    m.doKeyboardCommand("f " + fps); // set fps	 
 	}

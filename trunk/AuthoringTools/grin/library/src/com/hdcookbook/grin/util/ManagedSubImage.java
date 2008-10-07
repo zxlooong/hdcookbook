@@ -90,31 +90,45 @@ public class ManagedSubImage extends ManagedImage {
 	return placement.height;
     }
 
-    public void addReference() {
+    void addReference() {
 	numReferences++;
 	mosaic.addReference();
     }
 
-    public void removeReference() {
+    void removeReference() {
 	numReferences--;
 	mosaic.removeReference();
     }
 
-    public boolean isReferenced() {
+    boolean isReferenced() {
 	return numReferences > 0;
     }
 
     /**
      * @inheritDoc
      **/
-    public void prepare(Component comp) {
-	mosaic.prepare(comp);
+    public void prepare() {
+	mosaic.prepare();
     }
 
     /**
      * @inheritDoc
      **/
-    public synchronized void unprepare() {
+    public boolean isLoaded() {
+	return mosaic.isLoaded();
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void load(Component comp) {
+	mosaic.load(comp);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void unprepare() {
 	mosaic.unprepare();
     }
 

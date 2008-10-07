@@ -37,7 +37,8 @@ public class Oval extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
+	return 0;
     }
 
     /**

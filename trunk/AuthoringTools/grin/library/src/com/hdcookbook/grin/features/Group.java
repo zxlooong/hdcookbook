@@ -273,7 +273,7 @@ public class Group extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
 	//
 	// Note that setup is  only done on the original scene graph;
 	// cloned features are exempt from setup/unsetup.  This is
@@ -282,30 +282,17 @@ public class Group extends Feature implements Node {
 	// virtue of a group.
 	//
 	if (mode) {
+	    int num = 0;
 	    for (int i = 0; i < parts.length; i++) {
-		parts[i].setup();
+		num += parts[i].setup();
 	    }
+	    return num;
 	} else {
 	    for (int i = 0; i < parts.length; i++) {
 		parts[i].unsetup();
 	    }
+	    return 0;
 	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void doSomeSetup() {
-	//
-	// See note about cloned features in setSetupMode()
-	//
-	for (int i = 0; i < parts.length; i++) {
-	    if (parts[i].needsMoreSetup()) {
-		parts[i].doSomeSetup();
-		return;
-	    }
-	}
-	// None needed
     }
 
     /**

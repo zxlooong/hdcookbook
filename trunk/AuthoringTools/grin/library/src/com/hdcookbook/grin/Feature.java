@@ -76,7 +76,7 @@ import java.awt.Graphics2D;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public abstract class Feature implements SetupClient {
+public abstract class Feature {
 
     protected Show show;
     
@@ -178,8 +178,16 @@ public abstract class Feature implements SetupClient {
      * be different than the old.
      * Clients of the GRIN framework should never call this method directly.
      * Custom feature extensions must implement this method.
+     * <p>
+     * This method must return a guaranteed lower bound for the number of
+     * times it will send a feature setup command as a result of this
+     * call.  That is, it must send at least as many feature setup commands
+     * to the segment as the number returned; sending an accurate number
+     * makes the setup process more efficient, since the time it takes to
+     * process a command scales with the number of features in a segment.
+     * When mode is false, 0 should be returned.
      **/
-    abstract protected void setSetupMode(boolean mode);
+    abstract protected int setSetupMode(boolean mode);
 
     /**
      * Change the activated mode of this feature.  The new mode will
@@ -190,15 +198,6 @@ public abstract class Feature implements SetupClient {
     abstract protected void setActivateMode(boolean mode);
 
     /**
-     * Do some setup work.  This is called from the SetupManager thread,
-     * and is where time-consuming setup (like image loading) should
-     * happen.
-     * Clients of the GRIN framework should never call this method directly.
-     * Custom feature extensions must implement this method.
-     **/
-    abstract public void doSomeSetup();
-
-    /**
      * This is where the feaure says whether or not it needs more
      * setup.  Calls to this are synchronized within the init manager
      * to avoid race conditions.  The implementation of this method
@@ -206,6 +205,8 @@ public abstract class Feature implements SetupClient {
      * methods.
      * Clients of the GRIN framework should never call this method directly.
      * Custom feature extensions must implement this method.
+     *
+     * @see com.hdcookbook.grin.util.SetupClient#needsMoreSetup()
      **/
     abstract public boolean needsMoreSetup();
 
@@ -218,15 +219,15 @@ public abstract class Feature implements SetupClient {
      * 
      * @see #unsetup()
      *
-     * @return true if this call started setup being done
+     * @return A lower bound on the number of setup commands that will
+     *		be generated due to this call.
      **/
-    final public boolean setup() {
+    final public int setup() {
 	setupCount++;
 	if (setupCount == 1) {
-	    setSetupMode(true);
-	    return true;
+	    return setSetupMode(true);
 	} else {
-	    return false;
+	    return 0;
 	}
     }
 
@@ -290,6 +291,10 @@ public abstract class Feature implements SetupClient {
     /**
      * When a feature finishes its setup, it should call this to
      * tell the show about it.  This happens in the setup thread.
+     * If this is done, then the feature should return the number
+     * of commands it can generate from setSetupMode.
+     *
+     * @see #setSetupMode(boolean)
      **/
     protected void sendFeatureSetup() {
         if (featureSetupCommand == null) {

@@ -229,29 +229,19 @@ public class Assembly extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
 	if (mode) {
+	    int num = 0;
 	    for (int i = 0; i < parts.length; i++) {
-		parts[i].setup();
+		num += parts[i].setup();
 	    }
+	    return num;
 	} else {
 	    for (int i = 0; i < parts.length; i++) {
 		parts[i].unsetup();
 	    }
+	    return 0;
 	}
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void doSomeSetup() {
-	for (int i = 0; i < parts.length; i++) {
-	    if (parts[i].needsMoreSetup()) {
-		parts[i].doSomeSetup();
-		return;
-	    }
-	}
-	// None needed
     }
 
     /**

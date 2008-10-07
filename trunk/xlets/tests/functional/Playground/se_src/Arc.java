@@ -142,7 +142,8 @@ public class Arc extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    public void setSetupMode(boolean mode) {
+    public int setSetupMode(boolean mode) {
+	return 0;
     }
 
     /**

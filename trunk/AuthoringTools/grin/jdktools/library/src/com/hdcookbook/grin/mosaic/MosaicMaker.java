@@ -188,7 +188,8 @@ import javax.imageio.ImageIO;
     }
 
     private void addImage(ManagedImage mi) {
-	mi.prepare(this);
+	mi.prepare();
+	mi.load(this);
 	images.add(mi);
 	mi.draw(frameG, 0, 30, null);
     }

@@ -89,10 +89,17 @@ public class Segment implements Node {
     protected Command[] nextCommands;
     protected RCHandler[] rcHandlers;
     private boolean active = false;
-    private boolean nextCommandSent;
+    private boolean segmentSetupComplete;
 
     private ActivateSegmentCommand cmdToActivate;
     private ActivateSegmentCommand cmdToActivatePush;
+
+    private int outstandingSetups;
+
+    private int setupCheckedInSetup; 	
+    private int setupCheckedInActive;
+	// # of features in setup clause and activate clause that have
+	// been checked so far for setup
 
     public Segment() {
     }
@@ -191,15 +198,21 @@ public class Segment implements Node {
 	    return;
 	}
 	active = true;
-	nextCommandSent = false;
+	segmentSetupComplete = false;
+	outstandingSetups = 0;
+	setupCheckedInSetup = 0;
+	setupCheckedInActive = 0;
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    boolean wasNeeded = activeFeatures[i].setup();
+	    int needed = activeFeatures[i].setup();
+	    outstandingSetups += needed;
 	    if (Debug.LEVEL > 0 
-	        && (wasNeeded || activeFeatures[i].needsMoreSetup())) 
+	        && (needed > 0 || activeFeatures[i].needsMoreSetup())) 
 	    {
+	        Debug.println();
 		Debug.println("WARNING:  Feature " + activeFeatures[i]
 			      + " in segment " + name 
 			      + " wasn't set up on time.");
+	        Debug.println();
 	    }
 	    if (!activeFeatures[i].needsMoreSetup()) {
 		activeFeatures[i].activate();
@@ -207,7 +220,11 @@ public class Segment implements Node {
 	    }
 	}
 	for (int i = 0; i < settingUpFeatures.length; i++) {
-	    settingUpFeatures[i].setup();
+	    outstandingSetups += settingUpFeatures[i].setup();
+	    	// Our count of outstanding setups might be low, if some
+		// features had already started setting up in a previous
+		// segment, but it will never be high.  If it's low, the
+		// result will be some wasted CPU time, but correct behavior.
 	}
 	if (lastSegment != null) {
 	    lastSegment.active = false;
@@ -232,6 +249,7 @@ public class Segment implements Node {
 		show.runCommand(onEntryCommands[i]);
 	    }
 	}
+	outstandingSetups++;	// The one we set up on the next line...
 	runFeatureSetup();
     }
 
@@ -246,47 +264,55 @@ public class Segment implements Node {
     // This is externally synchronized by show, and must be.
     //
     void runFeatureSetup() {
-	if (!active) {
+	outstandingSetups--;	
+		// This can actually go negative -- see the comment where
+		// it's incremented to see why.
+	if (!active || outstandingSetups > 0 || segmentSetupComplete) {
 	    return;
 	}
-	for (int i = 0; i < activeFeatures.length; i++) {
-	    if (!featureWasActivated[i] && !activeFeatures[i].needsMoreSetup())
+
+	// Check if the setup clause is really finished.
+	while (setupCheckedInSetup < settingUpFeatures.length) {
+	    if (settingUpFeatures[setupCheckedInSetup].needsMoreSetup()) {
+		return;
+	    }
+	    setupCheckedInSetup++;
+	}
+	// Check to see if all features in active clause are set up
+	while (setupCheckedInActive < activeFeatures.length) {
+	    if (!featureWasActivated[setupCheckedInActive] 
+	    	&& activeFeatures[setupCheckedInActive].needsMoreSetup()) 
 	    {
+		return;
+	    }
+	    setupCheckedInActive++;
+	}
+
+	// That's it - setup is done.  We now activate any features that
+	// weren't ready when the segment was activated...
+	for (int i = 0; i < activeFeatures.length; i++) {
+	    if (!featureWasActivated[i]) {
 		activeFeatures[i].activate();
 		featureWasActivated[i] = true;
 	    }
 	}
-	// Now check to see if
+	segmentSetupComplete = true;
+
+	// Now check to see if we should send the next
 	// it's time to move to the next segment.  It is if we have
 	// no active features, and all of our features are set up.
-	if (nextCommands == null || 
-	    (!nextOnSetupDone && activeFeatures.length > 0)) 
-	{
-	    return;
+	if (nextOnSetupDone || activeFeatures.length == 0) {
+	    doSegmentDone();
 	}
-	for (int i = 0; i < settingUpFeatures.length; i++) {
-	    if (settingUpFeatures[i].needsMoreSetup()) {
-		return;
-	    }
-	}
-	if (nextCommandSent) {
-	    return;
-	}
-	for (int i = 0; i < nextCommands.length; i++) {
-	    show.runCommand(nextCommands[i]);
-	}
-
-	nextCommandSent = true;
     }
 
     void doSegmentDone() {
-	// We don't need to consult nextCommandSent here, because
-	// the "segment done" command is sent from a feature within
+	// The "segment done" command is sent from a feature within
 	// the model update loop; if the next command moves us to
 	// a new segment, that will prevent us from getting a second
-	// one.  If it *doesn't* move us to a new segment, then maybe
-	// the show author means to send the next command more than
-	// once.
+	// one due to finishing setup.  If it *doesn't* move us to a 
+	// new segment, then maybe the show author means to send the 
+	// next command more than once.
 	if (nextCommands != null) {
 	    for (int i = 0; i < nextCommands.length; i++) {
 		show.runCommand(nextCommands[i]);
@@ -299,7 +325,9 @@ public class Segment implements Node {
     //
     void paintFrame(Graphics2D gr) {
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    activeFeatures[i].paintFrame(gr);
+	    if (featureWasActivated[i]) {
+		activeFeatures[i].paintFrame(gr);
+	    }
 	}
     }
 
@@ -309,7 +337,9 @@ public class Segment implements Node {
     //
     void addDisplayAreas(RenderContext context) {
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    activeFeatures[i].addDisplayAreas(context);
+	    if (featureWasActivated[i]) {
+		activeFeatures[i].addDisplayAreas(context);
+	    }
 	}
     }
 
@@ -318,7 +348,9 @@ public class Segment implements Node {
     //
     void nextFrame() {
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    activeFeatures[i].nextFrame();
+	    if (featureWasActivated[i]) {
+		activeFeatures[i].nextFrame();
+	    }
 	}
 	if (rcHandlers != null) {
 	    for (int i = 0; i < rcHandlers.length; i++) {

@@ -67,6 +67,7 @@ import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.SetupClient;
 
 import java.io.IOException;
 import java.awt.Graphics2D;
@@ -80,7 +81,7 @@ import java.util.HashMap;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class ImageSequence extends Feature implements Node {
+public class ImageSequence extends Feature implements Node, SetupClient {
 
     protected Rectangle[] placements;	// Same length as fileNames[]
     protected String[] fileNames; 
@@ -96,7 +97,7 @@ public class ImageSequence extends Feature implements Node {
     	// The images in this sequence.  A null image will show up as
 	// blank, that is, any previous image will be erased.
     private boolean setupMode = false;
-    private int imagesSetup = 0;
+    private boolean imagesSetup = false;
     private Object setupMonitor = new Object();
     private boolean isActivated = false;
 
@@ -274,50 +275,59 @@ public class ImageSequence extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
 	synchronized(setupMonitor) {
 	    setupMode = mode;
 	    if (setupMode) {
-		show.setupManager.scheduleSetup(this);
-	    } else {
-		for (int i = 0; i < imagesSetup; i++) {
-		    if (images[i] != null) {
-			images[i].unprepare();
+		boolean allLoaded = true;
+		for (int i = 0; i < images.length; i++) {
+		    ManagedImage mi = images[i];
+		    if (mi != null) {
+			mi.prepare();
+			allLoaded = allLoaded && mi.isLoaded();
 		    }
 		}
-		imagesSetup = 0;
+		if (allLoaded) {
+		    imagesSetup = true;
+		    return 0;
+		} else {
+		    show.setupManager.scheduleSetup(this);
+		    return 1;
+		}
+	    } else {
+		for (int i = 0; i < images.length; i++) {
+		    ManagedImage mi = images[i];
+		    if (mi != null) {
+			mi.unprepare();
+		    }
+		}
+		imagesSetup = false;
 	    }
+	    return 0;
 	}
     }
+
 
     /**
      * @inheritDoc
      **/
     public void doSomeSetup() {
-	ManagedImage im;
+	for (int i = 0; i < images.length; i++) {
+	    synchronized(setupMonitor) {
+		if (!setupMode) {
+		    return;
+		}
+	    }
+	    ManagedImage mi = images[i];
+	    mi.load(show.component);
+	}
 	synchronized(setupMonitor) {
 	    if (!setupMode) {
 		return;
 	    }
-	    im = images[imagesSetup];
-	    while (im == null && (imagesSetup+1) < images.length) {
-		imagesSetup++;
-		im = images[imagesSetup];
-	    }
+	    imagesSetup = true;
 	}
-	if (im != null) {
-	    im.prepare(show.component);
-	    synchronized(setupMonitor) {
-		if (setupMode) {
-		    imagesSetup++;
-		} else {
-		    im.unprepare();
-		}
-	    }
-	}
-	if (!needsMoreSetup()) {
-	    sendFeatureSetup();
-	}
+	sendFeatureSetup();
     }
 
     /**
@@ -325,7 +335,7 @@ public class ImageSequence extends Feature implements Node {
      **/
     public boolean needsMoreSetup() {
 	synchronized (setupMonitor) {
-	    return setupMode && (imagesSetup < images.length);
+	    return setupMode && !imagesSetup;
 	}
     }
 

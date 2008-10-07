@@ -288,15 +288,9 @@ public class InterpolatedModel extends Feature implements Node {
 	}
     }
 
-    protected void setSetupMode(boolean mode) {
+    protected int setSetupMode(boolean mode) {
 	// do nothing
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void doSomeSetup() {
-	// do nothing
+	return 0;
     }
 
     /**

@@ -91,7 +91,7 @@
                 <pathelement path="${grin.classes}"/>
                 <pathelement path="${xlet.jar}"/>
             </classpath>
-            <arg line="-assets / -automate ${script.name}.grin"/>
+            <arg line="-assets / -asset_dir build -automate -binary ${script.name}.grin"/>
         </java>
     </target>
     <target name="debug_grinview">

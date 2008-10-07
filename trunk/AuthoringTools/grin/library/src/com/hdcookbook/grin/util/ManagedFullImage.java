@@ -73,6 +73,8 @@ public class ManagedFullImage extends ManagedImage {
     private int numReferences = 0;
     private int numPrepares = 0;
     Image image = null;		// Accessed by ManagedSubImage
+    private boolean loaded = false;
+    	// If image == null && !loaded, then we're loading.
 
     ManagedFullImage(String name) {
 	this.name = name;
@@ -83,64 +85,117 @@ public class ManagedFullImage extends ManagedImage {
     }
 
     public int getWidth() {
-	if (Debug.ASSERT && image == null) {
-	    Debug.assertFail();
-	}
+	// assert image != null
 	return image.getWidth(null);
     }
     
     public int getHeight() {
-	if (Debug.ASSERT && image == null) {
-	    Debug.assertFail();
-	}
+	// assert image != null
 	return image.getHeight(null);
     }
 
-    public void addReference() {
+    synchronized void addReference() {
 	numReferences++;
     }
 
-    public void removeReference() {
+    synchronized void removeReference() {
 	numReferences--;
     }
 
-    public boolean isReferenced() {
+    synchronized boolean isReferenced() {
 	return numReferences > 0;
     }
 
     /**
      * @inheritDoc
      **/
-    public void prepare(Component comp) {
-	boolean load = false;
+    public synchronized void prepare() {
+	    // See ManagedImage's main class documentation under
+	    //  "ManagedImage contract - image loading and unloading".
+	numPrepares++;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public synchronized boolean isLoaded() {
+	    // See ManagedImage's main class documentation under
+	    //  "ManagedImage contract - image loading and unloading".
+	return loaded;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void load(Component comp) {
+	    // See ManagedImage's main class documentation under
+	    //  "ManagedImage contract - image loading and unloading".
 	synchronized(this) {
-	    numPrepares++;
-	    if (image == null && comp != null) {
-		image = AssetFinder.loadImage(name);
-		load = true;
+	    while (true) {
+		if (loaded || numPrepares <= 0) {
+			// If load is done in a different thread than
+			// unprepare, it's possible for our client to lose
+			// interest in us before we even start preparing.
+			// For example, in GRIN, the show could possibly
+			// move to a different segment before the setup
+			// thread starts preparing an image from the previous
+			// segment.
+		    return;
+		}
+		if (image == null) {
+		    image = AssetFinder.loadImage(name);
+		    break;	// Load the image ourselves
+		} else {
+		    // Another thread is loading this image, so we wait.
+		    try {
+			wait();	// Until that other thread loads image
+		    } catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+			return;
+		    }
+		    // Now, go back around the loop
+		}
 	    }
 	}
-	if (load) {
-	    //
-	    // The JDK seems to put the image fetching thread priority
-	    // really high, which is the opposite of what we want.  By
-	    // yielding, we increase the odds that higher-priority animation
-	    // will be given a chance before our lower-priority setup thread
-	    // grabs the CPU with the image fetching thread.  On all 
-	    // implementations, yielding in this manner should be at worst 
-	    // harmless.
-	    //
-	    Thread.currentThread().yield();
-	    MediaTracker tracker = new MediaTracker(comp);
-	    tracker.addImage(image, 0);
-	    try {
-		tracker.waitForAll();
-	    } catch (InterruptedException ex) {
-		Thread.currentThread().interrupt();
+	//
+	// If we get here, we are loading the image ourselves.
+	//
+
+	//
+	// The JDK seems to put the image fetching thread priority
+	// really high, which is the opposite of what we want.  By
+	// yielding, we increase the odds that higher-priority animation
+	// will be given a chance before our lower-priority setup thread
+	// grabs the CPU with the image fetching thread.  On all 
+	// implementations, yielding in this manner should be at worst 
+	// harmless.
+	//
+	Thread.currentThread().yield();
+	MediaTracker tracker = new MediaTracker(comp);
+	tracker.addImage(image, 0);
+	try {
+	    tracker.waitForAll();
+	} catch (InterruptedException ex) {
+	    Thread.currentThread().interrupt();
+	}
+	if (Debug.LEVEL > 1) {
+	    Debug.println("Loaded image " + name);
+	}
+	synchronized(this) {
+	    if (numPrepares <= 0) {	// They've lost interest in us.  So sad.
+		image.flush();
+		image = null;
+		if (Debug.LEVEL > 1) {
+		    Debug.println("Unloaded image " + name 
+		    		   + " due to loss of interest.");
+		}
+	    } else {
+		loaded = true;
 	    }
-	    if (Debug.LEVEL > 1) {
-		Debug.println("Loaded image " + name);
-	    }
+	    notifyAll();
+		// Threads waiting on us will proceed, either because image is
+		// now null (so they can abandon load due to loss of interest), 
+		// or because we've loaded the image.  
 	}
     }
 
@@ -148,10 +203,13 @@ public class ManagedFullImage extends ManagedImage {
      * @inheritDoc
      **/
     public synchronized void unprepare() {
+	    // See ManagedImage's main class documentation under
+	    //  "ManagedImage contract - image loading and unloading".
 	numPrepares--;
-	if (numPrepares == 0 && image != null) {
+	if (numPrepares <= 0 && loaded) {
 	    image.flush();
 	    image = null;
+	    loaded = false;
 	    if (Debug.LEVEL > 1) {
 		Debug.println("Unloaded image " + name);
 	    }
