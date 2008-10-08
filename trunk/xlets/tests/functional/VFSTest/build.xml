@@ -78,6 +78,9 @@
         <delete file="keystore.store"/>
         <delete file="${xlet.name}.zip"/>
     </target>
+    <target name="spotless" depends="clean">
+	<delete file="src/budafiles/sample.sf"/>
+    </target>
     
     <target name="deploy" depends="bundle">
         <scp todir="${hostdir}" password="${password}" 

@@ -36,4 +36,7 @@
           <ant dir="logger" target="clean"/>         
 	</target>
 
+	<target name="spotless" depends="clean">
+	</target>
+
 </project>

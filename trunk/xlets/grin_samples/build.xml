@@ -33,4 +33,7 @@
             <ant dir="Scripts/Translation" target="clean"/>                  
             <ant dir="Scripts/VisualRCHandler" target="clean"/>         
 	</target>
+	<target name="spotless" depends="clean">
+	    <ant dir="GrinBunny" target="spotless"/>
+	</target>
 </project>

@@ -110,4 +110,8 @@ information or have any questions.
     </condition>
 </target>
 
+<target name="clean-bdjo-desc">
+    <delete file="${bdjo-desc-file}.tmp"/>
+    <delete file="${bdjo-desc-file}"/>
+</target>
 </project>

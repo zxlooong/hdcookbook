@@ -173,7 +173,7 @@
         </java>	
     </target>
     
-    <target name="clean">
+    <target name="clean" depends="clean-bdjo-desc">
         <delete dir="${build.dir}"/>
         <delete file="${generated.class}"/>
     </target>

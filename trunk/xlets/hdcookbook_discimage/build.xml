@@ -46,6 +46,13 @@ information or have any questions.
         <delete dir="dist"/>
         <delete file="HDCookbookDiscImage.zip"/>
     </target>
+
+    <target name="spotless" depends="clean">
+	<delete file="keystore.store"/>
+	<delete file="appcert.cer"/>
+	<delete file="appcert.csr"/>
+	<delete dir="META-INF"/>
+    </target>
     
     <target name="build-hdcookbook-xlets" 
             depends="init, build-xlets, bundle"/>

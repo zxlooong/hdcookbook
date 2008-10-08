@@ -196,7 +196,7 @@ abstract public class ManagedImage {
      * "ManagedImage contract - image loading and unloading".
      *
      * @see #prepare()
-     * @see #load()
+     * @see #load(Component)
      * @see #makeSticky()
      * @see #unmakeSticky()
      * @see ManagedImage

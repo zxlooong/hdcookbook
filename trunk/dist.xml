@@ -51,5 +51,8 @@
         <delete dir="${RELEASE_BUNDLE}"/>
         <delete dir="${RELEASE_BUNDLE}.tmp"/>
     </target>
+
+    <target name="spotless" depends="clean">
+    </target>
     
 </project>

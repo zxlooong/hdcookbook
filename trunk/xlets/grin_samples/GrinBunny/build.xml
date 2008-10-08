@@ -63,6 +63,11 @@
         <delete dir="${dist.dir}"/>
         <delete file="${ant.project.name}.zip"/>
     </target>
+    <target name="spotless" depends="clean">
+	<delete file="keystore.store"/>
+	<delete file="app.discroot.crt"/>
+	<delete dir="META-INF"/>
+    </target>
 
     <target name="deploy" depends="bundle"/>
     

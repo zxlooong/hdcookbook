@@ -59,6 +59,19 @@
         <ant antfile="dist.xml"      target="clean"/>
         <delete dir="bin"/>
     </target>
+
+    <target name="spotless">
+        <ant dir="DiscCreationTools" target="spotless"/>
+        <ant dir="AuthoringTools"    target="spotless"/>
+        <ant dir="xlets"             target="spotless"/>
+        <ant antfile="dist.xml"      target="spotless"/>
+        <delete dir="bin"/>
+	<echo message=""/>
+	<echo message="Cleaned out all generated file.  This removed keystore files used for"/>
+	<echo message="signing, which means that the next build you do will result in xlets "/>
+	<echo message="that are signed by a different, new entity."/>
+	<echo message=""/>
+    </target>
     
     <target name="check-stubs">
         <available file="${HDC_BDJ_PLATFORM_CLASSES}" type="file"

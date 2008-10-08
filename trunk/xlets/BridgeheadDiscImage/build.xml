@@ -25,6 +25,11 @@
     <target name="clean" depends="client-clean, bumfgen-clean, bridgehead-clean, sample-clean">
         <delete file="${zipfile}"/>
     </target>
+
+    <target name="spotless" depends="clean">
+	<delete file="SampleDiscImage/keystore.store"/>
+	<delete file="SampleDiscImage/app.discroot.crt"/>
+    </target>
     
     <target name="deploy" depends="bridgehead-deploy, make-bumfgen-jar, 
                                    make-client-jar, bundle, make-sample"

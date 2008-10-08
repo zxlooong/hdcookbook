@@ -8,6 +8,10 @@
         <delete file="WriterXlet.zip"/>
         <delete file="ReaderXlet.zip"/>
     </target>
+
+    <target name="spotless" depends="clean">
+	<delete file="Reader/grantorchain.crt"/>
+    </target>
     
     <target name="deploy" depends="bundle"/>
     
