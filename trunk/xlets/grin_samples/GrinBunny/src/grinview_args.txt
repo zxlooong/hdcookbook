@@ -1,0 +1,12 @@
+#
+#  This file contains command-line arguments for use with
+#  a launchable GrinView JAR file.  See the grinview-jar target
+#  in build.xml
+#
+-assets
+/
+-director
+GrinBunnyDirector
+-segment
+S:Initialize
+grinbunny_show.txt

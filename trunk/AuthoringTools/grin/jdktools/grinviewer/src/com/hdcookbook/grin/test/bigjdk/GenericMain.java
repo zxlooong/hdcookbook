@@ -609,16 +609,18 @@ public class GenericMain extends Frame implements AnimationContext {
     }
 
     public void animationFinishInitialization() throws InterruptedException {
-	if (initialSegmentName != null) {
-	    doKeyboardCommand("s " + initialSegmentName); 
-                // Calls Show.activateSegment
-	}
 	System.out.println("Starting frame pump...");
         synchronized(this) {
             initialized = true;
             notifyAll();
         }
+	if (initialSegmentName != null) {
+	    doKeyboardCommand("s " + initialSegmentName); 
+                // Calls Show.activateSegment
+	}
         
+	requestFocus();
+
         if (doAutoTest) {
             new Thread() {
                 @Override

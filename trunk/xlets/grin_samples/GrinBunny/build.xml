@@ -18,6 +18,11 @@
                source="1.3" target="1.3"
                debug="on" deprecation="on"/>
     </presetdef>
+    <presetdef name="jdktools.javac">
+        <javac srcdir="${src.dir}"
+               source="1.5" target="1.5"
+               debug="on" deprecation="on"/>
+    </presetdef>
     
     <target name="init" depends="check-tools">
         <tstamp/>
@@ -86,14 +91,14 @@
 	      tofile="${build.dir}/gensrc/grinview/ShowCommands.java"/>
 	<move file="${build.dir}/grinbunny_show.xlet.java"
 	      tofile="${build.dir}/gensrc/xlet/ShowCommands.java"/>
-	<javac destdir="${build.dir}/gensrc/grinview" debug="on"
+	<jdktools.javac destdir="${build.dir}/gensrc/grinview" debug="on"
 		excludes="GrinBunnyXlet.java">
 	    <src path="${build.dir}/gensrc/grinview" />
 	    <src path="src"/>
 	    <classpath>
 		<pathelement path="${grinview.jar}"/>
 	    </classpath>
-	</javac>
+	</jdktools.javac>
     </target>
 
     <target name="grinview" depends="run-grinview"/>
@@ -112,6 +117,34 @@
             <arg value="grinbunny_show.txt"/>
         </jdktools.java>
     </target>
+
+    <target name="grinview-jar" depends="init, generate-binary-script"
+    	    description="Generate launchable grinview jar file">
+        <delete dir="${build.dir}/grinview-jar"/>
+        <mkdir dir="${build.dir}/grinview-jar"/>
+	<unzip src="${grinview.jar}" dest="${build.dir}/grinview-jar"/>
+	<copy todir="${build.dir}/grinview-jar">
+            <fileset dir="${build.dir}/gensrc/grinview">
+                <include name="**.class"/>
+            </fileset>
+            <fileset dir="src">
+                <include name="grinbunny_show.txt"/>
+                <include name="grinview_args.txt"/>
+                <include name="images/**.png"/>
+            </fileset>
+        </copy>
+	<delete dir="${build.dir}/grinview-jar/META-INF"/>
+	<jar jarfile="${build.dir}/${ant.project.name}.jar">
+	    <fileset dir="${build.dir}/grinview-jar"/>
+	    <manifest>
+	        <attribute name="Main-Class" value="com.hdcookbook.grin.test.bigjdk.GrinViewJar"/>
+	    </manifest>
+	</jar>
+	<echo message=""/>
+	<echo message="Created launchable gunbunny using grinview in ${build.dir}/${ant.project.name}.jar"/>
+	<echo message=""/>
+    </target>
+
 
     <target name="test" depends="init, generate-binary-script"
     		description="Run grinview on game in autotest mode">

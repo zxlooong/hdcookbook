@@ -94,6 +94,9 @@ public class GrinView extends GenericMain {
     static final DeviceConfig QHD  = new DeviceConfig(960, 540);
     static final DeviceConfig FOURTHREE = new DeviceConfig(1440, 1080);
     static final DeviceConfig FULLHD = new DeviceConfig(1920, 1080);  
+
+    static boolean doInputLoop = true;	
+    	// Can be set false externally, e.g. by GrinViewJar
         
     public GrinView() {
     }
@@ -558,9 +561,11 @@ public class GrinView extends GenericMain {
 	if (fps != null) {
 	    m.doKeyboardCommand("f " + fps); // set fps	 
 	}
-        
-	m.inputLoop();		// Never returns
-	System.exit(0);
+
+	if (doInputLoop) {
+	    m.inputLoop();
+	    System.exit(0);
+	}
     } 
     
     
