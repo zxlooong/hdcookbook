@@ -362,12 +362,27 @@ public class Segment implements Node {
     //
     // Called from Show with the Show lock held
     //
-    boolean handleRCEvent(RCKeyEvent re) {
+    boolean handleKeyPressed(RCKeyEvent re) {
 	if (rcHandlers == null) {
 	    return false;
 	}
 	for (int i = 0; i < rcHandlers.length; i++) {
-	    if (rcHandlers[i].handleRCEvent(re)) {
+	    if (rcHandlers[i].handleKeyPressed(re)) {
+		return true;
+	    }
+	}
+	return false;
+    }
+
+    //
+    // Called from Show with the Show lock held
+    //
+    boolean handleKeyReleased(RCKeyEvent re) {
+	if (rcHandlers == null) {
+	    return false;
+	}
+	for (int i = 0; i < rcHandlers.length; i++) {
+	    if (rcHandlers[i].handleKeyReleased(re)) {
 		return true;
 	    }
 	}

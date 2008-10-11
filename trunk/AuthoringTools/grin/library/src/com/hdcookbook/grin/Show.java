@@ -605,9 +605,9 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * Called by the xlet when a keypress is received.
+     * Called by the xlet when a key press is received.
      *
-     * @return true	If the keypress is handled
+     * @return true	If the key press is handled
      **/
     public synchronized boolean handleKeyPressed(int vkCode) {
 	if (currentSegment == null) {
@@ -623,7 +623,30 @@ public class Show implements AnimationClient {
 	if (Debug.LEVEL > 1) {
 	    System.out.println("RC event:  " + re.getName());
 	}
-	return currentSegment.handleRCEvent(re);
+	return currentSegment.handleKeyPressed(re);
+    }
+
+    /**
+     * Called by the xlet when a key release is received.  Note that not
+     * all devices generate a key released.
+     *
+     * @return true	If the keypress is handled
+     **/
+    public synchronized boolean handleKeyReleased(int vkCode) {
+	if (currentSegment == null) {
+	    return false;
+	}
+	if (!waitForInputOK()) {
+	    return false;
+	}
+	RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
+	if (re == null) {
+	    return false;
+	}
+	if (Debug.LEVEL > 1) {
+	    System.out.println("RC event:  " + re.getName());
+	}
+	return currentSegment.handleKeyReleased(re);
     }
 
     /**

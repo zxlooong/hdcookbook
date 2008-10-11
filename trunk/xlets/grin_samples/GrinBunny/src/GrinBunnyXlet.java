@@ -85,9 +85,10 @@ import org.bluray.ui.event.HRcEvent;
 
 /** 
  * The xlet class for the GrinBunny project
- */
+ **/
 
-public class GrinBunnyXlet implements Xlet, AnimationContext, UserEventListener
+public class GrinBunnyXlet 
+	implements Xlet, AnimationContext, UserEventListener
 {
 	
 	public Show show;
@@ -96,6 +97,12 @@ public class GrinBunnyXlet implements Xlet, AnimationContext, UserEventListener
 	DirectDrawEngine animationEngine;
 	GrinBunnyDirector director;
 	XletContext context;
+	boolean sendKeyUp = true;
+
+	// A small show we use to manage a debug screen accessed with
+	// the popup menu key
+	private Show xletShow;
+	private XletDirector xletDirector;
 	
 	public void initXlet(XletContext context) {
 		
@@ -128,9 +135,15 @@ public class GrinBunnyXlet implements Xlet, AnimationContext, UserEventListener
 		    System.out.println();
 		    System.out.println("Destroying GrinBunny show...");
 		}
-		show.activateSegment(getSegment("S:Finished"));	
+		show.activateSegment(show.getSegment("S:Finished"));	
+		if (xletShow != null) {
+		    xletShow.activateSegment(xletShow.getSegment("S:Finished"));
+		}
 		try {
 		    director.waitForGameDestroyed();
+		    if (xletShow != null) {
+			xletDirector.waitForShowDestroyed();
+		    }
 		} catch (InterruptedException ex) {
 		    Thread.currentThread().interrupt();
 		    return;
@@ -154,6 +167,7 @@ public class GrinBunnyXlet implements Xlet, AnimationContext, UserEventListener
 	public void animationInitialize() throws InterruptedException {
 
 	   director = new GrinBunnyDirector();
+	   xletDirector = new XletDirector(this);
 	   try {
 	       fontFactory = new FontFactory();
 	    } catch (Exception ex) {
@@ -197,12 +211,18 @@ public class GrinBunnyXlet implements Xlet, AnimationContext, UserEventListener
 		});
 
                AssetFinder.setSearchPath(new String[]{""}, null);      
+
 	       GrinBinaryReader reader = 
                        new GrinBinaryReader(AssetFinder.getURL(
 		       		"grinbunny_show.grin").openStream());
 	       show = new Show(director);
                reader.readShow(show);
-               
+
+	       reader = new GrinBinaryReader(AssetFinder.getURL(
+		       		"xlet_show.grin").openStream());
+	       xletShow = new Show(xletDirector);
+               reader.readShow(xletShow);
+
            } catch (IOException e) {
                e.printStackTrace();
                System.err.println("Error in reading the show file");
@@ -210,13 +230,15 @@ public class GrinBunnyXlet implements Xlet, AnimationContext, UserEventListener
            }
            
 	   animationEngine.checkDestroy();
-	   animationEngine.initClients(new AnimationClient[]{show});
-	   animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
+	   animationEngine.initClients(new AnimationClient[] { show, xletShow });
+	   animationEngine.initContainer(rootContainer, 
+	   				 new Rectangle(0,0,1920,1080));
 	   
 	} 
 	
 	public void animationFinishInitialization() {
-	    show.activateSegment(getSegment("S:Initialize"));	
+	    show.activateSegment(show.getSegment("S:Initialize"));	
+	    xletShow.activateSegment(xletShow.getSegment("S:Initialize"));	
            
             UserEventRepository userEventRepo = new UserEventRepository("x");
             userEventRepo.addAllArrowKeys();
@@ -234,17 +256,23 @@ public class GrinBunnyXlet implements Xlet, AnimationContext, UserEventListener
      * org.dvb.event.UserEventListener
      **/
     public void userEventReceived(UserEvent e) {
-        if (e.getType() == HRcEvent.KEY_PRESSED) {
-            show.handleKeyPressed(e.getCode());
-        }
-    }	
-
-    private Segment getSegment(String name) {
-	Segment s = show.getSegment(name);
-	if (Debug.ASSERT && s == null) {
-	    Debug.assertFail("Segment \"" + name + "\" not found.");
+	int type = e.getType();
+        if (type == HRcEvent.KEY_PRESSED) {
+	    int code = e.getCode();
+	    boolean handled =
+		xletShow.handleKeyPressed(code) || show.handleKeyPressed(code);
+        } else if (sendKeyUp && type == HRcEvent.KEY_RELEASED) {
+	    int code = e.getCode();
+	    boolean handled =
+		xletShow.handleKeyReleased(code) || show.handleKeyReleased(code);
+			// Note that Gun Bunny doesn't do anything on key_released,
+			// or at least it didn't when this comment was written.
+			// Because of this setting sendKeyUp false doesn't have
+			// a visible effect on this particular game, but this xlet
+			// can trivially be adapted for use as a generic game xlet.
+			// If you do this, then being able to turn off key up events
+			// is really useful.
 	}
-	return s;
-    }
+    }	
 
 }

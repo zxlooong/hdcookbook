@@ -142,36 +142,6 @@ public class GrinBunnyDirector extends Director {
     public GrinBunnyDirector() {
     }
 
-    private Feature getFeature(String name) {
-	Feature f = getShow().getFeature(name);
-	if (Debug.ASSERT && f == null) {
-	    Debug.assertFail("Feature \"" + name + "\" not found.");
-	}
-	return f;
-    }
-
-    private Feature getPart(Assembly assembly, String partName) {
-	Feature[] parts = assembly.getParts();
-	String[] partNames = assembly.getPartNames();
-	for (int i = 0; i < parts.length; i++) {
-	    if (partName.equals(partNames[i])) {
-		return parts[i];
-	    }
-	}
-	if (Debug.ASSERT) {
-	    Debug.assertFail();
-	}
-	return null;
-    }
-
-    private Segment getSegment(String name) {
-	Segment s = getShow().getSegment(name);
-	if (Debug.ASSERT && s == null) {
-	    Debug.assertFail("Segment \"" + name + "\" not found.");
-	}
-	return s;
-    }
-
 
     /**
      * Called by a java_command in the show to initialize the game

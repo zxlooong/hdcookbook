@@ -56,6 +56,7 @@
 package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.util.Debug;
 
 /**
  * This class is a supertype that xlets can subclass to interact with a show.
@@ -92,6 +93,60 @@ public class Director {
     public Show getShow() {
 	return show;
     }
+
+    /**
+     * Get the named public feature from the show we're managing.  If not
+     * found and if we're in debug mode, trigger an assertion failure.
+     * This method does
+     * a search through the show's features using a hashtable lookup, 
+     * so it shouldn't be called
+     * frequently; it's best used during initialization.
+     **/
+    public Feature getFeature(String name) {
+	Feature f = getShow().getFeature(name);
+	if (Debug.ASSERT && f == null) {
+	    Debug.assertFail("Feature \"" + name + "\" not found.");
+	}
+	return f;
+    }
+
+    /**
+     * Look up the named part in the given assembly.  If not found and if
+     * we're in debug mode, trigger an assertion failure.  This method does
+     * a search through the assembly's parts, so it shouldn't be called
+     * frequently; it's best used during initialization.
+     **/
+    public Feature getPart(Assembly assembly, String partName) {
+	Feature[] parts = assembly.getParts();
+	String[] partNames = assembly.getPartNames();
+	for (int i = 0; i < parts.length; i++) {
+	    if (partName.equals(partNames[i])) {
+		return parts[i];
+	    }
+	}
+	if (Debug.ASSERT) {
+	    Debug.assertFail();
+	}
+	return null;
+    }
+
+    /**
+     * Look up the given named public segment in the show we're managing.
+     * If not found and if we're in debug mode, trigger an assertion failure.
+     * This method does
+     * a search through the show's features using a hashtable lookup, 
+     * so it shouldn't be called
+     * frequently; it's best used during initialization.
+     **/
+    public Segment getSegment(String name) {
+	Segment s = getShow().getSegment(name);
+	if (Debug.ASSERT && s == null) {
+	    Debug.assertFail("Segment \"" + name + "\" not found.");
+	}
+	return s;
+    }
+
+
 
     /**
      * Notify the director that the model is moving to the next frame.

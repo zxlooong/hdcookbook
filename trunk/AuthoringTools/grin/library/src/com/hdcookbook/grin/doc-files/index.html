@@ -442,8 +442,12 @@ Here's BNF describing the syntax of a show file:
 
     part_name_list ::= "{" part_name * "}"
 
-    command_rc_handler ::= "rc_handler" "key_pressed" name "{" rc_key * "}" 
+    command_rc_handler ::= "rc_handler" [ "key_pressed" | "key_released" ]
+    				name "{" rc_key * "}" 
     				"execute" commands ";"
+	#  Note that only key_pressed is guaranteed to be available
+	#  on all devices.  OCAP and MHP don't guarantee it, and
+	#  BD part J.1.2 looks like it's not guarnateed in BD-J, either.
 
     rc_key ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
                | "right" | "left" | "up" | "down" | "enter"
@@ -463,7 +467,7 @@ Here's BNF describing the syntax of a show file:
 	# mosaic_hint is deprecated.  See "mosaics"
 
     sub_feature ::= feature_name
-    		    | sub_feature feature_without_name
+    		    | "sub_feature" feature_without_name
 
     feature_without_name ::= ... exactly like feature, without the feature name
 

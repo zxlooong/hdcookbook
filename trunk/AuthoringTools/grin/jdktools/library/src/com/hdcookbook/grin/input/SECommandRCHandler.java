@@ -62,10 +62,13 @@ import java.io.IOException;
 
 public class SECommandRCHandler extends CommandRCHandler implements SENode {
     
-    public SECommandRCHandler(String name, int mask, Command[] commands) {
+    public SECommandRCHandler(String name, int mask, boolean wantKeypress,
+    			     Command[] commands) 
+    {
         super();
         this.name = name;
 	this.mask = mask;
+	this.wantKeypress = wantKeypress;
 	this.commands = commands;
     }
     
@@ -81,6 +84,10 @@ public class SECommandRCHandler extends CommandRCHandler implements SENode {
     public Command[] getCommands() {
         return commands;
     }
+
+    public boolean getWantKeypress() {
+	return wantKeypress;
+    }
     
     public void setMask(int mask) {
         this.mask = mask;
@@ -95,6 +102,7 @@ public class SECommandRCHandler extends CommandRCHandler implements SENode {
 	
         out.writeSuperClassData(this);
         out.writeInt(getMask());
+	out.writeBoolean(wantKeypress);
         out.writeCommands(getCommands());           
     }
 

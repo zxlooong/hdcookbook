@@ -71,6 +71,7 @@ public class CommandRCHandler extends RCHandler implements Node {
    
     protected int mask;
     protected Command[] commands;
+    protected boolean wantKeypress;	// otherwise wants key release
     
     public CommandRCHandler() {
         super();
@@ -79,8 +80,22 @@ public class CommandRCHandler extends RCHandler implements Node {
     /**
      * @inheritDoc
      **/
-    public boolean handleRCEvent(RCKeyEvent ke) {
-	if ((ke.getBitMask() & mask) != 0) {
+    public boolean handleKeyPressed(RCKeyEvent ke) {
+	if (wantKeypress && (ke.getBitMask() & mask) != 0) {
+	    for (int i = 0; i < commands.length; i++) {
+		commands[i].execute();
+	    }
+	    return true;
+	} else {
+	    return false;
+	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public boolean handleKeyReleased(RCKeyEvent ke) {
+	if (!wantKeypress && (ke.getBitMask() & mask) != 0) {
 	    for (int i = 0; i < commands.length; i++) {
 		commands[i].execute();
 	    }
@@ -114,6 +129,7 @@ public class CommandRCHandler extends RCHandler implements Node {
                 
         in.readSuperClassData(this);
         this.mask = in.readInt();     
+	this.wantKeypress = in.readBoolean();
         this.commands = in.readCommands();
     }
 }

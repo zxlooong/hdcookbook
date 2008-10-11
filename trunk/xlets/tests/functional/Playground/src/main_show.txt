@@ -59,16 +59,19 @@ segment S:Initialize
 segment S:Main 
     active {
 	F:MainText
+	F:EnterAssembly
     } setup {
 	F:Everything
     } rc_handlers {
 	H:1 H:2 H:3 H:4
+	H:EnterPress H:EnterRelease
     }
 ;
 
 feature group F:Everything {
     F:MainText
     F:ProgrammaticDemo
+    F:EnterAssembly
 } ;
 
 feature text F:MainText
@@ -103,6 +106,14 @@ rc_handler key_pressed H:4 { 4 } execute {
     java_command [[ XLET_ONLY_[[
 	getMainDirector().putNewShowOnTopOfMenu("S:ExtensionTest");
     ]] ]]
+} ;
+
+rc_handler key_pressed H:EnterPress { enter } execute {
+	activate_part F:EnterAssembly press ;
+} ;
+
+rc_handler key_released H:EnterRelease { enter } execute {
+	activate_part F:EnterAssembly release ;
 } ;
 
 #########################################################
@@ -175,7 +186,7 @@ feature translator F:BoxTranslator F:BoxedStuffPosition {
  	F:BoxedStuffFade
 } ;
 
-    # Finally, some text (that we change programmatically), plus an
+    # Now, some text (that we change programmatically), plus an
     # assembly/fade combo we use to randomly make it fade out then in
     # from time to time.
 
@@ -202,6 +213,25 @@ feature assembly F:TextAssembly {
 	fading	F:FadeText
     }
 ;
+
+    #  Now, something to show when the enter key is pressed, and (if supported
+    #  by the player) released.
+
+feature assembly F:EnterAssembly {
+	normal	sub_feature group { } ;
+	press   sub_feature group {
+		    sub_feature timer 20 { activate_part F:EnterAssembly normal ; } ;
+		    sub_feature text middle 980 baseline 960 { "Enter Pressed" }
+		    	SansSerif plain 36 { { 255 0 0 255 } }
+			background { 0 0 0 255 } ;
+		} ;
+	release sub_feature group {
+		    sub_feature timer 20 { activate_part F:EnterAssembly normal ; } ;
+		    sub_feature text middle 980 baseline 960 { "Enter Released " }
+		    	SansSerif plain 36 { { 255 0 0 255 } }
+			background { 0 0 0 255 } ;
+		} ;
+} ;
 
     # This is cute:  We make a timer on every frame that flips
     # a coin, and sometimes makes the text fade out for a beat.

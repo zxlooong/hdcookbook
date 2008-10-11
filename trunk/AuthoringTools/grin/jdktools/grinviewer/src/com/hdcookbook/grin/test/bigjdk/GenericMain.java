@@ -127,6 +127,7 @@ public class GenericMain extends Frame implements AnimationContext {
     private boolean initialized = false;
     private String initialSegmentName = null;
     private boolean doAutoTest = false;
+    private boolean sendKeyUp = true;
     private Insets insets;
 
     private String directorClassName = GenericDirector.class.getName();
@@ -211,7 +212,18 @@ public class GenericMain extends Frame implements AnimationContext {
 
         java.awt.event.KeyAdapter listener = new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent e) {
-                // ignored
+	    	int code = e.getKeyCode();
+		// Translate F1..F4 into red/green/yellow/blue
+		if (code >= KeyEvent.VK_F1 && code <= KeyEvent.VK_F4) {
+		    code = code - KeyEvent.VK_F1 + RCKeyEvent.KEY_RED.getKeyCode();
+		} else if (code >= KeyEvent.VK_NUMPAD0 && code <= KeyEvent.VK_NUMPAD9) {
+		    code = code - KeyEvent.VK_NUMPAD0 + RCKeyEvent.KEY_0.getKeyCode();
+		} else if (code == KeyEvent.VK_F5) {
+		    code = RCKeyEvent.KEY_POPUP_MENU.getKeyCode();
+		}
+		if (sendKeyUp) {
+		    show.handleKeyReleased(code);
+		}
             }
             public void keyPressed(java.awt.event.KeyEvent e) {
 	    	int code = e.getKeyCode();
@@ -567,6 +579,10 @@ public class GenericMain extends Frame implements AnimationContext {
 
     public void setDebugDraw(boolean doDebugDraw) {
 	engine.setDebugDraw(doDebugDraw);
+    }
+
+    public void setSendKeyUp(boolean v) {
+	sendKeyUp = v;
     }
     
     protected String setFps(float newFps) {

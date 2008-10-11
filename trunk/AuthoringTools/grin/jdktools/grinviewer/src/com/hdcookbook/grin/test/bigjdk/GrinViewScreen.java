@@ -111,6 +111,7 @@ public class GrinViewScreen extends javax.swing.JFrame {
     private JTree showTree;
     private JSlider fontSlider;
     private JButton registersButton;
+    private JCheckBox keyUpCB;
 
     private BDRegisterEmulatorScreen registerEmulatorScreen;
     
@@ -141,6 +142,7 @@ public class GrinViewScreen extends javax.swing.JFrame {
         resultLabel = new JLabel();
 	fontSlider = new JSlider(1, 128, 12);
 	registersButton = new JButton();
+	keyUpCB = new JCheckBox();
 	setTextFont(12);
 
 	commandLabel.setText("Command:");
@@ -167,6 +169,8 @@ public class GrinViewScreen extends javax.swing.JFrame {
         snapshotButton.setText("Snapshot");
         frameButton.setText("+frame");
 	registersButton.setText("Registers");
+	keyUpCB.setLabel("Send Key Up");
+	keyUpCB.setSelected(true);
 
         fpsLabel.setText("fps:  ");
 
@@ -230,6 +234,13 @@ public class GrinViewScreen extends javax.swing.JFrame {
             }
 	});
 
+	keyUpCB.addItemListener(new java.awt.event.ItemListener() {
+	    public void itemStateChanged(java.awt.event.ItemEvent evt) {
+		keyUpCBItemChanged(evt);
+	    }
+	});
+
+
 	fontSlider.addChangeListener(new javax.swing.event.ChangeListener() {
 	    public void stateChanged(javax.swing.event.ChangeEvent evt) {
 		setTextFont(fontSlider.getModel().getValue());
@@ -259,6 +270,7 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	m.add(resultLabel);
 	m.add(fontSlider);
 	m.add(registersButton);
+	m.add(keyUpCB);
 
 	layout.putConstraint(w, nameLabel, 10, w, m);
 	layout.putConstraint(n, nameLabel, 5, n, m);
@@ -270,9 +282,12 @@ public class GrinViewScreen extends javax.swing.JFrame {
 		  Spring.sum(Spring.constant(10),
 		    Spring.sum(layout.getConstraints(nameLabel).getX(),
 		      Spring.sum(layout.getConstraints(nameLabel).getWidth(),
-		        layout.getConstraints(registersButton).getWidth()))))));
+		        Spring.sum(layout.getConstraints(keyUpCB).getWidth(),
+		          layout.getConstraints(registersButton).getWidth())))))));
 	layout.putConstraint(e, registersButton, -10, e, m);
 	layout.putConstraint(n, registersButton, 2, n, m);
+	layout.putConstraint(e, keyUpCB, -10, w, registersButton);
+	layout.putConstraint(n, keyUpCB, 2, n, m);
 	layout.putConstraint(w, jSplitPane1, 10, w, m);
 	layout.putConstraint(n, jSplitPane1, 10, s, nameLabel);
 	layout.putConstraint(e, m, 10, e, jSplitPane1);
@@ -330,10 +345,13 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	registerEmulatorScreen.setVisible(true);
     }
 
+    private void keyUpCBItemChanged(java.awt.event.ItemEvent evt) {
+	main.setSendKeyUp(evt.getStateChange() == evt.SELECTED);
+    }
+
     private void debugDrawCBItemChanged(java.awt.event.ItemEvent evt) {
 	debugDraw = evt.getStateChange() == evt.SELECTED;
 	main.setDebugDraw(debugDraw);
-
     }
 
     private void nextDrawButtonActionPerformed(java.awt.event.ActionEvent evt){

@@ -218,7 +218,7 @@ public class VisualRCHandler extends RCHandler implements Node {
     /**
      * @inheritDoc
      **/
-    public boolean handleRCEvent(RCKeyEvent ke) {
+    public boolean handleKeyPressed(RCKeyEvent ke) {
 	if ((ke.getBitMask() & MASK) == 0) {
 	    return false;
 	}
@@ -248,6 +248,14 @@ public class VisualRCHandler extends RCHandler implements Node {
 		return true;
 	    }
 	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public boolean handleKeyReleased(RCKeyEvent ke) {
+	// ignored
+	return false;
     }
     
     /**

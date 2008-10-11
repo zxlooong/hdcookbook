@@ -37,7 +37,7 @@
               .
         Could not find bd-j platform classes at ${bdj.classes}.
         Please change the value of the "HDC_BDJ_PLATFORM_CLASSES" property 
-        in the ${basedir}/../../../vars.properties file.
+        in the ${cookbook.dir}/vars.properties file.
                  
         Don't be alarmed, this is a configuration error.
         The HDCookbook source repository does not include BD-J platform classes
@@ -52,7 +52,7 @@
         Please build all the tools under the "hdcookbook/DiscCreationTools"
         and "hdcookbook/AuthoringTools" dirs before building this xlet,
         by calling "ant tools" in the toplevel directory,
-        or modify ${basedir}/build.properties so that various jar properties
+        or modify ${cookbook.dir}/build.properties so that various jar properties
         points to a pre-built hdcookbook tool jars.
         </fail>
 
@@ -86,18 +86,29 @@
             <arg value="-out"/>
             <arg value="${build.dir}"/>
 	    <arg value="-avoid_optimization"/>
-            <arg value="grinbunny_show.txt"/>
+            <arg value="${show.file}.txt"/>
+        </jdktools.java>
+        <jdktools.java jar="${converter.jar}">
+            <arg value="-asset_dir"/>
+            <arg value="src"/>
+            <arg value="-out"/>
+            <arg value="${build.dir}"/>
+	    <arg value="-avoid_optimization"/>
+            <arg value="xlet_show.txt"/>
         </jdktools.java>
 	<delete dir="${build.dir}/gensrc"/>
 	<mkdir dir="${build.dir}/gensrc"/>
 	<mkdir dir="${build.dir}/gensrc/grinview"/>
 	<mkdir dir="${build.dir}/gensrc/xlet"/>
-	<move file="${build.dir}/grinbunny_show.grinview.java"
-	      tofile="${build.dir}/gensrc/grinview/ShowCommands.java"/>
-	<move file="${build.dir}/grinbunny_show.xlet.java"
-	      tofile="${build.dir}/gensrc/xlet/ShowCommands.java"/>
+	<delete file="${build.dir}/xlet_show.grinview.java"/>
+	<move file="${build.dir}/${show.file}.grinview.java"
+	      tofile="${build.dir}/gensrc/grinview/${show.commands}.java"/>
+	<move file="${build.dir}/xlet_show.xlet.java"
+	      tofile="${build.dir}/gensrc/xlet/XletShowCommands.java"/>
+	<move file="${build.dir}/${show.file}.xlet.java"
+	      tofile="${build.dir}/gensrc/xlet/${show.commands}.java"/>
 	<jdktools.javac destdir="${build.dir}/gensrc/grinview" debug="on"
-		excludes="GrinBunnyXlet.java">
+		excludes="${xlet.name}.java XletDirector.java">
 	    <src path="${build.dir}/gensrc/grinview" />
 	    <src path="src"/>
 	    <classpath>
@@ -118,8 +129,8 @@
 	    <arg value="-asset_dir"/>
 	    <arg value="src"/>
 	    <arg value="-director"/>
-	    <arg value="GrinBunnyDirector"/>
-            <arg value="grinbunny_show.txt"/>
+	    <arg value="${show.director}"/>
+            <arg value="${show.file}.txt"/>
         </jdktools.java>
     </target>
 
@@ -133,7 +144,7 @@
                 <include name="**.class"/>
             </fileset>
             <fileset dir="src">
-                <include name="grinbunny_show.txt"/>
+                <include name="${show.file}.txt"/>
                 <include name="grinview_args.txt"/>
                 <include name="images/**.png"/>
             </fileset>
@@ -160,7 +171,7 @@
 	    <arg value="-asset_dir"/>
 	    <arg value="src"/>
 	    <arg value="-automate"/>
-            <arg value="grinbunny_show.txt"/>
+            <arg value="${show.file}.txt"/>
         </jdktools.java>
     </target>
 
@@ -258,11 +269,8 @@
 	        file = "${src.dir}/fonts/Lisa.ttf" />
 	<copy todir = "${dist.dir}/BDMV/AUXDATA"
 	       file = "${src.dir}/fonts/dvb.fontindex" />
-        <copy todir = "${dist.dir}/BDMV/JAR">
-            <fileset dir="${build.dir}">
-                <include name="*.jar"/>
-            </fileset>
-        </copy>
+        <copy todir = "${dist.dir}/BDMV/JAR"
+	       file = "${xlet.jar}" />
         <copy todir = "${dist.dir}/BDMV/BDJO" 
               file="${build.dir}/${bdjo.name}.bdjo"/>
         <copy todir = "${dist.dir}/CERTIFICATE" 

@@ -1,5 +1,5 @@
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -52,49 +52,84 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.binary;
+import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.util.Debug;
 
-/**
- * Defines constants used for the binary format of the Show file.
- */
 
-class Constants {
- 
-	static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
-	static final int GRINSCRIPT_VERSION = 21;
+/** 
+ * The director for the small xlet UI that manages test state using the
+ * popup menu.
+ **/
+
+public class XletDirector extends Director {
 	
-        /**
-         * Make sure to change BinaryWriter.recordBuiltInClasses()
-         * when the constants are updated.
-         */
-	static final int ASSEMBLY_IDENTIFIER                = 0;
-	static final int BOX_IDENTIFIER                     = 1;
-	static final int FIXEDIMAGE_IDENTIFIER              = 2; 
-	static final int GROUP_IDENTIFIER                   = 3;
-	static final int IMAGESEQUENCE_IDENTIFIER           = 4;
-	static final int TEXT_IDENTIFIER                    = 5;
-	static final int INTERPOLATED_MODEL_IDENTIFIER      = 6;
-	static final int TRANSLATOR_IDENTIFIER              = 7;
-	static final int CLIPPED_IDENTIFIER                 = 8;
-	static final int FADE_IDENTIFIER                    = 9;
-	static final int SRCOVER_IDENTIFIER                 = 10;        
-        static final int ACTIVATEPART_CMD_IDENTIFIER        = 11;
-        static final int ACTIVATESEGMENT_CMD_IDENTIFIER     = 12;
-        static final int RESETFEATURE_CMD_IDENTIFIER        = 13;
-        static final int GRINXHELPER_CMD_IDENTIFIER         = 14;
-        static final int SETVISUALRCSTATE_CMD_IDENTIFIER    = 15;
-        static final int COMMAND_RCHANDLER_IDENTIFIER       = 16;
-        static final int VISUAL_RCHANDLER_IDENTIFIER        = 17;
-        static final int GUARANTEE_FILL_IDENTIFIER          = 18;
-	static final int SET_TARGET_IDENTIFIER              = 19;
-	static final int SEGMENT_IDENTIFIER                 = 20;
-        
-        static final byte STRING_CONSTANTS_IDENTIFIER      = (byte) 0xe0;
-        static final byte INT_ARRAY_CONSTANTS_IDENTIFIER   = (byte) 0xe1;
-        static final byte RECTANGLE_CONSTANTS_IDENTIFIER   = (byte) 0xe2;
-        static final byte RECTANGLE_ARRAY_CONSTANTS_IDENTIFIER = (byte) 0xe3;
-        static final byte EXTENSION_CLASSES_IDENTIFIER = (byte) 0xe4;
+    public GrinBunnyXlet xlet;
+    private boolean destroyed = false;
 
-        static final byte NULL = (byte) 0xff;
-        static final byte NON_NULL = (byte) 0xee;
-}	
+    Assembly F_KeyUpState;
+    Feature F_KeyUpState_enabled;
+    Feature F_KeyUpState_disabled;
+
+
+    public XletDirector(GrinBunnyXlet xlet) {
+	this.xlet = xlet;
+    }
+
+    public void initialize() {
+	F_KeyUpState = (Assembly) getFeature("F:KeyUpState");
+	F_KeyUpState_enabled = getPart(F_KeyUpState, "enabled");
+	F_KeyUpState_disabled = getPart(F_KeyUpState, "disabled");
+    }
+
+    /**
+     * Sets the UI state to match the model.
+     **/
+    public void setUIState() {
+	if (xlet.sendKeyUp) {
+	    F_KeyUpState.setCurrentFeature(F_KeyUpState_enabled);
+	} else {
+	    F_KeyUpState.setCurrentFeature(F_KeyUpState_disabled);
+	}
+    }
+
+
+    /**
+     * Called by a java_command in the show when it's time to destroy
+     * the show. When the xlet wants to shut
+     * down, it should send the show to S:Finished, and then call
+     * waitForShowDestroyed().  Navigating to S:Finished will cause
+     * destroyShow() to be called in the animation thread.  So, the
+     * proper shutdown sequence for an xlet is:
+     * <pre>
+     *		Send the show to S:Finished
+     *		Call waitForShowDestroyed()
+     *		destroy the animation engine
+     * </pre>
+     *
+     * @see #waitForShowDestroyed();
+     **/
+    public void destroyShow() {
+	synchronized(this) {
+	    destroyed = true;
+	    notifyAll();
+	}
+    }
+
+    /**
+     * Wait for the show to be destroyed.  This should be called from the
+     * xlet when the xlet is being destroyed to wait until the show is shut
+     * down.
+     *
+     * @see #destroyShow()
+     **/
+    public synchronized void waitForShowDestroyed() throws InterruptedException
+    {
+	while (!destroyed) {
+	    wait();
+	}
+    }
+}

@@ -280,7 +280,9 @@ public class ShowParser {
 		} else if ("visual".equals(tok)) {
 		    parseVisualRCHandler();
 		} else if ("key_pressed".equals(tok)) {
-		    parseCommandRCHandler();
+		    parseCommandRCHandler(true);
+		} else if ("key_released".equals(tok)) {
+		    parseCommandRCHandler(false);
 		} else {
 		    lexer.reportError("Unrecognized token \"" + tok + "\"");
 		}
@@ -1728,7 +1730,7 @@ public class ShowParser {
 	return -1;
     }
 
-    private void parseCommandRCHandler() throws IOException {
+    private void parseCommandRCHandler(boolean wantsPressed) throws IOException {
 	int lineStart = lexer.getLineNumber();
 	String handlerName = lexer.getString();
 	int mask = parseRCKeyList();
@@ -1736,7 +1738,7 @@ public class ShowParser {
 	Command[] commands = parseCommands();
 	parseExpected(";");
 	builder.addRCHandler(handlerName, lineStart,
-			     new SECommandRCHandler(handlerName, mask, commands));
+		 new SECommandRCHandler(handlerName, mask, wantsPressed, commands));
     }
 
     //
