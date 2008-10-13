@@ -319,7 +319,9 @@ public class ImageSequence extends Feature implements Node, SetupClient {
 		}
 	    }
 	    ManagedImage mi = images[i];
-	    mi.load(show.component);
+	    if (mi != null) {
+		mi.load(show.component);
+	    }
 	}
 	synchronized(setupMonitor) {
 	    if (!setupMode) {
@@ -397,28 +399,37 @@ public class ImageSequence extends Feature implements Node, SetupClient {
 	int frame = getStateHolder().currFrame;
 	currImage = images[frame];
 	currPlacement = placements[frame];
-	if (scalingModel == null) {
-	    drawRecord.setArea(currPlacement.x, currPlacement.y, 
-	    		       currPlacement.width, currPlacement.height);
-	} else {
-	    boolean changed = 
-		scalingModel.scaleBounds(currPlacement.x, currPlacement.y, 
-					 currPlacement.width, 
-					 currPlacement.height, 
-					 scaledBounds);
-		    // When newly activated, we might get a false positive
-		    // on changed, but that's OK because our draw area is
-		    // changed anyway.
-	    drawRecord.setArea(scaledBounds.x, scaledBounds.y, 
-	    		       scaledBounds.width, scaledBounds.height);
-	    if (changed) {
+	if (currImage != null) {
+	    if (scalingModel == null) {
+		drawRecord.setArea(currPlacement.x, currPlacement.y, 
+				   currPlacement.width, currPlacement.height);
+	    } else {
+		boolean changed = 
+		    scalingModel.scaleBounds(currPlacement.x, currPlacement.y, 
+					     currPlacement.width, 
+					     currPlacement.height, 
+					     scaledBounds);
+			// When newly activated, we might get a false positive
+			// on changed, but that's OK because our draw area is
+			// changed anyway.
+		drawRecord.setArea(scaledBounds.x, scaledBounds.y, 
+				   scaledBounds.width, scaledBounds.height);
+		if (changed) {
+		    drawRecord.setChanged();
+		}
+	    }
+	    if (currImage != lastImage) {
 		drawRecord.setChanged();
 	    }
+	    context.addArea(drawRecord);
+
+	    // if currImage == null, then we simply don't add this drawRecord
+	    // to our RenderContext.  RenderContext remembers what was drawn
+	    // in the last frame, so if this drawRecord was drawn in the last
+	    // frame but wasn't drawn in this frame, it automatically knows
+	    // that it needs to be erased.
+
 	}
-	if (currImage != lastImage) {
-	    drawRecord.setChanged();
-	}
-	context.addArea(drawRecord);
 	lastImage = currImage;
     }
 

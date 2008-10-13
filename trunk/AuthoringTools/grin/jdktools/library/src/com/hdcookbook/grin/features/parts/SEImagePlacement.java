@@ -142,7 +142,12 @@ public class SEImagePlacement implements SEImageSeqPlacement {
     {
 	Rectangle[] result = new Rectangle[images.length];
 	for (int i = 0; i < images.length; i++) {
-	    result[i] = getImagePlacementRect(images[i]);
+	    String im = images[i];
+	    if (im == null) {
+		result[i] = null;
+	    } else {
+		result[i] = getImagePlacementRect(images[i]);
+	    }
 	}
 	return result;
     }

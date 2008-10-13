@@ -260,6 +260,23 @@ feature timer F:ChangeSceneGraphTimer 1 repeat {
     }
 ;
 
+    #
+    # An animated yin/yang to test the fix of issue number 117,
+    # "Null images in image sequences are broken"
+    #
+
+feature image_sequence F:Issue117 ( left 50 top 50 scale 500 500 mills )
+	"images/yinyang/Load_" {
+		0000 + + 0001 + + 0002 + + 0003 + + 0004 + + 
+		0005 + + 0006 + + 0007 + + 0008 + + 0009 + +
+		0010 + + 0011 + + 0012 + + 0013 + + 0014 + + 
+		0015 + +
+		- - - - - - - - - -
+	 } ".png"
+	 repeat
+	 scaling_model F:MainScaler 
+;
+
     #  Finaly, we put the whole scene graph in one group, which makes
     # it a bit easier to list in F:Everything.
 
@@ -268,6 +285,7 @@ feature group F:ProgrammaticDemo {
 	F:ChangeSceneGraphTimer
     	F:BoxTranslator
 	F:BoxedStuffPosition
+	F:Issue117
 } ;
 
     # Then, a segment to show it, and an RC handler to get us back to the
