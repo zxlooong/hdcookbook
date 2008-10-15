@@ -232,7 +232,16 @@ public class ManagedFullImage extends ManagedImage {
 			    0, 0, image.getWidth(null), image.getHeight(null), 
 			    comp);
     }
-
+    
+    /**
+     * @inheritDoc
+     **/
+    public void drawClipped(Graphics2D gr, int x, int y, Rectangle subsection, Component comp) {
+	gr.drawImage(image, x, y, x+ subsection.width, y+subsection.height,
+			    subsection.x, subsection.y, 
+			    subsection.x+subsection.width, subsection.y+subsection.height, 
+			    comp);
+    }
     void destroy() {
 	Image im = image;
 	if (im != null) {

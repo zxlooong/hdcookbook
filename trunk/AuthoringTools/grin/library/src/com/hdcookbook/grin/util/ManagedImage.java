@@ -250,6 +250,12 @@ abstract public class ManagedImage {
      **/
     abstract public void drawScaled(Graphics2D gr, Rectangle bounds,
     				    Component comp);
-
+    /**
+     * Draw the the given subsection of the image into a graphics context,
+     * without scaling.  
+     **/
+    abstract public void drawClipped(Graphics2D gr, int x, int y,
+                                    Rectangle subsection,
+    				    Component comp);
     abstract void destroy();
 }

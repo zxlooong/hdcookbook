@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,118 +52,99 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.util;
 
-import java.awt.Image;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+package com.hdcookbook.grin.fontstrip.xml;
+
+import com.hdcookbook.grin.util.AssetFinder;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * This represents an image that has been packed into a mosaic.
- *
- *   @author     Bill Foote (http://jovial.com)
- **/
-public class ManagedSubImage extends ManagedImage {
-
-    private String name;
-    private ManagedFullImage mosaic;
-    private Rectangle placement;
-    private int numReferences = 0;
-
-    ManagedSubImage(String name, String mosaicName, Rectangle placement) {
-	this.name = name;
-	this.mosaic = (ManagedFullImage) ImageManager.getImage(mosaicName);
-	this.placement = placement;
+ * Java representation of the xml configuration file which
+ * the fontstrip image generator expects from the user.
+ */
+@XmlRootElement
+public class InputData {
+    private FontDescription[] fontDescription;
+    private FontImageFile[]   fontImageFile;
+ 
+    public FontImageFile[] getFontImageFile() {
+        return fontImageFile;
     }
 
-    public String getName() {
-	return name;
+    public void setFontImageFile(FontImageFile[] fim) {
+        this.fontImageFile = fim;
     }
 
-    public int getWidth() {
-	return placement.width;
+    public FontDescription[] getFontDescription() {
+        return fontDescription;
+    }
+
+    public void setFontDescription(FontDescription[] descriptions) {
+        this.fontDescription = descriptions;
+        
+        for (int i = 0; i < descriptions.length; i++) {
+            loadFont(descriptions[i]);
+        }
     }
     
-    public int getHeight() {
-	return placement.height;
+    public  FontDescription getFontDescription(FontImageFile file) {
+        String descriptionName = file.getFontName();
+        for (int i = 0; i < fontDescription.length; i++) {
+            if (fontDescription[i].getName().equals(descriptionName)) {
+                return fontDescription[i];
+            }
+        }
+        return null;
     }
-
-    void addReference() {
-	numReferences++;
-	mosaic.addReference();
+    
+    private Font loadFont(FontDescription description) {
+        Font font = null;
+        String fontFileName = description.getFontFileName();
+        int    fontSize     = description.getFontSize();
+        
+        if (fontFileName != null) {
+            try {
+               font = loadFont(fontFileName);   
+               font = font.deriveFont((float) fontSize);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.err.println("Error in loading font file " + fontFileName);
+            } catch (FontFormatException e) {
+                e.printStackTrace();
+                System.err.println("Error in loading font file " + fontFileName);
+            }
+        }
+        
+        if (font == null) {
+            String fontName = description.getPhysicalName();
+            font = new Font(fontName, Font.PLAIN, fontSize);
+        }        
+        
+        description.font = font;
+        
+        return font;
     }
-
-    void removeReference() {
-	numReferences--;
-	mosaic.removeReference();
-    }
-
-    boolean isReferenced() {
-	return numReferences > 0;
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void prepare() {
-	mosaic.prepare();
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public boolean isLoaded() {
-	return mosaic.isLoaded();
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void load(Component comp) {
-	mosaic.load(comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void unprepare() {
-	mosaic.unprepare();
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void draw(Graphics2D gr, int x, int y, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, x, y, x+p.width, y+p.height,
-				   p.x, p.y, p.x+p.width, p.y+p.height, comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, 
-		     bounds.x, bounds.y, 
-		     bounds.x+bounds.width, bounds.y + bounds.height,
-		     p.x, p.y, p.x+p.width, p.y+p.height, comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void drawClipped(Graphics2D gr, int x, int y, 
-            Rectangle subsection, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, 
-                     x, y, x+ subsection.width,y+subsection.height,
-		     p.x+subsection.x, p.y+subsection.y, 
-                     p.x+subsection.width, p.y+subsection.height, comp);
-    }
-
-    void destroy() {
-	ImageManager.ungetImage(mosaic);
-    }
+    
+    private Font loadFont(String filename) 
+            throws IOException, FontFormatException {   
+        URL u = AssetFinder.tryURL(filename);
+        InputStream in;
+        if (u != null) {
+            in = u.openStream();
+        } else {
+            in = new BufferedInputStream(new FileInputStream(filename));
+        }
+        Font f = Font.createFont(Font.TRUETYPE_FONT, in); 
+        GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(f);
+        return f;
+    }      
+ 
 }

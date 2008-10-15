@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -52,119 +51,71 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
+package com.hdcookbook.grin.fontstrip;
 
-package com.hdcookbook.grin.util;
-
-import java.awt.Image;
-import java.awt.Component;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * This represents an image that has been packed into a mosaic.
- *
- *   @author     Bill Foote (http://jovial.com)
- **/
-public class ManagedSubImage extends ManagedImage {
+ * This class holds various FontMetrics info for a particular charactor of a particular font.
+ * The data here is used for positioning and generating FontDesignImage, as well as
+ * providing FontMetrics measurement recorded into "fontstrip.inf" and used during xlet 
+ * runtime to position characters.
+ */
+class CharMetrics {
 
-    private String name;
-    private ManagedFullImage mosaic;
-    private Rectangle placement;
-    private int numReferences = 0;
+    private char ch;
+    private int baseline;
+    private Rectangle pixRect;
+    private Rectangle boundingRect;
+    private int leading;
 
-    ManagedSubImage(String name, String mosaicName, Rectangle placement) {
-	this.name = name;
-	this.mosaic = (ManagedFullImage) ImageManager.getImage(mosaicName);
-	this.placement = placement;
+    public CharMetrics(char c, int baseline,
+            Rectangle pixRect, Rectangle boundingRect,
+            int leading) {
+        this.ch = c;
+        this.baseline = baseline;
+        this.pixRect = pixRect;
+        this.boundingRect = boundingRect;
+        this.leading = leading;
     }
 
-    public String getName() {
-	return name;
+    public char getChar() {
+        return ch;
     }
 
-    public int getWidth() {
-	return placement.width;
-    }
-    
-    public int getHeight() {
-	return placement.height;
+    public void setChar(char ch) {
+        this.ch = ch;
     }
 
-    void addReference() {
-	numReferences++;
-	mosaic.addReference();
+    public Rectangle getPixRect() {
+        return pixRect;
     }
 
-    void removeReference() {
-	numReferences--;
-	mosaic.removeReference();
+    public void setPixRect(Rectangle pixRect) {
+        this.pixRect = pixRect;
     }
 
-    boolean isReferenced() {
-	return numReferences > 0;
+    public Rectangle getBoundingRect() {
+        return boundingRect;
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public void prepare() {
-	mosaic.prepare();
+    public void setBoundingRect(Rectangle boundingRect) {
+        this.boundingRect = boundingRect;
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public boolean isLoaded() {
-	return mosaic.isLoaded();
+    public int getBaseline() {
+        return baseline;
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public void load(Component comp) {
-	mosaic.load(comp);
+    public void setBaseline(int baseline) {
+        this.baseline = baseline;
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public void unprepare() {
-	mosaic.unprepare();
+    public int getLeading() {
+        return leading;
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public void draw(Graphics2D gr, int x, int y, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, x, y, x+p.width, y+p.height,
-				   p.x, p.y, p.x+p.width, p.y+p.height, comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, 
-		     bounds.x, bounds.y, 
-		     bounds.x+bounds.width, bounds.y + bounds.height,
-		     p.x, p.y, p.x+p.width, p.y+p.height, comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void drawClipped(Graphics2D gr, int x, int y, 
-            Rectangle subsection, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, 
-                     x, y, x+ subsection.width,y+subsection.height,
-		     p.x+subsection.x, p.y+subsection.y, 
-                     p.x+subsection.width, p.y+subsection.height, comp);
-    }
-
-    void destroy() {
-	ImageManager.ungetImage(mosaic);
+    public void setLeading(int leading) {
+        this.leading = leading;
     }
 }

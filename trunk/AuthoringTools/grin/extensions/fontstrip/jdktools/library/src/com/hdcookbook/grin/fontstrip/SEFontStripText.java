@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,118 +52,63 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.util;
+package com.hdcookbook.grin.fontstrip;
 
-import java.awt.Image;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShowVisitor;
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
+import java.awt.Color;
+import java.io.IOException;
 
-/**
- * This represents an image that has been packed into a mosaic.
- *
- *   @author     Bill Foote (http://jovial.com)
- **/
-public class ManagedSubImage extends ManagedImage {
-
-    private String name;
-    private ManagedFullImage mosaic;
-    private Rectangle placement;
-    private int numReferences = 0;
-
-    ManagedSubImage(String name, String mosaicName, Rectangle placement) {
-	this.name = name;
-	this.mosaic = (ManagedFullImage) ImageManager.getImage(mosaicName);
-	this.placement = placement;
-    }
-
-    public String getName() {
-	return name;
-    }
-
-    public int getWidth() {
-	return placement.width;
+public class SEFontStripText extends FontStripText implements SENode {
+    
+    public SEFontStripText(Show show) {
+        super(show);
     }
     
-    public int getHeight() {
-	return placement.height;
+    public SEFontStripText(Show show, int xArg, int yArg, int alignment,
+            String[] strings, String fileName, int hspace, int vspace,
+            Color background) {
+        this(show);
+        this.xArg = xArg;
+        this.yArg = yArg;
+        this.alignment = alignment;
+        this.strings = strings;
+        this.fontImageFileName = fileName;
+        this.hspace = hspace;
+        this.vspace = vspace;
+        this.background = background;
+        
+        initialize();
+    }
+    
+    public void writeInstanceData(GrinDataOutputStream out) 
+            throws IOException {
+        
+        out.writeSuperClassData(this);
+        out.writeInt(this.xArg);
+        out.writeInt(this.yArg);
+        out.writeInt(this.alignment);
+        out.writeStringArray(this.strings);
+        out.writeString(this.fontImageFileName);
+        out.writeInt(this.hspace);
+        out.writeInt(this.vspace);
+        out.writeColor(this.background);
+        
     }
 
-    void addReference() {
-	numReferences++;
-	mosaic.addReference();
-    }
-
-    void removeReference() {
-	numReferences--;
-	mosaic.removeReference();
-    }
-
-    boolean isReferenced() {
-	return numReferences > 0;
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void prepare() {
-	mosaic.prepare();
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public boolean isLoaded() {
-	return mosaic.isLoaded();
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void load(Component comp) {
-	mosaic.load(comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void unprepare() {
-	mosaic.unprepare();
+    /** 
+     * For xlet runtime, FonrStripText class instance should be used.
+     */
+    public String getRuntimeClassName() {
+        return  FontStripText.class.getName();
     }
 
     /**
-     * @inheritDoc
-     **/
-    public void draw(Graphics2D gr, int x, int y, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, x, y, x+p.width, y+p.height,
-				   p.x, p.y, p.x+p.width, p.y+p.height, comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, 
-		     bounds.x, bounds.y, 
-		     bounds.x+bounds.width, bounds.y + bounds.height,
-		     p.x, p.y, p.x+p.width, p.y+p.height, comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void drawClipped(Graphics2D gr, int x, int y, 
-            Rectangle subsection, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, 
-                     x, y, x+ subsection.width,y+subsection.height,
-		     p.x+subsection.x, p.y+subsection.y, 
-                     p.x+subsection.width, p.y+subsection.height, comp);
-    }
-
-    void destroy() {
-	ImageManager.ungetImage(mosaic);
+     * For a visitor method
+     */
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitUserDefinedFeature(this);
     }
 }

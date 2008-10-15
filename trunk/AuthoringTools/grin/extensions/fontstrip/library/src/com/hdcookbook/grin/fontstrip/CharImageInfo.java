@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,118 +52,16 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.util;
+package com.hdcookbook.grin.fontstrip;
 
-import java.awt.Image;
-import java.awt.Component;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * This represents an image that has been packed into a mosaic.
- *
- *   @author     Bill Foote (http://jovial.com)
- **/
-public class ManagedSubImage extends ManagedImage {
-
-    private String name;
-    private ManagedFullImage mosaic;
-    private Rectangle placement;
-    private int numReferences = 0;
-
-    ManagedSubImage(String name, String mosaicName, Rectangle placement) {
-	this.name = name;
-	this.mosaic = (ManagedFullImage) ImageManager.getImage(mosaicName);
-	this.placement = placement;
-    }
-
-    public String getName() {
-	return name;
-    }
-
-    public int getWidth() {
-	return placement.width;
-    }
-    
-    public int getHeight() {
-	return placement.height;
-    }
-
-    void addReference() {
-	numReferences++;
-	mosaic.addReference();
-    }
-
-    void removeReference() {
-	numReferences--;
-	mosaic.removeReference();
-    }
-
-    boolean isReferenced() {
-	return numReferences > 0;
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void prepare() {
-	mosaic.prepare();
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public boolean isLoaded() {
-	return mosaic.isLoaded();
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void load(Component comp) {
-	mosaic.load(comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void unprepare() {
-	mosaic.unprepare();
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void draw(Graphics2D gr, int x, int y, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, x, y, x+p.width, y+p.height,
-				   p.x, p.y, p.x+p.width, p.y+p.height, comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, 
-		     bounds.x, bounds.y, 
-		     bounds.x+bounds.width, bounds.y + bounds.height,
-		     p.x, p.y, p.x+p.width, p.y+p.height, comp);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void drawClipped(Graphics2D gr, int x, int y, 
-            Rectangle subsection, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, 
-                     x, y, x+ subsection.width,y+subsection.height,
-		     p.x+subsection.x, p.y+subsection.y, 
-                     p.x+subsection.width, p.y+subsection.height, comp);
-    }
-
-    void destroy() {
-	ImageManager.ungetImage(mosaic);
-    }
+ * Data holder for each character in FontStrip's image file.
+ */
+public class CharImageInfo {
+    char ch;
+    Rectangle charRect;  // char's location in the fontstrip image mosaic
+    int baseline;        // char's baseline, relative to charRectangle's x,y at (0,0)
+    Rectangle boundRect; // char's bounding rect, assuming charRectangle's x,y as (0,0)
 }
