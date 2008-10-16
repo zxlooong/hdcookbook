@@ -117,10 +117,14 @@ public class BDCertGenerator {
             } else if (opt.equals("-debug")) {
                 builder = builder.debug();
             } else {
-                if (args[i].length() != 8) {
-                    printUsageAndExit("Bad OrgID " + args[i] + ", please provide an 8 digit hex.");
+                String orgId = args[i];
+                if (orgId.startsWith("0X") || orgId.startsWith("0x")) {
+                    orgId = orgId.substring(2);
                 }
-                builder = builder.orgId(args[i]);
+                if (orgId.length() != 8) {
+                    printUsageAndExit("Bad OrgID " +orgId + ", please provide an 8 digit hex.");
+                }
+                builder = builder.orgId(orgId);
                 setOrgId = true;
             }          
         }
