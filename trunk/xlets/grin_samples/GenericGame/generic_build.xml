@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+This file is designed to be included in the build.xml file of a
+Game xlet project.  See the documentation in vars.properties for details.
+
+-->
+<project name="${project.name}" default="deploy" basedir=".">
+    
+    <presetdef name="jdktools.java">
+        <java fork="true" failOnError="true"/>
+    </presetdef>    
+    
+    <presetdef name="xlets.javac">
+        <javac srcdir="${src.dir}"
+               bootclasspath="${bdj.classes}"
+               source="1.3" target="1.3"
+               debug="on" deprecation="on"/>
+    </presetdef>
+    <presetdef name="jdktools.javac">
+        <javac srcdir="${src.dir}"
+               source="1.5" target="1.5"
+               debug="on" deprecation="on"/>
+    </presetdef>
+    
+    <target name="init" depends="check-tools">
+        <tstamp/>
+        <mkdir dir="${build.dir}/classes"/> 
+	<!--
+		Convert com.mypackage.Foo to com/mypackage/Foo for a couple
+		of properties, and check if debug is set.
+	-->
+	<pathconvert property="show.director.file">
+	    <path path="/${show.director}"/>
+	    <unpackagemapper from="/*" to="*"/>
+	</pathconvert>
+	<pathconvert property="show.commands.file">
+	    <path path="/${show.commands}"/>
+	    <unpackagemapper from="/*" to="*"/>
+	</pathconvert>
+        <condition property="debug.is.set">
+	      <equals arg1="${debug.or.deploy}" arg2="debug"/>
+	</condition>
+	<antcall target="post-init"/>
+    </target>
+    <target name="post-init">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="check-tools">
+	<fail>
+	    <condition>
+	      <or>
+		  <equals arg1="" arg2="${project.name}"/>
+		  <not> <isset property="project.name"/> </not>
+	      </or>
+	    </condition>
+.
+
+The project.name property is not set.  This usually has one of two causes:
+
+    *  You've typed "ant" in HD cookbook's GenericGame directory.  This
+       directory isn't meant to be built; it has files that are meant to
+       be included in other projects.  Please ../GrinBunny for an example 
+       of this.
+
+    *  You've copied build.xml and vars.properties from GenericGame to set up
+       a new project, but you haven't yet edited vars.properties to customize
+       it for your project.  Please see the documentation in vars.properties
+       for details.
+
+	</fail>
+        <available file="${bdj.classes}" type="file"
+                   property="bdjstubs.ok"/>
+                   
+        <fail unless="bdjstubs.ok"> 
+              .
+        Could not find bd-j platform classes at ${bdj.classes}.
+        Please change the value of the bdj.classes property 
+        in the /vars.properties file.
+                 
+        Don't be alarmed, this is a configuration error.
+        The HDCookbook source repository does not include BD-J platform classes
+        needed for compiling applications against.  These classes need to be
+        provided by you.
+        
+        </fail> 
+        <available file="${converter.jar}" type="file" property="grincompiler.ok"/>
+        <fail unless="grincompiler.ok">
+              .
+        Could not find the grin compiler jar file at ${converter.jar}.
+        Please build all the tools under the "hdcookbook/DiscCreationTools"
+        and "hdcookbook/AuthoringTools" dirs before building this xlet,
+        by calling "ant tools" in the toplevel directory,
+        or modify vars.properties so that various jar properties
+        points to a pre-built hdcookbook tool jars.
+        </fail>
+
+	<antcall target="post-check-tools"/>
+    </target>
+    <target name="post-check-tools">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+    
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete file="${project.name}-discimage.zip"/>
+        <delete file="${project.name}-grinview.jar"/>
+	<antcall target="post-clean"/>
+    </target>
+    <target name="post-clean">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="spotless" depends="clean">
+	<delete file="keystore.store"/>
+	<delete file="app.discroot.crt"/>
+	<delete dir="META-INF"/>
+	<antcall target="post-spotless"/>
+    </target>
+    <target name="post-spotless">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="deploy" depends="bundle, grinview-jar"/>
+    
+    <target name="bundle" depends="jar, gen-bdjo-desc-file, 
+                                   sign-xlet, copy-to-bdmv"
+            description="Make a blu-ray disc image bundle">
+        <zip destfile="${project.name}-discimage.zip"
+             basedir="${dist.dir}"/> 
+	<antcall target="post-bundle"/>
+    </target>
+    <target name="post-bundle">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+    
+    <target name="generate-binary-script" depends="init">
+	<delete dir="${build.dir}/gensrc"/>
+	<mkdir dir="${build.dir}/gensrc"/>
+	<mkdir dir="${build.dir}/gensrc/grinview"/>
+	<mkdir dir="${build.dir}/gensrc/xlet"/>
+	<antcall target="generate-binary-script-debug-subtarget"/>
+	<property name="generate.binary.script.optimize.argument"
+	          value="-optimize"/>
+	<!--	Compile the game so we'll pick up any extension parser -->
+	<jdktools.javac destdir="${build.dir}/gensrc/grinview" debug="on">
+	    <src path="src"/>
+	    <src path="se_src"/>
+	    <classpath>
+		<pathelement path="${converter.jar}"/>
+	    </classpath>
+	</jdktools.javac>
+	<!--	Now run converter with extension parser in path -->
+        <jdktools.java classname="com.hdcookbook.grin.binaryconverter.Main">
+	    <classpath>
+		<pathelement path="${converter.jar}"/>
+		<pathelement path="${build.dir}/gensrc/grinview"/>
+	    </classpath>
+            <arg value="-asset_dir"/>
+            <arg value="${asset.dir}"/>
+	    <arg value="-extension_parser"/>
+	    <arg value="${extension.parser}"/>
+	    <arg value="${generate.binary.script.optimize.argument}"/>
+            <arg value="-out"/>
+            <arg value="${build.dir}"/>
+            <arg value="${show.file}.txt"/>
+        </jdktools.java>
+	<move file="${build.dir}/${show.file}.grinview.java"
+	      tofile="${build.dir}/gensrc/grinview/${show.commands.file}.java"/>
+	<move file="${build.dir}/${show.file}.xlet.java"
+	      tofile="${build.dir}/gensrc/xlet/${show.commands.file}.java"/>
+	<jdktools.javac destdir="${build.dir}/gensrc/grinview" debug="on"
+		excludes="${grinview.excludes} GameXlet.java XletDirector.java">
+	    <src path="${build.dir}/gensrc/grinview" />
+	    <src path="src"/>
+	    <classpath>
+		<pathelement path="${grinview.jar}"/>
+	    </classpath>
+	</jdktools.javac>
+	<antcall target="post-generate-binary-script"/>
+    </target>
+    <target name="post-generate-binary-script">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="generate-binary-script-debug-subtarget" 
+    		if="debug.is.set" depends="init">
+        <jdktools.java jar="${converter.jar}">
+            <arg value="-asset_dir"/>
+            <arg value="${generic.game}/src/${debug.or.deploy}/com/hdcookbook/genericgame"/>
+            <arg value="-out"/>
+            <arg value="${build.dir}"/>
+	    <arg value="-avoid_optimization"/>
+            <arg value="xlet_show.txt"/>
+        </jdktools.java>
+	<delete file="${build.dir}/xlet_show.grinview.java"/>
+	<move file="${build.dir}/xlet_show.xlet.java"
+	      tofile="${build.dir}/gensrc/xlet/com/hdcookbook/genericgame/XletShowCommands.java"/>
+	<antcall target="post-generate-binary-script-debug-subtarget"/>
+    </target>
+    <target name="post-generate-binary-script-debug-subtarget">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="grinview" depends="run-grinview"/>
+
+    <target name="run-grinview" depends="init"
+    		description="Run grinview on game">
+
+	<!--  We build the binary script so that we'll have our
+	      extension parser and java_command implementations  -->
+	<property name="generate.binary.script.optimize.argument"
+	          value="-avoid_optimization"/>
+	<antcall target="generate-binary-script"/>
+        <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+	    <classpath>
+		<pathelement path="${grinview.jar}"/>
+		<pathelement path="${build.dir}/gensrc/grinview"/>
+	    </classpath>
+	    <arg value="-asset_dir"/>
+	    <arg value="${asset.dir}"/>
+	    <arg value="-extension_parser"/>
+	    <arg value="${extension.parser}"/>
+	    <arg value="-director"/>
+	    <arg value="${show.director}"/>
+            <arg value="${show.file}.txt"/>
+        </jdktools.java>
+	<antcall target="post-run-grinview"/>
+    </target>
+    <target name="post-run-grinview">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="grinview-jar" depends="init, generate-binary-script,
+    		  generate-grinview-args"
+		  description="Generate launchable grinview jar file">
+        <delete dir="${build.dir}/grinview-jar"/>
+        <mkdir dir="${build.dir}/grinview-jar"/>
+	<unzip src="${grinview.jar}" dest="${build.dir}/grinview-jar"/>
+	<copy todir="${build.dir}/grinview-jar">
+            <fileset dir="${build.dir}/gensrc/grinview">
+		<include name="grinview_args.txt"/>
+                <include name="**/*.class"/>
+            </fileset>
+            <fileset dir="${asset.dir}">
+                <include name="${show.file}.txt"/>
+            </fileset>
+	    <fileset dir="${build.dir}">
+		<include name="*.png"/>
+		<include name="images.map"/>
+	    </fileset>
+        </copy>
+	<delete dir="${build.dir}/grinview-jar/META-INF"/>
+	<jar jarfile="${project.name}-grinview.jar">
+	    <fileset dir="${build.dir}/grinview-jar"/>
+	    <manifest>
+	        <attribute name="Main-Class" value="com.hdcookbook.grin.test.bigjdk.GrinViewJar"/>
+	    </manifest>
+	</jar>
+	<echo message=""/>
+	<echo message="Created launchable gunbunny using grinview in ${project.name}-grinview.jar"/>
+	<echo message=""/>
+	<antcall target="post-grinview-jar"/>
+    </target>
+    <target name="post-grinview-jar">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+
+    <target name="test" depends="init, generate-binary-script"
+    		description="Run grinview on game in autotest mode">
+        <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+	    <classpath>
+		<pathelement path="${grinview.jar}"/>
+		<pathelement path="${build.dir}/gensrc/grinview"/>
+	    </classpath>
+	    <arg value="-asset_dir"/>
+	    <arg value="${asset.dir}"/>
+	    <arg value="-extension_parser"/>
+	    <arg value="${extension.parser}"/>
+	    <arg value="-automate"/>
+            <arg value="${show.file}.txt"/>
+        </jdktools.java>
+	<echo message="Don't worry about the CassCastExceptions above; they're normal."/>
+	<antcall target="post-test"/>
+    </target>
+    <target name="post-test">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="compile"
+            depends="init, generate-binary-script" 
+	    description="Compiles the sources">
+        <mkdir dir="${build.dir}/classes"/>
+        <xlets.javac destdir="${build.dir}/classes" >
+            <src path="${generic.game}/src/${debug.or.deploy}"/>
+            <src path="${grin.library.src.dir}" />
+            <src path="src"/>
+	    <src path="${build.dir}/gensrc/xlet"/>
+        </xlets.javac>
+	<antcall target="post-compile"/>
+    </target>
+    <target name="post-compile">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="jar" depends="compile" description="Creates an xlet jar file">
+        <jar destfile="${xlet.jar}">
+            <fileset dir="${build.dir}/classes"/>
+            <fileset dir="${build.dir}" includes="*.grin"/>
+	    <fileset dir="${build.dir}" includes="*.png"/>
+	    <fileset dir="${build.dir}" includes="images.map"/>
+        </jar>
+	<antcall target="post-jar"/>
+    </target>
+    <target name="post-jar">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+    
+    <target name="sign-xlet" depends="gen-permission-file">
+        
+        <path id="sec.tools.path">
+            <pathelement location="${security.jar}"/>
+            <pathelement location="${bouncycastle.jar}"/>
+            <pathelement location="${java.home}/../lib/tools.jar"/>   
+        </path>	   
+        
+        <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
+            <arg value="-root"/>
+            <arg value="${disc.orgid}"/>
+            <classpath refid="sec.tools.path"/>
+        </jdktools.java>
+        
+        <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
+            <arg value="-app"/>
+            <arg value="${xlet.orgid}"/>
+            <classpath refid="sec.tools.path"/>
+        </jdktools.java>
+        
+        <jdktools.java classname="net.java.bd.tools.security.BDSigner">
+            <arg value="${xlet.jar}"/>
+            <classpath refid="sec.tools.path"/>	   
+        </jdktools.java>
+	<antcall target="post-sign-xlet"/>
+    </target>  
+    <target name="post-sign-xlet">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+    
+    <target name="gen-bdjo-desc-file"
+            depends="gen-bdjo-desc.tmp"
+            if="update-bdjo-desc.file">
+        
+        <move file="${bdjo-desc-file}.tmp" tofile="${bdjo-desc-file}"/>
+        
+        <jdktools.java
+            jar="${bdjo.jar}">
+            <arg value="${bdjo-desc-file}"/>
+            <arg value="${build.dir}/${bdjo.name}.bdjo"/>
+        </jdktools.java>
+	<antcall target="post-gen-bdjo-desc-file"/>
+    </target>
+    <target name="post-gen-bdjo-desc-file">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+    
+    <target name="gen-bdmv-files" depends="init">
+        <jdktools.java jar="${id.jar}">
+            <arg value="${generic.game}/bdmv/id.xml"/>
+            <arg value="${build.dir}/id.bdmv"/>              
+        </jdktools.java>
+        <jdktools.java jar="${index.jar}">
+            <arg value="${generic.game}/bdmv/index.xml"/>
+            <arg value="${build.dir}/index.bdmv"/>              
+        </jdktools.java>
+        <jdktools.java jar="${movieobject.jar}">
+            <arg value="${generic.game}/bdmv/MovieObject.xml"/>
+            <arg value="${build.dir}/MovieObject.bdmv"/>              
+        </jdktools.java>
+	<antcall target="post-gen-bdmv-files"/>
+    </target>
+    <target name="post-gen-bdmv-files">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+    
+    <target name="copy-to-bdmv" 
+            depends="jar, gen-bdjo-desc-file, sign-xlet, gen-bdmv-files">
+        <mkdir dir="${dist.dir}/BDMV/AUXDATA"/>
+        <mkdir dir="${dist.dir}/BDMV/BDJO"/>
+        <mkdir dir="${dist.dir}/BDMV/CLIPINF"/>
+        <mkdir dir="${dist.dir}/BDMV/JAR"/>
+        <mkdir dir="${dist.dir}/BDMV/META"/>
+        <mkdir dir="${dist.dir}/BDMV/PLAYLIST"/>
+        <mkdir dir="${dist.dir}/BDMV/STREAM"/>
+        <mkdir dir="${dist.dir}/CERTIFICATE"/>
+       
+	<copy tofile = "${dist.dir}/BDMV/AUXDATA/00000.otf"
+	        file = "${src.dir}/fonts/Lisa.ttf" />
+	<copy todir = "${dist.dir}/BDMV/AUXDATA"
+	       file = "${src.dir}/fonts/dvb.fontindex" />
+        <copy todir = "${dist.dir}/BDMV/JAR"
+	       file = "${xlet.jar}" />
+        <copy todir = "${dist.dir}/BDMV/BDJO" 
+              file="${build.dir}/${bdjo.name}.bdjo"/>
+        <copy todir = "${dist.dir}/CERTIFICATE" 
+              file="app.discroot.crt"/>
+        <copy todir="${dist.dir}/BDMV"
+              file="${build.dir}/index.bdmv"/>
+        <copy todir="${dist.dir}/BDMV"
+              file="${build.dir}/MovieObject.bdmv"/>
+        <copy todir="${dist.dir}/CERTIFICATE"
+              file="${build.dir}/id.bdmv"/>
+              
+        <copy todir="${dist.dir}/CERTIFICATE/BACKUP">
+            <fileset dir="${dist.dir}/CERTIFICATE"/>
+        </copy>
+        <copy todir="${dist.dir}/BDMV/BACKUP">
+            <fileset dir="${dist.dir}/BDMV">
+                <include name="index.bdmv"/>
+                <include name="MovieObject.bdmv"/>                
+                <include name="BDJO/**"/>  
+                <include name="CLIPINF/**"/>     
+                <include name="JAR/**"/> 
+                <include name="PLAYLIST/**"/>                    
+            </fileset>            
+        </copy>        
+	<antcall target="post-copy-to-bdmv"/>
+    </target>
+    <target name="post-copy-to-bdmv">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="generate-grinview-args" depends="init">
+	<concat destfile="${build.dir}/gensrc/grinview/grinview_args.txt"><![CDATA[#
+# This file contains command-line arguments for use with
+# a launchable GrinView JAR file.  See the grinview-jar and
+# generate-grinview-args targets in build.xml.
+-assets
+/
+-extension_parser
+${extension.parser}
+-director
+${show.director}
+-segment
+${show.initial.segment}
+${show.file}.txt
+]]></concat>
+	<antcall target="post-generate-grinview-args"/>
+    </target>
+    <target name="post-generate-grinview-args">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="gen-permission-file" depends="init">
+	<concat destfile="${build.dir}/classes/bluray.GameXlet.perm"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file contains information taken from build.xml -->
+<!-- AUTO-GENERATED - DO NOT EDIT -->
+<n:permissionrequestfile xmlns:n="urn:BDA:bdmv;PRF" orgid="0x${xlet.orgid}" appid="0x${xlet.appid}">
+    <file value="true"></file>
+    <applifecyclecontrol value="true"></applifecyclecontrol>
+    <servicesel value="true"></servicesel>
+    <userpreferences read="true" write="false"></userpreferences>
+    <network>
+        <host action="connect">*</host>
+    </network>
+</n:permissionrequestfile>
+        ]]></concat>
+	<antcall target="post-gen-permission-file"/>
+    </target>
+    <target name="post-gen-permission-file">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="gen-bdjo-desc.tmp" depends="init">
+        
+        <concat destfile="${bdjo-desc-file}.tmp"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- This file contains information taken from build.xml -->
+<!-- AUTO-GENERATED - DO NOT EDIT -->
+<bdjo>
+    <appCacheInfo>
+        <entries>
+            <language>*.*</language>
+            <name>00000</name>
+            <type>1</type>
+        </entries>
+    </appCacheInfo>
+    <applicationManagementTable>
+        <applications>
+            <applicationDescriptor>
+                <baseDirectory>00000</baseDirectory>
+                <binding>TITLE_BOUND_DISC_BOUND</binding>
+                <classpathExtension></classpathExtension>
+                <iconFlags>0x0</iconFlags>
+                <iconLocator></iconLocator>
+                <initialClassName>com.hdcookbook.genericgame.GameXlet</initialClassName>
+		    <parameters>${show.file}.grin</parameters>
+		    <parameters>${show.initial.segment}</parameters>
+		    <parameters>${show.director}</parameters>
+                <priority>3</priority>
+                <profiles>
+                    <majorVersion>1</majorVersion>
+                    <microVersion>0</microVersion>
+                    <minorVersion>0</minorVersion>
+                    <profile>1</profile>
+                </profiles>
+                <visibility>V_11</visibility>
+            </applicationDescriptor>
+            <applicationId>0x${xlet.appid}</applicationId>
+            <controlCode>0x1</controlCode>
+            <organizationId>0x${xlet.orgid}</organizationId>
+            <type>0x1</type>
+        </applications>
+    </applicationManagementTable>
+    <fileAccessInfo>.</fileAccessInfo>
+    <keyInterestTable>0x0</keyInterestTable>
+    <tableOfAccessiblePlayLists>
+        <accessToAllFlag>false</accessToAllFlag>
+        <autostartFirstPlayListFlag>false</autostartFirstPlayListFlag>
+        <playListFileNames>00004</playListFileNames>    
+    </tableOfAccessiblePlayLists>
+    <terminalInfo>
+        <defaultFontFile>00000</defaultFontFile>
+        <initialHaviConfig>HD_1920_1080</initialHaviConfig>
+        <menuCallMask>false</menuCallMask>
+        <titleSearchMask>false</titleSearchMask>
+    </terminalInfo>
+    <version>V_0200</version>
+</bdjo>
+
+        ]]></concat>
+        
+        <condition property="update-bdjo-desc.file">
+            <not>
+                <filesmatch
+                    file1="${bdjo-desc-file}.tmp"
+                    file2="${bdjo-desc-file}"/>
+            </not>
+        </condition>
+	<antcall target="post-gen-bdjo-desc.tmp"/>
+    </target>
+    <target name="post-gen-bdjo-desc.tmp">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+</project>

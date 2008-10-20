@@ -535,7 +535,7 @@ public class GrinView extends GenericMain {
 	}
         
         ExtensionParser reader = null;
-        if (extensionParserName != null) {
+        if (extensionParserName != null && !("".equals(extensionParserName))) {
             try {
                 reader = (ExtensionParser)
                         Class.forName(extensionParserName).newInstance();

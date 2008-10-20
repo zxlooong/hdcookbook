@@ -336,8 +336,8 @@ Here's BNF describing the syntax of a show file:
     translator ::= "feature" "translator" name translator_model_name 
     			"{" sub_feature "}" ";"
 
-    extension_feature ::= "feature" "extension" namespace:type_name 
-    				name string ";"
+    extension_feature ::= "feature" "extension" namespace:type_name name 
+    			  <syntax of extension> ";"
 
     modifier_feature ::= "feature" "modifier" namespace:type_name name 
     				sub_feature string ";"

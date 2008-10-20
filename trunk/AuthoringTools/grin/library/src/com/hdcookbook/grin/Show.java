@@ -270,6 +270,7 @@ public class Show implements AnimationClient {
 	}
 	destroyed = true;
 	setupManager.stop();
+	director.notifyDestroyed();
 	notifyAll();
     }
 

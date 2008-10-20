@@ -53,7 +53,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-// Default package
+package com.hdcookbook.grinbunny;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
@@ -98,8 +98,6 @@ public class GrinBunnyDirector extends Director {
     private static int SAUCER_STAGE_LEFT = -202;
     private static int SAUCER_STAGE_RIGHT = 1896;
 
-    private boolean destroyed = false;
-
     private int framesLeft;	// # of frames left in game
     private int lastTimeLeft;	// Last value of remaining time
     private int score;		// Current score
@@ -114,6 +112,7 @@ public class GrinBunnyDirector extends Director {
     private Group troopersGroup; // The group that holds them
     private Text scoreMessage;
     private Text timeMessage;
+    private Arc timeLeftCircle;
     private InterpolatedModel bunnyPos;
     private Assembly carrotAssembly;
     private Feature carrotFiringState;
@@ -184,6 +183,7 @@ public class GrinBunnyDirector extends Director {
 
 	scoreMessage = (Text) getFeature("F:ScoreMessage");
 	timeMessage = (Text) getFeature("F:TimeMessage");
+	timeLeftCircle = (Arc) getFeature("F:TimeLeftCircle");
 	bunnyPos = (InterpolatedModel) getFeature("F:Bunny.Pos");
 	carrotAssembly = (Assembly) getFeature("F:Carrot.Assembly");
 	carrotFiringState = getPart(carrotAssembly, "firing");
@@ -202,43 +202,19 @@ public class GrinBunnyDirector extends Director {
     }
 
     /**
-     * Called by a java_command in the show to destroy the game.  
-     * When the xlet wants to shut
-     * down, it should send the show to S:Finished, and then call
-     * waitForGameDestroyed().  Navigating to S:Finished will cause
-     * destroyGame() to be called in the animation thread.  So, the
-     * proper shutdown sequence for an xlet is:
-     * <pre>
-     *		Send the show to S:Finished
-     *		Call waitForGameDestroyed()
-     *		destroy the animation engine
-     * </pre>
-     *
-     * @see #waitForGameDestroyed();
+     * @inheritDoc
      **/
-    public void destroyGame() {
-	troopersGroup.resetVisibleParts(null);
+    public void notifyDestroyed() {
+	if (troopersGroup != null) {
+	    troopersGroup.resetVisibleParts(null);
+	}
 	// trooper[0] wasn't cloned by us, so it shouldn't be destroyed by us
-	for (int i = 1; i < troopers.length; i++) {
-	    troopers[i].top.destroyClonedSubgraph();
-	}
-	synchronized(this) {
-	    destroyed = true;
-	    notifyAll();
-	}
-    }
-
-    /**
-     * Wait for the game to be destroyed.  This should be called from the
-     * xlet when the xlet is being destroyed to wait until the game is shut
-     * down.
-     *
-     * @see #destroyGame()
-     **/
-    public synchronized void waitForGameDestroyed() throws InterruptedException
-    {
-	while (!destroyed) {
-	    wait();
+	if (troopers != null) {
+	    for (int i = 1; i < troopers.length; i++) {
+		if (troopers[i].top != null) {
+		    troopers[i].top.destroyClonedSubgraph();
+		}
+	    }
 	}
     }
 
@@ -267,6 +243,8 @@ public class GrinBunnyDirector extends Director {
 	    timeMessage.setText(s);
 	    lastTimeLeft = timeLeft;
 	}
+	int arcAngle = (framesLeft * 360) / GAME_DURATION_FRAMES;
+	timeLeftCircle.setArcAngle(arcAngle);
 	bunnyPos.setField(Translator.X_FIELD, bunnyX);
     }
 

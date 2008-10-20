@@ -132,6 +132,8 @@ public class Main {
                 outputDir = args[index];
             } else if ("-avoid_optimization".equals(args[index])) {
                 optimize = false;
+            } else if ("-optimize".equals(args[index])) {
+                optimize = true;
             } else {
                 showFilesLL.add(args[index]);
             }
@@ -297,10 +299,12 @@ public class Main {
         System.out.println("\t\t-out <output_dir>");      
         System.out.println("\t\t-debug");
         System.out.println("\t\t-avoid_optimization");
+        System.out.println("\t\t-optimize");
         System.out.println("");
         System.out.println("\t-assets and -asset_dir may be repeated to form a search path.");
         System.out.println("\t-avoid_otimization prevents the conversion process from using " +
                 "GrinCompiler methods.");
+        System.out.println("\t-optimize undoes an -avoid_optimization earlier on the command line.");
         System.out.println("\t-debug includes debugging information to the generated binary file.");
         
          

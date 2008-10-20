@@ -111,6 +111,12 @@ public class RenderContextBase extends RenderContext {
 
     RenderContextBase(int numTargets) {
 	this.currTarget = 0;
+	if (numTargets < 1) {
+	    numTargets = 1;
+	    // RenderContextBase piggybacks on drawTargets[0] to implement
+	    // setFullPaint(), so make sure there's at least one drawTarget,
+	    // e.g. to handle the case where there are no animation clients.
+	}
 	this.drawTargets = newRectArray(numTargets);
 	this.eraseTargets = newRectArray(numTargets);
 	lastFrameList.prev = lastFrameList;

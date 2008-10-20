@@ -55,6 +55,9 @@
 package com.hdcookbook.grin.features.parts;
 
 import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.util.ImageManager;
+import com.hdcookbook.grin.util.ManagedImage;
+import com.hdcookbook.grin.util.ManagedSubImage;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -170,9 +173,29 @@ public class SEImagePlacement implements SEImageSeqPlacement {
     		throws IOException 
     {
 	Rectangle result = new Rectangle();
-	BufferedImage im = ImageIO.read(AssetFinder.getURL(imageFileName));
-	result.width = (int) Math.round(im.getWidth() * scaleX);
-	result.height = (int) Math.round(im.getHeight() * scaleY);
+
+	// 
+	// First, we see if this image exists in a mosaic.  This can
+	// happen with GrinView, and in this case the original image
+	// file isn't available.  If we don't find a mosaic tile, then
+	// we use ImageIO, because that works even if we're running
+	// in a program that has no GUI.
+	//
+	ManagedImage mi = ImageManager.getImage(imageFileName);
+	try {
+	    if (mi instanceof ManagedSubImage) {
+		result.width = mi.getWidth();
+		result.height = mi.getHeight();
+	    } else {
+		BufferedImage im = ImageIO.read(
+					AssetFinder.getURL(imageFileName));
+		result.width = (int) Math.round(im.getWidth() * scaleX);
+		result.height = (int) Math.round(im.getHeight() * scaleY);
+	    }
+	} finally {
+	    ImageManager.ungetImage(mi);
+	}
+
 	if (xAlign == HorizontalAlignment.LEFT) {
 	    result.x = x;
 	} else if (xAlign == HorizontalAlignment.MIDDLE) {

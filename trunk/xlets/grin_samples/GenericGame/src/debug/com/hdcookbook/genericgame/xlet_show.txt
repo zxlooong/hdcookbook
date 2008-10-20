@@ -64,16 +64,15 @@ show
 exports
     segments {
 	S:Initialize
-	S:Finished
     } features {
 	F:KeyUpState
     } handlers {
     }
 ;
 
-java_generated_class XletShowCommands [[
+java_generated_class com.hdcookbook.genericgame.XletShowCommands [[
 
-    // Default package
+    package com.hdcookbook.genericgame;
 
     import com.hdcookbook.grin.Show;
     import com.hdcookbook.grin.GrinXHelper;
@@ -112,7 +111,7 @@ feature group F:LaunchScreen {
     sub_feature text middle 960 baseline 100 { 
     			"Press the popup menu key" 
 			"for debug menu"
-		} Lisa plain 64 { 
+		} SansSerif plain 64 { 
 			{ 0 255 0 255 } 
 			+ + + + + + + + +
 			+ + + + + + + + + +
@@ -140,7 +139,7 @@ feature group F:LaunchScreen {
 
 feature text F:Title
     middle 960 baseline 160 { "Debug Menu" }
-    Lisa plain 96 { { 0 255 0 255 } } ;
+    SansSerif plain 96 { { 0 255 0 255 } } ;
 
 #
 #  A text entry in the menu that gives the state of xlet.sendKeyUp
@@ -149,23 +148,23 @@ feature text F:Title
 feature assembly F:KeyUpState {
     enabled	sub_feature text left 400 baseline 280
     			{ "Key up events:  ENABLED" }
-			Lisa plain 48 { { 0 255 0 255 } } ;
+			SansSerif plain 48 { { 0 255 0 255 } } ;
     disabled	sub_feature text left 400 baseline 280
 			{ "Key up events:  DISABLED" }
-			Lisa plain 48 { { 0 255 0 255 } } ;
+			SansSerif plain 48 { { 0 255 0 255 } } ;
 } ;
 
 feature text F:Done
 	left 400 baseline 340 { "Return to Game" }
-	Lisa plain 48 { { 0 255 0 255 } } ;
+	SansSerif plain 48 { { 0 255 0 255 } } ;
 
 feature assembly F:FocusHighlight {
 
     keyUp	sub_feature text left 280 baseline 280 { "-->" }
-    			Lisa plain 48 { { 255 255 0 255 } } ;
+    			SansSerif plain 48 { { 255 255 0 255 } } ;
 
     done	sub_feature text left 280 baseline 340 { "-->" }
-    			Lisa plain 48 { { 255 255 0 255 } } ;
+    			SansSerif plain 48 { { 255 255 0 255 } } ;
  } ;
 
 
@@ -237,17 +236,6 @@ segment S:MainMenu
 ;
 
 
-#
-#  This segment should be navigated to by the xlet when the xlet is
-#  being destroyed.  See the documentation of destroyGame() for details.
-#
-
-segment S:Finished
-    active {
-    } on_entry {
-	java_command [[ getDirector().destroyShow(); ]]
-    }
-;
 
 #
 #

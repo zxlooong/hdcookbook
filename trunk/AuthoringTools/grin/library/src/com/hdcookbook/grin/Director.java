@@ -227,4 +227,13 @@ public class Director {
     {
     }
 
+    /**
+     * Notifies the director that the underlying show has been destroyed.
+     * This is called from the animation thread with the show lock held.
+     * If the director has acquired any resources, it should release them
+     * here.
+     **/
+    public void notifyDestroyed() {
+    }
+
 }

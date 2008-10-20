@@ -52,84 +52,163 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.features.Assembly;
-import com.hdcookbook.grin.util.Debug;
-
 
 /** 
- * The director for the small xlet UI that manages test state using the
- * popup menu.
+ * An Arc extension feature.  
  **/
 
-public class XletDirector extends Director {
-	
-    public GrinBunnyXlet xlet;
-    private boolean destroyed = false;
+package com.hdcookbook.grinbunny;
 
-    Assembly F_KeyUpState;
-    Feature F_KeyUpState_enabled;
-    Feature F_KeyUpState_disabled;
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.util.Debug;
+
+import java.awt.Graphics2D;
+import java.awt.Color;
+
+import java.io.IOException;
+
+public class Arc extends Feature implements Node {
+
+    protected int x;
+    protected int y;
+    protected int width;
+    protected int height;
+    protected int startAngle;
+    protected int arcAngle;
+    protected Color color;
+
+    private boolean changed;
 
 
-    public XletDirector(GrinBunnyXlet xlet) {
-	this.xlet = xlet;
+    private DrawRecord drawRecord = new DrawRecord();
+
+    public Arc(Show show) {
+	super(show);
     }
 
+    /**
+     * A method we can call from a java_command to change the arc angle of
+     * this arc.
+     **/
+    public void setArcAngle(int newAngle) {
+	if (newAngle != arcAngle) {
+	    changed = true;
+	    arcAngle = newAngle;
+	}
+    }
+
+    //
+    // We don't implement makeNewClone(), so cloning is not
+    // supported.
+    //
+    // It's easy enough to implement; we didn't here because we don't
+    // need to, and because that's a way of demonstrating that you
+    // aren't required to implement cloning.
+
+    /**
+     * @inheritDoc
+     **/
+    public int getX() {
+	return x;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public int getY() {
+	return y;
+    }
+
+    /**
+     * @inheritDoc
+     **/
     public void initialize() {
-	F_KeyUpState = (Assembly) getFeature("F:KeyUpState");
-	F_KeyUpState_enabled = getPart(F_KeyUpState, "enabled");
-	F_KeyUpState_disabled = getPart(F_KeyUpState, "disabled");
+	changed = true;
+    }
+    
+    /**
+     * @inheritDoc
+     **/
+    public void destroy() {
     }
 
     /**
-     * Sets the UI state to match the model.
+     * @inheritDoc
      **/
-    public void setUIState() {
-	if (xlet.sendKeyUp) {
-	    F_KeyUpState.setCurrentFeature(F_KeyUpState_enabled);
-	} else {
-	    F_KeyUpState.setCurrentFeature(F_KeyUpState_disabled);
+    public void setActivateMode(boolean mode) {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public int setSetupMode(boolean mode) {
+	return 0;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void doSomeSetup() {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public boolean needsMoreSetup() {
+	return false;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void nextFrame() {
+	// We don't animate, so there's nothing to update
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addDisplayAreas(RenderContext context) {
+	drawRecord.setArea(x, y, width, height);
+	if (changed) {
+	    drawRecord.setChanged();
+	    changed = false;
 	}
+	// We might be overstating the draw area, depending on the
+	// values of startAngle and arcAngle.  It's OK to overstate
+	// the draw area.
+	context.addArea(drawRecord);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void paintFrame(Graphics2D gr) {
+	gr.setColor(color);
+	gr.fillArc(x, y, width, height, startAngle, arcAngle);
     }
 
 
     /**
-     * Called by a java_command in the show when it's time to destroy
-     * the show. When the xlet wants to shut
-     * down, it should send the show to S:Finished, and then call
-     * waitForShowDestroyed().  Navigating to S:Finished will cause
-     * destroyShow() to be called in the animation thread.  So, the
-     * proper shutdown sequence for an xlet is:
-     * <pre>
-     *		Send the show to S:Finished
-     *		Call waitForShowDestroyed()
-     *		destroy the animation engine
-     * </pre>
-     *
-     * @see #waitForShowDestroyed();
+     * @inheritDoc
      **/
-    public void destroyShow() {
-	synchronized(this) {
-	    destroyed = true;
-	    notifyAll();
-	}
-    }
-
-    /**
-     * Wait for the show to be destroyed.  This should be called from the
-     * xlet when the xlet is being destroyed to wait until the show is shut
-     * down.
-     *
-     * @see #destroyShow()
-     **/
-    public synchronized void waitForShowDestroyed() throws InterruptedException
+    public void readInstanceData(GrinDataInputStream in, int length)
+	    throws IOException
     {
-	while (!destroyed) {
-	    wait();
-	}
+	in.readSuperClassData(this);
+	color = in.readColor();
+	x = in.readInt();
+	y = in.readInt();
+	width = in.readInt();
+	height = in.readInt();
+	startAngle = in.readInt();
+	arcAngle = in.readInt();
     }
+
 }

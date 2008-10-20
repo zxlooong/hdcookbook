@@ -72,9 +72,9 @@ exports
     segments {
 	S:Initialize
 	S:GameOver
-	S:Finished
     } features {
 	F:TimeMessage
+	F:TimeLeftCircle
 	F:ScoreMessage
 	F:TurtleSaucer.Assembly
 	F:TurtleSaucer.Pos
@@ -90,16 +90,16 @@ exports
     }
 ;
 
-java_generated_class ShowCommands [[
+java_generated_class com.hdcookbook.grinbunny.GrinBunnyShowCommands [[
 
-    // Default package
+    package com.hdcookbook.grinbunny;
 
     import com.hdcookbook.grin.Show;
     import com.hdcookbook.grin.GrinXHelper;
 
-    public class ShowCommands extends GrinXHelper {
+    public class GrinBunnyShowCommands extends GrinXHelper {
 
-	public ShowCommands(Show show) {
+	public GrinBunnyShowCommands(Show show) {
 	    super(show);
 	}
 
@@ -282,7 +282,7 @@ feature set_target F:Carrot.Opt F:Carrot T:Carrot ;
 #
 
 feature text F:TimeMessage
-	left 20 top 10 
+	left 85 top 10 
 	"MM:SS"
 	    Lisa plain 60 { { 240 0 0 255 } } ;
 
@@ -291,6 +291,9 @@ feature text F:ScoreMessage
 	"Score:  0"
 	    Lisa plain 60 { { 240 0 0 255 } } ;
 
+feature extension GB:Arc F:TimeLeftCircle 
+	{ 240  0 0 255 }		# green
+	x 20 y 10 width 60 height 60 startAngle 0 arcAngle 360 ;
 
 #
 #  The "heartbeat" timer.  While the show is playing, this timer calls
@@ -335,6 +338,7 @@ feature group F:Everything {
     F:GameStartMessage
     F:TurtleSaucer
     F:TimeMessage
+    F:TimeLeftCircle
     F:ScoreMessage
     F:PlayHeartbeat
     F:GameOverScreen
@@ -386,6 +390,7 @@ segment S:ReadyToPlay
 
 segment S:Playing
     active {
+	F:TimeLeftCircle
 	F:TimeMessage
 	F:ScoreMessage
 	F:TurtleSaucer
@@ -415,18 +420,6 @@ segment S:GameOver
 	F:Everything
     } rc_handlers {
 	H:GameOver
-    }
-;
-
-#
-#  This segment should be navigated to by the xlet when the xlet is
-#  being destroyed.  See the documentation of destroyGame() for details.
-#
-
-segment S:Finished
-    active {
-    } on_entry {
-	java_command [[ getDirector().destroyGame(); ]]
     }
 ;
 
