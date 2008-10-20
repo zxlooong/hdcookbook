@@ -156,7 +156,23 @@ public abstract class Modifier extends Feature {
 	    part.activate();
 	} else {
 	    part.deactivate();
+	    setChildChanged();
 	}
+    }
+
+    /**
+     * Set our child's drawing area(s) as modified, if we modify the appearance
+     * of our child node.  This is done when we are deactivated, because it's
+     * possible our children aren't deactivated at the same time.
+     *
+     * @see com.hdcookbook.grin.Feature#markDisplayAreasChanged()
+     **/
+    protected void setChildChanged() {
+	// When we're deactivated, our child might not be, and we might modify
+	// the child.  See als
+	// https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=121
+	//
+	part.markDisplayAreasChanged();
     }
 
     /**
@@ -186,6 +202,13 @@ public abstract class Modifier extends Feature {
      **/
     public void paintFrame(Graphics2D g) {
 	part.paintFrame(g);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void markDisplayAreasChanged() {
+	part.markDisplayAreasChanged();
     }
 
     /**

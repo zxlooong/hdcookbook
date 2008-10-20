@@ -311,6 +311,12 @@ public class Text extends Feature implements Node {
 	currColor = colors[colorIndex];
     }
 
+    /**
+     * @inheritDoc
+     **/
+    public void markDisplayAreasChanged() {
+	drawRecord.setChanged();
+    }
 
     /**
      * @inheritDoc

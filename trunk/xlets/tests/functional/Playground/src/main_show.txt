@@ -63,7 +63,7 @@ segment S:Main
     } setup {
 	F:Everything
     } rc_handlers {
-	H:1 H:2 H:3 H:4
+	H:1 H:2 H:3 H:4 H:5
 	H:EnterPress H:EnterRelease
     }
 ;
@@ -72,6 +72,7 @@ feature group F:Everything {
     F:MainText
     F:ProgrammaticDemo
     F:EnterAssembly
+    F:FadeTestEverything
 } ;
 
 feature text F:MainText
@@ -81,6 +82,7 @@ feature text F:MainText
 	    "     2 - Put new show on top of menu"
 	    "     3 - Show programmatic control of scene graph"
 	    "     4 - Run show with extension feature"
+	    "     5 - Run regression test for issue 121 (fade and redisplay)"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
 	background { 0 0 0 255 } 
@@ -106,6 +108,10 @@ rc_handler key_pressed H:4 { 4 } execute {
     java_command [[ XLET_ONLY_[[
 	getMainDirector().putNewShowOnTopOfMenu("S:ExtensionTest");
     ]] ]]
+} ;
+
+rc_handler key_pressed H:5 { 5 } execute {
+	activate_segment S:FadeTest ;
 } ;
 
 rc_handler key_pressed H:EnterPress { enter } execute {
@@ -302,5 +308,70 @@ segment S:ProgrammaticSceneGraphControl
 rc_handler key_pressed H:ProgrammaticEscape { enter } execute {
     activate_segment S:Main ;
 } ;
+
+
+#########################################################
+#	    FADE TEST (Issue 121 regression test)       #
+#########################################################
+
+feature text F:FadeTestText 100 100 {
+	"You should see a faded blue rectangle.  Press enter to continue"
+    } SansSerif plain 48 { { 255 255 255 255 } } ;
+
+feature text F:FadeTestText2 100 100 {
+	"You should see an opaque blue rectangle.  Press enter to go back to menu"
+    } SansSerif plain 48 { { 255 255 255 255 } } ;
+
+
+feature box F:Red ( 100 200 960 980 ) 
+	fill { 255 0 0 255 } ;
+
+feature box F:Green ( 960 200 1820 980 )
+	fill { 0 255 0 255 } ;
+
+feature box F:Blue ( 500 400 1400 800 )
+	fill { 0 0 255 255 } ;
+
+feature fade F:FadedBlue F:Blue src_over {  0 100 linear } ;
+
+
+feature group F:FadeTestEverything {
+	F:Red F:Green F:FadedBlue 
+} ;
+
+rc_handler key_pressed H:FadeTest { enter } execute {
+	segment_done ;
+} ;
+
+segment S:FadeTest 
+   active {
+	F:Red
+	F:Green
+	F:FadedBlue
+	F:FadeTestText
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:FadeTest
+    } next {
+	activate_segment S:FadeTest_2 ;
+    }
+;
+
+segment S:FadeTest_2
+       active {
+	F:Red
+	F:Green
+	F:Blue
+	F:FadeTestText2
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:FadeTest
+    } next {
+	activate_segment S:Main ;
+    }
+;
+
 
 end_show 

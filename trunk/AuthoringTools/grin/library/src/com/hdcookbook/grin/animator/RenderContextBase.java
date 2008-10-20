@@ -235,6 +235,7 @@ public class RenderContextBase extends RenderContext {
 	n = lastFrameList.next;
 	DrawRecord prev = lastFrameList;
 	while (n != null) {
+	    n.finishedFrame();
 	    n.prev = prev;
 	    prev = n;
 	    n = n.next;

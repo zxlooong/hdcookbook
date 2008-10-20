@@ -285,7 +285,7 @@ Here's BNF describing the syntax of a show file:
     src_over ::= "feature" "src_over" name sub_feature ";"
 
     fade ::= "feature" "fade" name sub_feature
-    		[ "src_over" ] "{" ( frame_number alpha "linear" ) * "}" 
+    		[ "src_over" ] "{" ( frame_number alpha_int "linear" ) * "}" 
 		[ "repeat" frame_number ] 
 		[ loop_count ]
 		[ "end_commands" commands ] ";"

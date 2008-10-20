@@ -133,6 +133,15 @@ public class BioImageFeature extends Modifier implements Node {
     }
 
     /**
+     * @inheritDoc
+     **/
+    public void markDisplayAreasChanged() {
+	super.markDisplayAreasChanged();
+	drawRecord.setChanged();
+    }
+
+
+    /**
      * Called by the GRIN framework to figure out the extent of the
      * area we paint to.  This is called with the show lock held.
      **/

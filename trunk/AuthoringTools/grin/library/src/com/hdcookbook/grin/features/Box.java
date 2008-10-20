@@ -189,6 +189,13 @@ public class Box extends Feature implements Node {
     /**
      * @inheritDoc
      **/
+    public void markDisplayAreasChanged() {
+	drawRecord.setChanged();
+    }
+
+    /**
+     * @inheritDoc
+     **/
     public void addDisplayAreas(RenderContext context) {
 	if (scalingModel == null) {
 	    drawRecord.setArea(x, y, width, height);

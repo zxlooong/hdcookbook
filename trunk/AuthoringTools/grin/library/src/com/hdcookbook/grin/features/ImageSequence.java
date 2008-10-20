@@ -391,6 +391,12 @@ public class ImageSequence extends Feature implements Node, SetupClient {
         }
     }
 
+    /**
+     * @inheritDoc
+     **/
+    public void markDisplayAreasChanged() {
+	drawRecord.setChanged();
+    }
 
     /**
      * @inheritDoc

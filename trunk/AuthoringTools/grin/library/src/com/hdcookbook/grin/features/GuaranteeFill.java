@@ -128,6 +128,14 @@ public class GuaranteeFill extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
+    protected void setChildChanged() {
+	// When we're deactivated, our child doesn't need to be marked as
+	// modified, because we don't change the drawing at all.
+    }
+
+    /**
+     * @inheritDoc
+     **/
     public void addDisplayAreas(RenderContext context) {
 	drawRecord.setArea(guaranteed.x, guaranteed.y, 
 			   guaranteed.width, guaranteed.height);

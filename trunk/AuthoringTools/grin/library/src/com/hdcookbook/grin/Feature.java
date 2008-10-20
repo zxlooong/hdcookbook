@@ -324,6 +324,21 @@ public abstract class Feature {
      **/
     abstract public void addDisplayAreas(RenderContext context);
 
+    /**
+     * Mark the display areas of this feature as modified for the next call
+     * to addDisplayAreas.  This can be
+     * called by a parent node on its children, e.g. when the parent is
+     * deactivated.  This is necessary because a parent node might modify
+     * the drawing of its children (e.g. by setting an alpha value), and
+     * a parent might be taken out of a render tree when its children are
+     * not.
+     * <p>
+     * See also <a href="https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=121">Issue 121</a>
+     *
+     * @see #addDisplayAreas(com.hdcookbook.grin.animator.RenderContext)
+     **/
+    abstract public void markDisplayAreasChanged();
+
 
     /**
      * Paint the current state of this feature to gr.

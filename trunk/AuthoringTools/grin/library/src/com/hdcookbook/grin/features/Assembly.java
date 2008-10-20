@@ -301,6 +301,17 @@ public class Assembly extends Feature implements Node {
 	return currentFeature;
     }
 
+    /**
+     * @inheritDoc
+     **/
+    public void markDisplayAreasChanged() {
+	currentFeature.markDisplayAreasChanged();
+	    // At this point, we're not sure if currentFeature refers to
+	    // the previous frame or the next frame, but either way will
+	    // generate correct results, because a feature could only fail
+	    // to be marked as modified if it was active in both.
+    }
+
 
     /**
      * @inheritDoc

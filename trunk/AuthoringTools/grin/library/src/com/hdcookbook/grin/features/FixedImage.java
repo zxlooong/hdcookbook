@@ -247,6 +247,13 @@ public class FixedImage extends Feature implements Node, SetupClient {
     /**
      * @inheritDoc
      **/
+    public void markDisplayAreasChanged() {
+	drawRecord.setChanged();
+    }
+
+    /**
+     * @inheritDoc
+     **/
     public void addDisplayAreas(RenderContext context) {
 	if (scalingModel == null) {
 	    drawRecord.setArea(placement.x, placement.y, 

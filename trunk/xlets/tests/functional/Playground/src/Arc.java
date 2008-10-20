@@ -169,6 +169,13 @@ public class Arc extends Feature implements Node {
     /**
      * @inheritDoc
      **/
+    public void markDisplayAreasChanged() {
+	drawRecord.setChanged();
+    }
+
+    /**
+     * @inheritDoc
+     **/
     public void addDisplayAreas(RenderContext context) {
 	drawRecord.setArea(x, y, width, height);
 	    // We don't animate, so we don't have to think about setting

@@ -83,6 +83,9 @@ public class GenericExtensionParser implements ExtensionParser {
             public String getRuntimeClassName() {
                 return null;
             }
+
+	    public void markDisplayAreasChanged() {
+	    }
         };
         
         feature.setName(name);

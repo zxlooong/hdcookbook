@@ -368,6 +368,13 @@ public class InterpolatedModel extends Feature implements Node {
     /**
      * @inheritDoc
      **/
+    public void markDisplayAreasChanged() {
+	// do nothing
+    }
+
+    /**
+     * @inheritDoc
+     **/
     public void addDisplayAreas(RenderContext context) {
 	// do nothing
     }

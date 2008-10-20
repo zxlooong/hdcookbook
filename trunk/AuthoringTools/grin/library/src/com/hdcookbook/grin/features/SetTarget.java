@@ -109,6 +109,17 @@ public class SetTarget extends Modifier implements Node {
     public void mapDrawTarget(Hashtable targetMap) {
 	target = ((Integer) targetMap.get(targetName)).intValue();
     }
+
+
+    /**
+     * @inheritDoc
+     **/
+    protected void setChildChanged() {
+	// When we're deactivated, our child doesn't need to be marked as
+	// modified, because we don't change the drawing at all.
+    }
+
+
     /**
      * @inheritDoc
      **/

@@ -333,6 +333,19 @@ public class Group extends Feature implements Node {
     /**
      * @inheritDoc
      **/
+    public void markDisplayAreasChanged() {
+	for (int i = 0; i < visibleParts.length; i++) {
+	    visibleParts[i].markDisplayAreasChanged();
+	    	// Even if visibleParts changes in this frame, this will
+		// be correct, because the only way a DrawRecord could fail
+		// to be marked as changed is if it were active in both
+		// the previoius and the next frame.
+	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
     public void addDisplayAreas(RenderContext context) {
 	for (int i = 0; i < visibleParts.length; i++) {
 	    visibleParts[i].addDisplayAreas(context);

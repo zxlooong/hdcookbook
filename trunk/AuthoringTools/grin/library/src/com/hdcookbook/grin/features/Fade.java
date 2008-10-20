@@ -225,6 +225,7 @@ public class Fade extends Modifier implements Node {
 	}
 	alphas[0] = ac;
 	currAlpha = ac;
+	srcOver = ac.getRule() != AlphaComposite.SRC;
     }
 
     /**

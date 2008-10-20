@@ -151,6 +151,15 @@ public class DrawRecord {
 	this.y = y;
 	this.width = width;
 	this.height = height;
+    }
+
+    //
+    // Called by RenderContextBase when it's finished processing the
+    // DrawRecord instances drawn in the current frame.  Here, we re-set
+    // changed and opaque, in order to ready this DrawRecord for the next
+    // frame, if it is visible in that next frame.
+    //
+    void finishedFrame() {
 	this.changed = false;
 	this.opaque = true;
     }
