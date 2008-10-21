@@ -313,6 +313,10 @@ public class FontStripText extends Feature implements Node, SetupClient {
         // nothing to do.
     }
 
+    public void markDisplayAreasChanged() {
+	drawRecord.setChanged();
+    }
+
     public void readInstanceData(GrinDataInputStream in, int length) 
             throws IOException {
         in.readSuperClassData(this);
