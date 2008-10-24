@@ -6,7 +6,18 @@ Game xlet project.  See the documentation in vars.properties for details.
 
 -->
 <project name="${project.name}" default="deploy" basedir=".">
-    
+
+    <!--
+    	Some default values for properties.  These can be overridden
+	in vars.properties.
+    <property name="xlet.lib.zip" value=""/>
+    <property name="se.lib.zip" value=""/>
+    -->
+    <property name="extension.parser" 
+    	      value="com.hdcookbook.grin.io.text.NullExtensionParser"/>
+    <!--
+    	Targets for java and javac...
+    -->
     <presetdef name="jdktools.java">
         <java fork="true" failOnError="true"/>
     </presetdef>    
@@ -30,17 +41,23 @@ Game xlet project.  See the documentation in vars.properties for details.
 		Convert com.mypackage.Foo to com/mypackage/Foo for a couple
 		of properties, and check if debug is set.
 	-->
+	<pathconvert property="kludge.root.dir">
+	    <path path="/"/>
+	</pathconvert>
 	<pathconvert property="show.director.file">
 	    <path path="/${show.director}"/>
-	    <unpackagemapper from="/*" to="*"/>
+	    <unpackagemapper from="${kludge.root.dir}*" to="*"/>
 	</pathconvert>
 	<pathconvert property="show.commands.file">
 	    <path path="/${show.commands}"/>
-	    <unpackagemapper from="/*" to="*"/>
+	    <unpackagemapper from="${kludge.root.dir}*" to="*"/>
 	</pathconvert>
         <condition property="debug.is.set">
 	      <equals arg1="${debug.or.deploy}" arg2="debug"/>
 	</condition>
+	<available file="${src.dir}/fonts/dvb.fontindex"
+		   property="xlet.fonts.flag" value="-fonts"/>
+	<property name="xlet.fonts.flag" value="-nofonts"/>
 	<antcall target="post-init"/>
     </target>
     <target name="post-init">
@@ -150,6 +167,7 @@ The project.name property is not set.  This usually has one of two causes:
 	    <src path="se_src"/>
 	    <classpath>
 		<pathelement path="${converter.jar}"/>
+		<pathelement path="${se.lib.zip}"/>
 	    </classpath>
 	</jdktools.javac>
 	<!--	Now run converter with extension parser in path -->
@@ -157,6 +175,7 @@ The project.name property is not set.  This usually has one of two causes:
 	    <classpath>
 		<pathelement path="${converter.jar}"/>
 		<pathelement path="${build.dir}/gensrc/grinview"/>
+		<pathelement path="${se.lib.zip}"/>
 	    </classpath>
             <arg value="-asset_dir"/>
             <arg value="${asset.dir}"/>
@@ -177,6 +196,7 @@ The project.name property is not set.  This usually has one of two causes:
 	    <src path="src"/>
 	    <classpath>
 		<pathelement path="${grinview.jar}"/>
+		<pathelement path="${se.lib.zip}"/>
 	    </classpath>
 	</jdktools.javac>
 	<antcall target="post-generate-binary-script"/>
@@ -218,6 +238,7 @@ The project.name property is not set.  This usually has one of two causes:
 	    <classpath>
 		<pathelement path="${grinview.jar}"/>
 		<pathelement path="${build.dir}/gensrc/grinview"/>
+		<pathelement path="${se.lib.zip}"/>
 	    </classpath>
 	    <arg value="-asset_dir"/>
 	    <arg value="${asset.dir}"/>
@@ -239,6 +260,7 @@ The project.name property is not set.  This usually has one of two causes:
         <delete dir="${build.dir}/grinview-jar"/>
         <mkdir dir="${build.dir}/grinview-jar"/>
 	<unzip src="${grinview.jar}" dest="${build.dir}/grinview-jar"/>
+	<antcall target="internal-unzip-se-lib-zip"/>
 	<copy todir="${build.dir}/grinview-jar">
             <fileset dir="${build.dir}/gensrc/grinview">
 		<include name="grinview_args.txt"/>
@@ -268,6 +290,9 @@ The project.name property is not set.  This usually has one of two causes:
         <!-- Projects that include this build file can re-define this target -->
     </target>
 
+    <target name="internal-unzip-se-lib-zip" if="se.lib.zip">
+	<unzip src="${se.lib.zip}" dest="${build.dir}/grinview-jar"/>
+    </target>
 
     <target name="test" depends="init, generate-binary-script"
     		description="Run grinview on game in autotest mode">
@@ -275,6 +300,7 @@ The project.name property is not set.  This usually has one of two causes:
 	    <classpath>
 		<pathelement path="${grinview.jar}"/>
 		<pathelement path="${build.dir}/gensrc/grinview"/>
+		<pathelement path="${se.lib.zip}"/>
 	    </classpath>
 	    <arg value="-asset_dir"/>
 	    <arg value="${asset.dir}"/>
@@ -294,7 +320,11 @@ The project.name property is not set.  This usually has one of two causes:
             depends="init, generate-binary-script" 
 	    description="Compiles the sources">
         <mkdir dir="${build.dir}/classes"/>
+	<antcall target="internal-unzip-xlet-lib-zip"/>
         <xlets.javac destdir="${build.dir}/classes" >
+	    <classpath>
+		<pathelement path="${xlet.lib.zip}"/>
+	    </classpath>
             <src path="${generic.game}/src/${debug.or.deploy}"/>
             <src path="${grin.library.src.dir}" />
             <src path="src"/>
@@ -304,6 +334,9 @@ The project.name property is not set.  This usually has one of two causes:
     </target>
     <target name="post-compile">
         <!-- Projects that include this build file can re-define this target -->
+    </target>
+    <target name="internal-unzip-xlet-lib-zip" if="xlet.lib.zip">
+	<unzip src="${xlet.lib.zip}" dest="${build.dir}/grinview-jar"/>
     </target>
 
     <target name="jar" depends="compile" description="Creates an xlet jar file">
@@ -396,10 +429,9 @@ The project.name property is not set.  This usually has one of two causes:
         <mkdir dir="${dist.dir}/BDMV/STREAM"/>
         <mkdir dir="${dist.dir}/CERTIFICATE"/>
        
-	<copy tofile = "${dist.dir}/BDMV/AUXDATA/00000.otf"
-	        file = "${src.dir}/fonts/Lisa.ttf" />
-	<copy todir = "${dist.dir}/BDMV/AUXDATA"
-	       file = "${src.dir}/fonts/dvb.fontindex" />
+	<copy todir = "${dist.dir}/BDMV/AUXDATA" failonerror="false">
+            <fileset dir="${src.dir}/fonts"/>
+        </copy>
         <copy todir = "${dist.dir}/BDMV/JAR"
 	       file = "${xlet.jar}" />
         <copy todir = "${dist.dir}/BDMV/BDJO" 
@@ -498,6 +530,7 @@ ${show.file}.txt
 		    <parameters>${show.file}.grin</parameters>
 		    <parameters>${show.initial.segment}</parameters>
 		    <parameters>${show.director}</parameters>
+		    <parameters>${xlet.fonts.flag}</parameters>
                 <priority>3</priority>
                 <profiles>
                     <majorVersion>1</majorVersion>

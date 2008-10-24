@@ -93,7 +93,7 @@ public class Main {
         LinkedList<String> assetDirsLL = new LinkedList<String>();
        
 	LinkedList<String> showFilesLL = new LinkedList<String>();
-        String extensionParserName = null;
+        String extensionParserName = "com.hdcookbook.grin.io.text.NullExtensionParser";
         String outputDir = null;
         boolean debug = false;
         boolean optimize = true;
@@ -157,6 +157,13 @@ public class Main {
             } catch (ClassNotFoundException ex) {
                  ex.printStackTrace();
             } 
+	    if (extensionParser == null) {
+		System.err.println();
+		System.err.println("Error:  extension parser \"" 
+				   + extensionParserName + "\" not found.");
+		System.err.println();
+		System.exit(1);
+	    }
         }
 
         String[] assetPath = null;

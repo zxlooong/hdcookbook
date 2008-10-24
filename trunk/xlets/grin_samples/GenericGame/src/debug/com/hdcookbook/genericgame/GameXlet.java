@@ -103,6 +103,7 @@ public class GameXlet
     private String showFileName;
     private String showInitialSegment;
     private String showDirectorName;
+    private boolean definesFonts;
 
     boolean sendKeyUp = true;
 
@@ -115,12 +116,13 @@ public class GameXlet
         this.context = context;
 
 	String[] args = (String[]) context.getXletProperty(context.ARGS);
-	if (Debug.ASSERT && args.length != 3) {
-	    Debug.assertFail("Parameters:  <grin file> <initial segment> <director>");
+	if (Debug.ASSERT && args.length != 4) {
+	    Debug.assertFail("Parameters:  <grin file> <initial segment> <director> <fontflag>\n    fontflag is -fonts or -nofonts");
 	}
 	showFileName = args[0];
 	showInitialSegment = args[1];
 	showDirectorName = args[2];
+	definesFonts = "-fonts".equals(args[3]);
        
         rootContainer = TVContainer.getRootContainer(context);			
         rootContainer.setSize(1920, 1080);
@@ -164,13 +166,17 @@ public class GameXlet
 	    Debug.assertFail("Can't create director:  " + t);
 	}
 	xletDirector = new XletDirector(this);
-	try {
-	   fontFactory = new FontFactory();
-	} catch (Exception ex) {
-	    ex.printStackTrace();
-	    if (Debug.ASSERT) {
-		Debug.assertFail();
+	if (definesFonts) {
+	    try {
+	       fontFactory = new FontFactory();
+	    } catch (Exception ex) {
+		ex.printStackTrace();
+		if (Debug.ASSERT) {
+		    Debug.assertFail();
+		}
 	    }
+	} else {
+	    fontFactory = null;
 	}
 
 	try {
@@ -193,13 +199,15 @@ public class GameXlet
 		}
 		protected Font getFontHelper(String name, int style, int size)
 		{
-		    try {
-			return fontFactory.createFont(name, style, size);
-		    } catch (Exception ex) {
-			if (Debug.LEVEL > 0) {
-			    ex.printStackTrace();
-			    Debug.println("***  Font " + name 
-					  + " not found.  ***");
+		    if (fontFactory != null) {
+			try {
+			    return fontFactory.createFont(name, style, size);
+			} catch (Exception ex) {
+			    if (Debug.LEVEL > 0) {
+				ex.printStackTrace();
+				Debug.println("***  Font " + name 
+					      + " not found.  ***");
+			    }
 			}
 		    }
 		    return null;

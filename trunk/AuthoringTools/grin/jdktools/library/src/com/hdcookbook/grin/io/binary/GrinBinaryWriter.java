@@ -643,7 +643,7 @@ public class GrinBinaryWriter {
        
        String nodeClassName = Node.class.getName();
        StringBuffer generated = new StringBuffer();
-       generated.append("    public " + nodeClassName + " getInstanceOf(Show show, int id) ");
+       generated.append("    public " + nodeClassName + " getInstanceOf(com.hdcookbook.grin.Show show, int id) ");
        generated.append("throws java.io.IOException {\n");
        generated.append("        switch (id) {\n");
        for (int i = extensionIndex; i < list.length; i++ ) {
