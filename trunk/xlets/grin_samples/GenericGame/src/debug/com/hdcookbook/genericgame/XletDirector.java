@@ -59,6 +59,7 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.util.Debug;
 
 
@@ -74,7 +75,16 @@ public class XletDirector extends Director {
     Assembly F_KeyUpState;
     Feature F_KeyUpState_enabled;
     Feature F_KeyUpState_disabled;
-
+    Assembly F_DebugDraw;
+    Feature F_DebugDraw_enabled;
+    Feature F_DebugDraw_disabled;
+    Text F_Framerate;
+    private int currFramerate = 10;	// Default to 23.976
+    private static int[] framerates = {
+    	31, 62, 125, 250, 500, 1001, 2002, 3003, 6006, 12012, 24000,
+	24024, 30000, 30030, 60000, 60060, 120000, 120120
+    };
+    private boolean debugDraw = false;
 
     public XletDirector(GameXlet xlet) {
 	this.xlet = xlet;
@@ -84,6 +94,10 @@ public class XletDirector extends Director {
 	F_KeyUpState = (Assembly) getFeature("F:KeyUpState");
 	F_KeyUpState_enabled = getPart(F_KeyUpState, "enabled");
 	F_KeyUpState_disabled = getPart(F_KeyUpState, "disabled");
+	F_Framerate = (Text) getFeature("F:Framerate");
+	F_DebugDraw = (Assembly) getFeature("F:DebugDraw");
+	F_DebugDraw_enabled = getPart(F_DebugDraw, "enabled");
+	F_DebugDraw_disabled = getPart(F_DebugDraw, "disabled");
     }
 
     /**
@@ -95,6 +109,51 @@ public class XletDirector extends Director {
 	} else {
 	    F_KeyUpState.setCurrentFeature(F_KeyUpState_disabled);
 	}
+	if (debugDraw) {
+	    F_DebugDraw.setCurrentFeature(F_DebugDraw_enabled);
+	} else {
+	    F_DebugDraw.setCurrentFeature(F_DebugDraw_disabled);
+	}
+	setFramerate();
+    }
+
+    public void setFramerate() {
+	int fpts = framerates[currFramerate];	// frames / 1001ths second
+	float fps = ((float) fpts) / 1001f;
+	String[] arr = new String[] { "Frames per second:  " + fps };
+	F_Framerate.setText(arr);
+	xlet.animationEngine.setFps(fpts);
+    }
+
+    /**
+     * Increases the framerate
+     **/
+    public void framerateUp() {
+	currFramerate++;
+	if (currFramerate >= framerates.length) {
+	    currFramerate = framerates.length - 1;
+	}
+	setFramerate();
+    }
+
+    /**
+     * Decreases the framerate
+     **/
+    public void framerateDown() {
+	currFramerate--;
+	if (currFramerate < 0) {
+	    currFramerate = 0;
+	}
+	setFramerate();
+    }
+
+    public boolean getDebugDraw() {
+	return debugDraw;
+    }
+
+    public void setDebugDraw(boolean value) {
+	debugDraw = value;
+	xlet.animationEngine.setDebugDraw(value);
     }
 
 }

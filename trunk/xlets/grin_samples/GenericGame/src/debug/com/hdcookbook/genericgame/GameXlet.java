@@ -96,7 +96,7 @@ public class GameXlet
     public Show show;
     Container rootContainer;
     FontFactory fontFactory;
-    DirectDrawEngine animationEngine;
+    DebugDirectDrawEngine animationEngine;
     Director director;
     XletContext context;
 
@@ -127,7 +127,7 @@ public class GameXlet
         rootContainer = TVContainer.getRootContainer(context);			
         rootContainer.setSize(1920, 1080);
         
-        animationEngine = new DirectDrawEngine();
+        animationEngine = new DebugDirectDrawEngine();
         animationEngine.setFps(24000);
         animationEngine.initialize(this);
     }
