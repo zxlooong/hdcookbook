@@ -1,6 +1,6 @@
 
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -55,12 +55,14 @@
 
 package com.hdcookbook.grin.util;
 
+
 /**
- * Debugging support.  Before shipping a final disc, you should modify the
- * constant values in this class and re-compile.
+ * Debugging support.  This overrides the version in the GRIN library, to 
+ * turn off debugging in a deployment xlet.
  *
  * @author Bill Foote (http://jovial.com)
  */
+
 public class Debug {
  
     /**
@@ -78,26 +80,20 @@ public class Debug {
      * Note that JDK 1.4's assertion facility can't be used
      * for Blu-Ray, since PBP 1.0 is based on JDK 1.3.
      **/
-    public final static boolean ASSERT = true;
+    public final static boolean ASSERT = false;
 
     /**
      * Debug level.  2 = noisy, 1 = some debug, 0 = none.
      **/
-    public final static int LEVEL = 2;
+    public final static int LEVEL = 0;
     
     private Debug() {
     }
     
     public static void println() {
-	if (LEVEL > 0) {
-	    println("");
-	}
     }
     
     public static void println(Object o) {
-	if (LEVEL > 0) {
-	    System.err.println(o);
-	}
     }
 
     /**
@@ -109,8 +105,11 @@ public class Debug {
      **/
     public static void assertFail(String msg) {
 	if (ASSERT) {
-	    Thread.dumpStack();
-	    System.err.println("\n***  Assertion failure:  " + msg + "  ***\n");
+	    try {
+		throw new RuntimeException("\n***  Assertion failure:  " + msg + "  ***\n");
+	    } catch (RuntimeException ex) {
+		printStackTrace(ex);
+	    }
 	    AssetFinder.abort();
 	}
     }
@@ -128,11 +127,10 @@ public class Debug {
 	}
     }
 
-
     /**'
-     * Print a stack trace to the debug log, if Debug.LEVEL > 0.  Note 
-     * that you can also easily use this for the equivalent of 
-     * <code>Thread.dumpStack()</code> using this bit of code:
+     * Print a stack trace to the debug log, if Debug.LEVEL > 0.  Note that you can
+     * also easily use this for the equivalent of <code>Thread.dumpStack()</code> using this
+     * bit of code:
      * <pre>
      *      try {
      *          throw new RuntimeException("STACK BACKTRACE");
@@ -142,6 +140,6 @@ public class Debug {
      * </pre>
      **/
     public static void printStackTrace(Throwable t) {
-	t.printStackTrace();
     }
+
 }

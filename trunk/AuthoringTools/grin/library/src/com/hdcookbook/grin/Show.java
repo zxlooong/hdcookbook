@@ -621,9 +621,6 @@ public class Show implements AnimationClient {
 	if (re == null) {
 	    return false;
 	}
-	if (Debug.LEVEL > 1) {
-	    System.out.println("RC event:  " + re.getName());
-	}
 	return currentSegment.handleKeyPressed(re);
     }
 
@@ -643,9 +640,6 @@ public class Show implements AnimationClient {
 	RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
 	if (re == null) {
 	    return false;
-	}
-	if (Debug.LEVEL > 1) {
-	    System.out.println("RC event:  " + re.getName());
 	}
 	return currentSegment.handleKeyReleased(re);
     }

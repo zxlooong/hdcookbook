@@ -68,6 +68,10 @@ exports
 	F:KeyUpState
 	F:Framerate
 	F:DebugDraw
+	F:DebugLog.LineCount
+	F:DebugLog.LineNumbers
+	F:DebugLog.Lines
+	F:DebugLog.Scroller
     } handlers {
     }
 ;
@@ -102,6 +106,7 @@ java_generated_class com.hdcookbook.genericgame.XletShowCommands [[
 #  The visible features
 #
 #
+
 
 
 feature group F:LaunchScreen {
@@ -143,6 +148,83 @@ feature text F:Title
     middle 960 baseline 160 { "Debug Menu" }
     SansSerif plain 96 { { 0 255 0 255 } } ;
 
+
+feature group F:Everything {
+    F:LaunchScreen
+    F:MainMenu
+    F:DebugLog
+} ;
+
+feature src_over F:DimBackgroundBox
+	sub_feature box ( 0 0 1919 1079 ) fill { 0 0 0 192 } ;
+    ;
+
+#
+#
+#  Segments
+#
+#
+
+
+segment S:Initialize
+    setup { 
+	F:Everything
+    } setup_done {
+	java_command [[    getDirector().initialize();  ]]
+	activate_segment S:Launch ;
+    }
+;
+
+segment S:Launch
+    active {
+	F:LaunchScreen
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:Waiting
+    } next {
+	activate_segment S:Waiting ;
+    }
+;
+
+segment S:Waiting
+    active {
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:Waiting
+    }
+;
+
+rc_handler key_pressed H:Waiting
+	{ popup_menu }
+	execute {
+	    activate_segment S:MainMenu ;
+	} 
+;
+
+segment S:Waiting.RedKey
+    active {
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:Waiting.RedKey
+    }
+;
+
+rc_handler key_pressed H:Waiting.RedKey
+	{ red }
+	execute {
+	    activate_segment S:MainMenu ;
+	} 
+;
+
+
+###########################################################
+#    			MAIN MENU
+###########################################################
+
+
 #
 #  A text entry in the menu that gives the state of xlet.sendKeyUp
 #
@@ -178,8 +260,16 @@ feature assembly F:DebugDraw {
 			SansSerif plain 48 { { 0 255 0 255 } } ;
 } ;
 
+feature text F:ShowLog
+	left 400 baseline 460 { "Show Debug Log" }
+	SansSerif plain 48 { { 0 255 0 255 } } ;
+
+feature text F:Done.Red
+	left 400 baseline 550 { "Return to Game - RED for debug menu" }
+	SansSerif plain 48 { { 0 255 0 255 } } ;
+
 feature text F:Done
-	left 400 baseline 460 { "Return to Game" }
+	left 400 baseline 610 { "Return to Game - POPUP for debug menu" }
 	SansSerif plain 48 { { 0 255 0 255 } } ;
 
 feature assembly F:FocusHighlight {
@@ -193,66 +283,32 @@ feature assembly F:FocusHighlight {
     debug_draw  sub_feature text left 280 baseline 400 { "-->" }
     			SansSerif plain 48 { { 255 255 0 255 } } ;
 
-    done	sub_feature text left 280 baseline 460 { "-->" }
+    show_log 	sub_feature text left 280 baseline 460 { "-->" }
+    			SansSerif plain 48 { { 255 255 0 255 } } ;
+
+    done_red	sub_feature text left 280 baseline 550 { "-->" }
+    			SansSerif plain 48 { { 255 255 0 255 } } ;
+
+    done	sub_feature text left 280 baseline 610 { "-->" }
     			SansSerif plain 48 { { 255 255 0 255 } } ;
  } ;
 
 
 feature group F:MainMenu {
 
-    sub_feature src_over 
-	sub_feature box ( 0 0 1919 1079 ) fill { 0 0 0 192 } ;
-    ;
+    F:DimBackgroundBox
     F:Title
     F:KeyUpState
     F:Framerate
     F:DebugDraw
+    F:ShowLog
+    F:Done.Red
     F:Done
     F:FocusHighlight
 } ;
 
 
-feature group F:Everything {
-    F:LaunchScreen
-    F:MainMenu
-} ;
 
-
-
-#
-#
-#  Segments
-#
-#
-
-
-segment S:Initialize
-    setup { 
-	F:LaunchScreen
-    } setup_done {
-	activate_segment S:Launch ;
-    }
-;
-
-segment S:Launch
-    active {
-	F:LaunchScreen
-    } setup {
-	F:Everything
-    } next {
-	java_command [[    getDirector().initialize();  ]]
-	activate_segment S:Waiting ;
-    }
-;
-
-segment S:Waiting
-    active {
-    } setup {
-	F:Everything
-    } rc_handlers {
-	H:Waiting
-    }
-;
 
 segment S:MainMenu
     active {
@@ -275,18 +331,14 @@ segment S:MainMenu
 #
 #
 
-rc_handler key_pressed H:Waiting
-	{ popup_menu }
-	execute {
-	    activate_segment S:MainMenu ;
-	} 
-;
 
 rc_handler visual H:MainMenu
     grid {
 	{   keyUp_off	  keyUp	     keyUp_on }
 	{   frame_down  framerate    frame_up }
 	{   deDraw_off  debug_draw   deDraw_on }
+	{  [ show_log ]  show_log    show_log_on }
+	{  [ done_red ]  done_red    [ done_red ] }
 	{   [ done ]       done      [ done ] }
     }
     assembly F:FocusHighlight
@@ -336,6 +388,11 @@ rc_handler visual H:MainMenu
 			    ]]
 			    activate_part F:DebugDraw enabled ;
 			}
+	show_log	show_log
+	show_log_on	{
+			    activate_segment S:DebugLog ;
+			}
+	done_red	done_red
 	done		done
     } activate {
 	keyUp		{ 
@@ -352,8 +409,179 @@ rc_handler visual H:MainMenu
 				d.setUIState();
 			    ]]
 			}
+	show_log	{ activate_segment S:DebugLog ; }
+	done_red	{ activate_segment S:Waiting.RedKey ; }
 	done		{ activate_segment S:Waiting ; }
     }
+;
+
+###########################################################
+#    			DEBUG LOG SCREEN
+###########################################################
+
+
+feature text F:DebugLog.LineCount
+    left 60 top 84 { "0 lines" }
+    SansSerif plain 20 { { 255 0 0 255 } } ;
+
+feature text F:DebugLog.Title
+    left 500 top 80  {
+        "DEBUG LOG                                                Arrows move text, 1..9 to jump (9=end), enter to quit."
+    }
+    SansSerif plain 24 { { 255 180 0 255 } } ;
+
+feature text F:DebugLog.LineNumbers
+    left 60 top 160 { "1:" "2:" }
+    SansSerif plain 24 { { 255 180 0 255 } } ;
+
+feature text F:DebugLog.Lines
+    left 180 top 160 {
+    	"a message"
+	"second line"
+    } 
+    SansSerif plain 24 { { 255 255 255 255 } } ;
+
+feature translator_model F:DebugLog.Scroller
+	{ 0 0 0 linear-relative } ;
+
+feature group F:DebugLog {
+	F:DimBackgroundBox
+	F:DebugLog.LineCount
+	F:DebugLog.Title
+	F:DebugLog.LineNumbers
+	F:DebugLog.Scroller
+	sub_feature clipped 
+	    sub_feature translator F:DebugLog.Scroller {
+		F:DebugLog.Lines
+	    } ;
+	    ( 175 160 1919 1079 ) ;
+	sub_feature timer 1 repeat {
+	    java_command [[ getDirector().debugLogHeartbeat(); ]]
+	} ;
+} ;
+
+
+segment S:DebugLog
+    active {
+	F:DebugLog
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:DebugLog.1
+	H:DebugLog.2
+	H:DebugLog.3
+	H:DebugLog.4
+	H:DebugLog.5
+	H:DebugLog.6
+	H:DebugLog.7
+	H:DebugLog.8
+	H:DebugLog.9
+	H:DebugLog.Left
+	H:DebugLog.Right
+	H:DebugLog.Up
+	H:DebugLog.Down
+	H:DebugLog.Enter
+    } on_entry {
+	java_command [[  getDirector().skipDebugLogTo(1); ]]
+    }
+;
+
+rc_handler key_pressed H:DebugLog.1
+	{ 0 1 }
+	execute {
+	    java_command [[ getDirector().skipDebugLogTo(1); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.2
+	{ 2 }
+	execute {
+	    java_command [[ getDirector().skipDebugLogTo(2); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.3
+	{ 3 }
+	execute {
+	    java_command [[ getDirector().skipDebugLogTo(3); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.4
+	{ 4 }
+	execute {
+	    java_command [[ getDirector().skipDebugLogTo(4); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.5
+	{ 5 }
+	execute {
+	    java_command [[ getDirector().skipDebugLogTo(5); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.6
+	{ 6 }
+	execute {
+	    java_command [[ getDirector().skipDebugLogTo(6); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.7
+	{ 7 }
+	execute {
+	    java_command [[ getDirector().skipDebugLogTo(7); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.8
+	{ 8 }
+	execute {
+	    java_command [[ getDirector().skipDebugLogTo(8); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.9
+	{ 9 }
+	execute {
+	    java_command [[ getDirector().skipDebugLogTo(9); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.Left
+	{ left }
+	execute {
+	    java_command [[ getDirector().moveDebugLogLeft(); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.Right
+	{ right }
+	execute {
+	    java_command [[ getDirector().moveDebugLogRight(); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.Up
+	{ up }
+	execute {
+	    java_command [[ getDirector().moveDebugLogUp(); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.Down
+	{ down }
+	execute {
+	    java_command [[ getDirector().moveDebugLogDown(); ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.Enter
+	{ enter popup_menu }
+	execute {
+	    activate_segment S:MainMenu ;
+	} 
 ;
 
 #

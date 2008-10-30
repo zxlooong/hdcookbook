@@ -1,6 +1,6 @@
 
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -55,9 +55,14 @@
 
 package com.hdcookbook.grin.util;
 
+import com.hdcookbook.genericgame.DebugLog;
+
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 /**
- * Debugging support.  Before shipping a final disc, you should modify the
- * constant values in this class and re-compile.
+ * Debugging support.  This overrides the version in the GRIN library, to redirect
+ * debug output to the log maintained by GenericGame.
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -97,6 +102,11 @@ public class Debug {
     public static void println(Object o) {
 	if (LEVEL > 0) {
 	    System.err.println(o);
+	    if (o == null) {
+		DebugLog.println("" + null);
+	    } else {
+		DebugLog.println(o.toString());
+	    }
 	}
     }
 
@@ -109,8 +119,11 @@ public class Debug {
      **/
     public static void assertFail(String msg) {
 	if (ASSERT) {
-	    Thread.dumpStack();
-	    System.err.println("\n***  Assertion failure:  " + msg + "  ***\n");
+	    try {
+		throw new RuntimeException("\n***  Assertion failure:  " + msg + "  ***\n");
+	    } catch (RuntimeException ex) {
+		printStackTrace(ex);
+	    }
 	    AssetFinder.abort();
 	}
     }
@@ -128,11 +141,10 @@ public class Debug {
 	}
     }
 
-
     /**'
-     * Print a stack trace to the debug log, if Debug.LEVEL > 0.  Note 
-     * that you can also easily use this for the equivalent of 
-     * <code>Thread.dumpStack()</code> using this bit of code:
+     * Print a stack trace to the debug log, if Debug.LEVEL > 0.  Note that you can
+     * also easily use this for the equivalent of <code>Thread.dumpStack()</code> using this
+     * bit of code:
      * <pre>
      *      try {
      *          throw new RuntimeException("STACK BACKTRACE");
@@ -142,6 +154,13 @@ public class Debug {
      * </pre>
      **/
     public static void printStackTrace(Throwable t) {
-	t.printStackTrace();
+	if (LEVEL > 0) {
+	    StringWriter sw = new StringWriter();
+	    PrintWriter pw = new PrintWriter(sw);
+	    t.printStackTrace(pw);
+	    pw.close();
+	    println(sw.toString());
+	}
     }
+
 }

@@ -387,5 +387,4 @@ public class DrawRecord {
 		// r.contains(4,4) is false.
 	}
     }
-
 }

@@ -59,8 +59,12 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Text;
+import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.util.Debug;
+
+import java.util.ListIterator;
 
 
 /** 
@@ -79,6 +83,12 @@ public class XletDirector extends Director {
     Feature F_DebugDraw_enabled;
     Feature F_DebugDraw_disabled;
     Text F_Framerate;
+    Text F_DebugLog_LineCount;
+    Text F_DebugLog_LineNumbers;
+    Text F_DebugLog_Lines;
+    InterpolatedModel F_DebugLog_Scroller;
+
+
     private int currFramerate = 10;	// Default to 23.976
     private static int[] framerates = {
     	31, 62, 125, 250, 500, 1001, 2002, 3003, 6006, 12012, 24000,
@@ -86,9 +96,26 @@ public class XletDirector extends Director {
     };
     private boolean debugDraw = false;
 
+    private int debugLogTop = 0;	// Top line visible in debug log
+    private int lastDebugLogTop = Integer.MIN_VALUE;
+    private boolean debugLogFollow = false;	
+    	// If we're in "follow" mode, always showing the last line (like tail -f)
+    private String[] debugLogEntries;
+    private String[] debugLogLineNumbers;
+    private String[] debugLogLineCount;
+
     public XletDirector(GameXlet xlet) {
 	this.xlet = xlet;
+	DebugLog.startDebugListener();
     }
+
+    /** 
+     * @inheritDoc
+     **/
+    public void notifyDestroyed() {
+	DebugLog.shutdownDebugListener();
+    }
+
 
     public void initialize() {
 	F_KeyUpState = (Assembly) getFeature("F:KeyUpState");
@@ -98,6 +125,14 @@ public class XletDirector extends Director {
 	F_DebugDraw = (Assembly) getFeature("F:DebugDraw");
 	F_DebugDraw_enabled = getPart(F_DebugDraw, "enabled");
 	F_DebugDraw_disabled = getPart(F_DebugDraw, "disabled");
+	F_DebugLog_LineCount = (Text) getFeature("F:DebugLog.LineCount");
+	F_DebugLog_LineNumbers = (Text) getFeature("F:DebugLog.LineNumbers");
+	F_DebugLog_Lines = (Text) getFeature("F:DebugLog.Lines");
+	F_DebugLog_Scroller = (InterpolatedModel) getFeature("F:DebugLog.Scroller");
+	int lines = (1080 - 80*2) / F_DebugLog_Lines.getLineHeight();
+	debugLogEntries = new String[lines];
+	debugLogLineNumbers = new String[lines];
+	debugLogLineCount = new String[1];
     }
 
     /**
@@ -154,6 +189,100 @@ public class XletDirector extends Director {
     public void setDebugDraw(boolean value) {
 	debugDraw = value;
 	xlet.animationEngine.setDebugDraw(value);
+    }
+
+    private void displayDebugLog() {
+	synchronized(DebugLog.LOCK) {
+	    DebugLog.changed = false;
+	    int lines = DebugLog.log.size() + DebugLog.linesRemoved;
+	    debugLogLineCount[0] = "" + lines + " lines";
+	    F_DebugLog_LineCount.setText(debugLogLineCount);
+	    int maxTop = lines - debugLogEntries.length;
+	    if (debugLogTop >= maxTop) {
+		debugLogFollow = true;
+	    }
+	    if (debugLogFollow) {
+		debugLogTop = maxTop;
+	    }
+	    if (debugLogTop == lastDebugLogTop && debugLogTop != maxTop) {
+		return;
+	    }
+	    if (debugLogTop < DebugLog.linesRemoved) {
+		debugLogTop = DebugLog.linesRemoved;
+	    }
+	    ListIterator iter = DebugLog.log.listIterator(
+	    				debugLogTop - DebugLog.linesRemoved);
+	    for (int i = 0; i < debugLogEntries.length; i++) {
+		if (!iter.hasNext()) {
+		    debugLogEntries[i] = "";
+		    debugLogLineNumbers[i] = "";
+		} else {
+		    debugLogEntries[i] = (String) iter.next();
+		    int line = debugLogTop + i + 1;
+		    debugLogLineNumbers[i] = "" + line + ":";
+		}
+	    }
+	    F_DebugLog_LineNumbers.setText(debugLogLineNumbers);
+	    F_DebugLog_Lines.setText(debugLogEntries);
+	    lastDebugLogTop = debugLogTop;
+	}
+    }
+
+    public void debugLogHeartbeat() {
+	synchronized(DebugLog.LOCK) {
+	    if (DebugLog.changed) {
+		displayDebugLog();
+	    }
+	}
+    }
+
+    public void skipDebugLogTo(int pos) {
+	F_DebugLog_Scroller.setField(Translator.X_FIELD, 0);
+	synchronized(DebugLog.LOCK) {
+	    int lines = DebugLog.log.size();   
+		    // not including DebugLog.linesRemoved.
+	    lines -= debugLogEntries.length;
+	    if (lines <= 0) {
+		debugLogFollow = true;
+	    } else {
+		debugLogFollow = false;
+		pos--;
+		if (pos < 0) {
+		    pos = 0;
+		} else if (pos > 8) {
+		    pos = 8;
+		}
+		debugLogTop = (pos * 100 * lines) / 800;
+		debugLogTop += DebugLog.linesRemoved;
+	    }
+	    displayDebugLog();
+	}
+    }
+
+    public void moveDebugLogLeft() {
+	int x = F_DebugLog_Scroller.getField(Translator.X_FIELD);
+	x += 960;
+	if (x > 0) {
+	    x = 0;
+	}
+	F_DebugLog_Scroller.setField(Translator.X_FIELD, x);
+    }
+
+    public void moveDebugLogRight() {
+	int x = F_DebugLog_Scroller.getField(Translator.X_FIELD);
+	x -= 960;
+	F_DebugLog_Scroller.setField(Translator.X_FIELD, x);
+    }
+
+    public void moveDebugLogUp() {
+	debugLogTop -= 10;
+	debugLogFollow = false;
+	displayDebugLog();
+    }
+
+    public void moveDebugLogDown() {
+	debugLogTop += 10;
+	displayDebugLog();
     }
 
 }

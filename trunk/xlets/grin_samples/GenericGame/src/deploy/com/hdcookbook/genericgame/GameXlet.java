@@ -87,8 +87,8 @@ import org.dvb.ui.FontFactory;
 import org.bluray.ui.event.HRcEvent;
 
 /** 
- * The xlet class for a game project.  This is the debug version
- * of the xlet, with debug support turned on.
+ * The xlet class for a game project.  This is the deployment version
+ * of the xlet, with debug support turned off.
  **/
 
 public class GameXlet
@@ -97,7 +97,7 @@ public class GameXlet
     public Show show;
     Container rootContainer;
     FontFactory fontFactory = null;
-    DebugDirectDrawEngine animationEngine;
+    DirectDrawEngine animationEngine;
     Director director;
     XletContext context;
 
@@ -106,13 +106,6 @@ public class GameXlet
     private String showDirectorName;
     private boolean definesFonts;
 
-    boolean sendKeyUp = true;
-
-    // A small show we use to manage a debug screen accessed with
-    // the popup menu key
-    private Show xletShow;
-    private XletDirector xletDirector;
-	
     public void initXlet(XletContext context) {
         this.context = context;
 
@@ -128,7 +121,7 @@ public class GameXlet
         rootContainer = TVContainer.getRootContainer(context);			
         rootContainer.setSize(1920, 1080);
         
-        animationEngine = new DebugDirectDrawEngine();
+        animationEngine = new DirectDrawEngine();
         animationEngine.setFps(24000);
         animationEngine.initialize(this);
     }
@@ -142,7 +135,7 @@ public class GameXlet
        rootContainer.setVisible(false);
        animationEngine.pause();
     }
-
+    
     public void destroyXlet(boolean unconditional) {
        rootContainer = null;
 	if (Debug.LEVEL > 0) {
@@ -166,7 +159,6 @@ public class GameXlet
 	} catch (Throwable t) {
 	    Debug.assertFail("Can't create director:  " + t);
 	}
-	xletDirector = new XletDirector(this);
 	if (definesFonts) {
 	    try {
 	       fontFactory = new FontFactory();
@@ -227,12 +219,6 @@ public class GameXlet
 			    showFileName).openStream());
 	   show = new Show(director);
 	   reader.readShow(show);
-
-	   reader = new GrinBinaryReader(AssetFinder.getURL(
-			    "xlet_show.grin").openStream());
-	   xletShow = new Show(xletDirector);
-	   reader.readShow(xletShow);
-
 	} catch (IOException e) {
 	   e.printStackTrace();
 	   Debug.println("Error in reading the show file");
@@ -240,7 +226,7 @@ public class GameXlet
 	}
 
 	animationEngine.checkDestroy();
-	animationEngine.initClients(new AnimationClient[] { show, xletShow });
+	animationEngine.initClients(new AnimationClient[] { show });
 	animationEngine.initContainer(rootContainer, 
 				     new Rectangle(0,0,1920,1080));
        
@@ -248,7 +234,6 @@ public class GameXlet
     
     public void animationFinishInitialization() {
 	show.activateSegment(show.getSegment(showInitialSegment));	
-	xletShow.activateSegment(xletShow.getSegment("S:Initialize"));	
        
 	UserEventRepository userEventRepo = new UserEventRepository("x");
 	userEventRepo.addAllArrowKeys();
@@ -269,20 +254,10 @@ public class GameXlet
 	int type = e.getType();
         if (type == HRcEvent.KEY_PRESSED) {
 	    int code = e.getCode();
-	    boolean handled =
-		xletShow.handleKeyPressed(code) || show.handleKeyPressed(code);
-        } else if (sendKeyUp && type == HRcEvent.KEY_RELEASED) {
+	    show.handleKeyPressed(code);
+        } else if (type == HRcEvent.KEY_RELEASED) {
 	    int code = e.getCode();
-	    boolean handled =
-		xletShow.handleKeyReleased(code) 
-		|| show.handleKeyReleased(code);
-		    // Note that Gun Bunny doesn't do anything on key_released,
-		    // or at least it didn't when this comment was written.
-		    // Because of this setting sendKeyUp false doesn't have
-		    // a visible effect on this particular game, but this xlet
-		    // can trivially be adapted for use as a generic game xlet.
-		    // If you do this, then being able to turn off key up events
-		    // is really useful.
+	    show.handleKeyReleased(code);
 	}
     }	
 

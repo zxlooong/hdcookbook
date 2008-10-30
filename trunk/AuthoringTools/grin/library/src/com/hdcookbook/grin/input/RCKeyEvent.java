@@ -305,7 +305,6 @@ public class RCKeyEvent {
 		    if (keys[i].getKeyCode() == keys[j].getKeyCode()
 		        || keys[i].getBitMask() == keys[j].getBitMask())
 		    {
-		    System.out.println(i + ", " + j);
 			Debug.assertFail(keys[i].getName() + " key is same as "
 			                 + keys[j].getName());
 		    }

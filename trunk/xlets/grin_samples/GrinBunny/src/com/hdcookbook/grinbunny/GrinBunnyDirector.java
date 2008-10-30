@@ -98,6 +98,8 @@ public class GrinBunnyDirector extends Director {
     private static int SAUCER_STAGE_LEFT = -202;
     private static int SAUCER_STAGE_RIGHT = 1896;
 
+    private PlayerWrangler playerWrangler;
+
     private int framesLeft;	// # of frames left in game
     private int lastTimeLeft;	// Last value of remaining time
     private int score;		// Current score
@@ -146,14 +148,19 @@ public class GrinBunnyDirector extends Director {
      * Called by a java_command in the show to initialize the game
      **/
     public void initializeGame() {
-	int[] trooperX = new int[] { 162, 364, 566, 768, 970, 1172, 1374, 1576 };
+	playerWrangler = new PlayerWrangler();
+	Debug.println("The gratituous PlayerWrangler method gives this:");
+	playerWrangler.aMethod();
+	int[] trooperX = new int[]{ 162, 364, 566, 768, 970, 1172, 1374, 1576 };
 	if (Debug.ASSERT && troopers != null) {
 	    Debug.assertFail();
 	}
 	Trooper firstTrooper = new Trooper();
 	firstTrooper.top = getFeature("F:TurtleTrooper");
-	firstTrooper.pos = (InterpolatedModel) getFeature("F:TurtleTrooper.Pos");
-	firstTrooper.assembly = (Assembly) getFeature("F:TurtleTrooper.Assembly");
+	firstTrooper.pos 
+	    = (InterpolatedModel) getFeature("F:TurtleTrooper.Pos");
+	firstTrooper.assembly 
+	    = (Assembly) getFeature("F:TurtleTrooper.Assembly");
 	firstTrooper.blamState = getPart(firstTrooper.assembly, "blam");
 	firstTrooper.showingState = getPart(firstTrooper.assembly, "showing");
 

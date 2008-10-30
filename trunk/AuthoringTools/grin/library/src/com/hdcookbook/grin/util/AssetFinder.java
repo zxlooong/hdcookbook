@@ -297,7 +297,11 @@ public class AssetFinder  {
 	    if (f != null) {
 		return f;
 	    }
-	    if (Debug.LEVEL > 0) {
+	    if (Debug.LEVEL > 0 && !("SansSerif".equals(fontName))) {
+	    		// SansSerif is the one font guaranteed to be present
+			// on all players.  It's useful for debugging, but since
+			// there's no guarantee of appearance, it probably shouldn't
+			// be used in production.
 		Debug.println("*** Helper didn't find font " + fontName);
 	    }
 	}

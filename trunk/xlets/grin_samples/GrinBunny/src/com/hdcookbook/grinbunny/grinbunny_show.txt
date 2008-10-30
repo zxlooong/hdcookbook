@@ -146,10 +146,15 @@ feature text F:GameStartMessage
 #  that flies acrosss at random times.
 #
 
+
 feature assembly F:TurtleSaucer.Assembly {
-    showing	sub_feature fixed_image 0 80 "images/turtle_saucer.png" ;
+    showing	sub_feature guarantee_fill
+    		    sub_feature fixed_image 0 80 "images/turtle_saucer.png" ;
+		( 0 80 226 244 ) { } ;
     blam	sub_feature group {
-    		    sub_feature fixed_image 0 80 "images/turtle_saucer_blam.png" ;
+		    sub_feature guarantee_fill
+			sub_feature fixed_image 0 80 "images/turtle_saucer_blam.png" ;
+		    ( 0 80 226 244 ) { } ;
 		    sub_feature timer 14 {
 			activate_part F:TurtleSaucer.Assembly cooldown ;
 		    } ;
@@ -177,10 +182,14 @@ feature translator F:TurtleSaucer F:TurtleSaucer.Pos {
 #
 
 feature assembly F:TurtleTrooper.Assembly {
-    showing	sub_feature fixed_image 0 240 	"images/turtle_trooper.png" ;
+    showing	sub_feature guarantee_fill
+    		    sub_feature fixed_image 0 240 	"images/turtle_trooper.png" ;
+		( 0 240 62 349 ) { } ;
     blam	sub_feature group {
-		    sub_feature fixed_image 0 240 
+		    sub_feature guarantee_fill
+			sub_feature fixed_image 0 240 
 		    			   "images/turtle_trooper_blam.png" ;
+		    ( 0 240 62 349 ) { } ;
 		    sub_feature timer 10 {
 			activate_part F:TurtleTrooper.Assembly empty ;
 		    } ;
@@ -240,8 +249,13 @@ feature translator_model F:Bunny.Pos {
 
 feature translator F:Bunny F:Bunny.Pos {
 	F:Bunny.Pos
-	sub_feature fixed_image  ( middle 0 top 775 ) "images/bunny.png" ;
+	sub_feature guarantee_fill 
+	    sub_feature fixed_image  ( left -88 top 775 ) "images/bunny.png" ;
+	( -88 775 86 974 ) { } ;
+		# The guarantee_fill is possible because the image is drawn in src
+		# mode.  Doing this allows the animation engine to erase fewer pixels.
 } ;
+
 
 feature set_target F:Bunny.Opt F:Bunny T:Bunny ;
     # The set_target cause the bunny to be drawn within a different

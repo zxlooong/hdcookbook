@@ -244,6 +244,14 @@ public class Text extends Feature implements Node {
 	return strings;
     }
 
+    /**
+     * Get the height of a line, including any vertical padding to take it
+     * to the next line.
+     **/
+    public int getLineHeight() {
+	return vspace + ascent + descent + 1;
+    }
+
     /** 
      * Change the text to display.
      * This should only be called with the show lock held, at an

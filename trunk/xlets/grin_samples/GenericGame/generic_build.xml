@@ -10,11 +10,18 @@ Game xlet project.  See the documentation in vars.properties for details.
     <!--
     	Some default values for properties.  These can be overridden
 	in vars.properties.
-    <property name="xlet.lib.zip" value=""/>
-    <property name="se.lib.zip" value=""/>
     -->
     <property name="extension.parser" 
     	      value="com.hdcookbook.grin.io.text.NullExtensionParser"/>
+    <condition property="debug.is.set">
+	  <equals arg1="${debug.or.deploy}" arg2="debug"/>
+    </condition>
+    <condition property="debug.is.set">
+	  <equals arg1="${debug.or.deploy}" arg2="debug"/>
+    </condition>
+    <condition property="xlet.debug.on.or.off" value="on" else="off">
+	  <equals arg1="${debug.or.deploy}" arg2="debug"/>
+    </condition>
     <!--
     	Targets for java and javac...
     -->
@@ -26,7 +33,7 @@ Game xlet project.  See the documentation in vars.properties for details.
         <javac srcdir="${src.dir}"
                bootclasspath="${bdj.classes}"
                source="1.3" target="1.3"
-               debug="on" deprecation="on"/>
+               debug="${xlet.debug.on.or.off}" deprecation="on"/>
     </presetdef>
     <presetdef name="jdktools.javac">
         <javac srcdir="${src.dir}"
@@ -52,9 +59,6 @@ Game xlet project.  See the documentation in vars.properties for details.
 	    <path path="/${show.commands}"/>
 	    <unpackagemapper from="${kludge.root.dir}*" to="*"/>
 	</pathconvert>
-        <condition property="debug.is.set">
-	      <equals arg1="${debug.or.deploy}" arg2="debug"/>
-	</condition>
 	<available file="${src.dir}/fonts/dvb.fontindex"
 		   property="xlet.fonts.flag" value="-fonts"/>
 	<property name="xlet.fonts.flag" value="-nofonts"/>
@@ -191,7 +195,7 @@ The project.name property is not set.  This usually has one of two causes:
 	<move file="${build.dir}/${show.file}.xlet.java"
 	      tofile="${build.dir}/gensrc/xlet/${show.commands.file}.java"/>
 	<jdktools.javac destdir="${build.dir}/gensrc/grinview" debug="on"
-		excludes="${grinview.excludes} GameXlet.java XletDirector.java">
+		excludes="GameXlet.java XletDirector.java">
 	    <src path="${build.dir}/gensrc/grinview" />
 	    <src path="src"/>
 	    <classpath>
@@ -321,13 +325,19 @@ The project.name property is not set.  This usually has one of two causes:
 	    description="Compiles the sources">
         <mkdir dir="${build.dir}/classes"/>
 	<antcall target="internal-unzip-xlet-lib-zip"/>
+	<copy todir = "${build.dir}/gensrc/xlet">
+            <fileset dir="${grin.library.src.dir}"
+		includes="**/*.java"
+		excludes="com/hdcookbook/grin/util/Debug.java"
+	    />
+	</copy>
         <xlets.javac destdir="${build.dir}/classes" >
 	    <classpath>
 		<pathelement path="${xlet.lib.zip}"/>
 	    </classpath>
             <src path="${generic.game}/src/${debug.or.deploy}"/>
-            <src path="${grin.library.src.dir}" />
             <src path="src"/>
+            <src path="xlet_src"/>
 	    <src path="${build.dir}/gensrc/xlet"/>
         </xlets.javac>
 	<antcall target="post-compile"/>
@@ -339,7 +349,7 @@ The project.name property is not set.  This usually has one of two causes:
 	<unzip src="${xlet.lib.zip}" dest="${build.dir}/grinview-jar"/>
     </target>
 
-    <target name="jar" depends="compile" description="Creates an xlet jar file">
+    <target name="jar" depends="compile, gen-permission-file" description="Creates an xlet jar file">
         <jar destfile="${xlet.jar}">
             <fileset dir="${build.dir}/classes"/>
             <fileset dir="${build.dir}" includes="*.grin"/>
@@ -352,7 +362,7 @@ The project.name property is not set.  This usually has one of two causes:
         <!-- Projects that include this build file can re-define this target -->
     </target>
     
-    <target name="sign-xlet" depends="gen-permission-file">
+    <target name="sign-xlet">
         
         <path id="sec.tools.path">
             <pathelement location="${security.jar}"/>
@@ -486,7 +496,7 @@ ${show.file}.txt
     </target>
 
     <target name="gen-permission-file" depends="init">
-	<concat destfile="${build.dir}/classes/bluray.GameXlet.perm"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+	<concat destfile="${build.dir}/classes/com/hdcookbook/genericgame/bluray.GameXlet.perm"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!-- This file contains information taken from build.xml -->
 <!-- AUTO-GENERATED - DO NOT EDIT -->
 <n:permissionrequestfile xmlns:n="urn:BDA:bdmv;PRF" orgid="0x${xlet.orgid}" appid="0x${xlet.appid}">
@@ -495,8 +505,10 @@ ${show.file}.txt
     <servicesel value="true"></servicesel>
     <userpreferences read="true" write="false"></userpreferences>
     <network>
-        <host action="connect">*</host>
+        <host action="connect,listen,resolve,accept">*</host>
     </network>
+    <bd-bindingunitarea value="true"></bd-bindingunitarea>
+    <bd-vfs value="true"></bd-vfs>
 </n:permissionrequestfile>
         ]]></concat>
 	<antcall target="post-gen-permission-file"/>
@@ -554,7 +566,6 @@ ${show.file}.txt
         <playListFileNames>00004</playListFileNames>    
     </tableOfAccessiblePlayLists>
     <terminalInfo>
-        <defaultFontFile>00000</defaultFontFile>
         <initialHaviConfig>HD_1920_1080</initialHaviConfig>
         <menuCallMask>false</menuCallMask>
         <titleSearchMask>false</titleSearchMask>
