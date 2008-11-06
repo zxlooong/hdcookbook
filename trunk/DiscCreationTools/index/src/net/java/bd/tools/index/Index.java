@@ -60,6 +60,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.Arrays;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -74,6 +75,7 @@ public class Index {
     Indexes indexes = new Indexes();
     ExtensionData extensionData = new ExtensionData();
     int paddingN1, paddingN2, paddingN3;
+    short[] n1, n2, n3;
 
     public Index() {}
     
@@ -115,7 +117,16 @@ public class Index {
   
     public int getPaddingN1() {
         return paddingN1;
-    }   
+    }  
+    
+    public void setPaddingN1Data(short[] n1) {
+        this.n1 = n1;
+    }
+    
+    public short[] getPaddingN1Data() {
+        return n1;
+    }
+    
     public void setPaddingN2(int i) {
         paddingN2 = i;
     }
@@ -124,6 +135,14 @@ public class Index {
         return paddingN2;
     }    
     
+    public void setPaddingN2Data(short[] n2) {
+        this.n2 = n2;
+    }
+    
+    public short[] getPaddingN2Data() {
+        return n2;
+    }
+       
     public void setPaddingN3(int i) {
         paddingN3 = i;
     }
@@ -131,6 +150,14 @@ public class Index {
     public int getPaddingN3() {
         return paddingN3;
     }    
+    
+    public void setPaddingN3Data(short[] n3) {
+        this.n3 = n3;
+    }
+    
+    public short[] getPaddingN3Data() {
+        return n3;
+    } 
     
     public void readObject(DataInputStream din) throws IOException {
         // 8*4 bit type indicator
@@ -156,34 +183,40 @@ public class Index {
         setVersion(versionNumber);
         din.skipBytes(24);        
         
-        byte[] appInfoBytes = new byte[indexesAddress - (4*4 + 24)];
+        int appInfoLength = indexesAddress - (4*4 + 24);
+        byte[] appInfoBytes = new byte[appInfoLength];
         din.read(appInfoBytes);
         DataInputStream substream = 
                 new DataInputStream(new ByteArrayInputStream(appInfoBytes));
         appInfo.readObject(substream);     
-        setPaddingN1(seekPaddings(substream));  // check for padding_words
+        n1 = seekPaddings(substream);
+        setPaddingN1(n1.length);
         substream.close();
         
         if (extensionAddress == 0) {
             // no extension data, just read indexes and be done.
             indexes.readObject(din);
-            setPaddingN2(seekPaddings(din));
+            n2 = seekPaddings(din);
+            setPaddingN2(n2.length);
             setPaddingN3(0);
             return;
         } 
             
         // read indexes and extensions
-        byte[] indexesBytes = new byte[extensionAddress = indexesAddress];
+        int indexesLength = extensionAddress - indexesAddress;
+        byte[] indexesBytes = new byte[indexesLength];
         din.read(indexesBytes);
         DataInputStream substream2 
                 = new DataInputStream(new ByteArrayInputStream(indexesBytes));
         indexes.readObject(substream2);
-        setPaddingN2(seekPaddings(substream2));        
+        n2 = seekPaddings(substream2);
+        setPaddingN2(n2.length);        
         substream2.close();
             
         extensionData = new ExtensionData();
-        extensionData.readObject(din);       
-        setPaddingN3(seekPaddings(din));
+        extensionData.readObject(din);   
+        n3 = seekPaddings(din);
+        setPaddingN3(n3.length);
     }
     
     public void writeObject(DataOutputStream out) throws IOException {
@@ -202,13 +235,13 @@ public class Index {
         appInfo.writeObject(appInfoStream);
         if (paddingN1 != 0) {
             for (int i = 0; i < paddingN1; i++) {
-                appInfoStream.writeShort((short)0);
+                appInfoStream.writeShort(n1[i]);
             }
         }
         indexes.writeObject(indexDataStream);
         if (paddingN2 != 0) {
             for (int i = 0; i < paddingN2; i++) {
-                indexDataStream.writeShort((short)0);
+                appInfoStream.write(n2[i]);
             }
         }        
         appInfoStream.flush();
@@ -230,29 +263,28 @@ public class Index {
         out.write(baos.toByteArray());  // appInfoBDMV
         out.write(baos2.toByteArray()); // Indexes
         if (extensionData.getData() != null) {
-            extensionData.writeObject(out);  // extensionsData
-            if (paddingN3 != 0) {
-                for (int i = 0; i < paddingN3; i++) {
-                    indexDataStream.writeShort((short) 0);
-                }
-            }          
+            extensionData.writeObject(out);  // extensionsDat       
         }
-        
+        if (paddingN3 != 0) {
+            for (int i = 0; i < paddingN3; i ++) {
+                appInfoStream.writeShort(n3[i]);
+            }
+        }        
         appInfoStream.close();
         indexDataStream.close();
     }
      
     // Find out how many 16-bit paddings are at the end of the stream.
-    private int seekPaddings(DataInputStream in) throws IOException {
-        int i = 0;
+    private short[] seekPaddings(DataInputStream in) 
+            throws IOException {
+        int count = 0;
+        short[] s = new short[1024];
         try {
-            while (true) {
-                in.readUnsignedShort();
-                i++;
-            }
+            s[count] = (short) in.readUnsignedShort();
+            count++;
         } catch (EOFException e) {
         }
         
-        return i;
+        return Arrays.copyOf(s, count);
     }
 }

@@ -58,30 +58,30 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-// Handle this as raw data for now.
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public class ExtensionData {
     
-   int length;
-   byte[] data = null;
-    
-   public void setData(byte[] b) {
+   short[] data = null; // extensiondata are multiple of 16 bits.
+   
+   public void setData(short[] b) {
        this.data = b;
    }
-
-   @XmlJavaTypeAdapter(HexStringBinaryAdapter.class)  
-   public byte[] getData() {
+     
+   public short[] getData() {
        return data;
    }
    
    public void readObject(DataInputStream din) throws IOException {
-        length = din.readInt();
-        data = new byte[length];
-        din.read(data);      
+        int length = din.readInt(); // length is in byte
+        data = new short[length/2]; // read data as a 16-bit shorts.
+        for (int i = 0; i < data.length; i++) {
+           data[i]= (short) din.readUnsignedShort();
+        }
    }
-   
+        
    public void writeObject(DataOutputStream dout) throws IOException {
-        dout.writeInt(length);
-        dout.write(data);
+        dout.writeInt(data.length*2);
+        for (int i = 0; i < data.length; i++) {
+           dout.writeShort(data[i]);
+        }
    }
 }
