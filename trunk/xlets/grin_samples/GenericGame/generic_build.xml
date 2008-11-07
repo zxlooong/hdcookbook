@@ -346,7 +346,7 @@ The project.name property is not set.  This usually has one of two causes:
         <!-- Projects that include this build file can re-define this target -->
     </target>
     <target name="internal-unzip-xlet-lib-zip" if="xlet.lib.zip">
-	<unzip src="${xlet.lib.zip}" dest="${build.dir}/grinview-jar"/>
+	<unzip src="${xlet.lib.zip}" dest="${build.dir}/classes"/>
     </target>
 
     <target name="jar" depends="compile, gen-permission-file" description="Creates an xlet jar file">
