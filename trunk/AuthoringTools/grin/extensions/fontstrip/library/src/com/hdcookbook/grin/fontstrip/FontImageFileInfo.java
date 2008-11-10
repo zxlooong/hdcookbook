@@ -83,7 +83,7 @@ public class FontImageFileInfo {
         initialized = true;
         URL u = AssetFinder.tryURL(infoFile);
         if (u == null) {
-            throw new IOException("No FontStrip image info fond " + infoFile);
+            throw new IOException("ERROR: FontStrip image info file not found " + infoFile);
         }
     
         DataInputStream dis = new DataInputStream(

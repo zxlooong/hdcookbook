@@ -179,7 +179,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
         
 	charMap = FontImageFileInfo.getCharMap(fontImageFileName);
         if (charMap == null) {
-            System.err.println("ERROR: info for " + fontImageFileName + " not found.");
+            System.err.println("ERROR: entry for " + fontImageFileName + " not found in the info file.");
             loadingFailed = true;
             return;
         }        
@@ -377,4 +377,37 @@ public class FontStripText extends Feature implements Node, SetupClient {
            x += charInfo.boundRect.width+hspace;
         }        
     }
+    
+    /**
+     * Get the text that's being displayed.
+     **/
+    public String[] getText() {
+	return strings;
+    }
+
+    /**
+     * Get the height of a line, including any vertical padding to take it
+     * to the next line.
+     **/
+    public int getLineHeight() {
+	return vspace + ascent + descent + 1;
+    }
+
+    /** 
+     * Change the text to display.
+     * This should only be called with the show lock held, at an
+     * appropriate time in the frame pump loop.  A good time to call
+     * this is from within a command.
+     * <p>
+     * A good way to write this command that calls this is by using
+     * the java_command structure.  There's an example of this in the
+     * cookbook menu.
+     **/
+    public void setText(String[] newText) {
+	synchronized(show) {	// Shouldn't be necessary, but doesn't hurt
+	    strings = newText;
+	    initialize();
+	}
+    }
+    
 }

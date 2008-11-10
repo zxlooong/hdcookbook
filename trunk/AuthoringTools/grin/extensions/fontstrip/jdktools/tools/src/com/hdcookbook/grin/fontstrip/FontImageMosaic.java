@@ -153,7 +153,7 @@ public class FontImageMosaic {
        boolean ok = ImageIO.write(getCurrentImage(), 
                FontStripImageGenerator.getFormatName(outputFile), out);
        if (!ok) {
-          throw new IOException("No image writer found");
+          throw new IOException("No image writer found.");
        }
        out.flush();
        out.close();

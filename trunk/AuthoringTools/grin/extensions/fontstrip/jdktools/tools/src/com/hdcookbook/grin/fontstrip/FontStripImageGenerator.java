@@ -112,7 +112,7 @@ public class FontStripImageGenerator {
             }
         }
         if (configFile == null) {
-            System.err.println("Config file " + configFile + " not found in the asset directory.");
+            System.err.println("Config file " + configFile + " was not found in the asset directory.");
             return;
         }
         

@@ -208,10 +208,10 @@ public class FontDesignImage {
     
     private BufferedImage getCurrentImage() {
         if (currBaseline + fontSize/2 > image.getHeight()) {
-            System.err.println("Generated image is larger than buffer for file " + outputFile);
+            System.err.println("Warning: Generated image is larger than buffer for file " + outputFile);
             return image.getSubimage(0,0,image.getWidth(), image.getHeight());
         }
-        return image.getSubimage(0,0,maxPixelsX,currBaseline+fontSize/2);
+        return image.getSubimage(0,0,maxPixelsX,currBaseline+fontSize/2+whitespace);
     }
     
     public void discardCurrentImage() {
