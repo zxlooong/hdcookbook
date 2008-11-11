@@ -63,7 +63,7 @@ import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.Group;
-import com.hdcookbook.grin.features.Text;
+import com.hdcookbook.grin.fontstrip.FontStripText;
 import com.hdcookbook.grin.util.Debug;
 
 import java.util.HashMap;
@@ -112,8 +112,8 @@ public class GrinBunnyDirector extends Director {
     private Trooper[] troopers;  // Our troopers.  The first is taken from
     			  	 // the show file, and the rest are cloned.
     private Group troopersGroup; // The group that holds them
-    private Text scoreMessage;
-    private Text timeMessage;
+    private FontStripText scoreMessage;
+    private FontStripText timeMessage;
     private Arc timeLeftCircle;
     private InterpolatedModel bunnyPos;
     private Assembly carrotAssembly;
@@ -188,8 +188,8 @@ public class GrinBunnyDirector extends Director {
 	troopersGroup = (Group) getFeature("F:TurtleTroopers");
 	troopersGroup.resetVisibleParts(groupMembers);
 
-	scoreMessage = (Text) getFeature("F:ScoreMessage");
-	timeMessage = (Text) getFeature("F:TimeMessage");
+	scoreMessage = (FontStripText) getFeature("F:ScoreMessage");
+	timeMessage = (FontStripText) getFeature("F:TimeMessage");
 	timeLeftCircle = (Arc) getFeature("F:TimeLeftCircle");
 	bunnyPos = (InterpolatedModel) getFeature("F:Bunny.Pos");
 	carrotAssembly = (Assembly) getFeature("F:Carrot.Assembly");

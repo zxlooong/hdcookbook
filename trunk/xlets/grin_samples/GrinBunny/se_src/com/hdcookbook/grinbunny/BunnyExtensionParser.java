@@ -68,13 +68,15 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.io.text.ExtensionParser;
 import com.hdcookbook.grin.io.text.Lexer;
 
+import com.hdcookbook.grin.fontstrip.FontStripExtensionCompiler;
+
 import java.awt.Color;
 import java.io.IOException;
 
 
 public class BunnyExtensionParser implements ExtensionParser {
-
-
+    ExtensionParser otherParser = (ExtensionParser) new FontStripExtensionCompiler();
+    
     /**
      * @inheritDoc
      **/
@@ -82,11 +84,15 @@ public class BunnyExtensionParser implements ExtensionParser {
     			      String name, Lexer lexer)
 		   throws IOException
     {
-	if ("GB:Arc".equals(typeName)) {
-	    return parseArc(show, name, lexer);
+        if (typeName == null) {
+            return null;
+        }
+        
+	if (typeName.startsWith("GB:")) {
+	    return parseArc(show, name, lexer); // reserved for this parser
 	} else {
-	    return null;
-	}
+	    return otherParser.getFeature(show, typeName, name, lexer);
+	} 
     }
 
     private Feature parseArc(Show show, String name, Lexer lexer)
@@ -133,8 +139,16 @@ public class BunnyExtensionParser implements ExtensionParser {
     public Modifier getModifier(Show show, String typeName,
 				String name, Lexer lexer) 
 		throws IOException
-    {
-	return null;
+    {   
+        if (typeName == null) {
+            return null;
+        }
+        
+	if (typeName.startsWith("GB:")) {
+	    return null; // reserved for this parser
+	} else {
+	    return otherParser.getModifier(show, typeName, name, lexer);
+	} 
     }
 
     /**
@@ -142,8 +156,15 @@ public class BunnyExtensionParser implements ExtensionParser {
      **/
     public Command getCommand(Show show, String typeName, Lexer lexer)
                            throws IOException
-    {
-	return null;
+    {   if (typeName == null) {
+            return null;
+        }
+        
+	if (typeName.startsWith("GB:")) {
+	    return null; // reserved for this parser 
+	} else {
+	    return otherParser.getCommand(show, typeName, lexer);
+	} 
     }
 
 }

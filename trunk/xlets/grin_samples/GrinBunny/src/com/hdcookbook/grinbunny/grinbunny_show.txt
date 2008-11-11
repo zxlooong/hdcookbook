@@ -114,7 +114,6 @@ java_generated_class com.hdcookbook.grinbunny.GrinBunnyShowCommands [[
 
 ]]
 
-
 #
 #
 #  The visible features
@@ -135,7 +134,7 @@ feature text F:GameStartMessage
 	"Hit Enter to begin!"
 	    Lisa plain 60
 	    { { 240 0 0 255 } } ;
-
+ 
 #
 #  Features for game play
 #
@@ -295,15 +294,27 @@ feature set_target F:Carrot.Opt F:Carrot T:Carrot ;
 # Two text features for the time remaining and the score
 #
 
-feature text F:TimeMessage
-	left 85 top 10 
-	"MM:SS"
-	    Lisa plain 60 { { 240 0 0 255 } } ;
+#feature text F:TimeMessage
+#	left 85 top 10 
+#	"MM:SS"
+#	    Lisa plain 60 { { 240 0 0 255 } } ;
 
-feature text F:ScoreMessage
-	left 1410 top 10 
-	"Score:  0"
-	    Lisa plain 60 { { 240 0 0 255 } } ;
+#feature text F:ScoreMessage
+#	left 1410 top 10 
+#	"Score:  0"
+#	    Lisa plain 60 { { 240 0 0 255 } } ;
+
+feature extension fontstrip:text 
+    F:TimeMessage 
+       "images/fontstrip.png" 
+       left 85 top 10 
+       "MM:SS" ;
+
+feature extension fontstrip:text 
+    F:ScoreMessage 
+       "images/fontstrip.png" 
+       left 1410 top 10 
+       "Score:  0" ;
 
 feature extension GB:Arc F:TimeLeftCircle 
 	{ 240  0 0 255 }		# green
