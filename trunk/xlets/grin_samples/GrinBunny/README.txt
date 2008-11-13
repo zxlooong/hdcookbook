@@ -8,12 +8,8 @@ this kind of game.
 
 For the original, see xlets/hdcookbook_discimage/gunbunny.
 
-The xlet that drives the game was made generic.  To adapt to
-a different game, you should only need to change vars.properties
-a bit, and then look for occurances of "bunny" or "Bunny" in
-places like the classname of GrinBunnyXlet, and change it to
-something suitable.
-
+Gun bunny was re-written to use GRIN, and to use the GenericXlet
+framework that's now a part of the HD cookbook project.
 The game xlet has a debug screen you can get to with the popup
 menu key.  This lets you suppress KEY_RELEASED events, so you can test
 how a game would play on a player that doesn't generate them.  The

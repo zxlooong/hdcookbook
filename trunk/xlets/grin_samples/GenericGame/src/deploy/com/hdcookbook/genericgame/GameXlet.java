@@ -56,6 +56,7 @@ package com.hdcookbook.genericgame;
 
 
 import java.awt.Rectangle;
+import java.io.File;
 import java.io.IOException;
 import javax.tv.xlet.Xlet;
 import javax.tv.xlet.XletContext;
@@ -94,31 +95,41 @@ import org.bluray.ui.event.HRcEvent;
 public class GameXlet
 	implements Xlet, AnimationContext, UserEventListener
 {
+    /**
+     * The XletContext of our game xlet.  This is exposed as a public static
+     * variable so that client code can access the XletContext.  It's set
+     * as soon as we discover our context, and nulled when the xlet is
+     * destroyed.
+     **/
+    public static XletContext xletContext;
+
     public Show show;
     Container rootContainer;
     FontFactory fontFactory = null;
     DirectDrawEngine animationEngine;
     Director director;
-    XletContext context;
 
     private String showFileName;
     private String showInitialSegment;
     private String showDirectorName;
     private boolean definesFonts;
+    private File resourcesDir;
 
     public void initXlet(XletContext context) {
-        this.context = context;
+        this.xletContext = context;
 
-	String[] args = (String[]) context.getXletProperty(context.ARGS);
-	if (Debug.ASSERT && args.length != 4) {
-	    Debug.assertFail("Parameters:  <grin file> <initial segment> <director> <fontflag>\n    fontflag is -fonts or -nofonts");
+	String[] args = (String[]) xletContext.getXletProperty(xletContext.ARGS);
+	if (Debug.ASSERT && args.length != 5) {
+	    Debug.assertFail("Parameters:  <grin file> <initial segment> <director> <fontflag> <resources dir>\n    fontflag is -fonts or -nofonts");
 	}
 	showFileName = args[0];
 	showInitialSegment = args[1];
 	showDirectorName = args[2];
 	definesFonts = "-fonts".equals(args[3]);
+	String root = System.getProperty("bluray.vfs.root") + "/";
+	resourcesDir = new File(root + args[4]);
        
-        rootContainer = TVContainer.getRootContainer(context);			
+        rootContainer = TVContainer.getRootContainer(xletContext);			
         rootContainer.setSize(1920, 1080);
         
         animationEngine = new DirectDrawEngine();
@@ -150,6 +161,7 @@ public class GameXlet
 	    Debug.println();
 	    Debug.println();
 	}
+	xletContext = null;
     }
     
     public void animationInitialize() throws InterruptedException {
@@ -202,7 +214,7 @@ public class GameXlet
 		}
 	    });
 
-	   AssetFinder.setSearchPath(new String[]{""}, null);      
+	   AssetFinder.setSearchPath(null, new File[] {resourcesDir});      
 	   if (AssetFinder.tryURL("images.map") != null) {
 	       AssetFinder.setImageMap("images.map");
 	       if (Debug.LEVEL > 0) {

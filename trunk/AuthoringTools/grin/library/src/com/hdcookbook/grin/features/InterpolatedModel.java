@@ -152,7 +152,7 @@ public class InterpolatedModel extends Feature implements Node {
 	InterpolatedModel result = new InterpolatedModel(show);
 	result.frames = frames;
 	result.currValues = new int[currValues.length];
-	System.arraycopy(currValues, 0, result.currValues, 0, currValues.length);
+	System.arraycopy(currValues, 0, result.currValues, 0,currValues.length);
 	result.values = values;
 	result.repeatFrame = repeatFrame;
 	result.loopCount = loopCount;
@@ -178,7 +178,9 @@ public class InterpolatedModel extends Feature implements Node {
      * @param	fieldNum 	The field number, counting from 0
      **/
     public final int getField(int fieldNum) {
-	if (Debug.ASSERT && !isActivated) {
+	if (Debug.ASSERT && !isActivated && values[fieldNum] != null) {
+		// If this is an automatically generated value, then it only
+		// has a meaningful value if we're activated.
 	    Debug.assertFail("InterpolatedModel " + getName()+" not activated");
 	}
 	return currValues[fieldNum];

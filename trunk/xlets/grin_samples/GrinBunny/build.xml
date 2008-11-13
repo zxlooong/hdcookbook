@@ -29,15 +29,6 @@ set up a new project using this build file.
         </copy>
     </target>  
     
-    <target name="post-jar">
-       <zip destfile="${xlet.jar}" update="true">
-            <fileset file="${build.dir}/fontstrip.inf"/>
-            <fileset dir="${asset.dir}">
-                <include name="images/fontstrip.png"/>
-            </fileset>   
-       </zip>      
-    </target>
-  
     <target name="post-grinview-jar">     
 	<zip destfile="${project.name}-grinview.jar" update="true">
             <fileset file="${build.dir}/fontstrip.inf"/>
@@ -46,5 +37,20 @@ set up a new project using this build file.
             </fileset>   
        </zip>    
     </target> 
+  
+    <target name="post-copy-to-bdmv">
+	<copy todir="${dist.dir}/BDMV/JAR/${xlet.jar.basename}">
+            <fileset file="${build.dir}/fontstrip.inf"/>
+            <fileset dir="${asset.dir}">
+                <include name="images/fontstrip.png"/>
+            </fileset>   
+        </copy>      
+    </target>
+
+    <target name="post-spotless">
+	<delete file="${asset.dir}/fontstrip.inf"/>
+	<delete file="${asset.dir}/fontstrip-edit.png"/>
+	<delete file="${asset.dir}/images/fontstrip.png"/>
+    </target>
 </project>
 

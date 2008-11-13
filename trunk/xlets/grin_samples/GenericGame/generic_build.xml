@@ -59,6 +59,10 @@ Game xlet project.  See the documentation in vars.properties for details.
 	    <path path="/${show.commands}"/>
 	    <unpackagemapper from="${kludge.root.dir}*" to="*"/>
 	</pathconvert>
+	<pathconvert property="xlet.jar.basename">
+	    <path path="/${xlet.jar}"/>
+	    <globmapper from="${kludge.root.dir}${build.dir}/*.jar" to="*"/>
+	</pathconvert>
 	<available file="${src.dir}/fonts/dvb.fontindex"
 		   property="xlet.fonts.flag" value="-fonts"/>
 	<property name="xlet.fonts.flag" value="-nofonts"/>
@@ -286,7 +290,7 @@ The project.name property is not set.  This usually has one of two causes:
 	    </manifest>
 	</jar>
 	<echo message=""/>
-	<echo message="Created launchable gunbunny using grinview in ${project.name}-grinview.jar"/>
+	<echo message="Created launchable game using grinview in ${project.name}-grinview.jar"/>
 	<echo message=""/>
 	<antcall target="post-grinview-jar"/>
     </target>
@@ -352,9 +356,6 @@ The project.name property is not set.  This usually has one of two causes:
     <target name="jar" depends="compile, gen-permission-file" description="Creates an xlet jar file">
         <jar destfile="${xlet.jar}">
             <fileset dir="${build.dir}/classes"/>
-            <fileset dir="${build.dir}" includes="*.grin"/>
-	    <fileset dir="${build.dir}" includes="*.png"/>
-	    <fileset dir="${build.dir}" includes="images.map"/>
         </jar>
 	<antcall target="post-jar"/>
     </target>
@@ -433,7 +434,7 @@ The project.name property is not set.  This usually has one of two causes:
         <mkdir dir="${dist.dir}/BDMV/AUXDATA"/>
         <mkdir dir="${dist.dir}/BDMV/BDJO"/>
         <mkdir dir="${dist.dir}/BDMV/CLIPINF"/>
-        <mkdir dir="${dist.dir}/BDMV/JAR"/>
+        <mkdir dir="${dist.dir}/BDMV/JAR/${xlet.jar.basename}"/>
         <mkdir dir="${dist.dir}/BDMV/META"/>
         <mkdir dir="${dist.dir}/BDMV/PLAYLIST"/>
         <mkdir dir="${dist.dir}/BDMV/STREAM"/>
@@ -458,6 +459,11 @@ The project.name property is not set.  This usually has one of two causes:
         <copy todir="${dist.dir}/CERTIFICATE/BACKUP">
             <fileset dir="${dist.dir}/CERTIFICATE"/>
         </copy>
+	<copy todir="${dist.dir}/BDMV/JAR/${xlet.jar.basename}">
+            <fileset dir="${build.dir}" includes="*.grin"/>
+	    <fileset dir="${build.dir}" includes="*.png"/>
+	    <fileset dir="${build.dir}" includes="images.map"/>
+	</copy>
         <copy todir="${dist.dir}/BDMV/BACKUP">
             <fileset dir="${dist.dir}/BDMV">
                 <include name="index.bdmv"/>
@@ -526,14 +532,14 @@ ${show.file}.txt
     <appCacheInfo>
         <entries>
             <language>*.*</language>
-            <name>00000</name>
+            <name>${xlet.jar.basename}</name>
             <type>1</type>
         </entries>
     </appCacheInfo>
     <applicationManagementTable>
         <applications>
             <applicationDescriptor>
-                <baseDirectory>00000</baseDirectory>
+                <baseDirectory>${xlet.jar.basename}</baseDirectory>
                 <binding>TITLE_BOUND_DISC_BOUND</binding>
                 <classpathExtension></classpathExtension>
                 <iconFlags>0x0</iconFlags>
@@ -543,6 +549,7 @@ ${show.file}.txt
 		    <parameters>${show.initial.segment}</parameters>
 		    <parameters>${show.director}</parameters>
 		    <parameters>${xlet.fonts.flag}</parameters>
+		    <parameters>BDMV/JAR/${xlet.jar.basename}/</parameters>
                 <priority>3</priority>
                 <profiles>
                     <majorVersion>1</majorVersion>
