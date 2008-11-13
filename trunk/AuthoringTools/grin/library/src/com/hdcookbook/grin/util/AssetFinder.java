@@ -448,6 +448,8 @@ public class AssetFinder  {
      * Get the key code for the given color key.  The HD Cookbook has
      * an algorithm that an xlet might choose to use, if it wants
      * to assign the color keys in a way that works on most players.
+     * See the HD cookbook page 19-4, "Those Crazy Color Keys" for an
+     * algorithm.
      *
      * @param c		A color that is == to one of the standard
      *			constants Color.red, Color.green, Color.yellow
@@ -482,6 +484,8 @@ public class AssetFinder  {
     /**
      * Get the key code for the given color key.  Xlets may override
      * this to do an intelligent assignment of the color keys.
+     * See the HD cookbook page 19-4, "Those Crazy Color Keys" for an
+     * algorithm.
      *
      * @param c		A color that is == to one of the standard
      *			constants Color.red, Color.green, Color.yellow
