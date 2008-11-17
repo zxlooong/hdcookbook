@@ -55,6 +55,7 @@
 package com.hdcookbook.genericgame;
 
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
@@ -85,6 +86,7 @@ import org.dvb.event.UserEventRepository;
 import org.dvb.ui.DVBBufferedImage;
 import org.dvb.ui.FontFactory;
 
+import org.havi.ui.event.HRcCapabilities;
 import org.bluray.ui.event.HRcEvent;
 
 /** 
@@ -116,6 +118,11 @@ public class GameXlet
     private File resourcesDir;
 
     boolean sendKeyUp = true;
+
+    private int redKeyCode;
+    private int greenKeyCode;
+    private int blueKeyCode;
+    private int yellowKeyCode;
 
     // A small show we use to manage a debug screen accessed with
     // the popup menu key
@@ -190,10 +197,12 @@ public class GameXlet
 	    }
 	}
 
+	assignColorKeys();
+
 	try {
-	    // Set up AssetFinder so we use DVBBufferedImage.
-	    // See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
 	    AssetFinder.setHelper(new AssetFinder() {
+		// Set up AssetFinder so we use DVBBufferedImage.
+		// See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
 		protected Image createCompatibleImageBufferHelper
 				    (Component c, int width, int height) 
 		{
@@ -208,6 +217,10 @@ public class GameXlet
 		protected void destroyImageBufferHelper(Image buffer) {
 		    ((DVBBufferedImage) buffer).dispose();
 		}
+
+		//
+		// Manage font loading
+		//
 		protected Font getFontHelper(String name, int style, int size)
 		{
 		    if (fontFactory != null) {
@@ -220,6 +233,28 @@ public class GameXlet
 		    }
 		    return null;
 		}
+
+		//
+		// Map the color keys according to the HAVi API.
+		// cf. HD cookbook 19-4, "Those Crazy Color Keys".
+		//
+		protected int getColorKeyCodeHelper(Color c) {
+		    if (c == Color.red) {
+			return redKeyCode;
+		    } else if (c == Color.green) {
+			return greenKeyCode;
+		    } else if (c == Color.blue) {
+			return blueKeyCode;
+		    } else if (c == Color.yellow) {
+			return yellowKeyCode;
+		    } else {
+			if (Debug.ASSERT) {
+			    Debug.assertFail("unknown color key");
+			}
+			return 0;
+		    }
+		}
+
 	    });
 
 	   AssetFinder.setSearchPath(null, new File[] {resourcesDir});      
@@ -257,7 +292,71 @@ public class GameXlet
 				     new Rectangle(0,0,1920,1080));
        
     } 
-    
+
+    //
+    // Assign the four color keys to a HAVI VK_ code.
+    // cf. HD cookbook 19-4, "Those Crazy Color Keys".
+    //
+    private void assignColorKeys() {
+	float[] hues = { getKeyHue(0), getKeyHue(1), 
+			 getKeyHue(2), getKeyHue(3) };
+	redKeyCode = getClosest(hues, Color.red);
+	hues[redKeyCode] = 1000f;
+	redKeyCode += HRcEvent.VK_COLORED_KEY_0;
+
+	greenKeyCode = getClosest(hues, Color.green);
+	hues[greenKeyCode] = 1000f;
+	greenKeyCode += HRcEvent.VK_COLORED_KEY_0;
+
+	blueKeyCode = getClosest(hues, Color.blue);
+	hues[blueKeyCode] = 1000f;
+	blueKeyCode += HRcEvent.VK_COLORED_KEY_0;
+
+	yellowKeyCode = getClosest(hues, Color.yellow);
+	hues[yellowKeyCode] = 1000f;
+	yellowKeyCode += HRcEvent.VK_COLORED_KEY_0;
+    }
+
+    //
+    // Used by assignColorKeys()
+    //
+    private int getClosest(float[] hues, Color goal) {
+	float goalHue = getHue(goal);
+	int result = -1;
+	float resultDiff = 100f;
+	for (int i = 0; i < hues.length; i++) {
+	    float diff = Math.abs(goalHue - hues[i]);
+	    if (diff > 0.5f && diff <= 1f) {
+		diff = 1f - diff;
+	    }
+	    if (resultDiff >= diff) {
+		result = i;
+		resultDiff = diff;
+	    }
+	}
+	return result;
+    }
+
+    //
+    // Used by assignColorKeys()
+    //
+    private float getKeyHue(int key) {
+	key += HRcEvent.VK_COLORED_KEY_0;
+	Color c = HRcCapabilities.getRepresentation(key).getColor();
+	return getHue(c);
+    }
+
+    //
+    // Used by assignColorKeys()
+    //
+    private float getHue(Color c) {
+	float[] hsb = Color.RGBtoHSB(c.getRed(), c.getGreen(),
+				     c.getBlue(), null);
+	return hsb[0] - ((float) Math.floor(hsb[0]));
+    }
+   
+
+
     public void animationFinishInitialization() {
 	show.activateSegment(show.getSegment(showInitialSegment));	
 	xletShow.activateSegment(xletShow.getSegment("S:Initialize"));	

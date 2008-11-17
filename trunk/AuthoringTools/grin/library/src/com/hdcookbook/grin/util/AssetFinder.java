@@ -486,6 +486,10 @@ public class AssetFinder  {
      * this to do an intelligent assignment of the color keys.
      * See the HD cookbook page 19-4, "Those Crazy Color Keys" for an
      * algorithm.
+     * <p>
+     * An implementation of the cookbook's color key algorithm is
+     * also available, in the "GenericGame" project.  See, for example,
+     * xlets/grin_samples/GenericGame/src/deploy/com/hdcookbook/genericgame/GameXlet.java
      *
      * @param c		A color that is == to one of the standard
      *			constants Color.red, Color.green, Color.yellow

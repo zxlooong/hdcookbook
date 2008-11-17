@@ -82,6 +82,7 @@ java_generated_class com.hdcookbook.genericgame.XletShowCommands [[
 
     import com.hdcookbook.grin.Show;
     import com.hdcookbook.grin.GrinXHelper;
+    import com.hdcookbook.grin.util.Debug;
 
     public class XletShowCommands extends GrinXHelper {
 
@@ -481,6 +482,10 @@ segment S:DebugLog
 	H:DebugLog.Up
 	H:DebugLog.Down
 	H:DebugLog.Enter
+	H:DebugLog.red
+	H:DebugLog.yellow
+	H:DebugLog.blue
+	H:DebugLog.green
     } on_entry {
 	java_command [[  getDirector().skipDebugLogTo(1); ]]
     }
@@ -581,6 +586,47 @@ rc_handler key_pressed H:DebugLog.Enter
 	{ enter popup_menu }
 	execute {
 	    activate_segment S:MainMenu ;
+	} 
+;
+
+#
+#  When the debug log is showing, we generate log entries for the color
+#  keys, so the xlet's color key algorithm can be verified.
+#
+
+rc_handler key_pressed H:DebugLog.red
+	{ red }
+	execute {
+	    java_command [[ 
+		Debug.println("red key rc_handler invoked from GRIN"); 
+	    ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.green
+	{ green }
+	execute {
+	    java_command [[ 
+		Debug.println("green key rc_handler invoked from GRIN"); 
+	    ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.blue
+	{ blue }
+	execute {
+	    java_command [[ 
+		Debug.println("blue key rc_handler invoked from GRIN"); 
+	    ]]
+	} 
+;
+
+rc_handler key_pressed H:DebugLog.yellow
+	{ yellow }
+	execute {
+	    java_command [[ 
+		Debug.println("yellow key rc_handler invoked from GRIN"); 
+	    ]]
 	} 
 ;
 

@@ -203,7 +203,7 @@ public class DebugLog {
 			    return;
 			}
 			int available = log.size() + linesRemoved;
-			if (atEOLN) {
+			if (!atEOLN) {
 			    available--;
 			}
 			if (linesSent < linesRemoved) {
