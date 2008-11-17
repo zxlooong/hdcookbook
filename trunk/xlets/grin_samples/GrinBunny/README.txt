@@ -16,3 +16,7 @@ how a game would play on a player that doesn't generate them.  The
 GrinBunny game doesn't do anything on KEY_RELEASED, so when you do this
 test with GrinBunny you'll find that its behavior is unchanged.
 
+Since this is a model of a stand-alone project outside of HD cookbook, 
+the build file doesn't include the top-level user.vars.properties file.
+You might need to create a user.vars.properites in this directory,
+pointing to your compilation stubs.

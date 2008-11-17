@@ -49,3 +49,13 @@ grinview-jar, creates an executable Java JAR file that can be used
 to test the game on Java SE.  This target is convenient for sending
 a desktop mockup of your game that people can just double-click and 
 run.
+
+
+SAMPLES OF GenericGame USAGE
+============================
+
+There are two sample projects that use GenericGame bundled with the cookbook
+repository, in ../GrinBunny ../SimpleGame.  Since these are models of
+stand-alone projects outside of HD cookbook, they don't include the
+top-level user.vars.properties file, so you might need to create a
+user.vars.properites file for each, pointing to your compilation stubs.
