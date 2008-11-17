@@ -134,6 +134,9 @@ public class Main {
                 optimize = false;
             } else if ("-optimize".equals(args[index])) {
                 optimize = true;
+            } else if ("".equals(args[index])) {
+		// Skip it.  In ant, it's much easier to make a property blank
+		// than it is to pass one argument fewer to a program.
             } else {
                 showFilesLL.add(args[index]);
             }

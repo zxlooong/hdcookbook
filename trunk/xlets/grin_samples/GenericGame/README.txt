@@ -25,12 +25,18 @@ and then customizing vars.properties.  If you're able to do that (rather
 than copying generic_build.xml and modifying it), then you'll automatically
 integrate any improvements in GenericGame whenever you do a bringover.
 
-The build system assumes that the game xlet has two directories:
+The build system assumes that the game xlet has three directories:
 
     src     Includes all source code and assets used in the xlet runtime
 
     se_src  Includes source code of anything needed on the desktop at
             compile  time, such as support files for game-specific extensions.
+	    This directory must exist, but it may be empty.
+
+    xlet_src  Includes the source code of anything needed in the xlet that
+    	    can't be present on SE, such as code that depends on javax.tv
+	    or org.bluray APIs.  This directory must exist, but it may be
+	    empty.
 
 The show file must have an exported segment (usually called "S:Initialize"); 
 the xlet will navigate to this segment when the game is started.  If the

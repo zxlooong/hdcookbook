@@ -11,6 +11,10 @@ Game xlet project.  See the documentation in vars.properties for details.
     	Some default values for properties.  These can be overridden
 	in vars.properties.
     -->
+    <condition property="mosaics.file.txt" value="${mosaics.file}.txt">
+	<isset property="mosaics.file"/>
+    </condition>
+    <property name="mosaics.file.txt" value=""/>
     <property name="extension.parser" 
     	      value="com.hdcookbook.grin.io.text.NullExtensionParser"/>
     <condition property="debug.is.set">
@@ -193,6 +197,7 @@ The project.name property is not set.  This usually has one of two causes:
             <arg value="-out"/>
             <arg value="${build.dir}"/>
             <arg value="${show.file}.txt"/>
+            <arg value="${mosaics.file.txt}"/>
         </jdktools.java>
 	<move file="${build.dir}/${show.file}.grinview.java"
 	      tofile="${build.dir}/gensrc/grinview/${show.commands.file}.java"/>

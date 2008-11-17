@@ -662,12 +662,12 @@ A mosaics file has the following syntax:
 	# If set to true, this mosaic will include all images that aren't
 	# part of another mosaic.
 
-    image_files ::= "{" file_name* "}"
+    image_files ::= "image_files" "{" file_name* "}"
     	# A list of the image files to consider for inclusion in this
 	# mosaic.  An image file is only included if it is actually used
 	# in a show.
 
-    add_image_files ::= "{" file_name* "}"
+    add_image_files ::= "add_image_files" "{" file_name* "}"
 	# A list of image files to include in the mosaic, whether or not
 	# it's actually used in a show.  Use this for images you want
 	# to include to use from your xlet, using the ManagedImage class.
