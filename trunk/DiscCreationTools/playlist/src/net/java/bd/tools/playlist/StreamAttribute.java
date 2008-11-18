@@ -104,7 +104,7 @@ public class StreamAttribute {
             int rate = value & 0x0f;
             Enum[] frameRates = FrameRate.values();
             for (int i = 0; i < frameRates.length; i++) {
-                if (frameRates[i].ordinal() == format) {
+                if (frameRates[i].ordinal() == rate) {
                     setFrameRate((FrameRate) frameRates[i]);
                     break;
                 }
