@@ -141,7 +141,6 @@ abstract public class ManagedImage {
      * Prepare this image for display, by registering interest in having
      * the image be loaded.  In order to actually load the image,
      * <code>load(Component)</code> must be called.
-     * for a call to <code>load(Component)</code>.
      * <p>
      * See ManagedImage's main class documentation under
      * "ManagedImage contract - image loading and unloading".

@@ -227,17 +227,7 @@ public class Segment implements Node {
 		// result will be some wasted CPU time, but correct behavior.
 	}
 	if (lastSegment != null) {
-	    lastSegment.active = false;
-	    for (int i = 0; i < lastSegment.activeFeatures.length; i++) {
-		if (lastSegment.featureWasActivated[i]) {
-		    lastSegment.activeFeatures[i].deactivate();
-		    lastSegment.featureWasActivated[i] = false;
-		}
-		lastSegment.activeFeatures[i].unsetup();
-	    }
-	    for (int i = 0; i < lastSegment.settingUpFeatures.length; i++) {
-		lastSegment.settingUpFeatures[i].unsetup();
-	    }
+	    lastSegment.deactivate();
 	}
 	if (rcHandlers != null) {
 	    for (int i = 0; i < rcHandlers.length; i++) {
@@ -251,6 +241,24 @@ public class Segment implements Node {
 	}
 	outstandingSetups++;	// The one we set up on the next line...
 	runFeatureSetup();
+    }
+
+    //
+    // Called when another segment is activated, and called on the active
+    // segment when the show is destroyed.
+    //
+    void deactivate() {
+	active = false;
+	for (int i = 0; i < activeFeatures.length; i++) {
+	    if (featureWasActivated[i]) {
+		activeFeatures[i].deactivate();
+		featureWasActivated[i] = false;
+	    }
+	    activeFeatures[i].unsetup();
+	}
+	for (int i = 0; i < settingUpFeatures.length; i++) {
+	    settingUpFeatures[i].unsetup();
+	}
     }
 
     //

@@ -28,6 +28,7 @@
 	<target name="clean">      
             <ant dir="HelloGrinWorld" target="clean"/>     
             <ant dir="GrinBunny" target="clean"/>     
+            <ant dir="SimpleGame" target="clean"/>     
             <ant dir="Scripts/CustomFeature" target="clean"/> 
             <ant dir="Scripts/DrawingOptimization" target="clean"/>        
             <ant dir="Scripts/Translation" target="clean"/>                  
@@ -35,5 +36,6 @@
 	</target>
 	<target name="spotless" depends="clean">
 	    <ant dir="GrinBunny" target="spotless"/>
+	    <ant dir="SimpleGame" target="spotless"/>
 	</target>
 </project>

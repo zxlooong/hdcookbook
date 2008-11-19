@@ -260,6 +260,10 @@ public class Show implements AnimationClient {
 	if (Debug.ASSERT && !initialized) {
 	    Debug.assertFail("Destroy of uninitialized show");
 	}
+	if (currentSegment != null) {
+	    currentSegment.deactivate();
+	    currentSegment = null;
+	}
 	for (int i = 0; i < features.length; i++) {
 	    features[i].destroy();
 	}
