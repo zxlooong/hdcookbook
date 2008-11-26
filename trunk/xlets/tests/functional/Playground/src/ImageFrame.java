@@ -54,103 +54,113 @@
 
 
 /** 
- * The extensions parser for the Playground project
- */
+ * An image_frame extension feature, that puts a frame around a fixed_image.
+ * This is a contrived extension feature that was created to test parsing
+ * a forward reference to a feature from an extension parser.  The RFE
+ * for this was number 130.
+ **/
 
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.FixedImage;
-import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.io.text.ExtensionParser;
-import com.hdcookbook.grin.io.text.Lexer;
-import com.hdcookbook.grin.io.text.ShowParser;
-import com.hdcookbook.grin.io.text.ForwardReference;
+import com.hdcookbook.grin.features.Box;
+import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.util.Debug;
 
+import java.awt.Graphics2D;
 import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.HashMap;
+
 import java.io.IOException;
 
-public class PlaygroundExtensionParser implements ExtensionParser {
+public class ImageFrame extends Box implements Node {
 
+    protected FixedImage fixedImage;
+
+    public ImageFrame(Show show) {
+	super(show);
+	this.width = Integer.MIN_VALUE;
+	this.fillColor = null;
+    }
+
+    /**
+     * We un-implement Box's version of makeNewClone()
+     **/
+    public Feature makeNewClone(HashMap clones) {
+	throw new UnsupportedOperationException(getClass().getName()
+						    + ".makeNewClone()");
+    }
+
+    /**
+     * We un-implement Box's version of initializeClone()
+     **/
+    protected void initializeClone(Feature original, HashMap clones) {
+    }
 
     /**
      * @inheritDoc
      **/
-    public Feature getFeature(Show show, String typeName,
-    			      String name, Lexer lexer)
-		   throws IOException
-    {
-	if ("Playground:arc".equals(typeName)) {
-	    return parseArc(show, name, lexer);
-	} else if ("Playground:image_frame".equals(typeName)) {
-	    return parseFrame(show, name, lexer);
-	} else {
-	    return null;
+    public int getX() {
+	return fixedImage.getX();
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public int getY() {
+	return fixedImage.getY();
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void nextFrame() {
+	// We don't animate, so there's nothing to update
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void addDisplayAreas(RenderContext context) {
+    	//
+	// This is a bit tricky.  Whenever this is called, we know the
+	// scene graph is stable.  Namely, our fixedImage is stable, so
+	// we grab its bounds, and re-size ourselves (if needed) to still
+	// fit around the image.
+	//
+	// We just inherit paintFrame() from box, but since we modify
+	// its instance variables to fit the box around us, that works.
+	Rectangle bounds = fixedImage.getMutablePlacement();
+	int bX = bounds.x - outlineWidth;
+	int bY = bounds.y - outlineWidth;
+	int bH = bounds.height + 2*outlineWidth;
+	int bW = bounds.width + 2*outlineWidth;
+	if (x != bX || y != bY || height != bH || width != bW) {
+	    x = bX;
+	    y = bY;
+	    height = bH;
+	    width = bW;
+	    markDisplayAreasChanged();
 	}
+	super.addDisplayAreas(context);
     }
 
-    private Feature parseArc(Show show, String name, Lexer lexer)
-    		throws IOException
-    {
-	Color color = lexer.getParser().parseColor();
-	lexer.parseExpected("x");
-	int x = lexer.getInt();
-	lexer.parseExpected("y");
-	int y = lexer.getInt();
-	lexer.parseExpected("width");
-	int width = lexer.getInt();
-	lexer.parseExpected("height");
-	int height = lexer.getInt();
-	lexer.parseExpected("startAngle");
-	int startAngle = lexer.getInt();
-	lexer.parseExpected("arcAngle");
-	int arcAngle = lexer.getInt();
-	lexer.parseExpected(";");
-	return new SEArc(show, name, x, y, width, height, startAngle, arcAngle,
-			 color);
-    }
-
-    private Feature parseFrame(Show show, String name, Lexer lexer)
-    		throws IOException
-    {
-	final ShowParser parser = lexer.getParser();
-	final String fixedImageName = lexer.getString();
-	lexer.parseExpected("outline");
-	int outlineWidth = lexer.getInt();
-	Color color = parser.parseColor();
-	lexer.parseExpected(";");
-	final SEImageFrame frame 
-		= new SEImageFrame(show, name, outlineWidth, color);
-	ForwardReference fw = new ForwardReference(lexer) {
-	    public void resolve() throws IOException {
-		Feature f = parser.lookupFeatureOrFail(fixedImageName);
-		if (!(f instanceof FixedImage)) {
-		    reportError(fixedImageName + " is not a fixed_image");
-		}
-		frame.setFixedImage((FixedImage) f);
-	    }
-	};
-	parser.addForwardReference(fw, 0);
-	return frame;
-    }
 
     /**
      * @inheritDoc
      **/
-    public Modifier getModifier(Show show, String typeName,
-				String name, Lexer lexer) 
-		throws IOException
+    public void readInstanceData(GrinDataInputStream in, int length)
+	    throws IOException
     {
-	return null;
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public Command getCommand(Show show, String typeName, Lexer lexer)
-                           throws IOException
-    {
-	return null;
+	in.readSuperClassData(this);
+	outlineWidth = in.readInt();
+	outlineColor = in.readColor();
+	fixedImage = (FixedImage) in.readFeatureReference();
     }
 
 }

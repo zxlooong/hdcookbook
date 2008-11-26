@@ -179,6 +179,7 @@ The project.name property is not set.  This usually has one of two causes:
 	    <src path="se_src"/>
 	    <classpath>
 		<pathelement path="${converter.jar}"/>
+		<pathelement path="${grinview.jar}"/>
 		<pathelement path="${se.lib.zip}"/>
 	    </classpath>
 	</jdktools.javac>

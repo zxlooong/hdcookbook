@@ -54,9 +54,6 @@
 
 import java.awt.Rectangle;
 import java.io.IOException;
-import javax.tv.xlet.Xlet;
-import javax.tv.xlet.XletContext;
-import javax.tv.graphics.TVContainer;
 
 import java.awt.AlphaComposite;
 import java.awt.Container;
@@ -65,24 +62,21 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.util.Random;
 
+import com.hdcookbook.genericgame.GameXlet;
+
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.animator.AnimationClient; 
 import com.hdcookbook.grin.animator.AnimationContext;
-import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Fade;
+import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
-
-import org.dvb.event.EventManager;
-import org.dvb.event.UserEvent;
-import org.dvb.event.UserEventListener;
-import org.dvb.event.UserEventRepository;
-import org.bluray.ui.event.HRcEvent;
-import org.dvb.ui.DVBBufferedImage;
+import com.hdcookbook.grin.util.ManagedImage;
+import com.hdcookbook.grin.util.ImageManager;
 
 /** 
  * The main class for the Playground project
@@ -90,30 +84,34 @@ import org.dvb.ui.DVBBufferedImage;
 
 public class MainDirector extends Director {
 
-    private AnimationEngine engine;
-
     private InterpolatedModel scaler;
     private InterpolatedModel boxPos;
     private Text myText;
     private Fade boxedStuffFade;
+    private FixedImage replaceImageImage;
+    private static String[] replacementImages = new String[] {
+		    "images/hat_plain.jpg", "images/pope.jpg",
+		    "images/spoo2.png"
+    };
+    private ManagedImage replacementImage = null;
     private Random random;
 
     private float fadeGoal = 1.0f;
     private float fadeAlpha = 1.0f;
 
-    public MainDirector(AnimationEngine engine) {
-	this.engine = engine;
+    public MainDirector() {
     }
 
     public void restoreNormalMenu() {
 	AnimationClient[] clients = new AnimationClient[] { getShow() };
-	engine.resetAnimationClients(clients);
+	GameXlet.getInstance().resetAnimationClients(clients);
     }
 
     public void putNewShowOnTopOfMenu(String segmentName) {
 	    // First we print out the old clients.  This is only done
-	    // as a minimal test of engine.getAnimationClients()
-	AnimationClient[] clients = engine.getAnimationClients();
+	    // as a minimal test of AnimationEngine.getAnimationClients()
+	AnimationClient[] clients 
+		= GameXlet.getInstance().getAnimationClients();
 	System.out.println();
 	System.out.println("Old animation clients:");
 	for (int i = 0; i < clients.length; i++) {
@@ -142,7 +140,7 @@ public class MainDirector extends Director {
 	    // clients.  This won't take effect until the current frame of
 	    // animation is complete.
 	clients = new AnimationClient[] { getShow(), newShow };
-	engine.resetAnimationClients(clients);
+	GameXlet.getInstance().resetAnimationClients(clients);
     }
 
 
@@ -158,11 +156,11 @@ public class MainDirector extends Director {
      **/
     public void programmaticallyChageSceneGraph() {
 	if (scaler == null) {
-	    Show show = getShow();
-	    scaler = (InterpolatedModel) show.getFeature("F:MainScaler");
-	    boxPos = (InterpolatedModel)show.getFeature("F:BoxedStuffPosition");
-	    myText = (Text) show.getFeature("F:EnterText");
-	    boxedStuffFade = (Fade) show.getFeature("F:BoxedStuffFade");
+	    scaler = (InterpolatedModel) getFeature("F:MainScaler");
+	    boxPos = (InterpolatedModel) getFeature("F:BoxedStuffPosition");
+	    myText = (Text) getFeature("F:EnterText");
+	    boxedStuffFade = (Fade) getFeature("F:BoxedStuffFade");
+	    replaceImageImage = (FixedImage) getFeature("F:ReplaceImage.Image");
 	    random = new Random();
 	}
 
@@ -232,5 +230,66 @@ public class MainDirector extends Director {
 	} else {
 	    return line + " " + tmp;
 	}
+    }
+
+    //
+    // Called each frame to manage the random replacement of 
+    // the image F:ReplaceImage.Image.  We only replace images from a
+    // set of 3, but we load the new image and unload the old.  This way
+    // the technique can be scaled to any number of images.
+    //
+    // You'll also note that the API works in terms of only the
+    // upper-left hand corner, but in this method we keep the images
+    // centered about the same point.  We just do the arithmetic ourselves.
+    //
+    public void replaceImage() {
+	if (replacementImage == null) {
+	    if (random.nextInt(48) != 42) {	
+		// replace each two seconds on average
+		return;
+	    }
+	    int i = random.nextInt(replacementImages.length);
+	    String name = replacementImages[i];
+	    System.out.println("Replace image with " + name);
+	    replacementImage = ImageManager.getImage(name);
+	    replacementImage.prepare();
+	    replacementImage.startLoading(getShow().component);
+	    return;
+	}
+	if (replacementImage.isLoaded()) {
+	    ManagedImage old = replaceImageImage.getImage();
+	    Rectangle loc = replaceImageImage.getMutablePlacement();
+	    loc.x = loc.x + loc.width/2 - replacementImage.getWidth()/2;
+	    loc.y = loc.y + loc.height/2 - replacementImage.getHeight()/2;
+	    loc.width = replacementImage.getWidth();
+	    loc.height = replacementImage.getHeight();
+	    replaceImageImage.setImageSizeChanged();
+	    // loc is mutable, and retained by replaceImageImage, so setting
+	    // the fields of the Rectangle has the effect of moving the
+	    // FixedImage.
+
+	    replaceImageImage.replaceImage(replacementImage);
+
+	    // When we give the image to FixedImage, it increments the 
+	    // reference count and the prepare count of replacementImage.
+	    // (ManagedImage.addReference() and ManagedImage.prepare()).
+	    // Thus, we need to remove our prepare and our reference count.
+	    // This is precisely what needs to be done by 
+	    // stopImageReplacement(), too.
+	    stopImageReplacement();
+	}
+    }
+
+    public void stopImageReplacement() {
+	if (replacementImage != null) {
+	    replacementImage.unprepare();
+	    ImageManager.ungetImage(replacementImage);
+	    replacementImage = null;
+	}
+    }
+
+    public void notifyDestroyed() {
+	super.notifyDestroyed();
+	stopImageReplacement();
     }
 }

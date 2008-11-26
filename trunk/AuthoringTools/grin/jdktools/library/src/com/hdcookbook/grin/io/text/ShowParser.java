@@ -133,8 +133,8 @@ public class ShowParser {
     private SEShow show;
     private Lexer lexer;
     private ExtensionParser extParser;
-    private Vector[] deferred = { new Vector(), new Vector(), new Vector() };  
-    	// Array of Vector<ForwardReference>
+    private ArrayList<ArrayList<ForwardReference>> deferred;
+    private static final int NUM_DEFERRED_LISTS = 3;	// We use 3 slots
     private Map<String, VisualRCHandlerHelper> visualRCHelpers
 	= new HashMap<String, VisualRCHandlerHelper>();
 
@@ -177,9 +177,13 @@ public class ShowParser {
     public ShowParser(Reader reader, String showName, SEShow show, 
     		      ShowBuilder builder) 
     {
+	deferred = new ArrayList();
+	for (int i = 0; i < NUM_DEFERRED_LISTS; i++) {
+	    deferred.add(new ArrayList());
+	}
         this.show = show;
 	Director d = show.getDirector();
-	this.lexer = new Lexer(reader, showName);
+	this.lexer = new Lexer(reader, showName, this);
         
 	if (builder == null) {
 	    builder = new ShowBuilder();
@@ -189,6 +193,51 @@ public class ShowParser {
 	builder.init(show);
         
         this.extParser = builder.getExtensionParser();
+    }
+
+    /**
+     * Adds a forward reference to a show feature.  The forward reference
+     * will be resolved after the entire show has been read.  This is
+     * useful from an extension parser for looking up other parts of a show, 
+     * like a named feature.  You can use it like this:
+     * <pre>
+     *
+     *     Lexer lexer = ...;
+     *     final ShowParser parser = lexer.getParser();
+     *     final MyFeature feature = ...;
+     *     final String otherFeatureName = ...;
+     *     ForwardReference fw = new ForwardReference(lexer) {
+     *         public void resolve() throws IOException {
+     *             Feature f = parser.lookupFeatureOrFail(otherFeatureName);
+     *             feature.setOtherFeature(f);
+     *         }
+     *     };
+     *     parser.addForwardReference(fw, 0);
+     *
+     * </pre>
+     *
+     * The GRIN parser guarantees that all of its forward reference resolution
+     * will be copleted before the first forward reference added by this
+     * method.  For example, all groups and assemblies will be completely
+     * populated before any of your forward references are.
+     * <p>
+     * Within your forward references, you might need to make sure that
+     * some of them are resolved before others.  Within GRIN, and example
+     * of this is the visual RC handler, which depends on the assembly it's
+     * bound to being completely resolved before the RC handler's references
+     * are resolved.  If you need to impose an ordering on the resolution
+     * order of different kinds of forward references, use the rank parameter.
+     *
+     *   @param fw	The forward reference to add
+     *	 @param rank	The rank order.  Higher numbered forward references
+     *			are processed after lower numbered ones.  Internally,
+     *			the parser uses this as an array index.  Must be >= 0.
+     **/
+    public void addForwardReference(ForwardReference fw, int rank) {
+	while (deferred.size() <= rank + NUM_DEFERRED_LISTS) {
+	    deferred.add(new ArrayList());
+	}
+	deferred.get(rank + NUM_DEFERRED_LISTS).add(fw);
     }
 
     /**
@@ -388,7 +437,7 @@ public class ShowParser {
 	   lexer.reportError("\";\" expected, \"" + tok + "\" seen");
 	}
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		Feature[] a = makeFeatureList(active);
 		Feature[] s = makeFeatureList(setup);
 		RCHandler[] h = makeRCHandlerList(rcHandlers);
@@ -396,7 +445,7 @@ public class ShowParser {
 				   onEntry, nextOnSetupDone, next));
 	    }
 	};
-	deferred[0].addElement(fw);
+	deferred.get(0).add(fw);
     }
 
     //
@@ -506,7 +555,7 @@ public class ShowParser {
 	if (scalingModel != null) {
 	    final String scalingModelF = scalingModel;
 	    ForwardReference fw = new ForwardReference(lexer) {
-		void resolve() throws IOException {
+		public void resolve() throws IOException {
 		    Feature smf = builder.getNamedFeature(scalingModelF);
 		    if (smf == null || !(smf instanceof InterpolatedModel)) {
 			lexer.reportError("In fixed_image " + name + 
@@ -516,7 +565,7 @@ public class ShowParser {
 		    f.setScalingModel((InterpolatedModel) smf);
 		}
 	    };
-	    deferred[0].addElement(fw);
+	    deferred.get(0).add(fw);
 	}
 	return f;
     }
@@ -582,7 +631,7 @@ public class ShowParser {
 	if (model != null) {
 	    final String mod = model;
 	    ForwardReference fw = new ForwardReference(lexer) {
-		void resolve() throws IOException {
+		public void resolve() throws IOException {
 		    Feature modf = builder.getNamedFeature(mod);
 		    if (modf == null || !(modf instanceof ImageSequence)) {
 			    lexer.reportError("In image_sequence " + name + 
@@ -592,12 +641,12 @@ public class ShowParser {
 		    f.setModel((ImageSequence) modf);
 		}
 	    };
-	    deferred[0].addElement(fw);
+	    deferred.get(0).add(fw);
 	}
 	if (scalingModel != null) {
 	    final String scalingModelF = scalingModel;
 	    ForwardReference fw = new ForwardReference(lexer) {
-		void resolve() throws IOException {
+		public void resolve() throws IOException {
 		    Feature smf = builder.getNamedFeature(scalingModelF);
 		    if (smf == null || !(smf instanceof InterpolatedModel)) {
 			lexer.reportError("In image_sequence " + name + 
@@ -607,7 +656,7 @@ public class ShowParser {
 		    f.setScalingModel((InterpolatedModel) smf);
 		}
 	    };
-	    deferred[0].addElement(fw);
+	    deferred.get(0).add(fw);
 	}
 	return f;
     }
@@ -717,7 +766,7 @@ public class ShowParser {
 	if (scalingModel != null) {
 	    final String scalingModelF = scalingModel;
 	    ForwardReference fw = new ForwardReference(lexer) {
-		void resolve() throws IOException {
+		public void resolve() throws IOException {
 		    Feature smf = builder.getNamedFeature(scalingModelF);
 		    if (smf == null || !(smf instanceof InterpolatedModel)) {
 			lexer.reportError("In box " + name + 
@@ -727,7 +776,7 @@ public class ShowParser {
 		    box.setScalingModel((InterpolatedModel) smf);
 		}
 	    };
-	    deferred[0].addElement(fw);
+	    deferred.get(0).add(fw);
 	}
 	return box;
     }
@@ -758,11 +807,11 @@ public class ShowParser {
 	final SubFeature[] parts 
 		= partsList.toArray(new SubFeature[partsList.size()]);
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		a.setParts(names, makeFeatureList(parts));
 	    }
 	};
-	deferred[0].addElement(fw);
+	deferred.get(0).add(fw);
 	return a;
     }
 
@@ -795,14 +844,14 @@ public class ShowParser {
 	helper.assembly = a;
 	builder.addFeature(name, line, a);
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		Iterable<Feature> syntheticFeatures = helper.setupAssembly();
 		for (Feature f: syntheticFeatures) {
 		    builder.addSyntheticFeature(line, f);
 		}
 	    }
 	};
-	deferred[1].addElement(fw);
+	deferred.get(1).add(fw);
 	return a;
     }
 
@@ -841,11 +890,11 @@ public class ShowParser {
 	final SEGroup group = new SEGroup(show, name);
 	builder.addFeature(name, line, group);
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		group.setup(makeFeatureList(parts));
 	    }
 	};
-	deferred[0].addElement(fw);
+	deferred.get(0).add(fw);
 	return group;
     }
 
@@ -872,11 +921,11 @@ public class ShowParser {
 
     private void resolveModifier(final Modifier m, final SubFeature part) {
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		m.setup(part.getFeature());
 	    }
 	};
-	deferred[0].addElement(fw);
+	deferred.get(0).add(fw);
     }
 
     private Feature parseFade(boolean hasName, int line) throws IOException {
@@ -1135,7 +1184,7 @@ public class ShowParser {
 	final SETranslator trans = new SETranslator(show, name);
 	builder.addFeature(name, line, trans);
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		Feature t  = builder.getNamedFeature(translationName);
 		if (t == null || !(t instanceof SETranslatorModel)) {
 		    lexer.reportError("Translation \"" + translationName 
@@ -1154,7 +1203,7 @@ public class ShowParser {
                 }
 	    }
 	};
-	deferred[0].addElement(fw);
+	deferred.get(0).add(fw);
 	builder.addDeferredBuilder(new TranslatorHelper(trans, line));
 	return trans;
     }
@@ -1444,7 +1493,7 @@ public class ShowParser {
 	final SEVisualRCHandler hand = helper.getFinishedHandler();
 	builder.addRCHandler(handlerName, lineStart, hand);
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		Assembly assembly = lookupAssemblyOrFail(assemblyName);
 		Feature[] realSelectParts 
 		    = lookupFeatureGrid(assembly, selectParts, width, height);
@@ -1453,7 +1502,7 @@ public class ShowParser {
 		hand.setup(assembly, realSelectParts, realInvokeParts);
 	    }
 	};
-	deferred[0].addElement(fw);
+	deferred.get(0).add(fw);
     }
 
     private void parseVisualRCHandler() throws IOException {
@@ -1532,7 +1581,7 @@ public class ShowParser {
 	final SEVisualRCHandler hand = handler;
 	builder.addRCHandler(handlerName, lineStart, hand);
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		Assembly assembly = null;
 		Feature[] realSelParts = null;
 		Feature[] realActParts = null;
@@ -1544,7 +1593,7 @@ public class ShowParser {
 		hand.setup(assembly, realSelParts, realActParts);
 	    }
 	};
-	deferred[1].addElement(fw);
+	deferred.get(1).add(fw);
     }
 
     private ArrayList<ArrayList<VisualRCHandlerCell>> parseVisualGrid() 
@@ -1837,7 +1886,7 @@ public class ShowParser {
 	final SEActivateSegmentCommand cmd 
 		= new SEActivateSegmentCommand(show, push, pop);
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		if (!pop) {
 		    Segment s = builder.getNamedSegment(name);
 		    if (s == null) {
@@ -1853,7 +1902,7 @@ public class ShowParser {
 		}
 	    }
 	};
-	deferred[2].addElement(fw);
+	deferred.get(2).add(fw);
 	return cmd;
     }
 
@@ -1863,7 +1912,7 @@ public class ShowParser {
 	parseExpected(";");
 	final SEActivatePartCommand cmd = new SEActivatePartCommand(show);
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		Assembly a = lookupAssemblyOrFail(assemblyName);
 		Feature f = a.findPart(partName);
 		if (f == null) {
@@ -1872,7 +1921,7 @@ public class ShowParser {
 		cmd.setup(a, f);
 	    }
 	};
-	deferred[2].addElement(fw);
+	deferred.get(2).add(fw);
 	return cmd;
     }
 
@@ -1904,7 +1953,7 @@ public class ShowParser {
 	parseExpected(";");
 	final SESetVisualRCStateCommand cmd = new SESetVisualRCStateCommand(show);
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		RCHandler h = builder.getNamedRCHandler(handlerName);
 		if (h == null || !(h instanceof VisualRCHandler)) {
 		    reportError("Handler not found or wrong type ");
@@ -1922,7 +1971,7 @@ public class ShowParser {
 		cmd.setup(true, state, handler, false);
 	    }
 	};
-	deferred[0].addElement(fw);
+	deferred.get(0).add(fw);
 	return cmd;
     }
 
@@ -1961,7 +2010,7 @@ public class ShowParser {
 	final boolean activateF = activate;
         final boolean runCommandsF = runCommands;
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		RCHandler h = builder.getNamedRCHandler(handlerName);
 		if (h == null || !(h instanceof VisualRCHandler)) {
 		    reportError("Handler not found or wrong type ");
@@ -1977,7 +2026,7 @@ public class ShowParser {
 		cmd.setup(activateF, state, handler, runCommandsF);
 	    }
 	};
-	deferred[0].addElement(fw);
+	deferred.get(0).add(fw);
 	return cmd;
     }
     
@@ -1986,12 +2035,12 @@ public class ShowParser {
 	parseExpected(";");
 	final SEResetFeatureCommand cmd = new SEResetFeatureCommand(show);
 	ForwardReference fw = new ForwardReference(lexer) {
-	    void resolve() throws IOException {
+	    public void resolve() throws IOException {
 		Feature f = lookupFeatureOrFail(featureName);
 		cmd.setFeature(f);
 	    }
 	};
-	deferred[0].addElement(fw);
+	deferred.get(0).add(fw);
 	return cmd;
     }
 
@@ -2022,10 +2071,10 @@ public class ShowParser {
 
 
     private void finishBuilding() throws IOException {
-	for (int i = 0; i < deferred.length; i++) {
-	    for (int j = 0; j < deferred[i].size(); j++) {
-		ForwardReference fw 
-			= (ForwardReference) deferred[i].elementAt(j);
+	for (int i = 0; i < deferred.size(); i++) {
+	    ArrayList<ForwardReference> list = deferred.get(i);
+	    for (int j = 0; j < list.size(); j++) {
+		ForwardReference fw = list.get(j);
 		fw.resolveAtLine();
 	    }
 	}
@@ -2103,8 +2152,13 @@ public class ShowParser {
         return result;
     }
 
-
-    private Feature[] lookupAssemblyParts(Assembly assembly, String[] parts)
+    /**
+     * Look up the parts of an assembly.  This can be called from a
+     * forward reference.
+     *
+     * @see ForwardReference
+     **/
+    public Feature[] lookupAssemblyParts(Assembly assembly, String[] parts)
             throws IOException 
     {
 	if (parts == null) {
@@ -2125,7 +2179,13 @@ public class ShowParser {
         return result;
     }
 
-    private Feature lookupFeatureOrFail(String name) throws IOException {
+    /**
+     * Look up a named feature.  Fail with an IOException if it's not found.
+     * This can be called from a forward reference.
+     *
+     * @see ForwardReference
+     **/
+    public Feature lookupFeatureOrFail(String name) throws IOException {
 	Feature f = builder.getNamedFeature(name);
 	if (f == null) {
 	    lexer.reportError("Feature " + name + " not found,");
@@ -2134,7 +2194,13 @@ public class ShowParser {
     }
 
 
-    private Assembly lookupAssemblyOrFail(String name) throws IOException {
+    /**
+     * Look up a named assembly.  Fail with an IOException if it's not found.
+     * This can be called from a forward reference.
+     *
+     * @see ForwardReference
+     **/
+    public Assembly lookupAssemblyOrFail(String name) throws IOException {
 	Feature f = lookupFeatureOrFail(name);
 	if (f == null || !(f instanceof Assembly)) {
 	    lexer.reportError("Feature " + name + " is not an assembly");
@@ -2145,7 +2211,11 @@ public class ShowParser {
 
     //***************    BASIC TYPES  ************************
 
-    private String[][] parseMatrix() throws IOException {
+    /** 
+     * Parse a 2-D matrix of strings.  It's not required to be
+     * rectangular; each row may have a different length.
+     **/
+    public String[][] parseMatrix() throws IOException {
 	Vector v = new Vector();
 	parseExpected("{");
 	for (;;) {
@@ -2168,12 +2238,18 @@ public class ShowParser {
 	return result;
     }
 
-    private String[] parseStrings() throws IOException {
+    /**
+     * Parse a list of strings
+     **/
+    public String[] parseStrings() throws IOException {
 	parseExpected("{");
 	return parseStringsWithOpenBraceRead();
     }
 
-    private String[] parseStringsWithOpenBraceRead() throws IOException {
+    /**
+     * Parse a list of strings, without reading the leading open-brace.
+     **/
+    public String[] parseStringsWithOpenBraceRead() throws IOException {
 	Vector v = new Vector();
 	for (;;) {
 	    String tok = lexer.getString();
@@ -2193,7 +2269,10 @@ public class ShowParser {
 	return result;
     }
 
-    private boolean parseBoolean() throws IOException {
+    /** 
+     * Parse a boolean value
+     **/
+    public boolean parseBoolean() throws IOException {
 	String tok = lexer.getString();
 	if ("true".equals(tok)) {
 	    return true;
@@ -2222,12 +2301,24 @@ public class ShowParser {
      **/
     public Color parseColorNoOpenBrace() throws IOException {
 	int r = lexer.getInt();
+	checkColorValue("r", r);
 	int g = lexer.getInt();
+	checkColorValue("g", g);
 	int b = lexer.getInt();
+	checkColorValue("b", b);
 	int a = lexer.getInt();
+	checkColorValue("a", a);
 	parseExpected("}");
 	return AssetFinder.getColor(r, g, b, a);
     }
+
+    private void checkColorValue(String name, int value) throws IOException {
+        if (value < 0 || value > 255) {
+            throw new IOException("Illegal color value for " + name + ":  "
+                                  + value);
+        }
+    }
+
     
     /**
      * Parses a token that we expect to see.  A token is read, and
@@ -2301,9 +2392,9 @@ public class ShowParser {
      * @return the SEShow object that got reconstructed.
      */
     public static SEShow parseShow(String showName, 
-            Director director, ShowBuilder builder) 
-       throws IOException {
-        
+				   Director director, ShowBuilder builder) 
+	       throws IOException 
+    {
         BufferedReader rdr = null;
         SEShow show = new SEShow(director);
         IOException ioe = null;

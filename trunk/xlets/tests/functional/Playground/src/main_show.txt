@@ -13,6 +13,7 @@ exports
 	F:BoxedStuffPosition
 	F:BoxedStuffFade
 	F:EnterText
+	F:ReplaceImage.Image
     } handlers {
     }
 ;
@@ -31,11 +32,9 @@ java_generated_class MainShowCommands [[
 	    super(show);
 	}
 
-	XLET_ONLY_[[
-	    public MainDirector getMainDirector() {
-		return (MainDirector) show.getDirector();
-	    }
-	]]
+	public MainDirector getMainDirector() {
+	    return (MainDirector) show.getDirector();
+	}
 
 	JAVA_COMMAND_BODY 
 
@@ -89,15 +88,15 @@ feature text F:MainText
 ;
 
 rc_handler key_pressed H:1 { 1 } execute {
-    java_command [[ XLET_ONLY_[[
+    java_command [[ 
 	getMainDirector().restoreNormalMenu();
-    ]] ]]
+    ]]
 } ;
 
 rc_handler key_pressed H:2 { 2 } execute {
-    java_command [[ XLET_ONLY_[[
+    java_command [[
 	getMainDirector().putNewShowOnTopOfMenu("S:Initialize");
-    ]] ]]
+    ]]
 } ;
 
 rc_handler key_pressed H:3 { 3 } execute {
@@ -105,9 +104,9 @@ rc_handler key_pressed H:3 { 3 } execute {
 } ;
 
 rc_handler key_pressed H:4 { 4 } execute {
-    java_command [[ XLET_ONLY_[[
+    java_command [[ 
 	getMainDirector().putNewShowOnTopOfMenu("S:ExtensionTest");
-    ]] ]]
+    ]]
 } ;
 
 rc_handler key_pressed H:5 { 5 } execute {
@@ -259,9 +258,7 @@ feature timer F:ChangeSceneGraphTimer 1 repeat {
 		    activate_part F:TextAssembly fading ;
 		]]
 	    }
-	    XLET_ONLY_[[
-		getMainDirector().programmaticallyChageSceneGraph();
-	    ]]
+	    getMainDirector().programmaticallyChageSceneGraph();
 	]]
     }
 ;
@@ -283,6 +280,35 @@ feature image_sequence F:Issue117 ( left 50 top 50 scale 500 500 mills )
 	 scaling_model F:MainScaler 
 ;
 
+    #
+    # An extension feature that's a frame around a fixed_image.  This is kind
+    # of silly as an extension feature; it's a contrived example,
+    # made to test forward references in an extension parser.
+    # The RFE for that was issue 130.
+    #
+
+feature extension Playground:image_frame F:ReplaceImage.Frame
+	F:ReplaceImage.Image
+	outline 10 { 255 0 0 255 }		# Red
+;
+
+    #
+    #  A fixed_image whose contents we swap with an image that we load
+    #  and unload under programmatic control.  This RFE was issue 126.
+    #
+feature fixed_image F:ReplaceImage.Image ( middle 100 middle 850 )
+	"images/pope.jpg"
+;
+
+
+feature group F:ReplaceImage {
+    F:ReplaceImage.Frame
+    F:ReplaceImage.Image
+    sub_feature timer 1 repeat { java_command [[
+	getMainDirector().replaceImage();
+    ]] } ;
+} ;
+
     #  Finaly, we put the whole scene graph in one group, which makes
     # it a bit easier to list in F:Everything.
 
@@ -292,6 +318,7 @@ feature group F:ProgrammaticDemo {
     	F:BoxTranslator
 	F:BoxedStuffPosition
 	F:Issue117
+	F:ReplaceImage
 } ;
 
     # Then, a segment to show it, and an RC handler to get us back to the
@@ -302,10 +329,11 @@ segment S:ProgrammaticSceneGraphControl
 	setup { F:Everything }
 	rc_handlers { H:ProgrammaticEscape }
 	on_entry {
-	}
+	} 
 ;
 
 rc_handler key_pressed H:ProgrammaticEscape { enter } execute {
+    java_command [[  getMainDirector().stopImageReplacement(); ]]
     activate_segment S:Main ;
 } ;
 

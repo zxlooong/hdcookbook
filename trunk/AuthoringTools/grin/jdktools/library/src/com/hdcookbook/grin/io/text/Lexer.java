@@ -85,10 +85,22 @@ public class Lexer {
     private int lineNum = 1;
     private StringBuffer strBuf = new StringBuffer(512);
     private String fileName;
+    private ShowParser parser;
 
-    public Lexer (Reader input, String fileName) {
+    public Lexer (Reader input, String fileName, ShowParser parser) {
 	this.input = input;
 	this.fileName = fileName;
+	this.parser = parser;
+    }
+
+    /**
+     * Get the main ShowParser we're lexing for.  This is useful for
+     * extension parsers that want to call back to the main parser, e.g.
+     * to parse more complex things, like a color or a forward reference
+     * to another feature.
+     **/
+    public ShowParser getParser() {
+	return parser;
     }
 
     /**

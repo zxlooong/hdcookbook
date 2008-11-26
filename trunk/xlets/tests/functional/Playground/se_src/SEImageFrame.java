@@ -54,26 +54,20 @@
 
 
 /** 
- * An Arc extension feature.  This is the version of the feature for
- * use in GrinView.  In the case of Arc, this is exactly the same as what
- * gets deployed in an xlet, but that's not necessarily true of all
- * extension features or commands.  Some might use MHP or Blu-ray
- * APIs that aren't available in GrinView.  In such a case, it's nice
- * if you provide an SE version of a mock-up of the feature, so you
- * can debug shows using GrinView.
- * <p>
- * Also, having a seperate SE version of extension features simplifies
- * the build process a bit, because you don't have to figure out which
- * java classes to include in the SE builds, and which not to.
+ * The compile-time SE version of Frame.  This adds to Frame methods for
+ * writing the binary file and other parts of the compilation process.
  **/
 
 import com.hdcookbook.grin.Feature;
-import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.features.FixedImage;
+import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import com.hdcookbook.grin.util.Debug;
 
 import java.awt.Graphics2D;
@@ -81,135 +75,35 @@ import java.awt.Color;
 
 import java.io.IOException;
 
-public class Arc extends Feature implements Node {
+public class SEImageFrame extends ImageFrame implements SENode {
 
-    protected int x;
-    protected int y;
-    protected int width;
-    protected int height;
-    protected int startAngle;
-    protected int arcAngle;
-    protected Color color;
+    public SEImageFrame(Show show, String name, int outlineWidth, Color color) {
+	super(show);
+	this.name = name;
+    	this.outlineWidth = outlineWidth;
+    	this.outlineColor = color;
+    }
 
-
-    private DrawRecord drawRecord = new DrawRecord();
-
-    public Arc(Show show) {
+    public SEImageFrame(SEShow show) {
 	super(show);
     }
 
-    //
-    // We don't implement makeNewClone(), so cloning is not
-    // supported.
-    //
-    // It's easy enough to implement; we didn't here because we don't
-    // need to, and because that's a way of demonstrating that you
-    // aren't required to implement cloning.
-
-    /**
-     * @inheritDoc
-     **/
-    public int getX() {
-	return x;
+    void setFixedImage(FixedImage fixedImage) {
+	this.fixedImage = fixedImage;
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public int getY() {
-	return y;
+    public void writeInstanceData(GrinDataOutputStream out) throws IOException {
+	out.writeSuperClassData(this);
+	out.writeInt(outlineWidth);
+	out.writeColor(outlineColor);
+	out.writeFeatureReference(fixedImage);
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public void initialize() {
-	// no initialization needed
-    }
-    
-    /**
-     * @inheritDoc
-     **/
-    public void destroy() {
+    public String getRuntimeClassName() {
+	return ImageFrame.class.getName();
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public void setActivateMode(boolean mode) {
+    public void accept(SEShowVisitor visitor) {
+	visitor.visitUserDefinedFeature(this);
     }
-
-    /**
-     * @inheritDoc
-     **/
-    public int setSetupMode(boolean mode) {
-	return 0;
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void doSomeSetup() {
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public boolean needsMoreSetup() {
-	return false;
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void nextFrame() {
-	// We don't animate, so there's nothing to update
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void markDisplayAreasChanged() {
-	drawRecord.setChanged();
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(x, y, width, height);
-	    // We don't animate, so we don't have to think about setting
-	    // drawRecord.setChanged(), or anything like that.
-	    //
-	    // We might be overstating the draw area, depending on the
-	    // values of startAngle and arcAngle.  It's OK to overstate
-	    // the draw area.
-	context.addArea(drawRecord);
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void paintFrame(Graphics2D gr) {
-	gr.setColor(color);
-	gr.fillArc(x, y, width, height, startAngle, arcAngle);
-    }
-
-
-    /**
-     * @inheritDoc
-     **/
-    public void readInstanceData(GrinDataInputStream in, int length)
-	    throws IOException
-    {
-	in.readSuperClassData(this);
-	color = in.readColor();
-	x = in.readInt();
-	y = in.readInt();
-	width = in.readInt();
-	height = in.readInt();
-	startAngle = in.readInt();
-	arcAngle = in.readInt();
-    }
-
 }

@@ -92,6 +92,16 @@ import org.bluray.ui.event.HRcEvent;
 /** 
  * The xlet class for a game project.  This is the debug version
  * of the xlet, with debug support turned on.
+ * <p>
+ * WARNING:  There are actually three copies of this class:  The debug
+ * version, the deploy version, and the GrinView version.  The GrinView
+ * version can be found under AuthoringTools/grin/jdktools/grinviewer.
+ * It offers a subset of the public method of GameXlet, e.g. to get
+ * and set the list of animation clients.  This allows a GrinView
+ * simulation of a wider range of functionalities on a desktop.
+ * <p>
+ * If you add features to the xlet versions of this class (both debug
+ * and deploy), consider adding them to the GrinView version, too.
  **/
 
 public class GameXlet
@@ -102,8 +112,11 @@ public class GameXlet
      * variable so that client code can access the XletContext.  It's set
      * as soon as we discover our context, and nulled when the xlet is
      * destroyed.
+     * <p>
+     * This is not available in the GrinView version of GameXlet.
      **/
     public static XletContext xletContext;
+    private static GameXlet theInstance;
 
     public Show show;
     Container rootContainer;
@@ -128,7 +141,43 @@ public class GameXlet
     // the popup menu key
     private Show xletShow;
     private XletDirector xletDirector;
-	
+
+    public GameXlet() {
+	theInstance = this;
+    }
+
+    /**
+     * Get the instance of this singleton
+     **/
+    public static GameXlet getInstance() {
+	return theInstance;
+    }
+
+    /**
+     * Get the list of animation clients
+     **/
+    public AnimationClient[] getAnimationClients() {
+	AnimationClient[] clients = animationEngine.getAnimationClients();
+	// We need to suppress xletShow from the list
+	AnimationClient[] result = new AnimationClient[clients.length - 1];
+	for (int i = 0; i < result.length; i++) {
+	    result[i] = clients[i];
+	}
+	return result;
+    }
+
+    /**
+     * Reset the list of animation clients
+     **/
+    public void resetAnimationClients(AnimationClient[] clients) {
+	AnimationClient[] real = new AnimationClient[clients.length + 1];
+	for (int i = 0; i < clients.length; i++) {
+	    real[i] = clients[i];
+	}
+	real[clients.length] = xletShow;
+        animationEngine.resetAnimationClients(real);
+    }
+
     public void initXlet(XletContext context) {
         this.xletContext = context;
 
@@ -176,6 +225,7 @@ public class GameXlet
 	    Debug.println();
 	}
 	xletContext = null;
+	theInstance = null;
     }
     
     public void animationInitialize() throws InterruptedException {

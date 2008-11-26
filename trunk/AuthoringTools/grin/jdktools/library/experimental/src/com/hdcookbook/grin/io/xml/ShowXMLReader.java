@@ -335,7 +335,7 @@ public class ShowXMLReader {
     }
 
     protected Command handleJavaCode(String code, boolean isHeaderScript) throws IOException {
-        Lexer lexer = new Lexer(new StringReader(code), "<script>");
+        Lexer lexer = new Lexer(new StringReader(code), "<script>", null);
         if (isHeaderScript) {
             lexer.parseExpected("java_generated_class");
             String className = lexer.getString();

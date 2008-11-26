@@ -133,7 +133,7 @@ segment S:ExtensionTest.Showing
     }
 ;
 
-feature extension Playground:Arc F:ExtensionTest
+feature extension Playground:arc F:ExtensionTest
 	{ 255 0 0 255 }		# Red
 	x 400 y 400 width 800 height 400 startAngle 45 arcAngle 315
 ;

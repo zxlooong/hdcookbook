@@ -186,6 +186,31 @@ abstract public class ManagedImage {
      **/
     abstract public void load(Component comp);
 
+
+    /**
+     * Start loading an image.  This is just like 
+     * <code>load(Component)</code>, except that it doesn't block until
+     * the image is loaded.  If the image has a postive <code>prepare()</code> 
+     * count, then sometime after <code>startLoading(Component)</code> is
+     * called, <code>isLoaded()</code> will return true (unless, of course,
+     * the caller loses interest in the image and calls 
+     * <code>unprepare()</code>
+     * <p>
+     * This method is useful for loading an image asynchronously when the
+     * threading model makes polling for image load a natural thing to do.
+     * For example, if one wants to load an image while a show is running,
+     * one good way to do that is to start the loading, then poll for
+     * the completion of the loading in a once-per-frame "heartbeat"
+     * method.
+     *
+     * @see #prepare()
+     * @see #unprepare()
+     * @see #load(java.awt.Componet)
+     * @see #isLoaded()
+     * @see ManagedImage
+     **/
+    abstract public void startLoading(Component  comp);
+
     /** 
      * Undo a prepare.  We do reference counting; when the number of
      * active prepares hits zero, and the "sticky" count reaches zero,

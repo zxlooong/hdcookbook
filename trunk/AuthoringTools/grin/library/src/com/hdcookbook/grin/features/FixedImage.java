@@ -90,6 +90,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     private Object setupMonitor = new Object();
     private boolean imageSetup = false;
     private boolean isActivated = false;
+    private boolean imageChanged = false;
     private DrawRecord drawRecord = new DrawRecord();
     
     public FixedImage(Show show) {
@@ -150,14 +151,87 @@ public class FixedImage extends Feature implements Node, SetupClient {
     public int getY() {
 	return placement.y;
     }
+
+    /**
+     * Get the placement of this image, that is, the x, y, position, the width
+     * and the height.  You can modify these values, so long as you do so
+     * in a thread-safe manner, e.g. with the Show lock held.  Usually, this
+     * means modifying them from a Show command.
+     * <p>
+     * If you change the width or height, you <b>must</b> call
+     * setImageSizeChanged().
+     *
+     * @see #setImageSizeChanged()
+     **/
+    public Rectangle getMutablePlacement() {
+	return placement;
+    }
+
+    /**
+     * Notify us that our image size has changed.  It can be changed
+     * by setting the width or height of our placement.  If this is done,
+     * setImageSizeChanged() must be called, to guarantee that the now-modified
+     * image will get drawn to the screen.
+     *
+     * @see #getMutablePlacement()
+     **/
+    public void setImageSizeChanged() {
+	imageChanged = true;
+    }
+
     
     /**
-     * Get the underlying image that we display.
+     * Get the underlying image that we display.  Neither the
+     * reference count nor the prepare count are adjusted.
      **/
     public ManagedImage getImage() {
 	return image;
     }
-    
+
+    /**
+     * Set the image being displayed by this FixedImage.  The old image
+     * will be de-referenced (and, if needed, unprepared) by FixedImage,
+     * and the new image will be referenced (and, if needed, prepared)
+     * by FixedImage.  If this FixedImage feature is set up, then the new
+     * image must have been loaded.  If it isn't, an IllegalStateException
+     * will be thrown.
+     * <p>
+     * Note that if you have a ManagedImage instance that you want to forget
+     * about after you give it to FixedImage, you'll have to call
+     * ManagedImage.unprepare() and ImageManager.ungetImage() after giving
+     * FixedImage the instance.  You give FixedImage the instance, it
+     * increments the reference counts, but you have to decrement the
+     * reference counts you added when you first referenced the ManagedImage.
+     * <p>
+     * This method must only be called when it is safe to do so, according to 
+     * the threading model, and with the Show lock held.  Usually, this means 
+     * calling it from a Show command.
+     *
+     * @throws IllegalStateException if this feature is set up, and 
+     *			newImage has not been loaded.  Also thrown if
+     *		        newImage.isReferenced() is false.
+     **/
+    public void replaceImage(ManagedImage newImage) {
+	if (newImage == image) {
+	    return;
+	}
+	if (setupMode) {
+	    if (!newImage.isLoaded()) {
+		throw new IllegalStateException();
+	    }
+	    ImageManager.getImage(newImage);
+	    newImage.prepare();
+	    image.unprepare();
+	    ImageManager.ungetImage(image);
+	} else {
+	    ImageManager.getImage(newImage);
+	    ImageManager.ungetImage(image);
+	}
+	image = newImage;
+	imageChanged = true;
+    }
+
+
     /**
      * Free any resources held by this feature.  It is the opposite of
      * initialize().
@@ -271,6 +345,10 @@ public class FixedImage extends Feature implements Node, SetupClient {
 	    if (changed) {
 		drawRecord.setChanged();
 	    }
+	}
+	if (imageChanged) {
+	    drawRecord.setChanged();
+	    imageChanged = false;
 	}
 	context.addArea(drawRecord);
     }

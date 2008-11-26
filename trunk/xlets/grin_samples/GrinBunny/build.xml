@@ -34,7 +34,7 @@ set up a new project using this build file.
             <fileset file="${build.dir}/fontstrip.inf"/>
             <fileset dir="${asset.dir}">
                 <include name="images/fontstrip.png"/>
-            </fileset>   
+            </fileset>
        </zip>    
     </target> 
   

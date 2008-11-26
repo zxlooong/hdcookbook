@@ -434,7 +434,7 @@ public class AssetFinder  {
 
     /**
      * Helper subclass can override this in order to search for
-     * images specifically.  If the helper doesn't find one, the
+     * images in some special way.  If the helper doesn't find one, the
      * default AssetFinder implementation will call tryURL(), which 
      * the helper can also override.  If you override tryURL() such
      * that images can be located, there's no reason to override

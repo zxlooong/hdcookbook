@@ -110,6 +110,22 @@ public class ImageManager {
     }
 
     /**
+     * This is like <code>getImage(String)</code>, but for the case where
+     * you already have the ManagedImage instance.  It just increments the
+     * reference count, without needing to do a hash table lookup.
+     *
+     * @throws	IllegalStateException if im.isReferenced() is false
+     **/
+    public static void getImage(ManagedImage im) {
+	synchronized(lock) {
+	    if (!im.isReferenced()) {
+		throw new IllegalStateException();
+	    }
+	    im.addReference();
+	}
+    }
+
+    /**
      * Called when an image acquired with getImage is no longer needed.
      *
      * @see #getImage(java.lang.String)

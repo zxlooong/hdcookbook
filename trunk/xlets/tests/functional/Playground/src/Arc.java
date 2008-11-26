@@ -54,17 +54,7 @@
 
 
 /** 
- * An Arc extension feature.  This is the version of the feature for
- * use in an xlet.  In the case of Arc, this is exactly the same as what
- * is used in grinview, but that's not necessarily true of all
- * extension features or commands.  Some might use MHP or Blu-ray
- * APIs that aren't available in GrinView.  In such a case, it's nice
- * if you provide an SE version of a mock-up of the feature, so you
- * can debug shows using GrinView.
- * <p>
- * Also, having a seperate SE version of extension features simplifies
- * the build process a bit, because you don't have to figure out which
- * java classes to include in the SE builds, and which not to.
+ * An Arc extension feature.  
  **/
 
 import com.hdcookbook.grin.Feature;

@@ -102,8 +102,11 @@ public class GameXlet
      * variable so that client code can access the XletContext.  It's set
      * as soon as we discover our context, and nulled when the xlet is
      * destroyed.
+     * <p>
+     * This is not available in the GrinView version of GameXlet.
      **/
     public static XletContext xletContext;
+    private static GameXlet theInstance;
 
     public Show show;
     Container rootContainer;
@@ -121,6 +124,31 @@ public class GameXlet
     private int greenKeyCode;
     private int blueKeyCode;
     private int yellowKeyCode;
+
+    public GameXlet() {
+	theInstance = this;
+    }
+
+    /**
+     * Get the instance of this singleton
+     **/
+    public static GameXlet getInstance() {
+	return theInstance;
+    }
+
+    /**
+     * Get the list of animation clients
+     **/
+    public AnimationClient[] getAnimationClients() {
+        return animationEngine.getAnimationClients();
+    }
+
+    /**
+     * Reset the list of animation clients
+     **/
+    public void resetAnimationClients(AnimationClient[] clients) {
+        animationEngine.resetAnimationClients(clients);
+    }
 
     public void initXlet(XletContext context) {
         this.xletContext = context;
@@ -169,6 +197,7 @@ public class GameXlet
 	    Debug.println();
 	}
 	xletContext = null;
+	theInstance = null;
     }
     
     public void animationInitialize() throws InterruptedException {

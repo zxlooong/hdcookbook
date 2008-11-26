@@ -58,8 +58,8 @@ package com.hdcookbook.grin.util;
 import java.awt.Image;
 import java.awt.Component;
 import java.awt.Graphics2D;
-import java.awt.MediaTracker;
 import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
 
 /**
  * A managed image that's loaded from its own image file (and not
@@ -67,7 +67,7 @@ import java.awt.Rectangle;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
-public class ManagedFullImage extends ManagedImage {
+public class ManagedFullImage extends ManagedImage implements ImageObserver {
 
     private String name;
     private int numReferences = 0;
@@ -119,7 +119,7 @@ public class ManagedFullImage extends ManagedImage {
      * @inheritDoc
      **/
     public synchronized boolean isLoaded() {
-	    // See ManagedImage's main class documentation under
+	    //  See ManagedImage's main class documentation under
 	    //  "ManagedImage contract - image loading and unloading".
 	return loaded;
     }
@@ -143,10 +143,9 @@ public class ManagedFullImage extends ManagedImage {
 		    return;
 		}
 		if (image == null) {
-		    image = AssetFinder.loadImage(name);
-		    break;	// Load the image ourselves
+		    startLoading(comp);	// Sets image to non-null
 		} else {
-		    // Another thread is loading this image, so we wait.
+		    // Image is being loaded, so we wait.
 		    try {
 			wait();	// Until that other thread loads image
 		    } catch (InterruptedException ex) {
@@ -157,10 +156,16 @@ public class ManagedFullImage extends ManagedImage {
 		}
 	    }
 	}
-	//
-	// If we get here, we are loading the image ourselves.
-	//
+    }
 
+    /**
+     * @inheritDoc
+     **/
+    public synchronized void startLoading(Component  comp) {
+	if (image != null || numPrepares <= 0) {
+	    return;
+	}
+	image = AssetFinder.loadImage(name);
 	//
 	// The JDK seems to put the image fetching thread priority
 	// really high, which is the opposite of what we want.  By
@@ -171,31 +176,40 @@ public class ManagedFullImage extends ManagedImage {
 	// harmless.
 	//
 	Thread.currentThread().yield();
-	MediaTracker tracker = new MediaTracker(comp);
-	tracker.addImage(image, 0);
-	try {
-	    tracker.waitForAll();
-	} catch (InterruptedException ex) {
-	    Thread.currentThread().interrupt();
+	comp.prepareImage(image, this);
+    }
+
+    //
+    // Implementation of the ImageObserver method.  This gets called by the
+    // system on the image loading thread.
+    //
+    public synchronized boolean 
+    imageUpdate(Image img, int infoflags, int x, int y, int width, int height)
+    {
+	if (img != image) {		
+		// They've lost interest in us.  So sad.
+		//
+		// Usually, we'd get here because image is null, because
+		// unprepare() got called.  It's possible that after image
+		// becomes null, it might become non-null with a fresh
+		// instance of Image; in this case, the old image in img
+		// is still something we don't care about, so we flush it and
+		// tell the system to stop updating us.
+	    img.flush();
+	    return false;
 	}
-	if (Debug.LEVEL > 1) {
-	    Debug.println("Loaded image " + name);
-	}
-	synchronized(this) {
-	    if (numPrepares <= 0) {	// They've lost interest in us.  So sad.
-		image.flush();
-		image = null;
-		if (Debug.LEVEL > 1) {
-		    Debug.println("Unloaded image " + name 
-		    		   + " due to loss of interest.");
-		}
-	    } else {
-		loaded = true;
-	    }
+	if ((infoflags & (ALLBITS | ERROR | ABORT)) != 0) {
+		// ERROR and ABORT shouldn't really happen, but if it does
+		// the best we can do is blithely accept the fact, and treat
+		// the image as though it were loaded.
+	    loaded = true;
 	    notifyAll();
-		// Threads waiting on us will proceed, either because image is
-		// now null (so they can abandon load due to loss of interest), 
-		// or because we've loaded the image.  
+	    if (Debug.LEVEL > 1) {
+		Debug.println("Loaded image " + name);
+	    }
+	    return false;
+	} else {
+	    return true;
 	}
     }
 
@@ -207,12 +221,14 @@ public class ManagedFullImage extends ManagedImage {
 	    //  "ManagedImage contract - image loading and unloading".
 	numPrepares--;
 	if (numPrepares <= 0 && loaded) {
-	    image.flush();
-	    image = null;
-	    loaded = false;
-	    if (Debug.LEVEL > 1) {
+	    if (image != null) {
+		image.flush();
+		image = null;
+	    }
+	    if (Debug.LEVEL > 1 && loaded) {
 		Debug.println("Unloaded image " + name);
 	    }
+	    loaded = false;
 	}
     }
 

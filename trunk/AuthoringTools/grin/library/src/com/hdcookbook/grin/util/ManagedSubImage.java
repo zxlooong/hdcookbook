@@ -128,6 +128,13 @@ public class ManagedSubImage extends ManagedImage {
     /**
      * @inheritDoc
      **/
+    public synchronized void startLoading(Component  comp) {
+	mosaic.startLoading(comp);
+    }
+
+    /**
+     * @inheritDoc
+     **/
     public void unprepare() {
 	mosaic.unprepare();
     }

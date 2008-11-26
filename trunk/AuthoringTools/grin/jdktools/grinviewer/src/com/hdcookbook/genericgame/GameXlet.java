@@ -1,6 +1,6 @@
 
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,46 +53,49 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.text;
+package com.hdcookbook.genericgame;
 
-import java.io.IOException;
+import com.hdcookbook.grin.test.bigjdk.GenericMain;	// that's GrinView
+import com.hdcookbook.grin.animator.AnimationClient;
+
 
 /**
- * Used by the parser when it encounters something that might be a forward
- * reference.  It's used to defer some computation in parsing until the
- * reference is resolved.
- *
- * @author Bill Foote (http://jovial.com)
- */
-public abstract class ForwardReference {
-    
-    private int lineNumber;
-    private Lexer lexer;
-    
-    public ForwardReference(Lexer lexer) {
-        this.lineNumber = lexer.getLineNumber();
-	this.lexer = lexer;
+ * This is a facade to the main controller in GrinView.  It allows GrinView
+ * emulation of some of the features of the GameXlet class found in
+ * xlets/grin_samples/GenericGame.  This GrinView facade implements a subset
+ * of those methods, so any public methods added here must be present in the
+ * real xlet versions of GameXlet.
+ **/
+
+public class GameXlet {
+
+    private static GameXlet theInstance = null;
+
+    private GenericMain grinView;
+
+    public GameXlet(GenericMain grinView) {
+	this.grinView = grinView;
+	theInstance = this;
     }
 
-    void resolveAtLine() throws IOException {
-	int n = lexer.getLineNumber();
-	lexer.setLineNumber(lineNumber);
-	resolve();
-	lexer.setLineNumber(n);
-    }
-   
     /**
-     * Called by the parser after the entire file has been parsed, and
-     * it's time to resolve this forward reference.
+     * Get the instance of this singleton.
      **/
-    abstract public void resolve() throws IOException;
+    public static GameXlet getInstance() {
+	return theInstance;
+    }
 
     /**
-     * Convenience method for reporting an error.  The error message
-     * gives the line number where the construct we represent was read.
+     * Get the list of animation clients
      **/
-    public void reportError(String msg) throws IOException {
-        throw new IOException(msg + " on line " + lineNumber + ".");
+    public AnimationClient[] getAnimationClients() {
+	return grinView.getAnimationClients();
     }
-    
+
+    /**
+     * Reset the list of animation clients
+     **/
+    public void resetAnimationClients(AnimationClient[] clients) {
+	grinView.resetAnimationClients(clients);
+    }
 }
