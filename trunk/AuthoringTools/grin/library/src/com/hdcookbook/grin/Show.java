@@ -136,7 +136,9 @@ public class Show implements AnimationClient {
     private int segmentStackPos = 0;
     private String[] drawTargets;
     private int defaultDrawTarget = 0;
-    private ActivateSegmentCommand popSegmentCommand;
+    private ActivateSegmentCommand popSegmentCommand = null;
+    private GrinXHelper syncDisplayCommand = null;
+    private GrinXHelper segmentDoneCommand = null;
 
     private boolean initialized = false;
     private boolean destroyed = false;
@@ -433,6 +435,55 @@ public class Show implements AnimationClient {
     }
 
     /**
+     * Synchronize the display to the current show state.  This works by
+     * queueing a show command.  When executed, this command will prevent
+     * the execution of any other show commands, until the display has
+     * caught up to the internal program state.  This is a good thing
+     * to do before a command that is potentially time-consuming, like
+     * selecting a playlist.  To flesh out this example, 
+     * on some players, while a playlist is being
+     * selected, the Java runtime does not get a chance to run and update
+     * the screen, so it's good to make sure the screen is up-to-date before
+     * starting the playlist selection.
+     * <p>
+     * Note carefully the difference between syncDisplay() and 
+     * deferNextCommands().  If you're about to queue a command that does
+     * something time-consuming, then you should call syncDisplay() first,
+     * so the display is guaranteed to be updated.  If, however, you're
+     * executing within the body of the command and you want to make sure the
+     * display gets synchronized before the next command in the queue (which
+     * was already there), then you want to call deferNextCommands().
+     * <p>
+     * This is equivalent to the <code>sync_display</code> GRIN command.
+     *
+     * @see #deferNextCommands()
+     **/
+    public void syncDisplay() {
+	if (syncDisplayCommand == null) {
+	    GrinXHelper cmd = new GrinXHelper(this);
+	    cmd.setCommandNumber(GrinXHelper.SYNC_DISPLAY);
+	    syncDisplayCommand = cmd;
+	}
+	runCommand(syncDisplayCommand);
+    }
+
+    /**
+     * Signal to the show that the current segment is done.  This causes
+     * the segment to execute its "next" command block, which in most
+     * shows should contain a command to move to a different segment.
+     * <p>
+     * This is equivalent to the <code>segment_done</code> GRIN command.
+     **/
+    public void segmentDone() {
+	if (segmentDoneCommand == null) {
+	    GrinXHelper cmd = new GrinXHelper(this);
+	    cmd.setCommandNumber(GrinXHelper.SEGMENT_DONE);
+	    segmentDoneCommand = cmd;
+	}
+	runCommand(segmentDoneCommand);
+    }
+
+    /**
      * Run the given command when we advance to the next frame.
      * If the show has been destroyed, this has no effect. 
      * <p>
@@ -501,6 +552,8 @@ public class Show implements AnimationClient {
      * <p>
      * Doing this can be useful, for example, just before an operation that
      * is time-consuming and CPU-bound on some players, like JMF selection.
+     *
+     * @see #syncDisplay()
      **/
     public synchronized void deferNextCommands() {
 	deferringPendingCommands = true;

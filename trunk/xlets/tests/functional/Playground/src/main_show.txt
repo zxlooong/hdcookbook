@@ -368,7 +368,14 @@ feature group F:FadeTestEverything {
 } ;
 
 rc_handler key_pressed H:FadeTest { enter } execute {
-	segment_done ;
+    java_command [[ 
+	getMainDirector().getShow().segmentDone();
+		// This is the same as just saying "segment_done".  It's
+		// done here to test the method on Show.
+
+	getMainDirector().getShow().syncDisplay();
+		// Similarly, this is just to test the method on Show.
+    ]]
 } ;
 
 segment S:FadeTest 
