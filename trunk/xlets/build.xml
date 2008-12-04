@@ -7,7 +7,9 @@
             <ant dir="BridgeheadDiscImage"/>
             <ant dir="grin_samples"/>
             <ant dir="tests/functional/DataAreaAccessTest"/>
-            <ant dir="tests/functional/Playground"/>       
+            <ant dir="tests/functional/Playground">       
+               <property name="bdj.classes" value="${HDC_BDJ_PLATFORM_CLASSES}"/>
+            </ant>
             <ant dir="tests/functional/StorageAccessXlets"/>
             <ant dir="tests/functional/VFSTest"/>
             <ant dir="tests/performance/classload"/>
