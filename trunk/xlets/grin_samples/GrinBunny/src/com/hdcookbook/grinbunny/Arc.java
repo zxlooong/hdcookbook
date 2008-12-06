@@ -104,7 +104,7 @@ public class Arc extends Feature implements Node {
     }
 
     //
-    // We don't implement makeNewClone(), so cloning is not
+    // We don't implement createClone(), so cloning is not
     // supported.
     //
     // It's easy enough to implement; we didn't here because we don't

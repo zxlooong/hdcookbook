@@ -146,13 +146,12 @@ public class Fade extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (activated || alphas == null) {
 	    throw new IllegalStateException();
 	}
 	Fade result = new Fade(show);
 	result.part = part.makeNewClone(clones);
-	clones.put(part, result.part);
 	result.alphas = alphas;
 	result.opaqueAlpha = opaqueAlpha;
 	result.srcOver = srcOver;

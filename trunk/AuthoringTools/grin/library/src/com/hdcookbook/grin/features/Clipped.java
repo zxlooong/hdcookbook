@@ -122,7 +122,7 @@ public class Clipped extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (!isSetup()) {
 	    throw new IllegalStateException();
 	}
@@ -131,7 +131,6 @@ public class Clipped extends Modifier implements Node {
 	    result.clipRegion = new Rectangle(clipRegion);
 	}
 	result.part = part.makeNewClone(clones);
-	clones.put(part, result.part);
 	return result;
     }
 

@@ -88,6 +88,9 @@ public abstract class Modifier extends Feature {
      * @inheritDoc
      **/
     public void addSubgraph(HashSet set) {
+	if (set.contains(this)) {
+	    return;
+	}
 	super.addSubgraph(set);
 	part.addSubgraph(set);
     }

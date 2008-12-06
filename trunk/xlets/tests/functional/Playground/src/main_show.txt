@@ -14,6 +14,8 @@ exports
 	F:BoxedStuffFade
 	F:EnterText
 	F:ReplaceImage.Image
+	F:AC.Assembly
+	F:AC.ClonedGroup
     } handlers {
     }
 ;
@@ -62,7 +64,7 @@ segment S:Main
     } setup {
 	F:Everything
     } rc_handlers {
-	H:1 H:2 H:3 H:4 H:5
+	H:1 H:2 H:3 H:4 H:5 H:6
 	H:EnterPress H:EnterRelease
     }
 ;
@@ -82,6 +84,7 @@ feature text F:MainText
 	    "     3 - Show programmatic control of scene graph"
 	    "     4 - Run show with extension feature"
 	    "     5 - Run regression test for issue 121 (fade and redisplay)"
+	    "     6 - Run regression test for issue 131 (assembly and cloning)"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
 	background { 0 0 0 255 } 
@@ -111,6 +114,10 @@ rc_handler key_pressed H:4 { 4 } execute {
 
 rc_handler key_pressed H:5 { 5 } execute {
 	activate_segment S:FadeTest ;
+} ;
+
+rc_handler key_pressed H:6 { 6 } execute {
+	activate_segment S:AssemblyCloneTest ;
 } ;
 
 rc_handler key_pressed H:EnterPress { enter } execute {
@@ -394,7 +401,7 @@ segment S:FadeTest
 ;
 
 segment S:FadeTest_2
-       active {
+   active {
 	F:Red
 	F:Green
 	F:Blue
@@ -408,5 +415,54 @@ segment S:FadeTest_2
     }
 ;
 
+###################################################################
+#	    ASSEMBLY CLONE TEST (Issue 131 regression test)       #
+###################################################################
+
+feature text F:AC.Text 
+	left 200 top 200 {
+		"If you see this, it worked.  Press enter."
+	}
+	SansSerif plain 72 { { 0 255 0 255 } }
+	background { 0 0 0 255 }  ;
+
+feature assembly F:AC.Assembly {
+    first	F:AC.Text
+    second	F:AC.Text
+} ;
+
+feature group F:AC.ClonedGroup {
+} ;
+
+segment S:AssemblyCloneTest
+   active {
+    } setup {
+	F:Everything
+	F:AC.Assembly
+	F:AC.ClonedGroup
+    } rc_handlers {
+    } next {
+	java_command [[ getMainDirector().createAssemblyCloneTest(); ]]
+	activate_segment S:AssemblyCloneTest_2 ;
+    }
+;
+
+segment S:AssemblyCloneTest_2
+    active {
+	F:AC.ClonedGroup	# It's populated in createAssemblyCloneTest() 
+    } setup {
+	F:Everything
+	F:AC.Assembly
+	F:AC.ClonedGroup
+    } rc_handlers {
+	H:ACTest
+    } next {
+	java_command [[ getMainDirector().destroyAssemblyCloneTest(); ]]
+	activate_segment S:Main ;
+    }
+;
+
+
+rc_handler key_pressed H:ACTest { enter } execute { segment_done ; } ;
 
 end_show 

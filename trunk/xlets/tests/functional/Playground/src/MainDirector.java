@@ -61,14 +61,18 @@ import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.util.Random;
+import java.util.HashMap;
 
 import com.hdcookbook.genericgame.GameXlet;
 
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.animator.AnimationClient; 
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.features.InterpolatedModel;
+import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Fade;
@@ -291,5 +295,30 @@ public class MainDirector extends Director {
     public void notifyDestroyed() {
 	super.notifyDestroyed();
 	stopImageReplacement();
+    }
+
+    //***********************
+    //  Assembly clone test:
+    //***********************
+
+    private Assembly assemblyCloneTestClone;
+
+    public void createAssemblyCloneTest() {
+	Assembly a = (Assembly) getFeature("F:AC.Assembly");
+	Group g = (Group) getFeature("F:AC.ClonedGroup");
+	    // performance here doesn't matter, so we just look it up
+	    // every time
+	assemblyCloneTestClone = (Assembly) a.cloneSubgraph(new HashMap());
+	Feature[] parts = new Feature[] { assemblyCloneTestClone };
+	g.resetVisibleParts(parts);
+    }
+    
+    public void destroyAssemblyCloneTest() {
+	Group g = (Group) getFeature("F:AC.ClonedGroup");
+	    // performance here doesn't matter, so we just look it up
+	    // every time
+	g.resetVisibleParts(new Feature[0]);
+	assemblyCloneTestClone.destroyClonedSubgraph();
+	assemblyCloneTestClone = null;
     }
 }

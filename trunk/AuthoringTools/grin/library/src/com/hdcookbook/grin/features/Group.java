@@ -68,6 +68,7 @@ import java.awt.Graphics2D;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * Represents a group of features that are all activated at the same
@@ -104,7 +105,7 @@ public class Group extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (!isSetup() || activated) {
 	    throw new IllegalStateException();
 	}
@@ -113,11 +114,10 @@ public class Group extends Feature implements Node {
 	result.numSetupChecked = numSetupChecked;
 	for (int i = 0; i < parts.length; i++) {
 	    result.parts[i] = parts[i].makeNewClone(clones);
-	    clones.put(parts[i], result.parts[i]);
 	}
-	// result.activated remains false
+	    // result.activated remains false
 	return result;
-	// No initializeClone() of this feature is needed.
+	    // No initializeClone() of this feature is needed.
     }
 
     /**
@@ -141,6 +141,9 @@ public class Group extends Feature implements Node {
      * @inheritDoc
      **/
     public void addSubgraph(HashSet set) {
+	if (set.contains(this)) {
+	    return;		// Avoid O(n^2) with assemblies 
+	}
 	super.addSubgraph(set);
 	for (int i = 0; i < parts.length; i++) {
 	    parts[i].addSubgraph(set);
@@ -247,6 +250,43 @@ public class Group extends Feature implements Node {
 	}
 	if (visibleParts == null) {
 	    visibleParts = parts;
+	} else if (Debug.ASSERT) {
+	    //
+	    // Check that each child's graph is disjoint from every other child's.
+	    // This property is necessary for the correctness of the scene graph,
+	    // which must be a directed acyclic graph where each node can only
+	    // be active through one path at any given time.
+	    //
+	    // Note that even with this assertion, a programmer could force a
+	    // scene graph that's invalid, e.g. by having a group that contains
+	    // two children, each a group, and then by populating each child group
+	    // with the same set of nodes as its sibling.  To catch that,
+	    // we could do a global validity check of the entire tree every time
+	    // resetVisibleParts() is called on any group, but that seems like
+	    // overkill; this assetion as it stands will hopefully catch all 
+	    // unintentional  programmer errors.
+	    //
+	    // No assertion is needed if we're re-setting the Group to its original
+	    // state, because that set was already checked for us by 
+	    // SEDoubleUseChecker.
+	    //
+	    HashSet union = null;
+	    for (int i = 0; i < visibleParts.length; i++) {
+		HashSet child = new HashSet();
+		visibleParts[i].addSubgraph(child);
+		if (union == null) {
+		    union = child;
+		} else {
+		    for (Iterator it = child.iterator(); it.hasNext(); ) {
+			Object f = it.next();
+			if (union.contains(f)) {
+			    Debug.assertFail("Invalid cloned scene graph - "
+			    		     + " see comments in Group");
+			}
+			union.add(f);
+		    }
+		}
+	    }
 	}
 	if (activated) {
 	    for (int i = 0; i < visibleParts.length; i++) {

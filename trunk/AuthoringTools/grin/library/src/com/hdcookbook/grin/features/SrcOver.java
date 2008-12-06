@@ -116,13 +116,12 @@ public class SrcOver extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (!isSetup() || activated) {
 	    throw new IllegalStateException();
 	}
 	SrcOver result = new SrcOver(show);
 	result.part = part.makeNewClone(clones);
-	clones.put(part, result.part);
 	return result;
 	    // initializeClone() not needed
     }

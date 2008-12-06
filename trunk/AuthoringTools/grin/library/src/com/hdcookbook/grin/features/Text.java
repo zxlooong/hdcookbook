@@ -155,7 +155,7 @@ public class Text extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (!isSetup() || isActivated) {
 	    throw new IllegalStateException();
 	}

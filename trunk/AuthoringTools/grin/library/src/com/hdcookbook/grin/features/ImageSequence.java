@@ -126,7 +126,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (!isSetup() || isActivated) {
 	    throw new IllegalStateException();
 	}

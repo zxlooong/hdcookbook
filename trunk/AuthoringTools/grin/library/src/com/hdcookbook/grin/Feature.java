@@ -139,12 +139,7 @@ public abstract class Feature {
      **/
     public String toString() {
         if (Debug.LEVEL > 0) {
-            String nm = getClass().getName();
-            int i = nm.lastIndexOf('.');
-            if (i >= 0) {
-                nm = nm.substring(i+1, nm.length());
-            }
-            return nm + "(" + name + ")";
+            return super.toString() + "(" + name + ")";
         } else {
             return super.toString();
         }
@@ -424,7 +419,9 @@ public abstract class Feature {
 	    Debug.assertFail();
 	}
 	Feature result = makeNewClone(clones);
-	clones.put(this, result);
+	if (Debug.ASSERT && clones.get(this) == null) {
+	    Debug.assertFail();
+	}
 	for (Iterator it = clones.keySet().iterator(); it.hasNext(); ) {
 	    Feature key = (Feature) it.next();
 	    Feature value = (Feature) clones.get(key);
@@ -436,24 +433,27 @@ public abstract class Feature {
     /**
      * This is an implementation method
      * that should not be called direction by applications; applications 
-     * should call cloneSubgraph().  New subclasses of Feature may override
-     * this method.
+     * should call cloneSubgraph().  
      * <p>
-     * Make a new clone of this feature.  This method creates a new instance
-     * of this feature, and creates new instances of any sub-features, but it
-     * does not initialize the feature.  This is an implementation method
-     * that should not be called direction by applications; applications 
-     * should call cloneSubgraph().
+     * Make a clone of this feature if a new one is required, that is, if 
+     * it hasn't already been cloned.  This method checks to see if this
+     * feature has already been cloned, and if so, returns the previous clone.
+     * Otherwise, it calls createClone() to create that clone, then adds it
+     * into the clones map.
      * <p>
      * See the documentation of cloneSubgraph() for a list
-     * of runtime exceptions this method can throw.  Subclasses that wish
-     * to support cloning must override this method.
+     * of runtime exceptions this method can throw.  
      * <p>
-     * Whenever you call this method, be sure to add the new clone
-     * to the clones map.
+     * Note that in previous versions of GRIN, subclasses of Feature that 
+     * supported cloning were supposed to override this method.  If you've 
+     * just upgraded GRIN and gotten a compile-time error for overriding a 
+     * final method, then you need to change the name of your overridden 
+     * method to createClone(), make it protected, and make sure that you 
+     * remove the code from your method that used to add clones to the 
+     * clones map.
      *
      * @param	clones	A map from original feature to cloned feature.  Entries
-     *			are added by the <i>caller</i>.
+     *			are added by makeNewClone()
      *
      * @throws UnsupportedOperationException as specified in 
      *		Feature.cloneSubgraph()
@@ -462,10 +462,53 @@ public abstract class Feature {
      *		Feature.cloneSubgraph()
      *
      * @see #cloneSubgraph(java.util.HashMap)
+     * @see #createClone(java.util.HashMap)
      **/
-    public Feature makeNewClone(HashMap clones) {
+    final public Feature makeNewClone(HashMap clones) {
+	Feature clone = (Feature) clones.get(this);
+	if (clone == null) {
+	    clone = createClone(clones);
+	    if (Debug.ASSERT && clones.get(this) != null) {
+		Debug.assertFail();
+		    // A well-formed scene graph is a directed acyclic graph, so
+		    // if one of our children added us, the scene graph is 
+		    // not well-formed.
+	    }
+	    clones.put(this, clone);
+	}
+	return clone;
+    }
+
+    /**
+     * This is an implementation method
+     * that should not be called direction by applications; applications 
+     * should call cloneSubgraph().  New subclasses of Feature that wish
+     * to support cloning must override this method.
+     * <p>
+     * Create a new clone of this feature.  This method creates a new instance
+     * of this feature, and creates new instances of any sub-features, but it
+     * does not initialize the feature.  This method is called from
+     * Feature.makeNewClone().
+     * <p>
+     * See the documentation of cloneSubgraph() for a list
+     * of runtime exceptions this method can throw.  Subclasses that wish
+     * to support cloning must override this method.
+     *
+     * @param	clones	A map from original feature to cloned feature.  Entries
+     *			are added by Feature.makeNewClone().
+     *
+     * @throws UnsupportedOperationException as specified in 
+     *		Feature.cloneSubgraph()
+     *
+     * @throws IllegalStateException as specified in 
+     *		Feature.cloneSubgraph()
+     *
+     * @see #makeNewClone(java.util.HashMap)
+     * @see #cloneSubgraph(java.util.HashMap)
+     **/
+    protected Feature createClone(HashMap clones) {
 	throw new UnsupportedOperationException(getClass().getName()
-						    + ".makeNewClone()");
+						    + ".createClone()");
     }
 
     /**
@@ -517,7 +560,7 @@ public abstract class Feature {
      * This is an implementation method
      * that is not intended to be called direction by applications.
      * New subclasses of Feature may override
-     * this method.
+     * this method, and must overrride it if they have children.
      * <p>
      * Add this node and all of its descendent nodes to the given set.
      * The superclass definition of this method adds the current node.

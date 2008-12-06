@@ -102,7 +102,7 @@ public class Assembly extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (!isSetup() || activated) {
 	    throw new IllegalStateException();
 	}
@@ -115,21 +115,23 @@ public class Assembly extends Feature implements Node {
 		found = i;
 	    }
 	    result.parts[i] = parts[i].makeNewClone(clones);
-	    clones.put(parts[i], result.parts[i]);
 	}
 	if (found != -1) {
 	    result.currentFeature = result.parts[found];
 	}
 	result.numSetupChecked = numSetupChecked;
-	// result.activated remains false
+	    // result.activated remains false
 	return result;
-	// No initializeClone() of this feature is needed.
+	    // No initializeClone() of this feature is needed.
     }
 
     /**
      * @inheritDoc
      **/
     public void addSubgraph(HashSet set) {
+	if (set.contains(this)) {
+	    return;		// Avoid O(n^2) with assemblies 
+	}
 	super.addSubgraph(set);
 	for (int i = 0; i < parts.length; i++) {
 	    parts[i].addSubgraph(set);

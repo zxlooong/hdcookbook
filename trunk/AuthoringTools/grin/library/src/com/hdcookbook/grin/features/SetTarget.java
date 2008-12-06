@@ -90,13 +90,12 @@ public class SetTarget extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (!isSetup()) {
 	    throw new IllegalStateException();
 	}
 	SetTarget result = new SetTarget(show);
 	result.part = part.makeNewClone(clones);
-	clones.put(part, result.part);
 	result.target = target;
 	result.targetName = targetName;
 	return result;

@@ -89,11 +89,11 @@ public class ImageFrame extends Box implements Node {
     }
 
     /**
-     * We un-implement Box's version of makeNewClone()
+     * We un-implement Box's version of createClone()
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	throw new UnsupportedOperationException(getClass().getName()
-						    + ".makeNewClone()");
+						    + ".createClone()");
     }
 
     /**

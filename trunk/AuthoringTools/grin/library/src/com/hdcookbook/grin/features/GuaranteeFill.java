@@ -112,13 +112,12 @@ public class GuaranteeFill extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (!isSetup() || activated) {
 	    throw new IllegalStateException();
 	}
         GuaranteeFill result = new GuaranteeFill(show);
 	result.part = part.makeNewClone(clones);
-	clones.put(part, result.part);
 	result.guaranteed = guaranteed;
 	result.fills = fills;
 	return result;

@@ -144,13 +144,12 @@ public class Translator extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (!isSetup() || activated) {
 	    throw new IllegalStateException();
 	}
 	Translator result = new Translator(show);
 	result.part = part.makeNewClone(clones);
-	clones.put(part, result.part);
 	result.fx = fx;
 	result.fy = fy;
 	result.modelIsRelative = modelIsRelative;

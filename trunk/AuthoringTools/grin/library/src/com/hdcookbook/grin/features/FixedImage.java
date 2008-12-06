@@ -100,7 +100,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     /**
      * @inheritDoc
      **/
-    public Feature makeNewClone(HashMap clones) {
+    protected Feature createClone(HashMap clones) {
 	if (!setupMode || !imageSetup || isActivated) {
 	    throw new IllegalStateException();
 	}
