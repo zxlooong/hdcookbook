@@ -16,6 +16,9 @@ exports
 	F:ReplaceImage.Image
 	F:AC.Assembly
 	F:AC.ClonedGroup
+	F:ArcTest
+	F:SM.Text
+	F:SM.Arc
     } handlers {
     }
 ;
@@ -64,7 +67,7 @@ segment S:Main
     } setup {
 	F:Everything
     } rc_handlers {
-	H:1 H:2 H:3 H:4 H:5 H:6
+	H:1 H:2 H:3 H:4 H:5 H:6 H:7
 	H:EnterPress H:EnterRelease
     }
 ;
@@ -74,6 +77,7 @@ feature group F:Everything {
     F:ProgrammaticDemo
     F:EnterAssembly
     F:FadeTestEverything
+    F:SlowModelTest
 } ;
 
 feature text F:MainText
@@ -85,6 +89,7 @@ feature text F:MainText
 	    "     4 - Run show with extension feature"
 	    "     5 - Run regression test for issue 121 (fade and redisplay)"
 	    "     6 - Run regression test for issue 131 (assembly and cloning)"
+	    "     7 - Run test for issue 134 (fallling behind in nextFrame()"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
 	background { 0 0 0 255 } 
@@ -118,6 +123,10 @@ rc_handler key_pressed H:5 { 5 } execute {
 
 rc_handler key_pressed H:6 { 6 } execute {
 	activate_segment S:AssemblyCloneTest ;
+} ;
+
+rc_handler key_pressed H:7 { 7 } execute {
+	activate_segment S:SlowModelTest ;
 } ;
 
 rc_handler key_pressed H:EnterPress { enter } execute {
@@ -464,5 +473,52 @@ segment S:AssemblyCloneTest_2
 
 
 rc_handler key_pressed H:ACTest { enter } execute { segment_done ; } ;
+
+
+######################################################
+#    SLOW MODEL TEST  (issue 134)
+######################################################
+
+
+feature text F:SM.Text
+	left 150 top 150 {
+		"Model delay:  0 ms"
+	}
+	SansSerif plain 64 { { 0 255 0 255 } }
+	background { 0 0 0 255 }  ;
+
+feature extension Playground:arc F:SM.Arc
+	{ 255 0 0 255 }		# Red
+	x 250 y 250 width 600 height 600 startAngle 90 arcAngle 15
+;
+
+feature timer F:SM.Timer 1 repeat {
+    java_command [[
+	getMainDirector().slowModelHeartbeat();
+    ]]
+} ;
+
+feature group F:SlowModelTest {
+	F:SM.Text
+	F:SM.Arc
+	F:SM.Timer
+} ;
+
+segment S:SlowModelTest
+    active {
+	F:SlowModelTest
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:SlowModelTest
+    } on_entry {
+	java_command [[ getMainDirector().initSlowModel(); ]]
+    } next {
+	activate_segment S:Main ;
+    }
+;
+
+
+rc_handler key_pressed H:SlowModelTest { enter } execute { segment_done ; } ;
 
 end_show 

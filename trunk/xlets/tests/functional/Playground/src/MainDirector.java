@@ -93,6 +93,8 @@ public class MainDirector extends Director {
     private Text myText;
     private Fade boxedStuffFade;
     private FixedImage replaceImageImage;
+    private Text f_smText;
+    private Arc f_smArc;
     private static String[] replacementImages = new String[] {
 		    "images/hat_plain.jpg", "images/pope.jpg",
 		    "images/spoo2.png"
@@ -102,6 +104,8 @@ public class MainDirector extends Director {
 
     private float fadeGoal = 1.0f;
     private float fadeAlpha = 1.0f;
+    private int smAngle;
+    private int smDelay;
 
     public MainDirector() {
     }
@@ -116,12 +120,12 @@ public class MainDirector extends Director {
 	    // as a minimal test of AnimationEngine.getAnimationClients()
 	AnimationClient[] clients 
 		= GameXlet.getInstance().getAnimationClients();
-	System.out.println();
-	System.out.println("Old animation clients:");
+	Debug.println();
+	Debug.println("Old animation clients:");
 	for (int i = 0; i < clients.length; i++) {
-	    System.out.println("    [" + i + "]:  " + clients[i]);
+	    Debug.println("    [" + i + "]:  " + clients[i]);
 	}
-	System.out.println();
+	Debug.println();
 
 	    // Now we create a new Show object, and set it to the
 	    // first segment.  It's OK to call activateSegment() before
@@ -135,7 +139,7 @@ public class MainDirector extends Director {
 	    reader.readShow(newShow);
 	} catch (IOException e) {
 	    e.printStackTrace();
-	    System.err.println("Error in reading the show file");
+	    Debug.println("Error in reading the show file");
 	    return;
 	}
 	newShow.activateSegment(newShow.getSegment(segmentName));	
@@ -149,11 +153,11 @@ public class MainDirector extends Director {
 
 
     /**
-     * This method is alled from main_show.txt before each frame when the
-     * S:S:ProgrammaticSceneGraphControl segment is showing.  This
+     * This method is called from main_show.txt before each frame when the
+     * S:ProgrammaticSceneGraphControl segment is showing.  This
      * method does most of the control of the show, but a little bit
      * of Java scripting is also done in-line in the show file, just
-     * to show what it looks like.  Note, however, that the Director
+     * to show what that looks like.  Note, however, that the Director
      * is the natural place to store the state information you'll
      * need for whatever you're doing, so it's probably easier to just
      * call a method on your director most of the time.
@@ -254,7 +258,7 @@ public class MainDirector extends Director {
 	    }
 	    int i = random.nextInt(replacementImages.length);
 	    String name = replacementImages[i];
-	    System.out.println("Replace image with " + name);
+	    Debug.println("Replace image with " + name);
 	    replacementImage = ImageManager.getImage(name);
 	    replacementImage.prepare();
 	    replacementImage.startLoading(getShow().component);
@@ -321,4 +325,39 @@ public class MainDirector extends Director {
 	assemblyCloneTestClone.destroyClonedSubgraph();
 	assemblyCloneTestClone = null;
     }
+
+    //***********************
+    //  Slow Model test:
+    //***********************
+
+    public void initSlowModel() {
+	if (f_smText == null) {
+	    f_smText = (Text) getFeature("F:SM.Text");
+	    f_smArc = (Arc) getFeature("F:SM.Arc");
+	    random = new Random();
+	}
+	smDelay = -5;
+	smAngle = 360;
+    }
+
+    public void slowModelHeartbeat() {
+	smAngle += 15;	// 15 degrees/frame * 24fps = 360 degrees/second
+	if (smAngle > 360) {
+	    smAngle -= 360;
+	    smDelay += 5;
+	    String msg = "Model delay:  " + smDelay + " ms";
+	    f_smText.setText(new String[] { msg });
+	}
+	f_smArc.setArcAngle(smAngle);
+	if (smDelay > 0) {
+	    int ms = smDelay/4 + random.nextInt(smDelay + smDelay/2);
+		    // That averages out to smDelay, but puts some
+		    // variability in it, to better simulate real
+		    // code
+	    long tm = System.currentTimeMillis() + ms;
+	    while (System.currentTimeMillis() < tm) {
+	    }
+	}
+    }
+
 }

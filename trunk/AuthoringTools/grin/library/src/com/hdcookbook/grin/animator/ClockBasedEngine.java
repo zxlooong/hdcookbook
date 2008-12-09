@@ -65,6 +65,21 @@ import com.hdcookbook.grin.util.Debug;
 
 public abstract class ClockBasedEngine extends AnimationEngine {
 
+    private final static int MODEL_PERCENT_TIME = 50;
+    	// Maximum percentage of time to spend in model updates when
+	// we fall behind in animation.  If we fall behind, and a model
+	// update takes more than this percentage of the total time
+	// availble per frame, then we'll re-adjust the clock to
+	// force ourselves to be on time.  This will have the effect of
+	// slowing down the animation.
+	//
+	// Note that if a GC hits during a model update, we might
+	// trigger the behavior of slowing down the model updates.
+	// This should be OK perceptually, since GC pauses should
+	// be rare, and if this kind of GC pause happens during an
+	// animation, the effects of that are probably at least as
+	// disruptive perceptually as slowing down the model for a frame.
+
     private boolean paused = true;
     private int newFps = 24000;
     	// Used to change the frame rate - see setFps.
@@ -193,6 +208,10 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 	long startFrameTime = System.currentTimeMillis();
 	long nextFrameTime = startFrameTime;
 	int fps = newFps; 
+	int maxModelTime = (10010 * MODEL_PERCENT_TIME) / fps;
+		// fps is in 1001ths of a second, so this gives us
+		// the max reasonable time for a model update, assuming
+		// no more than 50% of clock time for model update is OK.
 	int frame = 0;
 		// Adjusted for units, the following invariant always holds:
 		//    nextFrameTime = startFrameTime + frame / fps,
@@ -200,6 +219,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 	int skippedFrames = 0; // used only for debug
 	long currTime;
 	boolean wasPaused = false;
+	modelTimeSkipped = 0;
 
 	for (;;) {
 	    checkNewClients();
@@ -273,6 +293,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 		    } else {
 			wasPaused = false;	// We know paused is false here
 			fps = newFps;
+			maxModelTime = (10010 * MODEL_PERCENT_TIME) / fps;
 			frame = 0;
 			nextFrameTime = startFrameTime;
 			continue;
@@ -297,6 +318,8 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 	    //
 	    advanceModel();
 	    frame++;
+	    modelTimeSkipped = 0;
+
 	    if (fps <= 0) {
 		nextFrameTime = Long.MAX_VALUE;
 	    } else {
@@ -309,17 +332,57 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 			      + skippedFrames + " skipped.");
 	    }
 
-	    // 
-	    // If we're behind, skip a frame
-	    //
-	    if (currTime >= nextFrameTime) {
+	    if (currTime < nextFrameTime) {
+	    	// If we're on time, or behind by less than a frame's time,
+		// update the display and continue through the loop
+		showFrame();
+		continue;
+	    } 
+	    long modelTime = System.currentTimeMillis() - currTime;
+	    if (modelTime <= maxModelTime) {
+		// Otherwise, if our model update didn't take too long,
+		// then drop a frame (don't display it, and proceed to the
+		// next model update)
 		if (Debug.LEVEL > 0) {
 		    skippedFrames++;
 		}
 		continue;
+	    } 
+	    //
+	    // Otherwise, our model is falling behind.  In practice, this
+	    // should be extremely rare - model updates should be much
+	    // faster than display times.
+	    //
+	    // This algorithm is somewhat modal -- usually, we keep
+	    // the model going full speed, and we drop frames.  When
+	    // we detect that the model is too slow, we drop into a mode
+	    // where every frame gets displayed, no matter how long the
+	    // display step takes.  This might not be optimal, but the
+	    // case of a model being consistently slow (rather than just
+	    // having an unfortunate frame, e.g. due to GC or CPU contention
+	    // with player functions) should be extremely rare, and is
+	    // something that should be fixed in the application...  Hence
+	    // the warning message.
+	    //
+	    if (Debug.ASSERT && currTime >= Long.MAX_VALUE - 1L) {
+		// if currTime is set to an artificial value, modelTime
+		// is < 0, which is < maxModelTime, so we will never
+		// reach here.
+		Debug.assertFail();
 	    }
-
 	    showFrame();
+	    // Now, with the frame shown, we re-set the clock to indicate
+	    // that we're right on time.
+	    currTime = System.currentTimeMillis();
+	    modelTimeSkipped = (int) (currTime - nextFrameTime);
+	    nextFrameTime = currTime;
+	    if (Debug.LEVEL > 0) {
+		Debug.println("Warning:  Model update slow; "
+				+ "delaying animation by " 
+				+ modelTimeSkipped + " ms.");
+	    }
+	    startFrameTime = nextFrameTime -
+				(frame * 1000L * 1001L) / ((long) fps);
 	}
     }
 

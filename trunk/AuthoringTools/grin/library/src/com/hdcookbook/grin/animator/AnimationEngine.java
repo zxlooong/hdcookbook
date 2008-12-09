@@ -102,6 +102,7 @@ public abstract class AnimationEngine implements Runnable {
 
     private boolean needsFullPaint = true;	// First frame painted fully
     private boolean paused = false;
+    protected int modelTimeSkipped = 0;
 
 
     /**
@@ -649,6 +650,33 @@ public abstract class AnimationEngine implements Runnable {
 	renderContext.resetLastFrameList();
 	doInitClients(localNew);
 	paintNextFrameFully();
+    }
+
+    /**
+     * Return the number of ms skipped before the next model update.
+     * Normally, this will return 0, but if animation falls behind
+     * and model updates are found to be taking a significant amount
+     * of the time available per frame, then the framework will skip
+     * a few ms of time, so that the framework can be considered caught
+     * up.  This method indicates how much time was skipped between
+     * the last frame and the current frame.
+     * <p>
+     * Typically, model updates should be very much faster than the
+     * time between frames, so this method should almost always return
+     * 0, unless the animation clients are doing some atypically
+     * complex calculations.
+     * <p>
+     * This can be queried from within AnimationClient.nextFrame()
+     * to see how much time to add to the normal frame time, if
+     * code wishes to keep time-based animations synchronized in time,
+     * even in the face of CPU-intensive model updates.
+     *
+     * @return The time skipped, in ms.  Typically 0.
+     *
+     * @see AnimationClient#nextFrame()
+     **/
+    public final int getModelTimeSkipped() {
+	return modelTimeSkipped;
     }
     
     protected final void advanceModel() throws InterruptedException {

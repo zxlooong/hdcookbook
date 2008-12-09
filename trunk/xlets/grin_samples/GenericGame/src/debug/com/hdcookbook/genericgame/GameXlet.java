@@ -74,6 +74,7 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.animator.AnimationClient; 
 import com.hdcookbook.grin.animator.AnimationContext;
+import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
@@ -176,6 +177,13 @@ public class GameXlet
 	}
 	real[clients.length] = xletShow;
         animationEngine.resetAnimationClients(real);
+    }
+
+    /**
+     * Get the animation engine
+     **/
+    public AnimationEngine getAnimationEngine() {
+	return animationEngine;
     }
 
     public void initXlet(XletContext context) {

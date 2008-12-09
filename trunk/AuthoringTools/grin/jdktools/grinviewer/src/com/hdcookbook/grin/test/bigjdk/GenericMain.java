@@ -90,6 +90,7 @@ import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationContext;
+import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
@@ -158,6 +159,13 @@ public class GenericMain extends Frame implements AnimationContext {
      **/
     public void resetAnimationClients(AnimationClient[] clients) {
 	engine.resetAnimationClients(clients);
+    }
+
+    /**
+     * Give the animation engine
+     **/
+    public AnimationEngine getAnimationEngine() {
+	return engine;
     }
 
     protected void setBackground(String file) {

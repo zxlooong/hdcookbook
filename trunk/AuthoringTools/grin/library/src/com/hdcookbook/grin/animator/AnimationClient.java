@@ -98,6 +98,8 @@ public interface AnimationClient {
      * more time-consuming calculations should be deferred until
      * an object is first painted for a given frame.
      *
+     * @see AnimationEngine#getModelTimeSkipped()
+     *
      * @throws	InterruptedException	if the thread has been interrupted
      *					(e.g. because the xlet is being killed)
      **/

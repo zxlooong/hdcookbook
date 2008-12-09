@@ -164,6 +164,14 @@ public class Arc extends Feature implements Node {
     }
 
     /**
+     * Set the arc angle, and mark that we need to re-draw ourselves.
+     **/
+    public void setArcAngle(int arcAngle) {
+	this.arcAngle = arcAngle;
+	drawRecord.setChanged();
+    }
+
+    /**
      * @inheritDoc
      **/
     public void addDisplayAreas(RenderContext context) {

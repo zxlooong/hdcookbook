@@ -57,6 +57,7 @@ package com.hdcookbook.genericgame;
 
 import com.hdcookbook.grin.test.bigjdk.GenericMain;	// that's GrinView
 import com.hdcookbook.grin.animator.AnimationClient;
+import com.hdcookbook.grin.animator.AnimationEngine;
 
 
 /**
@@ -97,5 +98,12 @@ public class GameXlet {
      **/
     public void resetAnimationClients(AnimationClient[] clients) {
 	grinView.resetAnimationClients(clients);
+    }
+
+    /**
+     * Get the animation engine
+     **/
+    public AnimationEngine getAnimationEngine() {
+	return grinView.getAnimationEngine();
     }
 }
