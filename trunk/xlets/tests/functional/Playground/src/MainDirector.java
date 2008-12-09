@@ -79,6 +79,7 @@ import com.hdcookbook.grin.features.Fade;
 import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.ImageManager;
 
