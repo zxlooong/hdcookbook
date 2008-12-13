@@ -337,7 +337,7 @@ public class MainDirector extends Director {
 	    f_smArc = (Arc) getFeature("F:SM.Arc");
 	    random = new Random();
 	}
-	smDelay = -5;
+	smDelay = -3;
 	smAngle = 360;
     }
 
@@ -345,7 +345,11 @@ public class MainDirector extends Director {
 	smAngle += 15;	// 15 degrees/frame * 24fps = 360 degrees/second
 	if (smAngle > 360) {
 	    smAngle -= 360;
-	    smDelay += 5;
+	    if (smDelay % 5 == 0) {
+		smDelay += 2;
+	    } else {
+		smDelay += 3;
+	    }
 	    String msg = "Model delay:  " + smDelay + " ms";
 	    f_smText.setText(new String[] { msg });
 	}

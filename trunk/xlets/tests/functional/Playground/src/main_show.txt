@@ -89,7 +89,7 @@ feature text F:MainText
 	    "     4 - Run show with extension feature"
 	    "     5 - Run regression test for issue 121 (fade and redisplay)"
 	    "     6 - Run regression test for issue 131 (assembly and cloning)"
-	    "     7 - Run test for issue 134 (fallling behind in nextFrame()"
+	    "     7 - Run test for issue 134 (falling behind in nextFrame()"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
 	background { 0 0 0 255 } 

@@ -219,6 +219,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 	int skippedFrames = 0; // used only for debug
 	long currTime;
 	boolean wasPaused = false;
+	boolean modelOnProbation = false;
 	modelTimeSkipped = 0;
 
 	for (;;) {
@@ -336,6 +337,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 	    	// If we're on time, or behind by less than a frame's time,
 		// update the display and continue through the loop
 		showFrame();
+		modelOnProbation = false;
 		continue;
 	    } 
 	    long modelTime = System.currentTimeMillis() - currTime;
@@ -348,6 +350,28 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 		}
 		continue;
 	    } 
+
+	    //
+	    // If an otherwise well-behaved model has one bad frame, we don't
+	    // want to punish it by re-setting the clock.  When we fall behind
+	    // and see an overly-slow model for one frame, we put the model on
+	    // probation, and only if it's slow a second time do we re-set 
+	    // the model.  The probation mode gets re-set as soon as we've
+	    // caught up.
+	    //
+
+	    if (Debug.LEVEL > 1) {
+		Debug.println("    (Model update ran long:  " + modelTime 
+			       + " ms.)");
+	    }
+	    if (!modelOnProbation) {
+		modelOnProbation = true;
+		if (Debug.LEVEL > 0) {
+		    skippedFrames++;
+		}
+		continue;
+	    }
+
 	    //
 	    // Otherwise, our model is falling behind.  In practice, this
 	    // should be extremely rare - model updates should be much
@@ -355,11 +379,13 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 	    //
 	    // This algorithm is somewhat modal -- usually, we keep
 	    // the model going full speed, and we drop frames.  When
-	    // we detect that the model is too slow, we drop into a mode
-	    // where every frame gets displayed, no matter how long the
-	    // display step takes.  This might not be optimal, but the
-	    // case of a model being consistently slow (rather than just
-	    // having an unfortunate frame, e.g. due to GC or CPU contention
+	    // we detect that the model is too slow, we put the model on 
+	    // probation; if it's two slow for another frame while we're 
+	    // catching up, we drop into a mode where every frame gets 
+	    // displayed, no matter how long the display step takes.  This 
+	    // might not always be optimal, but the case of a model being 
+	    // consistently slow (rather than just having an unfortunate 
+	    // frame, e.g. due to GC or CPU contention
 	    // with player functions) should be extremely rare, and is
 	    // something that should be fixed in the application...  Hence
 	    // the warning message.
@@ -377,7 +403,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 	    modelTimeSkipped = (int) (currTime - nextFrameTime);
 	    nextFrameTime = currTime;
 	    if (Debug.LEVEL > 0) {
-		Debug.println("Warning:  Model update slow; "
+		Debug.println("WARNING:  Animation f/w detects slow model; "
 				+ "delaying animation by " 
 				+ modelTimeSkipped + " ms.");
 	    }

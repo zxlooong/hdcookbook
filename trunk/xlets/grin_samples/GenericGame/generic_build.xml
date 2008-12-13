@@ -245,9 +245,10 @@ The project.name property is not set.  This usually has one of two causes:
 
 	<!--  We build the binary script so that we'll have our
 	      extension parser and java_command implementations  -->
-	<property name="generate.binary.script.optimize.argument"
-	          value="-avoid_optimization"/>
-	<antcall target="generate-binary-script"/>
+	<antcall target="generate-binary-script">
+	    <param name="generate.binary.script.optimize.argument"
+	           value="-avoid_optimization"/>
+	</antcall>
         <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
 	    <classpath>
 		<pathelement path="${grinview.jar}"/>
@@ -262,11 +263,32 @@ The project.name property is not set.  This usually has one of two causes:
 	    <arg value="${show.director}"/>
             <arg value="${show.file}.txt"/>
         </jdktools.java>
-	<antcall target="post-run-grinview"/>
     </target>
-    <target name="post-run-grinview">
-        <!-- Projects that include this build file can re-define this target -->
-    </target>
+
+    <target name="run-grinview-binary" depends="init"
+            description="Run grinview on game using binary .grin file">
+	<antcall target="generate-binary-script">
+	    <param name="generate.binary.script.optimize.argument"
+	          value="-avoid_optimization"/>
+	</antcall>
+        <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+	    <classpath>
+		<pathelement path="${grinview.jar}"/>
+		<pathelement path="${build.dir}/gensrc/grinview"/>
+		<pathelement path="${se.lib.zip}"/>
+	    </classpath>
+	    <arg value="-asset_dir"/>
+	    <arg value="${asset.dir}"/>
+	    <arg value="-asset_dir"/>
+	    <arg value="${build.dir}"/>
+	    <arg value="-extension_parser"/>
+	    <arg value="${extension.parser}"/>
+	    <arg value="-director"/>
+	    <arg value="${show.director}"/>
+	    <arg value="-binary"/>
+	    <arg value="${show.file}.grin"/>
+        </jdktools.java>
+    </target> 
 
     <target name="grinview-jar" depends="init, generate-binary-script,
     		  generate-grinview-args"
