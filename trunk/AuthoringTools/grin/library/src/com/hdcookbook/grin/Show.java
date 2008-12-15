@@ -63,6 +63,7 @@ import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.SetupManager;
+import com.hdcookbook.grin.util.SetupClient;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.Queue;
 import com.hdcookbook.grin.input.RCHandler;
@@ -91,7 +92,7 @@ public class Show implements AnimationClient {
 
     /**
      * Our helper that calls into us to load images and such.  This is
-     * for internal use only, and is public so that GRIN classes in
+     * for internal use only, and is public so that GRIN features in
      * other packages can access it efficiently.
      **/
     public SetupManager setupManager;
@@ -149,6 +150,8 @@ public class Show implements AnimationClient {
     				  // by this show
     private boolean inputOK = true;	
 	// Condition variable on this instance of show
+    private int inputOKWaiting = 0;
+    	// # of threads waiting on inputOK
 
     /** 
      * Create a new show.
@@ -240,7 +243,15 @@ public class Show implements AnimationClient {
 	    }
 	}
 	popSegmentCommand = new ActivateSegmentCommand(this, false, true);
-    	setupManager = new SetupManager(features.length);
+	{
+	    int num = 0;
+	    for (int i = 0; i < features.length; i++) {
+		if (features[i] instanceof SetupClient) {
+		    num++;
+		}
+	    }
+	    setupManager = new SetupManager(num);
+	}
 	setupManager.start();
 	for (int i = 0; i < segments.length; i++) {
 	    segments[i].initialize();
@@ -597,6 +608,10 @@ public class Show implements AnimationClient {
     public synchronized void addDisplayAreas(RenderContext context) 
 				throws InterruptedException 
     {
+	while (inputOKWaiting > 0) {
+	    // If input is pending, let it in first
+	    wait();	// can throw InterruptedException
+	}
 	inputOK = false;
 	    // We could call notifyAll() here, but nobody waits for
 	    // inputOK to turn false, so there's no need.
@@ -651,12 +666,18 @@ public class Show implements AnimationClient {
     // another keypress might come in before that command runs.
     //
     private synchronized boolean waitForInputOK() {
-	while ((!inputOK) && (!destroyed)) {
+	if ((!inputOK) && (!destroyed)) {
+	    inputOKWaiting++;
 	    try {
-		wait();
+		while ((!inputOK) && (!destroyed)) {
+		    wait();
+		}
 	    } catch (InterruptedException ex) {
 		Thread.currentThread().interrupt();
 		return false;
+	    } finally {
+		inputOKWaiting--;
+		notifyAll();
 	    }
 	}
 	return !destroyed;

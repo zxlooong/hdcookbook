@@ -96,6 +96,7 @@ java_generated_class com.hdcookbook.grinbunny.GrinBunnyShowCommands [[
 
     import com.hdcookbook.grin.Show;
     import com.hdcookbook.grin.GrinXHelper;
+    import com.hdcookbook.grin.util.Debug;
 
     public class GrinBunnyShowCommands extends GrinXHelper {
 

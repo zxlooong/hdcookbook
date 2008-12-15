@@ -203,6 +203,7 @@ public class DirectDrawEngine extends ClockBasedEngine {
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	}
+	Thread.currentThread().yield();
     }
 
     /**

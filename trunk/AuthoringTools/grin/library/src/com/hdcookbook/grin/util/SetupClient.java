@@ -66,16 +66,21 @@ package com.hdcookbook.grin.util;
 public interface SetupClient {
 
     /**
-     * Do some (or all) of the setup work needed for this client.
+     * Do some (or all) of the setup work needed for this client.  This
+     * might be called when setup is no longer required; in this case,
+     * the client should just return.
      **/
     public void doSomeSetup();
 
     /** 
-     * This is where the feaure says whether or not it needs more
-     * setup.  Calls to this are synchronized within the init manager
+     * This is where the feature (or other kind of SetupClient) 
+     * says whether or not it needs more
+     * setup.  Calls to this are synchronized within the setup manager
      * to avoid race conditions.  The implementation of this method
-     * must not call outside code or call any animation manager     
-     * methods.
+     * must not call outside code or call any animation manager
+     * methods.  This method will probably be called several times
+     * for each call to doSomeSetup() that results, so it should not
+     * be time-consuming.
      **/
     public boolean needsMoreSetup();
 }
