@@ -359,9 +359,7 @@ public class InterpolatedModel extends Feature implements Node {
 			currFrame--;
 		    }
 		    currIndex = repeatIndex;
-		    for (int i = 0; i < endCommands.length; i++) {
-			show.runCommand(endCommands[i]);
-		    }
+		    show.runCommands(endCommands);
 		}
 	    }
 	}

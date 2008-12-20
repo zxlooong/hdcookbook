@@ -63,8 +63,11 @@ import java.io.IOException;
 /**
  * The ExtensionParser interface defines methods that handle parsing of the
  * custom (user-defined) GRIN features, modifiers and commands  
- * from text-based GRIN script. These who are defining the custom GRIN subclasses 
- * and reading them from a text GRIN file should implement these methods accordingly.
+ * from text-based GRIN script. These who are defining the custom GRIN 
+ * subclasses  and reading them from a text GRIN file should implement 
+ * these methods accordingly.
+ *
+ * @see ExtensionParserList
  */
 
 public interface ExtensionParser {

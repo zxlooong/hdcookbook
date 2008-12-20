@@ -502,9 +502,33 @@ public class Show implements AnimationClient {
      * lock or any other global locks.  If the show has been destroyed, 
      * calling this method has no effect.  It's OK to call this before
      * the show has been initialized.
+     *
+     * @see #runCommands(Command[])
      **/
     public void runCommand(Command cmd) {
 	pendingCommands.add(cmd);
+    }
+
+    /**
+     * Run the given commands when we advance to the next frame.
+     * If the show has been destroyed, this has no effect. 
+     * <p>
+     * This can be called from any thread; it does not take out the show
+     * lock or any other global locks.  If the show has been destroyed, 
+     * calling this method has no effect.  It's OK to call this before
+     * the show has been initialized.
+     *
+     * @see #runCommand(Command)
+     **/
+    public void runCommands(Command[] cmds) {
+	if (cmds == null || cmds.length == 0) {
+	    return;
+	}
+	synchronized(pendingCommands) {
+	    for (int i = 0; i < cmds.length; i++) {
+		pendingCommands.add(cmds[i]);
+	    }
+	}
     }
 
     /**

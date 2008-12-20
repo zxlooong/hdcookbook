@@ -37,7 +37,7 @@ set up a new project using this build file.
             </fileset>
        </zip>    
     </target> 
-  
+ 
     <target name="post-copy-to-bdmv">
 	<copy todir="${dist.dir}/BDMV/JAR/${xlet.jar.basename}">
             <fileset file="${build.dir}/fontstrip.inf"/>
@@ -45,6 +45,14 @@ set up a new project using this build file.
                 <include name="images/fontstrip.png"/>
             </fileset>   
         </copy>      
+        <!-- We compile our playlist for the stars background -->
+	<!-- It's quick to compile, so we just write the output in place -->
+	<jdktools.java jar="${playlist.jar}">
+	    <arg value="bdmv/playlist/00003.xml"/>
+	    <arg value="${dist.dir}/BDMV/PLAYLIST/00003.mpls"/>
+	</jdktools.java>
+	<copy file="bdmv/stream/00002.m2ts" todir="${dist.dir}/BDMV/STREAM"/>
+	<copy file="bdmv/clipinf/00002.clpi" todir="${dist.dir}/BDMV/CLIPINF"/>
     </target>
 
     <target name="post-spotless">

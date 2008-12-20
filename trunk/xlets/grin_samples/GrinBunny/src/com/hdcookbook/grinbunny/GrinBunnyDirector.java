@@ -64,6 +64,9 @@ import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.fontstrip.FontStripText;
+import com.hdcookbook.genericgame.GameXlet;
+import com.hdcookbook.grin.media.Playlist;
+import com.hdcookbook.grin.media.PlayerWrangler;
 import com.hdcookbook.grin.util.Debug;
 
 import java.util.HashMap;
@@ -98,8 +101,6 @@ public class GrinBunnyDirector extends Director {
     private static int SAUCER_STAGE_LEFT = -202;
     private static int SAUCER_STAGE_RIGHT = 1896;
 
-    private PlayerWrangler playerWrangler;
-
     private int framesLeft;	// # of frames left in game
     private int lastTimeLeft;	// Last value of remaining time
     private int score;		// Current score
@@ -128,6 +129,8 @@ public class GrinBunnyDirector extends Director {
     private Feature saucerEmptyState;
     private InterpolatedModel saucerPos;
     private Segment gameOverSegment;
+    Playlist backgroundVideo;
+    boolean gameRunning = false;	// Used by grinbunny_show
 
 	// This static class gives us a convenient place to stash references
 	// to the GRIN nodes that make up a trooper.  A trooper is one of
@@ -148,9 +151,8 @@ public class GrinBunnyDirector extends Director {
      * Called by a java_command in the show to initialize the game
      **/
     public void initializeGame() {
-	playerWrangler = new PlayerWrangler();
-	Debug.println("The gratituous PlayerWrangler method gives this:");
-	playerWrangler.aMethod();
+	PlayerWrangler.getInstance().initialize(
+			GameXlet.getInstance().getAnimationEngine());
 	int[] trooperX = new int[]{ 162, 364, 566, 768, 970, 1172, 1374, 1576 };
 	if (Debug.ASSERT && troopers != null) {
 	    Debug.assertFail();
@@ -204,6 +206,7 @@ public class GrinBunnyDirector extends Director {
 	saucerBlamState = getPart(saucerAssembly, "blam");
 	saucerEmptyState = getPart(saucerAssembly, "empty");
 	saucerPos = (InterpolatedModel) getFeature("F:TurtleSaucer.Pos");
+	backgroundVideo = (Playlist) getFeature("F:BackgroundVideo");
 
 	gameOverSegment = getSegment("S:GameOver");
     }
@@ -212,6 +215,14 @@ public class GrinBunnyDirector extends Director {
      * @inheritDoc
      **/
     public void notifyDestroyed() {
+	PlayerWrangler.getInstance().destroy();
+	    //
+	    // PlayerWrangler is a singleton.
+	    // The only reason it's OK to destroy a singleton here,
+	    // in a Show director, is because this particular show is
+	    // the main show for the xlet - this show is only destroyed
+	    // when the xlet is being destroyed.
+	    //
 	if (troopersGroup != null) {
 	    troopersGroup.resetVisibleParts(null);
 	}

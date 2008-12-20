@@ -138,7 +138,10 @@ public class ShowParser {
     private Map<String, VisualRCHandlerHelper> visualRCHelpers
 	= new HashMap<String, VisualRCHandlerHelper>();
 
-    private final static Command[] emptyCommandArray = new Command[0];
+    /** 
+     * A useful constant for parsing:  An empty command array
+     **/
+    public final static Command[] emptyCommandArray = new Command[0];
 
     private ShowBuilder builder;
 
@@ -1813,15 +1816,19 @@ public class ShowParser {
 	return mask;
     }
 
-    //
-    // Parse a list of commands
-    //
-    private Command[] parseCommands() throws IOException {
+    /**
+     * Parse a list of commands
+     **/
+    public Command[] parseCommands() throws IOException {
 	parseExpected("{");
 	return parseCommandsNoOpenBrace();
     }
 
-    private Command[] parseCommandsNoOpenBrace() throws IOException {
+    /**
+     * Parse a list of commands after the leading "{" has already been
+     * read
+     **/
+    public Command[] parseCommandsNoOpenBrace() throws IOException {
         Vector v = new Vector();
 	for (;;) {
 	    String tok = lexer.getString();
@@ -2382,6 +2389,10 @@ public class ShowParser {
      * A utility method to convert text-based grin file to an
      * SEShow object.  Before calling this method, AssetFinder
      * should be set with a proper search path for assets.
+     * <p>
+     * On a parse error, this prints an error message to stderr,
+     * then aborts execution.  If you want the IOException yourself,
+     * then call parseShowNoAbort().
      * 
      * @param showName The name of the show text file to parse.
      * @param director The director to use for the recreated show,
@@ -2390,9 +2401,49 @@ public class ShowParser {
      * being set, could be null.
      * 
      * @return the SEShow object that got reconstructed.
+     *
+     * @see #parseShowNoAbort(String, Director, ShowBuilder)
      */
     public static SEShow parseShow(String showName, 
 				   Director director, ShowBuilder builder) 
+    {
+        try {
+	    return parseShowNoAbort(showName, director, builder);
+        } catch (IOException e) {
+	    e.printStackTrace();
+	    System.err.println();
+	    System.err.println("Error trying to parse " + showName + ":");
+	    System.err.println("    " + e.getMessage());
+	    System.err.println();
+	    System.err.println("See the stack trace above for more details.");
+	    System.err.println("Aborting.");
+	    System.err.println();
+	    System.exit(1);
+	    return null;	// not reached
+        }
+    }
+
+    /**
+     * A utility method to convert text-based grin file to an
+     * SEShow object.  Before calling this method, AssetFinder
+     * should be set with a proper search path for assets.
+     * <p>
+     * On a parse error, this throws an IO Exception, and doesn't  print
+     * anything to stderr.  If you want a more friendly error message,
+     * try parseShow().
+     * 
+     * @param showName The name of the show text file to parse.
+     * @param director The director to use for the recreated show,
+     * could be null.
+     * @param builder The show builder object with the extension parser
+     * being set, could be null.
+     * 
+     * @return the SEShow object that got reconstructed.
+     *
+     * @see #parseShow(String, Director, ShowBuilder)
+     */
+    public static SEShow parseShowNoAbort(String showName, 
+				     Director director, ShowBuilder builder) 
 	       throws IOException 
     {
         BufferedReader rdr = null;
@@ -2410,12 +2461,6 @@ public class ShowParser {
             ShowParser parser = new ShowParser(rdr, showName, show, builder);
             parser.parse(); // populates show
             rdr.close();
-        } catch (IOException e) {
-            ioe = e;
-	    System.out.println();
-	    System.out.println(e.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
         } finally {
             if (rdr != null) {
                 try {
@@ -2424,11 +2469,6 @@ public class ShowParser {
                 }
             }
         }
-
-        if (ioe != null) {
-            throw ioe;
-        }
-
         return show;
     }
 

@@ -373,11 +373,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
 			    currFrame = 0;
 			} else {
 			    loopsRemaining = loopCount;
-			    if (endCommands != null) {
-				for (int i = 0; i < endCommands.length; i++) {
-				    show.runCommand(endCommands[i]);
-				}
-			    }
+			    show.runCommands(endCommands);
 			    if (repeat)  {
 				currFrame = 0;
 			    } else {

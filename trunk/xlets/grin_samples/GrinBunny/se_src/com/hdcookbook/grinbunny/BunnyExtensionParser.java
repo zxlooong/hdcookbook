@@ -66,7 +66,9 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.io.text.ExtensionParser;
+import com.hdcookbook.grin.io.text.ExtensionParserList;
 import com.hdcookbook.grin.io.text.Lexer;
+import com.hdcookbook.grin.media.MediaExtensionParser;
 
 import com.hdcookbook.grin.fontstrip.FontStripExtensionCompiler;
 
@@ -75,8 +77,15 @@ import java.io.IOException;
 
 
 public class BunnyExtensionParser implements ExtensionParser {
-    ExtensionParser otherParser = (ExtensionParser) new FontStripExtensionCompiler();
-    
+
+    ExtensionParserList otherParser;
+   
+    public BunnyExtensionParser() {
+	otherParser = new ExtensionParserList();
+	otherParser.addParser(new FontStripExtensionCompiler());
+	otherParser.addParser(new MediaExtensionParser());
+    }
+
     /**
      * @inheritDoc
      **/
@@ -88,8 +97,11 @@ public class BunnyExtensionParser implements ExtensionParser {
             return null;
         }
         
-	if (typeName.startsWith("GB:")) {
-	    return parseArc(show, name, lexer); // reserved for this parser
+	if (typeName.equals("GB:Arc")) {
+	    return parseArc(show, name, lexer); 
+	} else if (typeName.startsWith("GB:")) {
+	    // "GB:" reserved for this parser
+	    return null;
 	} else {
 	    return otherParser.getFeature(show, typeName, name, lexer);
 	} 

@@ -156,7 +156,7 @@ public class Director {
      * state changes, such as selecting new segments, changing the selected
      * part in an assembly, etc.  Usually, you'll probably want to call
      * super.notifyNextFrame() first thing, but it may be useful in some
-     * circumstances to do some compation before, e.g. something that might
+     * circumstances to do some computation before, e.g. something that might
      * result in posting a command to the show.
      * <p>
      * This method is called after the scene graph's model has moved to the 

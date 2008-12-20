@@ -42,8 +42,10 @@ information or have any questions.
 		  <sourcepath location="library/src"/>
 		  <sourcepath location="jdktools/library/src" />
 		  <sourcepath location="jdktools/mosaic/src"/>   
-		  <sourcepath location="jdktools/binaryconverter/src"/>           
+		  <sourcepath location="jdktools/binaryconverter/src"/>
 		  <sourcepath location="jdktools/grinviewer/src"/>
+		  <sourcepath location="extensions/media/src"/>
+		  <sourcepath location="extensions/media/se_src"/>
 	</javadoc>	
         
 	<mkdir dir="${GRIN_JAVADOC_ME_DEST}"/>
@@ -51,7 +53,13 @@ information or have any questions.
 	  packagenames="com.hdcookbook.grin.*"
 	  destdir="${GRIN_JAVADOC_ME_DEST}">
 		  <sourcepath location="library/src"/>
+		  <sourcepath location="extensions/media/src"/>
+		  <sourcepath location="extensions/media/xlet_src"/>
 	</javadoc>        
+	<echo message=""/>
+	<echo message="Desktop javadocs are in ${GRIN_JAVADOC_JDK_DEST}"/>
+	<echo message="Xlet javadocs are in ${GRIN_JAVADOC_ME_DEST}"/>
+	<echo message=""/>
 </target>
 
 <target name="javadoc-deploy" depends="generate-grin-javadoc">

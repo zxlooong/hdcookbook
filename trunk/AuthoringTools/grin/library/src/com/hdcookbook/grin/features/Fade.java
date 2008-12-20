@@ -261,9 +261,7 @@ public class Fade extends Modifier implements Node {
 		}
 	    } else {
 		loopsRemaining = loopCount;
-		for (int i = 0; i < endCommands.length; i++) {
-		    show.runCommand(endCommands[i]);
-		}
+		show.runCommands(endCommands);
 		alphaIndex = repeatFrame;
 	    }
 	}

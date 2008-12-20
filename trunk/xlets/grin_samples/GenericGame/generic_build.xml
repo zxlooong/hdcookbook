@@ -26,6 +26,13 @@ Game xlet project.  See the documentation in vars.properties for details.
     <condition property="xlet.debug.on.or.off" value="on" else="off">
 	  <equals arg1="${debug.or.deploy}" arg2="debug"/>
     </condition>
+    <condition property="xlet.lib.src.int" value=":${xlet.lib.src}" else="">
+	<isset property="xlet.lib.src"/>
+    </condition>
+    <condition property="se.lib.src.int" value=":${se.lib.src}" else="">
+	<isset property="se.lib.src"/>
+    </condition>
+
     <!--
     	Targets for java and javac...
     -->
@@ -65,7 +72,7 @@ Game xlet project.  See the documentation in vars.properties for details.
 	</pathconvert>
 	<pathconvert property="xlet.jar.basename">
 	    <path path="/${xlet.jar}"/>
-	    <globmapper from="${kludge.root.dir}${build.dir}/*.jar" to="*"/>
+	    <globmapper from="${kludge.root.dir}${build.dir}${file.separator}*.jar" to="*"/>
 	</pathconvert>
 	<available file="${src.dir}/fonts/dvb.fontindex"
 		   property="xlet.fonts.flag" value="-fonts"/>
@@ -175,8 +182,7 @@ The project.name property is not set.  This usually has one of two causes:
 	          value="-optimize"/>
 	<!--	Compile the game so we'll pick up any extension parser -->
 	<jdktools.javac destdir="${build.dir}/gensrc/grinview" debug="on">
-	    <src path="src"/>
-	    <src path="se_src"/>
+	    <src path="src:se_src${se.lib.src.int}"/>
 	    <classpath>
 		<pathelement path="${converter.jar}"/>
 		<pathelement path="${grinview.jar}"/>
@@ -207,7 +213,7 @@ The project.name property is not set.  This usually has one of two causes:
 	<jdktools.javac destdir="${build.dir}/gensrc/grinview" debug="on"
 		excludes="GameXlet.java XletDirector.java">
 	    <src path="${build.dir}/gensrc/grinview" />
-	    <src path="src"/>
+	    <src path="src${se.lib.src.int}"/>
 	    <classpath>
 		<pathelement path="${grinview.jar}"/>
 		<pathelement path="${se.lib.zip}"/>
@@ -368,8 +374,7 @@ The project.name property is not set.  This usually has one of two causes:
 		<pathelement path="${xlet.lib.zip}"/>
 	    </classpath>
             <src path="${generic.game}/src/${debug.or.deploy}"/>
-            <src path="src"/>
-            <src path="xlet_src"/>
+            <src path="src:xlet_src${xlet.lib.src.int}"/>
 	    <src path="${build.dir}/gensrc/xlet"/>
         </xlets.javac>
 	<antcall target="post-compile"/>
@@ -596,9 +601,13 @@ ${show.file}.txt
     <fileAccessInfo>.</fileAccessInfo>
     <keyInterestTable>0x0</keyInterestTable>
     <tableOfAccessiblePlayLists>
-        <accessToAllFlag>false</accessToAllFlag>
+        <accessToAllFlag>true</accessToAllFlag>
         <autostartFirstPlayListFlag>false</autostartFirstPlayListFlag>
-        <playListFileNames>00004</playListFileNames>    
+        <!-- 
+	     Playlist files can be listed like the following, but with the 
+	     "access to all" flag set, it seems to be unnecessary
+	     <playListFileNames>00004</playListFileNames>    
+	-->
     </tableOfAccessiblePlayLists>
     <terminalInfo>
         <initialHaviConfig>HD_1920_1080</initialHaviConfig>

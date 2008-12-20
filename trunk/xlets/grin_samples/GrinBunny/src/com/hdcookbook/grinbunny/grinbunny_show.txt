@@ -86,6 +86,7 @@ exports
 	F:Bunny.Pos
 	F:Carrot.Assembly
 	F:Carrot.Pos
+	F:BackgroundVideo
     } handlers {
     }
 ;
@@ -321,6 +322,76 @@ feature extension GB:Arc F:TimeLeftCircle
 	{ 240  0 0 255 }		# green
 	x 20 y 10 width 60 height 60 startAngle 0 arcAngle 360 ;
 
+
+
+#
+# A timer that lets us stick on a segment for one frame, then move
+# on.
+#
+feature timer F:SegmentDoneTimer 1 {
+    segment_done ;
+} ;
+
+#
+# The background video.  This loops a video segment of stars in
+# the background.  The director maintains a reference to this feature
+# in the data member backgroundVideo.
+#
+
+feature extension media:playlist F:BackgroundVideo
+    "bd://0.PLAYLIST:00003"
+    autostart: true
+    autostop: true
+    on_activate {
+	java_command [[	
+	    Debug.println();
+	    Debug.println("*** starting background video of stars ***");
+	    Debug.println();
+	]]
+    }
+    on_media_start {
+	java_command [[	
+	    Debug.println();
+	    Debug.println("*** Background video of stars started ***");
+	    Debug.println();
+	    if (!getDirector().gameRunning) {
+		getDirector().gameRunning = true;
+		GRIN_COMMAND_[[ sync_display ; ]]
+		GRIN_COMMAND_[[ segment_done ;  ]]
+		    // This way, we don't start playing the game until
+		    // the stars video is presenting.  On some players,
+		    // starting a playlist consumes most of the CPU for
+		    // several frames.
+	    }
+	]]
+    }
+    on_media_end {
+	java_command [[	
+	    Debug.println();
+	    Debug.println("*** re-starting background video ***");
+	    Debug.println();
+	    getDirector().backgroundVideo.start();
+		// This normally doesn't happen, because our video clip
+		// is longer than gameplay.  However, it has been
+		// tested and works.  The star video clip is 30 seconds
+		// long, but the playlist repeats the clip 3 times
+		//
+		// Of course, if you go to the debug window and slow
+		// down the frame rate, you can make the game outlast
+		// the video, and trigger video restart.  On some players,
+		// this introduces a noticable seam into the gameplay.
+	]]
+    }
+    on_deactivate {
+	java_command [[	
+	    Debug.println();
+	    Debug.println("*** Stopping background video ***");
+	    Debug.println();
+	    getDirector().gameRunning = false;
+	]]
+    }
+;
+
 #
 #  The "heartbeat" timer.  While the show is playing, this timer calls
 #  the director's heartbeat() method for each frame of animation, that is,
@@ -361,6 +432,7 @@ feature text F:GameOverMessage
 
 feature group F:Everything {
     F:TitleScreen
+    F:SegmentDoneTimer
     F:GameStartMessage
     F:TurtleSaucer
     F:TimeMessage
@@ -373,6 +445,7 @@ feature group F:Everything {
     F:TrooperRestore
     F:Bunny.Opt
     F:Carrot.Opt
+    F:BackgroundVideo
 } ;
 
 
@@ -414,6 +487,29 @@ segment S:ReadyToPlay
     }
 ;
 
+segment S:StartPlaying 
+    active {
+	F:TitleScreen
+	F:SegmentDoneTimer
+    } setup {
+	F:Everything
+    } next {
+	sync_display ;
+	activate_segment S:StartPlaying2 ;
+    }
+;
+
+segment S:StartPlaying2
+    active {
+	F:TitleScreen
+	F:BackgroundVideo
+    } setup {
+	F:Everything
+    } next {
+	activate_segment S:Playing ;
+    }
+;
+
 segment S:Playing
     active {
 	F:TimeLeftCircle
@@ -425,6 +521,7 @@ segment S:Playing
 	F:Bunny.Opt
 	F:Carrot.Opt	# Carrot goes on top
 	F:PlayHeartbeat
+	F:BackgroundVideo
     } setup {
 	F:Everything
     } rc_handlers {
@@ -458,7 +555,7 @@ segment S:GameOver
 rc_handler key_pressed H:ReadyToPlay
     { enter }
     execute {
-	activate_segment S:Playing ;
+	activate_segment S:StartPlaying ;
     }
 ;
 
@@ -493,7 +590,7 @@ rc_handler key_pressed H:PlayStop
 rc_handler key_pressed H:GameOver
     { enter }
     execute {
-	activate_segment S:Playing ;
+	activate_segment S:StartPlaying ;
     }
 ;
 

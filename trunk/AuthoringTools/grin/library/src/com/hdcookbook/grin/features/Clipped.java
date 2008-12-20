@@ -90,10 +90,6 @@ public class Clipped extends Modifier implements Node {
     
     class ChildContext extends RenderContext {
 	RenderContext	parent;
-	private int x;
-	private int y;
-	private int width;
-	private int height;
 
 	public void addArea(DrawRecord r) {
 	    r.addClip(clipRegion.x, clipRegion.y, 
