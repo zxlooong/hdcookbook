@@ -75,6 +75,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -95,6 +96,8 @@ public class ShowBuilder {
     private Map<String, Feature> namedFeatures = new HashMap<String, Feature>();
     private Map<String, RCHandler> namedRCHandlers 
     		= new HashMap<String, RCHandler>();
+    private Map<String, Command> namedCommands
+    		= new HashMap<String, Command>();
 
     private List<Segment> allSegments = new ArrayList<Segment>();
     private List<Feature> allFeatures = new ArrayList<Feature>();
@@ -103,6 +106,7 @@ public class ShowBuilder {
     private List<String> exportedSegments = null;
     private List<String> exportedFeatures = null;
     private List<String> exportedRCHandlers = null;
+    private List<String> exportedNamedCommands = null;
 
     private List<DeferredBuilder> deferredBuilders
     	= new ArrayList<DeferredBuilder>();
@@ -166,6 +170,19 @@ public class ShowBuilder {
     }
 
     /**
+     * Called when a new named command is encountered
+     **/
+    public void addNamedCommand(String name, int line, Command c) 
+    		throws IOException
+    {
+	if (namedCommands.get(name) != null) {
+	    throw new IOException("Named command \"" + name
+				       + "\" already exists.");
+	}
+	namedCommands.put(name, c);
+    }
+
+    /**
      * Called when a new command is encountered.
      **/
     public void addCommand(Command command, int line) {
@@ -208,7 +225,7 @@ public class ShowBuilder {
      * character "*", which cannot be escaped.
      **/
     public void setExported(String[] segments, String[] features, 
-    			    String[] handlers) 
+    			    String[] handlers, String[] namedCommands) 
 		throws IOException
     {
 	if (exportedSegments != null) {
@@ -218,6 +235,7 @@ public class ShowBuilder {
 	exportedSegments = Arrays.asList(segments);
 	exportedFeatures = Arrays.asList(features);
 	exportedRCHandlers = Arrays.asList(handlers);
+	exportedNamedCommands = Arrays.asList(namedCommands);
     }
 
     /**
@@ -239,6 +257,13 @@ public class ShowBuilder {
      **/
     public Segment getNamedSegment(String name) {
 	return namedSegments.get(name);
+    }
+
+    /**
+     * Look up a command in the list of all named commands.
+     **/
+    public Command getNamedCommand(String name) {
+	return namedCommands.get(name);
     }
 
     /** 
@@ -275,8 +300,17 @@ public class ShowBuilder {
 	Hashtable publicRCHandlers 
 		= findPublic(namedRCHandlers, namedRCHandlers.keySet(),
 			     exportedRCHandlers, "RC Handler");
+	Hashtable publicNamedCommands 
+		= findPublic(namedCommands, namedCommands.keySet(),
+			     exportedNamedCommands, "Named Command");
+	{
+	    Collection<Command> v = namedCommands.values();
+	    Command[] a = (Command[]) v.toArray(new Command[v.size()]);
+	    show.setNamedCommands(a);
+	}
 	show.buildShow(segments, features, rcHandlers, stickyImages,
-		       publicSegments, publicFeatures, publicRCHandlers);
+		       publicSegments, publicFeatures, publicRCHandlers,
+		       publicNamedCommands);
 	if (binaryGrinFileName != null) {
 	    show.setBinaryGrinFileName(binaryGrinFileName);
 	}

@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -52,45 +51,95 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package com.hdcookbook.grin.commands;
 
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
-
 /**
- * Command to indicate that the current segment is done.  This causes
- * the segement to execute the commands from its next clause, which
- * will typically contain a command to move to a different segment.
- * This is useful for things like reacting when a set of assets finishes
- * loading.
- *
- * @author Bill Foote (http://jovial.com)
- */
-public class SegmentDoneCommand extends Command implements Node {
+ * This command is a reference to one of the shows named_command structures.
+ * It a reference to either a single command, or to a GrinXHelper.COMMAND_LIST.
+ * When the binary file is written out, SERunNamedCommand instances go away;
+ * they are simply replaced by their target.
+ **/
 
-    public SegmentDoneCommand(Show show) {
+public class SERunNamedCommand extends Command implements SENode {
+
+    private Command target;
+
+    public SERunNamedCommand(SEShow show) {
         super(show);
     }
-    
-    public void execute() {
-	// This command only makes sense inside a show, so
-	// we are being called within Show.nextFrame(),
-	// with the show lock held.  That means we don't have to
-	// worry about a race condition with the show moving to
-	// a different segment before this gets executed.
-	show.doSegmentDone();
+
+    public void setTarget(Command target) {
+	this.target = target;
     }
- 
-    public void readInstanceData(GrinDataInputStream in, int length) 
+
+    public Command getTarget() {
+	return target;
+    }
+
+    public void execute(Show caller) {
+	target.execute(caller);
+    }
+
+    public void execute() {
+	if (Debug.ASSERT) {
+	    Debug.assertFail();
+	}
+    }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work.  
+     * This is included for completeness, but the binary writer and
+     * GrinXHelper make sure that all SERunNamedCommand instances are
+     * resolved to their target before any comparision.
+     **/
+    public boolean equals(Object other) {
+	if (this == other) {
+	    return true;
+	} else if (!this.getClass().equals(other.getClass())) {
+	    return false;
+	}
+	SERunNamedCommand o = (SERunNamedCommand) other;
+	return this.show == o.show && this.target == o.target;
+    }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work.
+     *
+     * @see #equals(Object)
+     **/
+    public int hashCode() {
+	return target.hashCode() * 17;
+    }
+
+    public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException 
     {
-        in.readSuperClassData(this);
-        // nothing to do...
+	if (Debug.ASSERT) {
+	    Debug.assertFail();
+	    	// We're special-cased in GrinDataOutputStream
+	}
+	throw new IOException("Internal error");
     }
-    
+
+    public String getRuntimeClassName() {
+	if (Debug.ASSERT) {
+	    Debug.assertFail();
+	    	// We're special-cased in GrinDataOutputStream
+	}
+	return null;
+    }
+
+    public void accept(SEShowVisitor visitor) {
+        visitor.visitRunNamedCommand(this);
+    }
 }

@@ -55,6 +55,7 @@
 
 package com.hdcookbook.grin;
 
+import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.util.Debug;
 
@@ -108,6 +109,26 @@ public class Director {
 	    Debug.assertFail("Feature \"" + name + "\" not found.");
 	}
 	return f;
+    }
+
+    /**
+     * Get the named public command (or command list) from the show we're
+     * managing.  If not found and if we're in debug mode, trigger an assertion
+     * failure.  This method does a search through the show's named commands
+     * using a hashtable lookup, so it shouldn't be called too frequently;
+     * it's best used during initialization.
+     * <p>
+     * The returned Command
+     * object can be used in a call to runCommand(Command) on the show
+     * from whene it came.  If you send a named command to a different
+     * show, the results are undefined.
+     **/
+    public Command getNamedCommand(String name) {
+	Command c = getShow().getNamedCommand(name);
+	if (Debug.ASSERT && c == null) {
+	    Debug.assertFail("Named command \"" + name + "\" not found.");
+	}
+	return c;
     }
 
     /**

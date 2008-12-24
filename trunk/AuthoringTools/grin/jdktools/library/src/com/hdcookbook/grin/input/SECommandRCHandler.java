@@ -60,7 +60,10 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
-public class SECommandRCHandler extends CommandRCHandler implements SENode {
+public class SECommandRCHandler 
+		extends CommandRCHandler 
+		implements SENode, SERCHandler 
+{
     
     public SECommandRCHandler(String name, int mask, boolean wantKeypress,
     			     Command[] commands) 
@@ -96,6 +99,29 @@ public class SECommandRCHandler extends CommandRCHandler implements SENode {
     public void setCommands(Command[] commands) {
         this.commands = commands;
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public int getKeyPressedInterestMask() {
+	if (wantKeypress) {
+	    return mask;
+	} else {
+	    return 0;
+	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public int getKeyReleasedInterestMask() {
+	if (wantKeypress) {
+	    return 0;
+	} else {
+	    return mask;
+	}
+    }
+
     
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException {

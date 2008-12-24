@@ -222,16 +222,16 @@ public class SEShowCommands  {
         StringBuffer generated = new StringBuffer();
         if (commands != null) {
             // first, command switch statement\
-            generated.append("    public void execute() {\n");
+            generated.append("    public void execute(com.hdcookbook.grin.Show caller) {\n");
             generated.append("        switch (commandNumber) {\n");
             for (int i = 0; i < commands.size(); i++) {
-                generated.append("            case " + i + ": grinCommand" + i + "();    break;\n");
+                generated.append("            case " + i + ": grinCommand" + i + "(caller);    break;\n");
             }
             generated.append("        }\n");
             generated.append("    }\n\n");
 
             for (int i = 0; i < commands.size(); i++) {
-                generated.append("    private void grinCommand" + i + "() {\n");
+                generated.append("    private void grinCommand" + i + "(com.hdcookbook.grin.Show grinCaller) {\n");
                 generated.append("        " + commands.get(i).getJavaSource(forXlet) + "\n");
                 generated.append("    }\n\n");
             }

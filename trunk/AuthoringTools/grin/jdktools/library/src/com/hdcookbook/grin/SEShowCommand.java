@@ -56,6 +56,7 @@
 package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
@@ -99,7 +100,7 @@ public class SEShowCommand extends Command implements SENode {
     public String addSubCommand(Command cmd) {
         int num = subCommands.size();
         subCommands.add(cmd);
-        return "runSubCommand(" + num + ");";
+        return "runSubCommand(" + num + ", grinCaller);";
     }
     
     public int getCommandNumber() {
@@ -167,8 +168,11 @@ public class SEShowCommand extends Command implements SENode {
     public void setOriginalSource(String originalSource) {
 	 this.originalSource = originalSource;
     }
-    
-    public void execute() {
+   
+    /**
+     * @inheritDoc
+     **/
+    public void execute(Show caller) {
 	if (!triedSeCommand) {
 	    triedSeCommand = true;
 	    Class cl = container.getCommandClass();
@@ -189,7 +193,7 @@ public class SEShowCommand extends Command implements SENode {
 	}
 	if (seCommand != null) {
 	    try {
-		seCommand.execute();
+		seCommand.execute(caller);
 	    } catch (Throwable t) {
 		System.out.println("***  Error executing command:  ");
 		t.printStackTrace();
@@ -197,6 +201,15 @@ public class SEShowCommand extends Command implements SENode {
 	    }
 	} else {
 	    System.out.println("executing command:  " + xletMethodBody);
+	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void execute() {
+	if (Debug.ASSERT) {
+	    Debug.assertFail();
 	}
     }
 

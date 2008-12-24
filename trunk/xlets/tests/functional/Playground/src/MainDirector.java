@@ -70,6 +70,7 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.animator.AnimationClient; 
 import com.hdcookbook.grin.animator.AnimationContext;
+import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.Group;
@@ -363,6 +364,16 @@ public class MainDirector extends Director {
 	    while (System.currentTimeMillis() < tm) {
 	    }
 	}
+    }
+
+    public void runGotoAssemblyCloneTest(Show caller) {
+	Command c = getNamedCommand("C:GotoAssemblyCloneTest");
+	    // In a real program, we'd probably do the lookup once in an
+	    // initialize method, and store it in an instance variable.
+	getShow().runCommand(c);
+	    // We do queue the command, but since we're executing within
+	    // a command, it'll get run this cycle.  It would also be OK
+	    // to call c.execute(caller).
     }
 
 }

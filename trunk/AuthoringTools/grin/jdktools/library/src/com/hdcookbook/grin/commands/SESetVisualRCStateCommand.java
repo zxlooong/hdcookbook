@@ -69,7 +69,8 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
     }
     
     public SESetVisualRCStateCommand(SEShow show, boolean activated, int state,
-            VisualRCHandler handler, boolean runCommands) {
+            VisualRCHandler handler, boolean runCommands) 
+    {
         super(show, activated, state, handler, runCommands);
     }
     
@@ -100,6 +101,37 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
     
     public void setRunCommands(boolean runCommands) {
         this.runCommands = runCommands;
+    }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work
+     **/
+    public boolean equals(Object other) {
+	if (this == other) {
+	    return true;
+	} else if (!this.getClass().equals(other.getClass())) {
+	    return false;
+	}
+	SESetVisualRCStateCommand o = (SESetVisualRCStateCommand) other;
+	return this.show == o.show
+	       && this.activated == o.activated
+	       && this.state == o.state
+	       && this.handler == o.handler
+	       && this.runCommands == o.runCommands;
+    }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work
+     **/
+    public int hashCode() {
+	int result = state << 8;
+	if (runCommands) {
+	    result = result + 7;
+	}
+	if (activated) {
+	    result = result + 11;
+	}
+	return show.hashCode() ^ handler.hashCode() ^ result;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) 

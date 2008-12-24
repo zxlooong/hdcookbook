@@ -107,7 +107,7 @@ public abstract class RCHandler {
      *
      * @return true if the keypress is used
      **/
-    abstract public boolean handleKeyPressed(RCKeyEvent ke);
+    abstract public boolean handleKeyPressed(RCKeyEvent ke, Show caller);
     
     /** 
      * Handle a remote control key release.  This is not supported on
@@ -119,7 +119,7 @@ public abstract class RCHandler {
      *
      * @return true if the keypress is used
      **/
-    abstract public boolean handleKeyReleased(RCKeyEvent ke);
+    abstract public boolean handleKeyReleased(RCKeyEvent ke, Show caller);
    
     /** 
      * @return true if something is done with the mouse

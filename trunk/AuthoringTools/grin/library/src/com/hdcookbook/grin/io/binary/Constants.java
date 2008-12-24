@@ -61,7 +61,7 @@ package com.hdcookbook.grin.io.binary;
 class Constants {
  
 	static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
-	static final int GRINSCRIPT_VERSION = 21;
+	static final int GRINSCRIPT_VERSION = 22;
 	
         /**
          * Make sure to change BinaryWriter.recordBuiltInClasses()
@@ -93,7 +93,8 @@ class Constants {
         static final byte INT_ARRAY_CONSTANTS_IDENTIFIER   = (byte) 0xe1;
         static final byte RECTANGLE_CONSTANTS_IDENTIFIER   = (byte) 0xe2;
         static final byte RECTANGLE_ARRAY_CONSTANTS_IDENTIFIER = (byte) 0xe3;
-        static final byte EXTENSION_CLASSES_IDENTIFIER = (byte) 0xe4;
+        static final byte COMMAND_ARRAY_CONSTANTS_IDENTIFIER = (byte) 0xe4;
+        static final byte EXTENSION_CLASSES_IDENTIFIER = (byte) 0xe5;
 
         static final byte NULL = (byte) 0xff;
         static final byte NON_NULL = (byte) 0xee;

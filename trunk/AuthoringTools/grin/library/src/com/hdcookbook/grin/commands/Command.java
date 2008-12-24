@@ -67,6 +67,11 @@ import com.hdcookbook.grin.Show;
  * with the show lock held, at a time when it's OK to update the show's model.
  * They can be executed from the animation thread within Show.nextFrame(), and
  * the can also be executed from within a remote control key handler.
+ * <p>
+ * If you make an extension command, and if you want equivalent command objects
+ * to be canonicalized (that is, collapsed into one object), the Java SE 
+ * version of that command class should override 
+ * <code>Object.equals(Object)</code> and <code>Object.hashCode()</code>.
  *
  * @see com.hdcookbook.grin.Show#nextFrame()
  *
@@ -80,6 +85,19 @@ public abstract class Command {
         this.show = show;
     }
  
+    /**
+     * Execute the command.  This causes the command to take
+     * whatever action it was created to do.  By default, this calls
+     * execute().
+     *
+     * @param caller The show that is executing this command.  This might
+     *		     not be the same as the show this command was created
+     * 		     under.
+     **/
+    public void execute(Show caller) {
+	execute();
+    }
+
     /**
      * Execute the command.  This causes the command to take
      * whatever action it was created to do.

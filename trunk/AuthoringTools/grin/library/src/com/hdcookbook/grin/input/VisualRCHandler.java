@@ -115,7 +115,7 @@ public class VisualRCHandler extends RCHandler implements Node {
      **/
     public final static int GRID_ACTIVATE = 0xffff;
 
-    private static int MASK = RCKeyEvent.KEY_UP.getBitMask()
+    protected static int MASK = RCKeyEvent.KEY_UP.getBitMask()
     				| RCKeyEvent.KEY_DOWN.getBitMask()
     				| RCKeyEvent.KEY_RIGHT.getBitMask()
     				| RCKeyEvent.KEY_LEFT.getBitMask()
@@ -218,7 +218,7 @@ public class VisualRCHandler extends RCHandler implements Node {
     /**
      * @inheritDoc
      **/
-    public boolean handleKeyPressed(RCKeyEvent ke) {
+    public boolean handleKeyPressed(RCKeyEvent ke, Show caller) {
 	if ((ke.getBitMask() & MASK) == 0) {
 	    return false;
 	}
@@ -253,7 +253,7 @@ public class VisualRCHandler extends RCHandler implements Node {
     /**
      * @inheritDoc
      **/
-    public boolean handleKeyReleased(RCKeyEvent ke) {
+    public boolean handleKeyReleased(RCKeyEvent ke, Show caller) {
 	// ignored
 	return false;
     }

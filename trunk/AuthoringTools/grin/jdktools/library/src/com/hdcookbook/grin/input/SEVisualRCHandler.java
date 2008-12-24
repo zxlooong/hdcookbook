@@ -65,7 +65,11 @@ import com.hdcookbook.grin.io.builders.VisualRCHandlerHelper;
 import java.awt.Rectangle;
 import java.io.IOException;
 
-public class SEVisualRCHandler extends VisualRCHandler implements SENode {
+public class SEVisualRCHandler 
+		extends VisualRCHandler 
+		implements SENode, SERCHandler
+{
+
     private VisualRCHandlerHelper helper;
 
     public SEVisualRCHandler(SEShow show, VisualRCHandlerHelper helper) {
@@ -238,7 +242,21 @@ public class SEVisualRCHandler extends VisualRCHandler implements SENode {
 	this.activateFeatures = activateFeatures;
 	// activating this handler can change its state
     }
-        
+
+    /**
+     * @inheritDoc
+     **/
+    public int getKeyPressedInterestMask() {
+	return VisualRCHandler.MASK;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public int getKeyReleasedInterestMask() {
+	return 0;
+    }
+
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException {
         

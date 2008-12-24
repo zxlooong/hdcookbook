@@ -55,8 +55,10 @@
 
 package com.hdcookbook.grin.input;
 
-import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Node;
+import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
@@ -70,11 +72,13 @@ import java.awt.event.KeyEvent;
 
 /**
  * This class is used to manage constants related to the remote
- * control keys.
+ * control keys.  Instances of RCKeyEvent can be queued as GRIN
+ * commands; when they are executed, the show will process the
+ * keystroke.
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class RCKeyEvent {
+public class RCKeyEvent extends Command {
     
     public static RCKeyEvent KEY_0;
     public static RCKeyEvent KEY_1;
@@ -215,17 +219,29 @@ public class RCKeyEvent {
     private String name;    // human-readable name, used in script file
     private int keyCode;    // java.awt.event.KeyEvent.getKeyCode()
     private int mask;       // Mask value that we assign
+
+    private RCKeyEvent keyReleased;
+	// The key released event for this key.  If this instance represents
+	// a key pressed event, this will be null, or a value that's != this.
+	// If this instance represents a key released event, 
+	// "keyReleased == this" will be true.
     
     private RCKeyEvent(String name, int keyCode, int mask) {
+	super(null);	// The show data member of Command will be null
         this.name = name;
         this.keyCode = keyCode;
         this.mask = mask;
         keyByName.put(name, this);
     }
 
+        // constructor for key released instances.  See getKeyReleased().
+    private RCKeyEvent() {
+	super(null);
+    }
+
     /**
      * Get a developer-friendly name of this key event.
-     * Used for debugging.
+     * Useful for debugging.
      **/
     public String getName() {
 	return name;
@@ -251,12 +267,58 @@ public class RCKeyEvent {
     }
 
     /**
+     * Return true if this is represents key press, and false if it represents
+     * a key release.
+     **/
+    public boolean isKeyPress() {
+	return keyReleased != this;	// see keyReleased comment above
+    }
+
+    /**
+     * Give the RCKeyEvent for this VK code that represents a key release.
+     **/
+    public synchronized RCKeyEvent getKeyReleased() {
+	if (this.keyReleased == null) {
+	    this.keyReleased = new RCKeyEvent();	// doesn't add to table
+	    keyReleased.name = this.name;
+	    keyReleased.keyCode = this.keyCode;
+	    keyReleased.mask = this.mask;
+	    keyReleased.keyReleased = this.keyReleased;
+	}
+	return keyReleased;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void execute(Show caller) {
+	if (isKeyPress()) {
+	    caller.internalHandleKeyPressed(this, caller);
+	} else {
+	    caller.internalHandleKeyReleased(this, caller);
+	}
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void execute() {
+	if (Debug.ASSERT) {
+	    Debug.assertFail();
+	}
+    }
+
+    /**
      * Look up the RCKeyEvent corresponding to a VK_ key code.
      * This method is very fast and creates no garbage.  It
      * uses a perfect hash function, an idea I lifted from
      * http://www.onjava.com/pub/a/onjava/2001/01/25/hash_functions.html
+     * <p>
+     * This returns the RCKeyEvent corresponding to a key press.  
      *
      * @return The RCKeyEvent, or null if there's no corresponding event
+     *
+     * @see #getKeyReleased()
      **/
     public static RCKeyEvent getKeyByEventCode(int key) {
 	RCKeyEvent result = keyByEventCode[key % keyByEventCode.length];

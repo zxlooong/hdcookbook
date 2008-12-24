@@ -60,6 +60,7 @@ import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.SEActivatePartCommand;
 import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
+import com.hdcookbook.grin.commands.SERunNamedCommand;
 import com.hdcookbook.grin.commands.SEResetFeatureCommand;
 import com.hdcookbook.grin.commands.SESegmentDoneCommand;
 import com.hdcookbook.grin.commands.SESyncDisplayCommand;
@@ -132,6 +133,7 @@ public interface SEShowVisitor {
     public void visitActivateSegmentCommand(SEActivateSegmentCommand command);
     public void visitSegmentDoneCommand(SESegmentDoneCommand command);
     public void visitSyncDisplayCommand(SESyncDisplayCommand command);
+    public void visitRunNamedCommand(SERunNamedCommand command);
     public void visitSetVisualRCStateCommand(SESetVisualRCStateCommand command);
     public void visitResetFeatureCommand(SEResetFeatureCommand command);
     public void visitShowCommand(SEShowCommand command);

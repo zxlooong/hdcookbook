@@ -61,6 +61,7 @@ import com.hdcookbook.grin.input.RCHandler;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -78,6 +79,7 @@ public class SEShow extends Show {
     private Map<String, Segment> privateSegments = null;
     private Object internalMonitor = new Object();
     private SEShowCommands showCommands = new SEShowCommands(this);
+    private Command[] namedCommands;
 
     // For mosaic building.
     private ArrayList<MosaicSpec> mosaicSpecs = new ArrayList();
@@ -142,6 +144,11 @@ public class SEShow extends Show {
     public Segment[] getSegments() {
 	return segments;
     }
+
+    public Hashtable getPublicNamedCommands() {
+	return publicNamedCommands;
+    }
+
 
     /**
      * Get all of the features in the show
@@ -211,6 +218,10 @@ public class SEShow extends Show {
 	}
     }
 
+    public void setNamedCommands(Command[] namedCommands) {
+	this.namedCommands = namedCommands;
+    }
+
     /**
      * @inheritDoc
      * <p>
@@ -221,11 +232,13 @@ public class SEShow extends Show {
     public void buildShow(Segment[] segments, Feature[] features, 
     		          RCHandler[] rcHandlers, String[] stickyImages,
 		          Hashtable publicSegments, Hashtable publicFeatures,
-		          Hashtable publicRCHandlers)
+		          Hashtable publicRCHandlers, 
+			  Hashtable publicNamedCommands)
 	    throws IOException
     {
 	super.buildShow(segments, features, rcHandlers, stickyImages,
-		        publicSegments, publicFeatures, publicRCHandlers);
+		        publicSegments, publicFeatures, publicRCHandlers,
+			publicNamedCommands);
 	SEDoubleUseChecker checker = new SEDoubleUseChecker();
 	accept(checker);
 	checker.reportAnyProblems();
@@ -409,4 +422,5 @@ public class SEShow extends Show {
         
         out.println();        
     }
+
 }

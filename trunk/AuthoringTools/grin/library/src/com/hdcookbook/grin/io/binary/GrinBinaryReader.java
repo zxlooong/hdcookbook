@@ -171,8 +171,9 @@ public class GrinBinaryReader {
     private Feature[] featureList;
     private RCHandler[] rcHandlerList;
     private Segment[] segmentList;
+    private Command[] commandList;
     Hashtable publicSegments = new Hashtable();
-    Hashtable publicFeatures= new Hashtable();
+    Hashtable publicFeatures = new Hashtable();
     Hashtable publicRCHandlers = new Hashtable();
     
     private InputStream stream;
@@ -181,6 +182,7 @@ public class GrinBinaryReader {
     private int[][]  intArrayConstants = null;
     private Rectangle[] rectangleConstants;
     private Rectangle[][] rectangleArrayConstants;
+    private Command[][] commandArrayConstants;
 
     private GrinXHelper showCommands = null;
 
@@ -262,6 +264,25 @@ public class GrinBinaryReader {
         }
         
     }
+    
+    /**
+     * Returns an instace of a Command that corresponds to the index number
+     * that this GrinBinaryReader keeps track of.
+     * This method is expected to be used by the user defined ExtensionsReader class.
+     * 
+     * @param index     The index number for the command.
+     * @return          The Command corresponding to the index number
+     * 
+     * @see GrinBinaryWriter#getCommandIndex(Command)
+     */
+    Command getCommandFromIndex(int index) throws IOException {
+        if (index < 0 || index > commandList.length) {
+            throw new IOException("non-existing command reference " + index);
+        }  else {
+            return commandList[index];
+        }
+        
+    }
 
     int[] getIntArrayFromReference(int index) throws IOException {
         if (index < 0 || index > intArrayConstants.length) {
@@ -292,6 +313,14 @@ public class GrinBinaryReader {
 	    throw new IOException("bad rectangle array reference");
 	} else {
 	    return rectangleArrayConstants[index];
+	}
+    }
+
+    Command[] getCommandArrayFromReference(int index) throws IOException {
+	if (index < 0 || index > commandArrayConstants.length) {
+	    throw new IOException("bad command array reference");
+	} else {
+	    return commandArrayConstants[index];
 	}
     }
     
@@ -329,18 +358,23 @@ public class GrinBinaryReader {
 	rectangleConstants = readRectangleConstants(in);
 	rectangleArrayConstants = readRectangleArrayConstants(in);
 	extensionConstructors = readExtensionConstructors(in);
-       
-        int showSegmentStackDepth = in.readInt();
-	String[] showDrawTargets = in.readStringArray();
-        String[] stickyImages = in.readStringArray();
-        show.setSegmentStackDepth(showSegmentStackDepth);
-	show.setDrawTargets(showDrawTargets);
-        debuggable = in.readBoolean();
-            
-        // Read in the show file
+
 	readShowCommandsClass(in);
         showCommands = instantiateShowCommandsCmd();
         
+	commandList = new Command[in.readInt()];
+	readDeclarations(in, commandList);
+	commandArrayConstants = readCommandArrayConstants(in);
+       
+        int showSegmentStackDepth = in.readInt();
+        show.setSegmentStackDepth(showSegmentStackDepth);
+	String[] showDrawTargets = in.readStringArray();
+	show.setDrawTargets(showDrawTargets);
+        String[] stickyImages = in.readStringArray();
+	Hashtable publicNamedCommands = readPublicNamedCommands(in);
+        debuggable = in.readBoolean();
+            
+        // Read in the show file
 	featureList = new Feature[in.readInt()];
         readDeclarations(in, featureList);
 	rcHandlerList = new RCHandler[in.readInt()];
@@ -350,9 +384,24 @@ public class GrinBinaryReader {
         readContents(in, featureList);
         readContents(in, rcHandlerList);
         readContents(in, segmentList);
+        readContents(in, commandList);
         
 	show.buildShow(segmentList, featureList, rcHandlerList, stickyImages,
-		       publicSegments, publicFeatures, publicRCHandlers);
+		       publicSegments, publicFeatures, publicRCHandlers,
+		       publicNamedCommands);
+    }
+
+    private Hashtable readPublicNamedCommands(GrinDataInputStream in) 
+    		throws IOException 
+    {
+	int num = in.readInt();
+	Hashtable result = new Hashtable(num);
+	for (int i = 0; i < num; i++) {
+	    String key = in.readString();
+	    Command value = getCommandFromIndex(in.readInt());
+	    result.put(key, value);
+	}
+	return result;
     }
 
     private void readDeclarations(GrinDataInputStream in, Object[] list)
@@ -511,6 +560,25 @@ public class GrinBinaryReader {
         return array;
     }
 
+    private Command[][] readCommandArrayConstants(GrinDataInputStream in) 
+	    throws IOException 
+    {
+        checkValue(in.readByte(),
+                Constants.COMMAND_ARRAY_CONSTANTS_IDENTIFIER,
+                "Command array constants identifier");        
+        int length = in.readInt();
+        Command[][] array = new Command[length][];
+	array[0] = null;
+        for (int i = 1; i < length; i++) {
+	    Command[] row = new Command[in.readInt()];
+	    array[i] = row;
+	    for (int j = 0; j < row.length; j++) {
+		row[j] = getCommandFromIndex(in.readInt());
+	    }
+        }
+        return array;
+    }
+
     private Constructor[] readExtensionConstructors(GrinDataInputStream in) 
     		throws IOException 
     {
@@ -587,18 +655,12 @@ public class GrinBinaryReader {
         return strings;
     }
 
-    Command[] readCommands(GrinDataInputStream in) 
-	    throws IOException 
-    {
-        if (in.isNull()) {
-           return null;
-        }
-
-	Command[] commands = new Command[in.readInt()];
-        readDeclarations(in, commands);
-        readContents(in, commands);
-       
-        return commands;
+    Command[] getCommandArrayFromIndex(int index) throws IOException  {
+        if (index < 0 || index > commandArrayConstants.length) {
+            throw new IOException("non-existing command array reference");
+        }  else {
+	    return commandArrayConstants[index];
+	}
     }
 
     private GrinXHelper instantiateShowCommandsCmd() 

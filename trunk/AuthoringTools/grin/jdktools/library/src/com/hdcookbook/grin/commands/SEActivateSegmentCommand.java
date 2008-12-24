@@ -77,6 +77,39 @@ public class SEActivateSegmentCommand extends ActivateSegmentCommand implements 
     public void setPop(boolean pop) {
         this.pop = pop;
     }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work
+     **/
+    public boolean equals(Object other) {
+	if (this == other) {
+	    return true;
+	} else if (!this.getClass().equals(other.getClass())) {
+	    return false;
+	}
+	SEActivateSegmentCommand o = (SEActivateSegmentCommand) other;
+	return this.show == o.show
+	       && this.push == o.push
+	       && this.pop == o.pop
+	       && this.segment == o.segment;
+    }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work
+     **/
+    public int hashCode() {
+	int result = 0;
+	if (pop) {
+	    result += 0x0f1;
+	}
+	if (push) {
+	    result += 0xf0;
+	}
+	if (segment != null)  {
+	    result ^= segment.hashCode();
+	}
+	return show.hashCode() ^ result;
+    }
     
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException {

@@ -86,7 +86,6 @@ after any target is built.
 	    <arg value="${show.director}"/>
             <arg value="${show.file}.txt"/>
         </jdktools.java>
-	<antcall target="post-run-grinview"/>
     </target>
     
 </project>

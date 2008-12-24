@@ -56,11 +56,12 @@ package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.input.SERCHandler;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
 public class SESegment extends Segment implements SENode {
-    
+
     public SESegment(String name, Feature[] active, Feature[] setup,
     		 RCHandler[] rcHandlers, Command[] onEntryCommands,
 		 boolean nextOnSetupDone, Command[] nextCommands) 
@@ -73,7 +74,7 @@ public class SESegment extends Segment implements SENode {
 	this.onEntryCommands = onEntryCommands;
 	this.nextOnSetupDone = nextOnSetupDone;
 	this.nextCommands = nextCommands;
-	this.rcHandlers = rcHandlers;
+	this.setRCHandlers(rcHandlers);
     }
     
    public void setName(String name) {
@@ -98,8 +99,17 @@ public class SESegment extends Segment implements SENode {
     
     public void setRCHandlers(RCHandler[] rcHandlers) {
         this.rcHandlers = rcHandlers;
+	int pressedMask = 0;
+	int releasedMask = 0;
+	for (int i = 0; i < rcHandlers.length; i++) {
+	    SERCHandler h = (SERCHandler) rcHandlers[i];
+	    pressedMask = pressedMask | h.getKeyPressedInterestMask();
+	    releasedMask = releasedMask | h.getKeyReleasedInterestMask();
+	}
+	this.rcPressedInterest = pressedMask;
+	this.rcReleasedInterest = releasedMask;
     }
-    
+
     
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException 
@@ -110,7 +120,9 @@ public class SESegment extends Segment implements SENode {
         out.writeRCHandlersArrayReference(getRCHandlers());
         out.writeCommands(getOnEntryCommands());
         out.writeBoolean(getNextOnSetupDone());
-        out.writeCommands(getNextCommands());        
+        out.writeCommands(getNextCommands());
+	out.writeInt(rcPressedInterest);
+	out.writeInt(rcReleasedInterest);
     }
 
     public String getRuntimeClassName() {

@@ -20,6 +20,8 @@ exports
 	F:SM.Text
 	F:SM.Arc
     } handlers {
+    } named_commands {
+	C:GotoAssemblyCloneTest
     }
 ;
 
@@ -27,6 +29,7 @@ java_generated_class MainShowCommands [[
 
     import com.hdcookbook.grin.Show;
     import com.hdcookbook.grin.GrinXHelper;
+    import com.hdcookbook.grin.util.Debug;
     import java.util.Random;
 
     public class MainShowCommands extends GrinXHelper {
@@ -117,12 +120,28 @@ rc_handler key_pressed H:4 { 4 } execute {
     ]]
 } ;
 
-rc_handler key_pressed H:5 { 5 } execute {
+named_command C:GotoFadeTest {
 	activate_segment S:FadeTest ;
 } ;
 
-rc_handler key_pressed H:6 { 6 } execute {
+rc_handler key_pressed H:5 { 5 } execute {
+	run_named_commands C:GotoFadeTest ;
+		# That's right above us; we do this just as a test of
+		# named commands with one command in the list.
+} ;
+
+named_command C:GotoAssemblyCloneTest {
 	activate_segment S:AssemblyCloneTest ;
+	java_command [[ Debug.println("Running assemby clone test"); ]]
+} ;
+
+rc_handler key_pressed H:6 { 6 } execute {
+	java_command [[ 
+	    getMainDirector().runGotoAssemblyCloneTest(grinCaller); 
+	]]
+	# That's right above us; we do this just as a test of
+	# looking up named commands from Java, and a named command
+	# list with > 1 commands on it.
 } ;
 
 rc_handler key_pressed H:7 { 7 } execute {

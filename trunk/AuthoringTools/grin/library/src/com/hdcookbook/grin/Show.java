@@ -120,6 +120,7 @@ public class Show implements AnimationClient {
     protected Hashtable publicSegments;
     protected Hashtable publicFeatures;
     protected Hashtable publicRCHandlers;
+    protected Hashtable publicNamedCommands;
 
     /**
      * This is the set of images that are "sticky".  Sticky images get
@@ -188,7 +189,8 @@ public class Show implements AnimationClient {
     public void buildShow(Segment[] segments, Feature[] features, 
     		          RCHandler[] rcHandlers, String[] stickyImages,
 		          Hashtable publicSegments, Hashtable publicFeatures,
-		          Hashtable publicRCHandlers)
+		          Hashtable publicRCHandlers, 
+			  Hashtable publicNamedCommands)
 	    throws IOException 
     {
 	this.segments = segments;
@@ -208,6 +210,7 @@ public class Show implements AnimationClient {
 	this.publicSegments = publicSegments;
 	this.publicFeatures = publicFeatures;
 	this.publicRCHandlers = publicRCHandlers;
+	this.publicNamedCommands = publicNamedCommands;
 	
 	for (int i = 0; i < rcHandlers.length; i++) {
 	    rcHandlers[i].setShow(this);
@@ -346,6 +349,18 @@ public class Show implements AnimationClient {
      **/
     public Feature getFeature(String name) {
 	return (Feature) publicFeatures.get(name);
+    }
+
+    /**
+     * Look up the given public named command or command list.  This Command
+     * object can be used in a call to runCommand(Command) on the show
+     * from whene it came.  If you send a named command to a different
+     * show, the results are undefined.
+     *
+     * @return the Command, or null
+     **/
+    public Command getNamedCommand(String name) {
+	return (Command) publicNamedCommands.get(name);
     }
    
     /**
@@ -571,7 +586,7 @@ public class Show implements AnimationClient {
 	while (!deferringPendingCommands && !pendingCommands.isEmpty()) {
 	    Command c = (Command) pendingCommands.remove();
 	    if (c != null) {
-		c.execute();	// Can call deferNextCommands()
+		c.execute(this);	// Can call deferNextCommands()
 	    }
 	}
     }
@@ -601,13 +616,17 @@ public class Show implements AnimationClient {
     public synchronized void doActivateSegment(Segment newS) {
 	// We know the lock is being held, and a command is being executed
 	Segment old = currentSegment;
-	currentSegment = newS;
+	synchronized(pendingCommands) {
+	    currentSegment = newS;
+	    	// Needed for RC key processing, since we don't want to
+		// take out the show lock when receiving an RC event.
+	}
 	currentSegment.activate(old);
 	director.notifySegmentActivated(newS, old);
     }
 
     /**
-     * This is called from SegmentDoneCommand, and should not be
+     * This is called from GrinXHelper(SEGMENT_DONE), and should not be
      * called from anywhere else.
      **/
     // We know the lock is being held, and a command is being executed
@@ -709,46 +728,96 @@ public class Show implements AnimationClient {
 
     /**
      * Called by the xlet when a key press is received.
+     * <p>
+     * A key pressis queued and true is returned only if the current
+     * segment uses that key press  It is possible that the show will have
+     * a different current segment by the time the key press is processed, so
+     * there's some chance that a key press won't be queued, even if it is of
+     * interest to the state the show's about to be in.  This should almost
+     * always be harmless, but if you wish to capture all key presses in your
+     * show, you can populate the needed segments with a key_pressed
+     * rc_handler with an empty body that captures all keys.
      *
-     * @return true	If the key press is handled
+     * @return true	If the key press is enqueued, and thus is expected to
+     *			be used.
      **/
-    public synchronized boolean handleKeyPressed(int vkCode) {
-	if (currentSegment == null) {
-	    return false;
+    public boolean handleKeyPressed(int vkCode) {
+	synchronized(pendingCommands) {
+	    if (currentSegment == null) {
+		return false;
+	    }
+	    RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
+	    if (re == null) {
+		return false;
+	    }
+	    if ((currentSegment.rcPressedInterest & re.getBitMask()) == 0) {
+		return false;
+	    }
+	    pendingCommands.add(re);
 	}
-	if (!waitForInputOK()) {
-	    return false;
+	return true;
+    }
+
+    /**
+     * This is an implementation method, called by RCKeyEvent
+     **/
+    public synchronized void 
+    internalHandleKeyPressed(RCKeyEvent re, Show caller) {
+	if (currentSegment != null) {
+	    currentSegment.handleKeyPressed(re, caller);
 	}
-	RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
-	if (re == null) {
-	    return false;
-	}
-	return currentSegment.handleKeyPressed(re);
     }
 
     /**
      * Called by the xlet when a key release is received.  Note that not
      * all devices generate a key released.
+     * <p>
+     * A key release is queued and true is returned only if the current
+     * segment uses that key release.  It is possible that the show will have
+     * a different current segment by the time the key release is processed, so
+     * there's some chance that a key release won't be queued, even if it is of
+     * interest to the state the show's about to be in.  This should almost
+     * always be harmless, but if you wish to capture all key releases in your
+     * show, you can populate the needed segments with a key_released 
+     * rc_handler with an empty body that captures all keys.
      *
-     * @return true	If the keypress is handled
+     * @return true	If the key release is enqueued, and thus is expected to
+     *			be used.
      **/
-    public synchronized boolean handleKeyReleased(int vkCode) {
-	if (currentSegment == null) {
-	    return false;
+    public boolean handleKeyReleased(int vkCode) {
+	synchronized(pendingCommands) {
+	    if (currentSegment == null) {
+		return false;
+	    }
+	    RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
+	    if (re == null) {
+		return false;
+	    }
+	    if ((currentSegment.rcReleasedInterest & re.getBitMask()) == 0) {
+		return false;
+	    }
+	    pendingCommands.add(re.getKeyReleased());
 	}
-	if (!waitForInputOK()) {
-	    return false;
+	return true;
+    }
+
+    /**
+     * This is an implementation method, called by RCKeyEvent
+     **/
+    public synchronized void 
+    internalHandleKeyReleased(RCKeyEvent re, Show caller) {
+	if (currentSegment != null) {
+	    currentSegment.handleKeyReleased(re, caller);
 	}
-	RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
-	if (re == null) {
-	    return false;
-	}
-	return currentSegment.handleKeyReleased(re);
     }
 
     /**
      * Called by the xlet when the mouse moves.  This should be called
      * when a mouse moved event or a mouse dragged event is received.
+     * <p>
+     * Note that mouse events are handled synchronously, unlike remote
+     * control keypresses which are queued within the show.  We assume that
+     * only fast players (like PC players) support mice.
      **/
     public synchronized void handleMouseMoved(int x, int y) {
 	boolean used = false;
@@ -767,6 +836,10 @@ public class Show implements AnimationClient {
    
     /**
      * Called by the xlet when the mouse is clicked.
+     * <p>
+     * Note that mouse events are handled synchronously, unlike remote
+     * control keypresses which are queued within the show.  We assume that
+     * only fast players (like PC players) support mice.
      **/
     public synchronized void handleMouseClicked(int x, int y) {
         if (currentSegment != null) {

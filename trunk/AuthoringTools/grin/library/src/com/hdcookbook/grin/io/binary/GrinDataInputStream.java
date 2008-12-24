@@ -321,9 +321,10 @@ public class GrinDataInputStream extends DataInputStream {
     * @return an array of Commands reconstructed from this stream.
     * @throws java.io.IOException
     */
-   public Command[] readCommands() throws IOException {
-       return binaryReader.readCommands(this);
-   }
+    public Command[] readCommands() throws IOException {
+        int index = readInt();
+	return binaryReader.getCommandArrayFromReference(index);
+    }
    
    /**
     * Checks whether the Object reading is is null or not.

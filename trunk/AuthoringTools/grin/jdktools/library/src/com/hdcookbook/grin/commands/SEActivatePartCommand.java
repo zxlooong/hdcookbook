@@ -87,6 +87,28 @@ public class SEActivatePartCommand extends ActivatePartCommand implements SENode
 	this.assembly = assembly;
 	this.part = part;
     }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work
+     **/
+    public boolean equals(Object other) {
+	if (this == other) {
+	    return true;
+	} else if (!this.getClass().equals(other.getClass())) {
+	    return false;
+	}
+	SEActivatePartCommand o = (SEActivatePartCommand) other;
+	return this.show == o.show
+	       && this.assembly == o.assembly
+	       && this.part == o.part;
+    }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work
+     **/
+    public int hashCode() {
+	return show.hashCode() ^ assembly.hashCode() & part.hashCode();
+    }
     
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException { 

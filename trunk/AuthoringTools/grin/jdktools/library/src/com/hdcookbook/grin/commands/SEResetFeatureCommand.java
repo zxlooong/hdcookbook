@@ -80,6 +80,26 @@ public class SEResetFeatureCommand extends ResetFeatureCommand implements SENode
         return ResetFeatureCommand.class.getName();
     }
 
+    /**
+     * Override of equals and hashCode to make canonicalization work
+     **/
+    public boolean equals(Object other) {
+	if (this == other) {
+	    return true;
+	} else if (!this.getClass().equals(other.getClass())) {
+	    return false;
+	}
+	SEResetFeatureCommand o = (SEResetFeatureCommand) other;
+	return this.show == o.show && this.feature == o.feature;
+    }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work
+     **/
+    public int hashCode() {
+	return show.hashCode() ^ feature.hashCode();
+    }
+
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException 
     { 

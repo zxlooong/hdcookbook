@@ -368,7 +368,6 @@ public final class Main {
             DataOutputStream dos = new DataOutputStream(new FileOutputStream(files[0]));
             GrinBinaryWriter out = new GrinBinaryWriter(show, debug);
             out.writeShow(dos);
-            dos.close();
 
             files[1] = new File(outputDir, baseName + ".xlet.java");
             out.writeCommandClass(show, true, files[1]);

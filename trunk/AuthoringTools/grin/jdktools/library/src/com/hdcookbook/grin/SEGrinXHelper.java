@@ -57,6 +57,8 @@ import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.GrinXHelper;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.commands.SERunNamedCommand;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -80,6 +82,56 @@ public abstract class SEGrinXHelper extends GrinXHelper implements SENode {
 	out.writeInt(commandNumber);
 	out.writeCommands(subCommands);
     }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work
+     **/
+    public boolean equals(Object other) {
+	if (this == other) {
+	    return true;
+	} else if (!this.getClass().equals(other.getClass())) {
+	    return false;
+	}
+	SEGrinXHelper o = (SEGrinXHelper) other;
+	if (this.show != o.show || this.commandNumber != o.commandNumber) {
+	    return false;
+	}
+	if (this.subCommands == o.subCommands) {
+	    return true;
+	} else if (this.subCommands == null || o.subCommands == null) {
+	    return false;
+	} else if (this.subCommands.length != o.subCommands.length) {
+	    return false;
+	}
+	for (int i = 0; i < subCommands.length; i++) {
+	    if (!resolve(this.subCommands[i]).equals(resolve(o.subCommands[i])))
+	    {
+		return false;
+	    }
+	}
+	return true;
+    }
+
+    private Command resolve(Command command) {
+	while (command instanceof SERunNamedCommand) {
+	    command = ((SERunNamedCommand) command).getTarget();
+	}
+	return command;
+    }
+
+    /**
+     * Override of equals and hashCode to make canonicalization work
+     **/
+    public int hashCode() {
+	int result = show.hashCode() + (commandNumber * 11);
+	if (subCommands != null) {
+	    for (int i = 0; i < subCommands.length; i++) {
+		result = result ^ subCommands[i].hashCode();  // ^ is xor
+	    }
+	}
+	return result;
+    }
+
 
     public String getRuntimeClassName() {
         return GrinXHelper.class.getName();

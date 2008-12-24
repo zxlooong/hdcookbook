@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -52,97 +51,26 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package com.hdcookbook.grin.commands;
 
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.Node;
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.input.VisualRCHandler;
-import com.hdcookbook.grin.io.binary.GrinDataInputStream;
-import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
+import com.hdcookbook.grin.SEGrinXHelper;
+import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
+public class SECommandList extends SEGrinXHelper {
 
-/**
- * This command is used to set the state of a visual RC handler.  It's
- * useful when going into a segment that contains such a handler, to
- * put things into a known state.
- *
- * @author Bill Foote (http://jovial.com)
- */
-public class SetVisualRCStateCommand extends Command implements Node {
-    
-    protected boolean activated;
-    protected int state;
-    protected VisualRCHandler handler;
-    protected boolean runCommands;
-
-
-    public SetVisualRCStateCommand(Show show) {
+    public SECommandList(SEShow show, Command[] subCommands) {
         super(show);
-    }
-
-    /**
-     * Constructor for use by xlets that want to set a handler state
-     **/
-    public SetVisualRCStateCommand(Show show, boolean activated, int state, 
-    				   VisualRCHandler handler,
-				   boolean runCommands)  
-    {
-        this(show);
-	this.activated = activated;
-	this.state = state;
-	this.handler = handler;
-	this.runCommands = runCommands;
+	setCommandNumber(COMMAND_LIST);
+	setSubCommands(subCommands);
     }
     
-    public boolean getActivated() {
-        return activated;
-    }
-    
-    public int getState() {
-        return state;
-    }
-    
-    public VisualRCHandler getVisualRCHandler() {
-        return handler;
-    }
-    
-    public boolean getRunCommands() {
-        return runCommands;
-    }
-    
-    public void execute(Show caller) {
-	handler.setState(state, activated, runCommands);
-    }
-
-    public void execute() {
-	if (Debug.ASSERT) {
-	    Debug.assertFail();
+    public void accept(SEShowVisitor visitor) {
+	for (int i = 0; i < subCommands.length; i++) {
+	    ((SENode) subCommands[i]).accept(visitor);
 	}
     }
-
-    public String toString() {
-	if (Debug.LEVEL > 0) {
-	    return super.toString() + " : " + handler 
-				    + " (" + activated + ", " 
-				    + handler.getStateName(state) + ", "
-				    + runCommands + " )";
-	} else {
-	    return super.toString();
-        }
-    }
-    
-    public void readInstanceData(GrinDataInputStream in, int length) 
-            throws IOException {
-                
-        in.readSuperClassData(this);
-        
-        this.activated = in.readBoolean();
-        this.state = in.readInt();
-        this.handler = (VisualRCHandler) in.readRCHandlerReference();
-        this.runCommands = in.readBoolean();
-    }
-    
 }

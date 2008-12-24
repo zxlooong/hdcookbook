@@ -70,7 +70,10 @@ import java.io.IOException;
  * @author Bill Foote (http://jovial.com)
  */
 public class ActivateSegmentCommand extends Command implements Node {
-  
+ 
+    /**
+     * The segment to activate.  In the case of pop, this will be null.
+     **/
     protected Segment segment;
     protected boolean push;
     protected boolean pop;

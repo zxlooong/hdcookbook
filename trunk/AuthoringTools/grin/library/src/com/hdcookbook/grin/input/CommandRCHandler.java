@@ -56,6 +56,7 @@
 package com.hdcookbook.grin.input;
 
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
@@ -80,10 +81,10 @@ public class CommandRCHandler extends RCHandler implements Node {
     /**
      * @inheritDoc
      **/
-    public boolean handleKeyPressed(RCKeyEvent ke) {
+    public boolean handleKeyPressed(RCKeyEvent ke, Show caller) {
 	if (wantKeypress && (ke.getBitMask() & mask) != 0) {
 	    for (int i = 0; i < commands.length; i++) {
-		commands[i].execute();
+		commands[i].execute(caller);
 	    }
 	    return true;
 	} else {
@@ -94,10 +95,10 @@ public class CommandRCHandler extends RCHandler implements Node {
     /**
      * @inheritDoc
      **/
-    public boolean handleKeyReleased(RCKeyEvent ke) {
+    public boolean handleKeyReleased(RCKeyEvent ke, Show caller) {
 	if (!wantKeypress && (ke.getBitMask() & mask) != 0) {
 	    for (int i = 0; i < commands.length; i++) {
-		commands[i].execute();
+		commands[i].execute(caller);
 	    }
 	    return true;
 	} else {

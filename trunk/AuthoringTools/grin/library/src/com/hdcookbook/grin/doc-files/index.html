@@ -143,7 +143,7 @@ Here's BNF describing the syntax of a show file:
 </p>
 <pre>
     show ::= "show" setting*  [ exports ] [ java_generated_class ]
-    	     (segment | feature | rc_handler | mosaic_hint)* 
+    	     ( segment | feature | rc_handler | named_commands | mosaic_hint )* 
     	     "end_show"
 
     setting ::=    segment_stack_depth_setting 
@@ -172,6 +172,8 @@ Here's BNF describing the syntax of a show file:
     exports ::= "exports" "segments" name_list
     			"features" name_list
 			"handlers" name_list ";"
+			[ "named_commands" name_list ]
+			";"
 	# If this isn't set, then everything is public
 	# The names in name_list may contain wildcards like
 	# "*", "?", "[wxz]" and "[1-5]".
@@ -193,6 +195,7 @@ Here's BNF describing the syntax of a show file:
     			[ "rc_handlers" name_list ]
 			[ "on_entry" commands ]
 			[ ( "next" | "setup_done")  commands]  ";"
+
 
     feature_list ::= name_list
 
@@ -349,7 +352,7 @@ Here's BNF describing the syntax of a show file:
 
     command ::= activate_segment | activate_part | segment_done 
     		    | deprecated_invoke_assembly_cell | set_visual_rc_state
-		    | reset_feature | sync_display
+		    | reset_feature | sync_display | run_named_commands
 		    | other_command | java_command
 
     activate_segment ::= "activate_segment" segment_name [ "&lt;push&gt;" ] ";"
@@ -372,6 +375,8 @@ Here's BNF describing the syntax of a show file:
     reset_feature ::= "reset_feature" feature_name ";"
 
     sync_display ::= "sync_display" ";"
+
+    run_named_commands ::= "run_named_commands" name ";"
 
     other_command ::= namespace:type_name
     				(syntax as determined by director) ";"
@@ -466,6 +471,8 @@ Here's BNF describing the syntax of a show file:
     mosaic_hint ::= "mosaic_hint" name width height "{" file_name * "}" ";"
 	# mosaic_hint is deprecated.  See "mosaics"
 
+    named_commands ::= "named_commands" name commands ";"
+
     sub_feature ::= feature_name
     		    | "sub_feature" feature_without_name
 
@@ -558,7 +565,9 @@ commands in Java:  the <code>java_command</code>.  This lets you put a
 bit of Java source code in the show file, and have that code get triggered
 like any other GRIN command.  Behind the scenes, the GRIN show compiler
 generates a single Java class that contains all of these code snippets,
-and selection code to execute the right one.
+and selection code to execute the right one.  The generated code can
+reference the method parameter <code>grinCaller</code> to get a reference
+to the Show in which the command was enqueued.
 </p>
 <h2>Synchronization</h2>
 <p>

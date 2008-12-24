@@ -258,7 +258,7 @@ public class GrinDataOutputStream extends DataOutputStream {
        
        writeInt(index);
    }
-   
+
    /**
     * Writes out a reference of a segment.  This method should be used
     * when the user is writing out an extension feature or command, and 
@@ -346,13 +346,16 @@ public class GrinDataOutputStream extends DataOutputStream {
    }   
    
    /**
-    * Writes out the content, not the reference, of each command in the array.
+    * Writes out the reference to an array of references to the given
+    * commands.
     * 
     * @param commands  An array of commands to write out to.  
     * @throws java.io.IOException 
     */
    public void writeCommands(Command[] commands) throws IOException {
-       binaryWriter.writeCommands(this, commands);
+       int index = binaryWriter.getCommandArrayIndex(commands);      
+       assert index >= 0;
+       writeInt(index);      
    }
    
   /**

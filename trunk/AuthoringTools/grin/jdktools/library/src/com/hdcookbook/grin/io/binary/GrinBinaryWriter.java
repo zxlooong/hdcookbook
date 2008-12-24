@@ -61,6 +61,10 @@ import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.GrinXHelper;
@@ -74,6 +78,7 @@ import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.ResetFeatureCommand;
 import com.hdcookbook.grin.commands.SetVisualRCStateCommand;
+import com.hdcookbook.grin.commands.SERunNamedCommand;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.Box;
 import com.hdcookbook.grin.features.Clipped;
@@ -91,6 +96,7 @@ import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.input.CommandRCHandler;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.VisualRCHandler;
+import com.hdcookbook.grin.util.Debug;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -181,11 +187,12 @@ public class GrinBinaryWriter {
     private SEShowCommands seShowCommands;
     
     /**
-     * List of Feature, RCHandler and Segments in the show.
+     * List of Feature, RCHandler, Segments and named commands in the show.
      */
     private IndexedSet<SENode> featureList;
     private IndexedSet<SENode> rcHandlerList;
     private IndexedSet<SENode> segmentList;
+    private IndexedSet<SENode> allCommandsList;
     
     /**
      * List of shared String instances.
@@ -201,6 +208,11 @@ public class GrinBinaryWriter {
     // List of shared rectangles
     //
     private IndexedSet<Rectangle> sharedRectangles;
+
+    //
+    // List of shared command arrays
+    //
+    private IndexedSet<ObjectArray<Command>> sharedCommandArrays;
 
     //
     // List of shared rectangle arrays
@@ -243,6 +255,7 @@ public class GrinBinaryWriter {
         featureList = new IndexedSet();
         rcHandlerList = new IndexedSet();
         segmentList = new IndexedSet();
+	allCommandsList = new IndexedSet();
         
         Feature[] features = show.getFeatures();
         for (Feature feature: features) {
@@ -257,14 +270,15 @@ public class GrinBinaryWriter {
         Segment[] segments = show.getSegments();
         for (Segment segment: segments) {
             segmentList.getIndex((SENode) segment);
-        }         
-        
+        }
+
         runtimeClassNames = new IndexedSet();
 
         sharedStrings = new IndexedSet();
         sharedIntArrays = new IndexedSet();
 	sharedRectangles = new IndexedSet();
 	sharedRectangleArrays = new IndexedSet();
+	sharedCommandArrays = new IndexedSet();
 
 	    // For the constant data types, we make entry 0 be null.
 	    // This saves having an "is null" flag on every other element.
@@ -272,6 +286,7 @@ public class GrinBinaryWriter {
 	sharedIntArrays.getIndex(new IntArray(null));
 	sharedRectangles.getIndex(null);
 	sharedRectangleArrays.getIndex(new ObjectArray<Rectangle>(null));
+	sharedCommandArrays.getIndex(new ObjectArray<Command>(null));
     }
     
     /**
@@ -289,6 +304,33 @@ public class GrinBinaryWriter {
            int index = featureList.getIndex((SENode) feature);
            return index;
         }   
+    }
+
+    /**
+     * Returns an index number of the command that this GrinBinaryWriter
+     * is internally using in the show
+     *
+     * @see GrinBinaryReader.getCommandFromIndex(int)
+     * @param command The named command to get the index number of
+     * @return the index number for the named command, or -1 if no such
+     *		named command exists.
+     **/
+    int getCommandIndex(Command command) throws IOException {
+	if (command == null) {
+	    return -1;
+	} else {
+	    while (command instanceof SERunNamedCommand) {
+		command = ((SERunNamedCommand) command).getTarget();
+		if (command == null) {
+		    if (Debug.ASSERT) {
+			Debug.assertFail();
+		    }
+		    throw new IOException("Internal error: "
+					    + " empty RunNamedCommand");
+		}
+	    }
+	    return allCommandsList.getIndex((SENode) command);
+	}
     }
     
     /**
@@ -347,6 +389,21 @@ public class GrinBinaryWriter {
 			new ObjectArray<Rectangle>(array));
     }
 
+    int getCommandArrayIndex(Command[] array) throws IOException {
+	Command[] copy = null;
+	if (array != null) {
+	    copy = new Command[array.length];
+	    for (int i = 0; i < array.length; i++) {
+		copy[i] = array[i];
+		while (copy[i] instanceof SERunNamedCommand) {
+		    copy[i] = ((SERunNamedCommand) copy[i]).getTarget();
+		}
+		getCommandIndex(copy[i]);
+	    }
+	}
+	return sharedCommandArrays.getIndex(new ObjectArray<Command>(copy));
+    }
+
     /**
      * Writes out the script identifier and the script version to the DataOutputStream.
      *
@@ -358,7 +415,8 @@ public class GrinBinaryWriter {
     }
  
     /**
-     * Writes out the show object for this GrinBinaryWriter.
+     * Writes out the show object for this GrinBinaryWriter, and close
+     * the DataOutputStream when done.
      *
      * @param out The DataOutputStream to write out show's binary data to.
      * @throws IOException if writing to the DataOutputStream fails.
@@ -381,8 +439,8 @@ public class GrinBinaryWriter {
         dos.writeInt(show.getSegmentStackDepth());
         dos.writeStringArray(show.getDrawTargets());
 	dos.writeStringArray(show.getStickyImages());
+	writePublicNamedCommands(dos, show.getPublicNamedCommands());
         dos.writeBoolean(isDebugging);
-        dos.writeString(seShowCommands.getClassName());
         
         // We can create one large SENode array including all elements and write
         // it out, but if we do that, the reader needs to sort through it and
@@ -400,23 +458,78 @@ public class GrinBinaryWriter {
         writeDeclarations(dos, segments);
         writeContents(dos, features);  
         writeContents(dos, handlers); 
-        writeContents(dos, segments);   
-        
-        // Note, this is writing to the base DataOutputStream instance.
+        writeContents(dos, segments);
+
+	// Now we write out the commands.  We had to write out the body of
+	// the show, including the commands themselves in order to 
+	// discover all of the commands.
+	//
+	// The command declarations are written out a couple of lines
+	// down, but because of baos, they occur earlier in the file.
+	SENode[] allCommands = null;
+	if (allCommandsList.size() == 0) {
+	    allCommands = new SENode[0];
+	} else {
+	    int i = 0;
+	    while (i < allCommandsList.size()) {
+		allCommands = (SENode[]) allCommandsList.toArray(SENode.class);
+		while (i < allCommands.length) {
+		    writeNodeContents(dos, allCommands[i]);
+		    	// writeNodeContents() might grow allCommandsList.
+			// That's because a command can have a list of
+			// sub-commands.  Both java_command and
+			// named_command (which can become 
+			// GrinXHelper.COMMAND_LIST) have sub-commands, and thus
+			// can grow allCommandsList when we call 
+			// writeNodeContents().
+		    i++;
+		}
+	    }
+	}
+
+        dos.close();  // We're through writing to baos
+
+        // Note, this is now writing to the base DataOutputStream instance.
         // We want to write out all the String and integer array instances 
         // at the beginning of the binary file.
-        writeStringConstants(out, 
+        dos = new GrinDataOutputStream(out, this);
+
+	getStringIndex(seShowCommands.getClassName());
+		// This makes the writeString(that string) work, below.
+
+        writeStringConstants(dos, 
 			     (String[]) sharedStrings.toArray(String.class));
-        writeIntArrayConstants(out, (IntArray[]) 
+        writeIntArrayConstants(dos, (IntArray[]) 
 			  	    sharedIntArrays.toArray(IntArray.class));
-        writeRectangleConstants(out, (Rectangle[]) 
+        writeRectangleConstants(dos, (Rectangle[]) 
 			  	    sharedRectangles.toArray(Rectangle.class));
-        writeRectangleArrayConstants(out, (ObjectArray<Rectangle>[]) 
+        writeRectangleArrayConstants(dos, (ObjectArray<Rectangle>[]) 
 				    sharedRectangleArrays.toArray(
 					ObjectArray.class));
-	writeExtensionClassNames(out);
-        baos.writeTo(out);
-        dos.close();  
+	writeExtensionClassNames(dos);
+
+        dos.writeString(seShowCommands.getClassName());
+	    //
+	    // This needs to occur after writeStringConstants, above, so
+	    // that the reader finds the string constant.  However, it can't
+	    // go in the baos, because this one string constant is needed
+	    // by the reader to read the command declarations.  That's
+	    // because the command declarations can include extension
+	    // commands that are instantiated through the seShowCommands
+	    // object.
+	    //
+
+        writeDeclarations(dos, allCommands);
+	writeCommandArrayConstants(dos, 
+			(ObjectArray<Command>[]) sharedCommandArrays.toArray(
+				ObjectArray.class));
+	if (allCommands.length != allCommandsList.size()) {
+	    throw new IOException("Internal error:  command list size");
+	}
+
+	// Finally, we write out the body of the show.
+        baos.writeTo(dos);
+	dos.close();
     }
 
     /**
@@ -496,6 +609,20 @@ public class GrinBinaryWriter {
 	}
     }
 
+    private void writePublicNamedCommands(
+    			GrinDataOutputStream out, Hashtable table) 
+		throws IOException
+    {
+	out.writeInt(table.size());
+	for (Iterator it = table.entrySet().iterator(); it.hasNext(); ) {
+	    Map.Entry entry = (Map.Entry) it.next();
+	    String key = (String) entry.getKey();
+	    Command value = (Command) entry.getValue();
+	    out.writeString(key);
+	    out.writeInt(getCommandIndex(value));
+	}
+    }
+
     private void writeDeclarations(GrinDataOutputStream out, SENode[] nodes) 
             throws IOException 
     {
@@ -521,15 +648,21 @@ public class GrinBinaryWriter {
 	}
 
 	for (SENode node : nodes) {
-	    if (node != null) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-		node.writeInstanceData(dos);
-		out.writeInt(baos.size());
-		baos.writeTo(out);      
-		dos.close();
-	    }
-        }
+	    writeNodeContents(out, node);
+	}
+    }
+
+    private void writeNodeContents(GrinDataOutputStream out, SENode node)
+	    throws IOException
+    {
+	if (node != null) {
+	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
+	    node.writeInstanceData(dos);
+	    out.writeInt(baos.size());
+	    dos.close();
+	    baos.writeTo(out);      
+	}
     }
 
     private void writeStringConstants(DataOutputStream out, String[] list) 
@@ -595,29 +728,26 @@ public class GrinBinaryWriter {
 	    }
         }       
     }
+
+    private void writeCommandArrayConstants
+    		(DataOutputStream out, ObjectArray<Command>[] list) 
+        throws IOException 
+    {
+        out.writeByte(COMMAND_ARRAY_CONSTANTS_IDENTIFIER);     
+        out.writeInt(list.length);
+	assert list[0].array == null;
+	for (int i = 1; i < list.length; i++) {
+	    ObjectArray<Command> ra = list[i];
+	    assert ra != null;
+            Command[] array = list[i].array;
+	    assert array != null;
+	    out.writeInt(array.length);
+	    for (int j = 0; j < array.length; j++) {
+		out.writeInt(getCommandIndex(array[j]));
+	    }
+        }       
+    }
    
-    void writeCommands(GrinDataOutputStream out, Command[] commands) 
-        throws IOException {
- 
-       if (commands == null) {
-           out.writeByte(NULL);
-           return;
-       }     
-       out.writeByte(NON_NULL);
-       
-       SENode[] nodes = new SENode[commands.length];
-       for (int i = 0; i < nodes.length; i++) {
-           nodes[i] = (SENode) commands[i];
-       }
-      
-       writeDeclarations(out, nodes);
-       writeContents(out, nodes);
-       
-       for (int i = 0; i < nodes.length; i++) {
-           commands[i] = (Command) nodes[i];
-       }
-    }   
-  
    /**
     * Writes out an auto-generated java class that includes information about
     * Extension classes and ShowCommand subclasses.

@@ -88,6 +88,16 @@ public class Segment implements Node {
     protected boolean nextOnSetupDone;
     protected Command[] nextCommands;
     protected RCHandler[] rcHandlers;
+    /** 
+     * The bitmask formed by or-ing the set of remote control key presses
+     * this segment has handlers for.
+     **/
+    protected int rcPressedInterest;
+    /** 
+     * The bitmask formed by or-ing the set of remote control key releases
+     * this segment has handlers for.
+     **/
+    protected int rcReleasedInterest;
     private boolean active = false;
     private boolean segmentSetupComplete;
 
@@ -370,12 +380,12 @@ public class Segment implements Node {
     //
     // Called from Show with the Show lock held
     //
-    boolean handleKeyPressed(RCKeyEvent re) {
+    boolean handleKeyPressed(RCKeyEvent re, Show caller) {
 	if (rcHandlers == null) {
 	    return false;
 	}
 	for (int i = 0; i < rcHandlers.length; i++) {
-	    if (rcHandlers[i].handleKeyPressed(re)) {
+	    if (rcHandlers[i].handleKeyPressed(re, caller)) {
 		return true;
 	    }
 	}
@@ -385,12 +395,12 @@ public class Segment implements Node {
     //
     // Called from Show with the Show lock held
     //
-    boolean handleKeyReleased(RCKeyEvent re) {
+    boolean handleKeyReleased(RCKeyEvent re, Show caller) {
 	if (rcHandlers == null) {
 	    return false;
 	}
 	for (int i = 0; i < rcHandlers.length; i++) {
-	    if (rcHandlers[i].handleKeyReleased(re)) {
+	    if (rcHandlers[i].handleKeyReleased(re, caller)) {
 		return true;
 	    }
 	}
@@ -421,6 +431,8 @@ public class Segment implements Node {
 	this.onEntryCommands = in.readCommands();
         this.nextOnSetupDone = in.readBoolean();
         this.nextCommands = in.readCommands();
+	this.rcPressedInterest = in.readInt();
+	this.rcReleasedInterest = in.readInt();
     }
 
     /**
@@ -467,7 +479,7 @@ public class Segment implements Node {
      * building debugging tools, like grinview.
      *
      * @see #getNextOnSetupDone()
-     * @see com.hdcookbook.grin.commands.SegmentDoneCommand
+     * @see com.hdcookbook.grin.commands.GrinXHelper#SEGMENT_DONE
      **/
     public Command[] getNextCommands() {
 	return nextCommands;

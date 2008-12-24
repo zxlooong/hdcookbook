@@ -66,7 +66,9 @@ import com.hdcookbook.grin.SESegment;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
 import com.hdcookbook.grin.commands.SEActivatePartCommand;
+import com.hdcookbook.grin.commands.SECommandList;
 import com.hdcookbook.grin.commands.SEResetFeatureCommand;
+import com.hdcookbook.grin.commands.SERunNamedCommand;
 import com.hdcookbook.grin.commands.SESegmentDoneCommand;
 import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
 import com.hdcookbook.grin.commands.SESyncDisplayCommand;
@@ -287,8 +289,17 @@ public class ShowParser {
 	    String[] publicFeatures = parseStrings();
 	    parseExpected("handlers");
 	    String[] publicHandlers = parseStrings();
-	    parseExpected(";");
-	    builder.setExported(publicSegments, publicFeatures, publicHandlers);
+	    tok = lexer.getString();
+	    String[] publicNamedCommands;
+	    if ("named_commands".equals(tok)) {
+		publicNamedCommands = parseStrings();
+		tok = lexer.getString();
+	    } else {
+		publicNamedCommands = new String[0];
+	    }
+	    lexer.expectString(";", tok);
+	    builder.setExported(publicSegments, publicFeatures, publicHandlers,
+	    			publicNamedCommands);
 	    tok = lexer.getString();
 	}
 
@@ -325,6 +336,8 @@ public class ShowParser {
 		parseSegment(lineStart);
 	    } else if ("feature".equals(tok)) {
 		parseFeature(true, lineStart);
+	    } else if ("named_command".equals(tok)) {
+		parseNamedCommands(lineStart);
 	    } else if ("rc_handler".equals(tok)) {
 		tok = lexer.getString();
 		if ("assembly_grid".equals(tok)) {
@@ -1406,6 +1419,19 @@ public class ShowParser {
 	}
     }
 
+    private void parseNamedCommands(int lineStart) throws IOException {
+	String name = lexer.getString();
+	Command[] arr = parseCommands();
+	parseExpected(";");
+	Command result;
+	if (arr.length == 1) {
+	    result = arr[0];
+	} else {
+	    result = new SECommandList(show, arr);
+	}
+	builder.addNamedCommand(name, lineStart, result);
+    }
+
     private void parseAssemblyGridRCHandler() throws IOException {
 	lexer.reportWarning("Deprecated rc_handler assembly_grid");
 	int lineStart = lexer.getLineNumber();
@@ -1868,6 +1894,8 @@ public class ShowParser {
             return parseResetFeature();
 	} else if ("sync_display".equals(tok)) {
 	    return parseSyncDisplay();
+	} else if ("run_named_commands".equals(tok)) {
+	    return parseNamedCommands();
         } else if ("java_command".equals(tok)) {
             return parseJavaCommand();
         } else if (extParser == null || tok == null || tok.indexOf(':') < 0) {
@@ -2054,6 +2082,23 @@ public class ShowParser {
     private Command parseSyncDisplay() throws IOException {
 	parseExpected(";");
 	return new SESyncDisplayCommand(show);
+    }
+
+    private Command parseNamedCommands() throws IOException {
+	final String name = lexer.getString();
+	parseExpected(";");
+	final SERunNamedCommand cmd = new SERunNamedCommand(show);
+	ForwardReference fw = new ForwardReference(lexer) {
+	    public void resolve() throws IOException {
+		Command target = builder.getNamedCommand(name);
+		if (target == null) {
+		    reportError("Can't find named command \"" + name + "\"");
+		}
+		cmd.setTarget(target);
+	    }
+	};
+	deferred.get(0).add(fw);
+	return cmd;
     }
 
     
