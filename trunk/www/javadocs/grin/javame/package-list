@@ -4,4 +4,5 @@ com.hdcookbook.grin.commands
 com.hdcookbook.grin.features
 com.hdcookbook.grin.input
 com.hdcookbook.grin.io.binary
+com.hdcookbook.grin.media
 com.hdcookbook.grin.util

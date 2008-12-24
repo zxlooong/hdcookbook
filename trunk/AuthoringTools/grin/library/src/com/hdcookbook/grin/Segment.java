@@ -479,7 +479,7 @@ public class Segment implements Node {
      * building debugging tools, like grinview.
      *
      * @see #getNextOnSetupDone()
-     * @see com.hdcookbook.grin.commands.GrinXHelper#SEGMENT_DONE
+     * @see com.hdcookbook.grin.Show#segmentDone()
      **/
     public Command[] getNextCommands() {
 	return nextCommands;

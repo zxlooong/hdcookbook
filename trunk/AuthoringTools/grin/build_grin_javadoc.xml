@@ -51,6 +51,7 @@ information or have any questions.
 	<mkdir dir="${GRIN_JAVADOC_ME_DEST}"/>
 	<javadoc 	  
 	  packagenames="com.hdcookbook.grin.*"
+	  bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
 	  destdir="${GRIN_JAVADOC_ME_DEST}">
 		  <sourcepath location="library/src"/>
 		  <sourcepath location="extensions/media/src"/>

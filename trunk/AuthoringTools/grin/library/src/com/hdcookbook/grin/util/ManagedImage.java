@@ -205,7 +205,7 @@ abstract public class ManagedImage {
      *
      * @see #prepare()
      * @see #unprepare()
-     * @see #load(java.awt.Componet)
+     * @see #load(Component)
      * @see #isLoaded()
      * @see ManagedImage
      **/

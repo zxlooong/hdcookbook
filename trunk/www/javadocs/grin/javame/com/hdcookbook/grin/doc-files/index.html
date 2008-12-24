@@ -143,12 +143,13 @@ Here's BNF describing the syntax of a show file:
 </p>
 <pre>
     show ::= "show" setting*  [ exports ] [ java_generated_class ]
-    	     (segment | feature | rc_handler | | mosaic_hint)* 
+    	     ( segment | feature | rc_handler | named_commands | mosaic_hint )* 
     	     "end_show"
 
     setting ::=    segment_stack_depth_setting 
                  | draw_targets_setting
 		 | sticky_images_setting
+		 | binary_grin_file_setting 
 
     segment_stack_depth_setting := "setting" "segment_stack_depth" integer ";"
 
@@ -163,9 +164,16 @@ Here's BNF describing the syntax of a show file:
 	# prepared it is loaded normally, but subsequent prepares happen
 	# instantly.
 
+    binary_grin_file_setting ::= "setting" "binary_grin_file" string ";"
+	# Sets the file name of the binary grin file that's produced by
+	# the compiler.  This can be used to make the extension be ".grn"
+	# instead of ".grin".
+
     exports ::= "exports" "segments" name_list
     			"features" name_list
 			"handlers" name_list ";"
+			[ "named_commands" name_list ]
+			";"
 	# If this isn't set, then everything is public
 	# The names in name_list may contain wildcards like
 	# "*", "?", "[wxz]" and "[1-5]".
@@ -187,6 +195,7 @@ Here's BNF describing the syntax of a show file:
     			[ "rc_handlers" name_list ]
 			[ "on_entry" commands ]
 			[ ( "next" | "setup_done")  commands]  ";"
+
 
     feature_list ::= name_list
 
@@ -279,7 +288,7 @@ Here's BNF describing the syntax of a show file:
     src_over ::= "feature" "src_over" name sub_feature ";"
 
     fade ::= "feature" "fade" name sub_feature
-    		[ "src_over" ] "{" ( frame_number alpha "linear" ) * "}" 
+    		[ "src_over" ] "{" ( frame_number alpha_int "linear" ) * "}" 
 		[ "repeat" frame_number ] 
 		[ loop_count ]
 		[ "end_commands" commands ] ";"
@@ -330,8 +339,8 @@ Here's BNF describing the syntax of a show file:
     translator ::= "feature" "translator" name translator_model_name 
     			"{" sub_feature "}" ";"
 
-    extension_feature ::= "feature" "extension" namespace:type_name 
-    				name string ";"
+    extension_feature ::= "feature" "extension" namespace:type_name name 
+    			  <syntax of extension> ";"
 
     modifier_feature ::= "feature" "modifier" namespace:type_name name 
     				sub_feature string ";"
@@ -343,7 +352,7 @@ Here's BNF describing the syntax of a show file:
 
     command ::= activate_segment | activate_part | segment_done 
     		    | deprecated_invoke_assembly_cell | set_visual_rc_state
-		    | reset_feature | sync_display
+		    | reset_feature | sync_display | run_named_commands
 		    | other_command | java_command
 
     activate_segment ::= "activate_segment" segment_name [ "&lt;push&gt;" ] ";"
@@ -366,6 +375,8 @@ Here's BNF describing the syntax of a show file:
     reset_feature ::= "reset_feature" feature_name ";"
 
     sync_display ::= "sync_display" ";"
+
+    run_named_commands ::= "run_named_commands" name ";"
 
     other_command ::= namespace:type_name
     				(syntax as determined by director) ";"
@@ -436,8 +447,12 @@ Here's BNF describing the syntax of a show file:
 
     part_name_list ::= "{" part_name * "}"
 
-    command_rc_handler ::= "rc_handler" "key_pressed" name "{" rc_key * "}" 
+    command_rc_handler ::= "rc_handler" [ "key_pressed" | "key_released" ]
+    				name "{" rc_key * "}" 
     				"execute" commands ";"
+	#  Note that only key_pressed is guaranteed to be available
+	#  on all devices.  OCAP and MHP don't guarantee it, and
+	#  BD part J.1.2 looks like it's not guarnateed in BD-J, either.
 
     rc_key ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
                | "right" | "left" | "up" | "down" | "enter"
@@ -456,8 +471,10 @@ Here's BNF describing the syntax of a show file:
     mosaic_hint ::= "mosaic_hint" name width height "{" file_name * "}" ";"
 	# mosaic_hint is deprecated.  See "mosaics"
 
+    named_commands ::= "named_commands" name commands ";"
+
     sub_feature ::= feature_name
-    		    | sub_feature feature_without_name
+    		    | "sub_feature" feature_without_name
 
     feature_without_name ::= ... exactly like feature, without the feature name
 
@@ -548,7 +565,9 @@ commands in Java:  the <code>java_command</code>.  This lets you put a
 bit of Java source code in the show file, and have that code get triggered
 like any other GRIN command.  Behind the scenes, the GRIN show compiler
 generates a single Java class that contains all of these code snippets,
-and selection code to execute the right one.
+and selection code to execute the right one.  The generated code can
+reference the method parameter <code>grinCaller</code> to get a reference
+to the Show in which the command was enqueued.
 </p>
 <h2>Synchronization</h2>
 <p>
@@ -652,12 +671,12 @@ A mosaics file has the following syntax:
 	# If set to true, this mosaic will include all images that aren't
 	# part of another mosaic.
 
-    image_files ::= "{" file_name* "}"
+    image_files ::= "image_files" "{" file_name* "}"
     	# A list of the image files to consider for inclusion in this
 	# mosaic.  An image file is only included if it is actually used
 	# in a show.
 
-    add_image_files ::= "{" file_name* "}"
+    add_image_files ::= "add_image_files" "{" file_name* "}"
 	# A list of image files to include in the mosaic, whether or not
 	# it's actually used in a show.  Use this for images you want
 	# to include to use from your xlet, using the ManagedImage class.

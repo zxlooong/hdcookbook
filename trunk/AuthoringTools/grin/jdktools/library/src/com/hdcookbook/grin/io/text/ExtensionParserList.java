@@ -77,7 +77,7 @@ public class ExtensionParserList implements ExtensionParser {
     /**
      * Create a new ExtensionParserList with no parsers in it.
      *
-     * @see addParser(ExtensionParser)
+     * @see #addParser(ExtensionParser)
      **/
     public ExtensionParserList() {
     }
