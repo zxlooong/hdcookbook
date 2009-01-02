@@ -189,7 +189,23 @@ public class GameXlet
     public void initXlet(XletContext context) {
         this.xletContext = context;
 
-	String[] args = (String[]) xletContext.getXletProperty(xletContext.ARGS);
+	String[] args = 
+	    (String[]) xletContext.getXletProperty(xletContext.ARGS);
+	if (args == null || args.length == 0) {
+	    args = (String[]) 
+		xletContext.getXletProperty("dvb.caller.parameters");
+	}
+	doInitXlet(args);
+    }
+
+    /**
+     * This method can be overridden by subclasses that want to look
+     * for xlet arguments in places other than the default
+     * XletContext.ARGS and "dvb.caller.parameters".  Subclasses that
+     * overrid this should call super.doInitXlet(args) once they've
+     * colleded their arguments.
+     **/
+    protected void doInitXlet(String[] args) {
 	if (Debug.ASSERT && args.length != 5) {
 	    Debug.assertFail("Parameters:  <grin file> <initial segment> <director> <fontflag> <resources dir>\n    fontflag is -fonts or -nofonts");
 	}
