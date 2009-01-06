@@ -1118,8 +1118,8 @@ public class ShowParser {
 	    } catch (NumberFormatException ex) {
 		lexer.reportError(ex.toString());
 	    }
-	    int x = lexer.getInt();
-	    int y = lexer.getInt();
+	    int x = lexer.getIntOrOffscreen();
+	    int y = lexer.getIntOrOffscreen();
 	    keyframes.addElement(new int[] { frameNum, x, y } );
             String interpolation = lexer.getString();
 	    boolean thisIsRelative = false;

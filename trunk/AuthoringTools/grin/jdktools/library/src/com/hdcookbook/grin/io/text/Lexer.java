@@ -212,7 +212,18 @@ public class Lexer {
 	    return convertToInt(tok);
 	}
     }
-
+    
+    /**
+     * @return an int.  Integer.MIN_VALUE for "offscreen".
+     */
+    public int getIntOrOffscreen() throws IOException {
+	String tok = getString();
+	if ("offscreen".equals(tok)) {
+	    return Integer.MIN_VALUE;
+	} else {
+	    return convertToInt(tok);
+	}
+    }
     public int convertToInt(String tok) throws IOException {
 	if (tok == null) {
 	    reportError("int expected, EOF seen");

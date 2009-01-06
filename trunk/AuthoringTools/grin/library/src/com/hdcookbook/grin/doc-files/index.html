@@ -322,6 +322,10 @@ Here's BNF describing the syntax of a show file:
 	#
 	# If you want to set the x,y position programmatically, just have
 	# one key frame.
+        # Use "offscreen" keyword for x,y position to place a feature 
+        # off the screen without causing the animation engine to repaint extra
+        # region.  Use Integer.MIN_VALUE for x,y position to off-screen 
+        # programatically. 
 
     key_frame ::= frame_number x y interpolation_type
 

@@ -211,6 +211,9 @@ public class Translator extends Modifier implements Node {
     public void addDisplayAreas(RenderContext context) {
 	dx = model.getField(X_FIELD);
 	dy = model.getField(Y_FIELD);
+        if (dx == Integer.MIN_VALUE || dy == Integer.MIN_VALUE) {
+            return; // issue 138
+        }
         if (!modelIsRelative) {
             dx -= fx;
             dy -= fy;

@@ -375,5 +375,17 @@ public class MainDirector extends Director {
 	    // a command, it'll get run this cycle.  It would also be OK
 	    // to call c.execute(caller).
     }
+    
+    public void toggleImagePosition() {
+        System.out.println("Toggling image position off/on screen");
+        InterpolatedModel model = (InterpolatedModel) 
+                getShow().getFeature("F:OffScreenImagePosition");
+        int xPos = model.getField(Translator.X_FIELD);
+        if (xPos == Integer.MIN_VALUE) {
+            model.setField(Translator.X_FIELD, 0);
+        } else {
+            model.setField(Translator.X_FIELD, Integer.MIN_VALUE);
+        }
+    }
 
 }

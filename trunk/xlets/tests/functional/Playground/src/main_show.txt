@@ -19,6 +19,7 @@ exports
 	F:ArcTest
 	F:SM.Text
 	F:SM.Arc
+        F:OffScreenImagePosition
     } handlers {
     } named_commands {
 	C:GotoAssemblyCloneTest
@@ -70,7 +71,7 @@ segment S:Main
     } setup {
 	F:Everything
     } rc_handlers {
-	H:1 H:2 H:3 H:4 H:5 H:6 H:7
+	H:1 H:2 H:3 H:4 H:5 H:6 H:7 H:8
 	H:EnterPress H:EnterRelease
     }
 ;
@@ -81,6 +82,7 @@ feature group F:Everything {
     F:EnterAssembly
     F:FadeTestEverything
     F:SlowModelTest
+    F:OffScreenImageTestEverything
 } ;
 
 feature text F:MainText
@@ -93,6 +95,7 @@ feature text F:MainText
 	    "     5 - Run regression test for issue 121 (fade and redisplay)"
 	    "     6 - Run regression test for issue 131 (assembly and cloning)"
 	    "     7 - Run test for issue 134 (falling behind in nextFrame()"
+            "     8 - Run test for issue 138 (offscreen image)"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
 	background { 0 0 0 255 } 
@@ -146,6 +149,10 @@ rc_handler key_pressed H:6 { 6 } execute {
 
 rc_handler key_pressed H:7 { 7 } execute {
 	activate_segment S:SlowModelTest ;
+} ;
+
+rc_handler key_pressed H:8 { 8 } execute {
+	activate_segment S:OffScreenImageTest ;
 } ;
 
 rc_handler key_pressed H:EnterPress { enter } execute {
@@ -539,5 +546,68 @@ segment S:SlowModelTest
 
 
 rc_handler key_pressed H:SlowModelTest { enter } execute { segment_done ; } ;
+
+# Issue 138 Off-screen image test
+
+feature text F:OffScreenImageInstruction 100 100 
+      { 
+      "Use step drawing on GrinView to check that repaint isn't happening"
+      "beyond what a moving turtle in the screen requires."
+      "Press ENTER to return to the main menu."
+      }
+     SansSerif plain 36 { { 255 255 255 255 } } ;
+
+feature translator_model F:OffScreenImagePosition {
+    	0 	0 0 	linear-relative  # set programmatically
+    } ; 
+
+feature translator F:OffScreenImageTranslator F:OffScreenImagePosition {
+ 	F:OffScreenImage 
+        sub_feature timer 1 repeat {
+	   java_command [[ getMainDirector().toggleImagePosition(); ]]
+        } ;
+} ;
+
+feature fixed_image F:OffScreenImage ( left 1050 middle 580 )
+	"images/turtle_saucer.png"
+;
+
+feature translator_model F:OnScreenImagePosition {
+    	0 	0 0             linear-relative
+    	24      200 -200 	linear-relative
+    	48      400 0           linear-relative
+    	72      200 200 	linear-relative
+    	96      0 0             linear-relative
+} loop_count infinite ;
+
+feature translator F:OnScreenImageTranslator F:OnScreenImagePosition {
+ 	F:OnScreenImage
+} ;
+
+feature fixed_image F:OnScreenImage ( left 850 middle 580 )
+	"images/turtle_saucer.png"
+;
+
+feature group F:OffScreenImageTestEverything {
+        F:OffScreenImageInstruction
+        F:OffScreenImageTranslator
+        F:OffScreenImagePosition
+        F:OnScreenImageTranslator
+        F:OnScreenImagePosition
+} ;
+
+rc_handler key_pressed H:OffScreenImageTest { enter } execute { segment_done ; } ;
+
+segment S:OffScreenImageTest
+    active {
+        F:OffScreenImageTestEverything
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:OffScreenImageTest     
+    } next {
+	activate_segment S:Main ;
+    }
+;
 
 end_show 
