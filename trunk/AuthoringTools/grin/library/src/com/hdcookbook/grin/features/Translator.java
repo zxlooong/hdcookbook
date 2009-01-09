@@ -97,7 +97,7 @@ public class Translator extends Modifier implements Node {
 
     protected InterpolatedModel model;
 
-    protected int fx = 0;		// Feature's start position (if absolute model)
+    protected int fx = 0;	// Feature's start position (if absolute model)
     protected int fy = 0;
     protected boolean modelIsRelative;	// false if absolute.
 

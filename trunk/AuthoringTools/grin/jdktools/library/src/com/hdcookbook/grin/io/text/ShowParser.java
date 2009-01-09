@@ -1132,7 +1132,13 @@ public class ShowParser {
             }
 	    if (keyframes.size() == 1) {
 		if (!thisIsRelative) {
-		    lexer.reportWarning("Deprecated non-relative linear interpolation; consider linear-relative instead");
+		    lexer.reportWarning(
+		      "\nWARNING:  "
+		      + "Deprecated non-relative linear interpolation;"
+		      + "\n    consider using linear-relative instead."
+		      + "\n    Note that \"linear\" isn't guaranteed to work with all feature types."
+		      + "\n    For example, it's known that it doesn't work with the text feature."
+		      + "\n    ==> Dangerous usage occurs");
 		}
 	    } else if (thisIsRelative != isRelative) {
 		lexer.reportError("Inconsistent use of linear vs. linear-relative; all keyframes must be the same.");

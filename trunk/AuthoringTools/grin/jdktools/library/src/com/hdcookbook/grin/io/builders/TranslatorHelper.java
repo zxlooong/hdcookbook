@@ -59,7 +59,20 @@ import com.hdcookbook.grin.AbstractSEShowVisitor;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SESegment;
 import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowCommand;
 import com.hdcookbook.grin.SEShowVisitor;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.commands.SEActivatePartCommand;
+import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
+import com.hdcookbook.grin.commands.SEResetFeatureCommand;
+import com.hdcookbook.grin.commands.SERunNamedCommand;
+import com.hdcookbook.grin.commands.SESegmentDoneCommand;
+import com.hdcookbook.grin.commands.SESyncDisplayCommand;
+import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
+import com.hdcookbook.grin.features.SEInterpolatedModel;
+import com.hdcookbook.grin.features.SEScalingModel;
+import com.hdcookbook.grin.features.SETranslatorModel;
+import com.hdcookbook.grin.features.SETimer;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SEAssembly;
 import com.hdcookbook.grin.features.SEBox;
@@ -69,10 +82,13 @@ import com.hdcookbook.grin.features.SEFixedImage;
 import com.hdcookbook.grin.features.SEGroup;
 import com.hdcookbook.grin.features.SEGuaranteeFill;
 import com.hdcookbook.grin.features.SEImageSequence;
+import com.hdcookbook.grin.features.SEMenuAssembly;
 import com.hdcookbook.grin.features.SESetTarget;
 import com.hdcookbook.grin.features.SESrcOver;
 import com.hdcookbook.grin.features.SEText;
 import com.hdcookbook.grin.features.SETranslator;
+import com.hdcookbook.grin.input.SECommandRCHandler;
+import com.hdcookbook.grin.input.SEVisualRCHandler;
 
 
 import java.io.IOException;
@@ -134,9 +150,12 @@ public class TranslatorHelper implements DeferredBuilder {
 	// purposes of this calculation, which is about the only reasonable
 	// thing for us to do.
 	//
-	SEShowVisitor visitor = new AbstractSEShowVisitor() {
+	SEShowVisitor visitor = new SEShowVisitor() {
 	    public void visitAssembly(SEAssembly feature) { 
 		SEShow.acceptFeatures(this, feature.getParts());
+	    }
+	    public void visitMenuAssembly(SEMenuAssembly feature) {
+		visitAssembly(feature);
 	    }
 	    public void visitBox(SEBox feature) { 
 		check(feature.getX(), feature.getY());
@@ -177,11 +196,36 @@ public class TranslatorHelper implements DeferredBuilder {
 		SEShow.acceptFeature(this, feature.getPart());
 	    }
 	    public void visitText(SEText feature) {
-		check(feature.getX(), feature.getY());
+		// Do nothing, because a text feature doesn't know its
+		// upper-left hand corner without font metrics; we'd really
+		// need the font metrics on the client device, too.  It's
+		// better to just fail, so that people won't be mislead into
+		// using the deprecated "linear" translator style, and will
+		// use "linear-relative" instead.
 	    }
 	    public void visitTranslator(SETranslator feature) {
 		SEShow.acceptFeature(this, feature.getPart());
 	    }
+	    public void visitInterpolatedModel(SEInterpolatedModel feature) {}
+	    public void visitScalingModel(SEScalingModel feature) { }
+	    public void visitTranslatorModel(SETranslatorModel feature) { }
+	    public void visitTimer(SETimer feature) { }
+
+	    public void visitSegment(SESegment segment) { }
+	    public void visitShow(SEShow show) { }
+
+	    public void visitCommandRCHandler(SECommandRCHandler handler) {}
+	    public void visitVisualRCHandler(SEVisualRCHandler handler) {}
+
+	    public void visitActivatePartCommand(SEActivatePartCommand command) {}
+	    public void visitActivateSegmentCommand(SEActivateSegmentCommand command) {}
+	    public void visitSegmentDoneCommand(SESegmentDoneCommand command) {}
+	    public void visitSyncDisplayCommand(SESyncDisplayCommand command) {}
+	    public void visitRunNamedCommand(SERunNamedCommand command) {}
+	    public void visitSetVisualRCStateCommand(SESetVisualRCStateCommand cmd) {}
+	    public void visitResetFeatureCommand(SEResetFeatureCommand cmd) {}
+	    public void visitShowCommand(SEShowCommand command) {}
+	    public void visitUserDefinedCommand(Command command) {}
 	};
 
 	    // This does the actual depth-first traversal...
