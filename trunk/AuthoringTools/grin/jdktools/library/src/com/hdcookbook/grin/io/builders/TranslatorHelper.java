@@ -237,7 +237,7 @@ public class TranslatorHelper implements DeferredBuilder {
 	    // bounding rectangle of our children.
 	if (xCoord == Integer.MAX_VALUE || yCoord == Integer.MAX_VALUE) {
 	    throw new IOException("Can't determine upper-left hand coordinates "
-	    		          + " of tranlator's child at line " + line);
+	    		          + "of tranlator's child at line " + line);
 	}
 	translator.setupAbsoluteXOffset(xCoord);
 	translator.setupAbsoluteYOffset(yCoord);
