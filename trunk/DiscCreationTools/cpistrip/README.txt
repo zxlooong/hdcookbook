@@ -6,7 +6,7 @@ than it takes to do!  This is a utility program you can use to
 convert an audio/video transport stream into the format expected
 for a Blu-Ray read/write disc (a BD-RE).
 
-Here's the deal:  In a BD-R disc (a pre-recorded disc), the
+Here's the deal:  In a BD-ROM disc (a pre-recorded disc), the
 A/V media files are required to be protected with AACS.  The
 transport streams themselves have a flag set to indicate that
 they were created with the expectation of being protected. 
