@@ -52,7 +52,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.genericgame;
+package com.hdcookbook.grinxlet;
 
 
 import java.awt.Color;
@@ -91,11 +91,21 @@ import org.havi.ui.event.HRcCapabilities;
 import org.bluray.ui.event.HRcEvent;
 
 /** 
- * The xlet class for a game project.  This is the deployment version
- * of the xlet, with debug support turned off.
+ * The xlet class for a game project.  This is the debug version
+ * of the xlet, with debug support turned on.
+ * <p>
+ * WARNING:  There are actually three copies of this class:  The debug
+ * version, the deploy version, and the GrinView version.  The GrinView
+ * version can be found under AuthoringTools/grin/jdktools/grinviewer.
+ * It offers a subset of the public method of GrinXlet, e.g. to get
+ * and set the list of animation clients.  This allows a GrinView
+ * simulation of a wider range of functionalities on a desktop.
+ * <p>
+ * If you add features to the xlet versions of this class (both debug
+ * and deploy), consider adding them to the GrinView version, too.
  **/
 
-public class GameXlet
+public class GrinXlet
 	implements Xlet, AnimationContext, UserEventListener
 {
     /**
@@ -104,15 +114,15 @@ public class GameXlet
      * as soon as we discover our context, and nulled when the xlet is
      * destroyed.
      * <p>
-     * This is not available in the GrinView version of GameXlet.
+     * This is not available in the GrinView version of GrinXlet.
      **/
     public static XletContext xletContext;
-    private static GameXlet theInstance;
+    private static GrinXlet theInstance;
 
     public Show show;
     Container rootContainer;
     FontFactory fontFactory = null;
-    DirectDrawEngine animationEngine;
+    DebugDirectDrawEngine animationEngine;
     Director director;
 
     private String showFileName;
@@ -121,19 +131,26 @@ public class GameXlet
     private boolean definesFonts;
     private File resourcesDir;
 
+    boolean sendKeyUp = true;
+
     private int redKeyCode;
     private int greenKeyCode;
     private int blueKeyCode;
     private int yellowKeyCode;
 
-    public GameXlet() {
+    // A small show we use to manage a debug screen accessed with
+    // the popup menu key
+    private Show xletShow;
+    private XletDirector xletDirector;
+
+    public GrinXlet() {
 	theInstance = this;
     }
 
     /**
      * Get the instance of this singleton
      **/
-    public static GameXlet getInstance() {
+    public static GrinXlet getInstance() {
 	return theInstance;
     }
 
@@ -141,14 +158,25 @@ public class GameXlet
      * Get the list of animation clients
      **/
     public AnimationClient[] getAnimationClients() {
-        return animationEngine.getAnimationClients();
+	AnimationClient[] clients = animationEngine.getAnimationClients();
+	// We need to suppress xletShow from the list
+	AnimationClient[] result = new AnimationClient[clients.length - 1];
+	for (int i = 0; i < result.length; i++) {
+	    result[i] = clients[i];
+	}
+	return result;
     }
 
     /**
      * Reset the list of animation clients
      **/
     public void resetAnimationClients(AnimationClient[] clients) {
-        animationEngine.resetAnimationClients(clients);
+	AnimationClient[] real = new AnimationClient[clients.length + 1];
+	for (int i = 0; i < clients.length; i++) {
+	    real[i] = clients[i];
+	}
+	real[clients.length] = xletShow;
+        animationEngine.resetAnimationClients(real);
     }
 
     /**
@@ -191,7 +219,7 @@ public class GameXlet
         rootContainer = TVContainer.getRootContainer(xletContext);			
         rootContainer.setSize(1920, 1080);
         
-        animationEngine = new DirectDrawEngine();
+        animationEngine = new DebugDirectDrawEngine();
         animationEngine.setFps(24000);
         animationEngine.initialize(this);
     }
@@ -205,7 +233,7 @@ public class GameXlet
        rootContainer.setVisible(false);
        animationEngine.pause();
     }
-    
+
     public void destroyXlet(boolean unconditional) {
        rootContainer = null;
 	if (Debug.LEVEL > 0) {
@@ -231,6 +259,7 @@ public class GameXlet
 	} catch (Throwable t) {
 	    Debug.assertFail("Can't create director:  " + t);
 	}
+	xletDirector = new XletDirector(this);
 	if (definesFonts) {
 	    try {
 	       fontFactory = new FontFactory();
@@ -299,6 +328,7 @@ public class GameXlet
 			return 0;
 		    }
 		}
+
 	    });
 
 	   AssetFinder.setSearchPath(null, new File[] {resourcesDir});      
@@ -318,6 +348,12 @@ public class GameXlet
 			    showFileName).openStream());
 	   show = new Show(director);
 	   reader.readShow(show);
+
+	   reader = new GrinBinaryReader(AssetFinder.getURL(
+			    "xlet_show.grin").openStream());
+	   xletShow = new Show(xletDirector);
+	   reader.readShow(xletShow);
+
 	} catch (IOException e) {
 	   e.printStackTrace();
 	   Debug.println("Error in reading the show file");
@@ -325,7 +361,7 @@ public class GameXlet
 	}
 
 	animationEngine.checkDestroy();
-	animationEngine.initClients(new AnimationClient[] { show });
+	animationEngine.initClients(new AnimationClient[] { show, xletShow });
 	animationEngine.initContainer(rootContainer, 
 				     new Rectangle(0,0,1920,1080));
        
@@ -397,6 +433,7 @@ public class GameXlet
 
     public void animationFinishInitialization() {
 	show.activateSegment(show.getSegment(showInitialSegment));	
+	xletShow.activateSegment(xletShow.getSegment("S:Initialize"));	
        
 	UserEventRepository userEventRepo = new UserEventRepository("x");
 	userEventRepo.addAllArrowKeys();
@@ -417,10 +454,20 @@ public class GameXlet
 	int type = e.getType();
         if (type == HRcEvent.KEY_PRESSED) {
 	    int code = e.getCode();
-	    show.handleKeyPressed(code);
-        } else if (type == HRcEvent.KEY_RELEASED) {
+	    boolean handled =
+		xletShow.handleKeyPressed(code) || show.handleKeyPressed(code);
+        } else if (sendKeyUp && type == HRcEvent.KEY_RELEASED) {
 	    int code = e.getCode();
-	    show.handleKeyReleased(code);
+	    boolean handled =
+		xletShow.handleKeyReleased(code) 
+		|| show.handleKeyReleased(code);
+		    // Note that Gun Bunny doesn't do anything on key_released,
+		    // or at least it didn't when this comment was written.
+		    // Because of this setting sendKeyUp false doesn't have
+		    // a visible effect on this particular game, but this xlet
+		    // can trivially be adapted for use as a generic game xlet.
+		    // If you do this, then being able to turn off key up events
+		    // is really useful.
 	}
     }	
 

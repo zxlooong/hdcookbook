@@ -55,7 +55,7 @@
 
 package com.hdcookbook.grin.util;
 
-import com.hdcookbook.genericgame.DebugLog;
+import com.hdcookbook.grinxlet.DebugLog;
 
 import java.io.StringWriter;
 import java.io.PrintWriter;

@@ -52,7 +52,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.genericgame;
+package com.hdcookbook.grinxlet;
 
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
@@ -74,7 +74,7 @@ import java.util.ListIterator;
 
 public class XletDirector extends Director {
 	
-    public GameXlet xlet;
+    public GrinXlet xlet;
 
     Assembly F_KeyUpState;
     Feature F_KeyUpState_enabled;
@@ -104,7 +104,7 @@ public class XletDirector extends Director {
     private String[] debugLogLineNumbers;
     private String[] debugLogLineCount;
 
-    public XletDirector(GameXlet xlet) {
+    public XletDirector(GrinXlet xlet) {
 	this.xlet = xlet;
 	DebugLog.startDebugListener();
     }

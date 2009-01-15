@@ -53,103 +53,82 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.genericgame;
+package com.hdcookbook.grinxlet;
 
-import com.hdcookbook.grin.animator.ClockBasedEngine;
-import com.hdcookbook.grin.animator.DirectDrawEngine;
-import com.hdcookbook.grin.util.Debug;
-import java.awt.AlphaComposite;
-import java.awt.Container;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
-import java.util.LinkedList;
-import java.util.Iterator;
+import com.hdcookbook.grin.test.bigjdk.GenericMain;	// that's GrinView
+import com.hdcookbook.grin.animator.AnimationClient;
+import com.hdcookbook.grin.animator.AnimationEngine;
+
 
 /**
- * A double-buffered animation engine that uses direct draw, and
- * can be set in "debug draw" mode.
+ * This is a facade to the main controller in GrinView.  It allows GrinView
+ * emulation of some of the features of the GrinXlet class found in
+ * xlets/grin_samples/GenericGame.  This GrinView facade implements a subset
+ * of those methods, so any public methods added here must be present in the
+ * real xlet versions of GrinXlet.
+ * <p>
+ * In other words, the reason why a GrinView version of this class exists
+ * is so that a Director subclass can refer to it, and still work under
+ * GrinView.
+ * <p>
+ * If your project extends GameXlet, you'll probably want an se_src version
+ * of your extension for use with GrinView.  This GrinView version of your
+ * extension should look like this:
+ * <pre>
+ *    public class MyGameXlet extends GameXlet {
  *
- * @see com.hdcookbook.grin.animator.DirectDrawEngine
+ *         public MyGameXlet() {
+ *	   }
+ *
+ *         ...
+ *    }
+ * </pre>
  **/
-public class DebugDirectDrawEngine extends DirectDrawEngine {
 
+public class GrinXlet {
 
-    private Graphics2D containerG;
-    private boolean debugDraw = false;
-    private static Color red = new Color(255, 0, 0, 127);
-    private static Color green = new Color(0, 255, 0, 127);
-    private int fps = 24000;
-    
+    private static GrinXlet theInstance = null;
+    private static GenericMain grinView;
+
     /**
-     * Create a new DebugDirectDrawEngine.  
+     * This constructor is used by GrinView
      **/
-    public DebugDirectDrawEngine() {
+    public GrinXlet(GenericMain grinView) {
+	this.grinView = grinView;
+	theInstance = this;
     }
 
     /**
-     * @inheritDoc
+     * This constructor is for a subclass of GrinXlet.
      **/
-    public void initContainer(Container container, Rectangle bounds) {
-	super.initContainer(container, bounds);
-	containerG = (Graphics2D) container.getGraphics();
-	if (Debug.ASSERT && containerG == null) {
-	    Debug.assertFail();  // Maybe container is invisible?
-	}
+    protected GrinXlet() {
     }
 
     /**
-     * Tell us if we should step through each frame showing
-     * erase, paint areas, then painted result
+     * Get the instance of this singleton.
      **/
-    public void setDebugDraw(boolean debugDraw) {
-	this.debugDraw = debugDraw;
+    public static GrinXlet getInstance() {
+	return theInstance;
     }
 
     /**
-     * @inheritDoc
+     * Get the list of animation clients
      **/
-    protected void callPaintTargets() throws InterruptedException {
-	if (debugDraw) {
-		// Paint the area to be erased red, and wait
-	    containerG.setColor(red);
-	    containerG.setComposite(AlphaComposite.SrcOver);
-	    for (int i = 0; i < getNumEraseTargets(); i++) {
-		Rectangle a = getEraseTargets()[i];
-		containerG.fillRect(a.x, a.y, a.width, a.height);
-	    }
-	    Toolkit.getDefaultToolkit().sync();
-	    sleepQuarterFrame();
-
-		// Paint the area to be drawn green, and wait
-	    containerG.setColor(green);
-	    for (int i = 0; i < getNumDrawTargets(); i++) {
-		Rectangle a = getDrawTargets()[i];
-		containerG.fillRect(a.x, a.y, a.width, a.height);
-	    }
-	    Toolkit.getDefaultToolkit().sync();
-	    sleepQuarterFrame();
-	    containerG.setComposite(AlphaComposite.Src);
-	}
-	super.callPaintTargets();	// This covers the red and green
+    public AnimationClient[] getAnimationClients() {
+	return grinView.getAnimationClients();
     }
 
     /**
-     * @inheritDoc
+     * Reset the list of animation clients
      **/
-    public void setFps(int fps) {
-	this.fps = fps;
-	super.setFps(fps);
+    public void resetAnimationClients(AnimationClient[] clients) {
+	grinView.resetAnimationClients(clients);
     }
 
-    private void sleepQuarterFrame() throws InterruptedException {
-	long ms = (1000000 / fps) / 4;
-	Thread.sleep(ms);
+    /**
+     * Get the animation engine
+     **/
+    public AnimationEngine getAnimationEngine() {
+	return grinView.getAnimationEngine();
     }
 }

@@ -76,9 +76,9 @@ exports
     }
 ;
 
-java_generated_class com.hdcookbook.genericgame.XletShowCommands [[
+java_generated_class com.hdcookbook.grinxlet.XletShowCommands [[
 
-    package com.hdcookbook.genericgame;
+    package com.hdcookbook.grinxlet;
 
     import com.hdcookbook.grin.Show;
     import com.hdcookbook.grin.GrinXHelper;

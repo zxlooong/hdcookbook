@@ -63,7 +63,7 @@ import java.awt.Image;
 import java.util.Random;
 import java.util.HashMap;
 
-import com.hdcookbook.genericgame.GameXlet;
+import com.hdcookbook.grinxlet.GrinXlet;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
@@ -114,14 +114,14 @@ public class MainDirector extends Director {
 
     public void restoreNormalMenu() {
 	AnimationClient[] clients = new AnimationClient[] { getShow() };
-	GameXlet.getInstance().resetAnimationClients(clients);
+	GrinXlet.getInstance().resetAnimationClients(clients);
     }
 
     public void putNewShowOnTopOfMenu(String segmentName) {
 	    // First we print out the old clients.  This is only done
 	    // as a minimal test of AnimationEngine.getAnimationClients()
 	AnimationClient[] clients 
-		= GameXlet.getInstance().getAnimationClients();
+		= GrinXlet.getInstance().getAnimationClients();
 	Debug.println();
 	Debug.println("Old animation clients:");
 	for (int i = 0; i < clients.length; i++) {
@@ -150,7 +150,7 @@ public class MainDirector extends Director {
 	    // clients.  This won't take effect until the current frame of
 	    // animation is complete.
 	clients = new AnimationClient[] { getShow(), newShow };
-	GameXlet.getInstance().resetAnimationClients(clients);
+	GrinXlet.getInstance().resetAnimationClients(clients);
     }
 
 

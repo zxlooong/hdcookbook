@@ -83,7 +83,7 @@ import java.net.URL;
 import javax.swing.JFileChooser;
 import javax.imageio.ImageIO;
 
-import com.hdcookbook.genericgame.GameXlet;
+import com.hdcookbook.grinxlet.GrinXlet;
 
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Director;
@@ -142,7 +142,7 @@ public class GenericMain extends Frame implements AnimationContext {
     protected Object debugWaitingMonitor = new Object();
 
     public GenericMain() {
-	new GameXlet(this);
+	new GrinXlet(this);
 	// This creates a facade for controlling us, e.g. from an xlet
 	// built on the generic game framework.
     }

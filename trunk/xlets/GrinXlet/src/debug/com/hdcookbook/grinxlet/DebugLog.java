@@ -52,7 +52,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.genericgame;
+package com.hdcookbook.grinxlet;
 
 import com.hdcookbook.grin.util.Debug;
 

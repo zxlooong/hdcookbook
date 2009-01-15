@@ -64,7 +64,7 @@ import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.fontstrip.FontStripText;
-import com.hdcookbook.genericgame.GameXlet;
+import com.hdcookbook.grinxlet.GrinXlet;
 import com.hdcookbook.grin.media.Playlist;
 import com.hdcookbook.grin.media.PlayerWrangler;
 import com.hdcookbook.grin.util.Debug;
@@ -152,7 +152,7 @@ public class GrinBunnyDirector extends Director {
      **/
     public void initializeGame() {
 	PlayerWrangler.getInstance().initialize(
-			GameXlet.getInstance().getAnimationEngine());
+			GrinXlet.getInstance().getAnimationEngine());
 	int[] trooperX = new int[]{ 162, 364, 566, 768, 970, 1172, 1374, 1576 };
 	if (Debug.ASSERT && troopers != null) {
 	    Debug.assertFail();

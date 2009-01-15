@@ -8,7 +8,7 @@ set up a new project using this build file.
 
     <property file="user.vars.properties"/>
     <property file="vars.properties"/>
-    <import file="${generic.game}/generic_build.xml"/>
+    <import file="${grin.xlet}/generic_build.xml"/>
     
     <target name="post-init">
         <!-- Generate fontstrip image file -->

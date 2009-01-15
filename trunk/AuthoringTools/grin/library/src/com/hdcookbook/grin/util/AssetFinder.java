@@ -488,8 +488,8 @@ public class AssetFinder  {
      * algorithm.
      * <p>
      * An implementation of the cookbook's color key algorithm is
-     * also available, in the "GenericGame" project.  See, for example,
-     * xlets/grin_samples/GenericGame/src/deploy/com/hdcookbook/genericgame/GameXlet.java
+     * also available, in the GrinXlet directory project.  See, for example,
+     * xlets/GrinXlet/src/deploy/com/hdcookbook/grinxlet/GrinXlet.java
      *
      * @param c		A color that is == to one of the standard
      *			constants Color.red, Color.green, Color.yellow
