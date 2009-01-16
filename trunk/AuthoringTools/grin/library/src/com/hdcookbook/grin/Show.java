@@ -59,6 +59,7 @@ import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
@@ -132,6 +133,20 @@ public class Show implements AnimationClient {
      * This array may be null.
      **/
     protected ManagedImage[] stickyImages = null;
+    
+    /**
+     * This is a dummy segment which contains one feature 
+     * in its activated feature array, which represents the top of 
+     * the rendering tree.
+     **/
+    protected Segment showTop                = null;
+    /**
+     * A group representing a set of activated features in the 
+     * currently activated Segment.
+     * This data member is accessed from Segment.activate(Segment) 
+     * and Segment.runFeatureSetup().
+     */
+    protected Group   showTopGroup           = null;  
 
     private Segment currentSegment = null;
     private Segment[] segmentStack = new Segment[0];  // For push/pop
@@ -188,6 +203,7 @@ public class Show implements AnimationClient {
      **/
     public void buildShow(Segment[] segments, Feature[] features, 
     		          RCHandler[] rcHandlers, String[] stickyImages,
+                          Segment showTop, Group showTopGroup,
 		          Hashtable publicSegments, Hashtable publicFeatures,
 		          Hashtable publicRCHandlers, 
 			  Hashtable publicNamedCommands)
@@ -207,6 +223,11 @@ public class Show implements AnimationClient {
 		    // not at this time.
 	    }
 	}
+        
+        this.showTopGroup = showTopGroup;
+        this.showTop = showTop;
+        this.showTop.setShow(this); 
+        
 	this.publicSegments = publicSegments;
 	this.publicFeatures = publicFeatures;
 	this.publicRCHandlers = publicRCHandlers;
@@ -262,6 +283,10 @@ public class Show implements AnimationClient {
 	for (int i = 0; i < features.length; i++) {
 	    features[i].initialize();
 	}
+        
+        showTop.initialize();
+        showTop.activate(null);
+        
 	initializer = null;
     }
 
@@ -280,9 +305,12 @@ public class Show implements AnimationClient {
 	    currentSegment.deactivate();
 	    currentSegment = null;
 	}
+        showTop.deactivate();
+        showTop = null;
+                 
 	for (int i = 0; i < features.length; i++) {
 	    features[i].destroy();
-	}
+	}       
 	if (stickyImages != null) {
 	    for (int i = 0; i < stickyImages.length; i++) {
 		this.stickyImages[i].unmakeSticky();
@@ -312,7 +340,8 @@ public class Show implements AnimationClient {
     public void setDrawTargets(String[] drawTargets) {
 	this.drawTargets = drawTargets;
     }
-
+    
+    
     /**
      * Get the set of draw target names.  The numerical draw targets
      * in features (e.g. the SetTarget feature) don't necessarily correspond
@@ -572,7 +601,8 @@ public class Show implements AnimationClient {
      **/
     public synchronized void nextFrame() throws InterruptedException {
 	if (currentSegment != null) {
-	    currentSegment.nextFrame();
+	    showTop.nextFrameForActiveFeatures();
+            currentSegment.nextFrameForRCHandlers();
 	}
 	director.notifyNextFrame();
 	    // It's in Director's contract that this be called with the
@@ -658,11 +688,11 @@ public class Show implements AnimationClient {
 	inputOK = false;
 	    // We could call notifyAll() here, but nobody waits for
 	    // inputOK to turn false, so there's no need.
-	if (currentSegment != null) {
+        if (currentSegment != null) {
 	    int old = context.setTarget(defaultDrawTarget);
-	    currentSegment.addDisplayAreas(context);
+	    showTop.addDisplayAreas(context);
 	    context.setTarget(old);
-	}
+        }
     }
 
     /**
@@ -677,9 +707,9 @@ public class Show implements AnimationClient {
 	if (Thread.interrupted() || destroyed) {
 	    throw new InterruptedException();
 	}
-	if (currentSegment != null) {
-	    currentSegment.paintFrame(gr);
-	}
+        if (currentSegment != null) {
+	   showTop.paintFrame(gr);
+        }
 	if (Debug.ASSERT && deferringPendingCommands) {
 	    Debug.assertFail();
 	}
@@ -692,6 +722,7 @@ public class Show implements AnimationClient {
 	inputOK = true;
 	notifyAll();	// Remote control input might be waiting on inputOK
     }
+
     //
     // Wait until it's safe to receive input.  Returns true if 
     // it's OK to proceed, or false if we've been interrupted 

@@ -235,12 +235,16 @@ public class Group extends Feature implements Node {
      * If called with a non-null argument, then this group must be in
      * the set up state.  If the argument is null and we're not set up,
      * then we must also not be activated.
+     * <p>
+     * This method relies on resetVisiblePartsNoAssert(HashMap) after performing 
+     * appropriate parameter and state checks.
      *
      * @param visibleParts	An array of parts.  We take
      *				ownership of the array.  A value of null
      *				re-sets this group to its original state.
      *
      * @see com.hdcookbook.grin.Feature#cloneSubgraph(java.util.HashMap)
+     * @see com.hdcookbook.grin.Feature#resetVisiblePartsNoAssert(java.util.HashMap)
      **/
     public void resetVisibleParts(Feature[] visibleParts) {
 	if (Debug.ASSERT && !isSetup()) {
@@ -248,9 +252,7 @@ public class Group extends Feature implements Node {
 		Debug.assertFail();
 	    }
 	}
-	if (visibleParts == null) {
-	    visibleParts = parts;
-	} else if (Debug.ASSERT) {
+        if (Debug.ASSERT && visibleParts != null) {
 	    //
 	    // Check that each child's graph is disjoint from every other child's.
 	    // This property is necessary for the correctness of the scene graph,
@@ -288,7 +290,25 @@ public class Group extends Feature implements Node {
 		}
 	    }
 	}
-	if (activated) {
+
+        resetVisiblePartsNoAssert(visibleParts);
+    }
+    
+    /**
+     * Re-sets the parts that are visible in this group to a new set
+     * without performing any of the assertion checks.
+     * 
+     * @param visibleParts	An array of parts.  We take
+     *				ownership of the array.  A value of null
+     *				re-sets this group to its original state.
+     *
+     * @see com.hdcookbook.grin.Feature#resetVisibleParts(java.util.HashMap)
+     */
+    public void resetVisiblePartsNoAssert(Feature[] visibleParts) {
+        if (visibleParts == null) {
+	    visibleParts = parts;
+        }
+ 	if (activated) {
 	    for (int i = 0; i < visibleParts.length; i++) {
 		visibleParts[i].activate();
 	    }
@@ -296,7 +316,7 @@ public class Group extends Feature implements Node {
 		this.visibleParts[i].deactivate();
 	    }
 	}
-	this.visibleParts = visibleParts;
+	this.visibleParts = visibleParts;       
     }
 
     /**

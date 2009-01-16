@@ -76,6 +76,14 @@ public class SEGroup extends Group implements SENode {
     public void setup(Feature[] parts) { 
 	setParts(parts);
     }
+
+   /**
+     * Set the parts that make up this group.  
+     **/
+    @Override
+    public void setParts(Feature[] parts) {
+	super.setParts(parts);
+    }
     
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException {

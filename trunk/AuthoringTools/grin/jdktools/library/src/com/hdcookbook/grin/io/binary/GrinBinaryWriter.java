@@ -60,16 +60,14 @@ import java.io.DataOutputStream;
 import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.GrinXHelper;
 import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SESegment;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowCommands;
@@ -87,7 +85,6 @@ import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.GuaranteeFill;
 import com.hdcookbook.grin.features.ImageSequence;
-import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SetTarget;
 import com.hdcookbook.grin.features.SrcOver;
 import com.hdcookbook.grin.features.Text;
@@ -271,7 +268,7 @@ public class GrinBinaryWriter {
         for (Segment segment: segments) {
             segmentList.getIndex((SENode) segment);
         }
-
+        
         runtimeClassNames = new IndexedSet();
 
         sharedStrings = new IndexedSet();
@@ -487,6 +484,9 @@ public class GrinBinaryWriter {
 	    }
 	}
 
+        dos.writeSegmentReference((Segment) show.getShowTopSegment());
+        dos.writeFeatureReference((Feature) show.getShowTopGroup());
+        
         dos.close();  // We're through writing to baos
 
         // Note, this is now writing to the base DataOutputStream instance.

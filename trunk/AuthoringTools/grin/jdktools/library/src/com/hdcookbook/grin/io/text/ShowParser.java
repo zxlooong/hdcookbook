@@ -76,7 +76,6 @@ import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Modifier;
-import com.hdcookbook.grin.features.SEImageSequence;
 import com.hdcookbook.grin.features.SEAssembly;
 import com.hdcookbook.grin.features.SEBox;
 import com.hdcookbook.grin.features.SEClipped;
@@ -365,6 +364,8 @@ public class ShowParser {
 		ms.maxHeight = lexer.getInt();
 		ms.imagesToConsider = parseStrings();
 		parseExpected(";");
+            } else if ("show_top".equals(tok)) {
+                parseShowTop();                
 	    } else {
 		lexer.reportError("Unrecognized token \"" + tok + "\"");
 	    }
@@ -388,6 +389,12 @@ public class ShowParser {
 	}
 	parseExpected(";");
 	show.setDrawTargets(drawTargets);
+    }
+
+    private void parseShowTop() throws IOException {
+        String showTopName = lexer.getString();
+        parseExpected(";");
+        builder.setShowTop(showTopName);        
     }
 
     private void parseStickyImages() throws IOException {
@@ -512,6 +519,8 @@ public class ShowParser {
 	    return parseGuaranteeFill(hasName, lineStart);
 	} else if ("set_target".equals(tok)) {
 	    return parseSetTarget(hasName, lineStart);
+        } else if ("showtop_group".equals(tok)) {
+            return parseShowTopGroup(hasName, lineStart);
 	} else if (extParser == null || tok == null) {
 	    lexer.reportError("Unrecognized feature \"" + tok + "\"");
 	    return null;	// not reached
@@ -914,6 +923,17 @@ public class ShowParser {
 	return group;
     }
 
+    private Feature parseShowTopGroup(boolean hasName, int line) throws IOException {
+	String name = parseFeatureName(hasName);
+	parseExpected(";");
+	final SEGroup group = new SEGroup(show, name);
+        group.setParts(new Feature[0]);
+	builder.addFeature(name, line, group);
+        builder.setShowTopGroup(group);
+        // nothing to setup for this...     
+        return group;
+    }
+    
     private Feature parseClipped(boolean hasName, int line) throws IOException {
 	String name = parseFeatureName(hasName);
 	SubFeature part = parseSubFeature(lexer.getString());

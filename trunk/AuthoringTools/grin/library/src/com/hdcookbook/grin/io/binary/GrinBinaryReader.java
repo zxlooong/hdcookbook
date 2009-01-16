@@ -221,10 +221,10 @@ public class GrinBinaryReader {
      * @see GrinBinaryWriter#getFeatureIndex(Feature)
      */
      Feature getFeatureFromIndex(int index) throws IOException {
-        if (index < 0 || index > featureList.length) {
+        if (index < 0 || index >= featureList.length) {
             throw new IOException("non-existing feature reference");
         }  else {
-            return  featureList[index];
+            return featureList[index];
         }
     }
  
@@ -385,8 +385,12 @@ public class GrinBinaryReader {
         readContents(in, rcHandlerList);
         readContents(in, segmentList);
         readContents(in, commandList);
+
+        Segment showTop = (Segment) in.readSegmentReference();
+        Group showTopGroup     = (Group) in.readFeatureReference();
         
 	show.buildShow(segmentList, featureList, rcHandlerList, stickyImages,
+                       showTop, showTopGroup,
 		       publicSegments, publicFeatures, publicRCHandlers,
 		       publicNamedCommands);
     }

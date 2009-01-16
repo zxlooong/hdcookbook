@@ -56,11 +56,6 @@
 package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.SEShow;
-import com.hdcookbook.grin.commands.Command;
-import com.hdcookbook.grin.commands.SEActivatePartCommand;
-import com.hdcookbook.grin.commands.SEActivateSegmentCommand;
-import com.hdcookbook.grin.commands.SESegmentDoneCommand;
-import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SEAssembly;
 import com.hdcookbook.grin.features.SEBox;
@@ -76,8 +71,6 @@ import com.hdcookbook.grin.features.SESetTarget;
 import com.hdcookbook.grin.features.SESrcOver;
 import com.hdcookbook.grin.features.SEText;
 import com.hdcookbook.grin.features.SETranslator;
-import com.hdcookbook.grin.input.SECommandRCHandler;
-import com.hdcookbook.grin.input.SEVisualRCHandler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,6 +90,8 @@ public class SEDoubleUseChecker extends AbstractSEShowVisitor {
 
     private ArrayList<String> errors = new ArrayList<String>();
     private Set<Feature> activeFeatures;
+    private Set<Feature> showTopFeatures;
+    private SESegment showTopSegment;
 
     /**
      * Report any problems we've seen visiting the show graph.  Errors
@@ -119,12 +114,24 @@ public class SEDoubleUseChecker extends AbstractSEShowVisitor {
     public void visitShow(SEShow show) {
 	// We only visit the segments, and then recurse down the active features
 	// for each segment.
+ 
+        showTopFeatures = new HashSet<Feature>();        
+        SESegment showTopSegment = (SESegment) show.getShowTopSegment();
+        // Visit the showtop segment first.
+        visitSegment(showTopSegment);      
+        // save showTop's active features  
+        showTopFeatures.addAll(activeFeatures);
+        activeFeatures = null;    // gets re-set soon
+
+        this.showTopSegment  = showTopSegment; // prevent re-visit
 	SEShow.acceptSegments(this, show.getSegments());
     }
 
     public void visitSegment(SESegment segment) {
-	activeFeatures = new HashSet<Feature>();
-	SEShow.acceptFeatures(this, segment.getActiveFeatures());
+        if (segment != showTopSegment) {
+	   activeFeatures = new HashSet<Feature>(showTopFeatures);
+	   SEShow.acceptFeatures(this, segment.getActiveFeatures());
+        }
     }
 
     private void addActive(Feature feature) {

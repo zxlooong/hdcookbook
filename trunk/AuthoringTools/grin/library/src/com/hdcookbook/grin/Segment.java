@@ -212,6 +212,13 @@ public class Segment implements Node {
 	outstandingSetups = 0;
 	setupCheckedInSetup = 0;
 	setupCheckedInActive = 0;
+        /* 
+         * Reset showTopGroup's parts to a default 0-length array.
+         * When all of this Segment's active features finish their
+         * set up in runFeatureSetup(), showTopGroup's parts are updated
+         * to reflect this Segment's active feature array.
+         **/
+        show.showTopGroup.resetVisiblePartsNoAssert(null);
 	for (int i = 0; i < activeFeatures.length; i++) {
 	    int needed = activeFeatures[i].setup();
 	    outstandingSetups += needed;
@@ -269,6 +276,8 @@ public class Segment implements Node {
 	for (int i = 0; i < settingUpFeatures.length; i++) {
 	    settingUpFeatures[i].unsetup();
 	}
+        
+        show.showTopGroup.resetVisiblePartsNoAssert(null);
     }
 
     //
@@ -315,7 +324,14 @@ public class Segment implements Node {
 	    }
 	}
 	segmentSetupComplete = true;
-
+        
+        // Done with setup.  Set the showTopGroup to this Segment's activeFeature list,
+        // unless this segment is the ShowTop segment, in which its
+        // activeFeature node tree already contains showTopGroup.
+        if (this != show.showTop) {
+           show.showTopGroup.resetVisiblePartsNoAssert(activeFeatures);
+        }
+        
 	// Now check to see if we should send the next
 	// it's time to move to the next segment.  It is if we have
 	// no active features, and all of our features are set up.
@@ -343,9 +359,7 @@ public class Segment implements Node {
     //
     void paintFrame(Graphics2D gr) {
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    if (featureWasActivated[i]) {
-		activeFeatures[i].paintFrame(gr);
-	    }
+	   activeFeatures[i].paintFrame(gr);
 	}
     }
 
@@ -355,26 +369,27 @@ public class Segment implements Node {
     //
     void addDisplayAreas(RenderContext context) {
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    if (featureWasActivated[i]) {
-		activeFeatures[i].addDisplayAreas(context);
-	    }
+	   activeFeatures[i].addDisplayAreas(context);
 	}
     }
 
     //
     // Called from Show with the Show lock held
     //
-    void nextFrame() {
+    void nextFrameForActiveFeatures() {
 	for (int i = 0; i < activeFeatures.length; i++) {
-	    if (featureWasActivated[i]) {
-		activeFeatures[i].nextFrame();
-	    }
+           activeFeatures[i].nextFrame();
 	}
+    }
+    //
+    // Called from Show with the Show lock held
+    //    
+    void nextFrameForRCHandlers() {
 	if (rcHandlers != null) {
 	    for (int i = 0; i < rcHandlers.length; i++) {
 		rcHandlers[i].nextFrame();
 	    }
-	}
+	}         
     }
 
     //

@@ -58,7 +58,6 @@ package com.hdcookbook.grin.io.text;
 
 import java.io.Reader;
 import java.io.IOException;
-import java.util.Vector;
 
 import com.hdcookbook.grin.util.Debug;
 

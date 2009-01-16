@@ -150,6 +150,7 @@ Here's BNF describing the syntax of a show file:
                  | draw_targets_setting
 		 | sticky_images_setting
 		 | binary_grin_file_setting 
+                 | show_top
 
     segment_stack_depth_setting := "setting" "segment_stack_depth" integer ";"
 
@@ -168,6 +169,13 @@ Here's BNF describing the syntax of a show file:
 	# Sets the file name of the binary grin file that's produced by
 	# the compiler.  This can be used to make the extension be ".grn"
 	# instead of ".grin".
+        
+    show_top ::= "show_top" string ;
+        # Sets the name of show's top node for rendering.
+        # The string should correspond to one of the feature names
+        # in this show.  When the show_top element is present, then
+        # a showtop_group feature should also be defined in the show.
+        # This can be used to add a special effect to the show tree.
 
     exports ::= "exports" "segments" name_list
     			"features" name_list
@@ -202,7 +210,7 @@ Here's BNF describing the syntax of a show file:
     feature ::= fixed_image | image_sequence | box | assembly | menu_assembly
     		  | sound | text | translator_model | translator | group 
 		  | timer | clipped | src_over | fade | scaling_model
-		  | gurantee_fill | set_target
+		  | gurantee_fill | set_target | showtop_group
 		  | extension_feature | extension_modifier
 
     fixed_image ::= "feature" "fixed_image" name image_placement file_name 
@@ -342,6 +350,12 @@ Here's BNF describing the syntax of a show file:
 
     translator ::= "feature" "translator" name translator_model_name 
     			"{" sub_feature "}" ";"
+                        
+    showtop_group :: "feature" "showtop_group" name ";"
+        # This can be used to give a name to the group of features
+        # that represents a set of active features at runtime.
+        # When a segment in this show is activated, it's active features
+        # get slotted into this group.  See also "show_top".
 
     extension_feature ::= "feature" "extension" namespace:type_name name 
     			  <syntax of extension> ";"

@@ -13,7 +13,7 @@
     
     <target name="grin">
       <!-- Build GRIN library and tools, including the mosaic builder -->
-        <ant dir="AuthoringTools/grin"/>
+        <ant dir="AuthoringTools"/>
     </target>
     
   <!-- Build all the tools under the AuthoringTools and the DiscCreationTools -->

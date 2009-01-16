@@ -73,6 +73,7 @@ import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.features.Clipped;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.Text;
@@ -377,7 +378,6 @@ public class MainDirector extends Director {
     }
     
     public void toggleImagePosition() {
-        System.out.println("Toggling image position off/on screen");
         InterpolatedModel model = (InterpolatedModel) 
                 getShow().getFeature("F:OffScreenImagePosition");
         int xPos = model.getField(Translator.X_FIELD);
@@ -387,5 +387,18 @@ public class MainDirector extends Director {
             model.setField(Translator.X_FIELD, Integer.MIN_VALUE);
         }
     }
+    
+    public void toggleShowTopClip() {
+        Debug.println("Toggling show's clip region");
+        Assembly assembly = (Assembly)
+                getShow().getFeature("F:MyShow");
+        Feature[] features = assembly.getParts();
+        if (assembly.getCurrentPart() == features[0]) {
+            assembly.setCurrentFeature(features[1]);
+        } else {
+            assembly.setCurrentFeature(features[0]);
+        }
+    }
+    
 
 }

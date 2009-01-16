@@ -59,8 +59,11 @@ package com.hdcookbook.grin.io;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.SESegment;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.InterpolatedModel;
+import com.hdcookbook.grin.features.SEGroup;
 import com.hdcookbook.grin.features.SEInterpolatedModel;
 import com.hdcookbook.grin.features.SEScalingModel;
 import com.hdcookbook.grin.features.SETimer;
@@ -115,6 +118,8 @@ public class ShowBuilder {
     private String binaryGrinFileName = null;
 
     private ExtensionParser extensionParser;
+    private SEGroup   showTopGroup      = null;
+    private SESegment showTop           = null;
     
     public ShowBuilder() {
     }
@@ -251,6 +256,41 @@ public class ShowBuilder {
     public void setStickyImages(String[] stickyImages) {
 	this.stickyImages = stickyImages;
     }
+    
+    /**
+     * Called when a "showtop_group" clause is encountered.
+     */
+    public void setShowTopGroup(SEGroup showTopGroup) 
+        throws IOException {
+        if (this.showTopGroup != null) {
+	    throw new IOException("Multiple showtop_group clauses");
+        }
+        this.showTopGroup = showTopGroup;
+    }
+     /**
+     * Called when a "show_top" clause is encountered.
+     */   
+    public void setShowTop(String showTopName) throws IOException {
+        if (this.showTop != null) {
+	    throw new IOException("Multiple show_top clauses");
+        } 
+        this.showTop = makeShowTopSegment(namedFeatures.get(showTopName));
+    }
+    
+    private SEGroup makeShowTopGroup() {
+        SEGroup g = new SEGroup(show);
+        g.setParts(new Feature[0]);
+        allFeatures.add(g);
+        return g;
+    }
+    
+    private SESegment makeShowTopSegment(Feature showTopFeature) throws IOException {
+        Feature[] features = new Feature[] { showTopFeature };
+        SESegment segment = new SESegment(null, features, features,
+                new RCHandler[0], new Command[0], false, new Command[0]);
+        allSegments.add(segment);
+        return segment;
+    }
 
     /** 
      * Look up a segment in the list of all named segments.
@@ -285,6 +325,16 @@ public class ShowBuilder {
      * have been resolved.  Any DeferredBuider instances are processed here.
      **/
     public void finishBuilding() throws IOException {
+                    
+        if ((showTop == null) != (showTopGroup == null)) {
+            throw new IOException("show_top and showtop_group should both be set or unset.");
+        }    
+        
+        if (showTop == null) {
+            showTopGroup = makeShowTopGroup();
+            showTop = makeShowTopSegment(showTopGroup);
+        }
+        
 	Segment[] segments 
 	    = allSegments.toArray(new Segment[allSegments.size()]);
 	Feature[] features
@@ -308,9 +358,12 @@ public class ShowBuilder {
 	    Command[] a = (Command[]) v.toArray(new Command[v.size()]);
 	    show.setNamedCommands(a);
 	}
-	show.buildShow(segments, features, rcHandlers, stickyImages,
-		       publicSegments, publicFeatures, publicRCHandlers,
-		       publicNamedCommands);
+                                     
+	show.buildShow(segments, features, rcHandlers, stickyImages, 
+                       showTop, (Group)showTopGroup, 
+                       publicSegments,
+		       publicFeatures, publicRCHandlers, publicNamedCommands);
+        
 	if (binaryGrinFileName != null) {
 	    show.setBinaryGrinFileName(binaryGrinFileName);
 	}
@@ -455,4 +508,5 @@ public class ShowBuilder {
 		     loopCount, commands);
 	return result;
     }
+
 }

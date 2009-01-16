@@ -20,6 +20,7 @@ exports
 	F:SM.Text
 	F:SM.Arc
         F:OffScreenImagePosition
+        F:MyShow
     } handlers {
     } named_commands {
 	C:GotoAssemblyCloneTest
@@ -71,7 +72,7 @@ segment S:Main
     } setup {
 	F:Everything
     } rc_handlers {
-	H:1 H:2 H:3 H:4 H:5 H:6 H:7 H:8
+	H:1 H:2 H:3 H:4 H:5 H:6 H:7 H:8 H:9
 	H:EnterPress H:EnterRelease
     }
 ;
@@ -96,6 +97,7 @@ feature text F:MainText
 	    "     6 - Run regression test for issue 131 (assembly and cloning)"
 	    "     7 - Run test for issue 134 (falling behind in nextFrame()"
             "     8 - Run test for issue 138 (offscreen image)"
+            "     9 - Set/Unset a clip region around the show (issue 139)"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
 	background { 0 0 0 255 } 
@@ -153,6 +155,10 @@ rc_handler key_pressed H:7 { 7 } execute {
 
 rc_handler key_pressed H:8 { 8 } execute {
 	activate_segment S:OffScreenImageTest ;
+} ;
+
+rc_handler key_pressed H:9 { 9 } execute {
+	activate_segment S:ToplevelClippingTest ;
 } ;
 
 rc_handler key_pressed H:EnterPress { enter } execute {
@@ -563,7 +569,7 @@ feature translator_model F:OffScreenImagePosition {
 
 feature translator F:OffScreenImageTranslator F:OffScreenImagePosition {
  	F:OffScreenImage 
-        sub_feature timer 1 repeat {
+        sub_feature timer 10 repeat {
 	   java_command [[ getMainDirector().toggleImagePosition(); ]]
         } ;
 } ;
@@ -605,6 +611,60 @@ segment S:OffScreenImageTest
 	F:Everything
     } rc_handlers {
 	H:OffScreenImageTest     
+    } next {
+	activate_segment S:Main ;
+    }
+;
+
+# Issue 139 show's toplevel feature
+
+feature showtop_group F:MyShow.Body ;
+    # This gives a name to the "slot" where the current
+    # segment's active features go
+
+feature clipped F:MyShow.Clip.Still F:MyShow.Body
+        ( 0 0 1920 1080 ) ;          # Show clipped to this rectangle
+
+feature clipped F:MyShow.Clip.Moving F:MyShow.Body
+        ( 0 0 600 1000 ) ;            # Show clipped to this rectangle
+
+feature translator_model F:MyShow.Pos.Still
+        { 0  0 0      linear-relative  } ;  
+
+feature translator_model F:MyShow.Pos.Moving {
+    	0 	0 0             linear-relative
+    	96      0 480           linear-relative
+    	192      0 0             linear-relative  
+} loop_count infinite ;
+
+feature translator F:MyShow.Still F:MyShow.Pos.Still {
+        F:MyShow.Pos.Still
+        F:MyShow.Clip.Still
+} ;
+
+feature translator F:MyShow.Moving F:MyShow.Pos.Moving {
+        F:MyShow.Pos.Moving
+        F:MyShow.Clip.Moving
+} ;
+
+feature assembly F:MyShow {
+    still	F:MyShow.Still
+    moving	F:MyShow.Moving
+} ;
+
+show_top F:MyShow ;
+        # When the show is displayed, the top of the scene graph will be
+        # F:MyShow, with the current segment's active features slotted in
+        # at F:MyShow.Body
+
+segment S:ToplevelClippingTest
+    active {
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:OffScreenImageTest 
+    } on_entry {
+	   java_command [[ getMainDirector().toggleShowTopClip(); ]]    
     } next {
 	activate_segment S:Main ;
     }

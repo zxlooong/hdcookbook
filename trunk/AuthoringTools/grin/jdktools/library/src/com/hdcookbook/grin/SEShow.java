@@ -56,12 +56,12 @@
 package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.input.RCHandler;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -79,7 +79,7 @@ public class SEShow extends Show {
     private Map<String, Segment> privateSegments = null;
     private Object internalMonitor = new Object();
     private SEShowCommands showCommands = new SEShowCommands(this);
-    private Command[] namedCommands;
+    private Command[] namedCommands;   
 
     // For mosaic building.
     private ArrayList<MosaicSpec> mosaicSpecs = new ArrayList();
@@ -127,6 +127,28 @@ public class SEShow extends Show {
 	    result[i] = stickyImages[i].getName();
 	}
 	return result;
+    }
+    
+    /**
+     * Get the Show's top Segment, which represents the top of a rendering tree.  
+     * This segment's active feature list includes all the active features of 
+     * this show's activated segment.
+     * 
+     * @see #getShowTopGroup
+     */ 
+    public Segment getShowTopSegment() {
+        return showTop;
+    }
+    
+    /**
+     * Get the group for active features of a show's currently activated segment.
+     * When the show moves from one segment to another, then this showTopGroup's
+     * part is swapped using Group.resetVisibleParts().
+     * 
+     * @see #getShowTopSegment() 
+     */
+    public Group getShowTopGroup() {
+        return showTopGroup;
     }
     
     /**
@@ -231,19 +253,22 @@ public class SEShow extends Show {
     @Override
     public void buildShow(Segment[] segments, Feature[] features, 
     		          RCHandler[] rcHandlers, String[] stickyImages,
+                          Segment showTop, Group showTopGroup,
 		          Hashtable publicSegments, Hashtable publicFeatures,
 		          Hashtable publicRCHandlers, 
 			  Hashtable publicNamedCommands)
 	    throws IOException
     {
+
 	super.buildShow(segments, features, rcHandlers, stickyImages,
+                        showTop, showTopGroup,
 		        publicSegments, publicFeatures, publicRCHandlers,
 			publicNamedCommands);
 	SEDoubleUseChecker checker = new SEDoubleUseChecker();
 	accept(checker);
 	checker.reportAnyProblems();
     }
-
+    
     /**
      * Sets the name of the file that the GRIN compiler should generate,
      * if you want to override the default.
