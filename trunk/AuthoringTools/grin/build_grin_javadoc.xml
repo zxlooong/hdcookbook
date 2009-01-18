@@ -37,7 +37,7 @@ information or have any questions.
 <target name="generate-grin-javadoc">
 	<mkdir dir="${GRIN_JAVADOC_JDK_DEST}"/>
 	<javadoc 	  
-	  packagenames="com.hdcookbook.grin.*"
+	  packagenames="com.hdcookbook.*"
 	  destdir="${GRIN_JAVADOC_JDK_DEST}">
 		  <sourcepath location="library/src"/>
 		  <sourcepath location="jdktools/library/src" />
@@ -46,16 +46,20 @@ information or have any questions.
 		  <sourcepath location="jdktools/grinviewer/src"/>
 		  <sourcepath location="extensions/media/src"/>
 		  <sourcepath location="extensions/media/se_src"/>
+		  <sourcepath location="extensions/fontstrip/library/src"/>
+		  <sourcepath location="extensions/fontstrip/jdktools/tools/src"/>
 	</javadoc>	
         
 	<mkdir dir="${GRIN_JAVADOC_ME_DEST}"/>
 	<javadoc 	  
-	  packagenames="com.hdcookbook.grin.*"
+	  packagenames="com.hdcookbook.*"
 	  bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
 	  destdir="${GRIN_JAVADOC_ME_DEST}">
 		  <sourcepath location="library/src"/>
 		  <sourcepath location="extensions/media/src"/>
 		  <sourcepath location="extensions/media/xlet_src"/>
+		  <sourcepath location="extensions/fontstrip/library/src"/>
+		  <sourcepath location="../../xlets/GrinXlet/src/debug"/>
 	</javadoc>        
 	<echo message=""/>
 	<echo message="Desktop javadocs are in ${GRIN_JAVADOC_JDK_DEST}"/>

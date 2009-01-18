@@ -164,7 +164,7 @@ public interface SENode {
      *
      * @throws IOException	If the operation can't be completed
      *
-     * @see SENode#injectParent(Feature)
+     * @see SENode#changeFeatureReference(Feature, Feature)
      **/
     public void changeFeatureReference(Feature from, Feature to) 
     	throws IOException ;

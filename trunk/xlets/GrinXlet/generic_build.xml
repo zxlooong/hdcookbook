@@ -17,6 +17,8 @@ Game xlet project.  See the documentation in vars.properties for details.
     <property name="mosaics.file.txt" value=""/>
     <property name="extension.parser" 
     	      value="com.hdcookbook.grin.io.text.NullExtensionParser"/>
+    <property name="xlet.class.name"
+	      value="com.hdcookbook.grinxlet.GrinXlet"/>
     <condition property="debug.is.set">
 	  <equals arg1="${debug.or.deploy}" arg2="debug"/>
     </condition>
@@ -546,7 +548,18 @@ ${show.file}.txt
     </target>
 
     <target name="gen-permission-file" depends="init">
-	<concat destfile="${build.dir}/classes/com/hdcookbook/grinxlet/bluray.GrinXlet.perm"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+	<pathconvert property="gen-permission-file.almost.perm.file">
+	    <path path="/${xlet.class.name}"/>
+	    <unpackagemapper from="${kludge.root.dir}*" to="*"/>
+	</pathconvert>
+	<basename property="gen-permission-file.basename"
+		  file="${gen-permission-file.almost.perm.file}"/>
+	<pathconvert property="gen-permission-file.perm.file">
+	    <path path="${build.dir}/classes//${gen-permission-file.almost.perm.file}"/>
+	    <globmapper from="*/${gen-permission-file.basename}"
+			to="*/bluray.${gen-permission-file.basename}.perm"/>
+	</pathconvert>
+	<concat destfile="${gen-permission-file.perm.file}"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!-- This file contains information taken from build.xml -->
 <!-- AUTO-GENERATED - DO NOT EDIT -->
 <n:permissionrequestfile xmlns:n="urn:BDA:bdmv;PRF" orgid="0x${xlet.orgid}" appid="0x${xlet.appid}">
@@ -588,7 +601,7 @@ ${show.file}.txt
                 <classpathExtension></classpathExtension>
                 <iconFlags>0x0</iconFlags>
                 <iconLocator></iconLocator>
-                <initialClassName>com.hdcookbook.grinxlet.GrinXlet</initialClassName>
+                <initialClassName>${xlet.class.name}</initialClassName>
 		    <parameters>${show.file}.grin</parameters>
 		    <parameters>${show.initial.segment}</parameters>
 		    <parameters>${show.director}</parameters>

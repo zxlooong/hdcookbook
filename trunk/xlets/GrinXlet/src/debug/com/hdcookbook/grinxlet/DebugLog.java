@@ -145,7 +145,7 @@ public class DebugLog {
     }
 
     /**
-     * @see #startDebugLogListener()
+     * @see #startDebugListener()
      **/
     public static void shutdownDebugListener() {
 	synchronized(LOCK) {

@@ -5,6 +5,8 @@ com.hdcookbook.grin.commands
 com.hdcookbook.grin.compiler
 com.hdcookbook.grin.features
 com.hdcookbook.grin.features.parts
+com.hdcookbook.grin.fontstrip
+com.hdcookbook.grin.fontstrip.xml
 com.hdcookbook.grin.input
 com.hdcookbook.grin.io
 com.hdcookbook.grin.io.binary
@@ -15,3 +17,4 @@ com.hdcookbook.grin.mosaic
 com.hdcookbook.grin.test
 com.hdcookbook.grin.test.bigjdk
 com.hdcookbook.grin.util
+com.hdcookbook.grinxlet

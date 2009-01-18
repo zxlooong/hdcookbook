@@ -1,6 +1,5 @@
 <html><body>
 
-
 <style type="text/css">
   P.pagebreak {page-break-before: always}
 </style>
@@ -150,6 +149,7 @@ Here's BNF describing the syntax of a show file:
                  | draw_targets_setting
 		 | sticky_images_setting
 		 | binary_grin_file_setting 
+                 | show_top
 
     segment_stack_depth_setting := "setting" "segment_stack_depth" integer ";"
 
@@ -168,6 +168,13 @@ Here's BNF describing the syntax of a show file:
 	# Sets the file name of the binary grin file that's produced by
 	# the compiler.  This can be used to make the extension be ".grn"
 	# instead of ".grin".
+        
+    show_top ::= "show_top" string ;
+        # Sets the name of show's top node for rendering.
+        # The string should correspond to one of the feature names
+        # in this show.  When the show_top element is present, then
+        # a showtop_group feature should also be defined in the show.
+        # This can be used to add a special effect to the show tree.
 
     exports ::= "exports" "segments" name_list
     			"features" name_list
@@ -202,7 +209,7 @@ Here's BNF describing the syntax of a show file:
     feature ::= fixed_image | image_sequence | box | assembly | menu_assembly
     		  | sound | text | translator_model | translator | group 
 		  | timer | clipped | src_over | fade | scaling_model
-		  | gurantee_fill | set_target
+		  | gurantee_fill | set_target | showtop_group
 		  | extension_feature | extension_modifier
 
     fixed_image ::= "feature" "fixed_image" name image_placement file_name 
@@ -322,6 +329,10 @@ Here's BNF describing the syntax of a show file:
 	#
 	# If you want to set the x,y position programmatically, just have
 	# one key frame.
+        # Use "offscreen" keyword for x,y position to place a feature 
+        # off the screen without causing the animation engine to repaint extra
+        # region.  Use Integer.MIN_VALUE for x,y position to off-screen 
+        # programatically. 
 
     key_frame ::= frame_number x y interpolation_type
 
@@ -338,6 +349,12 @@ Here's BNF describing the syntax of a show file:
 
     translator ::= "feature" "translator" name translator_model_name 
     			"{" sub_feature "}" ";"
+                        
+    showtop_group :: "feature" "showtop_group" name ";"
+        # This can be used to give a name to the group of features
+        # that represents a set of active features at runtime.
+        # When a segment in this show is activated, it's active features
+        # get slotted into this group.  See also "show_top".
 
     extension_feature ::= "feature" "extension" namespace:type_name name 
     			  <syntax of extension> ";"
@@ -509,6 +526,21 @@ A string can be a sequence of characters delimited by whitespace,
 or it can be enclosed in double-quotes, with backslash as an
 escape characer if you need double-quote or backslash within a
 string..  Strings may contain newlines.
+</p>
+<p>
+A show can include a <code>$include</code> director that looks like this:
+<pre>
+
+    ...
+
+    $include some_file.txt ;
+
+</pre>
+<p>
+The string "<code>$include</code>" must not be inside quotation marks, 
+but the file name
+(like other normal strings) may be.  The included file is searched for on
+the search path used for all show assets.
 </p>
 
 <h2>Features</h2>
@@ -756,6 +788,50 @@ also be trying to change it with an active interpolation.  Further, when you
 set a value from Java, it stays set to that new value throughout the execution
 of the xlet; there is no mechanism to recover the default value set in the
 show file.
+</p>
+
+<h2>Extending GRIN</h2>
+<p>
+GRIN was designed to be extended, by adding new feature types and
+new remote control handler types.  Adding a new feature does require
+that you adhere to some needed structure.  In addition to writing a
+runtime class to implement your new feature, you need to write a method
+to read instantiate a feature from the GRIN binary file, and you need
+to write a Java SE subclass of your feature that knows how to write out
+that binary file format.
+</p><p>
+The SE version of your feature can, if you wish, include compile-time
+processing.  That is, when the GRIN compiler is run to create a binary
+file, the SE subclass of your feature can do any computation you want it
+to do.  This can include modifying the scene graph, even by injecting
+a new node as the parent of your feature, and making every every node
+in the show that referred to your feature refer to this new parent, instead.
+In this way, you can declare a new node type in the show file, but implement
+your node as a collection of already existing node types.
+</p><p>
+To see an example of adding a feature, see 
+<code>xlets/tests/functional/Playground</code>.  As of this writing, this
+included three extension features, <code>Arc</code>,
+<code>BouncingArc</code> and 
+<code>ImageFrame</code>.  In the <code>src</code> directory,
+you'll find <code>Arc.java</code> and <code>ImageFrame.java</code>, which
+are the runtime support for these features.  In the <code>se_src</code> 
+directory, you'll find <code>SEArc.java</code>,
+<code>SEBouncingArc.java</code> and 
+<code>SEImageFrame.java</code>,
+which are the SE versions of these extensions, complete with the
+<code>writeInstanceData()</code> methods.  The bouncing arc feature
+compiles into an arc under a translation, with a translator model that has
+pre-computed bounce coordinates.  You'll also find the
+extension parser for these new features, in 
+<code>PlaygroundExtensionParser.java</code>.  
+</p><p>
+A more substantive example of a "standard" extension is the media
+player, in <code>AuthoringTools/grin/extensions/media</code>.  It's
+used in the GrinBunny game in 
+<code>xlets/grin_samples/GrinBunny</code>, which can serve as a model
+for how to set up the vars.properties file to build in extensions from
+multiple sources.
 </p>
 
 <h2>Building Notes</h2>
