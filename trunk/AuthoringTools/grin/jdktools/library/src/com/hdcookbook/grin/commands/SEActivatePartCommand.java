@@ -59,6 +59,7 @@ import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -125,4 +126,22 @@ public class SEActivatePartCommand extends ActivatePartCommand implements SENode
         visitor.visitActivatePartCommand(this);
     }
 
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) {
+	if (assembly == from && to instanceof Assembly) {
+	    assembly = (Assembly) to;
+	}
+	if (part == from) {
+	    part = to;
+	}
+    }
 }

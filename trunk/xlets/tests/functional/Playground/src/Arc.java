@@ -190,7 +190,7 @@ public class Arc extends Feature implements Node {
      **/
     public void paintFrame(Graphics2D gr) {
 	gr.setColor(color);
-	gr.fillArc(x, y, width, height, startAngle, arcAngle);
+	gr.fillArc(x, y, width-1, height-1, startAngle, arcAngle);
     }
 
 

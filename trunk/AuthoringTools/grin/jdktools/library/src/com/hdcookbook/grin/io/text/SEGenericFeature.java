@@ -56,11 +56,13 @@ package com.hdcookbook.grin.io.text;
 
 import com.hdcookbook.grin.*;
 import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.io.ShowBuilder;
 import java.awt.Graphics2D;
+import java.io.IOException;
 
 /**
  * This is a generic SEFeature class in which the ExtensionParser implementation
- * can choose to subclass.  This is meant to be used for the show compiled time only.
+ * can choose to subclass.  This is meant to be used for the show compile time only.
  */
 public abstract class SEGenericFeature extends Feature implements SENode {
     public SEGenericFeature(Show show) {
@@ -106,5 +108,17 @@ public abstract class SEGenericFeature extends Feature implements SENode {
     
     public void accept(SEShowVisitor visitor) {
         visitor.visitUserDefinedFeature(this);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) {
     }
 }

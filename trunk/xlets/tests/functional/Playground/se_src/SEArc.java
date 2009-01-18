@@ -66,6 +66,7 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import com.hdcookbook.grin.util.Debug;
 
@@ -90,10 +91,6 @@ public class SEArc extends Arc implements SENode {
     	this.color = color;
     }
 
-    public SEArc(SEShow show) {
-	super(show);
-    }
-
     public void writeInstanceData(GrinDataOutputStream out) throws IOException {
 	out.writeSuperClassData(this);
 	out.writeColor(color);
@@ -111,5 +108,17 @@ public class SEArc extends Arc implements SENode {
 
     public void accept(SEShowVisitor visitor) {
 	visitor.visitUserDefinedFeature(this);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) {
     }
 }

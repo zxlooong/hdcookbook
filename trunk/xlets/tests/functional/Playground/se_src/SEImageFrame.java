@@ -59,6 +59,7 @@
  **/
 
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.features.SEFixedImage;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
@@ -67,6 +68,7 @@ import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.FixedImage;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import com.hdcookbook.grin.util.Debug;
 
@@ -88,7 +90,7 @@ public class SEImageFrame extends ImageFrame implements SENode {
 	super(show);
     }
 
-    void setFixedImage(FixedImage fixedImage) {
+    void setFixedImage(SEFixedImage fixedImage) {
 	this.fixedImage = fixedImage;
     }
 
@@ -105,5 +107,23 @@ public class SEImageFrame extends ImageFrame implements SENode {
 
     public void accept(SEShowVisitor visitor) {
 	visitor.visitUserDefinedFeature(this);
+	// fixedImage isn't a child, so we shouldn't visit it here.
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) 
+    		throws IOException 
+    {
+	// fixedImage isn't a child of ours, and if it adds a parent,
+	// that parent wouldn't be a FixedImage anyway, so the most sensible
+	// thing to do is to keep our reference to the FixedImage we know.
     }
 }

@@ -54,9 +54,11 @@
 
 package com.hdcookbook.grin.features;
 
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -83,5 +85,20 @@ public class SESrcOver extends SrcOver implements SENode {
 
     public void accept(SEShowVisitor visitor) {
         visitor.visitSrcOver(this);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) {
+	if (part == from) {
+	    part = to;
+	}
     }
 }

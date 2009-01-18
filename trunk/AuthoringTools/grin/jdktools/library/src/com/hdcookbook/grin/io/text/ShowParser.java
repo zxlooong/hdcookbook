@@ -871,8 +871,16 @@ public class ShowParser {
 	ForwardReference fw = new ForwardReference(lexer) {
 	    public void resolve() throws IOException {
 		Iterable<Feature> syntheticFeatures = helper.setupAssembly();
+		//
+		// this step combines resolving forward references, and
+		// creating synthetic features.  It was written before
+		// SENode.postProcess() existed.  It would be a bit
+		// cleaner to split the feature-creation part out into
+		// SEMenuAssembly.postProcess(), but this old way of doing
+		// it works too.
+		//
 		for (Feature f: syntheticFeatures) {
-		    builder.addSyntheticFeature(line, f);
+		    builder.addSyntheticFeature(f);
 		}
 	    }
 	};
@@ -2133,6 +2141,7 @@ public class ShowParser {
         if (cmds.getClassName() == null) {
             lexer.reportError("java_command seen, but java_generated_class not set");
         }
+	int lineStart = lexer.getLineNumber();
         parseExpected("[[");
         StringBuffer xletBody = new StringBuffer();
         StringBuffer grinviewBody = new StringBuffer();
@@ -2144,6 +2153,7 @@ public class ShowParser {
         result.setXletMethodBody(xletBody.toString());
         result.setGrinviewMethodBody(grinviewBody.toString());
         result.setOriginalSource(originalSource.toString());
+	builder.addCommand(result, lineStart);
         return result;
     }
 
@@ -2441,7 +2451,9 @@ public class ShowParser {
 		    originalSource.append(' ');
 		    originalSource.append(cmdStr);
 		    originalSource.append(' ');
+		    int lineStart = lexer.getLineNumber();
                     Command cmd = parseCommand(cmdStr);
+		    builder.addCommand(cmd, lineStart);
 		    parseExpected("]]");
                     originalSource.append(" ]]");
                     src = command.addSubCommand(cmd);

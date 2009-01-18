@@ -53,6 +53,7 @@
  */
 package com.hdcookbook.grin;
 
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -96,10 +97,75 @@ public interface SENode {
 
     /**
      * Calls the visit method corresponding to this node type.
+     * <p>
+     * If you are defining a user-defined feature, there are some
+     * restrictions that you'll want to follow.  If your extension is
+     * a feature that has children, then you should make it a subclass
+     * of one of the built-in feature types, Assembly, Modifer or Group.
+     * That's because the GRIN compiler defines visitors that need to
+     * visit every node in the tree, but these built-in visitors don't
+     * know about your extension types.  By making your extension type
+     * a subclass of one of the standard ones, and by making your
+     * <code>accept()</code> method call either 
+     * <code>visitAssembly()</code>, <code>visitGroup()</code> or
+     * <code>visitUserDefinedModifier()</code>, as appropriate,
+     * you'll ensure that all the children get visited.
      *
      * @param visitor SEShowVisitor object.
      *
      * @see SEShowVisitor
      */
     public void accept(SEShowVisitor visitor);
+
+    /**
+     * Do any needed post-processing in this show.  The grin compiler works
+     * as follows:
+     * <ul>
+     *    <li>GRIN source file is read and tree is built in memory
+     *    <li>Forward references are resolved (in multiple passes)
+     *    <li>postProcess() is called on every node.  During the call,
+     *	      child feature nodes can be added, and parent features can
+     *	      be injected.
+     *    <li>The double-use checker runs to ensure the graph structure
+     *        is valid.
+     *    <li>Deferred builders (e.g. TranslatorHelper) are called.
+     *        Deferred builders cannot make changes to the tree structure.
+     * </ul>
+     * <p>
+     * During the post-process phase, a node can add new features to the
+     * show, by calling <code>ShowBuilder.addSyntheticFeature()</code>,
+     * and it can insert a new feature as the parent of a given feature,
+     * by calling <code>ShowBuilder.injectParent()</code>.  It can also
+     * add segments and handlers by calling the appropriate builder methods.
+     * <p>
+     * When a parent is injected, the
+     * ShowBuilder calls postProcess() on all nodes automatically,
+     * including nodes that are created during the execution of postProcess()
+     * in another node.
+     *
+     * @param	builder	    The builder that holds state for the show
+     *
+     * @throws 	IOException if an error is encountered
+     *
+     * @see ShowBuilder#addSyntheticFeature(Feature)
+     * @see ShowBuilder#injectParent(Feature, Feature)
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException;
+
+    /**
+     * Change a feature reference from one feature to a new one.  If your
+     * node has a reference to the feature <code>from</code>, it should be
+     * changed to refer to <code>to</code>.  This is called for every node
+     * in an SEShow when <code>SENode.injectParent</code> is used.
+     * <p>
+     * The ShowBuilder calls changeFeatureReference() on all nodes 
+     * automatically, including nodes that are created during the 
+     * execution of postProcess().
+     *
+     * @throws IOException	If the operation can't be completed
+     *
+     * @see SENode#injectParent(Feature)
+     **/
+    public void changeFeatureReference(Feature from, Feature to) 
+    	throws IOException ;
 }

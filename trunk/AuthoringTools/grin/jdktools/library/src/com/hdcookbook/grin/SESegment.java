@@ -57,6 +57,7 @@ package com.hdcookbook.grin;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.SERCHandler;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -131,6 +132,30 @@ public class SESegment extends Segment implements SENode {
    
     public void accept(SEShowVisitor visitor) {
         visitor.visitSegment(this);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) 
+            throws IOException
+    {
+	for (int i = 0; i < activeFeatures.length; i++) {
+	    if (activeFeatures[i] == from) {
+		activeFeatures[i] = to;
+	    }
+	}
+	for (int i = 0; i < settingUpFeatures.length; i++) {
+	    if (settingUpFeatures[i] == from) {
+		settingUpFeatures[i] = to;
+	    }
+	}
     }
 
 }

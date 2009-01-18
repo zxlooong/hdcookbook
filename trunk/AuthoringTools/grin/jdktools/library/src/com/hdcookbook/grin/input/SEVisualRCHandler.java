@@ -60,6 +60,7 @@ import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Assembly;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import com.hdcookbook.grin.io.builders.VisualRCHandlerHelper;
 import java.awt.Rectangle;
@@ -305,5 +306,29 @@ public class SEVisualRCHandler
     
     public void accept(SEShowVisitor visitor) {
         visitor.visitVisualRCHandler(this);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) 
+            throws IOException
+    {
+	for (int i = 0; i < selectFeatures.length; i++) {
+	    if (selectFeatures[i] == from) {
+		selectFeatures[i] = to;
+	    }
+	}
+	for (int i = 0; i < activateFeatures.length; i++) {
+	    if (activateFeatures[i] == from) {
+		activateFeatures[i] = to;
+	    }
+	}
     }
 }

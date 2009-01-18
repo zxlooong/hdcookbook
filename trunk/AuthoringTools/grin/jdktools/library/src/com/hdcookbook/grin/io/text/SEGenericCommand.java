@@ -53,10 +53,15 @@
  */
 package com.hdcookbook.grin.io.text;
 
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.ShowBuilder;
+
+import java.io.IOException;
 
 /**
  * This is a generic SECommand class in which the ExtensionParser implementation
@@ -75,5 +80,17 @@ public abstract class SEGenericCommand extends Command
     
     public void accept(SEShowVisitor visitor) {
         visitor.visitUserDefinedCommand(this);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) {
     }
 }

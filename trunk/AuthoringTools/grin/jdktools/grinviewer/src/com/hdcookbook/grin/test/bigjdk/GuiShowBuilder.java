@@ -92,7 +92,7 @@ public class GuiShowBuilder extends ShowBuilder {
 	gui.addLineNumber(s, line);
     }
 
-    public void addCommand(Command command, int line) {
+    public void addCommand(Command command, int line) throws IOException {
 	super.addCommand(command, line);
 	gui.addLineNumber(command, line);
     }

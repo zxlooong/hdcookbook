@@ -55,11 +55,15 @@
 package com.hdcookbook.grin.features;
 
 
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.ShowBuilder;
+
+import java.io.IOException;
 
 public class SETranslatorModel extends SEInterpolatedModel {
 
@@ -98,5 +102,17 @@ public class SETranslatorModel extends SEInterpolatedModel {
             }
         }
         return result;
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) {
     }
 }

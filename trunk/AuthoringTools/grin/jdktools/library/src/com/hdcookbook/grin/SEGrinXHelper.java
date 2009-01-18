@@ -59,6 +59,7 @@ import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.GrinXHelper;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.commands.SERunNamedCommand;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -135,5 +136,19 @@ public abstract class SEGrinXHelper extends GrinXHelper implements SENode {
 
     public String getRuntimeClassName() {
         return GrinXHelper.class.getName();
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) 
+            throws IOException
+    {
     }
 }

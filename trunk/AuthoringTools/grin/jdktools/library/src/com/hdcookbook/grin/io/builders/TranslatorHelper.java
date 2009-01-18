@@ -180,7 +180,7 @@ public class TranslatorHelper implements DeferredBuilder {
 	    }
 	    public void visitUserDefinedFeature(Feature feature) {
                 if (feature instanceof Modifier) {
-                    SEShow.acceptFeature(this, ((Modifier)feature).getPart());
+		    visitUserDefinedModifier((Modifier) feature);
                 } else {
                     int x = feature.getX();
                     int y = feature.getY();
@@ -189,6 +189,10 @@ public class TranslatorHelper implements DeferredBuilder {
                     }
                 }
 	    }
+	    public void visitUserDefinedModifier(Modifier modifier) {
+		SEShow.acceptFeature(this, modifier.getPart());
+	    }
+
 	    public void visitSetTarget(SESetTarget feature) {
 		SEShow.acceptFeature(this, feature.getPart());
 	    }

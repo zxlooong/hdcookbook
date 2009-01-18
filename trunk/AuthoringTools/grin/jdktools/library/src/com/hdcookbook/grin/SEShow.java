@@ -57,6 +57,7 @@ package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Group;
+import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.input.RCHandler;
 
 import java.io.IOException;
@@ -86,6 +87,8 @@ public class SEShow extends Show {
     private boolean noShowFile = false;
 
     private String binaryGrinFileName = null;	// null means "use default"
+    private boolean isBinary = false;	
+	// This is set to true if this SEShow is created from a binary file.
     
     /**
      * Create a new SEShow.
@@ -95,6 +98,14 @@ public class SEShow extends Show {
      **/
     public SEShow(Director director) {
 	super(director);
+    }
+
+    /** 
+     * Set a flag to indicate that this show file was read from a binary
+     * file.  The double-use checker won't be run on such a show file.
+     **/
+    public void setIsBinary(boolean isBinary) {
+	this.isBinary = isBinary;
     }
 
     /**
@@ -264,6 +275,9 @@ public class SEShow extends Show {
                         showTop, showTopGroup,
 		        publicSegments, publicFeatures, publicRCHandlers,
 			publicNamedCommands);
+	if (isBinary) {
+	    return;
+	}
 	SEDoubleUseChecker checker = new SEDoubleUseChecker();
 	accept(checker);
 	checker.reportAnyProblems();
@@ -365,6 +379,8 @@ public class SEShow extends Show {
     public static void acceptFeature(SEShowVisitor visitor, Feature feature) {
 	if (feature instanceof SENode) {
             ((SENode)feature).accept(visitor);
+	} else if (feature instanceof Modifier) {
+	    visitor.visitUserDefinedModifier((Modifier) feature);
 	} else {
 	    visitor.visitUserDefinedFeature(feature);
 	}

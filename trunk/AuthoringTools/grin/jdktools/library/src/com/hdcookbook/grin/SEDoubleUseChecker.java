@@ -114,7 +114,7 @@ public class SEDoubleUseChecker extends AbstractSEShowVisitor {
     public void visitShow(SEShow show) {
 	// We only visit the segments, and then recurse down the active features
 	// for each segment.
- 
+
         showTopFeatures = new HashSet<Feature>();        
         SESegment showTopSegment = (SESegment) show.getShowTopSegment();
         // Visit the showtop segment first.
@@ -208,10 +208,16 @@ public class SEDoubleUseChecker extends AbstractSEShowVisitor {
     }
 
     public void visitUserDefinedFeature(Feature feature) {
-	addActive(feature);
         if (feature instanceof Modifier) {
-	   SEShow.acceptFeature(this, ((Modifier)feature).getPart());
+	    visitUserDefinedModifier((Modifier) feature);
+	} else {
+	    addActive(feature);
         }   
+    }
+
+    public void visitUserDefinedModifier(Modifier modifier) {
+	addActive(modifier);
+        SEShow.acceptFeature(this, modifier.getPart());
     }
 
     public void visitSetTarget(SESetTarget feature) {

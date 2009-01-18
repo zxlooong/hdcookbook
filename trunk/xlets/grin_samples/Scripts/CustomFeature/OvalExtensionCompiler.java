@@ -52,12 +52,14 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
+import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import com.hdcookbook.grin.io.text.ExtensionParser;
 import com.hdcookbook.grin.io.text.Lexer;
@@ -158,4 +160,16 @@ public class OvalExtensionCompiler extends Oval
     public void accept(SEShowVisitor visitor) {
         visitor.visitUserDefinedFeature(this);
     } 
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) {
+    }
 }

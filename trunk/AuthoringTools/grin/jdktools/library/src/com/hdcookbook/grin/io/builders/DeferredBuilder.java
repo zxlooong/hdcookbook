@@ -65,6 +65,9 @@ import java.io.IOException;
  * called when the show is complete.  This can be the case, for example,
  * for a feature that needs to look things up in other features that
  * might occur later in a text or XML source file.
+ * <p>
+ * A deferred builder is called after the show has been initialized, so
+ * no structural changes to the show can be made in a deferred builder.
  **/
 public interface DeferredBuilder {
 

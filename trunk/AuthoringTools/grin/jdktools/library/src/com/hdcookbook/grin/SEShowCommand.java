@@ -58,6 +58,7 @@ package com.hdcookbook.grin;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.Debug;
 
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -227,5 +228,19 @@ public class SEShowCommand extends Command implements SENode {
     
     public void accept(SEShowVisitor visitor) {
         visitor.visitShowCommand(this);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to)
+        throws IOException 
+    {
     }
 }

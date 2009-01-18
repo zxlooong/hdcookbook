@@ -88,5 +88,31 @@ after any target is built.
         </jdktools.java>
     </target>
     
+    <target name="run-grinview2" depends="init"
+    		description="Run grinview on second show">
+
+	<!--  We build the binary script so that we'll have our
+	      extension parser and java_command implementations  -->
+	<property name="generate.binary.script.optimize.argument"
+	          value="-avoid_optimization"/>
+	<antcall target="generate-binary-script"/>
+        <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
+	    <classpath>
+		<pathelement path="${grinview.jar}"/>
+		<pathelement path="${build.dir}/gensrc/grinview"/>
+		<pathelement path="${se.lib.zip}"/>
+	    </classpath>
+	    <arg value="-asset_dir"/>
+	    <arg value="${asset.dir}"/>
+	    <arg value="-asset_dir"/>
+	    <arg value="${build.dir}/run-grinview"/>
+	    <arg value="-extension_parser"/>
+	    <arg value="${extension.parser}"/>
+	    <arg value="-director"/>
+	    <arg value="${show.director}"/>
+            <arg value="second_show.txt"/>
+        </jdktools.java>
+    </target>
+    
 </project>
 

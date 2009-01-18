@@ -293,6 +293,7 @@ public class GenericMain extends Frame implements AnimationContext {
     			      ShowBuilder builder, boolean isBinary) 
     {
 	SEShow show = new SEShow(director);
+	show.setIsBinary(isBinary);
 	URL source = null;
 	BufferedReader rdr = null;
         BufferedInputStream bis = null;

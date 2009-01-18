@@ -1,6 +1,5 @@
-
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2009, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -53,50 +52,86 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin.io.text;
+
+/** 
+ * The compile-time SE version of BouncingArc.  A single SEBouncingArc feature
+ * is compiled into the following structure:
+ * <pre>
+ *     SEGroup
+ *         SETranslatorModel (with pre-computed coordinates for bouncing)
+ *         SETranslator
+ *             SEBouncingArc (which isa SEArc)
+ * </pre>
+ **/
+
+import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEShow;
+import com.hdcookbook.grin.SEShowVisitor;
+import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.animator.DrawRecord;
+import com.hdcookbook.grin.animator.RenderContext;
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.features.SEGroup;
+import com.hdcookbook.grin.features.SETranslator;
+import com.hdcookbook.grin.features.SETranslatorModel;
+import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
+import com.hdcookbook.grin.util.Debug;
+
+import java.awt.Graphics2D;
+import java.awt.Color;
 
 import java.io.IOException;
 
-/**
- * Used by the parser when it encounters something that might be a forward
- * reference.  It's used to defer some computation in parsing until the
- * reference is resolved.
- *
- * @author Bill Foote (http://jovial.com)
- */
-public abstract class ForwardReference {
-    
-    private int lineNumber;
-    private String fileName;
-    private Lexer lexer;
-    
-    public ForwardReference(Lexer lexer) {
-        this.lineNumber = lexer.getRealLineNumber();
-	this.fileName = lexer.getRealFileName();
-	this.lexer = lexer;
+public class SEBouncingArc extends SEArc {
+
+    private int bounceHeight;
+    private int bouncePeriod;
+
+    public SEBouncingArc(
+    		Show show, String name, int x, int y, int width, int height,
+		int startAngle, int arcAngle, Color color, int bounceHeight,
+		int bouncePeriod)
+    {
+	super(show, name, x, y, width, height, startAngle, arcAngle, color);
+	this.bounceHeight = bounceHeight;
+	this.bouncePeriod = bouncePeriod;
     }
 
-    void resolveAtLine() throws IOException {
-	int n = lexer.getLineNumber();
-	String s = lexer.getFileName();
-	lexer.setLineNumberAndName(lineNumber, fileName);
-	resolve();
-	lexer.setLineNumberAndName(n, s);
-    }
-   
     /**
-     * Called by the parser after the entire file has been parsed, and
-     * it's time to resolve this forward reference.
+     * @inheritDoc
      **/
-    abstract public void resolve() throws IOException;
-
-    /**
-     * Convenience method for reporting an error.  The error message
-     * gives the line number where the construct we represent was read.
-     **/
-    public void reportError(String msg) throws IOException {
-        throw new IOException(msg + " on line " + lineNumber 
-			      + " of " + fileName + ".");
+    public void postProcess(ShowBuilder builder) throws IOException {
+	super.postProcess(builder);
+	int[] frames = new int[bouncePeriod];
+	int[][] values = new int[2][];
+	int[] yValues = new int[bouncePeriod];
+	int[] xValues = new int[bouncePeriod];
+	values[SETranslator.Y_FIELD] = yValues;
+	values[SETranslator.X_FIELD] = xValues;
+	for (int i = 0; i < bouncePeriod; i++) {
+	    double period = bouncePeriod;
+	    double x = i - (period / 2.0);
+	    x = x * 2.0 / period;	// x between -1 and 1
+	    x = x * x;
+	    frames[i] = i;
+	    xValues[i] = 0;  
+	    	// bulder.makeTranslatorModel optimizes this array away
+	    yValues[i] = (int) (0.5 + x * bounceHeight);
+	    	// We could cut down on the number of frames by using the
+		// runtime linear interpolation built into InterpolatedModel
+	}
+	SETranslatorModel model 
+	    = builder.makeTranslatorModel(null, frames, values, true, 0, 1,
+	    				  new Command[0]);
+	SETranslator translator = new SETranslator(builder.getShow(), null);
+	translator.setupModelIsRelative(false);
+	translator.setup(model, this);
+	SEGroup group = new SEGroup(builder.getShow());
+	group.setup(new Feature[] { model, translator });
+	builder.injectParent(group, this);
+	builder.addSyntheticFeature(model);
+	builder.addSyntheticFeature(translator);
     }
-    
 }

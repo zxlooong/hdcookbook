@@ -57,6 +57,7 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -98,5 +99,24 @@ public class SEGroup extends Group implements SENode {
 
     public void accept(SEShowVisitor visitor) {
         visitor.visitGroup(this);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) {
+	Feature[] parts = getParts();
+	for (int i = 0; i < parts.length; i++) {
+	    if (parts[i] == from) {
+		parts[i] = to;
+	    }
+	}
+	setParts(parts);	// This isn't really necessary
     }
 }

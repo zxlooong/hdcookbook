@@ -27,38 +27,12 @@ exports
     }
 ;
 
-java_generated_class MainShowCommands [[
+$include main_show_commands.txt ;
+    # We're just doing this to test that include works.
 
-    import com.hdcookbook.grin.Show;
-    import com.hdcookbook.grin.GrinXHelper;
-    import com.hdcookbook.grin.util.Debug;
-    import java.util.Random;
-
-    public class MainShowCommands extends GrinXHelper {
-
-	private static Random random = new Random();
-
-	public MainShowCommands(Show show) {
-	    super(show);
-	}
-
-	public MainDirector getMainDirector() {
-	    return (MainDirector) show.getDirector();
-	}
-
-	JAVA_COMMAND_BODY 
-
-    }
-
-]]
-
-segment S:Initialize
-    setup {
-	F:Everything
-    } setup_done {
-	activate_segment S:Main ;
-    }
-;
+$include main_show_initialize_segment.txt ;
+    # Note that in GrinView, clicking on S:Initialize brings us
+    # to the include directive.
 
 
 #########################################################

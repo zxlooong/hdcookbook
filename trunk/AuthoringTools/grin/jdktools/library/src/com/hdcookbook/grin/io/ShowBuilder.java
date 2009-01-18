@@ -60,6 +60,7 @@ import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SESegment;
+import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.InterpolatedModel;
@@ -105,6 +106,8 @@ public class ShowBuilder {
     private List<Segment> allSegments = new ArrayList<Segment>();
     private List<Feature> allFeatures = new ArrayList<Feature>();
     private List<RCHandler> allRCHandlers = new ArrayList<RCHandler>();
+    private ArrayList<SENode> allNodes = new ArrayList<SENode>();
+    	// Contains all segments, features, RC handlers and commands
 
     private List<String> exportedSegments = null;
     private List<String> exportedFeatures = null;
@@ -120,8 +123,14 @@ public class ShowBuilder {
     private ExtensionParser extensionParser;
     private SEGroup   showTopGroup      = null;
     private SESegment showTop           = null;
+
+    private boolean noMoreNodes = false;
     
     public ShowBuilder() {
+    }
+
+    public SEShow getShow() {
+	return show;
     }
 
     public void init(SEShow show) {
@@ -140,8 +149,41 @@ public class ShowBuilder {
         return extensionParser;
     }
 
-    public void addSyntheticFeature(int line, Feature f) throws IOException {
-        addFeature(null, line, f);
+    /**
+     * Add a feature that's created programmatically during show construction,
+     * e.g. from <code>SENode.postProcess()</code>.
+     *
+     * @see SENode#postProcess(ShowBuilder)
+     **/
+    public void addSyntheticFeature(Feature f) throws IOException {
+        addFeature(null, 0, f);
+    }
+
+    /**
+     * Add a feature that's created programmatically during show construction,
+     * and inject it as the parent of the child node passed in.  The entire
+     * show tree will be visited, and references to the child will be
+     * changed to references to the parent where appropriate.
+     *
+     * @param newFeature	The new feature being added
+     * @param child		The existing feature that will be its child
+     *
+     * @throws IOException	if a problem is encountered
+     **/
+    public void injectParent(Feature newFeature, Feature child) 
+	    throws IOException
+    {
+	for (int i = 0; i < allNodes.size(); i++) {
+	    allNodes.get(i).changeFeatureReference(child, newFeature);
+	}
+	addSyntheticFeature(newFeature);	// adds to allNodes
+    }
+
+    private void addNode(SENode node) throws IOException {
+	if (noMoreNodes) {
+	    throw new IOException("Can't add new node:  The show's build phase is over.");
+	}
+	allNodes.add(node);
     }
 
     /** 
@@ -157,6 +199,7 @@ public class ShowBuilder {
 	    namedFeatures.put(name, f);
 	}
 	allFeatures.add(f);
+	addNode((SENode) f);
     }
 
     /**
@@ -172,6 +215,7 @@ public class ShowBuilder {
 	    namedSegments.put(name, s);
 	}
 	allSegments.add(s);
+	addNode((SENode) s);
     }
 
     /**
@@ -190,9 +234,8 @@ public class ShowBuilder {
     /**
      * Called when a new command is encountered.
      **/
-    public void addCommand(Command command, int line) {
-	// At xlet runtime, commands are just part of other things, so we
-	// don't need to record them.
+    public void addCommand(Command command, int line) throws IOException {
+	addNode((SENode) command);
     }
 
     /**
@@ -209,6 +252,7 @@ public class ShowBuilder {
 	    namedRCHandlers.put(name, hand);
 	}
 	allRCHandlers.add(hand);
+	addNode((SENode) hand);
     }
 
     /**
@@ -277,18 +321,20 @@ public class ShowBuilder {
         this.showTop = makeShowTopSegment(namedFeatures.get(showTopName));
     }
     
-    private SEGroup makeShowTopGroup() {
+    private SEGroup makeShowTopGroup() throws IOException {
         SEGroup g = new SEGroup(show);
         g.setParts(new Feature[0]);
         allFeatures.add(g);
+	addNode(g);
         return g;
     }
     
     private SESegment makeShowTopSegment(Feature showTopFeature) throws IOException {
         Feature[] features = new Feature[] { showTopFeature };
-        SESegment segment = new SESegment(null, features, features,
+        SESegment segment = new SESegment(" $show_top$ ", features, features,
                 new RCHandler[0], new Command[0], false, new Command[0]);
         allSegments.add(segment);
+	addNode((SENode) segment);
         return segment;
     }
 
@@ -334,7 +380,18 @@ public class ShowBuilder {
             showTopGroup = makeShowTopGroup();
             showTop = makeShowTopSegment(showTopGroup);
         }
-        
+
+	// In the following iteration, we specifically use the ArrayList
+	// methods, because they guarantee that elements that are added
+	// to the list during the iteration will be visited.
+	for (int i = 0; i < allNodes.size(); i++) {
+	    allNodes.get(i).postProcess(this);
+	}
+	
+	noMoreNodes = true;
+	    // This prevents any new nodes from being added to the
+	    // show tree.
+
 	Segment[] segments 
 	    = allSegments.toArray(new Segment[allSegments.size()]);
 	Feature[] features
@@ -456,7 +513,7 @@ public class ShowBuilder {
 	    // data values between frame 0 and frame numFrames.
     }
 
-    public InterpolatedModel 
+    public SETranslatorModel
     makeTranslatorModel(String name, int[] frames, int[][] values, 
     			boolean isRelative, int repeatFrame, int loopCount, 
 			Command[] commands) 

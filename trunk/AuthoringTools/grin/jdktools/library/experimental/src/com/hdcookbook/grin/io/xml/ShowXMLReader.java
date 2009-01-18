@@ -831,7 +831,7 @@ public class ShowXMLReader {
                 try {
                     Iterable<Feature> syntheticFeatures = helper.setupAssembly();
                     for (Feature f : syntheticFeatures) {
-                        getBuilder().addSyntheticFeature(-1, f);
+                        getBuilder().addSyntheticFeature(f);
                     }
                 } catch (IOException exp) {
                     throw wrapException(exp);

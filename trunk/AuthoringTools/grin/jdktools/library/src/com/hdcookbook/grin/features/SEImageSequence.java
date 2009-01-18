@@ -54,11 +54,13 @@
 
 package com.hdcookbook.grin.features;
 
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.parts.SEImageSeqPlacement;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.awt.Rectangle;
 import java.io.IOException;
@@ -177,5 +179,19 @@ public class SEImageSequence extends ImageSequence implements SENode {
     
     public void accept(SEShowVisitor visitor) {
         visitor.visitImageSequence(this);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) 
+            throws IOException
+    {
     }
 }

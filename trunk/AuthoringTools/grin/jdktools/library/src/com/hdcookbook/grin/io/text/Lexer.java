@@ -56,8 +56,13 @@
 
 package com.hdcookbook.grin.io.text;
 
-import java.io.Reader;
+import com.hdcookbook.grin.util.AssetFinder;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
 
 import com.hdcookbook.grin.util.Debug;
 
@@ -85,6 +90,7 @@ public class Lexer {
     private StringBuffer strBuf = new StringBuffer(512);
     private String fileName;
     private ShowParser parser;
+    private Lexer child = null;	// For processing $include
 
     public Lexer (Reader input, String fileName, ShowParser parser) {
 	this.input = input;
@@ -145,10 +151,41 @@ public class Lexer {
     }
 
     /**
-     * Get the current line number.
+     * Get the current line number within the main show file.  If a file
+     * is currently being included, this will be the line number of the
+     * include directive.
      **/
     public int getLineNumber() {
 	return lineNum;
+    }
+
+    /**
+     * Get the name of the main show file being read.  If a file is currently
+     * being included, this won't be that file name.
+     **/
+    public String getFileName() {
+	return fileName;
+    }
+
+    /**
+     * Get the current line number within the file getRealFileName(), which 
+     * might be an included file.
+     **/
+    int getRealLineNumber() {
+	if (child == null) {
+	    return lineNum;
+	} else {
+	    return child.getRealLineNumber();
+	}
+    }
+
+
+    String getRealFileName() {
+	if (child == null) {
+	    return fileName;
+	} else {
+	    return child.getRealFileName();
+	}
     }
 
     /**
@@ -156,8 +193,9 @@ public class Lexer {
      * so that error messages come out with the right line number, rather
      * than the last line in the show file.
      **/
-    void setLineNumber(int num) {
+    void setLineNumberAndName(int num, String name) {
 	this.lineNum = num;
+	this.fileName = name;
     }
 
     //
@@ -256,6 +294,15 @@ public class Lexer {
      * @throws IOException on any unexpected characters
      */
     public String getString() throws IOException {
+	// All reading from the input stream goes through this method or
+	// getStringExact()
+	if (child != null) {
+	    String result = child.getString();
+	    if (result != null) {
+		return result;
+	    }
+	    closeInclude();
+	}
 	skipWhitespace();
 	strBuf.setLength(0);
 	int ch = nextChar();
@@ -279,12 +326,48 @@ public class Lexer {
 	    }
 	    ch = nextChar();
 	}
+	if (checkInclude(result)) {
+	    return getString();
+	}
 	if (Debug.LEVEL >= 1 && result.length() > 1 && result.endsWith(";")) {
 	    Debug.println();
 	    Debug.println("==> Warning:  token \"" + result 
 	    		  + "\" ends with ';' on line " + lineNum);
 	}
 	return result;
+    }
+
+    //
+    // Check if this token is a $include directive.  If it is, then
+    // a child lexer will be created, and true will be returned.
+    //
+    private boolean checkInclude(String tok) throws IOException {
+	if (!("$include".equals(tok))) {
+	    return false;
+	}
+	String fileName = getString();
+	//
+	// We expect a ; here, but we hold of parsing it until we close the
+	// include file.  That way, the line number in GrinView points to the
+	// include directive, rather than the line after it.
+	//
+	URL source = AssetFinder.getURL(fileName);
+	if (source == null) {
+	    reportError("Can't find included show file " + fileName);
+	}
+	BufferedReader rdr = new BufferedReader(
+		new InputStreamReader(source.openStream(), "UTF-8"));
+	child = new Lexer(rdr, fileName, parser);
+	return true;
+    }
+
+    //
+    // Close the include file, and parse the final semicolon
+    //
+    private void closeInclude() throws IOException {
+	child.input.close();
+	child = null;
+	parseExpected(";");
     }
     
     /**
@@ -298,6 +381,15 @@ public class Lexer {
      * @return next word or next section of whitespace, or null on eof
      */
     public String getStringExact() throws IOException {
+	// All reading from the input stream goes through this method or
+	// getStringExact()
+	if (child != null) {
+	    String result = child.getStringExact();
+	    if (result != null) {
+		return result;
+	    }
+	    closeInclude();
+	}
         strBuf.setLength(0);
         int ch = nextChar();
         if (ch == -1) {
@@ -318,7 +410,11 @@ public class Lexer {
                 ch = nextChar();
                 if (ch == -1 || Character.isWhitespace((char) ch)) {
                     putback(ch);
-                    return strBufAsString();
+                    String result = strBufAsString();
+		    if (checkInclude(result)) {
+			return getStringExact();
+		    } 
+		    return result;
                 }
                 strBuf.append((char) ch);
             }

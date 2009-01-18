@@ -118,10 +118,15 @@ feature text F:MainText.Text
 #  in the show.  This forces the .grin file to contain the
 #  fully-qualified name of the extension class.
 #
+# In bouncing_arg, this also tests a Feature that, at compile time,
+# is decomposed into a graph of features.  See SEBouncingArc.java for
+# details.
+#
 
 segment S:ExtensionTest 
     setup {
-	F:ExtensionTest
+	F:ArcTest
+	F:BouncingArcTest
     } setup_done {
 	activate_segment S:ExtensionTest.Showing ;
     }
@@ -129,13 +134,21 @@ segment S:ExtensionTest
 
 segment S:ExtensionTest.Showing
     active {
-	F:ExtensionTest
+	F:ArcTest
+	F:BouncingArcTest
     }
 ;
 
-feature extension Playground:arc F:ExtensionTest
+feature extension Playground:arc F:ArcTest
 	{ 255 0 0 255 }		# Red
-	x 400 y 400 width 800 height 400 startAngle 45 arcAngle 315
+	x 200 y 400 width 600 height 300 startAngle 45 arcAngle 315
+;
+
+
+feature extension Playground:bouncing_arc F:BouncingArcTest
+	{ 255 0 0 255 }		# Red
+	x 1000 y 100 width 600 height 300 startAngle 180 arcAngle 315
+	bounceHeight 600 bouncePeriod 48
 ;
 
 

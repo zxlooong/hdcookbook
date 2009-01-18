@@ -65,6 +65,7 @@ import com.hdcookbook.grin.commands.SERunNamedCommand;
 import com.hdcookbook.grin.commands.SESegmentDoneCommand;
 import com.hdcookbook.grin.commands.SESyncDisplayCommand;
 import com.hdcookbook.grin.commands.SESetVisualRCStateCommand;
+import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.features.SEAssembly;
 import com.hdcookbook.grin.features.SEBox;
 import com.hdcookbook.grin.features.SEClipped;
@@ -103,7 +104,6 @@ public abstract class AbstractSEShowVisitor implements SEShowVisitor {
     public void visitGroup(SEGroup feature) {}
     public void visitGuaranteeFill(SEGuaranteeFill feature) {}
     public void visitImageSequence(SEImageSequence feature) {}
-    public void visitUserDefinedFeature(Feature feature) {}
     public void visitSetTarget(SESetTarget feature) {}
     public void visitSrcOver(SESrcOver feature) {}
     public void visitText(SEText feature) {}
@@ -121,6 +121,8 @@ public abstract class AbstractSEShowVisitor implements SEShowVisitor {
     public void visitMenuAssembly(SEMenuAssembly feature) {
         visitAssembly(feature);
     }
+    public void visitUserDefinedFeature(Feature feature) {}
+    public void visitUserDefinedModifier(Modifier modifier) { }
 
     public void visitCommandRCHandler(SECommandRCHandler handler) {}
     public void visitVisualRCHandler(SEVisualRCHandler handler) {}

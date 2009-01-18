@@ -53,10 +53,12 @@
  */
 package com.hdcookbook.grin.commands;
 
+import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.SEGrinXHelper;
+import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
@@ -74,5 +76,17 @@ public class SESyncDisplayCommand extends SEGrinXHelper {
     
     public void accept(SEShowVisitor visitor) {
         visitor.visitSyncDisplayCommand(this);
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void postProcess(ShowBuilder builder) throws IOException {
+    }
+
+    /**
+     * @inheritDoc
+     **/
+    public void changeFeatureReference(Feature from, Feature to) {
     }
 }

@@ -61,6 +61,7 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.FixedImage;
+import com.hdcookbook.grin.features.SEFixedImage;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.io.text.ExtensionParser;
 import com.hdcookbook.grin.io.text.Lexer;
@@ -82,6 +83,8 @@ public class PlaygroundExtensionParser implements ExtensionParser {
     {
 	if ("Playground:arc".equals(typeName)) {
 	    return parseArc(show, name, lexer);
+	} else if ("Playground:bouncing_arc".equals(typeName)) {
+	    return parseBouncingArc(show, name, lexer);
 	} else if ("Playground:image_frame".equals(typeName)) {
 	    return parseFrame(show, name, lexer);
 	} else {
@@ -110,6 +113,35 @@ public class PlaygroundExtensionParser implements ExtensionParser {
 			 color);
     }
 
+    private Feature parseBouncingArc(Show show, String name, Lexer lexer)
+    		throws IOException
+    {
+	Color color = lexer.getParser().parseColor();
+	lexer.parseExpected("x");
+	int x = lexer.getInt();
+	lexer.parseExpected("y");
+	int y = lexer.getInt();
+	lexer.parseExpected("width");
+	int width = lexer.getInt();
+	lexer.parseExpected("height");
+	int height = lexer.getInt();
+	lexer.parseExpected("startAngle");
+	int startAngle = lexer.getInt();
+	lexer.parseExpected("arcAngle");
+	int arcAngle = lexer.getInt();
+	lexer.parseExpected("bounceHeight");
+	int bounceHeight = lexer.getInt();
+	lexer.parseExpected("bouncePeriod");
+	int bouncePeriod = lexer.getInt();
+	if (bouncePeriod < 2) {
+	    lexer.reportError("bouncePeriod must be at least 2");
+	}
+	lexer.parseExpected(";");
+	return new SEBouncingArc(show, name, x, y, width, height, 
+				 startAngle, arcAngle, color, 
+				 bounceHeight, bouncePeriod);
+    }
+
     private Feature parseFrame(Show show, String name, Lexer lexer)
     		throws IOException
     {
@@ -124,10 +156,10 @@ public class PlaygroundExtensionParser implements ExtensionParser {
 	ForwardReference fw = new ForwardReference(lexer) {
 	    public void resolve() throws IOException {
 		Feature f = parser.lookupFeatureOrFail(fixedImageName);
-		if (!(f instanceof FixedImage)) {
+		if (!(f instanceof SEFixedImage)) {
 		    reportError(fixedImageName + " is not a fixed_image");
 		}
-		frame.setFixedImage((FixedImage) f);
+		frame.setFixedImage((SEFixedImage) f);
 	    }
 	};
 	parser.addForwardReference(fw, 0);
