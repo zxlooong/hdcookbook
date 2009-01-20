@@ -556,8 +556,8 @@ ${show.file}.txt
 		  file="${gen-permission-file.almost.perm.file}"/>
 	<pathconvert property="gen-permission-file.perm.file">
 	    <path path="${build.dir}/classes//${gen-permission-file.almost.perm.file}"/>
-	    <globmapper from="*/${gen-permission-file.basename}"
-			to="*/bluray.${gen-permission-file.basename}.perm"/>
+	    <globmapper from="*${gen-permission-file.basename}"
+			to="*bluray.${gen-permission-file.basename}.perm"/>
 	</pathconvert>
 	<concat destfile="${gen-permission-file.perm.file}"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!-- This file contains information taken from build.xml -->
