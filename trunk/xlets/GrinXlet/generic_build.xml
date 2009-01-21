@@ -164,7 +164,9 @@ The project.name property is not set.  This usually has one of two causes:
 
     <target name="spotless" depends="clean">
 	<delete file="keystore.store"/>
-	<delete file="app.discroot.crt"/>
+	<delete file="app.discroot.crt"/>	<!-- Mac name -->
+	<delete file="appcert.cer"/>		<!-- Windows name -->
+	<delete file="appcert.csr"/>
 	<delete dir="META-INF"/>
 	<antcall target="post-spotless"/>
     </target>
