@@ -662,6 +662,11 @@ public class GrinBinaryWriter {
 	    out.writeInt(baos.size());
 	    dos.close();
 	    baos.writeTo(out);      
+
+	    // Make sure the runtime class is registered.  This is
+	    // necessary for commands, and a harmless double-check
+	    // for other node types.
+	    runtimeClassNames.getIndex(node.getRuntimeClassName());
 	}
     }
 
