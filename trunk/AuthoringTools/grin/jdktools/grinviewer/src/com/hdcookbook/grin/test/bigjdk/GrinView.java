@@ -95,7 +95,7 @@ public class GrinView extends GenericMain {
     static final DeviceConfig FOURTHREE = new DeviceConfig(1440, 1080);
     static final DeviceConfig FULLHD = new DeviceConfig(1920, 1080);  
 
-    static boolean doInputLoop = true;	
+    static boolean doInputLoop = false;	
     	// Can be set false externally, e.g. by GrinViewJar
         
     public GrinView() {
@@ -378,6 +378,7 @@ public class GrinView extends GenericMain {
         System.out.println("                -extension_parser <a fully qualified classname>");       
         System.out.println("                -director <a fully qualified classname>");       
         System.out.println("                -binary");
+        System.out.println("                -stdin_commands");
         System.out.println("");
         System.out.println("            -assets and -asset_dir may be repeated to form a search path.");
         System.out.println("            -screensize keyword includes items like fullhd, pal, ntsc, 1080i, 720p, 960x520.");
@@ -484,6 +485,9 @@ public class GrinView extends GenericMain {
             } else if ("-automate".equals(args[argsUsed])) {
                 doAutoTest = true;
                 argsUsed++;
+            } else if ("-stdin_commands".equals(args[argsUsed])) {
+                doInputLoop = true;
+                argsUsed++;
             } else if ("-noui".equals(args[argsUsed])) {
                 noUI = true;
                 argsUsed++;
@@ -566,7 +570,7 @@ public class GrinView extends GenericMain {
 	    m.inputLoop();
 	    System.exit(0);
 	}
-    } 
+    }
     
     
 }

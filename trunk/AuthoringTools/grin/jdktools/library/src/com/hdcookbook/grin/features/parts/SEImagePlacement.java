@@ -184,8 +184,8 @@ public class SEImagePlacement implements SEImageSeqPlacement {
 	ManagedImage mi = ImageManager.getImage(imageFileName);
 	try {
 	    if (mi instanceof ManagedSubImage) {
-		result.width = mi.getWidth();
-		result.height = mi.getHeight();
+		result.width = (int) Math.round(mi.getWidth() * scaleX);
+		result.height = (int) Math.round(mi.getHeight() * scaleY);
 	    } else {
 		BufferedImage im = ImageIO.read(
 					AssetFinder.getURL(imageFileName));
