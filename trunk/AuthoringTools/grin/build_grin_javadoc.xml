@@ -62,6 +62,8 @@ information or have any questions.
 		  <sourcepath location="../../xlets/GrinXlet/src/debug"/>
 	</javadoc>        
 	<echo message=""/>
+	<copy file="../../xlets/GrinXlet/README.txt"
+	      todir="${GRIN_JAVADOC_ME_DEST}/com/hdcookbook/grinxlet"/>
 	<echo message="Desktop javadocs are in ${GRIN_JAVADOC_JDK_DEST}"/>
 	<echo message="Xlet javadocs are in ${GRIN_JAVADOC_ME_DEST}"/>
 	<echo message=""/>
