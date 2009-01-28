@@ -142,14 +142,14 @@ Here's BNF describing the syntax of a show file:
 </p>
 <pre>
     show ::= "show" setting*  [ exports ] [ java_generated_class ]
-    	     ( segment | feature | rc_handler | named_commands | mosaic_hint )* 
+    	     ( segment | feature | rc_handler | named_commands 
+		   | mosaic_hint | show_top )* 
     	     "end_show"
 
     setting ::=    segment_stack_depth_setting 
                  | draw_targets_setting
 		 | sticky_images_setting
 		 | binary_grin_file_setting 
-                 | show_top
 
     segment_stack_depth_setting := "setting" "segment_stack_depth" integer ";"
 

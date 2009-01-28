@@ -15,6 +15,7 @@ Game xlet project.  See the documentation in vars.properties for details.
 	<isset property="mosaics.file"/>
     </condition>
     <property name="mosaics.file.txt" value=""/>
+    <property name="asset.dir.2" value="${asset.dir}"/>
     <property name="extension.parser" 
     	      value="com.hdcookbook.grin.io.text.NullExtensionParser"/>
     <property name="xlet.class.name"
@@ -213,6 +214,8 @@ The project.name property is not set.  This usually has one of two causes:
 	    </classpath>
             <arg value="-asset_dir"/>
             <arg value="${asset.dir}"/>
+            <arg value="-asset_dir"/>
+            <arg value="${asset.dir.2}"/>
 	    <arg value="-extension_parser"/>
 	    <arg value="${extension.parser}"/>
 	    <arg value="${generate.binary.script.optimize.argument}"/>
@@ -278,6 +281,8 @@ The project.name property is not set.  This usually has one of two causes:
 	    </classpath>
 	    <arg value="-asset_dir"/>
 	    <arg value="${asset.dir}"/>
+            <arg value="-asset_dir"/>
+            <arg value="${asset.dir.2}"/>
 	    <arg value="-extension_parser"/>
 	    <arg value="${extension.parser}"/>
 	    <arg value="-director"/>
@@ -300,7 +305,8 @@ The project.name property is not set.  This usually has one of two causes:
 	    </classpath>
 	    <arg value="-asset_dir"/>
 	    <arg value="${asset.dir}"/>
-	    <arg value="-asset_dir"/>
+            <arg value="-asset_dir"/>
+            <arg value="${asset.dir.2}"/>
 	    <arg value="${build.dir}"/>
 	    <arg value="-extension_parser"/>
 	    <arg value="${extension.parser}"/>
