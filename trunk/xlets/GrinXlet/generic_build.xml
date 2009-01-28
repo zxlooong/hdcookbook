@@ -307,6 +307,7 @@ The project.name property is not set.  This usually has one of two causes:
 	    <arg value="${asset.dir}"/>
             <arg value="-asset_dir"/>
             <arg value="${asset.dir.2}"/>
+            <arg value="-asset_dir"/>
 	    <arg value="${build.dir}"/>
 	    <arg value="-extension_parser"/>
 	    <arg value="${extension.parser}"/>
