@@ -122,17 +122,6 @@ public class SetVisualRCStateCommand extends Command implements Node {
 	    Debug.assertFail();
 	}
     }
-
-    public String toString() {
-	if (Debug.LEVEL > 0) {
-	    return super.toString() + " : " + handler 
-				    + " (" + activated + ", " 
-				    + handler.getStateName(state) + ", "
-				    + runCommands + " )";
-	} else {
-	    return super.toString();
-        }
-    }
     
     public void readInstanceData(GrinDataInputStream in, int length) 
             throws IOException {

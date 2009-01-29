@@ -125,4 +125,15 @@ public class SESetTarget extends SetTarget implements SENode {
 	    part = to;
 	}
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "set_target @" + Integer.toHexString(hashCode());
+	} else {
+	    return "set_target " + name;
+	}
+    }
 }

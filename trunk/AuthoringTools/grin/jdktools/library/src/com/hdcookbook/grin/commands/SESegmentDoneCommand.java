@@ -84,4 +84,11 @@ public class SESegmentDoneCommand extends SEGrinXHelper {
      **/
     public void changeFeatureReference(Feature from, Feature to) {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	return "segment_done";
+    }
 }

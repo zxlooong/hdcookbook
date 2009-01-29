@@ -200,6 +200,15 @@ public class Text extends Feature implements Node {
     }
 
     /**
+     * Get the font used for this text feature.  This method will always
+     * return a font for a plain Text feature, but for subclasses
+     * that don't use a Java font (like font strips), it will return null.
+     **/
+    public Font getFont() {
+	return font;
+    }
+
+    /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
      * the phases.

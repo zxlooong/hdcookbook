@@ -72,4 +72,15 @@ public class SETimer extends SEInterpolatedModel {
     public void accept(SEShowVisitor visitor) {
         visitor.visitTimer(this);
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "timer @" + Integer.toHexString(hashCode());
+	} else {
+	    return "timer " + name;
+	}
+    }
 }

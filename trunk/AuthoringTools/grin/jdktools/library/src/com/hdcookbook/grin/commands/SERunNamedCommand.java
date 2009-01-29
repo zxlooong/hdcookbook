@@ -158,4 +158,11 @@ public class SERunNamedCommand extends Command implements SENode {
         // We don't call changeFeatureReference on target, because
         // SEShow calls changeFeatureReference on all named commands.
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	return "run_named_command " + target;
+    }
 }

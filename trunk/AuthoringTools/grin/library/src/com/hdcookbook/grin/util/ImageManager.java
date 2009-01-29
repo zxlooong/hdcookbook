@@ -110,6 +110,28 @@ public class ImageManager {
     }
 
     /**
+     * Get an image from a URL.  Any image mosaic won't be consulted; the
+     * image will be taken directly from whatever the URL refers to.
+     * Each call to getImage should be balanced
+     * by a call to ungetImage when you no longer need the image.
+     * Image instances are shared, so this class does reference counting.
+     *
+     * @see #ungetImage(com.hdcookbook.grin.util.ManagedImage)
+     **/
+    public static ManagedImage getImage(URL url) {
+	String name = url.toExternalForm();
+	synchronized(lock) {
+	    ManagedImage im = (ManagedImage) images.get(name);
+	    if (im == null) {
+		im = new ManagedFullImage(name, url);
+		images.put(name, im);
+	    }
+	    im.addReference();
+	    return im;
+	}
+    }
+
+    /**
      * This is like <code>getImage(String)</code>, but for the case where
      * you already have the ManagedImage instance.  It just increments the
      * reference count, without needing to do a hash table lookup.

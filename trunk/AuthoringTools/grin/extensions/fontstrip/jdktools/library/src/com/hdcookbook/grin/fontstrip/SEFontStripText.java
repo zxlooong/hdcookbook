@@ -126,4 +126,15 @@ public class SEFontStripText extends FontStripText implements SENode {
      **/
     public void changeFeatureReference(Feature from, Feature to) {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "fontstrip:text @" + Integer.toHexString(hashCode());
+	} else {
+	    return "fontstrip:text " + name;
+	}
+    }
 }

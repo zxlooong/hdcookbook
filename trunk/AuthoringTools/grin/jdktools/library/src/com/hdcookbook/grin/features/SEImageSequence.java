@@ -194,4 +194,15 @@ public class SEImageSequence extends ImageSequence implements SENode {
             throws IOException
     {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "image_sequence @" + Integer.toHexString(hashCode());
+	} else {
+	    return "image_sequence " + name;
+	}
+    }
 }

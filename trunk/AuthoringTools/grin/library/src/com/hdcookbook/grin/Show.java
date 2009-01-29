@@ -101,8 +101,7 @@ public class Show implements AnimationClient {
     /**
      * The component we're presented within.  This can be needed
      * for things like loading images via Component.prepareImage().
-     * This is for internal use only, and is public so that GRIN
-     * classes in other packages can access it efficiently.
+     * It should only be used on an initialized, non-destroyed show.
      **/
     public Component component;
 

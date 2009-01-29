@@ -144,4 +144,15 @@ public class SEGuaranteeFill extends GuaranteeFill implements SENode {
 	    part = to;
 	}
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "guarantee_fill @" + Integer.toHexString(hashCode());
+	} else {
+	    return "guarantee_fill " + name;
+	}
+    }
 }

@@ -115,7 +115,15 @@ public class Segment implements Node {
     }
     
     public String toString() {
-	return "Segment(" + name + ")";
+	if (Debug.LEVEL > 0) {
+	    if (name == null) {
+		return "segment @" + Integer.toHexString(hashCode());
+	    } else {
+		return "segment " + name;
+	    }
+	} else {
+	    return super.toString();
+	}
     }
 
     /**

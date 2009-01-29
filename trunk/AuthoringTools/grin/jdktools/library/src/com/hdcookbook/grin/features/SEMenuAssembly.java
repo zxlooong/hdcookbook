@@ -71,4 +71,15 @@ public class SEMenuAssembly extends SEAssembly {
     public void accept(SEShowVisitor visitor) {
         visitor.visitMenuAssembly(this);
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "menu_assembly @" + Integer.toHexString(hashCode());
+	} else {
+	    return "menu_assembly " + name;
+	}
+    }
 }

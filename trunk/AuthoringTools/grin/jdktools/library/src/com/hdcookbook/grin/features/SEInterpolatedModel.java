@@ -160,4 +160,15 @@ public class SEInterpolatedModel extends InterpolatedModel implements SENode {
             throws IOException
     {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "interpolated_model @" + Integer.toHexString(hashCode());
+	} else {
+	    return "interpolated_model " + name;
+	}
+    }
 }

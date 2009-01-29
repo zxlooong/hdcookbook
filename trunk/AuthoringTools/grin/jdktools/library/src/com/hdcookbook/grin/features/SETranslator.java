@@ -160,4 +160,15 @@ public class SETranslator extends Translator implements SENode {
 	    part = to;
 	}
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "translator @" + Integer.toHexString(hashCode());
+	} else {
+	    return "translator " + name;
+	}
+    }
 }

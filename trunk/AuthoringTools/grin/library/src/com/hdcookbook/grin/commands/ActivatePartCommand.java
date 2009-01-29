@@ -115,10 +115,6 @@ public class ActivatePartCommand extends Command implements Node {
 	assembly.setCurrentFeature(part);
     }
 
-    public String toString() {
-	return super.toString() + " : " + assembly + " part " + part;
-    }
-    
     public void readInstanceData(GrinDataInputStream in, int length) 
             throws IOException {
         

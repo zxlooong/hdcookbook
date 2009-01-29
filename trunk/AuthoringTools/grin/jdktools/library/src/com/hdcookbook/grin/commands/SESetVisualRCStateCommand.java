@@ -165,4 +165,14 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
      **/
     public void changeFeatureReference(Feature from, Feature to) {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	return "set_visual_rc " + handler 
+				+ " (" + activated + ", " 
+				+ handler.getStateName(state) + ", "
+				+ runCommands + " )";
+    }
 }

@@ -97,4 +97,15 @@ public class SEScalingModel extends SEInterpolatedModel {
         }
         return result;
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "scaling_model @" + Integer.toHexString(hashCode());
+	} else {
+	    return "scaling_model " + name;
+	}
+    }
 }

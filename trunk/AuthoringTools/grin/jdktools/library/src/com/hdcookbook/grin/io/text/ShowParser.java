@@ -392,9 +392,14 @@ public class ShowParser {
     }
 
     private void parseShowTop() throws IOException {
-        String showTopName = lexer.getString();
+        final String showTopName = lexer.getString();
         parseExpected(";");
-        builder.setShowTop(showTopName);        
+	ForwardReference fw = new ForwardReference(lexer) {
+	    public void resolve() throws IOException {
+		builder.setShowTop(showTopName);        
+	    }
+	};
+	deferred.get(0).add(fw);
     }
 
     private void parseStickyImages() throws IOException {

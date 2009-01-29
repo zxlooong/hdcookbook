@@ -121,4 +121,15 @@ public class SEArc extends Arc implements SENode {
      **/
     public void changeFeatureReference(Feature from, Feature to) {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "Playground:arc @" + Integer.toHexString(hashCode());
+	} else {
+	    return "Playground:arc " + name;
+	}
+    }
 }

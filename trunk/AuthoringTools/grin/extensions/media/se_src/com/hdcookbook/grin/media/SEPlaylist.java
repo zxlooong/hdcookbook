@@ -132,4 +132,15 @@ public class SEPlaylist extends Playlist implements SENode {
             throws IOException
     {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "media:playlist @" + Integer.toHexString(hashCode());
+	} else {
+	    return "media:playlist " + name;
+	}
+    }
 }

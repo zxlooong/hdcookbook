@@ -243,4 +243,11 @@ public class SEShowCommand extends Command implements SENode {
         throws IOException 
     {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	return "java_command number " + commandNumber;
+    }
 }

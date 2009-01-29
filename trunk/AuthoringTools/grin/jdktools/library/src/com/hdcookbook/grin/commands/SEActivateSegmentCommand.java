@@ -141,4 +141,21 @@ public class SEActivateSegmentCommand extends ActivateSegmentCommand implements 
      **/
     public void changeFeatureReference(Feature from, Feature to) {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	String result = "activate_segment ";
+	if (pop) {
+	    return result + "<pop>";
+	}
+	result = result + segment;
+	if (push) {
+	    return result + " <push>";
+	} else {
+	    return result;
+	}
+    }
+    
 }

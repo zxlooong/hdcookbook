@@ -331,4 +331,15 @@ public class SEVisualRCHandler
 	    }
 	}
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (getName() == null) {
+	    return "rc_handler visual @" + Integer.toHexString(hashCode());
+	} else {
+	    return "rc_handler visual " + getName();
+	}
+    }
 }

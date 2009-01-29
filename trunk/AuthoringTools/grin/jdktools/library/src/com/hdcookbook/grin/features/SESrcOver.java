@@ -101,4 +101,15 @@ public class SESrcOver extends SrcOver implements SENode {
 	    part = to;
 	}
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "src_over @" + Integer.toHexString(hashCode());
+	} else {
+	    return "src_over " + name;
+	}
+    }
 }

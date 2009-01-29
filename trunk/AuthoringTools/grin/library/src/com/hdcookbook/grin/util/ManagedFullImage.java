@@ -59,7 +59,9 @@ import java.awt.Image;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.image.ImageObserver;
+import java.net.URL;
 
 /**
  * A managed image that's loaded from its own image file (and not
@@ -70,6 +72,7 @@ import java.awt.image.ImageObserver;
 public class ManagedFullImage extends ManagedImage implements ImageObserver {
 
     private String name;
+    private URL url = null;	// Stays null unless special constructor used
     private int numReferences = 0;
     private int numPrepares = 0;
     Image image = null;		// Accessed by ManagedSubImage
@@ -78,6 +81,11 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 
     ManagedFullImage(String name) {
 	this.name = name;
+    }
+
+    ManagedFullImage(String name, URL url) {
+	this.name = name;
+	this.url = url;
     }
 
     public String getName() {
@@ -165,7 +173,11 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 	if (image != null || numPrepares <= 0) {
 	    return;
 	}
-	image = AssetFinder.loadImage(name);
+	if (url == null) {
+	    image = AssetFinder.loadImage(name);
+	} else {
+	    image = Toolkit.getDefaultToolkit().createImage(url);
+	}
 	//
 	// The JDK seems to put the image fetching thread priority
 	// really high, which is the opposite of what we want.  By

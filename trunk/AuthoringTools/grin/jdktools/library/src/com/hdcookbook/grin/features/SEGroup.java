@@ -119,4 +119,15 @@ public class SEGroup extends Group implements SENode {
 	}
 	setParts(parts);	// This isn't really necessary
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "group @" + Integer.toHexString(hashCode());
+	} else {
+	    return "group " + name;
+	}
+    }
 }

@@ -134,4 +134,15 @@ public class SEBouncingArc extends SEArc {
 	builder.addSyntheticFeature(model);
 	builder.addSyntheticFeature(translator);
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "Playground:bouncing_arc @" + Integer.toHexString(hashCode());
+	} else {
+	    return "Playground:bouncing_arc " + name;
+	}
+    }
 }

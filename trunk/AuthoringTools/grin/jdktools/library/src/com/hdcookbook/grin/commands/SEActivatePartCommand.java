@@ -144,4 +144,11 @@ public class SEActivatePartCommand extends ActivatePartCommand implements SENode
 	    part = to;
 	}
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	return "activate_part " + assembly + " " + part;
+    }
 }

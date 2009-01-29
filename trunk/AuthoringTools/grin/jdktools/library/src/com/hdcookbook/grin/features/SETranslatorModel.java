@@ -115,4 +115,15 @@ public class SETranslatorModel extends SEInterpolatedModel {
      **/
     public void changeFeatureReference(Feature from, Feature to) {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "translator_model @" + Integer.toHexString(hashCode());
+	} else {
+	    return "translator_model " + name;
+	}
+    }
 }

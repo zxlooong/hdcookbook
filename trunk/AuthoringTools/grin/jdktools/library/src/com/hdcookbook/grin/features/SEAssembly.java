@@ -112,4 +112,15 @@ public class SEAssembly extends Assembly implements SENode {
 	    currentFeature = to;
 	}
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "assembly @" + Integer.toHexString(hashCode());
+	} else {
+	    return "assembly " + name;
+	}
+    }
 }

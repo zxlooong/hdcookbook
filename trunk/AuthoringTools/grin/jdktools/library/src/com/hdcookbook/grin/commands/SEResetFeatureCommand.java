@@ -127,4 +127,11 @@ public class SEResetFeatureCommand extends ResetFeatureCommand implements SENode
 	}
     }
 
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	return "reset_feature " + feature;
+    }
+
 }

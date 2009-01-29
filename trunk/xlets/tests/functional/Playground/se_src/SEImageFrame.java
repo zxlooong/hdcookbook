@@ -126,4 +126,15 @@ public class SEImageFrame extends ImageFrame implements SENode {
 	// that parent wouldn't be a FixedImage anyway, so the most sensible
 	// thing to do is to keep our reference to the FixedImage we know.
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "Playground:image_frame @" + Integer.toHexString(hashCode());
+	} else {
+	    return "Playground:image_frame " + name;
+	}
+    }
 }

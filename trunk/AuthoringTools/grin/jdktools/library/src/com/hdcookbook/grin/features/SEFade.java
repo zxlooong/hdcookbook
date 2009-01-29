@@ -196,4 +196,15 @@ public class SEFade extends Fade implements SENode {
 	    part = to;
 	}
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	if (name == null) {
+	    return "fade @" + Integer.toHexString(hashCode());
+	} else {
+	    return "fade " + name;
+	}
+    }
 }

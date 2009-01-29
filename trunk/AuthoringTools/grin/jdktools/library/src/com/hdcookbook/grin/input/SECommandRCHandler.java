@@ -155,4 +155,16 @@ public class SECommandRCHandler
             throws IOException
     {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	String type = wantKeypress ? "key_pressed" : "key_released";
+	if (name == null) {
+	    return "rc_handler " + type + " @"+Integer.toHexString(hashCode());
+	} else {
+	    return "rc_handler " + type + " " + name;
+	}
+    }
 }

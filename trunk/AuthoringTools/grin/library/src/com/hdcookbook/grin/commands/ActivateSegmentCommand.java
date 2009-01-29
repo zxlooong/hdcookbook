@@ -121,19 +121,6 @@ public class ActivateSegmentCommand extends Command implements Node {
 	}
     }
 
-    public String toString() {
-	String result = super.toString() + " : ";
-	if (pop) {
-	    return result + "<pop>";
-	}
-	result = result + segment;
-	if (push) {
-	    return result + " <push>";
-	} else {
-	    return result;
-	}
-    }
-    
     public void readInstanceData(GrinDataInputStream in, int length) 
             throws IOException { 
                 

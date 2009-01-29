@@ -87,4 +87,11 @@ public class SECommandList extends SEGrinXHelper {
      **/
     public void changeFeatureReference(Feature from, Feature to) {
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public String toString() {
+	return "command list @" + Integer.toHexString(hashCode());
+    }
 }
