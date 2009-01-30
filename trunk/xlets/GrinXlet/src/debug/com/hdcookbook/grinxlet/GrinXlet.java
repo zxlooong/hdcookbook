@@ -138,6 +138,9 @@ public class GrinXlet
     private int blueKeyCode;
     private int yellowKeyCode;
 
+    private int xletWidth;
+    private int xletHeight;
+
     // A small show we use to manage a debug screen accessed with
     // the popup menu key
     private Show xletShow;
@@ -199,6 +202,25 @@ public class GrinXlet
     }
 
     /**
+     * Return the root container for this xlet, with the size set to
+     * the desired size.  The default implementation of this method
+     * returns a root container acquired from 
+     * javax.tv.graphics.TVContainer.getRootContainer() (which in GEM
+     * systems is an HScene).  It is sized to 1920x1080 by the default
+     * implementation of this method.
+     * <p>
+     * Subclasses may override this method to use a different container
+     * as the root container, or to set a different size.  The implementation
+     * of the subclass method might also change the resolution of the
+     * player, e.g. from full HD (1920x1080) to QHD (960x540).
+     **/
+    protected Container getRootContainer() {
+        Container c = TVContainer.getRootContainer(xletContext);
+        c.setSize(1920, 1080);
+	return c;
+    }
+
+    /**
      * This method can be overridden by subclasses that want to look
      * for xlet arguments in places other than the default
      * XletContext.ARGS and "dvb.caller.parameters".  Subclasses that
@@ -216,8 +238,9 @@ public class GrinXlet
 	String root = System.getProperty("bluray.vfs.root") + "/";
 	resourcesDir = new File(root + args[4]);
        
-        rootContainer = TVContainer.getRootContainer(xletContext);			
-        rootContainer.setSize(1920, 1080);
+        rootContainer = getRootContainer();
+	xletWidth = rootContainer.getWidth();
+	xletHeight = rootContainer.getHeight();
         
         animationEngine = new DebugDirectDrawEngine();
         animationEngine.setFps(24000);
@@ -363,7 +386,7 @@ public class GrinXlet
 	animationEngine.checkDestroy();
 	animationEngine.initClients(new AnimationClient[] { show, xletShow });
 	animationEngine.initContainer(rootContainer, 
-				     new Rectangle(0,0,1920,1080));
+				     new Rectangle(0, 0, xletWidth, xletHeight));
        
     } 
 
