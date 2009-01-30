@@ -144,7 +144,9 @@ public class TwitterXlet extends GrinXlet implements ResourceClient {
      * @inheritDoc
      **/
     public boolean requestRelease(ResourceProxy proxy, Object requestData) {
-	return false;	// We only release graphicsDevice when the 
-			// xlet is destroyed
+	return false;	
+	// We release the graphicsDevice right after we get it, so we should
+	// never get this call, but if we do then we're in the middle of using
+	// it.
     }
 }
