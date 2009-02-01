@@ -61,9 +61,10 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.RenderContext;
 
-import java.util.HashSet;
+//import java.util.HashSet;
+import java.util.Vector;
 
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 
 /**
  * Abstract base class for features that modify a single child feature.
@@ -87,7 +88,7 @@ public abstract class Modifier extends Feature {
     /**
      * @inheritDoc
      **/
-    public void addSubgraph(HashSet set) {
+    public void addSubgraph(Vector set) {
 	if (set.contains(this)) {
 	    return;
 	}
@@ -203,7 +204,7 @@ public abstract class Modifier extends Feature {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D g) {
+    public void paintFrame(Graphics g) {
 	part.paintFrame(g);
     }
 

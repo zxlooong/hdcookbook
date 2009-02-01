@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry path="src" kind="src"/>
+	<classpathentry path="VIDIOM_TOOLROOT/lib/ocap-stub.jar" kind="var"/>
+	<classpathentry path="build/classes" kind="output"/>
+</classpath>

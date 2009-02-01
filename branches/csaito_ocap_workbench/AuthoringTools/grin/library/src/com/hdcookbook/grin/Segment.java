@@ -64,7 +64,7 @@ import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.io.IOException;
 
 /**
@@ -365,7 +365,7 @@ public class Segment implements Node {
     //
     // Called from Show with the Show lock held
     //
-    void paintFrame(Graphics2D gr) {
+    void paintFrame(Graphics gr) {
 	for (int i = 0; i < activeFeatures.length; i++) {
 	   activeFeatures[i].paintFrame(gr);
 	}

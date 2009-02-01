@@ -56,7 +56,7 @@
 package com.hdcookbook.grin;
 
 import java.util.Hashtable;
-import java.awt.AlphaComposite;
+//import java.awt.AlphaComposite;
 
 /**
  * This is a small data holder used for a Show.  It's used to hold
@@ -89,6 +89,7 @@ public class ShowInitializer {
      * Get an AlphaComposite object for drawing with an alpha
      * value.
      **/
+    /**
     public synchronized AlphaComposite getAlpha(boolean srcOver, int alpha) {
 	Hashtable ht = (srcOver) ? srcOverAlphas : srcAlphas;
 	Integer key = new Integer(alpha);
@@ -101,6 +102,7 @@ public class ShowInitializer {
 	}
 	return result;
     }
+     * **/
 
     // We could choose to do the same thing with fonts and colors,
     // and maybe other things.

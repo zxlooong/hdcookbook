@@ -63,13 +63,15 @@ import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.SetupClient;
-import java.awt.AlphaComposite;
+//import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
+//import java.awt.Composite;
+//import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.HashMap;
+//import java.util.HashMap;
+import java.util.Hashtable;
 
 public class FontStripText extends Feature implements Node, SetupClient {
     
@@ -142,7 +144,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
     private boolean imageSetup = false;
 
     private ManagedImage fontImage = null;
-    private HashMap      charMap   = null;   
+    private Hashtable      charMap   = null;   
     
     private static boolean loadingFailed = false;
     
@@ -290,7 +292,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
 	changed = false;
     }
 
-    public void paintFrame(Graphics2D gr) {
+    public void paintFrame(Graphics gr) {
 	if (!isActivated || loadingFailed) {
 	    return;
 	}
@@ -300,13 +302,13 @@ public class FontStripText extends Feature implements Node, SetupClient {
 	}
         int y2 = alignedY;
 
-	Composite old = gr.getComposite();
-	gr.setComposite(AlphaComposite.SrcOver);        
+	//Composite old = gr.getComposite();
+	//gr.setComposite(AlphaComposite.SrcOver);        
         for (int i = 0; i < strings.length; i++) {
             drawString(gr, strings[i], alignedX, y2);
             y2 += ascent + descent + leading + vspace;
         }
-	gr.setComposite(old);            
+	//gr.setComposite(old);            
     }
 
     public void nextFrame() {
@@ -364,7 +366,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
         return Math.max(maxPixelWidth, w);
     }
     
-    private void drawString(Graphics2D g2, String string, int x, int y) {
+    private void drawString(Graphics g2, String string, int x, int y) {
         char[] chars = string.toCharArray();
         CharImageInfo charInfo;
         for (int i = 0; i < chars.length; i++) {

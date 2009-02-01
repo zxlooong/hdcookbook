@@ -66,7 +66,8 @@ import javax.tv.graphics.TVContainer;
 import java.awt.Container;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Graphics2D;
+//import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Image;
 
 import com.hdcookbook.grin.Director;
@@ -88,7 +89,8 @@ import org.dvb.ui.DVBBufferedImage;
 import org.dvb.ui.FontFactory;
 
 import org.havi.ui.event.HRcCapabilities;
-import org.bluray.ui.event.HRcEvent;
+//import org.bluray.ui.event.HRcEvent;
+import org.havi.ui.event.HRcEvent;
 
 /** 
  * The xlet class for a game project.  This is the debug version
@@ -202,22 +204,22 @@ public class GrinXlet
     }
 
     /**
-     * Return the root container for this xlet, with the size set to
-     * the desired size.  The default implementation of this method
-     * returns a root container acquired from 
-     * javax.tv.graphics.TVContainer.getRootContainer() (which in GEM
-     * systems is an HScene).  It is sized to 1920x1080 by the default
-     * implementation of this method.
-     * <p>
-     * Subclasses may override this method to use a different container
-     * as the root container, or to set a different size.  The implementation
-     * of the subclass method might also change the resolution of the
-     * player, e.g. from full HD (1920x1080) to QHD (960x540).
-     **/
+    * Return the root container for this xlet, with the size set to
+    * the desired size.  The default implementation of this method
+    * returns a root container acquired from
+    * javax.tv.graphics.TVContainer.getRootContainer() (which in GEM
+    * systems is an HScene).  It is sized to 1920x1080 by the default
+    * implementation of this method.
+    * <p>
+    * Subclasses may override this method to use a different container
+    * as the root container, or to set a different size.  The implementation
+    * of the subclass method might also change the resolution of the
+    * player, e.g. from full HD (1920x1080) to QHD (960x540).
+    **/
     protected Container getRootContainer() {
-        Container c = TVContainer.getRootContainer(xletContext);
-        c.setSize(1920, 1080);
-	return c;
+       Container c = TVContainer.getRootContainer(xletContext);
+       c.setSize(1920, 1080);
+       return c;
     }
 
     /**
@@ -235,12 +237,14 @@ public class GrinXlet
 	showInitialSegment = args[1];
 	showDirectorName = args[2];
 	definesFonts = "-fonts".equals(args[3]);
-	String root = System.getProperty("bluray.vfs.root") + "/";
-	resourcesDir = new File(root + args[4]);
+	//String root = System.getProperty("bluray.vfs.root") + "/";
+	//resourcesDir = new File(root + args[4]);
+	resourcesDir = new File(args[4]);
        
+        rootContainer = TVContainer.getRootContainer(xletContext);
         rootContainer = getRootContainer();
-	xletWidth = rootContainer.getWidth();
-	xletHeight = rootContainer.getHeight();
+        xletWidth = rootContainer.getSize().width;
+        xletHeight = rootContainer.getSize().height;
         
         animationEngine = new DebugDirectDrawEngine();
         animationEngine.setFps(24000);
@@ -305,11 +309,12 @@ public class GrinXlet
 		{
 		    return new DVBBufferedImage(width, height);
 		}
-		protected Graphics2D createGraphicsFromImageBufferHelper
+		protected Graphics createGraphicsFromImageBufferHelper
 				    (Image buffer) 
 		{
 		    Object g = ((DVBBufferedImage) buffer).createGraphics();
-		    return (Graphics2D) g;
+		    //return (Graphics2D) g;
+		    return (Graphics) g;
 		}
 		protected void destroyImageBufferHelper(Image buffer) {
 		    ((DVBBufferedImage) buffer).dispose();
@@ -354,7 +359,10 @@ public class GrinXlet
 
 	    });
 
-	   AssetFinder.setSearchPath(null, new File[] {resourcesDir});      
+	   //AssetFinder.setSearchPath(null, new File[] {resourcesDir});      
+	   AssetFinder.setSearchPath(
+              new String[] { resourcesDir.getPath() },  
+              new File[] {resourcesDir});      
 	   if (AssetFinder.tryURL("images.map") != null) {
 	       AssetFinder.setImageMap("images.map");
 	       if (Debug.LEVEL > 0) {
@@ -386,7 +394,7 @@ public class GrinXlet
 	animationEngine.checkDestroy();
 	animationEngine.initClients(new AnimationClient[] { show, xletShow });
 	animationEngine.initContainer(rootContainer, 
-				     new Rectangle(0, 0, xletWidth, xletHeight));
+				     new Rectangle(0,0,xletWidth,xletHeight));
        
     } 
 
@@ -463,7 +471,7 @@ public class GrinXlet
 	userEventRepo.addAllColourKeys();
 	userEventRepo.addAllNumericKeys();
 	userEventRepo.addKey(HRcEvent.VK_ENTER);
-	userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
+	//userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
 
 	EventManager.getInstance().addUserEventListener(this, userEventRepo);          
 	rootContainer.requestFocus();          

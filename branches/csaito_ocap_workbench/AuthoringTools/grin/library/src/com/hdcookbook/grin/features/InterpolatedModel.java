@@ -63,10 +63,11 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.HashMap;
+//import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * An InterpolatedModel is a feature that controls one or more integer
@@ -145,7 +146,7 @@ public class InterpolatedModel extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (!isSetup() || isActivated) {
 	    throw new IllegalStateException();
 	}
@@ -166,7 +167,7 @@ public class InterpolatedModel extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected void initializeClone(Feature original, HashMap clones) {
+    protected void initializeClone(Feature original, Hashtable clones) {
 	super.initializeClone(original, clones);
 	InterpolatedModel other = (InterpolatedModel) original;
 	endCommands = Feature.cloneCommands(other.endCommands, clones);
@@ -382,7 +383,7 @@ public class InterpolatedModel extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D gr) {
+    public void paintFrame(Graphics gr) {
 	// do nothing
     }
     

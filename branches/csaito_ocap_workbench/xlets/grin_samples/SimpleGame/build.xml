@@ -15,11 +15,28 @@ can just put a <target> tag in build.xml to add actions to be performed
 after any target is built.
 -->
 
-<project name="Game xlet" default="deploy" basedir=".">
+<project name="Game xlet" default="jar" basedir=".">
 
     <property file="user.vars.properties"/>
     <property file="vars.properties"/>
     <import file="${grin.xlet}/generic_build.xml"/>
+
+<target name="post-gen-permission-file">
+        <copy todir="${build.dir}/classes/com/hdcookbook/grinxlet">
+            <fileset dir="${grin.xlet}/src/debug/com/hdcookbook/grinxlet">
+                <include name="ocap.GrinXlet.perm"/>
+            </fileset>
+        </copy>
+</target>
+<target name="post-jar">
+        <copy todir="${build.dir}/classes">
+            <fileset dir="${build.dir}">
+                <include name="*.grin"/>
+                <include name="*.png"/>
+                <include name="images.map"/>
+            </fileset>
+        </copy>
+</target>
     
 </project>
 

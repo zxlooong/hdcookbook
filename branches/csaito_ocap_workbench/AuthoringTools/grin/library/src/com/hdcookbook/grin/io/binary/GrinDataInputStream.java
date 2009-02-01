@@ -103,7 +103,8 @@ public class GrinDataInputStream extends DataInputStream {
        }
       
        int rgba = readInt();
-       return new Color(rgba, true);
+       return new Color(rgba);
+       //return new Color(rgba, true);
    }
    
    /**

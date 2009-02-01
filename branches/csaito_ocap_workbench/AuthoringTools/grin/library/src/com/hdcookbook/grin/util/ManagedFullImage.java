@@ -57,7 +57,7 @@ package com.hdcookbook.grin.util;
 
 import java.awt.Image;
 import java.awt.Component;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.image.ImageObserver;
@@ -247,14 +247,14 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     /**
      * @inheritDoc
      **/
-    public void draw(Graphics2D gr, int x, int y, Component comp) {
+    public void draw(Graphics gr, int x, int y, Component comp) {
         gr.drawImage(image, x, y, comp);
     }
 
     /**
      * @inheritDoc
      **/
-    public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
+    public void drawScaled(Graphics gr, Rectangle bounds, Component comp) {
 	gr.drawImage(image, bounds.x, bounds.y, 
 			    bounds.x+bounds.width, bounds.y+bounds.height,
 			    0, 0, image.getWidth(null), image.getHeight(null), 
@@ -264,7 +264,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     /**
      * @inheritDoc
      **/
-    public void drawClipped(Graphics2D gr, int x, int y, Rectangle subsection, Component comp) {
+    public void drawClipped(Graphics gr, int x, int y, Rectangle subsection, Component comp) {
 	gr.drawImage(image, x, y, x+ subsection.width, y+subsection.height,
 			    subsection.x, subsection.y, 
 			    subsection.x+subsection.width, subsection.y+subsection.height, 

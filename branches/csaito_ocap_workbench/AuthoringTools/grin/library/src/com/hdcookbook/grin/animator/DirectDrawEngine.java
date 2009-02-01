@@ -57,11 +57,11 @@ package com.hdcookbook.grin.animator;
 
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
-import java.awt.AlphaComposite;
+//import java.awt.AlphaComposite;
 import java.awt.Container;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
+//import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Image;
@@ -92,8 +92,8 @@ public class DirectDrawEngine extends ClockBasedEngine {
     private Container container;
     private Component ddComponent;
     private Image buffer;
-    private Graphics2D bufferG;
-    private Graphics2D componentG;
+    private Graphics bufferG;
+    private Graphics componentG;
 
     /**
      * Create a new DirectDrawEngine.  It needs to be initialized with
@@ -113,7 +113,7 @@ public class DirectDrawEngine extends ClockBasedEngine {
 		    Debug.println("repainting...");
 		}
 		try {
-		    repaintFrame((Graphics2D) g);
+		    repaintFrame((Graphics) g);
 			// We could paint from the buffer, but this
 			// will be the same frame anyway.
 		} catch (InterruptedException ignored) {
@@ -128,29 +128,31 @@ public class DirectDrawEngine extends ClockBasedEngine {
 	buffer = AssetFinder.createCompatibleImageBuffer(
 				container, bounds.width, bounds.height);
 	bufferG = AssetFinder.createGraphicsFromImageBuffer(buffer);
-	bufferG.setComposite(AlphaComposite.Src);
+	//bufferG.setComposite(AlphaComposite.Src);
 	bufferG.setColor(transparent);
 	bufferG.fillRect(0, 0, bounds.width, bounds.height);
 
-	componentG = (Graphics2D) ddComponent.getGraphics();
+	componentG = (Graphics) ddComponent.getGraphics();
 	if (Debug.ASSERT && componentG == null) {
 	    Debug.assertFail();  // Maybe container is invisible?
 	}
-	componentG.setComposite(AlphaComposite.Src);
+	//componentG.setComposite(AlphaComposite.Src);
     }
 
     /** 
      * @inheritDoc
      **/
     public int getWidth() {
-	return ddComponent.getWidth();
+	//return ddComponent.getWidth();
+        return ddComponent.getSize().width;
     }
 
     /** 
      * @inheritDoc
      **/
     public int getHeight() {
-	return ddComponent.getHeight();
+	//return ddComponent.getHeight();
+        return ddComponent.getSize().height;
     }
 
     /**
@@ -184,7 +186,7 @@ public class DirectDrawEngine extends ClockBasedEngine {
      **/
     protected void callPaintTargets() throws InterruptedException {
 	paintTargets(bufferG);
-	bufferG.setComposite(AlphaComposite.Src);	// Add some robustness
+	//bufferG.setComposite(AlphaComposite.Src);	// Add some robustness
     }
 
     /**

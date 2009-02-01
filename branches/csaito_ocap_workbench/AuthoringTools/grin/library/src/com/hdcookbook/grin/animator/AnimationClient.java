@@ -56,7 +56,8 @@
 package com.hdcookbook.grin.animator;
 
 import com.hdcookbook.grin.util.Debug;
-import java.awt.Graphics2D;
+//import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Component;
 import java.util.Hashtable;
 
@@ -206,7 +207,7 @@ public interface AnimationClient {
      *
      * @see RenderContext#addArea(DrawRecord)
      **/
-    public void paintFrame(Graphics2D gr)
+    public void paintFrame(Graphics gr)
     	throws InterruptedException ;
 
     /**

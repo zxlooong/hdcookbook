@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<!DOCTYPE permissionrequestfile PUBLIC "-//OCAP//DTD Permission Request File 1.0//EN" "http://www.opencable.com/ocap/dtd/ocappermissionrequestfile-1-0.dtd">
+
+<permissionrequestfile appid="0x0001" orgid="0x000000001">
+<userpreferences read="true" write="true"></userpreferences>
+<file value="true"/>
+<filename * write="true" read="true/>
+
+</permissionrequestfile>

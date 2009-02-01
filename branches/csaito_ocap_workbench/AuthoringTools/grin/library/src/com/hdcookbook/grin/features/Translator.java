@@ -63,9 +63,10 @@ import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.io.IOException;
-import java.util.HashMap;
+//import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * A Translator wraps other features, and adds movement taken from a
@@ -144,7 +145,7 @@ public class Translator extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (!isSetup() || activated) {
 	    throw new IllegalStateException();
 	}
@@ -163,7 +164,7 @@ public class Translator extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    protected void initializeClone(Feature original, HashMap clones) {
+    protected void initializeClone(Feature original, Hashtable clones) {
 	super.initializeClone(original, clones);
 	Translator other = (Translator) original;
 	model = (InterpolatedModel)
@@ -252,7 +253,7 @@ public class Translator extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D gr) {
+    public void paintFrame(Graphics gr) {
 	if (!activated) {
 	    return;
 	}

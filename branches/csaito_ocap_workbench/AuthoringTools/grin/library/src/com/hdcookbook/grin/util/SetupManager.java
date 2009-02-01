@@ -56,9 +56,11 @@
 
 package com.hdcookbook.grin.util;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+//import java.util.ArrayList;
+//import java.util.HashSet;
+//import java.util.Iterator;
+import java.util.Vector;
+import java.util.Enumeration;
 
 /**
  * A SetupManager manages a low-priority thread that's used to set up
@@ -80,7 +82,8 @@ public class SetupManager implements Runnable {
     int lastPlusOne; // index into setting up.  Wraps.
     private static Object monitor = new Object();
     private static SetupManager worker = null;
-    private ArrayList managers;
+    //private ArrayList managers;
+    private Vector managers;
     	// ArrayList<SetupManager>, contains all running managers managed
 	// by a given thread.  This is null for most SetupManager instances,
 	// but populated for the worker singleton.
@@ -110,7 +113,8 @@ public class SetupManager implements Runnable {
     // in BD.
     //
     private SetupManager() {
-	managers = new ArrayList(4);
+	//managers = new ArrayList(4);
+        managers = new Vector(4);
 	    // A capacity of 4 is small enough so the memory doesn't matter,
 	    // and big enough so it will almost never grow.  Managers has
 	    // as many entries as there are active shows, which will usually
@@ -136,7 +140,7 @@ public class SetupManager implements Runnable {
 		// Called start() twice on the same SetupManager
 		Debug.assertFail();
 	    }
-	    worker.managers.add(this);
+	    worker.managers.addElement(this);
 	    monitor.notifyAll();
 	}
     }
@@ -154,7 +158,7 @@ public class SetupManager implements Runnable {
 		Debug.assertFail();
 	    }
 	    if (i >= 0) {
-		worker.managers.remove(i);
+		worker.managers.removeElementAt(i);
 	    }
 	    if (worker.managers.size() == 0) {
 		monitor.notifyAll();
@@ -188,11 +192,11 @@ public class SetupManager implements Runnable {
 		// In this rare case, we need to purge the array of
 		// duplicates.  Since it's rare, we go ahead and
 		// create heap traffic by using a HashSet.
-		HashSet set = new HashSet();
+		Vector set = new Vector();
 		for (int i = first; i != lastPlusOne; i = next(i)) {
-		    set.add(settingUp[i]);
+		    set.addElement(settingUp[i]);
 		}
-		set.add(f);
+		set.addElement(f);
 		if (Debug.ASSERT && set.size() >= settingUp.length) {
 		    // If this happens, settingUp is too small, but it
 		    // can't be, because it's one bigger than the total
@@ -201,8 +205,8 @@ public class SetupManager implements Runnable {
 		}
 		first = 0;
 		lastPlusOne = 0;
-		for (Iterator it = set.iterator(); it.hasNext(); ) {
-		    settingUp[lastPlusOne] = (SetupClient) it.next();
+		for (Enumeration it = set.elements(); it.hasMoreElements(); ) {
+		    settingUp[lastPlusOne] = (SetupClient) it.nextElement();
 		    lastPlusOne++;
 		}
 		for (int i = lastPlusOne; i < settingUp.length; i++) {
@@ -287,7 +291,7 @@ public class SetupManager implements Runnable {
 		    found = null;
 		}
 		for (int i = 0; found == null && i < managers.size(); i++)  {
-		    SetupManager m = (SetupManager) managers.get(i);
+		    SetupManager m = (SetupManager) managers.elementAt(i);
 		    if (m.hasWork()) {
 			found = m;
 		    }

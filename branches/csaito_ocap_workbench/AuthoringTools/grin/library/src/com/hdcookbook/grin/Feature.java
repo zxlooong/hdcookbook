@@ -57,17 +57,19 @@
 
 package com.hdcookbook.grin;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.Hashtable;
+//import java.util.HashSet;
+//import java.util.Iterator;
+//import java.util.Map;
+//import java.util.Set;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.SetupClient;
 
-import java.awt.Graphics2D;
+import java.awt.Graphics;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Represents a feature.  A feature is a thing that presents some sort
@@ -342,7 +344,7 @@ public abstract class Feature {
      *
      * @param gr  The place to paint to.
      **/
-    public abstract void paintFrame(Graphics2D gr);
+    public abstract void paintFrame(Graphics gr);
 
     /**
      * Called from Segment with the Show lock held, to advance us to
@@ -414,7 +416,7 @@ public abstract class Feature {
      * @see #initialize()
      * @see #destroyClonedSubgraph()
      **/
-    final public Feature cloneSubgraph(HashMap clones) {
+    final public Feature cloneSubgraph(Hashtable clones) {
 	if (Debug.ASSERT && !clones.isEmpty()) {
 	    Debug.assertFail();
 	}
@@ -422,11 +424,18 @@ public abstract class Feature {
 	if (Debug.ASSERT && clones.get(this) == null) {
 	    Debug.assertFail();
 	}
+        for (Enumeration e = clones.keys(); e.hasMoreElements();  ) {
+            Feature key = (Feature) e.nextElement();
+	    Feature value = (Feature) clones.get(key);
+	    value.initializeClone(key, clones);                       
+        }
+        /**
 	for (Iterator it = clones.keySet().iterator(); it.hasNext(); ) {
 	    Feature key = (Feature) it.next();
 	    Feature value = (Feature) clones.get(key);
 	    value.initializeClone(key, clones);
 	}
+         **/
 	return result;
     }
 
@@ -464,7 +473,7 @@ public abstract class Feature {
      * @see #cloneSubgraph(java.util.HashMap)
      * @see #createClone(java.util.HashMap)
      **/
-    final public Feature makeNewClone(HashMap clones) {
+    final public Feature makeNewClone(Hashtable clones) {
 	Feature clone = (Feature) clones.get(this);
 	if (clone == null) {
 	    clone = createClone(clones);
@@ -506,8 +515,9 @@ public abstract class Feature {
      * @see #makeNewClone(java.util.HashMap)
      * @see #cloneSubgraph(java.util.HashMap)
      **/
-    protected Feature createClone(HashMap clones) {
-	throw new UnsupportedOperationException(getClass().getName()
+    protected Feature createClone(Hashtable clones) {
+	//throw new UnsupportedOperationException(getClass().getName()
+	throw new RuntimeException(getClass().getName()
 						    + ".createClone()");
     }
 
@@ -532,7 +542,7 @@ public abstract class Feature {
      *
      * @see #cloneSubgraph(java.util.HashMap)
      **/
-    protected void initializeClone(Feature original, HashMap clones) {
+    protected void initializeClone(Feature original, Hashtable clones) {
     }
 
     /**
@@ -548,12 +558,18 @@ public abstract class Feature {
      * @see #cloneSubgraph(java.util.HashMap)
      **/
     public final void destroyClonedSubgraph() {
-	HashSet set = new HashSet();
+	Vector set = new Vector();
 	addSubgraph(set);
+        for (Enumeration it = set.elements(); it.hasMoreElements(); ) {
+	    Feature f = (Feature) it.nextElement();
+	    f.destroy();
+	}        
+        /**
 	for (Iterator it = set.iterator(); it.hasNext(); ) {
 	    Feature f = (Feature) it.next();
 	    f.destroy();
 	}
+         **/
     }
 
     /**
@@ -568,8 +584,8 @@ public abstract class Feature {
      * call the superclass version, then recursively invoke this method
      * on each child.
      **/
-    public void addSubgraph(HashSet set) {
-	set.add(this);
+    public void addSubgraph(Vector set) {
+	set.addElement(this);
     }
 
 
@@ -582,7 +598,7 @@ public abstract class Feature {
      *
      * @param f		The feature reference.  This may be null.
      **/
-    protected static Feature clonedReference(Feature f, HashMap clones) {
+    protected static Feature clonedReference(Feature f, Hashtable clones) {
 	if (f == null) {
 	    return null;
 	}
@@ -607,7 +623,7 @@ public abstract class Feature {
      * @throws IllegalStateException as specified in 
      *		Feature.cloneSubgraph()
      **/
-    protected static Command[] cloneCommands(Command[] commands, HashMap clones)
+    protected static Command[] cloneCommands(Command[] commands, Hashtable clones)
     {
 	if (commands == null || commands.length == 0) {
 	    return commands;

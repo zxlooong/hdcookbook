@@ -22,6 +22,7 @@ exports
 
 java_generated_class CubeCommands [[ 
 
+        import cube.CubeDirector;
         import com.hdcookbook.grin.Show;
         
 	public class CubeCommands extends com.hdcookbook.grin.GrinXHelper {
@@ -46,7 +47,7 @@ feature fixed_image F:Cube.Image
 ;
 
 feature translator_model F:Cube.Position
-    { 0 960 540 linear-relative }
+    { 0 100 100 linear-relative }
 ;
 
 feature translator F:CubeGroup F:Cube.Position {

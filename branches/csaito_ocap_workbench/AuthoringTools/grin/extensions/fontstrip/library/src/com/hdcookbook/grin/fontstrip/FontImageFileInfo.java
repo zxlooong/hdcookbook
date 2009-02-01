@@ -61,7 +61,8 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
+//import java.util.HashMap;
+import java.util.Hashtable;
 
 public class FontImageFileInfo {
     static  String[]  fileNames = null;
@@ -75,7 +76,7 @@ public class FontImageFileInfo {
     
     private  ManagedImage fontImage = null;
     private  int     maxLeading = 0;
-    private  HashMap charMap     = null;
+    private  Hashtable charMap     = null;
     
     public static void initFontImageFileInfo(String infoFile) 
             throws IOException {
@@ -101,7 +102,7 @@ public class FontImageFileInfo {
             fileNames[i] = dis.readUTF();
             FontImageFileInfo info = new FontImageFileInfo();
             info.maxLeading = dis.readInt();
-            info.charMap = new HashMap();
+            info.charMap = new Hashtable();
             int count = dis.readInt();
             for (int j = 0; j < count; j++) {
                 CharImageInfo charImage = new CharImageInfo();
@@ -124,7 +125,7 @@ public class FontImageFileInfo {
         }
     }
     
-    static HashMap getCharMap(String fileName) {
+    static Hashtable getCharMap(String fileName) {
         for (int i = 0; i < fileNames.length; i++) {
             if (fileName.equals(fileNames[i])) {
                 return fileInfos[i].charMap;

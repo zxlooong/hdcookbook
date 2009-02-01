@@ -65,11 +65,12 @@ import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Graphics2D;
+//import java.awt.AlphaComposite;
+//import java.awt.Composite;
+import java.awt.Graphics;
 import java.io.IOException;
-import java.util.HashMap;
+//import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * Causes its child to be painted in SRC_OVER mode, that is, with
@@ -116,7 +117,7 @@ public class SrcOver extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (!isSetup() || activated) {
 	    throw new IllegalStateException();
 	}
@@ -137,11 +138,11 @@ public class SrcOver extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D gr) {
-	Composite old = gr.getComposite();
-	gr.setComposite(AlphaComposite.SrcOver);
+    public void paintFrame(Graphics gr) {
+	//Composite old = gr.getComposite();
+	//gr.setComposite(AlphaComposite.SrcOver);
 	part.paintFrame(gr);
-	gr.setComposite(old);
+	//gr.setComposite(old);
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

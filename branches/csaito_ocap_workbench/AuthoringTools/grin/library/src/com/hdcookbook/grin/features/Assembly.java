@@ -61,12 +61,12 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
-import com.hdcookbook.grin.util.Debug;
 
 import java.io.IOException;
-import java.awt.Graphics2D;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.awt.Graphics;
+import java.util.Hashtable;
+//import java.util.HashSet;
+import java.util.Vector;
 
 /**
  * An assembly is a feature composed of other features.  It's a bit
@@ -102,7 +102,7 @@ public class Assembly extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (!isSetup() || activated) {
 	    throw new IllegalStateException();
 	}
@@ -128,7 +128,7 @@ public class Assembly extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    public void addSubgraph(HashSet set) {
+    public void addSubgraph(Vector set) {
 	if (set.contains(this)) {
 	    return;		// Avoid O(n^2) with assemblies 
 	}
@@ -325,7 +325,7 @@ public class Assembly extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D gr) {
+    public void paintFrame(Graphics gr) {
 	currentFeature.paintFrame(gr);
     }
 

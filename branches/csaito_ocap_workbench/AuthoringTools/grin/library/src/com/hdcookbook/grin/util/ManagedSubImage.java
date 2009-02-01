@@ -57,7 +57,7 @@ package com.hdcookbook.grin.util;
 
 import java.awt.Image;
 import java.awt.Component;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Rectangle;
 
 /**
@@ -142,7 +142,7 @@ public class ManagedSubImage extends ManagedImage {
     /**
      * @inheritDoc
      **/
-    public void draw(Graphics2D gr, int x, int y, Component comp) {
+    public void draw(Graphics gr, int x, int y, Component comp) {
 	Rectangle p = placement;
 	gr.drawImage(mosaic.image, x, y, x+p.width, y+p.height,
 				   p.x, p.y, p.x+p.width, p.y+p.height, comp);
@@ -151,7 +151,7 @@ public class ManagedSubImage extends ManagedImage {
     /**
      * @inheritDoc
      **/
-    public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
+    public void drawScaled(Graphics gr, Rectangle bounds, Component comp) {
 	Rectangle p = placement;
 	gr.drawImage(mosaic.image, 
 		     bounds.x, bounds.y, 
@@ -162,7 +162,7 @@ public class ManagedSubImage extends ManagedImage {
     /**
      * @inheritDoc
      **/
-    public void drawClipped(Graphics2D gr, int x, int y, 
+    public void drawClipped(Graphics gr, int x, int y, 
             Rectangle subsection, Component comp) {
 	Rectangle p = placement;
 	gr.drawImage(mosaic.image, 

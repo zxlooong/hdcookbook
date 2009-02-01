@@ -1,3 +1,4 @@
+package cube;
 
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.features.InterpolatedModel;
@@ -15,6 +16,8 @@ public class CubeDirector extends Director {
     private int cubeY;
     public int cubeDX = 0;
     public int cubeDY = 0;
+    public static final int MAX_X = 640;
+    public static final int MAX_Y = 480;
 
     public CubeDirector() {
     }
@@ -43,15 +46,17 @@ public class CubeDirector extends Director {
 	if (cubeX < 0) {
 	    cubeX = 0;
 	    cubeDX = 0;
-	} else if (cubeX > 1920) {
-	    cubeX = 1920;
+	//} else if (cubeX > 1920) {
+	} else if (cubeX > MAX_X) {
+	    cubeX = MAX_X;
 	    cubeDX = 0;
 	}
 	if (cubeY < 0) {
 	    cubeY = 0;
 	    cubeDY = 0;
-	} else if (cubeY > 1080) {
-	    cubeY = 1080;
+	//} else if (cubeY > 1080) {
+        } else if (cubeY > MAX_Y) {
+	    cubeY = MAX_Y;
 	    cubeDY = 0;
 	}
 	cubePosition.setField(Translator.X_FIELD, cubeX);

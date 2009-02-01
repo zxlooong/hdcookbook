@@ -62,12 +62,13 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
-import java.util.Collection;
+//import java.util.Collection;
 import java.util.Hashtable;
-import java.util.Iterator;
+//import java.util.Iterator;
 import java.util.Vector;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.util.Enumeration;
 
 
 /**
@@ -342,12 +343,15 @@ public class RCKeyEvent extends Command {
      * Returns a vector of events turned-on by the given mask.
      */
     public static Vector getEventsFromMask(int mask) {
-        Collection values = keyByName.values();
+        //Collection values = keyByName.values();
+        Enumeration values = keyByName.elements();
 	Vector result = new Vector();
-        for (Iterator itr = values.iterator(); itr.hasNext();) {
-	    RCKeyEvent keyEvent = (RCKeyEvent)itr.next();
+        //for (Iterator itr = values.iterator(); itr.hasNext();) {
+	    //RCKeyEvent keyEvent = (RCKeyEvent)itr.next();
+        for (; values.hasMoreElements() ; ) {
+            RCKeyEvent keyEvent = (RCKeyEvent) values.nextElement();
             if ((mask & keyEvent.getBitMask()) != 0) {
-	        result.add(keyEvent);
+	        result.addElement(keyEvent);
             }
         }
         return result;	

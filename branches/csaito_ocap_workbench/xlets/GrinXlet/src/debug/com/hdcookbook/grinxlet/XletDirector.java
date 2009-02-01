@@ -55,16 +55,14 @@
 package com.hdcookbook.grinxlet;
 
 import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Translator;
-import com.hdcookbook.grin.util.Debug;
 
-import java.util.ListIterator;
+//import java.util.ListIterator;
+import java.util.Enumeration;
 
 
 /** 
@@ -210,14 +208,17 @@ public class XletDirector extends Director {
 	    if (debugLogTop < DebugLog.linesRemoved) {
 		debugLogTop = DebugLog.linesRemoved;
 	    }
-	    ListIterator iter = DebugLog.log.listIterator(
-	    				debugLogTop - DebugLog.linesRemoved);
+	    //ListIterator iter = DebugLog.log.listIterator(
+            Enumeration iter = DebugLog.log.elements();
+	    				//debugLogTop - DebugLog.linesRemoved);
 	    for (int i = 0; i < debugLogEntries.length; i++) {
-		if (!iter.hasNext()) {
+		//if (!iter.hasNext()) {
+                if (!iter.hasMoreElements()) {
 		    debugLogEntries[i] = "";
 		    debugLogLineNumbers[i] = "";
 		} else {
-		    debugLogEntries[i] = (String) iter.next();
+		    //debugLogEntries[i] = (String) iter.next();
+		    debugLogEntries[i] = (String) iter.nextElement();
 		    int line = debugLogTop + i + 1;
 		    debugLogLineNumbers[i] = "" + line + ":";
 		}

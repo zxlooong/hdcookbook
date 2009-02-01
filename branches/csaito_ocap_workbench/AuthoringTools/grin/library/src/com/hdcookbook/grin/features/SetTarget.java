@@ -66,7 +66,7 @@ import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.HashMap;
+//import java.util.HashMap;
 
 /**
  * Causes its child use a different target in its RenderContext.
@@ -90,7 +90,7 @@ public class SetTarget extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (!isSetup()) {
 	    throw new IllegalStateException();
 	}

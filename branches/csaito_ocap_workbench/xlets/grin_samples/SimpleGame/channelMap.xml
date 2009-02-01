@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	HEADEND SIMULATOR CHANNEL MAP CONFIGURATION FILE
+ -->
+<channelMap version="1.0">
+	<name>Sample Channel Map</name>
+	<description>Sample channel map contains tuning data for sample OCAP applications.</description>
+	<carriers>
+		<!--	
+            DIGITAL CARRIER SAMPLE
+			
+            A digital carrier defines a band of digital television channels. 
+			delivered in a single modulation format for a 
+			frequency.
+            
+            Carriers cannot share frequencies with other carriers.
+		-->
+		<carrier>
+			<!-- 	
+				Frequencies are in whole hertz only. 
+				Any value from 10000 to 4095000000 are acceptable.
+
+                A carrier must have a frequency that is divisible by 125 kHz or less than 327
+                mHz and divisible by 10 kHz.
+			-->
+			<!-- 633 MHz -->
+			<frequency>633000000</frequency>
+			<!-- 
+				A modulation format value as defined in SCTE-65 2002 p.19.
+				Acceptable values range from 0 to 24.
+			-->
+			<!-- QAM 16 -->
+			<modulation>16</modulation>
+			<!-- Digital channels grouped by carrier. -->
+			<channels>
+				<channel>
+					<!-- 
+						Channel name.  Can be call letters. 
+						Not used by headend simulation.  Useful
+						for documenting channel contents and 
+						purpose.
+					-->
+					<name>BCS</name>
+					<!-- 
+						Virtual channel number.  Range is 0 to 4095. 
+						Must be unique within the entire channel map.
+					-->
+					<channelNumber>4</channelNumber>
+					<!-- 
+						Program number.  Range is 0 to 65535. 
+						Must be unique with a group of channels.
+					-->
+					<programNumber>3</programNumber>
+					<!-- 
+						Source ID.  Range is 0 to 65535. 
+						Must be unique within the entire channel map.
+					-->
+					<sourceId>2155</sourceId>
+					<!-- 
+						Path to tunable video content.  Must be a full file path or a path relative to
+						the env directory of your VISION Workbench installation.
+					-->
+ 					<filePath>mpeg\Vidiom_TrafficDusk.mpg</filePath>
+				</channel>
+			</channels>
+		</carrier>
+          <!-- 
+            ANALOG CARRIER SAMPLE
+            
+            An analog carrier defines a single analog 
+            television channel.  It can contain only one
+            channel.
+            
+            Analog carriers are indicated by setting
+            the modulation value to 255.            
+        -->
+		<carrier>
+			<!-- 630 MHz -->
+			<frequency>63000000</frequency>
+			<!-- 
+                ANALOG 
+                
+                Set modulation to 255 to indicate an analog carrier.
+            -->
+			<modulation>255</modulation>
+			<channels>
+                    <!-- Only one channel can be present in the channels list for an analog carrier. -->
+				<channel>
+					<name>DAC</name>
+					<channelNumber>3</channelNumber>
+                        <!-- 
+                        Although required in the channel map, program numbers are not used by 
+                        the head-end simulator for analog channels.  Set to 0 for 
+                        analog carriers.
+                    -->
+					<programNumber>0</programNumber>
+					<sourceId>2152</sourceId>
+					<filePath>mpeg\Vidiom_BusyAlleyPeople.mpg</filePath>
+				</channel>
+			</channels>
+		</carrier>		
+		<carrier>
+			<!-- 639 MHz -->
+			<frequency>639000000</frequency>
+			<!-- QAM 16 -->
+			<modulation>16</modulation>
+			<channels>
+				<channel>
+					<name>BAC</name>
+					<channelNumber>1</channelNumber>
+					<programNumber>5</programNumber>
+					<sourceId>2154</sourceId>
+					<filePath>mpeg\Vidiom_CityStreet.mpg</filePath>
+				</channel>
+			</channels>
+		</carrier>
+	</carriers>
+</channelMap>

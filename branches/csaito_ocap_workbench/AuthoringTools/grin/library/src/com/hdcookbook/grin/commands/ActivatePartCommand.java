@@ -62,7 +62,7 @@ import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * A GRIN command to activate a part within an assembly.
@@ -91,7 +91,7 @@ public class ActivatePartCommand extends Command implements Node {
     /**
      * @inheritDoc
      **/
-    public Command cloneIfNeeded(HashMap featureClones) {
+    public Command cloneIfNeeded(Hashtable featureClones) {
 	Assembly assemblyClone = (Assembly) featureClones.get(assembly);
 	if (assemblyClone == null) {
 	    return this;

@@ -73,7 +73,7 @@ import com.hdcookbook.grin.input.RCKeyEvent;
 import java.util.Hashtable;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.io.IOException;
 
 
@@ -700,7 +700,7 @@ public class Show implements AnimationClient {
      * Paint the current state of the enhancement.  This should be
      * called by the xlet, usually via the animation framework.  
      **/
-    public synchronized void paintFrame(Graphics2D gr)
+    public synchronized void paintFrame(Graphics gr)
     	throws InterruptedException 
     {
 	if (Thread.interrupted() || destroyed) {

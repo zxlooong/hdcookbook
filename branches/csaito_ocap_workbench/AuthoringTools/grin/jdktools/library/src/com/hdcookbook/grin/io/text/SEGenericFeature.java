@@ -57,7 +57,8 @@ package com.hdcookbook.grin.io.text;
 import com.hdcookbook.grin.*;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.io.ShowBuilder;
-import java.awt.Graphics2D;
+//import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.io.IOException;
 
 /**
@@ -100,7 +101,8 @@ public abstract class SEGenericFeature extends Feature implements SENode {
     public void addDisplayAreas(RenderContext context) {
     }
 
-    public void paintFrame(Graphics2D gr) {
+    //public void paintFrame(Graphics2D gr) {
+    public void paintFrame(Graphics gr) {
     }
 
     public void nextFrame() {

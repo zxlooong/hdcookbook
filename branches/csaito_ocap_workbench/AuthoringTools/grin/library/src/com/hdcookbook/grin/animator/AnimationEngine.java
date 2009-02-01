@@ -56,13 +56,16 @@
 package com.hdcookbook.grin.animator;
 
 import com.hdcookbook.grin.util.Debug;
-import java.awt.AlphaComposite;
+//import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Graphics2D;
+//import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.Hashtable;
+
+import org.dvb.ui.DVBColor;
 
 /**
  * Abstract base class for an animation engine.
@@ -76,7 +79,7 @@ public abstract class AnimationEngine implements Runnable {
     /**
      * A useful constant that's used extensively by engines
      **/
-    public final static Color transparent = new Color(0, 0, 0, 0);
+    public final static DVBColor transparent = new DVBColor(0, 0, 0, 0);
 
     /** 
      * The list of erase and drawing areas that were updated in 
@@ -755,19 +758,23 @@ public abstract class AnimationEngine implements Runnable {
      *
      * @see #callPaintTargets()
      **/
-    protected final void paintTargets(Graphics2D g) 
+    protected final void paintTargets(Graphics g) 
 	    throws InterruptedException 
     {
-	g.setComposite(AlphaComposite.Src);
-	lastClip.width = 0;
-	g.getClipBounds(lastClip);
+	//g.setComposite(AlphaComposite.Src);
+        lastClip = null;
+	//lastClip.width = 0;
+	//g.getClipBounds(lastClip);
+        lastClip = g.getClipBounds();
 	for (int i = 0; i < renderContext.numDrawTargets; i++) {
 	    g.setClip(renderContext.drawTargets[i]);
 	    for (int j = 0; j < clients.length; j++) {
 		clients[j].paintFrame(g);
 	    }
 	}
-	if (lastClip.width == 0) {
+        // csaito
+	//if (lastClip.width == 0) {
+        if (lastClip == null || lastClip.width == 0) {
 	    g.setClip(null);
 	} else {
 	    g.setClip(lastClip);
@@ -784,8 +791,8 @@ public abstract class AnimationEngine implements Runnable {
      *
      * @see #paintTargets(java.awt.Graphics2D)
      **/
-    protected final void paintFrame(Graphics2D g) throws InterruptedException {
-	g.setComposite(AlphaComposite.Src);
+    protected final void paintFrame(Graphics g) throws InterruptedException {
+	//g.setComposite(AlphaComposite.Src);
 	for (int j = 0; j < clients.length; j++) {
 	    clients[j].paintFrame(g);
 	}
@@ -802,7 +809,7 @@ public abstract class AnimationEngine implements Runnable {
      * This can also be used for things like capturing a screenshot
      * to a buffered image.
      **/
-    public void repaintFrame(Graphics2D g) throws InterruptedException {
+    public void repaintFrame(Graphics g) throws InterruptedException {
 	if (destroyRequested()) {
 	    return;
 	}

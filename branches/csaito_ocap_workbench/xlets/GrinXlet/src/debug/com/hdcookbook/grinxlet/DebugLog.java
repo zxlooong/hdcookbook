@@ -64,8 +64,10 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.ServerSocket;
 
-import java.util.LinkedList;
-import java.util.ListIterator;
+//import java.util.LinkedList;
+import java.util.Enumeration;
+import java.util.Vector;
+//import java.util.ListIterator;
 
 /**
  * A class to manage the debug log.  The log is managed as static
@@ -91,7 +93,8 @@ public class DebugLog {
 
 	// The data of the debug log.  It's package-private, because
 	// XletDirector looks directly at the data.
-    static LinkedList log = new LinkedList();	// <string>
+    //static LinkedList log = new LinkedList();	// <string>
+    static Vector log = new Vector(); // <string>
     static boolean atEOLN = true;		// handle \n
     static boolean changed = false;
     static int linesRemoved = 0;  // Count of lines removed off top
@@ -210,7 +213,8 @@ public class DebugLog {
 			    linesSent = linesRemoved;
 			}
 			int i = linesSent - linesRemoved;
-			ListIterator iter = log.listIterator(i);
+			//ListIterator iter = log.listIterator(i);
+                        Enumeration iter = log.elements();
 			if (linesSent >= available) {
 			    LOCK.wait();
 			    	// Wakes up on destroyed or when more
@@ -218,7 +222,8 @@ public class DebugLog {
 			} else {
 			    while (linesSent < available) {
 				linesSent++;
-				out.println(iter.next());
+				//out.println(iter.next());
+                                out.println(iter.nextElement());
 			    }
 			}
 		    }
@@ -253,16 +258,20 @@ public class DebugLog {
 	    if (s.length() > 0) {
 		changed = true;
 		if (atEOLN) {
-		    log.add(s);
+		    log.addElement(s);
 		    atEOLN = false;
 		} else {
-		    String start = (String) log.removeLast();
-		    log.add(start + s);
+		    //String start = (String) log.removeLast();
+                    String start = (String) log.lastElement();
+                    log.removeElement(start);
+		    log.addElement(start + s);
 		}
 		LOCK.notifyAll();
 	    }
 	    while (log.size() > MAX_DEBUG_LINES) {
-		log.removeFirst();
+		//log.removeFirst();
+                String first = (String) log.firstElement();
+                log.removeElement(first);
 		linesRemoved++;
 	    }
 	}
@@ -276,9 +285,10 @@ public class DebugLog {
 	    print(s);
 	    if (atEOLN) {
 		changed = true;
-		log.add("");
+		log.addElement("");
 		while (log.size() > MAX_DEBUG_LINES) {
-		    log.removeFirst();
+		    //log.removeFirst();
+                    log.removeElementAt(0);
 		    linesRemoved++;
 		}
 	    } else {

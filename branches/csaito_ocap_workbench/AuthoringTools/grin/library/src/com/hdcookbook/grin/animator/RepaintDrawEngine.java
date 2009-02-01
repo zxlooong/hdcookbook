@@ -57,13 +57,12 @@ package com.hdcookbook.grin.animator;
 
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
-import java.awt.AlphaComposite;
+//import java.awt.AlphaComposite;
 import java.awt.Container;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
+//import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.Image;
 
 /**
@@ -95,7 +94,7 @@ public class RepaintDrawEngine extends ClockBasedEngine {
     private Component rdComponent;
     private Rectangle bounds;
     private Image buffer = null;
-    private Graphics2D bufferG = null;
+    private Graphics bufferG = null;
     private Object repaintMonitor = new Object();
     private boolean repaintPending = false;
     private Rectangle clipBounds = new Rectangle();
@@ -117,7 +116,7 @@ public class RepaintDrawEngine extends ClockBasedEngine {
 	rdComponent = new Component() {
 	    public void paint(Graphics g) {
 		try {
-		    rdRepaintFrame((Graphics2D) g);
+		    rdRepaintFrame((Graphics) g);
 		} catch (InterruptedException ignored) {
 		    Thread.currentThread().interrupt();
 		}
@@ -127,13 +126,14 @@ public class RepaintDrawEngine extends ClockBasedEngine {
 	rdComponent.setBounds(bounds);
 	container.add(rdComponent);
 	rdComponent.setVisible(true);
-	if (container.isDoubleBuffered()) {
+	//if (container.isDoubleBuffered()) {
+        if (false) {
 	    // buffer and bufferG will be null
 	} else {
 	    buffer = AssetFinder.createCompatibleImageBuffer(
 				    container, bounds.width, bounds.height);
 	    bufferG = AssetFinder.createGraphicsFromImageBuffer(buffer);
-	    bufferG.setComposite(AlphaComposite.Src);
+	    //bufferG.setComposite(AlphaComposite.Src);
 	    bufferG.setColor(transparent);
 	    bufferG.fillRect(0, 0, bounds.width, bounds.height);
 	}
@@ -141,15 +141,16 @@ public class RepaintDrawEngine extends ClockBasedEngine {
 
     //
     // Only called from Component inner class in initContainer
-    void rdRepaintFrame(Graphics2D g) throws InterruptedException {
-	g.setComposite(AlphaComposite.Src);
+    void rdRepaintFrame(Graphics g) throws InterruptedException {
+	//g.setComposite(AlphaComposite.Src);
 	synchronized(repaintMonitor) {
 	    if (repaintPending) {
 		if (buffer == null) {
 		    paintFrame(g);
 		} else {
 		    clipBounds.setBounds(bounds);
-		    g.getClipBounds(clipBounds);
+		    //g.getClipBounds(clipBounds);
+                    clipBounds = g.getClipBounds();
 		    Rectangle a = clipBounds;
 		    g.drawImage(buffer, a.x, a.y, a.x+a.width, a.y+a.height,
 					a.x, a.y, a.x+a.width, a.y+a.height,

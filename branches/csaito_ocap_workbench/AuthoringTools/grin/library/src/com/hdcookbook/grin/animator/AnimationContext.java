@@ -55,14 +55,6 @@
 
 package com.hdcookbook.grin.animator;
 
-import com.hdcookbook.grin.util.Debug;
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-
 /**
  * Interface to be implemented by an xlet or other app that uses the
  * animation framework.  This interface provides state change hooks,

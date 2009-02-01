@@ -55,22 +55,20 @@
 
 package com.hdcookbook.grinxlet;
 
-import com.hdcookbook.grin.animator.ClockBasedEngine;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.util.Debug;
-import java.awt.AlphaComposite;
+//import java.awt.AlphaComposite;
 import java.awt.Container;
 import java.awt.Color;
-import java.awt.Component;
+//import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Insets;
+//import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
-import java.util.LinkedList;
-import java.util.Iterator;
+//import java.awt.image.BufferedImage;
+import org.dvb.ui.DVBColor;
+//import java.util.LinkedList;
+//import java.util.Iterator;
 
 /**
  * A double-buffered animation engine that uses direct draw, and
@@ -81,10 +79,10 @@ import java.util.Iterator;
 public class DebugDirectDrawEngine extends DirectDrawEngine {
 
 
-    private Graphics2D containerG;
+    private Graphics containerG;
     private boolean debugDraw = false;
-    private static Color red = new Color(255, 0, 0, 127);
-    private static Color green = new Color(0, 255, 0, 127);
+    private static DVBColor red = new DVBColor(255, 0, 0, 127);
+    private static DVBColor green = new DVBColor(0, 255, 0, 127);
     private int fps = 24000;
     
     /**
@@ -98,7 +96,7 @@ public class DebugDirectDrawEngine extends DirectDrawEngine {
      **/
     public void initContainer(Container container, Rectangle bounds) {
 	super.initContainer(container, bounds);
-	containerG = (Graphics2D) container.getGraphics();
+	containerG = (Graphics) container.getGraphics();
 	if (Debug.ASSERT && containerG == null) {
 	    Debug.assertFail();  // Maybe container is invisible?
 	}
@@ -119,7 +117,7 @@ public class DebugDirectDrawEngine extends DirectDrawEngine {
 	if (debugDraw) {
 		// Paint the area to be erased red, and wait
 	    containerG.setColor(red);
-	    containerG.setComposite(AlphaComposite.SrcOver);
+	    //containerG.setComposite(AlphaComposite.SrcOver);
 	    for (int i = 0; i < getNumEraseTargets(); i++) {
 		Rectangle a = getEraseTargets()[i];
 		containerG.fillRect(a.x, a.y, a.width, a.height);
@@ -135,7 +133,7 @@ public class DebugDirectDrawEngine extends DirectDrawEngine {
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	    sleepQuarterFrame();
-	    containerG.setComposite(AlphaComposite.Src);
+	    //containerG.setComposite(AlphaComposite.Src);
 	}
 	super.callPaintTargets();	// This covers the red and green
     }

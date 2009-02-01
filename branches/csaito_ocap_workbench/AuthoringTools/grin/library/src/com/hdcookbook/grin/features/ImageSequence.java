@@ -70,9 +70,10 @@ import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.SetupClient;
 
 import java.io.IOException;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.util.HashMap;
+//import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * An image sequence does "cell" animation.  It consists of a number
@@ -126,7 +127,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (!isSetup() || isActivated) {
 	    throw new IllegalStateException();
 	}
@@ -164,7 +165,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     /**
      * @inheritDoc
      **/
-    protected void initializeClone(Feature original, HashMap clones) {
+    protected void initializeClone(Feature original, Hashtable clones) {
 	super.initializeClone(original, clones);
 	ImageSequence other = (ImageSequence) original;
 	scalingModel = (InterpolatedModel)
@@ -438,14 +439,14 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D gr) {
+    public void paintFrame(Graphics gr) {
 	if (!isActivated) {
 	    return;
 	}
 	doPaint(gr);
     }
 
-    private void doPaint(Graphics2D g) {
+    private void doPaint(Graphics g) {
 	if (currImage != null) {
 	    if (scalingModel == null) {
 		currImage.drawScaled(g, currPlacement, show.component);

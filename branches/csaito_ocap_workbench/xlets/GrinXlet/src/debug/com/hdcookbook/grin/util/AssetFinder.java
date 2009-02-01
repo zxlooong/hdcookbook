@@ -67,7 +67,7 @@ import java.net.URL;
 import java.io.File;
 import java.util.Hashtable;
 //import org.dvb.ui.DVBBufferedImage;
-//import org.dvb.ui.DVBColor;
+import org.dvb.ui.DVBColor;
 
 
 /**
@@ -246,8 +246,11 @@ public class AssetFinder  {
 		File f = new File(filePath[i], path);
 		if (f.exists()) {
 		    try {
-                        //return null;
-			return f.toURL();
+                        URL url = new URL("file", null, f.getAbsolutePath());
+                        
+                        System.out.println(url);
+                        return url;
+			//return f.toURL();
                             // When compiled against desktop JDK, this will
                             // generate a warning about the method being
                             // deprecated.  Ignore that; the suggested
@@ -281,7 +284,7 @@ public class AssetFinder  {
      **/
     public static Color getColor(int r, int g, int b, int a) {
 	//Color c = new Color(r, g, b, a);
-        Color c = new Color(r, g, b);
+        DVBColor c = new DVBColor(r, g, b, a);
 	return c;
 	// We could consider canonicalizing Color instances for efficiency.  Not
 	// sure if this should use weak refs, or just a static 
@@ -432,6 +435,7 @@ public class AssetFinder  {
 	}
 
 	Toolkit tk = Toolkit.getDefaultToolkit();
+	Image result;
         URL url = getURL(path);
 	return tk.createImage(url);
     }

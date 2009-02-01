@@ -117,7 +117,7 @@ feature group F:LaunchScreen {
     ;
 
     sub_feature text middle 960 baseline 100 { 
-    			"Press the popup menu key" 
+    			"Press the red key" 
 			"for debug menu"
 		} SansSerif plain 64 { 
 			{ 0 255 0 255 } 
@@ -583,7 +583,7 @@ rc_handler key_pressed H:DebugLog.Down
 ;
 
 rc_handler key_pressed H:DebugLog.Enter
-	{ enter popup_menu }
+	{ enter popup_menu red }
 	execute {
 	    activate_segment S:MainMenu ;
 	} 

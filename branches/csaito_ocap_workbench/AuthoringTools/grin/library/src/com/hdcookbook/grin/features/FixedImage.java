@@ -69,9 +69,10 @@ import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.SetupClient;
 
 import java.io.IOException;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.util.HashMap;
+//import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * Represents a fixed image.
@@ -100,7 +101,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (!setupMode || !imageSetup || isActivated) {
 	    throw new IllegalStateException();
 	}
@@ -122,7 +123,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     /**
      * @inheritDoc
      **/
-    protected void initializeClone(Feature original, HashMap clones) {
+    protected void initializeClone(Feature original, Hashtable clones) {
 	super.initializeClone(original, clones);
 	FixedImage other = (FixedImage) original;
 	scalingModel = (InterpolatedModel)
@@ -307,7 +308,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D gr) {
+    public void paintFrame(Graphics gr) {
 	if (!isActivated) {
 	    return;
 	}

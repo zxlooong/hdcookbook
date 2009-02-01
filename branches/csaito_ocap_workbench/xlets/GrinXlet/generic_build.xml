@@ -198,7 +198,9 @@ The project.name property is not set.  This usually has one of two causes:
 	          value="-optimize"/>
 	<!--	Compile the game so we'll pick up any extension parser -->
 	<jdktools.javac destdir="${build.dir}/gensrc/grinview" debug="on">
-	    <src path="src:se_src${se.lib.src.int}"/>
+	    <src path="src"/>
+            <src path="se_src"/>
+            <src path="${se.lib.src.int}"/>
 	    <classpath>
 		<pathelement path="${converter.jar}"/>
 		<pathelement path="${grinview.jar}"/>
@@ -388,7 +390,8 @@ The project.name property is not set.  This usually has one of two causes:
 	<copy todir = "${build.dir}/gensrc/xlet">
             <fileset dir="${grin.library.src.dir}"
 		includes="**/*.java"
-		excludes="com/hdcookbook/grin/util/Debug.java"
+		excludes="com/hdcookbook/grin/util/Debug.java,
+		          com/hdcookbook/grin/util/AssetFinder.java"
 	    />
 	</copy>
         <xlets.javac destdir="${build.dir}/classes" >
@@ -396,7 +399,9 @@ The project.name property is not set.  This usually has one of two causes:
 		<pathelement path="${xlet.lib.zip}"/>
 	    </classpath>
             <src path="${grin.xlet}/src/${debug.or.deploy}"/>
-            <src path="src:xlet_src${xlet.lib.src.int}"/>
+            <src path="src"/>
+            <src path="xlet_src"/>
+            <src path="${xlet.lib.src.int}"/>
 	    <src path="${build.dir}/gensrc/xlet"/>
         </xlets.javac>
 	<antcall target="post-compile"/>

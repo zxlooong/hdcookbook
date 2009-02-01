@@ -66,9 +66,10 @@ import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.util.HashMap;
+//import java.util.HashMap;
+import java.util.Hashtable;
 import java.io.IOException;
 
 /**
@@ -112,7 +113,7 @@ public class GuaranteeFill extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (!isSetup() || activated) {
 	    throw new IllegalStateException();
 	}
@@ -145,7 +146,7 @@ public class GuaranteeFill extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D gr) {
+    public void paintFrame(Graphics gr) {
 	if (fills != null) {
 	    gr.setColor(AnimationEngine.transparent);
 	    for (int i = 0; i < fills.length; i++) {

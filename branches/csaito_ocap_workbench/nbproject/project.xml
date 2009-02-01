@@ -3,11 +3,8 @@
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
-            <name>hdcookbook</name>
-        </general-data>
-        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
             <!-- Do not use Project Properties customizer when editing this file manually. -->
-            <name>hdcookbook</name>
+            <name>hdcookbook-ocap</name>
             <properties/>
             <folders>
                 <source-folder>
@@ -129,9 +126,6 @@
                     <type>java</type>
                     <location>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</location>
                 </source-folder>
-                <build-file>
-                    <location>/Users/billf/bd-j/references/interactive/classes.zip</location>
-                </build-file>
             </folders>
             <ide-actions>
                 <action name="build">
@@ -267,6 +261,7 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
                 <package-root>AuthoringTools/grin/library/src</package-root>
+                <classpath mode="compile">C:\Program Files\Vidiom Systems\VISION Workbench\lib\ocap-stub.jar</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
             <compilation-unit>

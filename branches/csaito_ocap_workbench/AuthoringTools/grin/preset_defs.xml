@@ -40,7 +40,10 @@ information or have any questions.
             <javac sourcepath=""
                    source="1.5" target="1.5"
                    debug="on" deprecation="off"
-                   debuglevel="${JAVAC_DEBUG_OPTIONS}">
+                   debuglevel="${JAVAC_DEBUG_OPTIONS}">                          
+                   <classpath>
+                      <pathelement path="${HDC_BDJ_PLATFORM_CLASSES}"/>
+                   </classpath>
             </javac>
         </presetdef>
         
@@ -53,6 +56,9 @@ information or have any questions.
                    source="1.3" target="1.3"
                    debug="on" deprecation="on"
                           debuglevel="${JAVAC_DEBUG_OPTIONS}"> 
+                          <classpath>
+                              <pathelement path="${HDC_BDJ_PLATFORM_CLASSES}"/>
+                          </classpath>
                    </javac>   
         </presetdef>
     </target>

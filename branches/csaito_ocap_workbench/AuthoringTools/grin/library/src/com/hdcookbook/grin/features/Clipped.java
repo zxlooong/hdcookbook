@@ -65,10 +65,11 @@ import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.HashMap;
+//import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * Represents a clipped version of another feature.  When painting, a
@@ -118,7 +119,7 @@ public class Clipped extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (!isSetup()) {
 	    throw new IllegalStateException();
 	}
@@ -142,11 +143,12 @@ public class Clipped extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D gr) {
+    public void paintFrame(Graphics gr) {
 	// This is synchronized by Show.paintFrame, so we don't
 	// have to worry about concurrent calls.
 	lastClipRegion.x = Integer.MIN_VALUE;
-	gr.getClipBounds(lastClipRegion);
+        lastClipRegion = gr.getClipBounds();
+	//gr.getClipBounds(lastClipRegion);
 	if (lastClipRegion.x == Integer.MIN_VALUE) {
 	    gr.setClip(clipRegion);
 	    part.paintFrame(gr);

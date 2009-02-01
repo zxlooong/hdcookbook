@@ -55,7 +55,7 @@
 
 package com.hdcookbook.grin.commands;
 
-import java.util.HashMap;
+import java.util.Hashtable;
 
 import com.hdcookbook.grin.Show;
 
@@ -134,7 +134,7 @@ public abstract class Command {
      * @param featureClones HashMap<Feature, Feature> mapping an original
      *				feature to its clone.
      **/
-    public Command cloneIfNeeded(HashMap featureClones) {
+    public Command cloneIfNeeded(Hashtable featureClones) {
 	return this;
     }
 

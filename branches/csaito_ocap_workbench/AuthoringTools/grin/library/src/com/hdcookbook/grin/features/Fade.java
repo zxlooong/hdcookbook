@@ -66,12 +66,13 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.AlphaComposite;
+//import java.awt.AlphaComposite;
+//import java.awt.Composite;
+import java.awt.Graphics;
+//import java.awt.AlphaComposite;
 import java.io.IOException;
-import java.util.HashMap;
+//import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * Modifies a child feature by applying an alpha value when drawing in
@@ -83,9 +84,10 @@ import java.util.HashMap;
  **/
 public class Fade extends Modifier implements Node {
 
-    private AlphaComposite[] alphas;
-    private AlphaComposite opaqueAlpha = null;
- 
+    //private AlphaComposite[] alphas;
+    //private AlphaComposite opaqueAlpha = null;
+    private Object[] alphas;
+    private Object opaqueAlpha = null; 
     /*
      * keyframes and keyAlphas are read-only, hence they are
      * reconstructed using GrinDataInputStream.getSharedIntArray().
@@ -100,8 +102,10 @@ public class Fade extends Modifier implements Node {
 	// Integer.MAX_VALUE means "infinite"
     private int loopsRemaining;	// see loopCount
     protected Command[] endCommands;
-    private AlphaComposite currAlpha;
-    private AlphaComposite lastAlpha;
+    //private AlphaComposite currAlpha;
+    //private AlphaComposite lastAlpha;
+    private Object currAlpha;
+    private Object lastAlpha;
 
 	//
 	// Here, we make an inner class of RenderContext.  We
@@ -146,7 +150,7 @@ public class Fade extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (activated || alphas == null) {
 	    throw new IllegalStateException();
 	}
@@ -167,7 +171,7 @@ public class Fade extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    protected void initializeClone(Feature original, HashMap clones) {
+    protected void initializeClone(Feature original, Hashtable clones) {
 	super.initializeClone(original, clones);
 	Fade other = (Fade) original;
 	endCommands = Feature.cloneCommands(other.endCommands, clones);
@@ -179,10 +183,12 @@ public class Fade extends Modifier implements Node {
      **/
     public void initialize() {
 	if (keyframes.length == 1) {
-	    AlphaComposite ac = show.initializer.getAlpha(srcOver,keyAlphas[0]);
-	    alphas = new AlphaComposite[] { ac };
+	    //AlphaComposite ac = show.initializer.getAlpha(srcOver,keyAlphas[0]);
+	    //alphas = new AlphaComposite[] { ac };
+            alphas = new Object[1];
 	} else {
-	    alphas = new AlphaComposite[keyframes[keyframes.length-1]+1];
+	    //alphas = new AlphaComposite[keyframes[keyframes.length-1]+1];
+            alphas = new Object[keyframes[keyframes.length-1]+1];
 	    int i = 0;		// keyframes[i] <= f < keyframes[i+1]
 	    for (int f = 0; f < alphas.length; f++) {
 		// Restore invariant on i
@@ -201,7 +207,8 @@ public class Fade extends Modifier implements Node {
 		    }
 		    alpha = (keyAlphas[i+1]*distLast + keyAlphas[i]*distNext + dist/2) / dist;
 		}
-		alphas[f] = show.initializer.getAlpha(srcOver, alpha);
+		//alphas[f] = show.initializer.getAlpha(srcOver, alpha);
+                alphas[f] = new Object();
 		if (opaqueAlpha == null && alpha == 255) {
 		    opaqueAlpha = alphas[f];
 		}
@@ -218,6 +225,7 @@ public class Fade extends Modifier implements Node {
      * failure.  In other words, if you want to programmatically control a 
      * value, don't also try to control it by defining multiple keyframes.
      **/
+    /**
     public final void setAlpha(AlphaComposite ac) {
 	if (Debug.ASSERT && alphas.length != 1) {
 	    Debug.assertFail();		// This is a value that is interpolated
@@ -226,6 +234,7 @@ public class Fade extends Modifier implements Node {
 	currAlpha = ac;
 	srcOver = ac.getRule() != AlphaComposite.SRC;
     }
+     **/
 
     /**
      * @inheritDoc
@@ -283,15 +292,15 @@ public class Fade extends Modifier implements Node {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D gr) {
-	if (currAlpha != null) {
-	    Composite old = gr.getComposite();
-	    gr.setComposite(currAlpha);
+    public void paintFrame(Graphics gr) {
+	//if (currAlpha != null) {
+	//    Composite old = gr.getComposite();
+	//    gr.setComposite(currAlpha);
+	//    part.paintFrame(gr);
+	//    gr.setComposite(old);
+	//} else {
 	    part.paintFrame(gr);
-	    gr.setComposite(old);
-	} else {
-	    part.paintFrame(gr);
-	}
+	//}
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

@@ -64,11 +64,14 @@ import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+//import java.util.HashMap;
+//import java.util.HashSet;
+//import java.util.Iterator;
+import java.util.Hashtable;
+import java.util.Vector;
+import java.util.Enumeration;
 
 /**
  * Represents a group of features that are all activated at the same
@@ -105,7 +108,7 @@ public class Group extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected Feature createClone(HashMap clones) {
+    protected Feature createClone(Hashtable clones) {
 	if (!isSetup() || activated) {
 	    throw new IllegalStateException();
 	}
@@ -123,7 +126,7 @@ public class Group extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    protected void initializeClone(Feature original, HashMap clones) {
+    protected void initializeClone(Feature original, Hashtable clones) {
 	super.initializeClone(original, clones);
 	Group other = (Group) original;
 	if (other.visibleParts == other.parts) {
@@ -140,7 +143,7 @@ public class Group extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    public void addSubgraph(HashSet set) {
+    public void addSubgraph(Vector set) {
 	if (set.contains(this)) {
 	    return;		// Avoid O(n^2) with assemblies 
 	}
@@ -272,20 +275,20 @@ public class Group extends Feature implements Node {
 	    // state, because that set was already checked for us by 
 	    // SEDoubleUseChecker.
 	    //
-	    HashSet union = null;
+	    Vector union = null;
 	    for (int i = 0; i < visibleParts.length; i++) {
-		HashSet child = new HashSet();
+		Vector child = new Vector();
 		visibleParts[i].addSubgraph(child);
 		if (union == null) {
 		    union = child;
 		} else {
-		    for (Iterator it = child.iterator(); it.hasNext(); ) {
-			Object f = it.next();
+		    for (Enumeration it = child.elements(); it.hasMoreElements(); ) {
+			Object f = it.nextElement();
 			if (union.contains(f)) {
 			    Debug.assertFail("Invalid cloned scene graph - "
 			    		     + " see comments in Group");
 			}
-			union.add(f);
+			union.addElement(f);
 		    }
 		}
 	    }
@@ -415,7 +418,7 @@ public class Group extends Feature implements Node {
     /**
      * @inheritDoc
      **/
-    public void paintFrame(Graphics2D gr) {
+    public void paintFrame(Graphics gr) {
 	for (int i = 0; i < visibleParts.length; i++) {
 	    visibleParts[i].paintFrame(gr);
 	}
