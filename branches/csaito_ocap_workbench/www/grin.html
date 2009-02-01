@@ -1,0 +1,77 @@
+<html>
+<head>
+<title>GRIN Scene Graph</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+</head>
+<body>
+<p>&nbsp;</p>
+<div style="text-align: center">
+<img width="271" height="200" border="0" src="images/grin_bear.jpg" />
+</div>
+
+<h2>HD Cookbook - GRIN Scene Graph</h2>
+<p>
+The GRIN scene graph provides the BD-J runtime support needed for
+organizing and displaying visual assets, and for processing input
+from a remote control or an optional mouse.  Using GRIN, you can organize
+visual assets using a GRIN "show" file.  We provide a simple text file
+format that demonstrates the concept; 
+<a href="http://javelindvd.com/"><u>Javelin</u></a> has built on this with an
+XML file format more suitable to a professional workflow.  In the future,
+we plan to have a visual design tool that's freely available and can be
+used to make these show files, importing assets from e.g. the Adobe
+tool suite.  For now, the show files are written by hand.
+</p><p>
+Scene graph implementations are common - you can think of an
+HTML renderer or a Flash engine as a scene graph implementation, but
+there are plenty of others out there.  You can even think of a widget
+set as being a sort of scene graph, though the term "scene graph" is
+usually applied to an API used for highly dynamic, visually-oriented
+"post widget" screen design.  Given the many scene graph APIs out there,
+why GRIN?  To answer that, here are some of the GRIN scene graph's 
+unique features:
+</p>
+<ul>
+   <li>It is build for the graphics primitives available in Blu-ray
+       Java, and other TV platforms such as OCAP and MHP.  That means it's
+       optimized around the graphics APIs present in Personal Basis
+       Profile.
+   <li>It's ruthlessly efficient.  Great care has been taken to achieve
+       small code size (on the order of 80K obfuscated), quick loading
+       time, avoidance of floating point operations, minimal generation
+       of heap objects that would trigger garbage collection, and very
+       efficient screen redraw optimization.
+    <li>It's highly extensible.  It's designed to let the xlet developer
+        create their own visual "feature" objects, and integrate them
+	into the show file, which is compiled into an efficient
+	binary format.  The Java programmer can also place a GRIN
+	show above or below any other drawing they do from Java, and
+	a GRIN show can trigger commands that are written using the
+	Java language, right in the show file.
+    <li>It's <i>compiled</i>.  Whenever possible, work is done
+        at authoring time, so that disc startup time is minimal.  For
+	example, the show file is always compiled into an efficient
+	binary representation during authoring, and individual image files
+	are compiled together into a mosaic.
+    <li>It's designed to allow automatically transforming a show into 
+        different versions, to be run on different player performance
+	levels.  For example, a show can be automatically translated into
+	QHD (960x540) resolution for slow players.
+    <li>It's freely available, and carries no royalties.
+</ul>
+<p>
+More details about the internal design are available in this
+<a href="javadocs/grin/javame/com/hdcookbook/grin/doc-files/index.html"><u>GRIN design
+document</u></a>.  GRIN consists of a show compiler that runs on the
+desktop, and a runtime library that's included on a BD disc.  Click
+the links for the javadocs of the
+<a href="javadocs/grin/javase/overview-summary.html"><u>
+Java SE libraries for the show compiler,</u></a> or the separate
+javadocs of the
+<a href="javadocs/grin/javame/overview-summary.html"><u>
+CDC libraries for the GRIN show graph.</u></a>
+GRIN is built on top of our <a href="animator.html"><u>animation 
+framework</u></a>.
+</p>
+</body></html>
