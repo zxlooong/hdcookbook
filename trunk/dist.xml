@@ -10,7 +10,7 @@
     
     <property file="user.vars.properties"/>	
     <property file="vars.properties"/>	
-    <property name="RELEASE_BUNDLE" value="hdcookbook-bin-bindle"/>
+    <property name="RELEASE_BUNDLE" value="hdcookbook-bin-bundle"/>
     
     <target name="bundle" 
             description="Creates a binary bundle for the distribution">
