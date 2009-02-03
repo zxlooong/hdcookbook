@@ -458,6 +458,9 @@ public class Show implements AnimationClient {
      *		     the new segment.
      **/
     public void activateSegment(Segment seg, boolean push) {
+	if (Debug.ASSERT && seg.show != this) {
+	    Debug.assertFail();
+	}
 	if (seg == null) {
 	    runCommand(popSegmentCommand);
 	} else {

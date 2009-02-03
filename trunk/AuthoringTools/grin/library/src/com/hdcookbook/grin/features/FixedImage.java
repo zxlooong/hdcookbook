@@ -81,6 +81,7 @@ import java.util.HashMap;
 public class FixedImage extends Feature implements Node, SetupClient {
 
     protected Rectangle placement;
+    private boolean placementCopied = false;
     protected String fileName;
     protected InterpolatedModel scalingModel = null;
     protected Rectangle scaledBounds = null;
@@ -163,7 +164,11 @@ public class FixedImage extends Feature implements Node, SetupClient {
      *
      * @see #setImageSizeChanged()
      **/
-    public Rectangle getMutablePlacement() {
+    public synchronized Rectangle getMutablePlacement() {
+	if (!placementCopied) {
+	    placement = new Rectangle(placement);	// No longer shared
+	    placementCopied = true;
+	}
 	return placement;
     }
 
