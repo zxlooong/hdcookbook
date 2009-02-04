@@ -64,7 +64,6 @@ import com.substanceofcode.twitter.TwitterApi;
 
 import java.awt.Component;
 import java.awt.FontMetrics;
-import java.text.SimpleDateFormat;
 import java.util.StringTokenizer;
 
 public class TwitterDirector extends Director {
@@ -87,7 +86,6 @@ public class TwitterDirector extends Director {
 
     private NetworkManager manager;
     private TwitterPoll pendingCommand;
-    private SimpleDateFormat dateFormat=new SimpleDateFormat("hh:mm a MMM dd");
 
     private int page = 1;
     private String[] emptyStringArray = new String[0];
@@ -223,7 +221,7 @@ public class TwitterDirector extends Director {
 		Status status = tweetStatus[entry];
 		ManagedImage image = tweetIcon[entry];
 		tweet.screenName.setText(new String[] { status.getScreenName() });
-		String date = dateFormat.format(status.getDate());
+		String date = ""; // no SimpleDateFormat in pJava
 		tweet.createdTime.setText(new String[] { date });
 		String[] lines = new String[] { "", "", "", "" };
 		StringTokenizer tok = new StringTokenizer(status.getText(), " ", true);

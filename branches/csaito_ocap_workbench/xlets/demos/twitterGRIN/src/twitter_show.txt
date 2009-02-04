@@ -32,7 +32,8 @@ java_generated_class TwitterCommands [[
 	}
 
 	public TwitterDirector getDirector() {
-	    return (TwitterDirector) show.getDirector();
+	    Object o = show.getDirector();
+	    return (TwitterDirector) o;
 	}
 
 	JAVA_COMMAND_BODY

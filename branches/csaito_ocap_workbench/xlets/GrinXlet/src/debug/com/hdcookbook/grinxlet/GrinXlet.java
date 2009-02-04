@@ -284,7 +284,8 @@ public class GrinXlet
 	try {
 	    director = (Director) Class.forName(showDirectorName).newInstance();
 	} catch (Throwable t) {
-	    Debug.assertFail("Can't create director:  " + t);
+	    Debug.assertFail("Can't create director \"" + showDirectorName
+	    		     + "\":  " + t);
 	}
 	xletDirector = new XletDirector(this);
 	if (definesFonts) {

@@ -77,8 +77,8 @@ public class EdSullivan extends Director {
 	if (bushX != -1) {
 	    return false;	// He's showing, so he can't appear
 	}
-	if (rand.nextInt(3*24) == 42) {
-	    bushX = 150 + rand.nextInt(1920 - 300);
+	if ((rand.nextInt() % (3*24)) == 42) {
+	    bushX = 150 + rand.nextInt() % (1920 - 300);
 	    bushMover.setField(Translator.X_FIELD, bushX);
 	    bushHitMover.setField(Translator.X_FIELD, bushX);
 	    return true;

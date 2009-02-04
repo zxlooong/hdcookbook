@@ -37,7 +37,8 @@ java_generated_class ShoeCommands [[
 	    }
 
 	    public EdSullivan getDirector() {
-		return (EdSullivan) show.getDirector();
+	        Object o = show.getDirector();
+		return (EdSullivan) o;
 	    }
 	
 	    JAVA_COMMAND_BODY

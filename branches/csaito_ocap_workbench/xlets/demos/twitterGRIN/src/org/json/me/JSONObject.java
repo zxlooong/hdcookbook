@@ -685,7 +685,7 @@ public class JSONObject {
     public double optDouble(String key, double defaultValue) {
         try {
             Object o = opt(key);
-            return Double.parseDouble((String)o);
+            return Double.valueOf((String)o).doubleValue();
         } catch (Exception e) {
             return defaultValue;
         }

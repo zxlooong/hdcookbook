@@ -431,22 +431,6 @@ The project.name property is not set.  This usually has one of two causes:
             <pathelement location="${java.home}/../lib/tools.jar"/>   
         </path>	   
         
-        <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
-            <arg value="-root"/>
-            <arg value="${disc.orgid}"/>
-            <classpath refid="sec.tools.path"/>
-        </jdktools.java>
-        
-        <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
-            <arg value="-app"/>
-            <arg value="${xlet.orgid}"/>
-            <classpath refid="sec.tools.path"/>
-        </jdktools.java>
-        
-        <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg value="${xlet.jar}"/>
-            <classpath refid="sec.tools.path"/>	   
-        </jdktools.java>
 	<antcall target="post-sign-xlet"/>
     </target>  
     <target name="post-sign-xlet">
@@ -507,8 +491,6 @@ The project.name property is not set.  This usually has one of two causes:
 	       file = "${xlet.jar}" />
         <copy todir = "${dist.dir}/BDMV/BDJO" 
               file="${build.dir}/${bdjo.name}.bdjo"/>
-        <copy todir = "${dist.dir}/CERTIFICATE" 
-              file="app.discroot.crt"/>
         <copy todir="${dist.dir}/BDMV"
               file="${build.dir}/index.bdmv"/>
         <copy todir="${dist.dir}/BDMV"
