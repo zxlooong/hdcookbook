@@ -85,6 +85,9 @@ public class XletDirector extends Director {
     Text F_DebugLog_LineNumbers;
     Text F_DebugLog_Lines;
     InterpolatedModel F_DebugLog_Scroller;
+    
+    final int MAX_X = 640;  // 1920 for bd-j
+    final int MAX_Y = 480;  // 1080 for bd-j
 
 
     private int currFramerate = 10;	// Default to 23.976
@@ -127,7 +130,7 @@ public class XletDirector extends Director {
 	F_DebugLog_LineNumbers = (Text) getFeature("F:DebugLog.LineNumbers");
 	F_DebugLog_Lines = (Text) getFeature("F:DebugLog.Lines");
 	F_DebugLog_Scroller = (InterpolatedModel) getFeature("F:DebugLog.Scroller");
-	int lines = (1080 - 80*2) / F_DebugLog_Lines.getLineHeight();
+	int lines = (MAX_Y - 80*2) / F_DebugLog_Lines.getLineHeight();
 	debugLogEntries = new String[lines];
 	debugLogLineNumbers = new String[lines];
 	debugLogLineCount = new String[1];
@@ -262,7 +265,7 @@ public class XletDirector extends Director {
 
     public void moveDebugLogLeft() {
 	int x = F_DebugLog_Scroller.getField(Translator.X_FIELD);
-	x += 960;
+	x += MAX_X/2;
 	if (x > 0) {
 	    x = 0;
 	}
@@ -271,7 +274,7 @@ public class XletDirector extends Director {
 
     public void moveDebugLogRight() {
 	int x = F_DebugLog_Scroller.getField(Translator.X_FIELD);
-	x -= 960;
+	x -= MAX_X/2;
 	F_DebugLog_Scroller.setField(Translator.X_FIELD, x);
     }
 

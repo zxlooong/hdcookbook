@@ -182,9 +182,9 @@ segment S:Launch
     } setup {
 	F:Everything
     } rc_handlers {
-	H:Waiting
+	H:Waiting.RedKey
     } next {
-	activate_segment S:Waiting ;
+	activate_segment S:Waiting.RedKey ;
     }
 ;
 
