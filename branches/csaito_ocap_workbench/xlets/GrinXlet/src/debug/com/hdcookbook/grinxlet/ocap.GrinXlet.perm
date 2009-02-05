@@ -5,5 +5,8 @@
 <userpreferences read="true" write="true"></userpreferences>
 <file value="true"/>
 <filename * write="true" read="true/>
+    <network>
+        <host action="connect,listen,resolve,accept">*</host>
+    </network>
 
 </permissionrequestfile>

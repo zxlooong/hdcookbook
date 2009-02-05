@@ -25,7 +25,9 @@ exports
     }
 ;
 
-java_generated_class ShoeCommands [[ 
+java_generated_class pkg.ShoeCommands [[ 
+
+	package pkg;
 
         import com.hdcookbook.grin.Show;
         import com.hdcookbook.grin.util.Debug;

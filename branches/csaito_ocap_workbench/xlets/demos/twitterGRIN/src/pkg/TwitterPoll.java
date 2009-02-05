@@ -52,6 +52,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
+package pkg;
 
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;

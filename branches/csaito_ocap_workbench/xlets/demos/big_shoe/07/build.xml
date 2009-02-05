@@ -21,5 +21,15 @@ after any target is built.
     <property file="../vars.properties"/>
     <import file="${grin.xlet}/generic_build.xml"/>
     
+
+<target name="post-jar">
+        <copy todir="${build.dir}/classes">
+            <fileset dir="${build.dir}">
+                <include name="*.grin"/>
+                <include name="*.png"/>
+                <include name="images.map"/>
+            </fileset>
+        </copy>
+</target>
 </project>
 

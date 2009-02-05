@@ -52,50 +52,98 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
+package pkg;
 
-import com.substanceofcode.twitter.TwitterApi;
-import com.substanceofcode.twitter.model.Status;
+import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.Queue;
 
+public class NetworkManager {
 
-import java.util.Vector;
+    static Object LOCK = new Object();		// Also needed by XletDirector
+    private static int numActivations = 0;
+    private static boolean destroyed = false;
+    private static Queue queue = new Queue(10);
+    private static Thread thread;
 
-public class Main {
-
-    TwitterApi twitter = new TwitterApi(null);
-
-    public void init() {
-    }
-
-    public void printTweets() {
-	try {
-	    Vector v = twitter.requestPublicTimeline(null);
-	    for (int i = 0; i < v.size(); i++) {
-		Status status = (Status) v.elementAt(i);
-		System.out.println("Screen name:  " + status.getScreenName());
-		System.out.println("Text:  " + status.getText());
-		System.out.println("ID:  " + status.getId());
-		System.out.println("Date:  " + status.getDate());
-		System.out.println("Source:  " + status.getSource());
-		System.out.println("profile image URL:  " + status.getProfileImageURL());
+    public static void start() {
+	synchronized(LOCK) {
+	    if (destroyed) {
+		throw new IllegalStateException();
 	    }
-	} catch (Throwable t) {
-	    t.printStackTrace();
-	    System.exit(1);
+	    numActivations++;
+	    if (numActivations > 1) {
+		return;
+	    }
+	}
+	Runnable r = new Runnable() {
+	    public void run() {
+		try {
+		    processQueue();
+		} catch (InterruptedException ex) {
+		    if (Debug.LEVEL > 0) {
+			Debug.println("Network manager interrupted.");
+		    }
+		}
+		if (Debug.LEVEL > 0) {
+		    Debug.println("Network manager thread exits.");
+		}
+	    }
+	};
+	thread = new Thread(r, "Network Manager");
+	thread.setPriority(5);
+	thread.setDaemon(true);
+	thread.start();
+    }
+    
+    public static void shutdown() {
+	synchronized(LOCK) {
+	    numActivations--;
+	    if (numActivations < 1) {
+		destroyed = true;
+		LOCK.notifyAll();
+	    }
+	    if (thread != null) {
+		thread.interrupt();
+		thread = null;
+	    }
 	}
     }
 
-    public static void main(String[] args) {
-	Main m = new Main();
-	m.init();
-	m.printTweets();
+    /**
+     * Queue the runnable to run in the networking thread
+     **/
+    public static void enqueue(Runnable r) {
+	synchronized(LOCK) {
+	    queue.add(r);
+	    LOCK.notifyAll();
+	}
+    }
+
+    private static void processQueue() throws InterruptedException {
 	for (;;) {
-	    try {
-		Thread.sleep(30000);
-	    } catch (InterruptedException ex) {
-		ex.printStackTrace();
-		System.exit(1);
+	    Runnable runnable;
+	    for (;;) {
+		synchronized(LOCK) {
+		    if (destroyed) {
+			return;
+		    }
+		    if (!queue.isEmpty()) {
+			runnable = (Runnable) queue.remove();
+			break;
+		    }
+		    LOCK.wait();
+		}
 	    }
-	    m.printTweets();
+	    try {
+		runnable.run();
+	    } catch (Throwable t) {
+		if (t instanceof InterruptedException) {
+		    throw (InterruptedException) t;
+		}
+		if (Debug.LEVEL > 0) {
+		    Debug.printStackTrace(t);
+		}
+	    }
 	}
     }
 }

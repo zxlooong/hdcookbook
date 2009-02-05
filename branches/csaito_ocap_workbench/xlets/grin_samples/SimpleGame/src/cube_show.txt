@@ -32,7 +32,8 @@ java_generated_class CubeCommands [[
 	    }
 
 	    public CubeDirector getDirector() {
-		return (CubeDirector) show.getDirector();
+		Object o = show.getDirector();
+		return (CubeDirector) o;
 	    }
 	
 	    JAVA_COMMAND_BODY

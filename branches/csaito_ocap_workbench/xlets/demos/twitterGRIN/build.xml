@@ -59,5 +59,24 @@ ${show.file}.txt
 ]]></concat>
 	<antcall target="post-generate-grinview-args"/>
     </target>
+
+
+
+<target name="post-gen-permission-file">
+        <copy todir="${build.dir}/classes/com/hdcookbook/grinxlet">
+            <fileset dir="${grin.xlet}/src/debug/com/hdcookbook/grinxlet">
+                <include name="ocap.GrinXlet.perm"/>
+            </fileset>
+        </copy>
+</target>
+<target name="post-jar">
+        <copy todir="${build.dir}/classes">
+            <fileset dir="${build.dir}">
+                <include name="*.grin"/>
+                <include name="*.png"/>
+                <include name="images.map"/>
+            </fileset>
+        </copy>
+</target>
 </project>
 

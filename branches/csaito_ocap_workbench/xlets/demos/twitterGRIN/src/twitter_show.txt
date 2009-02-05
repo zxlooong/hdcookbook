@@ -19,11 +19,14 @@ exports
     }
 ;
 
-java_generated_class TwitterCommands [[
+java_generated_class pkg.TwitterCommands [[
+
+    package pkg;
 
     import com.hdcookbook.grin.Show;
     import com.hdcookbook.grin.GrinXHelper;
     import com.hdcookbook.grin.util.Debug;
+
 
     public class TwitterCommands extends GrinXHelper {
 

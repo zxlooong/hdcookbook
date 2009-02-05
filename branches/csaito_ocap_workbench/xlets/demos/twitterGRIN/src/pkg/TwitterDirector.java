@@ -53,6 +53,8 @@
  */
 
 
+package pkg;
+
 import com.hdcookbook.grin.Director;
 
 import com.hdcookbook.grin.features.FixedImage;
