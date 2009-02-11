@@ -14,6 +14,7 @@
             <ant dir="Scripts/DrawingOptimization"/>        
             <ant dir="Scripts/Translation"/>                  
             <ant dir="Scripts/VisualRCHandler"/>         
+            <ant dir="BouncingReddy"/>         
         </target>
         
         <target name="autotest-grinview">
@@ -21,8 +22,9 @@
             <ant dir="GrinBunny" target="test"/>          
             <ant dir="Scripts/CustomFeature" target="autotest-grinview"/> 
             <ant dir="Scripts/DrawingOptimization" target="autotest-grinview"/>        
-            <ant dir="Scripts/Translation" target="autotest-grinview"/>                  
-            <ant dir="Scripts/VisualRCHandler" target="autotest-grinview"/>         
+            <ant dir="Scripts/Translation" target="autotest-grinview"/>
+            <ant dir="Scripts/VisualRCHandler" target="autotest-grinview"/>
+            <ant dir="BouncingReddy" target="test"/>         
         </target>        
         
 	<target name="clean">      
@@ -33,9 +35,11 @@
             <ant dir="Scripts/DrawingOptimization" target="clean"/>        
             <ant dir="Scripts/Translation" target="clean"/>                  
             <ant dir="Scripts/VisualRCHandler" target="clean"/>         
+            <ant dir="BouncingReddy" target="clean"/>         
 	</target>
 	<target name="spotless" depends="clean">
 	    <ant dir="GrinBunny" target="spotless"/>
 	    <ant dir="SimpleGame" target="spotless"/>
+            <ant dir="BouncingReddy" target="spotless"/>         
 	</target>
 </project>

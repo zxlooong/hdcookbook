@@ -17,6 +17,7 @@ file is here just for the "clean" and "spotless" targets.
     <ant dir="05" target="clean"/>
     <ant dir="06" target="clean"/>
     <ant dir="07" target="clean"/>
+    <ant dir="08" target="clean"/>
 </target>
 
 <target name="spotless">
@@ -27,6 +28,7 @@ file is here just for the "clean" and "spotless" targets.
     <ant dir="05" target="spotless"/>
     <ant dir="06" target="spotless"/>
     <ant dir="07" target="spotless"/>
+    <ant dir="08" target="spotless"/>
 </target>
 
 </project>
