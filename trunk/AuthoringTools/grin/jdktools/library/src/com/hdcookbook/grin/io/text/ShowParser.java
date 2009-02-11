@@ -91,6 +91,7 @@ import com.hdcookbook.grin.features.SEText;
 import com.hdcookbook.grin.features.SETranslator;
 import com.hdcookbook.grin.features.SETranslatorModel;
 import com.hdcookbook.grin.features.Translator;
+import com.hdcookbook.grin.features.parts.EasingEquation;
 import com.hdcookbook.grin.features.parts.SEImagePlacement;
 import com.hdcookbook.grin.features.parts.SEImagePlacementList;
 import com.hdcookbook.grin.features.parts.SEImageSeqPlacement;
@@ -105,6 +106,7 @@ import com.hdcookbook.grin.io.builders.TranslatorHelper;
 import com.hdcookbook.grin.io.builders.VisualRCHandlerHelper;
 import com.hdcookbook.grin.io.builders.VisualRCHandlerCell;
 import com.hdcookbook.grin.util.AssetFinder;
+import com.robertpenner.PennerEasing;
 
 import java.io.Reader;
 import java.io.IOException;
@@ -989,9 +991,9 @@ public class ShowParser {
 	if (!("{".equals(tok))) {
 	    lexer.reportError("'{' expected, \"" + tok + "\" seen.");
 	}
-	Vector keyframes = new Vector();
+	ArrayList<int[]> keyframes = new ArrayList<int[]>();
+	tok = lexer.getString();
 	for (;;) {
-	    tok = lexer.getString();
 	    if ("}".equals(tok)) {
 		break;
 	    }
@@ -1002,8 +1004,15 @@ public class ShowParser {
 		lexer.reportError(ex.toString());
 	    }
 	    int alpha = lexer.getInt();
-	    keyframes.addElement(new int[] { frameNum, alpha } );
-	    parseExpected("linear");
+	    EasingEquation[] easing = new EasingEquation[1];
+	    tok = lexer.getString();
+	    tok = parseEasing(tok, easing);
+	    if (keyframes.size() == 0 || easing[0] == null) {
+		keyframes.add(new int[] { frameNum, alpha } );
+	    } else {
+		int[] destination = { frameNum, alpha };
+		easing[0].addKeyFrames(keyframes, destination);
+	    }
 	}
 	tok = lexer.getString();
 	Command[] endCommands = emptyCommandArray;
@@ -1029,7 +1038,7 @@ public class ShowParser {
 	int[] fs = new int[keyframes.size()];
 	int[] alphas = new int[keyframes.size()];
 	for (int i = 0; i < keyframes.size(); i++) {
-	    int[] el = (int[]) keyframes.elementAt(i);
+	    int[] el = keyframes.get(i);
 	    fs[i] = el[0];
 	    alphas[i] = el[1];
 	    if (i > 0 && fs[i] <= fs[i-1]) {
@@ -1138,11 +1147,12 @@ public class ShowParser {
     {
 	String name = parseFeatureName(hasName);
 	parseExpected("{");
-	Vector keyframes = new Vector();
+	ArrayList<int[]> keyframes = new ArrayList<int[]>();
         boolean isRelative = false;
+	String tok = lexer.getString();
 	for (;;) {
-	    String tok = lexer.getString();
 	    if ("}".equals(tok)) {
+		tok = lexer.getString();
 		break;
 	    }
 	    int frameNum = 0;
@@ -1153,16 +1163,22 @@ public class ShowParser {
 	    }
 	    int x = lexer.getIntOrOffscreen();
 	    int y = lexer.getIntOrOffscreen();
-	    keyframes.addElement(new int[] { frameNum, x, y } );
-            String interpolation = lexer.getString();
-	    boolean thisIsRelative = false;
-            if ("linear".equals(interpolation)) {
+            String tweenType = lexer.getString();
+	    boolean thisIsRelative = true;
+	    EasingEquation[] easing = new EasingEquation[1];
+	    thisIsRelative = true;
+            if ("linear".equals(tweenType)) {
                 thisIsRelative = false;
-            } else if ("linear-relative".equals(interpolation)) {
-                thisIsRelative = true;
-            } else {
-                lexer.reportError("linear or linear-relative expected");
-            }
+            } else if ("linear-relative".equals(tweenType)) {
+		tweenType = "linear";
+	    }
+	    tok = parseEasing(tweenType, easing);
+	    if (keyframes.size() == 0 || easing[0] == null) {
+		keyframes.add(new int[] { frameNum, x, y } );
+	    } else {
+		int[] destination = { frameNum, x, y };
+		easing[0].addKeyFrames(keyframes, destination);
+	    }
 	    if (keyframes.size() == 1) {
 		if (!thisIsRelative) {
 		    lexer.reportWarning(
@@ -1174,12 +1190,10 @@ public class ShowParser {
 		      + "\n    ==> Dangerous usage occurs");
 		}
 	    } else if (thisIsRelative != isRelative) {
-		lexer.reportError("Inconsistent use of linear vs. linear-relative; all keyframes must be the same.");
+		lexer.reportError("Use of incompatible, deprecated linear with other interpolation types; must use linear-relative.");
 	    }
 	    isRelative = thisIsRelative;
-
 	}
-	String tok = lexer.getString();
 	int repeatFrame = -1;
 	if ("repeat".equals(tok)) {
 	    repeatFrame = lexer.getInt();
@@ -1203,7 +1217,7 @@ public class ShowParser {
 	values[0] = new int[keyframes.size()];
 	values[1] = new int[keyframes.size()];
 	for (int i = 0; i < keyframes.size(); i++) {
-	    int[] el = (int[]) keyframes.elementAt(i);
+	    int[] el = keyframes.get(i);
 	    fs[i] = el[0];
 	    values[Translator.X_FIELD][i] = el[1];
 	    values[Translator.Y_FIELD][i] = el[2];
@@ -1227,6 +1241,280 @@ public class ShowParser {
 				          repeatFrame, loopCount, endCommands);
 	builder.addFeature(name, line, trans);
 	return trans;
+    }
+
+    //
+    // Parse the easing, and set easing[0] to that value.  Return the next
+    // token to be parsed.
+    //
+    private String parseEasing(String tweenType, EasingEquation[] easing) 
+    		throws IOException
+    {
+	String tok = lexer.getString();
+
+	if ("linear".equals(tweenType)) {
+	    // Nothing special needed
+	} else if ("start".equals(tweenType)) {
+	    // start is a synonym for linear-relative
+	} else if ("ease-in-quad".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInQuad(t, b, c, d);
+		}
+	    };
+	} else if ("ease-out-quad".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeOutQuad(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-out-quad".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInOutQuad(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-cubic".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInCubic(t, b, c, d);
+		}
+	    };
+	} else if ("ease-out-cubic".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeOutCubic(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-out-cubic".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInOutCubic(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-quart".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInQuart(t, b, c, d);
+		}
+	    };
+	} else if ("ease-out-quart".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeOutQuart(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-out-quart".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInOutQuart(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-quint".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInQuint(t, b, c, d);
+		}
+	    };
+	} else if ("ease-out-quint".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeOutQuint(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-out-quint".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInOutQuint(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-sine".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInSine(t, b, c, d);
+		}
+	    };
+	} else if ("ease-out-sine".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeOutSine(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-out-sine".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInOutSine(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-expo".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInExpo(t, b, c, d);
+		}
+	    };
+	} else if ("ease-out-expo".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeOutExpo(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-out-expo".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInOutExpo(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-circ".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInCirc(t, b, c, d);
+		}
+	    };
+	} else if ("ease-out-circ".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeOutCirc(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-out-circ".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInOutCirc(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-elastic".equals(tweenType)) {
+	    final double[] a = { PennerEasing.DEFAULT };
+	    tok = getOptionalParameter(tok, "amplitude", a);
+	    final double[] p = { PennerEasing.DEFAULT };
+	    tok = getOptionalParameter(tok, "period", p);
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInElastic(t, b, c, d,a[0],p[0]);
+		}
+	    };
+	} else if ("ease-out-elastic".equals(tweenType)) {
+	    final double[] a = { PennerEasing.DEFAULT };
+	    tok = getOptionalParameter(tok, "amplitude", a);
+	    final double[] p = { PennerEasing.DEFAULT };
+	    tok = getOptionalParameter(tok, "period", p);
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeOutElastic(t, b, c,d,a[0],p[0]);
+		}
+	    };
+	} else if ("ease-in-out-elastic".equals(tweenType)) {
+	    final double[] a = { PennerEasing.DEFAULT };
+	    tok = getOptionalParameter(tok, "amplitude", a);
+	    final double[] p = { PennerEasing.DEFAULT };
+	    tok = getOptionalParameter(tok, "period", p);
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return 
+		    PennerEasing.easeInOutElastic(t, b, c, d, a[0], p[0]);
+		}
+	    };
+	} else if ("ease-in-back".equals(tweenType)) {
+	    final double[] s = { PennerEasing.DEFAULT };
+	    tok = getOptionalParameter(tok, "overshoot", s);
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInBack(t, b, c, d, s[0]);
+		}
+	    };
+	} else if ("ease-out-back".equals(tweenType)) {
+	    final double[] s = { PennerEasing.DEFAULT };
+	    tok = getOptionalParameter(tok, "overshoot", s);
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeOutBack(t, b, c, d, s[0]);
+		}
+	    };
+	} else if ("ease-in-out-back".equals(tweenType)) {
+	    final double[] s = { PennerEasing.DEFAULT };
+	    tok = getOptionalParameter(tok, "overshoot", s);
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInOutBack(t, b, c, d, s[0]);
+		}
+	    };
+	} else if ("ease-in-bounce".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInBounce(t, b, c, d);
+		}
+	    };
+	} else if ("ease-out-bounce".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeOutBounce(t, b, c, d);
+		}
+	    };
+	} else if ("ease-in-out-bounce".equals(tweenType)) {
+	    easing[0] = new EasingEquation() {
+		public double 
+		evaluate(double t, double b, double c, double d) {
+		    return PennerEasing.easeInOutBounce(t, b, c, d);
+		}
+	    };
+	} else {
+	    lexer.reportError("unknown tween type \"" + tweenType + "\"");
+	}
+	if ("max-error".equals(tok)) {
+	    int maxError = lexer.getInt();
+	    tok = lexer.getString();
+	    if (easing[0] == null) {
+		// It's OK to specify a max-error for linear interpolation,
+		// but it doesn't mean anything, since there's no
+		// approximation with linear interpolation.
+	    } else {
+		easing[0].setMaxError(maxError);
+	    } 
+	}
+	return tok;
+    }
+
+    //
+    // Get an optional parameter named name.  Returns the next token after
+    // the optional parameter.  Delivers result to value[0].
+    //
+    private String getOptionalParameter(String tok, String name, double[] value)
+    		throws IOException
+    {
+	if (name.equals(tok)) {
+	    value[0] = lexer.getDouble();
+	    return lexer.getString();
+	} else {
+	    return tok;
+	}
     }
 
     private Feature parseTranslator(boolean hasName, int line) 
@@ -1358,7 +1646,7 @@ public class ShowParser {
     {
 	String name = parseFeatureName(hasName);
 	parseExpected("{");
-	Vector keyframes = new Vector();
+	ArrayList<int[]> keyframes = new ArrayList<int[]>();
 	for (;;) {
 	    String tok = lexer.getString();
 	    if ("}".equals(tok)) {
@@ -1374,8 +1662,18 @@ public class ShowParser {
 	    int y = lexer.getInt();
 	    int scaleX = lexer.getInt();
 	    int scaleY = lexer.getInt();
-	    keyframes.addElement(new int[] { frameNum, x, y, scaleX, scaleY } );
-	    parseExpected("mills");
+	    tok = lexer.getString();
+	    EasingEquation[] easing = new EasingEquation[1];
+	    if (!("mills".equals(tok))) {
+		tok = parseEasing(tok, easing);
+	    }
+	    if (keyframes.size() == 0 || easing[0] == null) {
+		keyframes.add(new int[] { frameNum, x, y, scaleX, scaleY } );
+	    } else {
+		int[] destination = { frameNum, x, y, scaleX, scaleY };
+		easing[0].addKeyFrames(keyframes, destination);
+	    }
+	    lexer.expectString("mills", tok);
 	}
 	String tok = lexer.getString();
 	int repeatFrame = -1;
@@ -1403,7 +1701,7 @@ public class ShowParser {
 	values[2] = new int[keyframes.size()];
 	values[3] = new int[keyframes.size()];
 	for (int i = 0; i < keyframes.size(); i++) {
-	    int[] el = (int[]) keyframes.elementAt(i);
+	    int[] el = keyframes.get(i);
 	    fs[i] = el[0];
 	    values[InterpolatedModel.SCALE_X_FIELD][i] = el[1];
 	    values[InterpolatedModel.SCALE_Y_FIELD][i] = el[2];
@@ -2171,8 +2469,12 @@ public class ShowParser {
 		fw.resolveAtLine();
 	    }
 	}
-	
+
 	builder.finishBuilding();
+	if (EasingEquation.framesAdded > 0) {
+	    System.out.println(EasingEquation.framesAdded 
+			+ " animation keyframes added for easing functions.");
+	}
     }
 
     //***************    Convenience Methods    ******************

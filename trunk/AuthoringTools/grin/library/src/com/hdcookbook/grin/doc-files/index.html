@@ -307,7 +307,7 @@ Here's BNF describing the syntax of a show file:
 		[ "end_commands" commands ] ";"
 	# There must be >= 1 scale_key_frame
     
-    scale_key_frame ::=  frame_number x y x_scale y_scale "mills"
+    scale_key_frame ::=  frame_number x y x_scale y_scale [ tween_type ] "mills"
     	# The first frame must be zero
 	# The scale factor is in mills (1/1000); a factor of 1000 is 1:1 scale
 
@@ -317,11 +317,12 @@ Here's BNF describing the syntax of a show file:
     				rectangle 	    # guaranteed area
 				{ rectangle * } ";" # areas to be cleared
 
-    set_target ::= "feature" "set_target" name sub_feature name ";"
-    	#  The last name is target name taken from draw_targets
+    set_target ::= "feature" "set_target" name sub_feature target_name ";"
+
+    target_name ::= name
 
     translator_model ::= "feature" "translator_model" name 
-			    "{" key_frame * "}" 
+			    "{" trans_key_frame * "}" 
 			    [ "repeat" frame_number ] 
 			    [ loop_count ]
 			    [ "end_commands" commands ] ";"
@@ -334,18 +335,72 @@ Here's BNF describing the syntax of a show file:
         # region.  Use Integer.MIN_VALUE for x,y position to off-screen 
         # programatically. 
 
-    key_frame ::= frame_number x y interpolation_type
+    trans_key_frame ::= frame_number x y trans_tween [ "max-error" integer ]
 
-    interpolation_type ::= "linear" | "linear-relative"
-    	# linear is deprecated, and really means "position children so that
-	#	the upper-left hand corner is set to the absolute coordinates
-	#	presented here."
-	# linear-relative means "position children relative to the
-	#	position set within each child node"
-	# 
-	# non-relative positioning is deprecated because it requires GRIN
-	# to attempt to determine the upper-left hand corner of its children,
-	# which isn't always possible.
+    trans_tween ::= "linear-relative" | tween_type
+    	# linear and linear-relative are special for translations.  You
+	# should always use linear-relative; that's linear interpolation
+	# using relative coordinates for the child nodes (that is, the
+	# interpolation specifies delta-x and delta-y for each child).
+	#
+	# "linear" is deprecated, and is kept for backwards compatibility
+	# with old show files.  In "linear", the coordinates are absolute
+	# coordinates for the upper-left hand corner of the children.  
+	# Trying to do this this was a bad idea - it's not always possible
+	# to determine the upper-left hand corner of the children.  When it's
+	# not, the compiler will report an error that suggests switching
+	# to linear-relative.
+
+    tween_type ::=
+              "linear" 
+	    | "ease-in-quad"
+	    | "ease-out-quad"
+	    | "ease-in-out-quad"
+	    | "ease-in-cubic"
+	    | "ease-out-cubic"
+	    | "ease-in-out-cubic"
+	    | "ease-in-quart"
+	    | "ease-out-quart"
+	    | "ease-in-out-quart"
+	    | "ease-in-quint"
+	    | "ease-out-quint"
+	    | "ease-in-out-quint"
+	    | "ease-in-sine"
+	    | "ease-out-sine"
+	    | "ease-in-out-sine"
+	    | "ease-in-expo"
+	    | "ease-out-expo"
+	    | "ease-in-out-expo"
+	    | "ease-in-circ"
+	    | "ease-out-circ"
+	    | "ease-in-out-circ"
+	    | "ease-in-elastic" [ "amplitude" double ] [ "period" double ]
+	    | "ease-out-elastic" [ "amplitude" double ] [ "period" double ]
+	    | "ease-in-out-elastic" [ "amplitude" double ] [ "period" double ]
+	    | "ease-in-back" [ "overshoot" double ]
+	    | "ease-out-back" [ "overshoot" double ]
+	    | "ease-in-out-back" [ "overshoot" double ]
+	    | "ease-in-bounce"
+	    | "ease-out-bounce"
+	    | "ease-in-out-bounce"
+        # The tween type give the algorithm used for the transition from the
+	# previous key frame to the present one.
+	#
+	# start is a synonym for linear.  It's intended to be
+	#    used for the first keyframe, since the tween type for the
+	#    first keyframe is meaningless anyway.
+	#
+	# The other tweening types are described in 
+	# com.robertpenner.PennerEasing, and in his book, which you can
+	# find out about at http://robertpenner.com.
+	#
+	# max-error says how many units of error you're willing to tolerate
+	# when the compiler uses linear interpolation segments to approximate
+	# tweening.  It default to 0, that is, no error.  Setting a higher
+	# tolerance will result in a smaller .grin file and less runtime
+	# memory usage.  The grin compiler tells you how many key frames
+	# are added for interpolation due to tweening; if the number looks
+	# huge, consider increasing the error tolerance.
 
     translator ::= "feature" "translator" name translator_model_name 
     			"{" sub_feature "}" ";"

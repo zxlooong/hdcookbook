@@ -239,6 +239,13 @@ public class Lexer {
     }
 
     /**
+     * @return a double.  It's an error to see EOF.
+     */
+    public double getDouble() throws IOException {
+	return convertToDouble(getString());
+    }
+
+    /**
      * @return an int.  Integer.MAX_VALUE for "infinite".
      */
     public int getIntOrInfinite() throws IOException {
@@ -261,12 +268,25 @@ public class Lexer {
 	    return convertToInt(tok);
 	}
     }
+
     public int convertToInt(String tok) throws IOException {
 	if (tok == null) {
 	    reportError("int expected, EOF seen");
 	}
 	try {
 	    return Integer.decode(tok).intValue();
+	} catch (NumberFormatException ex) {
+	    reportError(ex.toString());
+	    return -1;	// not reached
+	}
+    }
+
+    public double convertToDouble(String tok) throws IOException {
+	if (tok == null) {
+	    reportError("double expected, EOF seen");
+	}
+	try {
+	    return Double.parseDouble(tok);
 	} catch (NumberFormatException ex) {
 	    reportError(ex.toString());
 	    return -1;	// not reached
