@@ -17,12 +17,11 @@
     
     <import   file="build-client.xml"/>   
     <import   file="build-bridgehead.xml"/>
-    <import   file="build-bumf-generator.xml"/>
     <import   file="build-sampledisc.xml"/>
 
     <property name="zipfile" value="${discimage.name}.zip"/>
     
-    <target name="clean" depends="client-clean, bumfgen-clean, bridgehead-clean, sample-clean">
+    <target name="clean" depends="client-clean, bridgehead-clean, sample-clean">
         <delete file="${zipfile}"/>
     </target>
 
@@ -31,7 +30,7 @@
 	<delete file="SampleDiscImage/app.discroot.crt"/>
     </target>
     
-    <target name="deploy" depends="bridgehead-deploy, make-bumfgen-jar, 
+    <target name="deploy" depends="bridgehead-deploy,  
                                    make-client-jar, bundle, make-sample"
             description="Make an blu-ray disc image">
        <!-- Add sample's zip to the bundle -->
@@ -45,8 +44,7 @@
     <target name="bundle">
         <zip destfile="${zipfile}">
             <fileset dir="${bridgehead.dist.dir}"/>
-            <fileset dir="${client.dist.dir}"/>       
-            <fileset dir="${bumfgen.dist.dir}"/>     
+            <fileset dir="${client.dist.dir}"/>      
             <fileset dir="${keystore.dir}"/>
         </zip>
     </target>

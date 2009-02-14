@@ -17,9 +17,9 @@
             <ant dir="playlist"/>            
             <ant dir="cpistrip"/>  
             <ant dir="soundgen"/>
-            <ant dir="soundsplit"/> 
-            <ant dir="xmldata/bumf"/>         
-            <ant dir="logger"/>         
+            <ant dir="soundsplit"/>  
+            <ant dir="bumf"/>  
+            <ant dir="logger"/>    
         </target>        
         
 	<target name="clean">         
@@ -31,7 +31,7 @@
           <ant dir="id" target="clean"/>
           <ant dir="index" target="clean"/>
           <ant dir="movieobject" target="clean"/>
-          <ant dir="xmldata/bumf" target="clean"/>  
+          <ant dir="bumf" target="clean"/>  
           <ant dir="playlist" target="clean"/>             
           <ant dir="logger" target="clean"/>         
 	</target>

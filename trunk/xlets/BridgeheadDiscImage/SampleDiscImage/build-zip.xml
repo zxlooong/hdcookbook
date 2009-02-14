@@ -13,7 +13,6 @@
     <!-- Stuff unzipped from the BridgeheadDiscImage.zip -->
     <property name="BridgeheadDiscImage" location="bridgehead.unzipped"/>
     <property name="keystore" location="${BridgeheadDiscImage}/keystore.store"/>
-    <property name="bumfgen.jar" location="${BridgeheadDiscImage}/bumfgen.jar"/>
     <property name="id.bdmv" location="${BridgeheadDiscImage}/DiscImage/CERTIFICATE/id.bdmv"/>
 
     <!-- Custom properties for your disc image to be uploaded.  -->
@@ -66,7 +65,7 @@
         </jdktools.java>
     
         <!-- generate BUMF xml file for the disc image to upload -->
-        <jdktools.java jar="${bumfgen.jar}">
+        <jdktools.java jar="${bumfgenerator.jar}">
             <arg value="${id.bdmv}"/>
             <arg value="${bdmv-dir}"/>
             <arg value="${bdmv-dir}/../sample.xml"/>

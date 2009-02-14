@@ -52,7 +52,7 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package bumfgenerator;
+package net.java.bd.tools.bumfgenerator;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -71,13 +71,14 @@ import net.java.bd.tools.bumf.FileType;
 import net.java.bd.tools.bumf.Manifest;
 import net.java.bd.tools.bumf.ObjectFactory;
 import net.java.bd.tools.bumf.NamespacePrefixMapperImpl;
+import net.java.bd.tools.bumf.ProgressiveAssetType;
+import net.java.bd.tools.bumf.ProgressiveType;
 import net.java.bd.tools.id.IdReader;
 import net.java.bd.tools.id.Id;
-import net.java.bd.tools.id.HexStringBinaryAdapter;
 
 /**
- * This tool generates a binding unit manifest file which can be used with
- * the bridgehead xlet.
+ * This tool generates a binding unit manifest file (xml-based file)
+ * that can be used for a VFS update.
  */
 
 public class BumfGenerator {
@@ -89,33 +90,45 @@ public class BumfGenerator {
            usage();
        }
        
-       String idFile = args[0];
-       String input  = args[1];
-       String output = args[2];
+       int index = 0;
+       String idFile = args[index++];
+       String input  = args[index++];
+       String[] progressives = null;
+       if ("-progressive".equals(args[index])) {
+           index++;
+           String progressiveList = args[index++];
+           progressives = progressiveList.split(",");
+           for (int i = 0; i < progressives.length; i++) {
+               progressives[i] = progressives[i] + ".m2ts";
+           }
+       }
+       String output = args[index];
        
        if ("id.bdmv".equalsIgnoreCase(idFile) || !new File(idFile).exists()) {
            System.out.println("id.bdmv file not found, " + idFile);
            usage();
        }
        
-       if (!new File(input).exists()) {
-           System.out.println("Input needs to be an existing BDMV directory " + input);
+       if (!new File(input).exists() || input.indexOf("BDMV") == -1) {
+           System.out.println("Input directory needs to be an existing BDMV directory " + input);
            usage();
        }
        
        BumfGenerator budagen = new BumfGenerator();
-       Manifest manifest = budagen.constructManifest(idFile, input);
+       Manifest manifest = budagen.constructManifest(idFile, input, progressives);
        budagen.writeXml(manifest, output);
     
    }
    
    public static void usage() {
        System.out.println("\n\nUsage:\n");
-       System.out.println("" + BumfGenerator.class.getName() + " id.bdmv bdmv-dir output-xml-file");
+       System.out.println("" + BumfGenerator.class.getName() + " id.bdmv bdmv-directory [-progressive comma-separated-m2ts-numbers] output-xml-file");
+       System.out.println("\n\t-progressive is optional; use it to specify m2ts files that should be listed as progressive assets.");
+       System.out.println("\n\tExample: " + BumfGenerator.class.getName() + " ../../BDImage/CERTIFICATE/id.bdmv ../../BDImage/BDMV -progressive 00001,00002 sample.xml");
        System.exit(0);
    }
 
-   private Manifest constructManifest(String idFile, String input) 
+   private Manifest constructManifest(String idFile, String bdmvDir, String[] progressives) 
        throws Exception {   
        
         Manifest m = new Manifest();
@@ -141,26 +154,42 @@ public class BumfGenerator {
         m.setDiscID("0x" + fullDiscId); 
         m.setOrgID("0x" + fullOrgId);
     
-        int index = input.indexOf("BDMV");      
-        File[] fs = new File[]{ new File(input) };
+        int index = bdmvDir.indexOf("BDMV");      
+        File[] fs = new File[]{ new File(bdmvDir) };
         ArrayList<File> list = new ArrayList<File>();
         findFiles(fs, list);
         ObjectFactory factory = new ObjectFactory();
         AssetsType assetsType = factory.createAssetsType();
+        ProgressiveType progressiveType = factory.createProgressiveType();    
+        
         for(int i = 0; i < list.size(); i++) {
             String filename = list.get(i).getPath().substring(index).replace('\\', '/');
-            String buFilename = orgId + '/' + discId + '/' + filename;  
-            AssetType assetType = factory.createAssetType();
-            FileType fileType  = factory.createFileType();
-            assetType.setVPFilename(filename);
-            fileType.setName(buFilename);
-            assetType.setBUDAFile(fileType);
-            assetsType.getAsset().add(assetType);
+            String buFilename = orgId + '/' + discId + '/' + filename;
+            
+            if (isProgressive(filename, progressives)) {
+                addToProgressiveAssets(factory, progressiveType, filename, buFilename);
+            } else {
+                addToAssets(factory, assetsType, filename, buFilename);
+            }            
         } 
-        
+
+        assetsType.setProgressive(progressiveType);        
         m.setAssets(assetsType);
         
         return m;     
+   }
+   
+   private boolean isProgressive(String filename, String[] progressiveItems) {
+       if (progressiveItems == null) {
+           return false;
+       }
+       
+       for (int i = 0; i < progressiveItems.length; i++) {
+           if (filename.endsWith(progressiveItems[i])) {
+               return true;
+           } 
+       }
+       return false;
    }
    
    private void findFiles(File[] fs, ArrayList<File> v) {
@@ -171,7 +200,30 @@ public class BumfGenerator {
               findFiles(f.listFiles(), v);
            }
         }
-   }    
+   }
+   
+   private void addToProgressiveAssets(ObjectFactory factory, ProgressiveType progressiveType, 
+        String filename, String buFilename) {
+        ProgressiveAssetType progressiveAssetType = factory.createProgressiveAssetType();  
+        FileType fileType = factory.createFileType();
+        
+        fileType.setName(buFilename);
+
+        progressiveAssetType.setBUDAFile(fileType);
+        progressiveAssetType.setVPFilename(filename);
+        progressiveType.getProgressiveAsset().add(progressiveAssetType);  
+   }
+   
+   private void addToAssets(ObjectFactory factory, AssetsType assetsType, 
+        String filename, String buFilename) {
+        AssetType assetType = factory.createAssetType();
+        FileType fileType = factory.createFileType();
+
+        assetType.setVPFilename(filename);
+        fileType.setName(buFilename);
+        assetType.setBUDAFile(fileType);
+        assetsType.getAsset().add(assetType);
+   }
 
    private void writeXml(Manifest manifest, String output) throws Exception {       
        JAXBContext jc = JAXBContext.newInstance("net.java.bd.tools.bumf");
