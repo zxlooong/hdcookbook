@@ -117,6 +117,7 @@ public class ProgressiveExampleXlet implements Xlet, Runnable {
         this.context = context;
         final Font font = new Font(null, Font.PLAIN, 48);
         scene = HSceneFactory.getInstance().getDefaultHScene();
+        scene.setBackgroundMode(HScene.BACKGROUND_FILL);
         gui = new Container() {
             public void paint(Graphics g) {
                 g.setFont(font);
