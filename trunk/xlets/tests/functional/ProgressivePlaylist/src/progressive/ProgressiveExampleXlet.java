@@ -72,6 +72,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import java.util.ArrayList;
 import javax.media.ControllerEvent;
 import javax.media.ControllerListener;
 import javax.media.EndOfMediaEvent;
@@ -86,44 +88,58 @@ import org.bluray.ti.Title;
 import org.bluray.ti.selection.TitleContext;
 import org.bluray.vfs.PreparingFailedException;
 import org.bluray.vfs.VFSManager;
+import org.bluray.ui.event.HRcEvent;
 import org.davic.media.MediaLocator;
 import org.davic.net.InvalidLocatorException;
+import org.dvb.event.EventManager;
+import org.dvb.event.UserEvent;
+import org.dvb.event.UserEventListener;
+import org.dvb.event.UserEventRepository;
 import org.havi.ui.HScene;
 import org.havi.ui.HSceneFactory;
 
 /**
  * An example of a progressive playlist.
- * 
+ * <p>
  * This is a simple example where all the data for progressive playlist is
  * provided as a jar file in the optical disc structure.  The xlet unzips
  * the jar content to it's binding unit data area, performs the VFS update,
  * enables the clip that's listed as a progressive playlist asset in the
  * binding unit manifest file used for the VFS update, and then finally
  * plays back the video clip in the progressive playlist.
- * 
+ * <p>
  * In real use case, most likely the video clip is downloaded to the player.
  */
-public class ProgressiveExampleXlet implements Xlet, Runnable {
+public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
+{
 
     private HScene scene;
     private Container gui;
-    private static String message = "Progressive Playlist Example";
+    private String[] message = { "Progressive Playlist Example" };
+    private ArrayList messageList = new ArrayList();
     private String bindingUnitDir = null;
     private XletContext context;
     private char sep = File.separatorChar;
+    private boolean keyPressed = false;
+    private boolean started = false;
 
     public void initXlet(XletContext context) {
 
         this.context = context;
-        final Font font = new Font(null, Font.PLAIN, 48);
+        final Font font = new Font(null, Font.PLAIN, 36);
         scene = HSceneFactory.getInstance().getDefaultHScene();
         scene.setBackgroundMode(HScene.BACKGROUND_FILL);
         gui = new Container() {
             public void paint(Graphics g) {
                 g.setFont(font);
-                g.setColor(new Color(245, 245, 245));
-                int message_width = g.getFontMetrics().stringWidth(message);
-                g.drawString(message, (getWidth() - message_width) / 2, 500);
+                g.setColor(new Color(128, 245, 245));
+		String[] msg = message;
+		int x = 150;
+		int y = 150;
+		for (int i = 0; i < msg.length; i++) {
+		    g.drawString(msg[i], x, y);
+		    y += 40;
+		}
             }
         };
 
@@ -138,6 +154,18 @@ public class ProgressiveExampleXlet implements Xlet, Runnable {
     }
 
     public void startXlet() {
+	if (started) {
+	    return;
+	}
+	started = true;
+        UserEventRepository userEventRepo = new UserEventRepository("x");
+        userEventRepo.addAllArrowKeys();
+        userEventRepo.addAllColourKeys();
+        userEventRepo.addAllNumericKeys();
+        userEventRepo.addKey(HRcEvent.VK_ENTER);
+        userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
+        EventManager.getInstance().addUserEventListener(this, userEventRepo);   
+
         gui.setVisible(true);
         scene.setVisible(true);
         new Thread(this).start();  // start the test.
@@ -148,8 +176,9 @@ public class ProgressiveExampleXlet implements Xlet, Runnable {
     }
 
     public void destroyXlet(boolean unconditional) {
-        scene.remove(gui);
-        scene = null;
+       EventManager.getInstance().removeUserEventListener(this);
+       scene.remove(gui);
+       scene = null;
     }
     
     /**
@@ -160,24 +189,44 @@ public class ProgressiveExampleXlet implements Xlet, Runnable {
         // VFS update or the clip playback, since the VFS update
         // restarts this xlet.
         RegisterAccess register = RegisterAccess.getInstance();
-        if (register.getGPR(0) == 0) {
+	int regValue = register.getGPR(0);
+	register.setGPR(0, regValue+1);
+	if (regValue == 0) {
+	    try {
+		resetVFS();
+	        restartTitle();
+		// We reset the VFS here because this is a demo xlet.  Normally,
+		// you wouldn't; if the stuff you need was previously written
+		// to the VFS, you'd just run with it.
+            } catch (Exception e) {
+		println("Exception in VFS reset:");
+		println(e.toString());
+		setMessage(true);
+                e.printStackTrace();
+                register.setGPR(0,0);
+            }
+	} else if (regValue == 1) {
             try {
                prepareForVFSUpdate();
-               register.setGPR(0, 1);
                doVFSUpdate();
+	       restartTitle();
             } catch (Exception e) {
-                setMessage("Exception in VFS update: " + e.toString());
+		println("Exception in VFS update:");
+		println(e.toString());
+		setMessage(true);
                 e.printStackTrace();
                 register.setGPR(0,0);
             }
         } else {
             try {
+	       getTransportStream();
                startProgressivePlaylist(); 
             } catch (Exception e) {
-               setMessage("Exception in playback: " + e.toString());
+		println("Exception in playback:");
+		println(e.toString());
+		setMessage(true);
                e.printStackTrace();                
             }
-            register.setGPR(0,0);
         }  
     }
 
@@ -189,7 +238,7 @@ public class ProgressiveExampleXlet implements Xlet, Runnable {
      * The m2ts file under the STREAM dir is listed as a progressvie playlist.
      */
     void prepareForVFSUpdate() throws IOException {
-        setMessage("Preparing for the VFS update.");
+	println("Preparing for the VFS update.");
         
         // Simply unzip the content of "vfs.jar" to the binding unit data area.
         // In real use case, these files are likely to be downloaded to the player.
@@ -198,22 +247,67 @@ public class ProgressiveExampleXlet implements Xlet, Runnable {
         ZipInputStream zin = new ZipInputStream(
                 new BufferedInputStream(new FileInputStream(file)));
         ZipEntry e;
+	println("Unzipping to binding unit dir:");
+	println(bindingUnitDir);
+	removeAll(new File(bindingUnitDir), "    ");
+	// Verify that they're really removed:
+	removeAll(new File(bindingUnitDir), "    ");
+
         while ((e = zin.getNextEntry()) != null) {
-            unzip(zin, e, bindingUnitDir);    
+	    if (e.getName().endsWith(".m2ts"))  {
+		println("    skipping " + e.getName());
+	    } else {
+		unzip(zin, e, bindingUnitDir);    
+	    }
         }
         zin.close();
+    }
+
+
+    void getTransportStream() throws IOException {
+        // Simply unzip the transport stream in "vfs.jar" to the binding unit data area.
+        // In real use case, these files are likely to be downloaded to the player.
+        String root = System.getProperty("bluray.vfs.root");        
+        File file = new File(root + sep + "BDMV" + sep + "JAR" + sep + "vfs.jar");
+        ZipInputStream zin = new ZipInputStream(
+                new BufferedInputStream(new FileInputStream(file)));
+        ZipEntry e;
+	println("Unzipping to binding unit dir:");
+	println(bindingUnitDir);
+        
+	while ((e = zin.getNextEntry()) != null) {
+	    if (e.getName().endsWith(".m2ts"))  {
+		unzip(zin, e, bindingUnitDir);    
+	    }
+        }
+        zin.close();
+    }
+
+    private void removeAll(File directory, String indent) {
+	File[] files = directory.listFiles();
+	for (int i = 0; i < files.length; i++) {
+	    if (files[i].isDirectory()) {
+		println(indent +  files[i].getName() + " being removed :");
+		removeAll(files[i], "    " + indent);
+	    } else {
+		println(indent + files[i].getName() + " being removed.");
+	    }
+	    files[i].delete();
+	}
     }
     
     /**
      * Unzip a specific ZipEntry from the InputStream to the output directory.
      */
     private void unzip(InputStream zin, ZipEntry e, String dir)
-            throws IOException {
+            throws IOException 
+    {
 
         if (e.isDirectory()) 
             return;
- 
         String s = e.getName();       
+	println("    reading from " + s);
+	setMessage(false);
         File file = new File(dir, s);
         if (!file.exists()) {
            file.getParentFile().mkdirs();
@@ -228,23 +322,37 @@ public class ProgressiveExampleXlet implements Xlet, Runnable {
                out.write(b, 0, len);
             }
         }
-        
-        out.flush();
         out.close();
-    }   
+    }
     
     /**
      * Performs a VFS update.
      */
+    void resetVFS() throws IOException, PreparingFailedException, 
+            SecurityException, ServiceContextException 
+    {
+	println("Resetting VFS.");
+        VFSManager.getInstance().requestUpdating(null, null, true);
+    }
+
+    /**
+     * Performs a VFS update.
+     */
     void doVFSUpdate() throws IOException, PreparingFailedException, 
-            SecurityException, ServiceContextException {
-        setMessage("Restarting the title.");
-        
+            SecurityException, ServiceContextException 
+    {
+	println("Updating VFS.");
         VFSManager.getInstance().requestUpdating(
                     bindingUnitDir + sep + "sample.xml",
                     bindingUnitDir + sep + "sample.sf",
                     true);       
+    }
 
+    void restartTitle() throws IOException, PreparingFailedException,
+            SecurityException, ServiceContextException 
+    {
+	println("Restarting the title...");
+	setMessage(true);
         // restart this title.
         TitleContext titleContext = 
                 (TitleContext) ServiceContextFactory.getInstance().getServiceContext(context);
@@ -254,17 +362,24 @@ public class ProgressiveExampleXlet implements Xlet, Runnable {
     
     /**
      * Enable the progressive playlist clip and play it back.
-     * Since this xlet unzips the m2ts file to the buda before performing VFS update,
+     * Since this xlet unzips the m2ts file to the buda after performing 
+     * VFS update but before calling this method,
      * the method can safely assume that the m2ts file is already in the buda.
      */
-    void startProgressivePlaylist() throws InvalidLocatorException, IOException, NoPlayerException {    
-        setMessage("Playing back the progressive playlist.");
+    void startProgressivePlaylist() 
+    		throws InvalidLocatorException, IOException, NoPlayerException 
+    {    
+	println("Playing back the progressive playlist.");
 
         // First, enable the progressive playlist asset.
         VFSManager manager = VFSManager.getInstance();
-        if (!manager.isEnabledClip("00001")) {
+        if (manager.isEnabledClip("00001")) {
+	    println("Clip 00001 was already enabled.");
+	} else {
+	    println("Enabling clip 00001.m2ts");
             manager.enableClip(bindingUnitDir + sep + "BDMV" + sep + "STREAM" + sep + "00001.m2ts");
         }
+	setMessage(false);
         // Then, playback the video.  Note that playlist 00000 points to clipinf and stream 00001.
         BDLocator bdLocator = new BDLocator("bd://0.PLAYLIST:00000");
         MediaLocator locator = new MediaLocator(bdLocator);
@@ -283,10 +398,54 @@ public class ProgressiveExampleXlet implements Xlet, Runnable {
     /**
      * Display the message on the screen.
      */
-    private void setMessage(String s) {
-        message = s;
-        if (scene != null)
+    private void setMessage(boolean waitForKey) {
+	synchronized(messageList) {
+	    if (waitForKey) {
+		println("Press any key to continue.");
+	    }
+	    message = 
+		(String[]) messageList.toArray(new String[messageList.size()]);
+	    if (waitForKey) {
+		messageList.remove(messageList.size() - 1);
+	    } 
+	}
+        if (scene != null) {
            scene.repaint();
+	    if (waitForKey) {
+		try { 
+		    synchronized(this) {
+			keyPressed = false;
+			while (!keyPressed) {
+			    wait();
+			}
+		    }
+		} catch (InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		}
+	    }
+	}
+    }
+
+    /**
+     * @inheritDoc
+     * <p>
+     * Handle an event coming in via org.dvb.event.UserEventListener
+     **/
+    public void userEventReceived(UserEvent e) {
+	int type = e.getType();
+	if (type == HRcEvent.KEY_PRESSED) {
+	    synchronized(this) {
+		keyPressed = true;
+		notifyAll();
+	    }
+	}
+    }
+
+
+    private void println(String s) {
+	synchronized(messageList) {
+	    messageList.add(s);
+	}
     }
        
 }

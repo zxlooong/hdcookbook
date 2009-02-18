@@ -26,6 +26,7 @@ information or have any questions.
 <project name="ProgressivePlaylistExample" default="all" basedir=".">  
 
   <!-- Property Definitions -->
+    <property file="user.vars.properties"/>
     <property file="build.properties"/>
     <property name="src.dir"         value="src"/>
     <property name="build.dir"       value="build"/>
