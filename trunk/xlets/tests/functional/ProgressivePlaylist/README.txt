@@ -8,3 +8,6 @@ asset in the VFS update.
 When you run this xlet, it describes what it's doing on the screen.  After
 it finishes, be sure to pop it out of the player and put it back in -- that
 shows what happens when it discovers old files in the BUDA.
+
+See the screenshots in the doc directory to see what this should look
+like.
