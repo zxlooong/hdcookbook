@@ -157,10 +157,18 @@ public abstract class Feature {
      * Free any resources held by this feature.  It is the opposite of
      * initialize().  
      * <p>
-     * It's possible an active segment may be destroyed.  For example,
+     * Features are deactivated before they are destroyed.  For example,
      * the last segment a show is in when the show is destroyed will
-     * probably be active (and it will probably be an empty segment
-     * too!).
+     * probably be active, but it is deactivated and unsetup() is called
+     * in Show.destroy() before the features are destroyed.
+     * <p>
+     * Cloned features are handled a little differently.  They have destroy()
+     * called from within Feature.destroyClonedSubgraph().  Since cloned
+     * fetures are exempt from the setup/unsetup lifecycle, the cloned feature
+     * will not be activated, but will be in a setup state when destroy()
+     * is called.  Features that support cloning must therefore release any 
+     * resources they acquired in createClone() or initializeClone() during
+     * the call to destroy().
      * <p>
      * Clients of the GRIN framework should never call this method directly.
      * Custom feature extensions must implement this method.
@@ -544,6 +552,9 @@ public abstract class Feature {
      * by a call to destroyClonedSubgraph().  This should be done when
      * the cloned subgraph is not part of any group, but before the
      * containing show is destroyed.
+     * <p>
+     * This method will cause destroy() to be called on every feature that's 
+     * a member of the cloned subgraph.
      *
      * @see #cloneSubgraph(java.util.HashMap)
      **/

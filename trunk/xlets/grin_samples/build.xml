@@ -12,6 +12,7 @@
             <ant dir="GrinBunny"/>
             <ant dir="Scripts/CustomFeature"/> 
             <ant dir="Scripts/DrawingOptimization"/>        
+            <ant dir="Scripts/ShowTop"/>        
             <ant dir="Scripts/Translation"/>                  
             <ant dir="Scripts/VisualRCHandler"/>         
             <ant dir="BouncingReddy"/>         
@@ -21,7 +22,8 @@
             <ant dir="HelloGrinWorld" target="test"/>          
             <ant dir="GrinBunny" target="test"/>          
             <ant dir="Scripts/CustomFeature" target="autotest-grinview"/> 
-            <ant dir="Scripts/DrawingOptimization" target="autotest-grinview"/>        
+            <ant dir="Scripts/DrawingOptimization" target="autotest-grinview"/> 
+            <ant dir="Scripts/ShowTop" target="autotest-grinview"/> 
             <ant dir="Scripts/Translation" target="autotest-grinview"/>
             <ant dir="Scripts/VisualRCHandler" target="autotest-grinview"/>
             <ant dir="BouncingReddy" target="test"/>         
@@ -33,6 +35,7 @@
             <ant dir="SimpleGame" target="clean"/>     
             <ant dir="Scripts/CustomFeature" target="clean"/> 
             <ant dir="Scripts/DrawingOptimization" target="clean"/>        
+            <ant dir="Scripts/ShowTop" target="clean"/>        
             <ant dir="Scripts/Translation" target="clean"/>                  
             <ant dir="Scripts/VisualRCHandler" target="clean"/>         
             <ant dir="BouncingReddy" target="clean"/>         

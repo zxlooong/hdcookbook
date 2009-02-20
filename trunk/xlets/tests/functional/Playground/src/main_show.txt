@@ -21,6 +21,8 @@ exports
 	F:SM.Arc
         F:OffScreenImagePosition
         F:MyShow
+	F:IC.Image
+	F:IC.Group
     } handlers {
     } named_commands {
 	C:GotoAssemblyCloneTest
@@ -68,7 +70,7 @@ feature text F:MainText
 	    "     3 - Show programmatic control of scene graph"
 	    "     4 - Run show with extension feature"
 	    "     5 - Run regression test for issue 121 (fade and redisplay)"
-	    "     6 - Run regression test for issue 131 (assembly and cloning)"
+	    "     6 - Run regression test for issues 131, 143 (assembly and cloning)"
 	    "     7 - Run test for issue 134 (falling behind in nextFrame()"
             "     8 - Run test for issue 138 (offscreen image)"
             "     9 - Set/Unset a clip region around the show (issue 139)"
@@ -436,7 +438,8 @@ segment S:FadeTest_2
 
 feature text F:AC.Text 
 	left 200 top 200 {
-		"If you see this, it worked.  Press enter."
+		"If you see this, The issue 131 test worked."
+		"Press enter for image clone test."
 	}
 	SansSerif plain 72 { { 0 255 0 255 } }
 	background { 0 0 0 255 }  ;
@@ -473,12 +476,60 @@ segment S:AssemblyCloneTest_2
 	H:ACTest
     } next {
 	java_command [[ getMainDirector().destroyAssemblyCloneTest(); ]]
+	activate_segment S:IC.Start ;	# Chain to image clone test
+    }
+;
+
+rc_handler key_pressed H:ACTest { enter } execute { segment_done ; } ;
+
+###################################################################
+#	    IMAGE CLONE TEST (Issue 143 regression test)          #
+###################################################################
+
+
+feature text F:IC.Text 
+	left 200 top 200 {
+		"If you see this, The issue 143 test worked."
+		"Press enter."
+	}
+	SansSerif plain 72 { { 0 255 0 255 } }
+	background { 0 0 0 255 }  ;
+
+feature fixed_image F:IC.Image ( left 1050 middle 580 )
+	"images/spoo2.png"
+;
+
+feature group F:IC.Group { } ;
+
+segment S:IC.Start
+   active {
+    } setup {
+	F:Everything
+	F:IC.Text
+	F:IC.Image
+	F:IC.Group
+    } rc_handlers {
+    } next {
+	java_command [[ getMainDirector().cloneImageTestSetup(); ]]
+	activate_segment S:IC.2 ;
+    }
+;
+
+segment S:IC.2
+    active {
+	F:IC.Text
+	F:IC.Group
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:ACTest
+    } next {
+	java_command [[ getMainDirector().cloneImageTestDestroy(); ]]
 	activate_segment S:Main ;
     }
 ;
 
 
-rc_handler key_pressed H:ACTest { enter } execute { segment_done ; } ;
 
 
 ######################################################

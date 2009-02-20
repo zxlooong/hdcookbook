@@ -399,6 +399,26 @@ public class MainDirector extends Director {
             assembly.setCurrentFeature(features[0]);
         }
     }
+
+
+    //###################################################################
+    //#	    IMAGE CLONE TEST (Issue 143 regression test)  	        #
+    //###################################################################
+
+    FixedImage imageClone;
+
+    public void cloneImageTestSetup() {
+	FixedImage fi = (FixedImage) getFeature("F:IC.Image");
+	imageClone = (FixedImage) fi.cloneSubgraph(new HashMap());
+	Group g = (Group) getFeature("F:IC.Group");
+	g.resetVisibleParts(new Feature[] { imageClone });
+    }
+
+    public void cloneImageTestDestroy() {
+	Group g = (Group) getFeature("F:IC.Group");
+	g.resetVisibleParts(null);
+	imageClone.destroyClonedSubgraph();
+    }
     
 
 }

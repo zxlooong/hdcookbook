@@ -34,6 +34,7 @@
           <ant dir="bumf" target="clean"/>  
           <ant dir="playlist" target="clean"/>             
           <ant dir="logger" target="clean"/>         
+          <ant dir="xmldata/bumf" target="clean"/>         
 	</target>
 
 	<target name="spotless" depends="clean">

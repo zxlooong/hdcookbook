@@ -256,8 +256,8 @@ public class RCKeyEvent extends Command {
 
     /**
      * A bitmask value is assigned to each remote control key.  Since
-     * there are 19 keys we consider and 32 bits in an int, there's plenty
-     * of room in an int.  Using a bitmask lets us check a key against
+     * there are 27 keys we consider and 32 bits in an int, there's 
+     * room in an int.  Using a bitmask lets us check a key against
      * a set of expected keys very efficiently.
      * 
      * @return The mask for this key.

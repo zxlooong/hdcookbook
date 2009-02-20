@@ -20,7 +20,7 @@
               .
         Could not find bd-j platform classes at ${bdj.classes}.
         Please change the value of the "HDC_BDJ_PLATFORM_CLASSES" property 
-        in the ${basedir}/../../../vars.properties file, or the value of the
+        in the ${top.dir}/user.vars.properties file, or the value of the
         "bdj.classes" in the ${basedir}/build.properties file.
                  
         Don't be alarmed, this is a configuration error.

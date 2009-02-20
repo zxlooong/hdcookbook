@@ -107,14 +107,17 @@ public class FixedImage extends Feature implements Node, SetupClient {
 	}
 	FixedImage result = new FixedImage(show);
 	result.placement = placement;
-	result.fileName = fileName;
+	result.fileName = fileName;	// null if image replaced
 	if (scaledBounds != null) {
 	    result.scaledBounds = new Rectangle(scaledBounds);
 	}
-	result.image = ImageManager.getImage(fileName);
+	result.image = image;
+	ImageManager.getImage(image);
 		// This increments the reference count of this ManagedImage,
 		// which is necessary because when the clone is destroyed,
 		// it will decrement that reference count.
+	result.image.prepare();
+		// Balanced by an unprepare in destroy()
 	result.imageSetup = true;
 	result.setupMode = true;
 	return result;
@@ -233,6 +236,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
 	    ImageManager.ungetImage(image);
 	}
 	image = newImage;
+	fileName = null;
 	imageChanged = true;
     }
 
@@ -247,6 +251,14 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * too!).
      **/
     public void destroy() {
+	if (setupMode) {
+	    // That is, if this is a cloned feature
+	    if (Debug.ASSERT && !imageSetup) {
+		Debug.assertFail();
+	    }
+	    image.unprepare();
+		// This balances the image.prepare() in createClone().
+	}
 	ImageManager.ungetImage(image);
     }
 

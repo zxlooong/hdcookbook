@@ -72,6 +72,15 @@ information or have any questions.
         <delete dir="${dist.dir}"/>
         <delete file="${ant.project.name}.zip"/>
     </target>
+    <target name="spotless" depends="clean">
+        <delete file="keystore.store"/>
+        <delete file="app.discroot.crt"/>       <!-- Mac name -->
+        <delete file="appcert.cer"/>            <!-- Windows name -->
+        <delete file="appcert.csr"/>
+	<delete file="bu.discroot.crt"/>
+        <delete dir="META-INF"/>
+    </target>
+
     
     <target name="compile" depends="init" 
             description="Compiles the sources">
