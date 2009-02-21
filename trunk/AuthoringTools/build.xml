@@ -10,10 +10,12 @@
             
         <target name="invoke-all">
             <ant dir="grin"/>
+            <ant dir="profiler"/>
         </target>           
         
 	<target name="clean">         
 	  <ant dir="grin" target="clean"/> 
+	  <ant dir="profiler" target="clean"/> 
 	</target>
 
 	<target name="spotless" depends="clean">

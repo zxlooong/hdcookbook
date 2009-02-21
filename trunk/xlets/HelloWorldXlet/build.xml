@@ -26,7 +26,8 @@ information or have any questions.
 <project name="HelloTVXlet" default="all" basedir=".">  
 
   <!-- Property Definitions -->
-    <property file="build.properties"/>
+    <property file="user.vars.properties"/>
+    <property file="vars.properties"/>
     <property name="src.dir"         value="src"/>
     <property name="build.dir"       value="build"/>
     <property name="bdmv.src.dir"    value="bdmv"/>
@@ -53,13 +54,13 @@ information or have any questions.
               .
         Could not find bd-j platform classes at ${bdj.classes}.
         Please change the value of the "bdj.classes" property 
-        in the ${basedir}/build.properties file.
+        in the ${basedir}/user.vars.properties file.
         </fail>
         <available file="${id.jar}" type="file" property="id.ok"/>
         <fail unless="id.ok"> 
               .
         Could not find id.jar file at ${id.jar}, available in the hdcookbook
-        repository.  Please configure the ${basedir}/build.properties file.
+        repository.  Please configure the ${basedir}/user.vars.properties file.
         </fail>
     </target>
     

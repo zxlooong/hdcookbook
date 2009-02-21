@@ -52,13 +52,17 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package com.hdcookbook.grin.util;
 
 import com.hdcookbook.grinxlet.DebugLog;
 
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Debugging support.  This overrides the version in the GRIN library, to redirect
@@ -67,7 +71,7 @@ import java.io.PrintWriter;
  * @author Bill Foote (http://jovial.com)
  */
 public class Debug {
- 
+
     /**
      * Variable to say that assertions are enabled.  If
      * set false, then javac should strip all assertions
@@ -84,30 +88,63 @@ public class Debug {
      * for Blu-Ray, since PBP 1.0 is based on JDK 1.3.
      **/
     public final static boolean ASSERT = true;
-
     /**
      * Debug level.  2 = noisy, 1 = some debug, 0 = none.
      **/
     public final static int LEVEL = 2;
-    
+
+    /**
+     * Variable to say if time profiling is enabled.
+     * <p>
+     * Usage:
+     * <pre>
+     *     private static byte[] PROFILE_TIMER_1;
+     *     static {
+     *          if (Debug.PROFILE) {
+     *              PROFILE_TIMER_1 = Debug.makeProfileTimer("My animation");
+     *          }
+     *      }
+     *      <...>
+     *      public void myMethod() {
+     *          int token;
+     *     	    if (Debug.PROFILE) {
+     *     	    	Debug.initProfiler(2000, "127.0.0.1");
+     *              token = Debug.startTimer(PROFILE_TIMER_1);
+     *          }
+     *          doTheThingIWantMeasured();
+     *          if (Debug.PROFILE) {
+     *          	Debug.stopTimer(token);
+     *          	Debug.doneProfiling();
+     *          }
+     *      }
+     * </pre>
+     **/
+    public final static boolean PROFILE = true;
+    public final static byte TIMER_START = 0;
+    public final static byte TIMER_STOP = 1;
+    private static DatagramSocket socket;
+    private static DatagramPacket packet;
+    private static byte[] stopBuf = new byte[5];
+    private static int token = 0;
+
     private Debug() {
     }
-    
+
     public static void println() {
-	if (LEVEL > 0) {
-	    println("");
-	}
+        if (LEVEL > 0) {
+            println("");
+        }
     }
-    
+
     public static void println(Object o) {
-	if (LEVEL > 0) {
-	    System.err.println(o);
-	    if (o == null) {
-		DebugLog.println("" + null);
-	    } else {
-		DebugLog.println(o.toString());
-	    }
-	}
+        if (LEVEL > 0) {
+            System.err.println(o);
+            if (o == null) {
+                DebugLog.println("" + null);
+            } else {
+                DebugLog.println(o.toString());
+            }
+        }
     }
 
     /**
@@ -118,14 +155,14 @@ public class Debug {
      * so that the developer notices immediately, and sees the message.
      **/
     public static void assertFail(String msg) {
-	if (ASSERT) {
-	    try {
-		throw new RuntimeException("\n***  Assertion failure:  " + msg + "  ***\n");
-	    } catch (RuntimeException ex) {
-		printStackTrace(ex);
-	    }
-	    AssetFinder.abort();
-	}
+        if (ASSERT) {
+            try {
+                throw new RuntimeException("\n***  Assertion failure:  " + msg + "  ***\n");
+            } catch (RuntimeException ex) {
+                printStackTrace(ex);
+            }
+            AssetFinder.abort();
+        }
     }
 
     /**
@@ -136,9 +173,9 @@ public class Debug {
      * so that the developer notices immediately, and sees the message.
      **/
     public static void assertFail() {
-	if (ASSERT) {
-	    assertFail("");
-	}
+        if (ASSERT) {
+            assertFail("");
+        }
     }
 
     /**'
@@ -154,13 +191,112 @@ public class Debug {
      * </pre>
      **/
     public static void printStackTrace(Throwable t) {
-	if (LEVEL > 0) {
-	    StringWriter sw = new StringWriter();
-	    PrintWriter pw = new PrintWriter(sw);
-	    t.printStackTrace(pw);
-	    pw.close();
-	    println(sw.toString());
-	}
+        if (LEVEL > 0) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            t.printStackTrace(pw);
+            pw.close();
+            println(sw.toString());
+        }
     }
 
+    /**
+     * Initializes this class with the network address of the
+     * remote computer where profiling is done.
+     *
+     * @param port The UDP port on which the remote computer is waiting for
+     *             data
+     * @param host The hostname or the IP address of the remote computer
+     */
+    public static void initProfiler(int port, String host) {
+        InetAddress addr = null;
+        try {
+            // get the inet address from the string
+            addr = InetAddress.getByName(host);
+            socket = new DatagramSocket();
+            packet = new DatagramPacket(stopBuf, stopBuf.length,
+                                        addr, port);
+        } catch (IOException e) {
+            printStackTrace(e);
+        } 
+    }
+
+    /**
+     * Allocates buffer and returns UTF-8 bytes for the string representing
+     * profile information. This method is meant to be called by the application
+     * during class loading:
+     * Usage:
+     * <p>
+     * <pre>
+     *     private static byte[] PROFILE_TIMER_1;
+     *     static {
+     *          if (Debug.PROFILE) {
+     *              PROFILE_TIMER_1 = Debug.makeProfileTimer("my animation");
+     *          }
+     *     }
+     * </pre>
+     * @param description of the task that is being profiled.
+     * @return A UTF-8 encoded byte array representing the description.
+     */
+    public static byte[] makeProfileTimer(String description) {
+        byte[] utf8Buf = null;
+        try {
+            utf8Buf = description.getBytes("UTF-8");
+         } catch (UnsupportedEncodingException e) {
+            printStackTrace(e);
+         }
+         byte[] retBuf = new byte[(utf8Buf.length + 5)];
+         System.arraycopy(utf8Buf, 0,
+                         retBuf, 5, utf8Buf.length);
+         utf8Buf = null;
+         return retBuf;
+    }
+
+    /**
+     * Indicates profiling is over, releases the network resources.
+     */
+    public static synchronized void doneProfiling() {
+        socket.close();
+    }
+
+    /**
+     * Signals starting the timer on the remote computer.
+     *
+     * @param description Description of the task that is timed
+     * @return Returns the token for the task that is timed
+     */
+    public static synchronized int startTimer(byte[] startBuf) {
+        token++;
+        startBuf[0] = (byte) TIMER_START;
+        startBuf[1] = (byte) ((token >> 24) & 0xff);
+        startBuf[2] = (byte) ((token >> 16) & 0xff);
+        startBuf[3] = (byte) ((token >> 8) & 0xff);
+        startBuf[4] = (byte) (token & 0xff);
+        try{
+            packet.setData(startBuf);
+            socket.send(packet);
+        } catch (IOException e) {
+            Debug.printStackTrace(e);
+        }
+        return token;
+    }
+
+    /**
+     * Signals stopping the timer on the remote computer.
+     *
+     * @param token Token for the task that is done.
+     */
+    public synchronized static void stopTimer(int tk) {
+        stopBuf[0] = (byte) TIMER_STOP;
+        stopBuf[1] = (byte) ((tk >> 24) & 0xff);
+        stopBuf[2] = (byte) ((tk >> 16) & 0xff);
+        stopBuf[3] = (byte) ((tk >> 8) & 0xff);
+        stopBuf[4] = (byte) (tk & 0xff);
+        try{
+            packet.setData(stopBuf);
+            socket.send(packet);
+        } catch (IOException e) {
+            Debug.printStackTrace(e);
+        }
+    }
 }

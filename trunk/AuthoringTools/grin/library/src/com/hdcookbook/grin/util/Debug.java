@@ -52,7 +52,6 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package com.hdcookbook.grin.util;
 
 /**
@@ -62,7 +61,7 @@ package com.hdcookbook.grin.util;
  * @author Bill Foote (http://jovial.com)
  */
 public class Debug {
- 
+
     /**
      * Variable to say that assertions are enabled.  If
      * set false, then javac should strip all assertions
@@ -79,25 +78,54 @@ public class Debug {
      * for Blu-Ray, since PBP 1.0 is based on JDK 1.3.
      **/
     public final static boolean ASSERT = true;
-
     /**
      * Debug level.  2 = noisy, 1 = some debug, 0 = none.
      **/
     public final static int LEVEL = 2;
-    
+
+    /**
+     * Variable to say if time profiling is enabled.
+     * <p>
+     * Usage:
+     * <pre>
+     *     private static byte[] PROFILE_TIMER_1;
+     *     static {
+     *          if (Debug.PROFILE) {
+     *              PROFILE_TIMER_1 = Debug.makeProfileTimer("My animation");
+     *          }
+     *      }
+     *      <...>
+     *      public void myMethod() {
+     *          int token;
+     *     	    if (Debug.PROFILE) {
+     *     	    	Debug.initProfiler(2000, "127.0.0.1");
+     *              token = Debug.startTimer(PROFILE_TIMER_1);
+     *          }
+     *          doTheThingIWantMeasured();
+     *          if (Debug.PROFILE) {
+     *          	Debug.stopTimer(token);
+     *          	Debug.doneProfiling();
+     *          }
+     *      }
+     * </pre>
+     **/
+    public final static boolean PROFILE = false;
+    public final static byte TIMER_START = 0;
+    public final static byte TIMER_STOP = 1;
+
     private Debug() {
     }
-    
+
     public static void println() {
-	if (LEVEL > 0) {
-	    println("");
-	}
+        if (LEVEL > 0) {
+            println("");
+        }
     }
-    
+
     public static void println(Object o) {
-	if (LEVEL > 0) {
-	    System.err.println(o);
-	}
+        if (LEVEL > 0) {
+            System.err.println(o);
+        }
     }
 
     /**
@@ -108,11 +136,11 @@ public class Debug {
      * so that the developer notices immediately, and sees the message.
      **/
     public static void assertFail(String msg) {
-	if (ASSERT) {
-	    Thread.dumpStack();
-	    System.err.println("\n***  Assertion failure:  " + msg + "  ***\n");
-	    AssetFinder.abort();
-	}
+        if (ASSERT) {
+            Thread.dumpStack();
+            System.err.println("\n***  Assertion failure:  " + msg + "  ***\n");
+            AssetFinder.abort();
+        }
     }
 
     /**
@@ -123,13 +151,12 @@ public class Debug {
      * so that the developer notices immediately, and sees the message.
      **/
     public static void assertFail() {
-	if (ASSERT) {
-	    assertFail("");
-	}
+        if (ASSERT) {
+            assertFail("");
+        }
     }
 
-
-    /**'
+    /**
      * Print a stack trace to the debug log, if Debug.LEVEL > 0.  Note 
      * that you can also easily use this for the equivalent of 
      * <code>Thread.dumpStack()</code> using this bit of code:
@@ -142,6 +169,62 @@ public class Debug {
      * </pre>
      **/
     public static void printStackTrace(Throwable t) {
-	t.printStackTrace();
+        t.printStackTrace();
+    }
+
+    /**
+     * Allocates buffer and returns UTF-8 bytes for the string representing
+     * profile information. This method is meant to be called by the application
+     * during class loading:
+     * Usage:
+     * <p>
+     * <pre>
+     *     private static byte[] PROFILE_TIMER_1;
+     *     static {
+     *          if (Debug.PROFILE) {
+     *              PROFILE_TIMER_1 = Debug.makeProfileTimer("my animation");
+     *          }
+     *     }
+     * </pre>
+     * @param description of the task that is being profiled.
+     * @return A UTF-8 encoded byte array representing the description.
+     */
+    public static byte[] makeProfileTimer(String description) {
+        return null;
+    }
+
+    /**
+     * Initializes this class with the network address of the
+     * remote computer where profiling is done.
+     *
+     * @param port The UDP port on which the remote computer is waiting for
+     *             data
+     * @param host The hostname or the IP address of the remote computer
+     */
+    public static void initProfiler(int port, String host) {
+    }
+
+    /**
+     * Indicates profiling is over, releases the network resources.
+     */
+    public static void doneProfiling() {
+    }
+
+    /**
+     * Signals starting the timer on the remote computer.
+     *
+     * @param description Description of the task that is timed.
+     * @return Returns the token for the task that is timed.
+     */
+    public static int startTimer(byte[] description) {
+        return 0;
+    }
+
+    /**
+     * Signals stopping the timer on the remote computer.
+     *
+     * @param token Token for the task that is done.
+     */
+    public static void stopTimer(int token) {
     }
 }
