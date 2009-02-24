@@ -257,6 +257,13 @@ public class VisualRCHandler extends RCHandler implements Node {
 	// ignored
 	return false;
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public boolean handleKeyTyped(RCKeyEvent ke, Show caller) {
+	return false;
+    }
     
     /**
      * @inheritDoc

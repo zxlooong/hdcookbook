@@ -56,22 +56,41 @@ package com.hdcookbook.grin.input;
 import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
+import com.hdcookbook.grin.input.RCKeyEvent;
 import java.io.IOException;
 
 public interface SERCHandler { 
 
     /**
      * Get the bitmask formed by or-ing together the mask of all key pressed
-     * events we're interested in.
+     * events we're interested in.  This is used to determine if a Show is
+     * currently interested in receiving a keypress; a bit in the bitmask
+     * needen't be unique, if a set of keys go together as a group.
+     *
+     * @see Show#handleKeyPressed(int)
      **/
     public int getKeyPressedInterestMask();
 
     /**
      * Get the bitmask formed by or-ing together the mask of all key released
-     * events we're interested in.
+     * events we're interested in.  This is used to determine if a Show is
+     * currently interested in receiving a keypress; a bit in the bitmask
+     * needen't be unique, if a set of keys go together as a group.
+     *
+     * @see Show#handleKeyReleased(int)
      **/
     public int getKeyReleasedInterestMask();
-   
+
+    /**
+     * Get the bitmask formed by or-ing together the mask of all key typed
+     * events we're interested in.  This is used to determine if a Show is
+     * currently interested in receiving a keypress; a bit in the bitmask
+     * needen't be unique, if a set of keys go together as a group.
+     *
+     * @see Show#handleKeyTyped(RCKeyEvent)
+     **/
+    public int getKeyTypedInterestMask();
 }

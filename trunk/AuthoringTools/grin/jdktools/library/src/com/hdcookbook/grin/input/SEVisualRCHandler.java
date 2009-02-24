@@ -258,6 +258,13 @@ public class SEVisualRCHandler
 	return 0;
     }
 
+    /**
+     * @inheritDoc
+     **/
+    public int getKeyTypedInterestMask() {
+	return 0;
+    }
+
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException {
         

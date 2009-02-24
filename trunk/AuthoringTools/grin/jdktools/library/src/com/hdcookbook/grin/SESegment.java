@@ -102,13 +102,16 @@ public class SESegment extends Segment implements SENode {
         this.rcHandlers = rcHandlers;
 	int pressedMask = 0;
 	int releasedMask = 0;
+	int typedMask = 0;
 	for (int i = 0; i < rcHandlers.length; i++) {
 	    SERCHandler h = (SERCHandler) rcHandlers[i];
 	    pressedMask = pressedMask | h.getKeyPressedInterestMask();
 	    releasedMask = releasedMask | h.getKeyReleasedInterestMask();
+	    typedMask = typedMask | h.getKeyTypedInterestMask();
 	}
 	this.rcPressedInterest = pressedMask;
 	this.rcReleasedInterest = releasedMask;
+	this.keyTypedInterest = typedMask;
     }
 
     
@@ -124,6 +127,7 @@ public class SESegment extends Segment implements SENode {
         out.writeCommands(getNextCommands());
 	out.writeInt(rcPressedInterest);
 	out.writeInt(rcReleasedInterest);
+	out.writeInt(keyTypedInterest);
     }
 
     public String getRuntimeClassName() {

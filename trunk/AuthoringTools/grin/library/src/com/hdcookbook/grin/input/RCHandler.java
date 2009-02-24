@@ -99,8 +99,8 @@ public abstract class RCHandler {
      }
     
     /** 
-     * Handle a remote control key press.  This is called on the remote
-     * control input thread, but Show ensures that it is called at a
+     * Handle a remote control key press.  This is called on the 
+     * animation thread, at a
      * time when it's safe to modify the scene graph.  The show lock will
      * be held, and the show won't be between a call to addDisplayAreas()
      * and paintFrame().
@@ -111,8 +111,7 @@ public abstract class RCHandler {
     
     /** 
      * Handle a remote control key release.  This is not supported on
-     * all devices.  This is called on the remote
-     * control input thread, but Show ensures that it is called at a
+     * all devices.  This is called on the animation thread, at a
      * time when it's safe to modify the scene graph.  The show lock will
      * be held, and the show won't be between a call to addDisplayAreas()
      * and paintFrame().
@@ -120,6 +119,18 @@ public abstract class RCHandler {
      * @return true if the keypress is used
      **/
     abstract public boolean handleKeyReleased(RCKeyEvent ke, Show caller);
+
+    /** 
+     * Handle a key typed event.  Key typed events can be part of a GRIN
+     * extension; see the protected constructor of RCKeyEvent for details.
+     * This is called on the animatino thread when it's safe to modify the 
+     * scene graph.  The show lock will
+     * be held, and the show won't be between a call to addDisplayAreas()
+     * and paintFrame().
+     *
+     * @return true if the keypress is used
+     **/
+    abstract public boolean handleKeyTyped(RCKeyEvent ke, Show caller);
    
     /** 
      * @return true if something is done with the mouse

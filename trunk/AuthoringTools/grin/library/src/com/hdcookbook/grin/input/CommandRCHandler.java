@@ -105,6 +105,13 @@ public class CommandRCHandler extends RCHandler implements Node {
 	    return false;
 	}
     }
+
+    /**
+     * @inheritDoc
+     **/
+    public boolean handleKeyTyped(RCKeyEvent ke, Show caller) {
+	return false;
+    }
     
     /**
      * @inheritDoc

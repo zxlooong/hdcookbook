@@ -31,8 +31,7 @@ information or have any questions.
     <property name="PROFILER_JAR"  value="${PROFILER_DEST}/profiler.jar"/>
     
     <target name="clean">
-	    <delete file="${PROFILER_DEST}/${PROFILER_JAR}"/>
-            <delete dir="${PROFILER_DEST}/classes"/>
+            <delete dir="${PROFILER_DEST}"/>
     </target>
 
     <target name="init">

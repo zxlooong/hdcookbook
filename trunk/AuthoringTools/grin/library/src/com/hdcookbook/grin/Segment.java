@@ -89,15 +89,21 @@ public class Segment implements Node {
     protected Command[] nextCommands;
     protected RCHandler[] rcHandlers;
     /** 
-     * The bitmask formed by or-ing the set of remote control key presses
+     * The bitmask is formed by or-ing the set of remote control key presses
      * this segment has handlers for.
      **/
     protected int rcPressedInterest;
     /** 
-     * The bitmask formed by or-ing the set of remote control key releases
+     * The bitmask is formed by or-ing the set of remote control key releases
      * this segment has handlers for.
      **/
     protected int rcReleasedInterest;
+    /**
+     * This bitmask is formed by or-ing the set of key typed events
+     * this segment has handlers for.
+     **/
+    protected int keyTypedInterest;
+
     private boolean active = false;
     private boolean segmentSetupComplete;
 
@@ -430,6 +436,21 @@ public class Segment implements Node {
 	return false;
     }
     
+    //
+    // Called from Show with the Show lock held
+    //
+    boolean handleKeyTyped(RCKeyEvent re, Show caller) {
+	if (rcHandlers == null) {
+	    return false;
+	}
+	for (int i = 0; i < rcHandlers.length; i++) {
+	    if (rcHandlers[i].handleKeyTyped(re, caller)) {
+		return true;
+	    }
+	}
+	return false;
+    }
+    
     // Called from show with show lock held
     boolean handleMouse(int x, int y, boolean activate) {
         if (rcHandlers == null) {
@@ -456,6 +477,7 @@ public class Segment implements Node {
         this.nextCommands = in.readCommands();
 	this.rcPressedInterest = in.readInt();
 	this.rcReleasedInterest = in.readInt();
+	this.keyTypedInterest = in.readInt();
     }
 
     /**

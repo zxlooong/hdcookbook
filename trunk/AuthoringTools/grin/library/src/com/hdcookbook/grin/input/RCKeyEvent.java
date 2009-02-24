@@ -74,12 +74,24 @@ import java.awt.event.KeyEvent;
  * This class is used to manage constants related to the remote
  * control keys.  Instances of RCKeyEvent can be queued as GRIN
  * commands; when they are executed, the show will process the
- * keystroke.
+ * keystroke.  The built-in RCKeyEvent class is used for key pressed
+ * and key released events, taken from a strictly limited set of keys.
+ * <p>
+ * If desired, a GRIN extension can subclass RCKeyEvent to add support for
+ * key typed events.  GRIN doesn't really support key typed events, but
+ * it does provide support for queuing them and dispatching them in the
+ * animation thread (as is done with key pressed and released events).
  *
  * @author Bill Foote (http://jovial.com)
  */
 public class RCKeyEvent extends Command {
-    
+
+    //
+    // Constants for key pressed events.  Key released events are built
+    // lazily from the corresponding key pressed events.  Key typed events
+    // are not handled here; they are the responsibility of a GRIN
+    // extension, done as a subclass of RCKeyEvent.
+    //
     public static RCKeyEvent KEY_0;
     public static RCKeyEvent KEY_1;
     public static RCKeyEvent KEY_2;
@@ -216,15 +228,15 @@ public class RCKeyEvent extends Command {
 	keyByEventCode = generatePerfectHashOfEventCodes(keys);
     }
     
-    private String name;    // human-readable name, used in script file
+    private String name;    // human-readable name, used in script file.
     private int keyCode;    // java.awt.event.KeyEvent.getKeyCode()
     private int mask;       // Mask value that we assign
 
     private RCKeyEvent keyReleased;
 	// The key released event for this key.  If this instance represents
 	// a key pressed event, this will be null, or a value that's != this.
-	// If this instance represents a key released event, 
-	// "keyReleased == this" will be true.
+	// For a subclass defined to represent key typed events, this will
+	// be null, and won't be accessed.
     
     private RCKeyEvent(String name, int keyCode, int mask) {
 	super(null);	// The show data member of Command will be null
@@ -232,6 +244,41 @@ public class RCKeyEvent extends Command {
         this.keyCode = keyCode;
         this.mask = mask;
         keyByName.put(name, this);
+    }
+
+
+    /**
+     * Initialize a new key typed event.  This constructor is not used by
+     * the internal GRIN support for key pressed and key released handlers;
+     * it is intended for a subclass of RCKeyEvent that extends GRIN to
+     * support key typed events.  It is up to the extension whether or not it
+     * chooses to pre-allocate a number of constants, as is done in GRIN, or
+     * to allocate a new one with each arriving event.
+     * <p>
+     * Not all GEM devices support key typed events, nor do they have keyboards.
+     * If you extend GRIN to add support for key typed events, it's up to you
+     * how to generate the needed key typed events, e.g. by perhaps adding a 
+     * virtual keyboard.
+     * <p>
+     * NOTE:  If you subclass RCKeyEvent, be sure to override execute(Show)
+     *
+     * @param	keyCode	The VK code of the key.  This can be zero.  A subclass
+     *			will likely add a char data member to contain the 
+     *			character that is typed.
+     *
+     * @param   mask 	The bitmask of this key event.  A bit in the bitmask
+     *			can be used to identify groups of related keys.  The
+     *			bitmask is used to identify whether or not a segment
+     *			is interested in receiving key typed events from the
+     *			corresponding key group.
+     *
+     * @see #execute(Show)
+     * @see Segment#keyTypedInterest
+     **/
+    protected RCKeyEvent(int keyCode, int mask) {
+	super(null);	// The show data member of Command will be null
+	this.keyCode = keyCode;
+	this.mask = mask;
     }
 
         // constructor for key released instances.  See getKeyReleased().
@@ -290,6 +337,11 @@ public class RCKeyEvent extends Command {
 
     /**
      * @inheritDoc
+     * <p>
+     * This version of execute(Show) is only for use by the built-in GRIN
+     * support for key pressed and key released events.  If you subclass
+     * RCKeyEvent to support key typed events, be sure to override this
+     * method so that it calls Show.internalHandleKeyTypedEvent().
      **/
     public void execute(Show caller) {
 	if (isKeyPress()) {

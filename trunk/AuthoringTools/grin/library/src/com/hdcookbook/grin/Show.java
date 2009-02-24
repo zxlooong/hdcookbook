@@ -845,6 +845,40 @@ public class Show implements AnimationClient {
     }
 
     /**
+     * Called by the xlet when a key typed event is received, or generated
+     * (e.g. from a virtual keyboard).  Note that not
+     * all devices generate a key released.  In order to extend GRIN to
+     * support key typed events, a subclass of RCKeyEvent will be required;
+     * see the protected RCKeyEvent constructor for details.
+     * <p>
+     * A key typed event is queued and true is returned only if the current
+     * segment uses that key typed event.
+     *
+     * @return true	If the key typed is enqueued, and thus is expected to
+     *			be used.
+     **/
+    public boolean handleKeyTyped(RCKeyEvent typed) {
+	synchronized(pendingCommands) {
+	    if ((currentSegment.keyTypedInterest & typed.getBitMask()) == 0) {
+		return false;
+	    }
+	    pendingCommands.add(typed);
+	}
+	return true;
+    }
+
+    /**
+     * This method is to be called by a subclass of RCKeyEvent that is created
+     * by someone extending GRIN to support key typed events.
+     **/
+    public synchronized void 
+    internalHandleKeyTyped(RCKeyEvent re, Show caller) {
+	if (currentSegment != null) {
+	    currentSegment.handleKeyTyped(re, caller);
+	}
+    }
+
+    /**
      * Called by the xlet when the mouse moves.  This should be called
      * when a mouse moved event or a mouse dragged event is received.
      * <p>
