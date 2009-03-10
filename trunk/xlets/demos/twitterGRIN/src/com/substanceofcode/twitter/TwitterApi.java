@@ -209,44 +209,6 @@ public class TwitterApi {
         HttpUtil.setContentType(null);
 	}
 
-	public String requestTest() throws TwitterException {
-		String result = "";
-        HttpUtil.setBasicAuthentication("", "");
-		HttpUtil.setContentType("text/plain; charset=utf-8");
-        try {
-            String response = HttpUtil.doGet(gateway+TEST_URL, "");
-			if (response.length() > 0) {
-	            result = JSONTwitterParser.parseTest(response);
-			}
-        } catch (IOException ex) {
-            ex.printStackTrace();
-			throw new TwitterException("request "+ex);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-			throw new TwitterException("request "+ex);
-        }
-        return result;
-	}
-
-	public String requestScheduleDowntime() throws TwitterException {
-		String result = "";
-        HttpUtil.setBasicAuthentication("", "");
-		HttpUtil.setContentType("text/plain; charset=utf-8");
-        try {
-            String response = HttpUtil.doGet(gateway+SCHEDULE_DOWNTIME_URL, "");
-			if (response.length() > 0) {
-	            result = JSONTwitterParser.parseScheduleDowntime(response);
-			}
-        } catch (IOException ex) {
-            ex.printStackTrace();
-			throw new TwitterException("request "+ex);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-			throw new TwitterException("request "+ex);
-        }
-        return result;
-	}
-
 	private Status requestObject(String url, String id) throws TwitterException {
 		String response = "";
 		Status status = null;
