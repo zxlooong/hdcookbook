@@ -67,6 +67,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
 
+/**
+ * This object is used to represent a request to poll the twitter server.
+ * The information is gathered from the network on the networking thread
+ * (in the run() method), then delivered to the GRIN show as a GRIN command
+ * on the animation thread (in the execute() method).
+ **/
 class TwitterPoll extends Command implements Runnable {
 
     private TwitterDirector director;

@@ -67,6 +67,10 @@ import java.awt.FontMetrics;
 import java.text.SimpleDateFormat;
 import java.util.StringTokenizer;
 
+/**
+ * This is the "director" of the Twitter app widget.  It manages the UI,
+ * and performs its work inside the animation thread.
+ **/
 public class TwitterDirector extends Director {
 
     private static class TweetView {

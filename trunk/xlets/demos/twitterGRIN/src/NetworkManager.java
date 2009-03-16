@@ -56,6 +56,14 @@
 import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.Queue;
 
+/**
+ * This class runs a thread that is used for communicating with a server
+ * via a socket.  It accepts requests for network activity on the enqueue()
+ * method, which queues the request for execution on the networking thread.
+ * It then performs the request on the networking thread.  If used with
+ * GRIN, it is expected that the response data will be packaged as a
+ * GRIN command, for later execution back in the animation thread.
+ **/
 public class NetworkManager {
 
     static Object LOCK = new Object();		// Also needed by XletDirector
