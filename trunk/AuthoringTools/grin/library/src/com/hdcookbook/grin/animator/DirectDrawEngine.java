@@ -78,7 +78,7 @@ import java.awt.Image;
  * double-buffering, that is, platforms where HScene.isDoubleBuffered()
  * returns true.  On such platforms, repaint draw will save memory, and
  * on some implementations of platform double buffering, repaint draw
- * may even proove to be faster.
+ * may even prove to be faster.
  * <p>
  * Direct draw also has the drawback (no pun intended) that you can't
  * draw widgets in back of or in front of the area managed by the
@@ -213,6 +213,7 @@ public class DirectDrawEngine extends ClockBasedEngine {
 	componentG.setColor(transparent);
 	componentG.fillRect(0, 0, getWidth(), getHeight());
 	Toolkit.getDefaultToolkit().sync();
+	container.remove(ddComponent);
 	AssetFinder.destroyImageBuffer(buffer);
 	buffer = null;
 	bufferG = null;

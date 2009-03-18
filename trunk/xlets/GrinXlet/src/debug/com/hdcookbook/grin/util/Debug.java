@@ -138,7 +138,7 @@ public class Debug {
 
     public static void println(Object o) {
         if (LEVEL > 0) {
-            System.err.println(o);
+            System.out.println(o);
             if (o == null) {
                 DebugLog.println("" + null);
             } else {

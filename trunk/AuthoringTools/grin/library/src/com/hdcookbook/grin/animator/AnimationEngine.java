@@ -101,7 +101,6 @@ public abstract class AnimationEngine implements Runnable {
     private Rectangle lastClip = new Rectangle(); // see paintFrame
 
     private boolean needsFullPaint = true;	// First frame painted fully
-    private boolean paused = false;
     protected int modelTimeSkipped = 0;
 
 
@@ -304,11 +303,8 @@ public abstract class AnimationEngine implements Runnable {
     }
 
     /**
-     * Get the component that this animation engine renders into.  An
-     * xlet using this framework must add this component into the
-     * component hierarchy of the xlet and make it visible before
-     * the context's animationInitialize() code passed to initialize() 
-     * has completed.
+     * Get the component that this animation engine renders into.  This is
+     * added by the engine to the container.
      *
      * @return	the component, or null if initContainer hasn't been called yet.
      *
@@ -707,7 +703,7 @@ public abstract class AnimationEngine implements Runnable {
 	if (fullPaint) {
 	    renderContext.setFullPaint(0, 0, getWidth(), getHeight());
 	    // We still add the display areas, because that's also where
-	    // the client does any necessary erasing, and tracks state
+	    // the client tracks state
 	    // from frame to frame.  The contract of AnimationClient
 	    // requires that addDisplayAreas be called exactly once per
 	    // frame displayed.

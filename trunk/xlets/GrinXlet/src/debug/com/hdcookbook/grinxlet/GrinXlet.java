@@ -91,7 +91,7 @@ import org.havi.ui.event.HRcCapabilities;
 import org.bluray.ui.event.HRcEvent;
 
 /** 
- * The xlet class for a game project.  This is the debug version
+ * The xlet class for a grin-centric xlet project.  This is the debug version
  * of the xlet, with debug support turned on.
  * <p>
  * WARNING:  There are actually three copies of this class:  The debug
@@ -122,7 +122,8 @@ public class GrinXlet
     public Show show;
     Container rootContainer;
     FontFactory fontFactory = null;
-    DebugDirectDrawEngine animationEngine;
+    AnimationEngine animationEngine;
+    DebugDirectDrawEngine debugEngine = null;  // might stay null
     Director director;
 
     private String showFileName;
@@ -242,9 +243,21 @@ public class GrinXlet
 	xletWidth = rootContainer.getWidth();
 	xletHeight = rootContainer.getHeight();
         
-        animationEngine = new DebugDirectDrawEngine();
-        animationEngine.setFps(24000);
+        animationEngine = createAnimationEngine();
+	if (animationEngine instanceof DebugDirectDrawEngine) {
+	    debugEngine = (DebugDirectDrawEngine) animationEngine;
+	}
         animationEngine.initialize(this);
+    }
+
+    /**
+     * Create the animation engine for this xlet, set up for the desired
+     * framerate.
+     **/
+    protected AnimationEngine createAnimationEngine() {
+        DirectDrawEngine result = new DebugDirectDrawEngine();
+        result.setFps(24000);
+        return result;
     }
     
     public void startXlet() {

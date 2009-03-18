@@ -1,0 +1,60 @@
+
+show
+
+exports 
+    segments {
+	S:Initialize
+	S:Running	# for the debug message
+    } features {
+	F:Text
+    } handlers {
+    }
+;
+
+java_generated_class SFAACommands [[
+
+        import com.hdcookbook.grin.Show;
+
+        public class SFAACommands extends com.hdcookbook.grin.GrinXHelper {
+
+            public SFAACommands(Show show) {
+                super(show);
+            }
+
+            public SFAADirector getDirector() {
+                return (SFAADirector) show.getDirector();
+            }
+
+            JAVA_COMMAND_BODY
+
+        }
+
+]]
+
+feature text F:Text left 150 top 50 {
+	"Text goes here"
+    } SansSerif plain 32 { { 255 64 255 255 } } ;
+
+feature timer F:Heartbeat 1 repeat {
+	java_command [[ getDirector().heartbeat(); ]]
+} ;
+
+segment S:Initialize 
+    setup {
+	F:Text
+	F:Heartbeat
+    } setup_done {
+	java_command [[ getDirector().initialize(); ]]
+	activate_segment S:Running ;
+    }
+;
+
+segment S:Running
+    active {
+	F:Text
+	F:Heartbeat
+    } setup {
+    }
+;
+
+end_show

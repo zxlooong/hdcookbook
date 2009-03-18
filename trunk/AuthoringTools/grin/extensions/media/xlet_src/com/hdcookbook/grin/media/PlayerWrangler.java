@@ -278,6 +278,19 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 	}
     }
 
+    /**
+     * Returns the current media time, or -1 if no playlist has
+     * started.
+     **/
+    public long getMediaTime() {
+	Player p = thePlayer;
+	if (p == null) {
+	    return -1;
+	} else {
+	    return p.getMediaTime().getNanoseconds();
+	}
+    }
+
 
     /**
      * Stop playing a playlist.  

@@ -153,11 +153,17 @@ public class XletDirector extends Director {
     }
 
     public void setFramerate() {
-	int fpts = framerates[currFramerate];	// frames / 1001ths second
-	float fps = ((float) fpts) / 1001f;
-	String[] arr = new String[] { "Frames per second:  " + fps };
-	F_Framerate.setText(arr);
-	xlet.animationEngine.setFps(fpts);
+	if (xlet.debugEngine == null) {
+	    String[] arr = new String[] 
+	    		{ "Can't set fps on " + xlet.animationEngine } ;
+	    F_Framerate.setText(arr);
+	} else {
+	    int fpts = framerates[currFramerate];  // frames / 1001ths second
+	    float fps = ((float) fpts) / 1001f;
+	    String[] arr = new String[] { "Frames per second:  " + fps };
+	    F_Framerate.setText(arr);
+	    xlet.debugEngine.setFps(fpts);
+	}
     }
 
     /**
@@ -188,7 +194,9 @@ public class XletDirector extends Director {
 
     public void setDebugDraw(boolean value) {
 	debugDraw = value;
-	xlet.animationEngine.setDebugDraw(value);
+	if (xlet.debugEngine != null) {
+	    xlet.debugEngine.setDebugDraw(value);
+	}
     }
 
     private void displayDebugLog() {

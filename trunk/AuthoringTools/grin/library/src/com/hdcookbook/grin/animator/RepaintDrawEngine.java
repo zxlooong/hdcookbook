@@ -278,5 +278,6 @@ public class RepaintDrawEngine extends ClockBasedEngine {
      **/
     protected void terminatingEraseScreen() {
 	rdComponent.repaint();
+	container.remove(rdComponent);
     }
 }

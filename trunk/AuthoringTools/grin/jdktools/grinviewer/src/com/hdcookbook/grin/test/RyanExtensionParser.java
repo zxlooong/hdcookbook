@@ -56,12 +56,16 @@
 package com.hdcookbook.grin.test;
 
 import com.hdcookbook.grin.Show;
+import com.hdcookbook.grin.SEShowVisitor;
+import com.hdcookbook.grin.SENode;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.io.text.Lexer;
 import com.hdcookbook.grin.io.text.ExtensionParser;
+import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
 /**
@@ -76,6 +80,30 @@ public class RyanExtensionParser
    
     RyanDirector director;
 
+    private static abstract class RyanCommand extends Command implements SENode
+    {
+	public RyanCommand(Show show) {
+	    super(show);
+	}
+	public void writeInstanceData(GrinDataOutputStream out) {
+	    throw new UnsupportedOperationException("Not supported yet.");
+	}
+	public String getRuntimeClassName() {
+	    throw new UnsupportedOperationException("Not supported yet.");
+	}
+	public void accept(SEShowVisitor visitor) {
+	    visitor.visitUserDefinedCommand(this);
+	}
+	public void postProcess(ShowBuilder builder) {
+	}
+	public void changeFeatureReference(Feature from, Feature to) {
+	    throw new UnsupportedOperationException("Not supported yet.");
+	}
+    }
+
+    public RyanExtensionParser() {
+	this.director = null;	// used with GrinView
+    }
     public RyanExtensionParser(RyanDirector director) {
 	this.director = director;
     }
@@ -104,9 +132,13 @@ public class RyanExtensionParser
     {
 	Command result = null;
 	if ("ryan:start_video".equals(typeName)) {
-	    result = new Command(show) {
+	    result = new RyanCommand(show) {
 	       public void execute() { 
-		    director.startVideo();
+		    if (director == null) {
+			System.out.println("Pretending to start video");
+		    } else {
+			director.startVideo();
+		    }
 	       }
                public void readInstanceData(GrinDataInputStream in) throws IOException {
                     throw new UnsupportedOperationException("Not supported yet.");
@@ -114,27 +146,40 @@ public class RyanExtensionParser
 	    };
 	} else if ("ryan:play_mode_interactive".equals(typeName)) {
 	    final boolean val = lexer.getBoolean();
-	    result = new Command(show) {
+	    result = new RyanCommand(show) {
 	       public void execute() { 
-		    director.setInteractiveMode(val);
+		    if (director == null) {
+			System.out.println("Pretending to set interactive mode"
+					   + val);
+		    } else {
+			director.setInteractiveMode(val);
+		    }
 	       }
                public void readInstanceData(GrinDataInputStream in) throws IOException {
                     throw new UnsupportedOperationException("Not supported yet.");
                }
 	    };
 	} else if ("ryan:toggle_commentary".equals(typeName)) {
-	    result = new Command(show) {
+	    result = new RyanCommand(show) {
 	       public void execute() { 
-		    director.toggleCommentary();
+		    if (director == null) {
+			System.out.println("Pretending to toggle commentary");
+		    } else {
+			director.toggleCommentary();
+		    }
 	       }
                public void readInstanceData(GrinDataInputStream in) throws IOException {
                     throw new UnsupportedOperationException("Not supported yet.");
                }
 	    };
 	} else if ("ryan:commentary_start".equals(typeName)) {
-	    result = new Command(show) {
+	    result = new RyanCommand(show) {
 	       public void execute() { 
-		    director.startCommentary();
+		    if (director == null) {
+			System.out.println("Pretending to start commentary");
+		    } else {
+			director.startCommentary();
+		    }
 	       }
                public void readInstanceData(GrinDataInputStream in) throws IOException {
                     throw new UnsupportedOperationException("Not supported yet.");

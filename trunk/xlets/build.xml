@@ -23,6 +23,7 @@
             <ant dir="tests/functional/Playground" target="clean"/>
             <ant dir="tests/functional/ProgressivePlaylist" target="clean"/>
             <ant dir="tests/functional/StorageAccessXlets" target="clean"/> 
+            <ant dir="tests/functional/SFAATest" target="clean"/> 
             <ant dir="tests/functional/VFSTest" target="clean"/>     
             <ant dir="tests/performance/classload" target="clean"/>
 	</target>
@@ -35,6 +36,7 @@
             <ant dir="tests/functional/Playground" target="spotless"/>
             <ant dir="tests/functional/ProgressivePlaylist" target="spotless"/>
             <ant dir="tests/functional/StorageAccessXlets" target="spotless"/>
+            <ant dir="tests/functional/SFAATest" target="spotless"/> 
             <ant dir="tests/functional/VFSTest" target="spotless"/>     
             <ant dir="tests/performance/classload" target="spotless"/>
 	</target>

@@ -113,8 +113,7 @@ feature image_sequence F_play_mode_menu_interactive_act 0 378
 	    "Menus/PlayMenu/PlayMenu_InteractiveMode_" {
 		act act act sel sel sel act act act sel 
 	    } ".png"  repeat
-	    linked_to F_play_mode_menu_movie_act
-	    end_commands { segment_done ; }  ;
+	    linked_to F_play_mode_menu_movie_act ;
 
 feature image_sequence F_play_mode_menu_movie_act 0 378 
 	    "Menus/PlayMenu/PlayMenu_MovieMode_" {
@@ -240,8 +239,7 @@ feature image_sequence F_commentary_menu_count_up_on
 	    08 + + + + + + + + + + + + + + + + + + + + + + + + 
 	    09 + + + + + + + + + + + + + + + + + + + + + + + + 
 	} ".png" repeat
-	linked_to F_commentary_menu_count_up_off
-	end_commands { segment_done ; }  ;
+	linked_to F_commentary_menu_count_up_off ;
 
 feature assembly F_commentary_menu_active {
 	off  F_commentary_menu_active_off
@@ -298,8 +296,7 @@ feature image_sequence F_commentary_menu_count_down_on
 	    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
 	    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 	} ".png"  repeat
-	linked_to F_commentary_menu_count_down_off
-	end_commands { segment_done ; }  ;
+	linked_to F_commentary_menu_count_down_off ;
 
 # -- Commentary director's head
 

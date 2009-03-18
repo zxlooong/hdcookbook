@@ -230,7 +230,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 		// If we're being destroyed, bail out of the loop
 		//
 		if (destroyRequested()) {
-		    return;	// Note the finally clause below
+		    return;
 		}
 		if (Thread.interrupted()) {
 		    throw new InterruptedException();

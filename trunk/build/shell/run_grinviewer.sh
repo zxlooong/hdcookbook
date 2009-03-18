@@ -38,6 +38,8 @@ case $1 in
     ryan)
 	    ASSETS=$GRIN_BASE/jdktools/grinviewer/src/com/hdcookbook/grin/test/assets
 	    java -cp $CLASSES com.hdcookbook.grin.test.bigjdk.GrinView \
+		    -extension_parser com.hdcookbook.grin.test.RyanExtensionParser \
+		    -screensize pal -scale 1 \
 		    -asset_dir $ASSETS ryan_show.txt
 	    ;;
     *)

@@ -112,7 +112,7 @@ public class GrinXlet
     public Show show;
     Container rootContainer;
     FontFactory fontFactory = null;
-    DirectDrawEngine animationEngine;
+    AnimationEngine animationEngine;
     Director director;
 
     private String showFileName;
@@ -214,9 +214,18 @@ public class GrinXlet
 	xletWidth = rootContainer.getWidth();
 	xletHeight = rootContainer.getHeight();
 
-        animationEngine = new DirectDrawEngine();
-        animationEngine.setFps(24000);
+	animationEngine = createAnimationEngine();
         animationEngine.initialize(this);
+    }
+
+    /**
+     * Create the animation engine for this xlet, set up for the desired
+     * framerate.
+     **/
+    protected AnimationEngine createAnimationEngine() {
+	DirectDrawEngine result = new DirectDrawEngine();
+	result.setFps(24000);
+	return result;
     }
     
     public void startXlet() {

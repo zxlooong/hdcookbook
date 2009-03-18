@@ -58,7 +58,7 @@ information or have any questions.
     
     <target name="assemble-bdmv-structure" depends="generate-bdmv-files"
             description="assemble files in the build dir to create a complete
-                         blu-ray disc directoy in the dist dir.">
+                         blu-ray disc directory in the dist dir.">
         <mkdir dir="${dist.dir}/BDMV/AUXDATA"/>
         <mkdir dir="${dist.dir}/BDMV/BDJO"/>
         <mkdir dir="${dist.dir}/BDMV/CLIPINF"/>

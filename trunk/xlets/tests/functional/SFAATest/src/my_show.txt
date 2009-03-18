@@ -1,0 +1,122 @@
+
+show
+
+exports 
+    segments {
+	S:Initialize
+    } features {
+	F:Text
+	F:Playlist
+    } handlers {
+    }
+;
+
+java_generated_class MyCommands [[
+
+        import com.hdcookbook.grin.Show;
+
+        public class MyCommands extends com.hdcookbook.grin.GrinXHelper {
+
+            public MyCommands(Show show) {
+                super(show);
+            }
+
+            public MyDirector getDirector() {
+                return (MyDirector) show.getDirector();
+            }
+
+            JAVA_COMMAND_BODY
+
+        }
+
+]]
+
+feature text F:Text.Start left 50 top 50 {
+	"Starting video..."
+    } SansSerif plain 64 { { 255 255 0 255 } } ;
+
+feature text F:Text.Run left 60 top 60 {
+	"Video running."
+    } SansSerif plain 64 { { 255 255 0 255 } } ;
+
+feature group F:Wait {
+    sub_feature timer 120 {
+	segment_done ; 
+    } ;
+    sub_feature text left 50 top 50 {
+	"Waiting 5 seconds..."
+    } SansSerif plain 64 { { 255 255 0 255 } } ; 
+} ;
+
+feature extension media:playlist F:Playlist
+    "bd://0.PLAYLIST:00001"	# 00001 is name of .mpls file
+    autostart: true
+    autostop: true
+    on_media_start {
+	segment_done ;
+    } on_media_end {
+	activate_segment S:Wait ;
+    }
+;
+
+
+
+segment S:Initialize 
+    setup {
+	F:Text.Start
+	F:Text.Run
+	F:Playlist
+    } setup_done {
+	java_command [[ getDirector().initialize(); ]]
+	activate_segment S:Init.2 ;
+    }
+;
+
+segment S:Init.2
+    active {
+	F:Text.Start
+	F:Playlist
+    } setup {
+	F:Wait
+	F:Text.Run
+    } next {
+	activate_segment S:Running ;
+	java_command [[ SFAADirector.startSFAA(); ]]
+    }
+;
+
+segment S:Running
+    active {
+	F:Text.Run
+	F:Playlist
+    } setup {
+	F:Text.Start
+	F:Wait
+    }
+;
+
+segment S:Wait
+    active {
+	F:Wait
+    } setup {
+	F:Text.Start
+	F:Text.Run
+	F:Playlist
+    } next {
+	activate_segment S:WaitOver ;
+    }
+;
+
+segment S:WaitOver
+    active {
+	F:Text.Start
+	F:Playlist
+	F:Wait
+    } setup {
+	F:Text.Run
+    } next {
+	activate_segment S:Running ;
+    }
+;
+
+end_show
