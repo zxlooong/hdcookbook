@@ -184,7 +184,7 @@ class XMLParser {
                 System.out.println("code:" + fd.imageCode);
             }
             if (attrName.equals("temp")) {
-                fd.temp = st.nextToken() + "F";
+                fd.temp = st.nextToken() + " F";
                 System.out.println("temp:" + fd.temp);
             }
         }

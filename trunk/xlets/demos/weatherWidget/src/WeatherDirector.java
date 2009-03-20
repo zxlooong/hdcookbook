@@ -123,7 +123,6 @@ public class WeatherDirector extends Director {
         noWind = features[1];
 	zipCode = (Text) getFeature("F:ZipCode");
 	String[] zip = zipCode.getText();
-	WeatherMan.setZip(zip[0]);
 	zipBuf = new StringBuffer(zip[0]);
         NetworkManager.start();
     }
@@ -248,20 +247,23 @@ public class WeatherDirector extends Director {
     }
 
     void zipEntered(char key) {
-	zipBuf.append(key);
-	zipCode.setText(new String[] { zipBuf.toString()});	
+	if (zipBuf.length() < 5) {  // accepts only zip length of 5
+	    zipBuf.append(key);
+	    zipCode.setText(new String[] { zipBuf.toString()});	
+	}
     }
 
     void zipErased() {
-	if (zipBuf.length() <= 0) {
-	    return;
+	if (zipBuf.length() > 0) {
+	    zipBuf = zipBuf.deleteCharAt((zipBuf.length() - 1));
+	    zipCode.setText(new String[] { zipBuf.toString()});	
 	}
-	zipBuf = zipBuf.deleteCharAt((zipBuf.length() - 1));
-	zipCode.setText(new String[] { zipBuf.toString()});	
     }
 
     void zipDone() {
 	WeatherMan.setZip(zipBuf.toString());
+	//zipBuf.setLength(0); // editing is over;clear the zip code in the UI
+	//zipCode.setText(new String[] { zipBuf.toString()});	
 	pollWeather();
     }
 	

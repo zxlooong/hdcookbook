@@ -8,7 +8,7 @@ than the FX widget.
 
 1) RC Events for forecast and entering the zip code:
 
-The forecast information is obtained by pressing the down arrow 
+The forecast information is obtained by pressing the down or right arrow 
 button.
 
 The left arrow key can be used to erase the zip code displayed in
