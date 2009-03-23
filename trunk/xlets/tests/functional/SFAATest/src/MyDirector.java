@@ -12,6 +12,8 @@ public class MyDirector extends Director {
     public Playlist playlist;
     private int count = 0;
 
+    public static int numBuffers = -1;
+
     public MyDirector() {
     }
 
@@ -19,6 +21,10 @@ public class MyDirector extends Director {
 	PlayerWrangler.getInstance().initialize(
 		    GrinXlet.getInstance().getAnimationEngine());
 	playlist = (Playlist) getFeature("F:Playlist");
+    }
+
+    public void setNumBuffers(int num) {
+	numBuffers = num;
     }
 
     /**

@@ -49,7 +49,9 @@ public class SFAADirector extends Director implements AnimationContext {
 	} catch (Throwable t) {
 	    s2 += t;
 	}
-	text.setText(new String[] { s1, s2, s3 });
+	String s4 = "Number of SFAA buffers:  " + MyDirector.numBuffers;
+	String s5 = "Skipped frames:  " + engine.getSkippedFrames();
+	text.setText(new String[] { s1, s2, s3, s4, s5 });
     }
 
     public static void startSFAA() {
@@ -65,8 +67,10 @@ public class SFAADirector extends Director implements AnimationContext {
 	Time stop = new Time(9776422222L);
 	p.faaTimer = FrameAccurateAnimationTimer.getInstance(start, stop);
 	Dimension d = new Dimension(sfaaBounds.width, sfaaBounds.height);
+	int numBuffers = MyDirector.numBuffers;
 	SyncFrameAccurateAnimation sfaa 
-	    = SyncFrameAccurateAnimation.getInstance(d, 2, p);
+	    = SyncFrameAccurateAnimation.getInstance(d, numBuffers, p);
+	Debug.println("Created sfaa with " + numBuffers + " buffers.");
 	SFAAXlet xlet = (SFAAXlet) GrinXlet.getInstance();
 	Container c = xlet.getSFAAContainer();
 	c.add(sfaa);
@@ -78,7 +82,6 @@ public class SFAADirector extends Director implements AnimationContext {
 
     public static void stopSFAA() {
 	System.out.println("Stopping the SFAA engine");
-	Thread.currentThread().dumpStack(); // @@
 	engine.destroy();
     }
 

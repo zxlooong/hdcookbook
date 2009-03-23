@@ -209,6 +209,9 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 		    MediaLocator ml = new MediaLocator(locator);
 		    thePlayer = Manager.createPlayer(ml);
 		    newPlayer = true;
+		    if (Debug.LEVEL > 1) {
+			Debug.println("Created player on " + locator);
+		    }
 		} catch (Exception ignored) {
 		    if (Debug.LEVEL > 0) {
 			ignored.printStackTrace();
@@ -260,6 +263,9 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 	}
 	try {
 	    playlistControl.selectPlayList(locator);
+	    if (Debug.LEVEL > 1) {
+		Debug.println("Selected locator for player with " + locator);
+	    }
 	    thePlayer.start();
 	} catch (ClockStartedError ex) {
 	    // We are only called if playerStarted is false, so this must
@@ -299,6 +305,9 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 	if (Debug.ASSERT && engine == null) {
 	    Debug.assertFail();
 	}
+	if (Debug.LEVEL > 1) {
+	    Debug.println("Stopping playlist " + playlist);
+	}
 	Player stopPlayer = null;
 	synchronized(this) {
 	    if (currentPlaylist != playlist) {
@@ -334,6 +343,9 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * Callback from ControllerListener
      **/
     public void controllerUpdate(ControllerEvent event) {
+	if (Debug.LEVEL > 1) {
+	    Debug.println("Player gets controllerUpdate " + event);
+	}
 	if (event instanceof RestartingEvent) {
 	    // The restarting event is a subtype of StopEvent, and can
 	    // be generated for things like a rate change.  It's not
@@ -390,6 +402,9 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 	    if (startLocator != null) {
 		startExisting(startLocator);
 	    } else if (playerWasRunning && p != null) {
+		if (Debug.LEVEL > 1) {
+		    Debug.println("Notifying media end to playlist " + p);
+		}
 		p.notifyMediaEnd();
 		    // In the case where a new playlist has taken over
 		    // the player, startLocator will be non-null, so

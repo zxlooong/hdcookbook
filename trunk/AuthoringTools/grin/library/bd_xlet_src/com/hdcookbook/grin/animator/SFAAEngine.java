@@ -191,8 +191,8 @@ public class SFAAEngine extends AnimationEngine {
 	    bounds = new Rectangle();
 	    bounds.x = pos.x;
 	    bounds.y = pos.y;
-	    bounds.width = getWidth();
-	    bounds.height = getHeight();
+	    bounds.width = sfaa.getWidth();
+	    bounds.height = sfaa.getHeight();
 	}
 	this.bounds = bounds;
     }

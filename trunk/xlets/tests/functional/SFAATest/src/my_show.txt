@@ -31,6 +31,10 @@ java_generated_class MyCommands [[
 
 ]]
 
+feature text F:Text.InputNumber left 50 top 50 {
+	"Press 1-4 to set # of buffers..."
+    } SansSerif plain 32 { { 255 255 0 255 } } ;
+
 feature text F:Text.Start left 50 top 50 {
 	"Starting video..."
     } SansSerif plain 64 { { 255 255 0 255 } } ;
@@ -60,8 +64,34 @@ feature extension media:playlist F:Playlist
 ;
 
 
+segment S:Initialize
+    active {
+	F:Text.InputNumber
+    } rc_handlers { 
+	H:I.1 H:I.2 H:I.3 H:I.4 
+    } next {
+	activate_segment S:Init.1 ;
+    }
+;
 
-segment S:Initialize 
+rc_handler key_pressed H:I.1 { 1 } execute {
+	java_command [[ getDirector().setNumBuffers(1); ]]
+	segment_done ;
+} ;
+rc_handler key_pressed H:I.2 { 2 } execute {
+	java_command [[ getDirector().setNumBuffers(2); ]]
+	segment_done ;
+} ;
+rc_handler key_pressed H:I.3 { 3 } execute {
+	java_command [[ getDirector().setNumBuffers(3); ]]
+	segment_done ;
+} ;
+rc_handler key_pressed H:I.4 { 4 } execute {
+	java_command [[ getDirector().setNumBuffers(4); ]]
+	segment_done ;
+} ;
+
+segment S:Init.1
     setup {
 	F:Text.Start
 	F:Text.Run

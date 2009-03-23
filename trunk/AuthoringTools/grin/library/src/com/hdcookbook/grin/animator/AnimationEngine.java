@@ -441,12 +441,13 @@ public abstract class AnimationEngine implements Runnable {
      **/
     public void destroy() {
 	synchronized(this) {
-	    if (state != STATE_STOPPED) {
-		if (Debug.ASSERT && state != STATE_RUNNING) {
-		    Debug.assertFail();
-		}
-		setState(STATE_STOPPING);
+	    if (state == STATE_STOPPED) {
+		return;
 	    }
+	    if (Debug.ASSERT && state != STATE_RUNNING) {
+		Debug.assertFail();
+	    }
+	    setState(STATE_STOPPING);
 	    try {
 		//
 		// Wait until it's really terminated, so that things are
@@ -538,7 +539,7 @@ public abstract class AnimationEngine implements Runnable {
 	    Thread.currentThread().interrupt();
 	} catch (Throwable t) {
 	    if (Debug.LEVEL > 0) {
-		t.printStackTrace();
+		Debug.printStackTrace(t);
 		Debug.println("****  Exception in animation thread:  " + t);
 	    }
 	} finally {
@@ -549,6 +550,7 @@ public abstract class AnimationEngine implements Runnable {
 			c[i].destroy();
 		    } catch (Throwable t) {
 			if (Debug.LEVEL > 1) {
+			    Debug.println(this);
 			    t.printStackTrace();
 			    Debug.println("****  Exception in destroy:  " + t);
 			}
