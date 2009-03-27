@@ -1,13 +1,14 @@
 
 This directory holds GRIN extension feature for FontStrip.
 
-FontStrip extension and the image generation tool let the application 
-use set of image files containing pre-rendered characters for rendering text.  
+FontStrip extension and the image generation tool lets an application 
+to use set of image files containing pre-rendered characters for
+rendering text.  
 The tool user specifies which set of characters should be pre-rendered into 
 the character image mosaic, and FontMetrics information for each character 
 is preserved so that they can be positioned correctly to form arbitrary strings
 at runtime.  FontStrip eliminates the need to include real font files 
-(*.otf files in the AUXDATA directory for BD-J) to the application.  Unlike 
+(*.otf files in the AUXDATA directory for BD-J) in the application.  Unlike 
 font files, FontStrip carries no licensing compilication, since FontStrip 
 comes with characters needed for the associated application only, 
 which is typically much less than all available characters in a font set.  
@@ -15,14 +16,14 @@ This makes FontStrip image of a given disc impossible to be applied for
 a generic use.
 
 Also, FontStrip provides an opportunity for a content designer to 
-enhance and customize the look of font, by updating the generated font image 
-file (by adding dropshadows and so on), then generating final font image 
-mosaic from the modified file.
+enhance and customize the look of the font, by updating the generated
+font image file (by adding dropshadows and so on), then generating
+final font image mosaic from the modified file.
 
 
 How To Generate Font Image Mosaics
 ==================================
-The tool to generate images are included in the "fontimagemaker.jar".  To 
+The tool to generate images is included in the "fontimagemaker.jar".  To 
 generate the intermediate font image file and the final font image mosaic, do
 
 java -jar fontimagemaker.jar -config <name of the configuratin file>
@@ -34,8 +35,8 @@ and final character image mosaics, unless the intermediate images specified in
 the configuration file are found in the asset directory.   If you are planning 
 to update the look of the font for the disc, then use the FontImageMaker to 
 first generate the design image files, update those image files, and then 
-re-run the ImaFontImageMaker tool with the identical configuration file passed 
-in as the first time, but by placing the updated files in the asset directory.
+re-run the FontImageMaker tool with an identical configuration file passed 
+in the first time, but by placing the updated files in the asset directory.
  The final image will be based on the modified design images as opposed to 
 the auto-generated ones.
 
