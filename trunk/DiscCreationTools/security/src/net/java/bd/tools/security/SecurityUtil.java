@@ -230,7 +230,7 @@ public class SecurityUtil {
          String keystoreFile = DEF_KEYSTORE_FILE;
          String keystorePassword = DEF_KEYSTORE_PASSWORD;
          String appKeyPassword = DEF_APPKEY_PASSWORD;
-         String contentSignerPassword = DEF_APPKEY_PASSWORD;
+         String contentSignerPassword;
          String contentSignerAlias; // initialized based on jar or bumf file
          String certSignerAlias = DEF_ROOTCERT_ALIAS;
          String newCertAlias;  // initialized based on root/app/binding cert
@@ -344,6 +344,9 @@ public class SecurityUtil {
             if (contentSignerAlias == null) {
                 contentSignerAlias = DEF_BUCERT_ALIAS;
             }
+            if (contentSignerPassword == null) {
+                contentSignerPassword = DEF_ROOTKEY_PASSWORD;
+            }
             return this;
         } 
         public Builder discRootFile(String file) {
@@ -357,6 +360,9 @@ public class SecurityUtil {
             this.jarfiles = files;
             if (contentSignerAlias == null) {
                 contentSignerAlias = DEF_APPCERT_ALIAS;
+            }
+            if (contentSignerPassword == null) {
+                contentSignerPassword = DEF_APPKEY_PASSWORD;
             }
             return this;
         }
@@ -522,7 +528,7 @@ public class SecurityUtil {
                                   contentSignerAlias);
             }
             PrivateKey key = (PrivateKey) store.getKey(contentSignerAlias,
-                              rootKeyPassword.toCharArray());
+                              contentSignerPassword.toCharArray());
             signer.initSign(key);
             byte[] data = readIntoBuffer(BUMFile);
             signer.update(data);
