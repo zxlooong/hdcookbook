@@ -1,4 +1,8 @@
-<html><body>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
 
 <style type="text/css">
   P.pagebreak {page-break-before: always}
@@ -310,6 +314,9 @@ Here's BNF describing the syntax of a show file:
     scale_key_frame ::=  frame_number x y x_scale y_scale [ tween_type ] "mills"
     	# The first frame must be zero
 	# The scale factor is in mills (1/1000); a factor of 1000 is 1:1 scale
+	# The x,y values are the anchor point for the scaling operation.  
+	#     Scaled objects get bigger and smaller, centered at this anchor
+	#     point.  You can also think of it as the "origin for scaling."
 
     key_frame ::= frame_number x y interpolation_type
 
@@ -387,8 +394,8 @@ Here's BNF describing the syntax of a show file:
 	# previous key frame to the present one.
 	#
 	# start is a synonym for linear.  It's intended to be
-	#    used for the first keyframe, since the tween type for the
-	#    first keyframe is meaningless anyway.
+	# used for the first keyframe, since the tween type for the
+	# first keyframe is meaningless.
 	#
 	# The other tweening types are described in 
 	# com.robertpenner.PennerEasing, and in his book, which you can
@@ -396,7 +403,7 @@ Here's BNF describing the syntax of a show file:
 	#
 	# max-error says how many units of error you're willing to tolerate
 	# when the compiler uses linear interpolation segments to approximate
-	# tweening.  It default to 0, that is, no error.  Setting a higher
+	# tweening.  It defaults to 0, that is, no error.  Setting a higher
 	# tolerance will result in a smaller .grin file and less runtime
 	# memory usage.  The grin compiler tells you how many key frames
 	# are added for interpolation due to tweening; if the number looks
@@ -580,10 +587,10 @@ Here's BNF describing the syntax of a show file:
 A string can be a sequence of characters delimited by whitespace,
 or it can be enclosed in double-quotes, with backslash as an
 escape characer if you need double-quote or backslash within a
-string..  Strings may contain newlines.
+string.  Strings may contain newlines.
 </p>
 <p>
-A show can include a <code>$include</code> director that looks like this:
+A show can include a <code>$include</code> directive that looks like this:
 <pre>
 
     ...
@@ -932,6 +939,13 @@ For information about the detailed changes in each putback since then,
 please consult the source code repository.
 </p>
 <ul>
+  <li><b>Version 0.0, circa October 2004</b>  First version of GRIN developed
+      for "Ryan's Life" demo, in collaboration with Mark Johnson at Technicolor
+      and Cédric Monnier and Nicolas Mériau at NDS France (née Canal+ 
+      Technologies).  Segments were called "phases," and assemblies and 
+      image sequences existed already.  This version was shown at a demo 
+      at the DVD Forum, running on a commercial
+      CanalSatellite STB running pJava and MHP.
   <li><b>Version 0.1, Dec. 19 2006</b>
   <ul>
     <li>Added popup_menu key
