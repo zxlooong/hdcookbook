@@ -60,6 +60,7 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.SetupClient;
@@ -119,6 +120,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
     protected int xArg;
     protected int yArg;
     protected String[] strings;
+    private CharImageInfo[][] bakedStrings = null;
     protected String   fontImageFileName;
     
     protected int hspace;
@@ -179,7 +181,10 @@ public class FontStripText extends Feature implements Node, SetupClient {
         
 	charMap = FontImageFileInfo.getCharMap(fontImageFileName);
         if (charMap == null) {
-            System.err.println("ERROR: entry for " + fontImageFileName + " not found in the info file.");
+	    if (Debug.ASSERT) {
+		Debug.println("ERROR: entry for " + fontImageFileName + " not found in the info file.");
+		Debug.assertFail();
+	    }
             loadingFailed = true;
             return;
         }        
@@ -189,8 +194,9 @@ public class FontStripText extends Feature implements Node, SetupClient {
         // We know the charactor size without loading the actual font image,
         // since the size is recorded in the fontstrip info size.
         width = 0;
+	bakedStrings = new CharImageInfo[strings.length][];
         for (int i = 0; i < strings.length; i++) {
-            int w = getStringWidth(strings[i]);
+            int w = getStringWidth(strings, bakedStrings, i);
             if (w > width) {
                 width = w;
             }
@@ -302,8 +308,8 @@ public class FontStripText extends Feature implements Node, SetupClient {
 
 	Composite old = gr.getComposite();
 	gr.setComposite(AlphaComposite.SrcOver);        
-        for (int i = 0; i < strings.length; i++) {
-            drawString(gr, strings[i], alignedX, y2);
+        for (int i = 0; i < bakedStrings.length; i++) {
+            drawString(gr, bakedStrings[i], alignedX, y2);
             y2 += ascent + descent + leading + vspace;
         }
 	gr.setComposite(old);            
@@ -331,8 +337,15 @@ public class FontStripText extends Feature implements Node, SetupClient {
         initialize();
     }
 
-    private int getStringWidth(String string) {
-        char[] chars = string.toCharArray();
+
+    // Calculate the width of strings[index], and put the result in
+    // baked[index].
+    private int getStringWidth(String[] strings, CharImageInfo[][] resultCh, 
+    			       int index)
+    {
+        char[] chars = strings[index].toCharArray();
+	CharImageInfo[] infos = new CharImageInfo[chars.length];
+	resultCh[index] = infos;
         int w = 0;
         int maxPixelWidth  = 0;
         CharImageInfo charInfo;
@@ -341,13 +354,16 @@ public class FontStripText extends Feature implements Node, SetupClient {
            charInfo = (CharImageInfo) charMap.get(new Character(chars[i]));;
             
            if (charInfo == null) {
-               System.err.println("No charInfo found for " + chars[i]);
+	       if (Debug.LEVEL > 0) {
+		   Debug.println("No charInfo found for " + chars[i]);
+	       }
                charInfo = new CharImageInfo();
                charInfo.boundRect = new Rectangle(0,0,maxAscent+maxDescent, 20);
                charInfo.baseline  = 0;
                charInfo.charRect = new Rectangle(0,0,0,0);       
                charMap.put(new Character(chars[i]), charInfo);
            }
+	   infos[i] = charInfo;
            
            int charAscent = (charInfo.baseline - charInfo.boundRect.y);
            if (this.maxAscent < charAscent) {
@@ -364,11 +380,10 @@ public class FontStripText extends Feature implements Node, SetupClient {
         return Math.max(maxPixelWidth, w);
     }
     
-    private void drawString(Graphics2D g2, String string, int x, int y) {
-        char[] chars = string.toCharArray();
-        CharImageInfo charInfo;
-        for (int i = 0; i < chars.length; i++) {
-           charInfo = (CharImageInfo) charMap.get(new Character(chars[i]));
+    private void drawString(Graphics2D g2, CharImageInfo[] string, int x, int y)
+    {
+        for (int i = 0; i < string.length; i++) {
+	    CharImageInfo charInfo = string[i];
            fontImage.drawClipped(g2,
                     x - charInfo.boundRect.x, 
                     y - charInfo.boundRect.y,
