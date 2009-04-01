@@ -51,7 +51,6 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package net.java.bd.tools.security;
 
 import java.io.File;
@@ -137,63 +136,61 @@ import org.bouncycastle.jce.provider.X509CertificateObject;
  * 3) Sign the jar using the app certificate generated for (2).
  */
 public class SecurityUtil {
-    
-   // default values
-   static final String DEF_KEYSTORE_FILE = "keystore.store";
-   static final String DEF_KEYSTORE_PASSWORD = "keystorepassword";
-   static final String DEF_APPKEY_PASSWORD = "appcertpassword";
-   static final String DEF_APPCERT_ALIAS = "appcert";
-   static final String DEF_ROOTKEY_PASSWORD = "rootcertpassword"; 
-   static final String DEF_ROOTCERT_ALIAS = "rootcert";
-   static final String DEF_BUCERT_ALIAS = "bucert";
-   static final String DEF_ONLINE_CERT_ALIAS = "onlinecert";
-   static final String DEF_APP_ALT_NAME = "app@producer.com";
-   static final String DEF_ROOT_ALT_NAME = "root@studio.com";
-   static final String DEF_APP_CERT_DN = "CN=Producer, OU=Codesigning Department, O=BDJCompany, C=US";
-   static final String DEF_ROOT_CERT_DN = "CN=Studio, OU=Codesigning Department, O=BDJCompany, C=US";
-   static final String SIG_ALG = "SHA1WithRSA";
-   static final String APP_ROOT_DISC_FILE = "app.discroot.crt";
-   static final String BU_ROOT_DISC_FILE = "bu.discroot.crt";
-   static final String ONLINE_SIG_FILE = "online.sig";
-   static final int KEY_LENGTH = 1024;
-    
-   // Intermediate files to create, will be deleted at the tool exit time;
-   // XXX Make sure they are always deleted.
-   static final String APPCSRFILE = "appcert.csr";
-   static final String APPCERTFILE = "appcert.cer";
+
+    // default values
+    static final String DEF_KEYSTORE_FILE = "keystore.store";
+    static final String DEF_KEYSTORE_PASSWORD = "keystorepassword";
+    static final String DEF_NEWKEY_PASSWORD = "appcertpassword";
+    static final String DEF_ROOTKEY_PASSWORD = "rootcertpassword";
+    static final String DEF_APPCERT_ALIAS = "appcert";
+    static final String DEF_ROOTCERT_ALIAS = "rootcert";
+    static final String DEF_BUCERT_ALIAS = "bucert";
+    static final String DEF_ONLINE_CERT_ALIAS = "onlinecert";
+    static final String DEF_APP_ALT_NAME = "app@producer.com";
+    static final String DEF_ROOT_ALT_NAME = "root@studio.com";
+    static final String DEF_APP_CERT_DN = "CN=Producer, OU=Codesigning Department, O=BDJCompany, C=US";
+    static final String DEF_ROOT_CERT_DN = "CN=Studio, OU=Codesigning Department, O=BDJCompany, C=US";
+    static final String APP_ROOT_DISC_FILE = "app.discroot.crt";
+    static final String BU_ROOT_DISC_FILE = "bu.discroot.crt";
+    static final String ONLINE_SIG_FILE = "online.sig";
+    static final String SIG_ALG = "SHA1WithRSA";
+    static final int KEY_LENGTH = 1024;
+
+    // Intermediate files to create, will be deleted at the tool exit time;
+    // XXX Make sure they are always deleted.
+    static final String APPCSRFILE = "appcert.csr";
+    static final String APPCERTFILE = "appcert.cer";
 
     // Optional fields initialized by the nested Builder class.
     String keystoreFile;
     String keystorePassword;
-    String appKeyPassword;
+    String contentSignerAlias;  // Used by Signer
     String contentSignerPassword;
-    String contentSignerAlias;
-    String certSignerAlias;
-    String newCertAlias;
+    String newCertAlias;        // Used by Cert Generator
+    String newKeyPassword;
+    String certSignerAlias;     // Used by Cert Generator
+    String certSignerPassword;
     List<String> jarfiles;
     String orgId;
-    String dn; 
+    String dn;
     String altName;
     String BUMFile;   // Binding Unit Manifest File
-    String discRootFile; 
-    
+    String discRootFile;
     boolean isRootCert = false;
     boolean isAppCert = false;
     boolean isBindingUnitCert = false;
-    
+
     // This is a special flag indicating newly added
     // jar entries (not present in the signature file of an already
     // signed jar) should be excluded from signing. 
     boolean signOriginalOnly = false;
     boolean debug = false;
-   
+
     // non-optional fields
-    String rootKeyPassword = DEF_ROOTKEY_PASSWORD;
-   
-    private KeyStore store; 
+    private KeyStore store;
     private BigInteger appCertSerNo;
     private boolean ksInitialized = false;
-   
+
     /*
      * Using Builder pattern from Effective Java Reloaded. The arguments
      * for this constructor are way too many. The Builder Pattern makes
@@ -205,11 +202,12 @@ public class SecurityUtil {
         this.orgId = b.orgId;
         this.keystoreFile = b.keystoreFile;
         this.keystorePassword = b.keystorePassword;
-        this.appKeyPassword = b.appKeyPassword;
-        this.contentSignerPassword = b.contentSignerPassword;
         this.newCertAlias = b.newCertAlias;
+        this.newKeyPassword = b.newKeyPassword;
+        this.contentSignerPassword = b.contentSignerPassword;
         this.contentSignerAlias = b.contentSignerAlias;
         this.certSignerAlias = b.certSignerAlias;
+        this.certSignerPassword = b.certSignerPassword;
         this.dn = b.dn;
         this.altName = b.altName;
         this.debug = b.debug;
@@ -220,55 +218,63 @@ public class SecurityUtil {
         this.discRootFile = b.discRootFile;
         this.jarfiles = b.jarfiles;
         this.signOriginalOnly = b.signOriginalOnly;
-        
+
         // Minor processing;append the orgid to the names
         dn = appendOrgId(dn);
     }
-    
+
     public static class Builder {
-         // Initialize with default values.
-         String keystoreFile = DEF_KEYSTORE_FILE;
-         String keystorePassword = DEF_KEYSTORE_PASSWORD;
-         String appKeyPassword = DEF_APPKEY_PASSWORD;
-         String contentSignerPassword;
-         String contentSignerAlias; // initialized based on jar or bumf file
-         String certSignerAlias = DEF_ROOTCERT_ALIAS;
-         String newCertAlias;  // initialized based on root/app/binding cert
-        
-         // Certificate data.
-         String dn;
-         String altName;
-         
-         List<String> jarfiles;
-         String orgId;
-         boolean debug = false;
-         boolean isRootCert = false;
-         boolean isAppCert = false;
-         boolean isBindingUnitCert = false;
-         boolean signOriginalOnly = false;
-         String BUMFile;
-         String discRootFile;
-         
-        public Builder() { }
-        
-        public Builder orgId(String id) {
-           this.orgId = id;
-           return this;
+        // Initialize with default values.
+
+        String keystoreFile = DEF_KEYSTORE_FILE;
+        String keystorePassword = DEF_KEYSTORE_PASSWORD;
+
+        String newCertAlias;  // initialized based on root/app/binding cert
+        String newKeyPassword;
+
+        String contentSignerAlias; // initialized based on jar or bumf file
+        String contentSignerPassword;
+
+        String certSignerAlias = DEF_ROOTCERT_ALIAS;
+        String certSignerPassword = DEF_ROOTKEY_PASSWORD;
+
+        // Certificate data.
+        String dn;
+        String altName;
+        List<String> jarfiles;
+        String orgId;
+        boolean debug = false;
+        boolean isRootCert = false;
+        boolean isAppCert = false;
+        boolean isBindingUnitCert = false;
+        boolean signOriginalOnly = false;
+        String BUMFile;
+        String discRootFile;
+
+        public Builder() {
         }
+
+        public Builder orgId(String id) {
+            this.orgId = id;
+            return this;
+        }
+
         public Builder keystoreFile(String file) {
             this.keystoreFile = file;
             return this;
         }
+
         public Builder storepass(String password) {
             this.keystorePassword = password;
             return this;
         }
+
         public Builder setRootCert() {
             this.isRootCert = true;
             setRootDefaults();
             return this;
         }
-        
+
         private void setRootDefaults() {
             if (dn == null) {
                 dn = DEF_ROOT_CERT_DN;
@@ -278,12 +284,16 @@ public class SecurityUtil {
             }
             if (newCertAlias == null) {
                 if (isRootCert) {
-                   newCertAlias = DEF_ROOTCERT_ALIAS;
+                    newCertAlias = DEF_ROOTCERT_ALIAS;
                 } else {
-                   newCertAlias = DEF_BUCERT_ALIAS;
+                    newCertAlias = DEF_BUCERT_ALIAS;
                 }
             }
+            if (newKeyPassword == null) {
+                newKeyPassword = DEF_ROOTKEY_PASSWORD;
+            }
         }
+
         public Builder setAppCert() {
             this.isAppCert = true;
             if (dn == null) {
@@ -295,50 +305,74 @@ public class SecurityUtil {
             if (newCertAlias == null) {
                 newCertAlias = DEF_APPCERT_ALIAS;
             }
+            if (newKeyPassword == null) {
+                newKeyPassword = DEF_NEWKEY_PASSWORD;
+            }
             return this;
         }
+
         public Builder setBindingUnitCert() {
             this.isBindingUnitCert = true;
             setRootDefaults();
             return this;
         }
+
         public Builder newCertAlias(String alias) {
             this.newCertAlias = alias;
+            if (isRootCert || isBindingUnitCert) {
+                certSignerAlias = newCertAlias; // self signed
+            }
             return this;
         }
+
         public Builder certSignerAlias(String alias) {
             this.certSignerAlias = alias;
             return this;
         }
+
         public Builder contentSignerAlias(String alias) {
             this.contentSignerAlias = alias;
             return this;
         }
-        
-        public Builder appPassword(String password) {
-             this.appKeyPassword = password;
-             return this;
+
+        public Builder newKeyPassword(String password) {
+            this.newKeyPassword = password;
+            if (isRootCert || isBindingUnitCert) {
+                certSignerPassword = newKeyPassword; // self signed
+            }
+            return this;
         }
+
+        public Builder certSignerPassword(String password) {
+            this.certSignerPassword = password;
+            return this;
+        }
+
         public Builder contentSignerPassword(String password) {
-             this.contentSignerPassword = password;
-             return this;
+            this.contentSignerPassword = password;
+            return this;
         }
+
         public Builder dn(String name) {
             this.dn = name;
             return this;
         }
+
         public Builder altName(String name) {
             this.altName = name;
             return this;
         }
+
         public Builder originalOnly() {
             this.signOriginalOnly = true;
             return this;
         }
+
         public Builder debug() {
             this.debug = true;
             return this;
         }
+
         public Builder bumf(String file) {
             this.BUMFile = file;
             if (contentSignerAlias == null) {
@@ -348,7 +382,8 @@ public class SecurityUtil {
                 contentSignerPassword = DEF_ROOTKEY_PASSWORD;
             }
             return this;
-        } 
+        }
+
         public Builder discRootFile(String file) {
             this.discRootFile = file;
             if (contentSignerAlias == null) {
@@ -356,22 +391,24 @@ public class SecurityUtil {
             }
             return this;
         }
+
         public Builder jarfiles(List<String> files) {
             this.jarfiles = files;
             if (contentSignerAlias == null) {
                 contentSignerAlias = DEF_APPCERT_ALIAS;
             }
             if (contentSignerPassword == null) {
-                contentSignerPassword = DEF_APPKEY_PASSWORD;
+                contentSignerPassword = DEF_NEWKEY_PASSWORD;
             }
             return this;
         }
+
         public SecurityUtil build() throws Exception {
             return new SecurityUtil(this);
         }
     }
-    
-     // append the orgId to the OrganizationName of the DN
+
+    // append the orgId to the OrganizationName of the DN
     private String appendOrgId(String dn)
             throws InvalidNameException {
         if (dn == null) {
@@ -383,28 +420,52 @@ public class SecurityUtil {
         LdapName name = new LdapName(dn);
         List<Rdn> rdns = name.getRdns();
         List<Rdn> newRdns = new ArrayList<Rdn>();
-        for(Rdn rdn : rdns) {
-           String type = rdn.getType();
-           if (type.equalsIgnoreCase("O")) {
-               String value = (String) rdn.getValue();
-               String newValue = value + "." + orgId;
-               newRdns.add(new Rdn(type, newValue));
-           } else {
-               newRdns.add(rdn);
-           }
+        for (Rdn rdn : rdns) {
+            String type = rdn.getType();
+            if (type.equalsIgnoreCase("O")) {
+                String value = (String) rdn.getValue();
+                String newValue = value + "." + orgId;
+                newRdns.add(new Rdn(type, newValue));
+            } else {
+                newRdns.add(rdn);
+            }
         }
         return (new LdapName(newRdns)).toString();
     }
-    
+
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("orgID = ");
+        sb.append(orgId); sb.append("\n");
+        sb.append("keystoreFile = "); sb.append(keystoreFile); sb.append("\n");
+        sb.append("keystorePassword = "); sb.append(keystorePassword); sb.append("\n");
+        sb.append("newCertAlias = "); sb.append(newCertAlias); sb.append("\n");
+        sb.append("newKeyPassword = "); sb.append(newKeyPassword); sb.append("\n");
+        sb.append("contentSignerPassword = "); sb.append(contentSignerPassword); sb.append("\n");
+        sb.append("contentSignerAlias = "); sb.append(contentSignerAlias); sb.append("\n");
+        sb.append("certSignerAlias = "); sb.append(certSignerAlias); sb.append("\n");
+        sb.append("certSignerPassword = "); sb.append(certSignerPassword); sb.append("\n");
+        sb.append("dn = "); sb.append(dn); sb.append("\n");
+        sb.append("altName = "); sb.append(altName); sb.append("\n");
+        sb.append("debug = "); sb.append(debug); sb.append("\n");
+        sb.append("isAppCert = "); sb.append(isAppCert); sb.append("\n");
+        sb.append("isRootCert = "); sb.append(isRootCert); sb.append("\n");
+        sb.append("isBindingUnitCert = "); sb.append(isBindingUnitCert); sb.append("\n");
+        sb.append("BUMFile = "); sb.append(BUMFile); sb.append("\n");
+        sb.append("discRootFile ="); sb.append(discRootFile); sb.append("\n");
+        sb.append("jarfiles = "); sb.append(jarfiles); sb.append("\n");
+        sb.append("signOriginalOnly ="); sb.append(signOriginalOnly);
+        return sb.toString();
+    }
+
     public void signJars() {
-        try {               
+        try {
             initKeyStore();
-            for (String jfile:jarfiles) {
+            for (String jfile : jarfiles) {
                 if (signOriginalOnly) {
-                  signOriginalJarFile(jfile);  
-                }
-                else {
-                  signJarFile(jfile);
+                    signOriginalJarFile(jfile);
+                } else {
+                    signJarFile(jfile);
                 }
             }
         } catch (Exception e) {
@@ -412,23 +473,23 @@ public class SecurityUtil {
             System.exit(1); // VM exit with an error code
         }
     }
-    
+
     public void createCerts() throws Exception {
         if (isAppCert) {
             createAppCert();
-        } else { 
+        } else {
             createRootCert();
         }
     }
-    
+
     public void createRootCert() throws Exception {
-         boolean failed = false;
-         cleanup();  // Get rid of any previous key aliases first.
-         try {
-             initKeyStore();
-             generateSelfSignedCertificate(dn, newCertAlias,
-                                           rootKeyPassword, true);
-             exportRootCertificate();
+        boolean failed = false;
+        cleanup();  // Get rid of any previous key aliases first.
+        try {
+            initKeyStore();
+            generateSelfSignedCertificate(dn, newCertAlias,
+                    newKeyPassword, true);
+            exportRootCertificate();
         } catch (Exception e) {
             e.printStackTrace();
             failed = true;
@@ -437,18 +498,18 @@ public class SecurityUtil {
             System.exit(1); // VM exit with an error code+
         }
     }
-    
-     public void createAppCert() throws Exception {
+
+    public void createAppCert() throws Exception {
         boolean failed = false;
         try {
             initKeyStore();
             generateSelfSignedCertificate(dn, newCertAlias,
-                                          appKeyPassword, false);
+                    newKeyPassword, false);
             generateCSR();
             generateCSRResponse();
             importCSRResponse();
             if (debug) {
-               verifyCertificate("app", APPCERTFILE);
+                verifyCertificate("app", APPCERTFILE);
             }
             exportRootCertificate();
         } catch (Exception e) {
@@ -460,15 +521,16 @@ public class SecurityUtil {
             new File(APPCERTFILE).delete();
         }
         if (failed) {
-             System.exit(1); // VM exit with an error code
+            System.exit(1); // VM exit with an error code
         }
-     }
-    
+    }
+
     private void initKeyStore() throws Exception {
-        if (ksInitialized)
+        if (ksInitialized) {
             return;
+        }
         ksInitialized = true;
-        Security.addProvider(new BouncyCastleProvider());	  
+        Security.addProvider(new BouncyCastleProvider());
         char[] password = keystorePassword.toCharArray();
         store = KeyStore.getInstance(KeyStore.getDefaultType());
         File kfile = new File(keystoreFile);
@@ -477,7 +539,7 @@ public class SecurityUtil {
             FileOutputStream fout = new FileOutputStream(kfile);
             store.store(fout, password);
             fout.close();
-        }        
+        }
         URL url = new URL("file:" + kfile.getCanonicalPath());
         InputStream is = url.openStream();
         store.load(is, password);
@@ -486,33 +548,33 @@ public class SecurityUtil {
 
     private void generateCSR() throws Exception {
         String[] appCSRRequestArgs = {"-certreq", "-alias", newCertAlias,
-            "-keypass", appKeyPassword, "-keystore", keystoreFile, "-storepass",
-             keystorePassword, "-v", "-file", APPCSRFILE};
-       
-       KeyTool.main(appCSRRequestArgs);	    
+            "-keypass", newKeyPassword, "-keystore", keystoreFile, "-storepass",
+            keystorePassword, "-v", "-file", APPCSRFILE};
+
+        KeyTool.main(appCSRRequestArgs);
     }
-    
+
     private void generateCSRResponse() throws Exception {
-       issueCert(APPCSRFILE, APPCERTFILE, certSignerAlias, rootKeyPassword);
+        issueCert(APPCSRFILE, APPCERTFILE, certSignerAlias, certSignerPassword);
     }
-    
+
     private void importCSRResponse() throws Exception {
-       String[] responseImportArgs = {"-import", "-v", "-alias", newCertAlias,
-                "-keypass", appKeyPassword, "-keystore", keystoreFile,
-                "-storepass", keystorePassword, "-v", "-file", APPCERTFILE}; 
-       KeyTool.main(responseImportArgs);
+        String[] responseImportArgs = {"-import", "-v", "-alias", newCertAlias,
+            "-keypass", newKeyPassword, "-keystore", keystoreFile,
+            "-storepass", keystorePassword, "-v", "-file", APPCERTFILE};
+        KeyTool.main(responseImportArgs);
     }
-    
+
     private void signJarFile(String jfile) throws Exception {
-      String[] jarSigningArgs = {"-sigFile", "SIG-BD00",
-                                 "-keypass", contentSignerPassword, 
-                                 "-keystore", keystoreFile,
-                                 "-storepass", keystorePassword,
-                                 "-verbose", jfile, contentSignerAlias};
-      JarSigner.main(jarSigningArgs);
-      signWithBDJHeader(jfile);
+        String[] jarSigningArgs = {"-sigFile", "SIG-BD00",
+            "-keypass", contentSignerPassword,
+            "-keystore", keystoreFile,
+            "-storepass", keystorePassword,
+            "-verbose", jfile, contentSignerAlias};
+        JarSigner.main(jarSigningArgs);
+        signWithBDJHeader(jfile);
     }
-    
+
     /**
      * This method signs the Binding Unit Manifest File according to the
      * BD-J specification, Part: 3-2, section: 12.2.8.1 and 
@@ -520,21 +582,21 @@ public class SecurityUtil {
      * @throws java.lang.Exception
      */
     public void signBUMF() throws Exception {
-        try {            
+        try {
             initKeyStore();
             Signature signer = Signature.getInstance(SIG_ALG);
             if (debug) {
                 System.out.println("Signer of " + BUMFile + " file is:" +
-                                  contentSignerAlias);
+                        contentSignerAlias);
             }
             PrivateKey key = (PrivateKey) store.getKey(contentSignerAlias,
-                              contentSignerPassword.toCharArray());
+                    contentSignerPassword.toCharArray());
             signer.initSign(key);
             byte[] data = readIntoBuffer(BUMFile);
             signer.update(data);
             byte[] signedData = signer.sign();
             DerOutputStream dos = new DerOutputStream();
-            dos.putBitString(signedData);  
+            dos.putBitString(signedData);
             int extIndex;
             String prefix = "tmp";
             if ((extIndex = BUMFile.lastIndexOf(".")) != -1) {
@@ -542,7 +604,7 @@ public class SecurityUtil {
             }
             String sigFile = prefix + ".sf";
             BufferedOutputStream bos = new BufferedOutputStream(
-                                       new FileOutputStream(sigFile));
+                    new FileOutputStream(sigFile));
             dos.derEncode(bos);
             bos.close();
             dos.close();
@@ -553,30 +615,30 @@ public class SecurityUtil {
             e.printStackTrace();
             System.exit(1); // VM exit with an error code
         }
-    } 
-    
-     private void verifySignatureFile(String sigFile) throws Exception {
+    }
+
+    private void verifySignatureFile(String sigFile) throws Exception {
         Signature verifier = Signature.getInstance(SIG_ALG);
         if (debug) {
-                System.out.println("Verifier of " + sigFile + " file is:" + contentSignerAlias);
+            System.out.println("Verifier of " + sigFile + " file is:" + contentSignerAlias);
         }
-        Certificate cert =  store.getCertificate(contentSignerAlias);
+        Certificate cert = store.getCertificate(contentSignerAlias);
         verifier.initVerify(cert);
-        
+
         byte[] derData = readIntoBuffer(sigFile);
         DerInputStream din = new DerInputStream(derData);
         byte[] signature = din.getBitString();
-        
+
         byte[] data = readIntoBuffer(BUMFile);
         verifier.update(data);
         if (verifier.verify(signature)) {
             System.out.println("BUSF Verification PASSED..");
             System.out.println("The signed file is written into:" + sigFile);
         } else {
-             System.out.println("BUSF Verification FAILED..");
+            System.out.println("BUSF Verification FAILED..");
         }
     }
-    
+
     private byte[] readIntoBuffer(String filename) throws Exception {
         FileInputStream fis = new FileInputStream(filename);
         int INITIAL_BUF_SIZE = 3000; // some value for the buffer
@@ -588,23 +650,22 @@ public class SecurityUtil {
         while ((read = fis.read(buf, off, len)) != -1) {
             off = off + read;
             if (off >= size) {
-               size = size * 2;
-               buf = Arrays.copyOf(buf, size);
+                size = size * 2;
+                buf = Arrays.copyOf(buf, size);
             }
             len = size - off;
-            //System.out.println("off:" + off + ", len:" + len + ", size:" + size);
+        //System.out.println("off:" + off + ", len:" + len + ", size:" + size);
         }
         fis.close();
         return Arrays.copyOfRange(buf, 0, off);
     }
-    
     //
     // See BDROM part 3-2 version 2.2, Annex DD.
     //
     private static final String ISO = "ISO646-US";
-    
+
     public void generateOnlineSigFile() throws Exception {
-        byte[] typeIndicator = "OSIG".getBytes(ISO);;
+        byte[] typeIndicator = "OSIG".getBytes(ISO);
         byte[] versionNo = "0200".getBytes(ISO);
         byte[] reservedBytes = new byte[32];
         byte[] rootCert = readIntoBuffer(discRootFile);
@@ -613,19 +674,19 @@ public class SecurityUtil {
         if (!store.containsAlias(contentSignerAlias)) {
             if (debug) {
                 System.out.println("The alias:" + contentSignerAlias +
-                    " does not exist");
+                        " does not exist");
             }
             return;
         }
         PrivateKey key = (PrivateKey) store.getKey(contentSignerAlias,
-                          contentSignerPassword.toCharArray());
+                contentSignerPassword.toCharArray());
         signer.initSign(key);
         signer.update(rootCert);
         signer.update(typeIndicator);
         signer.update(versionNo);
         signer.update(reservedBytes);
         byte[] signedData = signer.sign();
-        
+
         // Write the online.sig file
         FileOutputStream fout = new FileOutputStream(ONLINE_SIG_FILE);
         fout.write(typeIndicator);
@@ -634,15 +695,15 @@ public class SecurityUtil {
         fout.write(signedData);
         fout.close();
         System.out.println("Signed online cert stored in file <" +
-                        ONLINE_SIG_FILE + ">");
+                ONLINE_SIG_FILE + ">");
         if (debug) {
             verifyOnlineSigFile();
         }
     }
-    
+
     private void verifyOnlineSigFile() throws Exception {
         DataInputStream dis = new DataInputStream(
-                              new FileInputStream(ONLINE_SIG_FILE));
+                new FileInputStream(ONLINE_SIG_FILE));
         String typeIndicator = readISO646String(dis, 4);
         if (!typeIndicator.equals("OSIG")) {
             throw new RuntimeException("Invalid TypeIndicator: " + typeIndicator +
@@ -662,10 +723,10 @@ public class SecurityUtil {
             baos.write(buf, 0, len);
         }
         dis.close();
-        byte[] signature = baos.toByteArray();           
-        
+        byte[] signature = baos.toByteArray();
+
         Signature verifier = Signature.getInstance(SIG_ALG);
-        Certificate cert =  store.getCertificate(contentSignerAlias);
+        Certificate cert = store.getCertificate(contentSignerAlias);
         verifier.initVerify(cert);
         verifier.update(readIntoBuffer(discRootFile));
         verifier.update(typeIndicator.getBytes(ISO));
@@ -678,7 +739,7 @@ public class SecurityUtil {
             System.out.println("Online Cert signature verification FAILED");
         }
     }
-    
+
     public static String iso646String(byte[] buf) {
         try {
             return new String(buf, ISO);
@@ -693,7 +754,7 @@ public class SecurityUtil {
         dis.read(buf);
         return iso646String(buf);
     }
-    
+
     /**
      * This method adds the BD-J specific attribute to the signature file (.SF file)
      * of a signed jar (already signed using JDK's jarsigner). This leads to
@@ -704,12 +765,12 @@ public class SecurityUtil {
      */
     private void signWithBDJHeader(String jarFile) throws Exception {
         String SIG_FILE = "META-INF/SIG-BD00.SF";
-        String SIG_BLOCK_FILE = "META-INF/SIG-BD00.RSA";    
+        String SIG_BLOCK_FILE = "META-INF/SIG-BD00.RSA";
         if (debug) {
             System.out.println("Adding BD header to:" + jarFile);
         }
         JarFile jf = new JarFile(jarFile);
-	JarEntry sigFile = (JarEntry) jf.getJarEntry(SIG_FILE);
+        JarEntry sigFile = (JarEntry) jf.getJarEntry(SIG_FILE);
         if (sigFile == null) {
             System.out.println("No entry found:" + SIG_FILE);
         }
@@ -717,18 +778,18 @@ public class SecurityUtil {
         if (sigBFile == null) {
             System.out.println("No entry found:" + SIG_BLOCK_FILE);
         }
-	InputStream pkcs7Is = jf.getInputStream(sigBFile);
-	PKCS7 signBlock = new PKCS7(pkcs7Is);
-	pkcs7Is.close();
-        
+        InputStream pkcs7Is = jf.getInputStream(sigBFile);
+        PKCS7 signBlock = new PKCS7(pkcs7Is);
+        pkcs7Is.close();
+
         // Add the desired line to the Signature file.
-	BufferedReader br = new BufferedReader(new InputStreamReader(
-                                               jf.getInputStream(sigFile)));
+        BufferedReader br = new BufferedReader(new InputStreamReader(
+                jf.getInputStream(sigFile)));
         StringWriter sw = new StringWriter();
         String line;
         boolean addBDLine = false;
-        while((line = br.readLine()) != null) {
-            
+        while ((line = br.readLine()) != null) {
+
             if (addBDLine) {
                 // the BD-J header already exists;stop here.
                 if (line.startsWith("BDJ-Signature-Version")) {
@@ -738,8 +799,8 @@ public class SecurityUtil {
                 }
                 sw.write("BDJ-Signature-Version: 1.0\n");
                 addBDLine = false;
-            } 
-            
+            }
+
             // BD-J doesn't mandate this attribute; keeping it should be fine
             if (!line.startsWith("SHA1-Digest-Manifest-Main-Attributes:")) {
                 sw.write(line);
@@ -751,48 +812,48 @@ public class SecurityUtil {
         }
         br.close();
         jf.close();
-        
+
         // Re-sign the signature file after adding the BD-J header
         Signature signer = Signature.getInstance(SIG_ALG);
         PrivateKey key = (PrivateKey) store.getKey(contentSignerAlias,
-                              contentSignerPassword.toCharArray());
+                contentSignerPassword.toCharArray());
         signer.initSign(key);
         byte[] newContent = sw.toString().getBytes();
         signer.update(newContent);
         byte[] signedContent = signer.sign();
-        
+
         ContentInfo newContentInfo = new ContentInfo(ContentInfo.DATA_OID, null);
-        SignerInfo[]  signerInfos =  signBlock.getSignerInfos();
+        SignerInfo[] signerInfos = signBlock.getSignerInfos();
         Certificate signerCert = store.getCertificate(contentSignerAlias);
         SignerInfo newSignerInfo = null;
-        
+
         // Note, BD-J allows only one signerInfo, but let's have this loop since
         // it does not add more code and it's easy to read.
-        for(int i = 0; i < signerInfos.length; i++) {
+        for (int i = 0; i < signerInfos.length; i++) {
             SignerInfo si = signerInfos[i];
             if (signerCert.equals(si.getCertificate(signBlock))) {
-                
+
                 // update the encrypted digest.
                 newSignerInfo = new SignerInfo(si.getIssuerName(),
-                                si.getCertificateSerialNumber(),
-                                si.getDigestAlgorithmId(),
-                                si.getDigestEncryptionAlgorithmId(),
-                                signedContent);
+                        si.getCertificateSerialNumber(),
+                        si.getDigestAlgorithmId(),
+                        si.getDigestEncryptionAlgorithmId(),
+                        signedContent);
                 signerInfos[i] = newSignerInfo;
             }
         }
-        
+
         // generate the updated PKCS7 Block
         PKCS7 newSignBlock = new PKCS7(
-		signBlock.getDigestAlgorithmIds(),
-		newContentInfo,
-		signBlock.getCertificates(),
-		signerInfos); 
+                signBlock.getDigestAlgorithmIds(),
+                newContentInfo,
+                signBlock.getCertificates(),
+                signerInfos);
         if (debug) {
             System.out.println("Signer Info Verified:" + (newSignBlock.verify(
-                                newSignerInfo, newContent)).toString());
+                    newSignerInfo, newContent)).toString());
         }
-        
+
         // Write down the files and re-bundle the jar with the updated signature
         // and signature block files.
         File mif = new File("META-INF");
@@ -815,26 +876,24 @@ public class SecurityUtil {
         Main jar = new Main(System.out, System.err, "jar");
         jar.run(jarArgs);
     }
-    
+
     private void exportRootCertificate() throws Exception {
-	String exportFileName = APP_ROOT_DISC_FILE;
-        String exportAlias = certSignerAlias;
+        String exportFileName = APP_ROOT_DISC_FILE;
         String type = "root";
         if (isBindingUnitCert) {
             exportFileName = BU_ROOT_DISC_FILE;
-            exportAlias = newCertAlias;
             type = "binding";
         }
         String[] exportRootCertificateArgs = {
-		"-export", "-alias", exportAlias, "-keypass", rootKeyPassword, 
-		"-keystore", keystoreFile, "-storepass", keystorePassword,
-		"-v", "-file", exportFileName};
-	KeyTool.main(exportRootCertificateArgs);
+            "-export", "-alias", certSignerAlias, "-keypass", certSignerPassword,
+            "-keystore", keystoreFile, "-storepass", keystorePassword,
+            "-v", "-file", exportFileName};
+        KeyTool.main(exportRootCertificateArgs);
         if (debug) {
             verifyCertificate(type, exportFileName);
         }
     }
-    
+
     private void verifyCertificate(String type, String filename) {
         File cert = new File(filename);
         boolean check = new CertificateVerifier().runTest(type, cert);
@@ -842,40 +901,42 @@ public class SecurityUtil {
             throw new RuntimeException("Problem with the certification generation");
         }
     }
-    
-    private void cleanup() throws IOException {    
-	 File keystore = new File(keystoreFile);
-         if (keystore.exists()) {
-             FileInputStream fis = null;
-             FileOutputStream fos = null;
-             try {
-                 KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-                 fis = new FileInputStream(keystore);
-                 ks.load(fis, keystorePassword.toCharArray());
-                 fos = new FileOutputStream(keystore);
-                 if (ks.containsAlias(newCertAlias)) {
-                     ks.deleteEntry(newCertAlias);
-                 }
-                 
-                 // Store back the updated keystore to the keystore file.
-                 ks.store(fos, keystorePassword.toCharArray());    
-	    } catch (Exception e) {
+
+    private void cleanup() throws IOException {
+        File keystore = new File(keystoreFile);
+        if (keystore.exists()) {
+            FileInputStream fis = null;
+            FileOutputStream fos = null;
+            try {
+                KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+                fis = new FileInputStream(keystore);
+                ks.load(fis, keystorePassword.toCharArray());
+                fos = new FileOutputStream(keystore);
+                if (ks.containsAlias(newCertAlias)) {
+                    ks.deleteEntry(newCertAlias);
+                }
+
+                // Store back the updated keystore to the keystore file.
+                ks.store(fos, keystorePassword.toCharArray());
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                if (fis != null)
+                if (fis != null) {
                     fis.close();
-                if (fos != null)
+                }
+                if (fos != null) {
                     fos.close();
+                }
             }
-	 } 
-	 new File(APPCSRFILE).delete();
-	 new File(APPCERTFILE).delete();
+        }
+        new File(APPCSRFILE).delete();
+        new File(APPCERTFILE).delete();
     }
-    
+
     private void generateSelfSignedCertificate(String issuer, String alias,
-             String keyPassword, boolean isRootCert) throws Exception { 
+            String keyPassword, boolean isRootCert) throws Exception {
         Date validFrom, validTo;
-        
+
         // For forcing GeneralizedTime DER encoding, with Bouncy Castle Provider 
         // make the range before 1950 and after 2050. The BD-J spec recommends
         // using the default validity period used below
@@ -888,11 +949,11 @@ public class SecurityUtil {
 
         // Generate a new keypair for this certificate
         KeyPair keyPair = generateKeyPair();
-        
+
         X509V3CertificateGenerator cg = new X509V3CertificateGenerator();
-        cg.reset();      
+        cg.reset();
         X509Name name = new X509Name(issuer, new X509BDJEntryConverter());
-        
+
         // Generate Serial Number
         SecureRandom prng = SecureRandom.getInstance("SHA1PRNG");
         BigInteger serNo = new BigInteger(32, prng);
@@ -905,49 +966,49 @@ public class SecurityUtil {
         cg.setNotAfter(validTo);
         cg.setSubjectDN(name);
         cg.setPublicKey(keyPair.getPublic());
-        cg.setSignatureAlgorithm("SHA1WITHRSA");        
+        cg.setSignatureAlgorithm("SHA1WITHRSA");
         if (isRootCert) {
             // Need to add root cert extensions.
-            if (isBindingUnitCert) { 
+            if (isBindingUnitCert) {
                 // This certificate is used only for signing
                 cg.addExtension(X509Extensions.KeyUsage.getId(), true,
-        		new X509KeyUsage(X509KeyUsage.digitalSignature));
+                        new X509KeyUsage(X509KeyUsage.digitalSignature));
             } else {
                 int usage = X509KeyUsage.digitalSignature +
-                            X509KeyUsage.keyCertSign;
+                        X509KeyUsage.keyCertSign;
                 cg.addExtension(X509Extensions.KeyUsage.getId(), true,
-        		new X509KeyUsage(usage));
+                        new X509KeyUsage(usage));
             }
             cg.addExtension(X509Extensions.IssuerAlternativeName.getId(), false,
-            	getRfc822Name(altName));    
-            cg.addExtension(X509Extensions.BasicConstraints.getId(), true, 
-                new BasicConstraints(true));
+                    getRfc822Name(altName));
+            cg.addExtension(X509Extensions.BasicConstraints.getId(), true,
+                    new BasicConstraints(true));
         }
         // For an app cert, most of the extensions will be added when generating
         // a certificate in response to the certificate request file.
         cg.addExtension(X509Extensions.SubjectAlternativeName.getId(), false,
-                       getRfc822Name(altName));
-          
+                getRfc822Name(altName));
+
         Certificate cert = cg.generate(keyPair.getPrivate());
-	store.setKeyEntry(alias, keyPair.getPrivate(), keyPassword.toCharArray(), new Certificate[] {cert});
+        store.setKeyEntry(alias, keyPair.getPrivate(), keyPassword.toCharArray(), new Certificate[]{cert});
         FileOutputStream fos = new FileOutputStream(keystoreFile);
         store.store(fos, keystorePassword.toCharArray());
         fos.close();
     }
-    
+
     private KeyPair generateKeyPair() throws Exception {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         SecureRandom random =
-           SecureRandom.getInstance("SHA1PRNG", "SUN");
-        keyGen.initialize(KEY_LENGTH, random);      
+                SecureRandom.getInstance("SHA1PRNG", "SUN");
+        keyGen.initialize(KEY_LENGTH, random);
         KeyPair keyPair = keyGen.generateKeyPair();
         return keyPair;
     }
-    
+
     void issueCert(String csrfile, String certfile, String alias, String keypass)
             throws Exception {
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(
-                                             convertFromBASE64(csrfile));
+                convertFromBASE64(csrfile));
         String subject = csr.getCertificationRequestInfo().getSubject().toString();
 
         // Generate the app certificate
@@ -956,33 +1017,33 @@ public class SecurityUtil {
         X509Certificate rootCert = (X509Certificate) store.getCertificate(alias);
         if (rootCert == null) {
             System.out.println("ERROR: Aborting application certificate creation." +
-                            " No root certificate to sign.");
+                    " No root certificate to sign.");
             cleanup(); // removes the self signed certificate from the keystore
             System.exit(1);
         }
-        cg.setIssuerDN(new X509Name(true, rootCert.getSubjectDN().getName(), 
-                                    new X509BDJEntryConverter()));
+        cg.setIssuerDN(new X509Name(true, rootCert.getSubjectDN().getName(),
+                new X509BDJEntryConverter()));
         cg.setSubjectDN(new X509Name(subject, new X509BDJEntryConverter()));
         cg.setNotBefore(rootCert.getNotBefore());
         cg.setNotAfter(rootCert.getNotAfter());
         cg.setPublicKey(csr.getPublicKey());
         cg.setSerialNumber(appCertSerNo);
 
-	// BD-J mandates using SHA1WithRSA as a signature Algorithm
-        cg.setSignatureAlgorithm("SHA1WITHRSA"); 
+        // BD-J mandates using SHA1WithRSA as a signature Algorithm
+        cg.setSignatureAlgorithm("SHA1WITHRSA");
         cg.addExtension(X509Extensions.KeyUsage.getId(), true,
-        		new X509KeyUsage(X509KeyUsage.digitalSignature));
+                new X509KeyUsage(X509KeyUsage.digitalSignature));
 
         // FIXME: Ideally this should be pulled out from the original app cert's
         // extension. Email on X500Name is not encoded with UTF8String.
         cg.addExtension(X509Extensions.SubjectAlternativeName.getId(), false,
-            	getRfc822Name(altName));
-        
+                getRfc822Name(altName));
+
         // Assuming that the root certificate was generated using our tool,
         // the certificate should have IssuerAlternativeNames as an extension.
         List issuerName = (List) rootCert.getIssuerAlternativeNames().iterator().next();
         cg.addExtension(X509Extensions.IssuerAlternativeName.getId(), false,
-            	getRfc822Name((String)issuerName.get(1)));
+                getRfc822Name((String) issuerName.get(1)));
         PrivateKey privateKey = (PrivateKey) store.getKey(alias, keypass.toCharArray());
         X509Certificate cert = cg.generate(privateKey);
 
@@ -990,17 +1051,17 @@ public class SecurityUtil {
         System.out.println("Writing cert to " + certfile + ".");
         FileOutputStream str = new FileOutputStream(certfile);
         str.write(cert.getEncoded());
-	str.close(); 
+        str.close();
     }
-    
+
     GeneralNames getRfc822Name(String name) {
         GeneralName gn = new GeneralName(GeneralName.rfc822Name,
-		 new DERIA5String(name));
+                new DERIA5String(name));
         DERConstructedSequence seq = new DERConstructedSequence();
         seq.addObject(gn);
-	return new GeneralNames(seq);
+        return new GeneralNames(seq);
     }
-    
+
     //
     // Bouncy castle API requires CSR file in DER (binary format i.e not BASE64)
     // format. CSR PKCS#10 files are normally BASE64 encoded. We remove
@@ -1011,25 +1072,25 @@ public class SecurityUtil {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         String line = null;
         line = reader.readLine();
-        if (! line.equals("-----BEGIN NEW CERTIFICATE REQUEST-----")) {
-           throw new IOException("not a valid CSR file");
+        if (!line.equals("-----BEGIN NEW CERTIFICATE REQUEST-----")) {
+            throw new IOException("not a valid CSR file");
         }
         boolean seenLastLine = false;
         while ((line = reader.readLine()) != null) {
-          if (line.equals("-----END NEW CERTIFICATE REQUEST-----")) {
-             seenLastLine = true;
-             break;
-          }
-          buf.append(line);          
-          buf.append('\n');
+            if (line.equals("-----END NEW CERTIFICATE REQUEST-----")) {
+                seenLastLine = true;
+                break;
+            }
+            buf.append(line);
+            buf.append('\n');
         }
-        if (! seenLastLine) {
-           throw new IOException("not a valid CSR file");
+        if (!seenLastLine) {
+            throw new IOException("not a valid CSR file");
         }
         BASE64Decoder decoder = new BASE64Decoder();
         return decoder.decodeBuffer(buf.toString());
     }
-    
+
     /**
      * This method works on only signed jar file that is now being resigned by
      * invalidating the previous signature.
@@ -1040,20 +1101,20 @@ public class SecurityUtil {
      * @throws java.lang.Exception
      */
     private void signOriginalJarFile(String jfile) throws Exception {
-        JarFile jf = new JarFile (jfile, false); // jar file need not be verified.
+        JarFile jf = new JarFile(jfile, false); // jar file need not be verified.
         String SIG_FILE = "META-INF/SIG-BD00.SF";
-	JarEntry sigFile = (JarEntry) jf.getJarEntry(SIG_FILE);
+        JarEntry sigFile = (JarEntry) jf.getJarEntry(SIG_FILE);
         if (sigFile == null) {
             System.err.println("ERROR: The jar file is not already signed:" + jfile +
-                               " do not use -original-only option");
+                    " do not use -original-only option");
             jf.close();
             System.exit(1);
         }
-        
+
         // jar seperation is done based on the files listed in the signature file
         Manifest man = new Manifest(jf.getInputStream(sigFile));
-        Map<String,Attributes> sigEntries = man.getEntries();
-        
+        Map<String, Attributes> sigEntries = man.getEntries();
+
         //
         // Seperate out the signed and unsigned files into temporary jar files.
         // They are merged after signing.
@@ -1064,16 +1125,16 @@ public class SecurityUtil {
         // hence we end up copying all the entries back and forth the original
         // jar file
         //
-        String tmpSignedJar   = "tmp-signed-files.jar";
+        String tmpSignedJar = "tmp-signed-files.jar";
         String tmpUnsignedJar = "tmp-unsigned-files.jar";
         JarOutputStream signedOut = new JarOutputStream(
-                                    new FileOutputStream(tmpSignedJar));
+                new FileOutputStream(tmpSignedJar));
 
         // If the jar is empty it cannot be closed; however, the
         // file handle it's accessing needs to be closed.
-        FileOutputStream fout =  new FileOutputStream(tmpUnsignedJar);
+        FileOutputStream fout = new FileOutputStream(tmpUnsignedJar);
         JarOutputStream unsignedOut = new JarOutputStream(fout);
-                                     
+
         Enumeration<JarEntry> jarEntries = jf.entries();
         boolean isEmptyUnsigned = true;
         while (jarEntries.hasMoreElements()) {
@@ -1086,28 +1147,28 @@ public class SecurityUtil {
              * the compressed data size differece between the original JarEntry 
              * and the new JarEntry that jdk creates.
              */
-            JarEntry jeOut = (JarEntry) je.clone(); 
-            jeOut.setCompressedSize(-1);  
+            JarEntry jeOut = (JarEntry) je.clone();
+            jeOut.setCompressedSize(-1);
             String filename = je.getName();
-            
+
             /** 
              * Issue 112.  Do not include signing related files;
              * these are re-generated during signing.
              */
             if (filename.equals(JarFile.MANIFEST_NAME) ||
-                filename.equals("META-INF/SIG-BD00.RSA") ||
-                filename.equals("META-INF/SIG-BD00.SF")) {
+                    filename.equals("META-INF/SIG-BD00.RSA") ||
+                    filename.equals("META-INF/SIG-BD00.SF")) {
                 continue;
             }
-            
+
             /**
              * "META-INF/" contents are re-generated during signing. The directory
              * entries (new or old) are not signed. To preserve the order of
              * the entries in the original jar we add them to the
              * to-be signed jar
-             */                
+             */
             if (filename.endsWith("/") ||
-                sigEntries.containsKey(filename)) { // this file is signed
+                    sigEntries.containsKey(filename)) { // this file is signed
                 signedOut.putNextEntry(jeOut);
                 InputStream jin = jf.getInputStream(je);
                 copyfile(signedOut, jin);
@@ -1120,53 +1181,52 @@ public class SecurityUtil {
                 jin.close();
             }
         }
-        
+
         // close all the files
         jf.close();
-	signedOut.closeEntry();
+        signedOut.closeEntry();
         signedOut.close();
         if (isEmptyUnsigned) {
             fout.close();
             if (debug) {
                 System.out.println(
-                "No new files are present in the jar; Signing without splitting");
+                        "No new files are present in the jar; Signing without splitting");
             }
             signJarFile(jfile);
         } else {
             unsignedOut.closeEntry();
-            unsignedOut.close();  
- 
+            unsignedOut.close();
+
             // resign the signed jar
             signJarFile(tmpSignedJar);
-        
+
             // The next step is to merge the signed and unsigned jars
             JarOutputStream jout = new JarOutputStream(
-                               new FileOutputStream(jfile));
+                    new FileOutputStream(jfile));
             copyJarFile(tmpSignedJar, jout);
             copyJarFile(tmpUnsignedJar, jout);
             jout.close();
         }
-       
+
         if (debug) {
             return;
-        } 
-        
+        }
+
         // attempt cleanup
         File signedJar = new File(tmpSignedJar);
         File unsignedJar = new File(tmpUnsignedJar);
         if (!signedJar.delete()) {
             System.out.println("Unable to delete temporary jar:" +
-			tmpSignedJar + " Please try deleting it manually");
+                    tmpSignedJar + " Please try deleting it manually");
             System.exit(1);
-        }  
+        }
         if (unsignedJar.exists() && !unsignedJar.delete()) {
-            System.out.println("Unable to delete temporary jar:" + 
+            System.out.println("Unable to delete temporary jar:" +
                     tmpUnsignedJar + " Please try deleting it manually");
             System.exit(1);
         }
     }
-    
-    
+
     private void copyfile(OutputStream out, InputStream in)
             throws IOException {
         int len;
@@ -1175,7 +1235,7 @@ public class SecurityUtil {
             out.write(buf, 0, len);
         }
     }
-    
+
     private void copyJarFile(String jarName, JarOutputStream jout)
             throws IOException {
         JarFile jf = new JarFile(jarName);
@@ -1187,6 +1247,6 @@ public class SecurityUtil {
             copyfile(jout, jin);
             jin.close();
         }
-	jf.close();
+        jf.close();
     }
 }

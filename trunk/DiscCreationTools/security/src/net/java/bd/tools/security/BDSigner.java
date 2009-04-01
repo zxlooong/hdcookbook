@@ -166,7 +166,7 @@ public class BDSigner {
          System.err.println("                     \tthat were orginally signed (as listed in signature file)");
          System.err.println(" -debug              \t:Prints debug messages");
          System.err.println(" -help               \t:Prints this message");
-         System.err.println("\nExample: java -cp security.jar:tools.jar:bcprov-jdk15-137.jar net.java.bd.tools.security.BDSigner 00000.jar\n");
+         System.err.println("\nExample: java net.java.bd.tools.security.BDSigner 00000.jar\n");
          System.exit(1);
     }
 }

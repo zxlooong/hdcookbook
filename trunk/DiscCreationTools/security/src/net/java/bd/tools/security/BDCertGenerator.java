@@ -65,9 +65,13 @@ package net.java.bd.tools.security;
  * the "resources" dir.
  */
 public class BDCertGenerator {
-     // Represents the certificate type that is being created
-    enum CertType {NONE, ROOT, APP, BINDING};
-    
+    // Represents the certificate type that is being created
+
+    enum CertType {
+
+        NONE, ROOT, APP, BINDING
+    };
+
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
             printUsageAndExit("Please enter certificate type");
@@ -82,6 +86,11 @@ public class BDCertGenerator {
                     errorNeedArgument(opt);
                 }
                 builder = builder.keystoreFile(args[i]);
+            } else if (opt.equals("-storepass")) {
+                if (++i == args.length) {
+                    errorNeedArgument(opt);
+                }
+                builder = builder.storepass(args[i]);
             } else if (opt.equals("-root")) {
                 builder = builder.setRootCert();
                 certType = CertType.ROOT;
@@ -92,27 +101,36 @@ public class BDCertGenerator {
                 builder = builder.setBindingUnitCert();
                 certType = CertType.BINDING;
             } else if (opt.equals("-dn")) {
-                 if (++i == args.length) {
+                if (++i == args.length) {
                     errorNeedArgument(opt);
-                 }
-                 builder = builder.dn(args[i]);
+                }
+                builder = builder.dn(args[i]);
             } else if (opt.equals("-altname")) {
-                 if (++i == args.length) {
+                if (++i == args.length) {
                     errorNeedArgument(opt);
-                 }
-                 builder = builder.altName(args[i]);
+                }
+                builder = builder.altName(args[i]);
             } else if (opt.equals("-alias")) {
-                 if (++i == args.length) {
+                if (++i == args.length) {
                     errorNeedArgument(opt);
                 }
                 builder = builder.newCertAlias(args[i]);
+            } else if (opt.equals("-keypass")) {
+                if (++i == args.length) {
+                    errorNeedArgument(opt);
+                }
+                builder = builder.newKeyPassword(args[i]);
             } else if (opt.equals("-signeralias")) {
-                 if (++i == args.length) {
+                if (++i == args.length) {
                     errorNeedArgument(opt);
                 }
                 builder = builder.certSignerAlias(args[i]);
-            }   
-            else if (opt.equals("-help")) {
+            } else if (opt.equals("-signerpass")) {
+                if (++i == args.length) {
+                    errorNeedArgument(opt);
+                }
+                builder = builder.certSignerPassword(args[i]);
+            } else if (opt.equals("-help")) {
                 printUsageAndExit("");
             } else if (opt.equals("-debug")) {
                 builder = builder.debug();
@@ -122,11 +140,11 @@ public class BDCertGenerator {
                     orgId = orgId.substring(2);
                 }
                 if (orgId.length() != 8) {
-                    printUsageAndExit("Bad OrgID " +orgId + ", please provide an 8 digit hex.");
+                    printUsageAndExit("Bad OrgID " + orgId + ", please provide an 8 digit hex.");
                 }
                 builder = builder.orgId(orgId);
                 setOrgId = true;
-            }          
+            }
         }
         if (certType == CertType.NONE) {
             printUsageAndExit("Please enter type of the certificate to generate:" +
@@ -134,20 +152,21 @@ public class BDCertGenerator {
         }
         if (!setOrgId) {
             switch (certType) {
-                case ROOT: break; // It's okay not have the orgID
+                case ROOT:
+                    break; // It's okay not have the orgID
                 case APP:  // May not be okay. But acceptable for non-leaf certs
                     System.err.println(
-                    "============================================================");
+                            "============================================================");
                     System.err.println(
-                    "WARNING: orgID is optional only for the non-leaf certificate.");
+                            "WARNING: orgID is optional only for the non-leaf certificate.");
                     System.err.println(
-                    "You may want specify an orgID for this certificate");
+                            "You may want specify an orgID for this certificate");
                     System.err.println(
-                    "============================================================");
+                            "============================================================");
                     break;
                 case BINDING:
                     printUsageAndExit("orgID that matches the orgID in the BUMF must be specified");
-                    break; 
+                    break;
             }
         }
         SecurityUtil util = builder.build();
@@ -170,19 +189,22 @@ public class BDCertGenerator {
         if (!reason.isEmpty()) {
             System.err.println("\nFailed: " + reason + "\n");
         }
-        System.err.println("***This tool generates keystore/certificates for securing BD-J applications***\n");
+        System.err.println("***This tool generates keystore and certificates for securing BD-J applications***\n");
         System.err.println("usage: BDCertGenerator -root|-app|-binding [options] [organization_id]\n");
         System.err.println("Valid Options:");
         System.err.println(" -keystore    filename\t:Create a keystore file with the given filename");
+        System.err.println(" -storepass   password\t:Password for accessing the new keystore");
         System.err.println(" -dn          name    \t:Distinguished name of the certificate");
         System.err.println("                      \t Note: The organization_id is appended to the org name");
         System.err.println("                      \t component of the dn");
         System.err.println(" -altname     name    \t:Subject alternate name for the certificate");
-        System.err.println(" -alias       name    \t:The keystore alias for the newly generated certificate");
-        System.err.println(" -signeralias name    \t:The certificate signer alias for the application certificate");
+        System.err.println(" -alias       name    \t:Keystore alias for the newly generated certificate");
+        System.err.println(" -keypass     password\t:Password for the newly generated key");
+        System.err.println(" -signeralias name    \t:Alias of the application certificate signer");
+        System.err.println(" -signerpass  password\t:Key password of the application certificate signer");
         System.err.println(" -debug               \t:Prints debug messages");
         System.err.println(" -help                \t:Prints this message");
-        System.err.println("\nExample: java -cp security.jar:tools.jar:bcprov-jdk15-137.jar net.java.bd.tools.security.BDCertGenerator -root 56789abc \n");
+        System.err.println("\nExample: java net.java.bd.tools.security.BDCertGenerator -root 56789abc \n");
         System.exit(1);
     }
 }
