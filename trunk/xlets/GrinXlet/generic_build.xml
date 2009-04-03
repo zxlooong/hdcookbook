@@ -418,8 +418,26 @@ The project.name property is not set.  This usually has one of two causes:
         <!-- Projects that include this build file can re-define this target -->
     </target>
     
-    <target name="sign-xlet">
-        
+    <target name="sign-xlet" depends="check-keystore , generate-certs">
+
+        <path id="sec.tools.path">
+            <pathelement location="${security.jar}"/>
+            <pathelement location="${bouncycastle.jar}"/>
+            <pathelement location="${java.home}/../lib/tools.jar"/>   
+        </path>	   
+
+        <jdktools.java classname="net.java.bd.tools.security.BDSigner">
+            <arg value="${xlet.jar}"/>
+            <classpath refid="sec.tools.path"/>	   
+        </jdktools.java>
+	<antcall target="post-sign-xlet"/>
+    </target>  
+    <target name="post-sign-xlet">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <!-- If the keystore is present then the keys are already generated -->
+    <target name="generate-certs" unless="keystore.ok">
         <path id="sec.tools.path">
             <pathelement location="${security.jar}"/>
             <pathelement location="${bouncycastle.jar}"/>
@@ -437,15 +455,11 @@ The project.name property is not set.  This usually has one of two causes:
             <arg value="${xlet.orgid}"/>
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
-        
-        <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg value="${xlet.jar}"/>
-            <classpath refid="sec.tools.path"/>	   
-        </jdktools.java>
-	<antcall target="post-sign-xlet"/>
-    </target>  
-    <target name="post-sign-xlet">
-        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="check-keystore">
+        <available file="keystore.store" type="file"
+                   property="keystore.ok"/>
     </target>
     
     <target name="gen-bdjo-desc-file"
