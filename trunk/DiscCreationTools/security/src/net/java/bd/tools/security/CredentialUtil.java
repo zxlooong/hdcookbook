@@ -413,19 +413,21 @@ class CredentialUtil {
 		throws Exception {
         File f = new File(keystore);
         if (!f.exists()) {
-            if (debug) {
-                System.out.println("The keystore file:" + keystore +
-                            " does not exists");
-            }
-            return null;
+            exitWithErrorMessage("The keystore file:\"" + keystore +
+                    "\" does not exists, please provide a keystore");
         }
-	KeyStore ks = KeyStore.getInstance("JKS");
+        KeyStore ks = KeyStore.getInstance("JKS");
         
     	// load the contents of the KeyStore
     	ks.load(new FileInputStream(f), storepass.toCharArray());
 
-	// fetch certificate chain stored with the given alias
+        // fetch certificate chain stored with the given alias
     	return ks.getCertificateChain(alias);
+    }
+
+    private void exitWithErrorMessage(String message) {
+        System.err.println("Error: " + message);
+        System.exit(1);
     }
     
     private PrivateKey getGrantorKey () throws Exception {

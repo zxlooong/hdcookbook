@@ -184,11 +184,11 @@ public class BDCredentialSigner {
            } else if (opt.equals("-gecert")) {
                 if (++i == args.length) errorNeedArgument(opt);
                 cBuilder = cBuilder.granteeRootCert(args[i]);
-            } else if (opt.equals("-gestore")) {
+            } else if (opt.equals("-store")) {
                  if (++i == args.length) errorNeedArgument(opt);
                  cBuilder = cBuilder.granteeKeyStore(args[i]);
                  sBuilder = sBuilder.keystoreFile(args[i]);
-            } else if (opt.equals("-gestorepass")) {
+            } else if (opt.equals("-storepass")) {
                  if (++i == args.length) errorNeedArgument(opt);
                  cBuilder = cBuilder.granteeStorePass(args[i]);
                  sBuilder = sBuilder.storepass(args[i]);
@@ -241,21 +241,29 @@ public class BDCredentialSigner {
 	System.err.println("usage: BDCredentialSigner [options] permission-request-file jarfile\n");
         System.err.println("Valid Options:");
         System.err.println(" -gencred             \t:Generate credentials;Output:PRF with credentials");
-	System.err.println(" -gastore filename    \t:Grantor's keystore;default used:\"grantor.store\"");
+        System.err.println(" -gastore filename    \t:Grantor's keystore;default used:\"grantor.store\"");
         System.err.println("                      \t from the current working directory");
         System.err.println(" -gastorepass password\t:Grantor's keystore password");
         System.err.println(" -gaalias alias       \t:Grantor's alias");
         System.err.println(" -gakeypass password  \t:Grantor's key password;used for signing credentials");
         System.err.println(" -gecert              \t:File containing disc root certificate of the grantee");
         System.err.println(" -updatecerts         \t:Update certificate chain and sign the jar");
-        System.err.println(" -gestore filename    \t:Grantee's keystore;default used:\"keystore.store\"");
+        System.err.println(" -store filename      \t:Grantee's keystore;default used:\"keystore.store\"");
         System.err.println("                      \t from the current working directory");
-        System.err.println(" -gestorepass password\t:Grantee's keystore password");
+        System.err.println(" -storepass password\t:Grantee's keystore password");
         System.err.println(" -alias alias         \t:Alias for the signing key");
         System.err.println(" -keypass password    \t:Password for accessing the signing key");
         System.err.println(" -gacerts             \t:File containing grantor certificate chain");
         System.err.println(" -debug               \t:Prints debug messages");
         System.err.println(" -help                \t:Prints this message");
+        System.err.println();
+        System.err.println("Examples:");
+        System.err.println("net.java.bd.tools.security.BDCredentialSigner -gencred -gecert grantee.discroot.crt bluray.MyXlet.perm");
+        System.err.println();
+        System.err.println("net.java.bd.tools.security.BDCredentialSigner -updatecert -gacerts grantorchain.crt bluray.MyXlet.perm 00000.jar");
+        System.err.println();
+        System.err.println("For testing:");
+        System.err.println("net.java.bd.tools.security.BDCredentialSigner bluray.MyXlet.perm 00000.jar");
         System.err.println();
         System.exit(1);
      }    
