@@ -305,6 +305,36 @@ public class Segment implements Node {
     // This is externally synchronized by show, and must be.
     //
     void runFeatureSetup() {
+	// Check to see if all features in active clause are set up
+	if (setupCheckedInActive < activeFeatures.length) {
+	    while (setupCheckedInActive < activeFeatures.length) {
+		if (!featureWasActivated[setupCheckedInActive] 
+		    && activeFeatures[setupCheckedInActive].needsMoreSetup()) 
+		{
+		    return;
+		}
+		setupCheckedInActive++;
+	    }
+	    for (int i = 0; i < activeFeatures.length; i++) {
+		if (!featureWasActivated[i]) {
+		    activeFeatures[i].activate();
+		    featureWasActivated[i] = true;
+		}
+	    }
+
+	    // Set the showTopGroup to this Segment's 
+	    // activeFeature list, unless this segment is the ShowTop segment, 
+	    // in which its activeFeature node tree already contains 
+	    // showTopGroup.
+	    //
+	    // Note that if this segment has no active features, it's OK
+	    // that this statement is never executed, because the 
+	    // showTopGroup's default is to have no active features.
+	    if (this != show.showTop) {
+	       show.showTopGroup.resetVisiblePartsNoAssert(activeFeatures);
+	    }
+	}
+
 	outstandingSetups--;	
 		// This can actually go negative -- see the comment where
 		// it's incremented to see why.
@@ -319,36 +349,22 @@ public class Segment implements Node {
 	    }
 	    setupCheckedInSetup++;
 	}
-	// Check to see if all features in active clause are set up
-	while (setupCheckedInActive < activeFeatures.length) {
-	    if (!featureWasActivated[setupCheckedInActive] 
-	    	&& activeFeatures[setupCheckedInActive].needsMoreSetup()) 
-	    {
-		return;
-	    }
-	    setupCheckedInActive++;
-	}
 
-	// That's it - setup is done.  We now activate any features that
-	// weren't ready when the segment was activated...
-	for (int i = 0; i < activeFeatures.length; i++) {
-	    if (!featureWasActivated[i]) {
-		activeFeatures[i].activate();
-		featureWasActivated[i] = true;
-	    }
-	}
 	segmentSetupComplete = true;
         
-        // Done with setup.  Set the showTopGroup to this Segment's activeFeature list,
-        // unless this segment is the ShowTop segment, in which its
-        // activeFeature node tree already contains showTopGroup.
-        if (this != show.showTop) {
-           show.showTopGroup.resetVisiblePartsNoAssert(activeFeatures);
-        }
-        
-	// Now check to see if we should send the next
-	// it's time to move to the next segment.  It is if we have
-	// no active features, and all of our features are set up.
+	// Now check to see if we should send the next command(s).
+	// At this point in the code, all of our features are set up,
+	// so we send the next command if we have no active features,
+	// or if nextOnSetupDone is true.  nextOnSetupDone will be true
+	// if our "next" clause was called "setup_done".
+	//
+	// A "next" clause gets the "setup_done" behavior because originally,
+	// there were only "next" clauses, the idea being that a segment
+	// with no active features could only reasonably be used for
+	// setup.  Later, "setup_done" was added, e.g. to allow a "loading"
+	// animation, but the old behavior was kept for backwards
+	// compatibility.
+
 	if (nextOnSetupDone || activeFeatures.length == 0) {
 	    doSegmentDone();
 	}
