@@ -1041,6 +1041,10 @@ public class SecurityUtil {
 
         // Assuming that the root certificate was generated using our tool,
         // the certificate should have IssuerAlternativeNames as an extension.
+	if (rootCert.getIssuerAlternativeNames() == null) {
+	    System.out.println("ERROR: the root certificate must have an alternate name");
+	    System.exit(1);
+	}
         List issuerName = (List) rootCert.getIssuerAlternativeNames().iterator().next();
         cg.addExtension(X509Extensions.IssuerAlternativeName.getId(), false,
                 getRfc822Name((String) issuerName.get(1)));

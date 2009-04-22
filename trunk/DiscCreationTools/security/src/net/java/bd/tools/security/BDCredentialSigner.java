@@ -276,7 +276,7 @@ public class BDCredentialSigner {
     }
 
     static private void errorNeedArgument(String flag) {
-        System.err.println("Command option <flag> needs an argument.");
+        System.err.println("Command option " + flag + " needs an argument.");
         tinyHelp();
     }
 }
