@@ -22,6 +22,7 @@
             <ant dir="tests/functional/DataAreaAccessTest" target="clean"/>     
             <ant dir="tests/functional/Playground" target="clean"/>
             <ant dir="tests/functional/ProgressivePlaylist" target="clean"/>
+            <ant dir="tests/functional/SocketTimeout" target="clean"/>
             <ant dir="tests/functional/StorageAccessXlets" target="clean"/> 
             <ant dir="tests/functional/SFAATest" target="clean"/> 
             <ant dir="tests/functional/VFSTest" target="clean"/>     
@@ -35,6 +36,7 @@
             <ant dir="tests/functional/DataAreaAccessTest" target="spotless"/>
             <ant dir="tests/functional/Playground" target="spotless"/>
             <ant dir="tests/functional/ProgressivePlaylist" target="spotless"/>
+            <ant dir="tests/functional/SocketTimeout" target="spotless"/>
             <ant dir="tests/functional/StorageAccessXlets" target="spotless"/>
             <ant dir="tests/functional/SFAATest" target="spotless"/> 
             <ant dir="tests/functional/VFSTest" target="spotless"/>     

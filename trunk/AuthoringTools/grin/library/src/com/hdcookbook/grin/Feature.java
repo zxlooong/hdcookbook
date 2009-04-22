@@ -71,8 +71,8 @@ import java.awt.Graphics2D;
 
 /**
  * Represents a feature.  A feature is a thing that presents some sort
- * of UI.  A phase presents some number of features, and features can
- * be shared between phases.
+ * of UI.  A segment presents some number of features, and features can
+ * be shared between segments.
  *
  *   @author     Bill Foote (http://jovial.com)
  **/

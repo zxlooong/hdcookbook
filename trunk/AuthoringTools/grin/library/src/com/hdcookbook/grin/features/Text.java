@@ -211,7 +211,7 @@ public class Text extends Feature implements Node {
     /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
-     * the phases.
+     * the segments.
      **/
     // This is also called from setText
     public void initialize() {

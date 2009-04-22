@@ -136,7 +136,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
-     * the phases.
+     * the segments.
      **/
     public void initialize() {
 	image = ImageManager.getImage(fileName);
@@ -247,7 +247,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * <p>
      * It's possible an active segment may be destroyed.  For example,
      * the last segment a show is in when the show is destroyed will
-     * probably be active (and it will probably be an empty phase
+     * probably be active (and it will probably be an empty segment
      * too!).
      **/
     public void destroy() {

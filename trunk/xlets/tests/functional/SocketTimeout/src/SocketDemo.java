@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2009, Sun Microsystems, Inc.
  *
@@ -52,39 +53,88 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.media.Playlist;
-import com.hdcookbook.grin.media.PlayerWrangler;
-import com.hdcookbook.grinxlet.GrinXlet;
+import java.lang.reflect.*;
+import java.net.*;
 
+import com.hdcookbook.grin.util.Debug;
 
-public class MyDirector extends Director {
+public class SocketDemo {
 
-    public Playlist playlist;
-    private int count = 0;
+    public static Socket createSocket(String host, int port) {
+	boolean PBP11Stack = true;
+	Class socketClass = null;
+	Class paramTypes[];
+	Constructor socketConstructor = null;
+	Socket theSocket=null;
 
-    public static int numBuffers = -1;
+	// look for the default socket constructor which is only public in
+	// CDC/PBP 1.1 (protected in CDC/PBP1.0)
+	try {
+	    Debug.println("Looking for PBP 1.1's no-argument socket constructor...");
+	    // lookup the Socket class
+	    socketClass = Class.forName("java.net.Socket");
+	    paramTypes = new Class[0];
+	    // lookup the public constructor which does not require parameters
+	    socketConstructor = socketClass.getConstructor(paramTypes);
+	} catch (NoSuchMethodException e) {
+	    // No public constructor was found
+	    PBP11Stack=false;
+	} catch (ClassNotFoundException e) {
+	    // there's a more fundamental problem - should never occur
+	    Debug.printStackTrace(e);
+	}
 
-    public MyDirector() {
+	if (PBP11Stack) {
+	    try {
+		Debug.println("We are on PBP1.1 or better");
+	        // create socket object
+	        // Socket s1=new Socket();
+	        theSocket = (Socket) socketConstructor.newInstance(new Object[0]);
+
+	        Class[] addrParamTypes = new Class[] { String.class, Integer.TYPE };
+		Class addrClass = Class.forName("java.net.InetSocketAddress");
+		Constructor addrConstructor = addrClass.getConstructor(addrParamTypes);
+		Object[] addrParams = new Object[] { host, new Integer(port) };
+		Object remoteHost = addrConstructor.newInstance(addrParams);
+		// does "new InetSocketAddress(host, port)"
+
+	        // the following connect call sets a timeout of 5000ms
+	        // s1.connect(remoteHost, 5000);
+	        paramTypes = new Class[2];
+	        // here we need to use SocketAddress, the base class for 
+	        // InetSocketAddress
+	        paramTypes[0] = Class.forName("java.net.SocketAddress");
+	        paramTypes[1] = Integer.TYPE;
+	        Method connectMethod 
+		     = socketClass.getMethod("connect", paramTypes);
+	        Object args1[] = new Object[2];
+	        args1[0] = remoteHost;
+	        args1[1] = new Integer(5000);
+	        Debug.println("connecting socket with 5000 ms timeout.");
+	        connectMethod.invoke(theSocket, args1);
+	        Debug.println("Connected.");
+	    } catch (InvocationTargetException e) {
+		Debug.println("" + e + ":");
+		Debug.printStackTrace(e.getTargetException());
+		return null;
+	    } catch (Exception e) {
+		Debug.printStackTrace(e);
+		return null;
+	    }
+	} else {
+	    // the block below works both on PBP 1.0 and PBP 1.1
+	    // but there's no way to set a timeout
+	    Debug.println("We are on PBP1.0");
+	    try {
+		Debug.println("Connecting socket with default timeout.");
+		theSocket = new Socket(host, port);
+	       Debug.println("Connected.");
+	    } catch (Exception e) {
+		Debug.printStackTrace(e);
+		return null;
+	    }
+	}
+	return theSocket;
     }
-
-    public void initialize() {
-	PlayerWrangler.getInstance().initialize(
-		    GrinXlet.getInstance().getAnimationEngine());
-	playlist = (Playlist) getFeature("F:Playlist");
-    }
-
-    public void setNumBuffers(int num) {
-	numBuffers = num;
-    }
-
-    /**
-     * @inheritDoc
-     **/
-    public void notifyDestroyed() {
-	PlayerWrangler.getInstance().destroy();
-	SFAADirector.stopSFAA();
-    }
-
 }
+

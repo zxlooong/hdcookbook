@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2009, Sun Microsystems, Inc.
  *
@@ -53,15 +54,15 @@
  */
 
 import com.hdcookbook.grin.Director;
-import com.hdcookbook.grin.features.Text;
-import com.hdcookbook.grin.media.Playlist;
-import com.hdcookbook.grin.media.PlayerWrangler;
-import com.hdcookbook.grinxlet.GrinXlet;
+import com.hdcookbook.grin.util.Debug;
+import java.io.OutputStream;
+import java.io.InputStream;
+
+import java.net.Socket;
 
 
 public class MyDirector extends Director {
 
-    public Playlist playlist;
     private int count = 0;
 
     public static int numBuffers = -1;
@@ -69,22 +70,46 @@ public class MyDirector extends Director {
     public MyDirector() {
     }
 
-    public void initialize() {
-	PlayerWrangler.getInstance().initialize(
-		    GrinXlet.getInstance().getAnimationEngine());
-	playlist = (Playlist) getFeature("F:Playlist");
+    public void startSocketTest() {
+        new Thread(
+	    new Runnable() {
+		public void run() {
+		    runSocketTest();
+		}
+	    }
+	).start();
     }
 
-    public void setNumBuffers(int num) {
-	numBuffers = num;
+    public void runSocketTest() {
+	long start = System.currentTimeMillis();
+	Socket socket = SocketDemo.createSocket("hdcookbook.com", 80);
+	Debug.println("Got socket " + socket);
+	if (socket == null) {
+	    Debug.println("Socket creation failed.");
+	    Debug.println("Perhaps the network cable is unplugged?");
+	} else {
+	    try {
+		InputStream is = socket.getInputStream();
+		OutputStream os = socket.getOutputStream();
+		os.write((int) '\n');
+		os.close();
+		is.read();  // one character
+		is.close();
+		Debug.println("Socket read/write worked.  This is odd, since when");
+		Debug.println("this xlet was written, hdcookbook.com didn't have");
+		Debug.println("an open telnet port.");
+	    } catch (Exception ex) {
+		Debug.println();
+		Debug.println("As expected, I/O failed, because hdcookbook.com's telnet port is closed.");
+		Debug.println("Full exception of failure:");
+		Debug.printStackTrace(ex);
+	    }
+	}
+	Debug.println();
+	long t = System.currentTimeMillis() - start;
+	Debug.println("Socket test ran in " + t + " ms.");
+	Debug.println("Test complete.");
     }
 
-    /**
-     * @inheritDoc
-     **/
-    public void notifyDestroyed() {
-	PlayerWrangler.getInstance().destroy();
-	SFAADirector.stopSFAA();
-    }
 
 }

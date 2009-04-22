@@ -127,7 +127,7 @@ public abstract class Modifier extends Feature {
     /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
-     * the phases.
+     * the segments.
      **/
     public void initialize() {
 	// The show will initialize our sub-feature, so we don't
@@ -139,9 +139,9 @@ public abstract class Modifier extends Feature {
      * setup; each call to setup() shall be balanced by
      * a call to unsetup(), and they shall *not* be nested.  
      * <p>
-     * It's possible an active phase may be destroyed.  For example,
-     * the last phase a show is in when the show is destroyed will
-     * probably be active (and it will probably be an empty phase
+     * It's possible an active segment may be destroyed.  For example,
+     * the last segment a show is in when the show is destroyed will
+     * probably be active (and it will probably be an empty segment
      * too!).
      **/
     public void destroy() {
