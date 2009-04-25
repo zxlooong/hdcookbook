@@ -124,7 +124,7 @@ public class MonitorIXCListener
 	    gameXlet.start();
 	} catch (Throwable ignored) {
 	    if (Debug.LEVEL > 0) {
-		ignored.printStackTrace();
+		Debug.printStackTrace(ignored);
 		Debug.println();
 		Debug.println("***  Failed to start game.  For this to work, the monitor xlet must");
 		Debug.println("***  be signed.  Perhaps it wasn't signed correctly?");
@@ -152,7 +152,7 @@ public class MonitorIXCListener
 	    gameXlet.stop(false);
 	} catch (Throwable ignored) {
 	    if (Debug.LEVEL > 0) {
-		ignored.printStackTrace();
+		Debug.printStackTrace(ignored);
 		Debug.println();
 		Debug.println("***  Failed to start menu.  For this to work, the monitor xlet must");
 		Debug.println("***  be signed.  Perhaps it wasn't signed correctly?");
@@ -164,7 +164,7 @@ public class MonitorIXCListener
 	    getAppProxy(ORG_ID, MENU_APP_ID).start();
 	} catch (Throwable ignored) {
 	    if (Debug.LEVEL > 0) {
-		ignored.printStackTrace();
+		Debug.printStackTrace(ignored);
 		Debug.println();
 	    }
 	}

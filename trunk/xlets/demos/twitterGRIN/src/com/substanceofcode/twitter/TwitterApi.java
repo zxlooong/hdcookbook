@@ -32,6 +32,8 @@ import com.sugree.twitter.JSONTwitterParser;
 import com.sugree.twitter.TwitterException;
 import com.sugree.utils.MultiPartFormOutputStream;
 
+import com.hdcookbook.grin.util.Debug;
+
 /**
  * TwitterApi
  *
@@ -162,7 +164,9 @@ public class TwitterApi {
             HttpUtil.setContentType("text/plain; charset=utf-8");
             response = HttpUtil.doPost(gateway+STATUS_UPDATE_URL, prepareParam(query));
         } catch(Exception ex) {
-			ex.printStackTrace();
+			if (Debug.LEVEL > 0) {
+			    Debug.printStackTrace(ex);
+			}
 			throw new TwitterException("update "+ex.toString());
         }
 		return null;
@@ -203,7 +207,9 @@ public class TwitterApi {
             response = HttpUtil.doPost(gateway+PICTURE_POST_URL, data.toByteArray());
 		} catch (Exception ex) {
             HttpUtil.setContentType(null);
-			ex.printStackTrace();
+			if (Debug.LEVEL > 0) {
+			    Debug.printStackTrace(ex);
+			}
 			throw new TwitterException("post "+ex.toString());
 		}
         HttpUtil.setContentType(null);
@@ -219,7 +225,9 @@ public class TwitterApi {
 		    response = HttpUtil.doPost(url, "");
 	        status = JSONTwitterParser.parseStatus(response);
 		} catch(Exception ex) {
-            ex.printStackTrace();
+			if (Debug.LEVEL > 0) {
+			    Debug.printStackTrace(ex);
+			}
 			throw new TwitterException("request "+ex);
 		}
 		return status;
@@ -234,10 +242,14 @@ public class TwitterApi {
 	            entries = JSONTwitterParser.parseStatuses(response);
 			}
         } catch (IOException ex) {
-            ex.printStackTrace();
+			if (Debug.LEVEL > 0) {
+			    Debug.printStackTrace(ex);
+			}
 			throw new TwitterException("request "+ex);
         } catch (Exception ex) {
-            ex.printStackTrace();
+			if (Debug.LEVEL > 0) {
+			    Debug.printStackTrace(ex);
+			}
 			throw new TwitterException("request "+ex);
         }
         return entries;        

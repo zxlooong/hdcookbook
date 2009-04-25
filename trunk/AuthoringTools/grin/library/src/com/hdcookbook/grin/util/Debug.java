@@ -55,8 +55,45 @@
 package com.hdcookbook.grin.util;
 
 /**
- * Debugging support.  Before shipping a final disc, you should modify the
- * constant values in this class and re-compile.
+ * Debugging support.  It is expected that in a real project, the 
+ * file Debug.java will be physically replaced with a different source 
+ * code file that * implements the same public API.  For a deploy build, 
+ * it should * have ASSERT set false, and LEVEL set to 0.  For a debug 
+ * build, it will almost certainly send the debug output somewhere more
+ * useful than stderr/stdout.
+ * <p>
+ * Replacing a source file and re-building a library may be
+ * unfamiliar to some Java programmers, but C programmers
+ * will instantly recognize this as the assert.h idiom.
+ * This way of doing things has fallen out of favor for
+ * desktop programming, but it is this author's opinion
+ * that the efficiency gain from stripping out assertions
+ * and debug statements at compile time is worth it in
+ * an embedded environment like Blu-ray.
+ * <p>
+ * The GrinXlet application framework (in xlets/GrinXlet)
+ * does as is outlined here -- the GrinXlet build excludes
+ * the version of Debug.java you're reading now, and replaces
+ * it with either a debug version (that sends debug info to
+ * a special screen you can access via the remote control, and
+ * that you can telnet to the player to get), and a deploy version
+ * (that sets the constants so that the compiler strips out
+ * debug and assertions).
+ * <p>
+ * Some people like to solve this problem by having a build system
+ * that edits one or two key source files, to change the value of some
+ * key constants (like ASSERT and LEVEL in this class) depending on the
+ * build.  That's a great technique too, but in any case you'll need to
+ * write your own version of Debug.java if you want to go that way.
+ * <p>
+ * Note that the GRIN library was written assuming that the deploy
+ * version of an xlet will be built with ASSERT set false and LEVEL set
+ * to 0.  It contains many assertions, some of which are computationally 
+ * expensive.  Consider, for example, com.hdcookbook.grin.features.Group.java, 
+ * which has an assertion that spans a couple of screens and creates a HashSet.
+ * <p>
+ * More discussion of this can be found in
+ * <a href="https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=164">Issue 164</a>
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -77,10 +114,11 @@ public class Debug {
      * Note that JDK 1.4's assertion facility can't be used
      * for Blu-Ray, since PBP 1.0 is based on JDK 1.3.
      **/
+
     public final static boolean ASSERT = true;
     /**
      * Debug level.  2 = noisy, 1 = some debug, 0 = none.
-     **/
+     */
     public final static int LEVEL = 2;
 
     /**
@@ -226,5 +264,18 @@ public class Debug {
      * @param token Token for the task that is done.
      */
     public static void stopTimer(int token) {
+    }
+
+    static {
+	// Print an obnoxious message to stderr, to try to make sure that
+	// nobody mistakenly uses this version of Debug.java in a production
+	// disc.
+	if (LEVEL > 0) {
+	    Debug.println("== NOTE ==");
+	    Debug.println("    GRIN debug is enabled, and being sent to stderr.");
+	    Debug.println("    If this is a production disc, please disable debug messages and assertions.");
+	    Debug.println("    See the class comments of com.hdcookbook.grin.util.Debug for details.");
+	    Debug.println();
+	}
     }
 }

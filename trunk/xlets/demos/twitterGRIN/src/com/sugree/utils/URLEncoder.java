@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
+import com.hdcookbook.grin.util.Debug;
+
 /**
  * Adapted from J2SE java.net.URLEncoder.
  */
@@ -23,13 +25,13 @@ public class URLEncoder {
 
 			for (int i = 0; i < s.length(); i++) {
 				int c = (int) s.charAt(i);
-				//System.out.println("Examining character: " + c);
+				//Debug.println("Examining character: " + c);
 				if (dontNeedEncoding(c)) {
 					if (c == ' ') {
 						c = '+';
 						needToChange = true;
 					}
-					//System.out.println("Storing: " + c);
+					//Debug.println("Storing: " + c);
 					out.append((char)c);
 					wroteUnencodedChar = true;
 				} else {
@@ -50,18 +52,18 @@ public class URLEncoder {
 						 */
 						if (c >= 0xD800 && c <= 0xDBFF) {
 							/*
-							   System.out.println(Integer.toHexString(c) 
+							   Debug.println(Integer.toHexString(c) 
 							   + " is high surrogate");
 							 */
 							if ( (i+1) < s.length()) {
 								int d = (int) s.charAt(i+1);
 								/*
-								   System.out.println("\tExamining " 
+								   Debug.println("\tExamining " 
 								   + Integer.toHexString(d));
 								 */
 								if (d >= 0xDC00 && d <= 0xDFFF) {
 									/*
-									   System.out.println("\t" 
+									   Debug.println("\t" 
 									   + Integer.toHexString(d) 
 									   + " is low surrogate");
 									 */

@@ -87,7 +87,7 @@ public class SoundUtil {
         }
         catch(Throwable thr) {
 	    if (Debug.LEVEL > 0) {
-		thr.printStackTrace();
+		Debug.printStackTrace(thr);
 	    }
         }
     }    

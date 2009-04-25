@@ -202,7 +202,9 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
 		println("Exception in VFS reset:");
 		println(e.toString());
 		setMessage(true);
-                e.printStackTrace();
+		if (Debug.LEVEL > 0) {
+		    Debug.printStackTrace(e);
+		}
                 register.setGPR(0,0);
             }
 	} else if (regValue == 1) {
@@ -214,7 +216,9 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
 		println("Exception in VFS update:");
 		println(e.toString());
 		setMessage(true);
-                e.printStackTrace();
+		if (Debug.LEVEL > 0) {
+		    Debug.printStackTrace(e);
+		}
                 register.setGPR(0,0);
             }
         } else {
@@ -225,7 +229,9 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
 		println("Exception in playback:");
 		println(e.toString());
 		setMessage(true);
-               e.printStackTrace();                
+		if (Debug.LEVEL > 0) {
+		    Debug.printStackTrace(e);
+		}
             }
         }  
     }

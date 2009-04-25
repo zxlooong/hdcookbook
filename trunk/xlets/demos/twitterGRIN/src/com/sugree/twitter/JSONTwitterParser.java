@@ -11,6 +11,7 @@ import com.substanceofcode.twitter.model.Status;
 import com.sugree.utils.DateUtil;
 import com.sugree.twitter.TwitterException;
 
+import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.JsonIO;
 
 public class JSONTwitterParser {
@@ -35,7 +36,9 @@ public class JSONTwitterParser {
 				statuses.addElement(new Status(id, screenName, text, createAt, source, favorited, profileImageURL));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (Debug.LEVEL > 0) {
+			    Debug.printStackTrace(e);
+			}
 			throw new TwitterException(e);
 		}
 		return statuses;
@@ -58,7 +61,9 @@ public class JSONTwitterParser {
 			String profileImageURL = (String) user.get("profile_image_url");
 			s = new Status(id, screenName, text, createAt, source, favorited, profileImageURL);
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (Debug.LEVEL > 0) {
+			    Debug.printStackTrace(e);
+			}
 			throw new TwitterException(e);
 		}
 		return s;

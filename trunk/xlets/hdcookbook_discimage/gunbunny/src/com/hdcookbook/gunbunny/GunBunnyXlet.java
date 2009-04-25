@@ -120,7 +120,7 @@ public class GunBunnyXlet extends BaseXlet {
 	    fontFactory = new FontFactory();
 	} catch (Exception ex) {
 	    if (Debug.ASSERT) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 		Debug.assertFail(ex.toString());
 	    }
 	}

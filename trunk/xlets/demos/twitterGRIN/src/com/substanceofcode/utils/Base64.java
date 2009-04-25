@@ -21,6 +21,8 @@ package com.substanceofcode.utils;
 
 import java.io.*;
 
+import com.hdcookbook.grin.util.Debug;
+
 public class Base64 {
 
     static final char[] legalChars =
@@ -115,7 +117,7 @@ public class Base64 {
             bos.close();
             bos = null;
         } catch (IOException ex) {
-            System.err.println("Error while decoding BASE64: " + ex.toString());
+            Debug.println("Error while decoding BASE64: " + ex.toString());
         }
         return decodedBytes;
     }

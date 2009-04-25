@@ -28,6 +28,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
 
+import com.hdcookbook.grin.util.Debug;
+
 import com.sugree.twitter.JSONTwitterParser;
 
 /**
@@ -177,7 +179,7 @@ public class HttpUtil extends HttpAbstractUtil {
             }
 		}
 		if (status == HttpURLConnection.HTTP_BAD_REQUEST) {
-			System.out.println(response);
+			Debug.println(response);
 			throw new IOException("Response status not OK:"+status+" "+message+" "+JSONTwitterParser.parse400(response));
 		}
 

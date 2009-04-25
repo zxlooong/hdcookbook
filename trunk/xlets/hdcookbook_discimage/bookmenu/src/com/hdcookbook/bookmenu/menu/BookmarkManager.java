@@ -208,11 +208,11 @@ public class BookmarkManager {
 	    is = null;
 	} catch (IOException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 	    }
 	} catch (SecurityException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 		Debug.println();
 		Debug.println("***  No permission to read bookmarks ***");
 		Debug.println();
@@ -251,14 +251,14 @@ public class BookmarkManager {
 	    os = null;
 	} catch (SecurityException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 		Debug.println();
 		Debug.println("***  No permission to write bookmarks ***");
 		Debug.println();
 	    }
 	} catch (IOException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 	    }
 	} finally {
 	    if (os != null) {

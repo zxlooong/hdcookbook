@@ -24,6 +24,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
 
+import com.hdcookbook.grin.util.Debug;
+
 import com.substanceofcode.utils.StringUtil;
 
 public class DateUtil {
@@ -108,11 +110,11 @@ public class DateUtil {
 
         } catch(Exception ex) {
             // TODO: Add exception handling code
-            System.err.println("parseRssDate error while converting date string to object: " +
+            Debug.println("parseRssDate error while converting date string to object: " +
                     dateString + "," + ex.toString());
         } catch(Throwable t) {
             // TODO: Add exception handling code
-            System.err.println("parseRssDate error while converting date string to object: " +
+            Debug.println("parseRssDate error while converting date string to object: " +
                     dateString + "," + t.toString());
         }
         return pubDate;

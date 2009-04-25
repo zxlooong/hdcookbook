@@ -173,7 +173,7 @@ public class MenuXlet implements Xlet, UserEventListener,
 			// the initialization is done.
 	    } catch (Exception ex) {
 		if (Debug.LEVEL > 0) {
-		    ex.printStackTrace();
+		    Debug.printStackTrace(ex);
 		}
 	    }
 	}
@@ -189,7 +189,7 @@ public class MenuXlet implements Xlet, UserEventListener,
 	    ourServiceContext = scf.getServiceContext(context);
 	} catch (ServiceContextException ex) {
 	    if (Debug.ASSERT) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 		Debug.assertFail();
 	    }
 	}
@@ -208,7 +208,7 @@ public class MenuXlet implements Xlet, UserEventListener,
 	} catch (Exception ex) {
 	    if (Debug.LEVEL > 0) {
 		// If this happens, it's a bug.
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 	    }
 	}
 	File[] path = { assetsJar.getMountPoint() } ;
@@ -308,7 +308,7 @@ public class MenuXlet implements Xlet, UserEventListener,
 		appIDint =  Integer.parseInt(appID, 16);
 	    } catch (Exception ignored) {
 		if (Debug.LEVEL > 0) {
-		    ignored.printStackTrace();
+		    Debug.printStackTrace(ignored);
 		}
 	    }
 	    String name = "/" + orgID + 
@@ -389,7 +389,7 @@ public class MenuXlet implements Xlet, UserEventListener,
 		return (MonitorIXCInterface) IxcRegistry.lookup(context, name);
 	    } catch (RemoteException ignored) {
 		if (Debug.LEVEL > 0) {
-		    ignored.printStackTrace();
+		    Debug.printStackTrace(ignored);
 		    // Must be a bug
 		}
 	    } catch (NotBoundException ex) {
@@ -416,7 +416,7 @@ public class MenuXlet implements Xlet, UserEventListener,
 	    getMonitorXlet().startGame("");
 	} catch (RemoteException ignored) {
 	    if (Debug.LEVEL > 0) {
-		ignored.printStackTrace();
+		Debug.printStackTrace(ignored);
 	    }
 	}
     }

@@ -151,7 +151,7 @@ public class AssetFinder  {
 	    ImageManager.setImageMap(map);
 	} catch (IOException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 	    }
 	    if (Debug.ASSERT) {
 		Debug.assertFail();
@@ -187,7 +187,7 @@ public class AssetFinder  {
 	    }
 	    ImageManager.setImageMap(map);
 	} catch (IOException ex) {
-	    ex.printStackTrace();
+	    Debug.printStackTrace(ex);
 	    Debug.assertFail();
 	}
     }
@@ -255,7 +255,7 @@ public class AssetFinder  {
 		    } catch (Exception ex) {
 			// This should never happen
 			if (Debug.LEVEL > 0) {
-			    ex.printStackTrace();
+			    Debug.printStackTrace(ex);
 			}
 		    }
 		}

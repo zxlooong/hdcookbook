@@ -161,7 +161,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 	    return new BDLocator(str);
 	} catch (Exception ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 	    }
 	    if (Debug.ASSERT) {
 		Debug.assertFail();
@@ -214,7 +214,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 		    }
 		} catch (Exception ignored) {
 		    if (Debug.LEVEL > 0) {
-			ignored.printStackTrace();
+			Debug.printStackTrace(ignored);
 		    }
 		    if (Debug.ASSERT) {
 			Debug.assertFail();
@@ -276,7 +276,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 	    locatorRequest = locator;
 	} catch (Exception ignored) {
 	    if (Debug.LEVEL > 0) {
-		ignored.printStackTrace();
+		Debug.printStackTrace(ignored);
 	    }
 	    if (Debug.ASSERT) {
 		Debug.assertFail();

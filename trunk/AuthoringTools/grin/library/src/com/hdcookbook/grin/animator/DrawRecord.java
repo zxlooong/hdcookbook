@@ -375,7 +375,7 @@ public class DrawRecord {
 		//                            + r.contains(2,2) + ", "
 		//                            + r.contains(3,3) + ", " 
 		//			      + r.contains(4,4));
-		// yields this:
+		// yields:
 		//
 		//     false
 		//     0 x 0

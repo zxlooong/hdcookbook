@@ -62,6 +62,8 @@ import java.util.StringTokenizer;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.hdcookbook.grin.util.Debug;
+
 /**
  *  A simple parser for parsing the rss feed data from yahoo
  *  weather web service. This parser uses BufferedReader and
@@ -93,15 +95,15 @@ class XMLParser {
                 while (!(attrName = st.nextToken()).equals("region")) {
                     fd.location += "  " + attrName;
                 }
-                System.out.println("location:" + fd.location);
+                Debug.println("location:" + fd.location);
             }
             if (attrName.equals("region")) {
                 fd.location += "  " + st.nextToken();
-                System.out.println("location:" + fd.location);
+                Debug.println("location:" + fd.location);
             }
             if (attrName.equals("country")) {
                 fd.location += "  " + st.nextToken();
-                System.out.println("location:" + fd.location);
+                Debug.println("location:" + fd.location);
             }
         }
 	xmldata = getElement(br, "wind");
@@ -110,11 +112,11 @@ class XMLParser {
             String attrName = st.nextToken();
             if (attrName.equals("direction")) {
                 fd.direction = st.nextToken();
-                System.out.println("direction:" + fd.direction);
+                Debug.println("direction:" + fd.direction);
             }
             if (attrName.equals("speed")) {
                 fd.speed = st.nextToken() + " mph";
-                System.out.println("speed:" + fd.speed);
+                Debug.println("speed:" + fd.speed);
             }
         }
 
@@ -160,7 +162,7 @@ class XMLParser {
         cal.set(Calendar.AM_PM, Calendar.PM);
         Date sunset = cal.getTime();
 
-        System.out.println("present=" + present +
+        Debug.println("present=" + present +
                 " sunrise=" + sunrise +
                 " sunset=" + sunset);
 
@@ -177,15 +179,15 @@ class XMLParser {
                 while (!(attrName = st.nextToken()).equals("code")) {
                     fd.condition += " " + attrName;
                 }
-                System.out.println("condition:" + fd.condition);
+                Debug.println("condition:" + fd.condition);
             }
             if (attrName.equals("code")) {
                 fd.imageCode = st.nextToken();
-                System.out.println("code:" + fd.imageCode);
+                Debug.println("code:" + fd.imageCode);
             }
             if (attrName.equals("temp")) {
                 fd.temp = st.nextToken() + " F";
-                System.out.println("temp:" + fd.temp);
+                Debug.println("temp:" + fd.temp);
             }
         }
 

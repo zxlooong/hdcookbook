@@ -36,7 +36,7 @@ public class SFAADirector extends Director implements AnimationContext {
     }
 
     public static void startSFAA() {
-	System.out.println("Pretending to start SFAA");
+	Debug.println("Pretending to start SFAA");
 	engine = new DirectDrawEngine();
 	engine.setFps(24000);
 	engine.initialize(new SFAADirector());
@@ -44,7 +44,7 @@ public class SFAADirector extends Director implements AnimationContext {
     }
 
     public static void stopSFAA() {
-	System.out.println("Stopping the pretend SFAA");
+	Debug.println("Stopping the pretend SFAA");
 	engine.destroy();
     }
 
@@ -56,8 +56,10 @@ public class SFAADirector extends Director implements AnimationContext {
 	    subShow = new Show(director);
 	    reader.readShow(subShow);
 	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    Debug.println("Error reading sfaa_show.grin");
+	    if (Debug.LEVEL > 0) {
+		Debug.printStackTrace(ex);
+		Debug.println("Error reading sfaa_show.grin");
+	    }
 	    throw new InterruptedException();
 	}
 

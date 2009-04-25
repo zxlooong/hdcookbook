@@ -155,7 +155,7 @@ public abstract class BaseXlet
 	    serviceContext = scf.getServiceContext(xletContext); 
 	} catch (ServiceContextException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 		Debug.assertFail();
 	    }
 	}
@@ -212,7 +212,7 @@ public abstract class BaseXlet
 	    player = Manager.createPlayer(stars);
 	} catch (Exception ex) {
 	    if (Debug.ASSERT) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 		Debug.assertFail(ex.toString());
 	    }
 	}

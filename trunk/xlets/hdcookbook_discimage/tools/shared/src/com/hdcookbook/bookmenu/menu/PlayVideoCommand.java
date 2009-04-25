@@ -61,6 +61,7 @@ import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+import com.hdcookbook.grin.util.Debug;
 import java.io.IOException;
 
 
@@ -87,7 +88,7 @@ public class PlayVideoCommand extends Command implements Node {
         if (extension != null) {
             extension.playVideo(tag);
         } else {
-            System.out.println("Playing back " + tag);
+            Debug.println("Playing back " + tag);
         }
 	 // Playing video takes some time to execute, so we want to
 	 // defer any following commands (like one to move to the next

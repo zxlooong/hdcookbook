@@ -81,7 +81,7 @@ public class SFAADirector extends Director implements AnimationContext {
     }
 
     public static void stopSFAA() {
-	System.out.println("Stopping the SFAA engine");
+	Debug.println("Stopping the SFAA engine");
 	engine.destroy();
     }
 
@@ -93,8 +93,10 @@ public class SFAADirector extends Director implements AnimationContext {
 	    subShow = new Show(director);
 	    reader.readShow(subShow);
 	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    Debug.println("Error reading sfaa_show.grin");
+	    if (Debug.LEVEL > 0) {
+		Debug.printStackTrace(ex);
+		Debug.println("Error reading sfaa_show.grin");
+	    }
 	    throw new InterruptedException();
 	}
 

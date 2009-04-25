@@ -113,7 +113,7 @@ public class MenuDirector extends Director implements PlayVideoExtension {
             
 	} catch (IOException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 		Debug.println();
 		Debug.println("***  Fatal error:  Failed to parse show.");
 		Debug.println("***  " + ex);

@@ -111,7 +111,7 @@ public class MonitorXlet implements Xlet {
 	    }
 	} catch (AlreadyBoundException ignored) {
 	    if (Debug.LEVEL > 0) {
-		ignored.printStackTrace();
+		Debug.printStackTrace(ignored);
 	    }
 	}
     }
@@ -135,7 +135,7 @@ public class MonitorXlet implements Xlet {
 	    IxcRegistry.unbind(xletContext, "Monitor");
 	} catch (NotBoundException ignored) {
 	    if (Debug.LEVEL > 0) {
-		ignored.printStackTrace();
+		Debug.printStackTrace(ignored);
 	    }
 	}
     }

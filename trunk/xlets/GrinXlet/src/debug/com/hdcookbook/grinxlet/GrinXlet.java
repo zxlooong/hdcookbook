@@ -300,7 +300,9 @@ public class GrinXlet
 	    try {
 	       fontFactory = new FontFactory();
 	    } catch (Exception ex) {
-		ex.printStackTrace();
+		if (Debug.LEVEL > 0) {
+		    Debug.printStackTrace(ex);
+		}
 		if (Debug.ASSERT) {
 		    Debug.assertFail();
 		}
@@ -391,7 +393,9 @@ public class GrinXlet
 	   reader.readShow(xletShow);
 
 	} catch (IOException e) {
-	   e.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		Debug.printStackTrace(e);
+	    }
 	   Debug.println("Error in reading the show file");
 	   throw new InterruptedException();
 	}

@@ -111,7 +111,9 @@ public class SFAAXlet extends GrinXlet implements ResourceClient {
 		    Debug.println("Set screen size to " + configWanted);
 		}
             } catch (Exception e) {
-                e.printStackTrace();
+		if (Debug.LEVEL > 0) {
+		    Debug.printStackTrace(e);
+		}
             } finally {
                 graphicsDevice.releaseDevice();
             }

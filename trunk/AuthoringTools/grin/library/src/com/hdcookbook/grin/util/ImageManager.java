@@ -200,7 +200,7 @@ public class ImageManager {
 	    // dis.close is in the finally block
 	} catch (IOException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 	    }
 	    if (Debug.ASSERT) {
 		Debug.assertFail();

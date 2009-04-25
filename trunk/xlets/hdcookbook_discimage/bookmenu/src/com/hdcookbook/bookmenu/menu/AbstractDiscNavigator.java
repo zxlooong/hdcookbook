@@ -167,7 +167,7 @@ public abstract class AbstractDiscNavigator
 	    return new BDLocator(ls);
 	} catch (Exception ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 	    }
 	    return null;
 	}
@@ -191,7 +191,7 @@ public abstract class AbstractDiscNavigator
 	    return hs;
 	} catch (Throwable t) {
 	    if (Debug.LEVEL > 0) {
-		t.printStackTrace();
+		Debug.printStackTrace(t);
 		Debug.println();
 		Debug.println("****  Failed to load sound " + ls + "  *****");
 		Debug.println(t);
@@ -213,12 +213,12 @@ public abstract class AbstractDiscNavigator
 	    return (Title) siManager.getService(loc);
 	} catch (InvalidLocatorException ignored) {
 	    if (Debug.LEVEL > 0) {
-		ignored.printStackTrace();
+		Debug.printStackTrace(ignored);
 	    }
 	    return null;
 	} catch (SecurityException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 		Debug.println();
 		Debug.println("*** Permission denied for creating Title "+loc);
 		Debug.println("*** Only signed xlets can do this.");
@@ -244,7 +244,7 @@ public abstract class AbstractDiscNavigator
 		titleContext = (TitleContext)scf.getServiceContext(xletContext);
 	    } catch (ServiceContextException ignored) {
 		if (Debug.LEVEL > 0) {
-		    ignored.printStackTrace();
+		    Debug.printStackTrace(ignored);
 		}
 		if (Debug.ASSERT) {
 		    Debug.assertFail();
@@ -297,7 +297,7 @@ public abstract class AbstractDiscNavigator
 		    mainPlayer  = Manager.createPlayer(ml);
 		} catch (Exception ignored) {
 		    if (Debug.LEVEL > 0) {
-			ignored.printStackTrace();
+			Debug.printStackTrace(ignored);
 		    }
 		    if (Debug.ASSERT) {
 			Debug.assertFail("Error creating player");
@@ -347,7 +347,7 @@ public abstract class AbstractDiscNavigator
 		    playlistControl.selectPlayList(loc);
 		} catch (Exception ignored) {
 		    if (Debug.LEVEL > 0) {
-			ignored.printStackTrace();
+			Debug.printStackTrace(ignored);
 		    }
 		}
 	    }

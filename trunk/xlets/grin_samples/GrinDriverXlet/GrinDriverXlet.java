@@ -69,6 +69,7 @@ import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.util.Debug;
 
 import org.dvb.ui.DVBBufferedImage;
 
@@ -141,10 +142,10 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
                 
                 AssetFinder.setSearchPath(new String[]{""}, null);  
                 if (AssetFinder.tryURL("images.map") != null) {
-                   System.out.println("Found images.map, using mosaic.");
+                   Debug.println("Found images.map, using mosaic.");
                    AssetFinder.setImageMap("images.map");
                 } else {
-                   System.out.println("No images.map, not using mosaic.");
+                   Debug.println("No images.map, not using mosaic.");
                 }
 	        GrinBinaryReader reader = new GrinBinaryReader(
                         AssetFinder.getURL(grinScriptName).openStream());
@@ -152,8 +153,10 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
 	        reader.readShow(show);
                
             } catch (IOException e) {
-                e.printStackTrace();
-                System.err.println("Error in reading the show file");
+		if (Debug.LEVEL > 0) {
+		    Debug.printStackTrace(e);
+		}
+                Debug.println("Error in reading the show file");
                 throw new InterruptedException();
             }
            

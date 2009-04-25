@@ -57,6 +57,9 @@ package com.hdcookbook.grin.util;
 /**
  * Debugging support.  This overrides the version in the GRIN library, to 
  * turn off debugging in a deployment xlet.
+ * <p>
+ * See the extensive class comments in the file
+ * AuthoringTools/grin/library/src/com/hdcookbook/grin/util/Debug.java
  *
  * @author Bill Foote (http://jovial.com)
  */

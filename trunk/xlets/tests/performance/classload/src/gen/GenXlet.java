@@ -62,7 +62,8 @@ import java.io.IOException;
 /**
  * This class is a Java SE program that generates the source code for
  * the classload performance tests.  To launch, just run this class; to
- * parameterize the tests differently, It generates an xlet class called 
+ * parameterize the tests differently, modify the main method.  This
+ * program generates an xlet class called 
  * "Test" that runs the test, then immediately destroys itself.  A driver
  * xlet can run this xlet with the app launching API, then time how long
  * it takes until it gets a notification that the xlet has been destroyed.

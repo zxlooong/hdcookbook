@@ -165,7 +165,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
             try {
                 FontImageFileInfo.initFontImageFileInfo("fontstrip.inf");
             } catch (IOException e) {
-                e.printStackTrace();
+		Debug.printStackTrace(e);
                 loadingFailed = true;
             }
         }

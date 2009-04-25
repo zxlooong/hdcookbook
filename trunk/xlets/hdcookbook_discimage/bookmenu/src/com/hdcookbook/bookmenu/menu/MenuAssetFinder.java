@@ -95,7 +95,7 @@ public class MenuAssetFinder extends AssetFinder {
 	    xlet.destroyXlet(true);
 	} catch (Throwable ignored) {
 	    if (Debug.LEVEL > 0) {
-		ignored.printStackTrace();
+		Debug.printStackTrace(ignored);
 	    }
 	}
 	xlet.navigator.startVideoAt(null);
@@ -111,7 +111,7 @@ public class MenuAssetFinder extends AssetFinder {
 	    return factory.createFont(fontName, style, size);
 	} catch (Exception ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 		Debug.println("***  Font " + fontName + " not found.  ***");
 	    }
 	}

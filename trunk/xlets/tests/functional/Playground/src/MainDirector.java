@@ -141,7 +141,9 @@ public class MainDirector extends Director {
 	    newShow = new Show(null);
 	    reader.readShow(newShow);
 	} catch (IOException e) {
-	    e.printStackTrace();
+	    if (Debug.LEVEL > 0) {
+		Debug.printStackTrace(e);
+	    }
 	    Debug.println("Error in reading the show file");
 	    return;
 	}

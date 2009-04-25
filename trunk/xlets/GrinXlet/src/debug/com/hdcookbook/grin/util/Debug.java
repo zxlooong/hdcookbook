@@ -66,7 +66,10 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * Debugging support.  This overrides the version in the GRIN library, to redirect
- * debug output to the log maintained by GenericGame.
+ * debug output to the log maintained by GrinXlet.
+ * <p>
+ * See the extensive class comments in the file
+ * AuthoringTools/grin/library/src/com/hdcookbook/grin/util/Debug.java
  *
  * @author Bill Foote (http://jovial.com)
  */
@@ -138,7 +141,6 @@ public class Debug {
 
     public static void println(Object o) {
         if (LEVEL > 0) {
-            System.out.println(o);
             if (o == null) {
                 DebugLog.println("" + null);
             } else {

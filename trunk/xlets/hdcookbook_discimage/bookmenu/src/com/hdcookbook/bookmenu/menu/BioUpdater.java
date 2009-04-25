@@ -258,7 +258,7 @@ public class BioUpdater implements Runnable {
 	    }
 	} catch (IOException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 	    }
 	} finally {
 	    synchronized(this) {
@@ -281,7 +281,7 @@ public class BioUpdater implements Runnable {
 	    version = Integer.parseInt(line);
 	} catch (NumberFormatException ex) {
 	    if (Debug.LEVEL > 0) {
-		ex.printStackTrace();
+		Debug.printStackTrace(ex);
 	    }
 	    return;
 	}

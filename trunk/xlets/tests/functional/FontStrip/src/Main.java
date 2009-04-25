@@ -70,6 +70,7 @@ import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
+import com.hdcookbook.grin.util.Debug;
 
 import org.dvb.event.EventManager;
 import org.dvb.event.UserEvent;
@@ -79,7 +80,7 @@ import org.bluray.ui.event.HRcEvent;
 import org.dvb.ui.DVBBufferedImage;
 
 /** 
- * The main class for the Playground project
+ * The main class for the font strip demo xlet
  */
 
 public class Main implements Xlet, AnimationContext, UserEventListener {
@@ -147,9 +148,11 @@ public class Main implements Xlet, AnimationContext, UserEventListener {
                reader.readShow(show);
                
            } catch (IOException e) {
-               e.printStackTrace();
-               System.err.println("Error in reading the show file");
-               throw new InterruptedException();
+		if (Debug.LEVEL > 0) {
+		    Debug.printStackTrace(e);
+		    Debug.println("Error in reading the show file");
+		}
+                throw new InterruptedException();
            }
            
 	   animationEngine.checkDestroy();

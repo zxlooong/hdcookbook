@@ -551,7 +551,7 @@ public abstract class AnimationEngine implements Runnable {
 		    } catch (Throwable t) {
 			if (Debug.LEVEL > 1) {
 			    Debug.println(this);
-			    t.printStackTrace();
+			    Debug.printStackTrace(t);
 			    Debug.println("****  Exception in destroy:  " + t);
 			}
 		    }
@@ -561,7 +561,7 @@ public abstract class AnimationEngine implements Runnable {
 		terminatingEraseScreen();
 	    } catch (Throwable t) {
 		if (Debug.LEVEL > 0) {
-		    t.printStackTrace();
+		    Debug.printStackTrace(t);
 		    Debug.println("****  Exception in destroy:  " + t);
 		}
 	    }

@@ -109,6 +109,22 @@ public class Debug {
 	}
     }
 
+    /**
+     * Print a stack trace to the debug log, if Debug.LEVEL > 0.  Note 
+     * that you can also easily use this for the equivalent of 
+     * <code>Thread.dumpStack()</code> using this bit of code:
+     * <pre>
+     *      try {
+     *          throw new RuntimeException("STACK BACKTRACE");
+     *      } catch (RuntimeException ex) {
+     *		Debug.printStackTrace(ex);
+     *      }
+     * </pre>
+     **/
+    public static void printStackTrace(Throwable t) {
+        t.printStackTrace();
+    }
+
     public static void assertFail(String msg) {
 	if (ASSERT) {
 	    Thread.dumpStack();
@@ -123,7 +139,7 @@ public class Debug {
 		try {
 		    x.destroyXlet(true);
 		} catch (Throwable ignored) {
-		    ignored.printStackTrace();
+		    Debug.printStackTrace(ignored);
 		}
 	    }
 	}
