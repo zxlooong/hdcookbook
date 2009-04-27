@@ -144,7 +144,7 @@ public class Fade extends Modifier implements Node {
     }  
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (activated || alphas == null) {
@@ -165,7 +165,7 @@ public class Fade extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
 	super.initializeClone(original, clones);
@@ -175,7 +175,7 @@ public class Fade extends Modifier implements Node {
 
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void initialize() {
 	if (keyframes.length == 1) {
@@ -228,7 +228,7 @@ public class Fade extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
 	super.setActivateMode(mode);
@@ -241,7 +241,7 @@ public class Fade extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	super.nextFrame();
@@ -272,7 +272,7 @@ public class Fade extends Modifier implements Node {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	childContext.parent = context;
@@ -281,7 +281,7 @@ public class Fade extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	if (currAlpha != null) {

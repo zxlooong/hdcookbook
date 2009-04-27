@@ -88,7 +88,7 @@ public class SetTarget extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (!isSetup()) {
@@ -111,7 +111,7 @@ public class SetTarget extends Modifier implements Node {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void setChildChanged() {
 	// When we're deactivated, our child doesn't need to be marked as
@@ -120,7 +120,7 @@ public class SetTarget extends Modifier implements Node {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	int old = context.setTarget(target);

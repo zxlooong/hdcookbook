@@ -216,7 +216,7 @@ public class VisualRCHandler extends RCHandler implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean handleKeyPressed(RCKeyEvent ke, Show caller) {
 	if ((ke.getBitMask() & MASK) == 0) {
@@ -251,7 +251,7 @@ public class VisualRCHandler extends RCHandler implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean handleKeyReleased(RCKeyEvent ke, Show caller) {
 	// ignored
@@ -259,14 +259,14 @@ public class VisualRCHandler extends RCHandler implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean handleKeyTyped(RCKeyEvent ke, Show caller) {
 	return false;
     }
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean handleMouse(int x, int y, boolean activate) {
         if (mouseRects == null) {
@@ -340,7 +340,7 @@ public class VisualRCHandler extends RCHandler implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void activate(Segment s) {
 	timedOut = timeout <= -1;
@@ -384,7 +384,7 @@ public class VisualRCHandler extends RCHandler implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	currFrame++;

@@ -142,7 +142,7 @@ public class Translator extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (!isSetup() || activated) {
@@ -161,7 +161,7 @@ public class Translator extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
 	super.initializeClone(original, clones);
@@ -178,20 +178,20 @@ public class Translator extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void initialize() {
 	super.initialize();
     }
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void destroy() {
 	super.destroy();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	if (Debug.ASSERT && !model.getIsActivated()) {
@@ -206,7 +206,7 @@ public class Translator extends Modifier implements Node {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	dx = model.getField(X_FIELD);
@@ -225,7 +225,7 @@ public class Translator extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getX() {
 	int x = model.getField(X_FIELD);
@@ -237,7 +237,7 @@ public class Translator extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getY() {
 	int y = model.getField(Y_FIELD);
@@ -250,7 +250,7 @@ public class Translator extends Modifier implements Node {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	if (!activated) {

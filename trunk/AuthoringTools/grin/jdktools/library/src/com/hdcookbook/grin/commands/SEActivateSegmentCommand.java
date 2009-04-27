@@ -131,19 +131,19 @@ public class SEActivateSegmentCommand extends ActivateSegmentCommand implements 
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	String result = "activate_segment ";

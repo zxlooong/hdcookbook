@@ -100,7 +100,7 @@ public class Assembly extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (!isSetup() || activated) {
@@ -126,7 +126,7 @@ public class Assembly extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addSubgraph(HashSet set) {
 	if (set.contains(this)) {
@@ -139,14 +139,14 @@ public class Assembly extends Feature implements Node {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getX() {
 	return currentFeature.getX();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getY() {
 	return currentFeature.getY();
@@ -235,7 +235,7 @@ public class Assembly extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
 	if (mode) {
@@ -254,7 +254,7 @@ public class Assembly extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
 	//
@@ -304,7 +304,7 @@ public class Assembly extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
 	currentFeature.markDisplayAreasChanged();
@@ -316,21 +316,21 @@ public class Assembly extends Feature implements Node {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	currentFeature.addDisplayAreas(context);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	currentFeature.paintFrame(gr);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	currentFeature.nextFrame();

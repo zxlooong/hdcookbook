@@ -111,13 +111,13 @@ public abstract class SEGenericFeature extends Feature implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
     }

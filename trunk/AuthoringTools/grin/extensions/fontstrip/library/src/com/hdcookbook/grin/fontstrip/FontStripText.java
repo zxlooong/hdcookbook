@@ -229,7 +229,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
         if (loadingFailed) {
@@ -256,7 +256,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void doSomeSetup() {
 	synchronized(setupMonitor) {
@@ -275,7 +275,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
 	synchronized (setupMonitor) {

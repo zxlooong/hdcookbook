@@ -245,21 +245,21 @@ public class SEVisualRCHandler
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getKeyPressedInterestMask() {
 	return VisualRCHandler.MASK;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getKeyReleasedInterestMask() {
 	return 0;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getKeyTypedInterestMask() {
 	return 0;
@@ -316,13 +316,13 @@ public class SEVisualRCHandler
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) 
             throws IOException
@@ -340,7 +340,7 @@ public class SEVisualRCHandler
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	if (getName() == null) {

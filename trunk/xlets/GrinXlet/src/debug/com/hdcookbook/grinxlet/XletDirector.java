@@ -110,7 +110,7 @@ public class XletDirector extends Director {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void notifyDestroyed() {
 	DebugLog.shutdownDebugListener();

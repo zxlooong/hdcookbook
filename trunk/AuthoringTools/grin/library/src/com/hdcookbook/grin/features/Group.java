@@ -103,7 +103,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (!isSetup() || activated) {
@@ -121,7 +121,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
 	super.initializeClone(original, clones);
@@ -138,7 +138,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addSubgraph(HashSet set) {
 	if (set.contains(this)) {
@@ -167,7 +167,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getX() {
 	int x = Integer.MAX_VALUE;
@@ -181,7 +181,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getY() {
 	int y = Integer.MAX_VALUE;
@@ -320,7 +320,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
 	// This is synchronized to only occur within model updates.
@@ -337,7 +337,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
 	//
@@ -363,7 +363,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
 	//
@@ -391,7 +391,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
 	for (int i = 0; i < visibleParts.length; i++) {
@@ -404,7 +404,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	for (int i = 0; i < visibleParts.length; i++) {
@@ -413,7 +413,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	for (int i = 0; i < visibleParts.length; i++) {
@@ -422,7 +422,7 @@ public class Group extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	for (int i = 0; i < visibleParts.length; i++) {

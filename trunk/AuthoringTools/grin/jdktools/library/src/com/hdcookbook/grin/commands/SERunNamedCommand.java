@@ -146,13 +146,13 @@ public class SERunNamedCommand extends Command implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
         // We don't call changeFeatureReference on target, because
@@ -160,7 +160,7 @@ public class SERunNamedCommand extends Command implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	return "run_named_command " + target;

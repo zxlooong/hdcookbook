@@ -105,42 +105,42 @@ public class ManagedSubImage extends ManagedImage {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void prepare() {
 	mosaic.prepare();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean isLoaded() {
 	return mosaic.isLoaded();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void load(Component comp) {
 	mosaic.load(comp);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public synchronized void startLoading(Component  comp) {
 	mosaic.startLoading(comp);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void unprepare() {
 	mosaic.unprepare();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void draw(Graphics2D gr, int x, int y, Component comp) {
 	Rectangle p = placement;
@@ -149,7 +149,7 @@ public class ManagedSubImage extends ManagedImage {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
 	Rectangle p = placement;
@@ -160,7 +160,7 @@ public class ManagedSubImage extends ManagedImage {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void drawClipped(Graphics2D gr, int x, int y, 
             Rectangle subsection, Component comp) {

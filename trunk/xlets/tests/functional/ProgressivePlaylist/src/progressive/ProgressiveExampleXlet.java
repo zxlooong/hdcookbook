@@ -433,7 +433,7 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * Handle an event coming in via org.dvb.event.UserEventListener
      **/

@@ -190,7 +190,7 @@ public class GrinXHelper extends Command implements Node {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void readInstanceData(GrinDataInputStream in, int length) 
             throws IOException 
@@ -244,7 +244,7 @@ public class GrinXHelper extends Command implements Node {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void execute() {
 	if (Debug.ASSERT) {

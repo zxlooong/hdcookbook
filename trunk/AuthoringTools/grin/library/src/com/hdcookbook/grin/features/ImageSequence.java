@@ -124,7 +124,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (!isSetup() || isActivated) {
@@ -165,7 +165,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
 	super.initializeClone(original, clones);
@@ -180,14 +180,14 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getX() {
 	return placements[getStateHolder().currFrame].x;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getY() {
 	return placements[getStateHolder().currFrame].y;
@@ -250,7 +250,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
@@ -284,7 +284,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
 	synchronized(setupMonitor) {
@@ -320,7 +320,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void doSomeSetup() {
 	for (int i = 0; i < images.length; i++) {
@@ -344,7 +344,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
 	synchronized (setupMonitor) {
@@ -361,7 +361,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	if (Debug.LEVEL > 0 && !isActivated) {
@@ -399,14 +399,14 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
 	drawRecord.setChanged();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	int frame = getStateHolder().currFrame;
@@ -447,7 +447,7 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {

@@ -128,13 +128,13 @@ public class SEActivatePartCommand extends ActivatePartCommand implements SENode
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
 	if (assembly == from && to instanceof Assembly) {
@@ -146,7 +146,7 @@ public class SEActivatePartCommand extends ActivatePartCommand implements SENode
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	return "activate_part " + assembly + " " + part;

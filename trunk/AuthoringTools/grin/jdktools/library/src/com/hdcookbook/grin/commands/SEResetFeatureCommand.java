@@ -113,13 +113,13 @@ public class SEResetFeatureCommand extends ResetFeatureCommand implements SENode
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
 	if (feature == from) {
@@ -128,7 +128,7 @@ public class SEResetFeatureCommand extends ResetFeatureCommand implements SENode
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	return "reset_feature " + feature;

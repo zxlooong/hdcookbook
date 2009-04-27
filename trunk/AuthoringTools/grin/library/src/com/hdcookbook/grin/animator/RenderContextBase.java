@@ -132,7 +132,7 @@ public class RenderContextBase extends RenderContext {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addArea(DrawRecord r) {
 	if (r.prev != null) {		// If on lastFrameList
@@ -151,7 +151,7 @@ public class RenderContextBase extends RenderContext {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void guaranteeAreaFilled(DrawRecord filled) {
 	filled.target = currTarget;
@@ -173,7 +173,7 @@ public class RenderContextBase extends RenderContext {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int setTarget(int newTarget) {
 	int old = currTarget;

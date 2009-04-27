@@ -82,7 +82,7 @@ public class SFAAXlet extends GrinXlet implements ResourceClient {
     private HGraphicsDevice graphicsDevice;
     private Container root;
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * This override of this method sets the HGraphicsDevice to QHD,
      * and sizes the component to QHD.
@@ -143,19 +143,19 @@ public class SFAAXlet extends GrinXlet implements ResourceClient {
     // ResourceClient methods:
     //
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void notifyRelease(ResourceProxy proxy) {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void release(ResourceProxy proxy) {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean requestRelease(ResourceProxy proxy, Object requestData) {
 	return false;	

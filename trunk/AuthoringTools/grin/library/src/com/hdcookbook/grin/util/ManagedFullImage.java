@@ -115,7 +115,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public synchronized void prepare() {
 	    // See ManagedImage's main class documentation under
@@ -124,7 +124,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public synchronized boolean isLoaded() {
 	    //  See ManagedImage's main class documentation under
@@ -133,7 +133,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void load(Component comp) {
 	    // See ManagedImage's main class documentation under
@@ -167,7 +167,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public synchronized void startLoading(Component  comp) {
 	if (image != null || numPrepares <= 0) {
@@ -226,7 +226,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public synchronized void unprepare() {
 	    // See ManagedImage's main class documentation under
@@ -245,14 +245,14 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void draw(Graphics2D gr, int x, int y, Component comp) {
         gr.drawImage(image, x, y, comp);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
 	gr.drawImage(image, bounds.x, bounds.y, 
@@ -262,7 +262,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void drawClipped(Graphics2D gr, int x, int y, Rectangle subsection, Component comp) {
 	gr.drawImage(image, x, y, x+ subsection.width, y+subsection.height,

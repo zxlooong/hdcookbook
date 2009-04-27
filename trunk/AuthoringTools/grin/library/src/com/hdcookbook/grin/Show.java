@@ -241,7 +241,7 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * This will  be called by the animation framework; clients of the GRIN
      * framework should ensure a show has been built before handing it off
@@ -290,7 +290,7 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * Destroy a show.  This will be called by the animation framework
      * when the animation engine is destroyed, or when this show is removed
@@ -330,11 +330,7 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * @inheritDoc
-     *
-     * Used to build the show, or to reinitialize it.  This method is
-     * called by the animation framework, and should not be directly called
-     * by client code.
+     * Used to build the show, or to reinitialize it.  
      **/
     public void setDrawTargets(String[] drawTargets) {
 	this.drawTargets = drawTargets;
@@ -357,7 +353,7 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void mapDrawTargets(Hashtable targetMap) {
 	defaultDrawTarget 
@@ -578,7 +574,7 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * The animation framework calls this method just before calling 
      * nextFrame() if
@@ -595,7 +591,7 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      *
      * @throws	InterruptedException	if the show has been destroyed
      *
@@ -678,7 +674,7 @@ public class Show implements AnimationClient {
     
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public synchronized void addDisplayAreas(RenderContext context) 
 				throws InterruptedException 
@@ -698,7 +694,7 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * Paint the current state of the enhancement.  This should be
      * called by the xlet, usually via the animation framework.  
@@ -718,7 +714,7 @@ public class Show implements AnimationClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public synchronized void paintDone() {
 	inputOK = true;

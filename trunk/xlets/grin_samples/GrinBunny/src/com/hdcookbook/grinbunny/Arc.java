@@ -112,74 +112,74 @@ public class Arc extends Feature implements Node {
     // aren't required to implement cloning.
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getX() {
 	return x;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getY() {
 	return y;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void initialize() {
 	changed = true;
     }
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void destroy() {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void setActivateMode(boolean mode) {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int setSetupMode(boolean mode) {
 	return 0;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void doSomeSetup() {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
 	return false;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	// We don't animate, so there's nothing to update
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
 	drawRecord.setChanged();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	drawRecord.setArea(x, y, width, height);
@@ -194,7 +194,7 @@ public class Arc extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	gr.setColor(color);
@@ -203,7 +203,7 @@ public class Arc extends Feature implements Node {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void readInstanceData(GrinDataInputStream in, int length)
 	    throws IOException

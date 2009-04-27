@@ -103,7 +103,7 @@ public class SECommandRCHandler
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getKeyPressedInterestMask() {
 	if (wantKeypress) {
@@ -114,7 +114,7 @@ public class SECommandRCHandler
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getKeyReleasedInterestMask() {
 	if (wantKeypress) {
@@ -125,7 +125,7 @@ public class SECommandRCHandler
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getKeyTypedInterestMask() {
 	return 0;
@@ -150,13 +150,13 @@ public class SECommandRCHandler
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) 
             throws IOException
@@ -164,7 +164,7 @@ public class SECommandRCHandler
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	String type = wantKeypress ? "key_pressed" : "key_released";

@@ -47,6 +47,7 @@ information or have any questions.
 		  <sourcepath location="extensions/media/src"/>
 		  <sourcepath location="extensions/media/se_src"/>
 		  <sourcepath location="extensions/fontstrip/library/src"/>
+		  <sourcepath location="extensions/fontstrip/jdktools/library/src"/>
 		  <sourcepath location="extensions/fontstrip/jdktools/tools/src"/>
 	</javadoc>	
         

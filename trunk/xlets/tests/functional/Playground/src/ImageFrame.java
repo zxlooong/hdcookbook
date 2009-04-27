@@ -103,28 +103,28 @@ public class ImageFrame extends Box implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getX() {
 	return fixedImage.getX();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getY() {
 	return fixedImage.getY();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	// We don't animate, so there's nothing to update
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
     	//
@@ -152,7 +152,7 @@ public class ImageFrame extends Box implements Node {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void readInstanceData(GrinDataInputStream in, int length)
 	    throws IOException

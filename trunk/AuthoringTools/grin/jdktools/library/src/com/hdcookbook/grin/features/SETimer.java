@@ -74,7 +74,7 @@ public class SETimer extends SEInterpolatedModel {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	if (name == null) {

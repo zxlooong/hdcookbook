@@ -189,40 +189,40 @@ public class Playlist extends Feature implements Node {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getX() {
 	return 0;
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getY() {
 	return 0;
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void initialize() {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void destroy() {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
 	return 0;
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
 	synchronized(this) {
@@ -242,32 +242,32 @@ public class Playlist extends Feature implements Node {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
 	return false;
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
     }

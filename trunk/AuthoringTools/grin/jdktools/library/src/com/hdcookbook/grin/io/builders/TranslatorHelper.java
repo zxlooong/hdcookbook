@@ -122,7 +122,7 @@ public class TranslatorHelper implements DeferredBuilder {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * Since the show is built, we can calculate the upper-left hand
      * corner of our translator's child.  If our model uses

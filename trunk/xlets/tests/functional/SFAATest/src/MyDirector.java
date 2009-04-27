@@ -100,7 +100,7 @@ public class MyDirector extends Director {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void notifyDestroyed() {
 	PlayerWrangler.getInstance().destroy();

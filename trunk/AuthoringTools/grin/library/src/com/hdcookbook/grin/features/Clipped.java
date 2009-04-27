@@ -116,7 +116,7 @@ public class Clipped extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (!isSetup()) {
@@ -131,7 +131,7 @@ public class Clipped extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	childContext.parent = context;
@@ -140,7 +140,7 @@ public class Clipped extends Modifier implements Node {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	// This is synchronized by Show.paintFrame, so we don't

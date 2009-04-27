@@ -25,7 +25,7 @@ public class Oval extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
 	//
@@ -35,40 +35,40 @@ public class Oval extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
 	return 0;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void doSomeSetup() {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
 	return false;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
 	drawRecord.setChanged();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	drawRecord.setArea(x, y, w, h);
@@ -77,7 +77,7 @@ public class Oval extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {

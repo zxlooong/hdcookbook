@@ -103,7 +103,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void initContainer(Container container, Rectangle bounds) {
 	try {
@@ -154,21 +154,21 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getWidth() {
 	return buffer.getWidth();
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getHeight() {
 	return buffer.getHeight();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public Component getComponent() {
 	return ddComponent;
@@ -201,7 +201,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void clearArea(int x, int y, int width, int height) {
 	bufferG.setColor(transparent);
@@ -209,7 +209,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * This is always false for direct draw.  Because we maintian our
      * own double buffer, nothing external can damage its contents.
@@ -219,7 +219,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void callPaintTargets() throws InterruptedException {
 	if (debugDraw) {
@@ -249,7 +249,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void runAnimationLoop() throws InterruptedException {
 	try {
@@ -265,7 +265,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void finishedFrame() {
 	//
@@ -363,7 +363,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void terminatingEraseScreen() {
 	int s = scaleDivisor;

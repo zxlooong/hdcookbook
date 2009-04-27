@@ -94,7 +94,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public synchronized void start() {
 	paused = false;
@@ -102,7 +102,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public synchronized void pause() {
 	paused = true;
@@ -190,7 +190,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void runAnimationLoop() throws InterruptedException {
 	//

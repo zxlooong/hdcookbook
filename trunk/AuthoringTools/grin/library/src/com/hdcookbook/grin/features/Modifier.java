@@ -85,7 +85,7 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addSubgraph(HashSet set) {
 	if (set.contains(this)) {
@@ -110,14 +110,14 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getX() {
 	return part.getX();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getY() {
 	return part.getY();
@@ -150,7 +150,7 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
 	// This is synchronized to only occur within model updates.
@@ -179,7 +179,7 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
 	if (mode) {
@@ -191,7 +191,7 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
 	if (part.needsMoreSetup()) {
@@ -201,21 +201,21 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D g) {
 	part.paintFrame(g);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
 	part.markDisplayAreasChanged();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * Subclasses will probably want to override this to account
      * for changes in the drawing environment they make.  The version
@@ -226,7 +226,7 @@ public abstract class Modifier extends Feature {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	part.nextFrame();

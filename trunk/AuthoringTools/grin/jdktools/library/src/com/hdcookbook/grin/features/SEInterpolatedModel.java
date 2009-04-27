@@ -148,13 +148,13 @@ public class SEInterpolatedModel extends InterpolatedModel implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) 
             throws IOException
@@ -162,7 +162,7 @@ public class SEInterpolatedModel extends InterpolatedModel implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	if (name == null) {

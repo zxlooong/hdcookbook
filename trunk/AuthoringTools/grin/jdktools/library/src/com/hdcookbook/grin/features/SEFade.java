@@ -181,13 +181,13 @@ public class SEFade extends Fade implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) 
             throws IOException
@@ -198,7 +198,7 @@ public class SEFade extends Fade implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	if (name == null) {

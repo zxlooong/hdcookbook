@@ -68,7 +68,7 @@ import java.io.IOException;
 public class NullExtensionParser implements ExtensionParser {
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public Feature getFeature(Show show, String typeName, String name, Lexer lexer)
 		       throws IOException
@@ -77,7 +77,7 @@ public class NullExtensionParser implements ExtensionParser {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public Modifier getModifier(Show show, String typeName, String name, Lexer lexer)
 		       throws IOException
@@ -86,7 +86,7 @@ public class NullExtensionParser implements ExtensionParser {
     }
 
      /**
-      * @inheritDoc
+      * {@inheritDoc}
       **/
     public Command getCommand(Show show, String typeName, Lexer lexer) throws IOException {
 	return null;

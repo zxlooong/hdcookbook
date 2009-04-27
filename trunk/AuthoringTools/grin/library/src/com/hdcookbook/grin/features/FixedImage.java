@@ -99,7 +99,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (!setupMode || !imageSetup || isActivated) {
@@ -124,7 +124,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
 	super.initializeClone(original, clones);
@@ -143,14 +143,14 @@ public class FixedImage extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getX() {
 	return placement.x;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getY() {
 	return placement.y;
@@ -264,14 +264,14 @@ public class FixedImage extends Feature implements Node, SetupClient {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
 	isActivated = mode;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
 	synchronized(setupMonitor) {
@@ -294,7 +294,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void doSomeSetup() {
 	synchronized(setupMonitor) {
@@ -313,7 +313,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
 	synchronized (setupMonitor) {
@@ -322,7 +322,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	if (!isActivated) {
@@ -336,14 +336,14 @@ public class FixedImage extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
 	drawRecord.setChanged();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	if (scalingModel == null) {
@@ -371,7 +371,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	// do nothing

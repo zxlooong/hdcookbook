@@ -119,7 +119,7 @@ public class MenuAssetFinder extends AssetFinder {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Image createCompatibleImageBufferHelper(Component c,
 						      int width, int height) 
@@ -128,7 +128,7 @@ public class MenuAssetFinder extends AssetFinder {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Graphics2D createGraphicsFromImageBufferHelper(Image buffer) {
 	Object g = ((DVBBufferedImage) buffer).createGraphics();
@@ -136,7 +136,7 @@ public class MenuAssetFinder extends AssetFinder {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void destroyImageBufferHelper(Image buffer) {
 	    ((DVBBufferedImage) buffer).dispose();

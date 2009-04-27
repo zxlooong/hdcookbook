@@ -336,7 +336,7 @@ public class RCKeyEvent extends Command {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * This version of execute(Show) is only for use by the built-in GRIN
      * support for key pressed and key released events.  If you subclass
@@ -352,7 +352,7 @@ public class RCKeyEvent extends Command {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void execute() {
 	if (Debug.ASSERT) {

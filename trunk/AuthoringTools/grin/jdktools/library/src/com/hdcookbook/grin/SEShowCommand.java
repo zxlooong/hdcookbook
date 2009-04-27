@@ -171,7 +171,7 @@ public class SEShowCommand extends Command implements SENode {
     }
    
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void execute(Show caller) {
 	if (!triedSeCommand) {
@@ -206,7 +206,7 @@ public class SEShowCommand extends Command implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void execute() {
 	if (Debug.ASSERT) {
@@ -231,13 +231,13 @@ public class SEShowCommand extends Command implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to)
         throws IOException 
@@ -245,7 +245,7 @@ public class SEShowCommand extends Command implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	return "java_command number " + commandNumber;

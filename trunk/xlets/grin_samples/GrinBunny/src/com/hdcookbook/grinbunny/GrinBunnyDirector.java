@@ -212,7 +212,7 @@ public class GrinBunnyDirector extends Director {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void notifyDestroyed() {
 	PlayerWrangler.getInstance().destroy();

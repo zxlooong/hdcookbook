@@ -79,7 +79,7 @@ public class CommandRCHandler extends RCHandler implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean handleKeyPressed(RCKeyEvent ke, Show caller) {
 	if (wantKeypress && (ke.getBitMask() & mask) != 0) {
@@ -93,7 +93,7 @@ public class CommandRCHandler extends RCHandler implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean handleKeyReleased(RCKeyEvent ke, Show caller) {
 	if (!wantKeypress && (ke.getBitMask() & mask) != 0) {
@@ -107,27 +107,27 @@ public class CommandRCHandler extends RCHandler implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean handleKeyTyped(RCKeyEvent ke, Show caller) {
 	return false;
     }
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean handleMouse(int x, int y, boolean activate) {
 	return false;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void activate(Segment s) {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
     }

@@ -89,7 +89,7 @@ public class ActivatePartCommand extends Command implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public Command cloneIfNeeded(HashMap featureClones) {
 	Assembly assemblyClone = (Assembly) featureClones.get(assembly);

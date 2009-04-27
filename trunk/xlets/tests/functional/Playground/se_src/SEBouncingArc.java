@@ -100,7 +100,7 @@ public class SEBouncingArc extends SEArc {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
 	super.postProcess(builder);
@@ -136,7 +136,7 @@ public class SEBouncingArc extends SEArc {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	if (name == null) {

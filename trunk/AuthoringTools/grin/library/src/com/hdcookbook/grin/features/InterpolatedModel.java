@@ -143,7 +143,7 @@ public class InterpolatedModel extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (!isSetup() || isActivated) {
@@ -164,7 +164,7 @@ public class InterpolatedModel extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
 	super.initializeClone(original, clones);
@@ -210,7 +210,7 @@ public class InterpolatedModel extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * Since an InterpolatedModel is invisible, this returns a very large value
      * (Integer.MAX_VALUE)
@@ -220,7 +220,7 @@ public class InterpolatedModel extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * Since an InterpolatedModel is invisible, this returns a very large
      * (Integer.MAX_VALUE)
@@ -262,7 +262,7 @@ public class InterpolatedModel extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void destroy() {
     }
@@ -296,14 +296,14 @@ public class InterpolatedModel extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
 	return false;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void nextFrame() {
 	if (Debug.ASSERT && !isActivated) {
@@ -366,21 +366,21 @@ public class InterpolatedModel extends Feature implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
 	// do nothing
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	// do nothing
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	// do nothing

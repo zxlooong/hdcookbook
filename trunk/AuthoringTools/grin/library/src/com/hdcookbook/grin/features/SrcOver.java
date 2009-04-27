@@ -114,7 +114,7 @@ public class SrcOver extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (!isSetup() || activated) {
@@ -127,7 +127,7 @@ public class SrcOver extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	childContext.parent = context;
@@ -135,7 +135,7 @@ public class SrcOver extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	Composite old = gr.getComposite();

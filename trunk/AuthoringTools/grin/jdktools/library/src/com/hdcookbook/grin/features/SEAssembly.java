@@ -94,13 +94,13 @@ public class SEAssembly extends Assembly implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
 	for (int i = 0; i < parts.length; i++) {
@@ -114,7 +114,7 @@ public class SEAssembly extends Assembly implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	if (name == null) {

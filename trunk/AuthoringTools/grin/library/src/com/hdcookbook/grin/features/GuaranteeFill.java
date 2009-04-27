@@ -110,7 +110,7 @@ public class GuaranteeFill extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
 	if (!isSetup() || activated) {
@@ -125,7 +125,7 @@ public class GuaranteeFill extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void setChildChanged() {
 	// When we're deactivated, our child doesn't need to be marked as
@@ -133,7 +133,7 @@ public class GuaranteeFill extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
 	drawRecord.setArea(guaranteed.x, guaranteed.y, 
@@ -143,7 +143,7 @@ public class GuaranteeFill extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
 	if (fills != null) {

@@ -73,7 +73,7 @@ public class SEMenuAssembly extends SEAssembly {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	if (name == null) {

@@ -92,7 +92,7 @@ class SubFeature implements FeatureRef {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public Feature getFeature() throws IOException {
 	if (feature == null) {

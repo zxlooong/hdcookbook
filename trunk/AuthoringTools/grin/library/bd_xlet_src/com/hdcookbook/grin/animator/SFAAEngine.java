@@ -178,7 +178,7 @@ public class SFAAEngine extends AnimationEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      *
      * @param container  The container that our SFAA instance should be put in.
      *
@@ -214,28 +214,28 @@ public class SFAAEngine extends AnimationEngine {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getWidth() {
 	return bounds.width;
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getHeight() {
 	return bounds.height;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public Component getComponent() {
 	return sfaa;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * This also calls SyncFrameAccurateAnimation.start()
      **/
@@ -246,7 +246,7 @@ public class SFAAEngine extends AnimationEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * This also calls SyncFrameAccurateAnimation.stop()
      **/
@@ -258,7 +258,7 @@ public class SFAAEngine extends AnimationEngine {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void clearArea(int x, int y, int width, int height) {
 	currGraphics.setColor(transparent);
@@ -266,7 +266,7 @@ public class SFAAEngine extends AnimationEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * This is always true for SFAA.  Even in SFAA with one buffer, we're
      * forced to redraw the entire buffer each time, because some 
@@ -283,14 +283,14 @@ public class SFAAEngine extends AnimationEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void callPaintTargets() throws InterruptedException {
 	paintTargets(currGraphics);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void finishedFrame() {
 	currGraphics = null;
@@ -299,7 +299,7 @@ public class SFAAEngine extends AnimationEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void runAnimationLoop() throws InterruptedException {
 	for (;;) {
@@ -390,7 +390,7 @@ public class SFAAEngine extends AnimationEngine {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * For SFAA, destroy must be called while the SFAA instance is running.
      * For an SFAA with a start/end time, this means video must be playing
@@ -411,7 +411,7 @@ public class SFAAEngine extends AnimationEngine {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void terminatingEraseScreen() {
 	container.remove(sfaa);

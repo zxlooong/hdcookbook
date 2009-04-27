@@ -109,7 +109,7 @@ public class RepaintDrawEngine extends ClockBasedEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void initContainer(Container container, Rectangle bounds) {
 	this.container = container;
@@ -171,21 +171,21 @@ public class RepaintDrawEngine extends ClockBasedEngine {
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getWidth() {
 	return bounds.width;
     }
 
     /** 
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public int getHeight() {
 	return bounds.height;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public Component getComponent() {
 	return rdComponent;
@@ -193,7 +193,7 @@ public class RepaintDrawEngine extends ClockBasedEngine {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void clearArea(int x, int y, int width, int height) {
 	if (buffer == null) {
@@ -205,7 +205,7 @@ public class RepaintDrawEngine extends ClockBasedEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * This is always false for repaint draw, because the AWT subsystem
      * tells us the extent of our drawing, and it erases behind that area
@@ -216,7 +216,7 @@ public class RepaintDrawEngine extends ClockBasedEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void callPaintTargets() throws InterruptedException {
 	if (renderContext.numDrawTargets == 0) {
@@ -267,14 +267,14 @@ public class RepaintDrawEngine extends ClockBasedEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void finishedFrame() {
 	// Nothing needed - AWT flushes the drawing for us
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void terminatingEraseScreen() {
 	rdComponent.repaint();

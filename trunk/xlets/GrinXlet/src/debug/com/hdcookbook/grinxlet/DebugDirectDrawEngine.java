@@ -94,7 +94,7 @@ public class DebugDirectDrawEngine extends DirectDrawEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void initContainer(Container container, Rectangle bounds) {
 	super.initContainer(container, bounds);
@@ -113,7 +113,7 @@ public class DebugDirectDrawEngine extends DirectDrawEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void callPaintTargets() throws InterruptedException {
 	if (debugDraw) {
@@ -141,7 +141,7 @@ public class DebugDirectDrawEngine extends DirectDrawEngine {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void setFps(int fps) {
 	this.fps = fps;

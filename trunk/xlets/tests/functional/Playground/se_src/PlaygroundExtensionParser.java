@@ -75,7 +75,7 @@ public class PlaygroundExtensionParser implements ExtensionParser {
 
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public Feature getFeature(Show show, String typeName,
     			      String name, Lexer lexer)
@@ -167,7 +167,7 @@ public class PlaygroundExtensionParser implements ExtensionParser {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public Modifier getModifier(Show show, String typeName,
 				String name, Lexer lexer) 
@@ -177,7 +177,7 @@ public class PlaygroundExtensionParser implements ExtensionParser {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public Command getCommand(Show show, String typeName, Lexer lexer)
                            throws IOException

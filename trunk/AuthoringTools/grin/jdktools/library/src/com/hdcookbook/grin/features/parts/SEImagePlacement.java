@@ -138,7 +138,7 @@ public class SEImagePlacement implements SEImageSeqPlacement {
 
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public Rectangle[] getImageSeqPlacementRects(String[] images) 
     		throws IOException

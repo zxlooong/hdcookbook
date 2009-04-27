@@ -79,7 +79,7 @@ public class ResetFeatureCommand extends Command implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public Command cloneIfNeeded(HashMap featureClones) {
 	Feature featureClone = (Feature) featureClones.get(feature);

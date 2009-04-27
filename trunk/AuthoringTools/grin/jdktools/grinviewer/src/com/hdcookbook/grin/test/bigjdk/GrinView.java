@@ -294,7 +294,7 @@ public class GrinView extends GenericMain {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     protected void waitForUser(String msg) {
 	    // Make sure that there's no race condition where a button
@@ -308,7 +308,7 @@ public class GrinView extends GenericMain {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void debugDrawFrameDone() {
 	if (getFps() == 0f) {

@@ -131,13 +131,13 @@ public class SEGuaranteeFill extends GuaranteeFill implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
 	if (part == from) {
@@ -146,7 +146,7 @@ public class SEGuaranteeFill extends GuaranteeFill implements SENode {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public String toString() {
 	if (name == null) {

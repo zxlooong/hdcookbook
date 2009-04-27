@@ -133,7 +133,7 @@ public class BioImageFeature extends Modifier implements Node {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
 	super.markDisplayAreasChanged();

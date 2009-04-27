@@ -256,7 +256,7 @@ public class SEShow extends Show {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * This adds internal structure checking to the superclass version of
      * this method.
