@@ -235,7 +235,7 @@ public class SecurityUtil {
         String contentSignerAlias; // initialized based on jar or bumf file
         String contentSignerPassword;
 
-        String certSignerAlias = DEF_ROOTCERT_ALIAS;
+        String certSignerAlias;
         String certSignerPassword = DEF_ROOTKEY_PASSWORD;
 
         // Certificate data.
@@ -292,10 +292,22 @@ public class SecurityUtil {
             if (newKeyPassword == null) {
                 newKeyPassword = DEF_ROOTKEY_PASSWORD;
             }
+            if (certSignerAlias == null) {
+                 if (isRootCert) {
+                    certSignerAlias = DEF_ROOTCERT_ALIAS;
+                } else {
+                    certSignerAlias = DEF_BUCERT_ALIAS;
+                }
+            }
         }
 
         public Builder setAppCert() {
             this.isAppCert = true;
+            setAppcertDefaults();
+            return this;
+        }
+
+        void setAppcertDefaults() {
             if (dn == null) {
                 dn = DEF_APP_CERT_DN;
             }
@@ -308,7 +320,9 @@ public class SecurityUtil {
             if (newKeyPassword == null) {
                 newKeyPassword = DEF_NEWKEY_PASSWORD;
             }
-            return this;
+            if (certSignerAlias == null) {
+                certSignerAlias = DEF_ROOTCERT_ALIAS;
+            }
         }
 
         public Builder setBindingUnitCert() {
@@ -1042,9 +1056,9 @@ public class SecurityUtil {
         // Assuming that the root certificate was generated using our tool,
         // the certificate should have IssuerAlternativeNames as an extension.
 	if (rootCert.getIssuerAlternativeNames() == null) {
-	    System.out.println("ERROR: the root certificate must have an alternate name");
-	    System.exit(1);
-	}
+            System.out.println("ERROR: the root certificate must have an alternate name");
+            System.exit(1);
+        }
         List issuerName = (List) rootCert.getIssuerAlternativeNames().iterator().next();
         cg.addExtension(X509Extensions.IssuerAlternativeName.getId(), false,
                 getRfc822Name((String) issuerName.get(1)));
