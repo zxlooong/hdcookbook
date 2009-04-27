@@ -53,30 +53,50 @@
  */
 
 import com.hdcookbook.grin.Director;
+import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.media.Playlist;
 import com.hdcookbook.grin.media.PlayerWrangler;
+import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grinxlet.GrinXlet;
 
 
 public class MyDirector extends Director {
 
-    public Playlist playlist;
+    public Text fResults;
+    public Text fTrim;
+    private Segment sVideoDone;
     private int count = 0;
 
     public static int numBuffers = -1;
+    public static long trim;		// nanosecondsQ
+    public static int xOffset = 0;
+    public static int yOffset = 0;
+    public static int xScaleOffset = 0;
+    public static int yScaleOffset = 0;
+    public static boolean offsetScale = false;	// else offset position
+    private static MyDirector theDirector = null;
 
     public MyDirector() {
+	theDirector = this;
     }
 
     public void initialize() {
 	PlayerWrangler.getInstance().initialize(
 		    GrinXlet.getInstance().getAnimationEngine());
-	playlist = (Playlist) getFeature("F:Playlist");
+	fResults = (Text) getFeature("F:Results");
+	fTrim = (Text) getFeature("F:Text.Trim");
+	sVideoDone = getSegment("S:VideoDone");
     }
 
     public void setNumBuffers(int num) {
 	numBuffers = num;
+    }
+
+    public void adjustTrim(int adjustMS) {
+	trim += adjustMS * 1000000L;
+	String s = "SFAA Trim value:  " + (trim / 1000000L) + " ms";
+	fTrim.setText(new String[] { s });
     }
 
     /**
@@ -85,6 +105,37 @@ public class MyDirector extends Director {
     public void notifyDestroyed() {
 	PlayerWrangler.getInstance().destroy();
 	SFAADirector.stopSFAA();
+    }
+
+    public void toggleOffset() {
+	if (Debug.LEVEL > 0) {
+	    offsetScale = !offsetScale;
+	    Debug.println("Now adjusting " + (offsetScale ? "scale." : "position."));
+	    SFAADirector.printTimeOffset();
+	}
+    }
+
+    public void adjustOffset(int dx, int dy) {
+	if (Debug.LEVEL > 0) {
+	    if (offsetScale) {
+		xScaleOffset += dx;
+		yScaleOffset += dy;
+		Debug.println("Scale offset:  " + xScaleOffset + ", " + yScaleOffset);
+	    } else {
+		xOffset += dx;
+		yOffset += dy;
+		Debug.println("Position offset:  " + xOffset + ", " + yOffset);
+	    }
+	    SFAADirector.printTimeOffset();
+	}
+    }
+
+    public static void finishPlayingVideo() {
+	MyDirector d = theDirector;
+	if (d == null) {
+	    return;
+	}
+	d.getShow().activateSegment(d.sVideoDone);
     }
 
 }

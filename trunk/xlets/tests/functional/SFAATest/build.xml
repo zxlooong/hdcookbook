@@ -14,13 +14,9 @@
             <arg value="${dist.dir}/BDMV/PLAYLIST/00001.mpls"/>
         </jdktools.java>
 
-        <!-- We snag the video from bookmenu rather than copying it in
-	     the repository -->
-	<property name="remote.video.bdmv"
-		  value="${cookbook.dir}/xlets/tests/functional/ProgressivePlaylist/bdmv/BDMV"/>
-        <copy file="${remote.video.bdmv}/stream/00001.m2ts" 
+        <copy file="bdmv/STREAM/00000.m2ts" 
 	      todir="${dist.dir}/BDMV/STREAM"/>
-        <copy file="${remote.video.bdmv}/clipinf/00001.clpi" 
+        <copy file="bdmv/CLIPINF/00000.clpi" 
 	      todir="${dist.dir}/BDMV/CLIPINF"/>
     </target>
 

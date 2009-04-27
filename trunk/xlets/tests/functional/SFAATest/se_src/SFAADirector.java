@@ -17,22 +17,20 @@ import java.io.IOException;
 
 public class SFAADirector extends Director implements AnimationContext {
 
-    private static DirectDrawEngine engine;
+    private static DirectDrawEngine engine = null;
 
     private int count = 0;
-    private Text text;
     private Show subShow;
+    private static Object LOCK = new Object();
 
     public SFAADirector() {
     }
 
-    public void initialize() {
-	text = (Text) getFeature("F:Text");
+    private void initialize() {
     }
 
     public void heartbeat() {
 	count++;
-	text.setText(new String[] { "Count:  " + count });
     }
 
     public static void startSFAA() {
@@ -43,9 +41,18 @@ public class SFAADirector extends Director implements AnimationContext {
 	engine.start();
     }
 
-    public static void stopSFAA() {
+    public static String stopSFAA() {
+	DirectDrawEngine e;
+	synchronized(LOCK) {
+	    if (engine == null) {
+		return "No pretend SFAA to stop.";
+	    }
+	    e = engine;
+	    engine = null;
+	}
 	Debug.println("Stopping the pretend SFAA");
-	engine.destroy();
+	e.destroy();
+	return "Pretend SFAA stopped.";
     }
 
     public void animationInitialize() throws InterruptedException {
@@ -65,6 +72,7 @@ public class SFAADirector extends Director implements AnimationContext {
 
 	engine.checkDestroy();
 	engine.initClients(new AnimationClient[] { subShow });
+	initialize();
 	Container c = GrinXlet.getInstance().getAnimationEngine()
 				.getComponent().getParent();
 	engine.initContainer(c, new Rectangle(0, 0, 960, 540));
@@ -72,5 +80,8 @@ public class SFAADirector extends Director implements AnimationContext {
 
     public void animationFinishInitialization() {
 	subShow.activateSegment(subShow.getSegment("S:Initialize"));
+    }
+
+    public static void printTimeOffset() {
     }
 }

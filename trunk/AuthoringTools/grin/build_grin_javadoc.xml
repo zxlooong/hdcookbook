@@ -56,6 +56,7 @@ information or have any questions.
 	  bootclasspath="${HDC_BDJ_PLATFORM_CLASSES}"
 	  destdir="${GRIN_JAVADOC_ME_DEST}">
 		  <sourcepath location="library/src"/>
+		  <sourcepath location="library/bd_xlet_src"/>
 		  <sourcepath location="extensions/media/src"/>
 		  <sourcepath location="extensions/media/xlet_src"/>
 		  <sourcepath location="extensions/fontstrip/library/src"/>

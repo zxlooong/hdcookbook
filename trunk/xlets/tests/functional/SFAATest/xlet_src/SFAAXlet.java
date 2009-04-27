@@ -129,7 +129,7 @@ public class SFAAXlet extends GrinXlet implements ResourceClient {
 
 	Container c = new Container();
 	root.add(c);
-	c.setBounds(0, 0, 960, 150);
+	c.setBounds(0, 0, 960, 540);
 	c.setVisible(true);
 	return c;
     }

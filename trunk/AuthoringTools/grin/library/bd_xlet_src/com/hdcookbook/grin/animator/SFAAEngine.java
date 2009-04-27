@@ -75,10 +75,26 @@ import org.bluray.ui.AnimationParameters;
 
 /**
  * An animation engine that draws into an instance of
- * org.bluray.ui.SyncFrameAccurateAnimation.  This can be trick to
- * use, because Blu-ray's SFAA can stall the animation thread under
- * certain circumstances, which makes things like commands sit on
- * the queue.
+ * <code>org.bluray.ui.SyncFrameAccurateAnimation</code>.
+ * <p>
+ * If you're thinking of using this style of animation, you might want to
+ * consider using direct draw, and 
+ * <code>javax.media.Player.getMediaTime()</code> instead.
+ * In some of SFAA using off-the-shelf players in April 2009, the
+ * execution of SFAA was found somewhat wanting, and no player seemed to do
+ * better in keeping the animation registered to the video than the sort of
+ * "best effort" result you'd get from direct draw.  Additionally, SFAA makes
+ * optimized drawing impossible, because some implementations clear the
+ * SFAA buffer before each frame.  This limits the on-screen size that can be
+ * covered by an SFAA if you want to maintain 24fps.  In most cases you can probably
+ * achieve better results using direect draw and 
+ * <code>Player.getMediaTime</code>.
+ * <p>
+ * If you do use SFAA Animator, be aware that when used with a start and
+ * stop media time, SFAA will stall the animation thread, which prevents
+ * GRIN commands from being executed.  It also makes it impossible to
+ * destroy the SFAA, so you need to be sure video is playing in the time
+ * range when trying to destroy the SFAA animator instance.
  **/
 public class SFAAEngine extends AnimationEngine {
 
@@ -181,7 +197,7 @@ public class SFAAEngine extends AnimationEngine {
 	    p.lockedToVideo = false;
 	    p.faaTimer = null;
 	    Dimension d = new Dimension(bounds.width, bounds.height);
-	    sfaa = SyncFrameAccurateAnimation.getInstance(d, 2, p);
+	    sfaa = SyncFrameAccurateAnimation.getInstance(d, 1, p);
 	    sfaa.setLocation(bounds.x, bounds.y);
 	    container.add(sfaa);
 	    sfaa.setLocation(bounds.x, bounds.y);
@@ -252,10 +268,15 @@ public class SFAAEngine extends AnimationEngine {
     /**
      * @inheritDoc
      * <p>
-     * This is always true for SFAA.  With SFAA, we're forced to have at
-     * least two buffers (at least on some implementations), and for any
-     * give frame, we can't predict which one we'll be drawing into, so it's
-     * hard (if not impossible) to do any optimized drawing at all.
+     * This is always true for SFAA.  Even in SFAA with one buffer, we're
+     * forced to redraw the entire buffer each time, because some 
+     * implementations clear the buffer "for us" before each frame.  We
+     * still have to clear the buffer, of course, because this behavior isn't
+     * required.
+     * <p>
+     * Note that returning true here disables optimized drawing.  Alas,
+     * this is necessary with SFAA - see the class comments for
+     * this class.
      **/
     protected boolean needsFullRedrawInAnimationLoop() {
 	return true;
@@ -321,7 +342,9 @@ public class SFAAEngine extends AnimationEngine {
 		    }
 		}
 	    }
-	    frameNumber++;
+	    synchronized(this) {
+		frameNumber++;
+	    }
 	    if (Debug.LEVEL > 0 && (frameNumber % 100) == 0) {
 		Debug.println("Frame " + frameNumber + ", "
 				+ skippedFrames + " skipped.");
@@ -341,7 +364,14 @@ public class SFAAEngine extends AnimationEngine {
      * @see #setSFAA(SyncFrameAccurateAnimation)
      **/
     public Time getAnimationFrameTime() {
-	return sfaa.getAnimationFrameTime(frameNumber);
+	long fn;
+	synchronized(this) {
+	    fn = frameNumber;
+	    // The Java memory model allows longs to be in an inconsistent
+	    // internal state if modified by one thread while being read
+	    // from another.
+	}
+	return sfaa.getAnimationFrameTime(fn);
     }
 
     /**
@@ -352,10 +382,21 @@ public class SFAAEngine extends AnimationEngine {
     }
 
     /**
+     * Get the current frame number.
+     **/
+    public synchronized long getFrameNumber() {
+	return frameNumber;
+    }
+
+
+    /**
      * @inheritDoc
      * <p>
-     * For SFAA, destroy immediately calls SyncFrameAccurateAnimation.destroy(),
-     * since the animation thread might be waiting on a call to the SFAA.
+     * For SFAA, destroy must be called while the SFAA instance is running.
+     * For an SFAA with a start/end time, this means video must be playing
+     * and the media time must be between the start and end.
+     * <p>
+     * See also the class comments for this class.
      **/
     public void destroy() {
 	SyncFrameAccurateAnimation s = sfaa;

@@ -12,7 +12,7 @@
     <playList>
         <PlayItem id="0">
             <Angle id="0">
-                <clipName>00001</clipName>
+                <clipName>00000</clipName>
                 <stcId>0</stcId>
             </Angle>
             <connectionCondition>1</connectionCondition>
@@ -20,15 +20,15 @@
             <isDifferentAudios>false</isDifferentAudios>
             <isMultiAngle>false</isMultiAngle>
             <isSeamlessAngleChange>false</isSeamlessAngleChange>
-            <outTime>27451951</outTime>
+            <outTime>29864111</outTime>
             <playItemRandomAccessFlag>false</playItemRandomAccessFlag>
             <stillMode>0</stillMode>
             <stillTime>0</stillTime>
             <stnTable>
                 <PrimaryVideoStream id="0">
                     <streamAttribute streamCodingType="0x1b">
-                        <frameRate>Hz_30000_1001</frameRate>
-                        <videoFormat>VIDEO_1080i</videoFormat>
+                        <frameRate>Hz_24000_1001</frameRate>
+                        <videoFormat>VIDEO_1080p</videoFormat>
                     </streamAttribute>
                     <streamEntry>
                         <refToStreamPIDOfMainClip>4113</refToStreamPIDOfMainClip>
@@ -47,13 +47,6 @@
             <duration>0</duration>
             <entryEsPid>0xffff</entryEsPid>
             <markTimeStamp>27000000</markTimeStamp>
-            <playItemIdRef>0</playItemIdRef>
-            <type>0x1</type>
-        </Mark>
-        <Mark id="1">
-            <duration>0</duration>
-            <entryEsPid>0xffff</entryEsPid>
-            <markTimeStamp>27405405</markTimeStamp>
             <playItemIdRef>0</playItemIdRef>
             <type>0x1</type>
         </Mark>
