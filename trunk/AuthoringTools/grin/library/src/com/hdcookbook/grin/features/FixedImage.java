@@ -214,8 +214,22 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * This method must only be called when it is safe to do so, according to 
      * the threading model, and with the Show lock held.  Usually, this means 
      * calling it from a Show command.
+     * <p>
+     * Code using this method to swap out an image with one that's to be
+     * displayed at a different size might look something like this:
+     * <pre>
+     * FixedImage fi = ...  the place you want to put the image
+     * ManagedImage mi = ... the image you want to put there
+     * fi.replaceImage(mi);
+     * Rectangle r = fi.getMutablePlacement();
+     * r.x, r.y = the upper-left hand corner where you want it to be
+     * r.width, r.height = the values you want (which can be taken
+     *			from mi.getWidth() and mi.getHeight()
+     * fi.setImageSizeChanged();
+     *</pre>
      *
-     * @throws IllegalStateException if this feature is set up, and 
+     *
+     * @throws  IllegalStateException if this feature is set up, and 
      *			newImage has not been loaded.  Also thrown if
      *		        newImage.isReferenced() is false.
      **/
