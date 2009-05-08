@@ -56,7 +56,7 @@
  *  This is a simple program that runs on a computer and collects the time
  *  profile information of the desired operations of an xlet running on a player.
  *  Note down the IP address and the port this program displays when it is
- *  launched, and provide them in a call to Debug.initProfiler() in an xlet
+ *  launched, and provide them in a call to Profile.initProfiler() in an xlet
  *  of interest.
  */
 
@@ -69,27 +69,36 @@ import java.net.UnknownHostException;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Date;
 
 import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.Profile;
 
 public class PCProfiler extends Thread {
 
     private int myPort;
     private DatagramSocket socket;
+    PacketList packets = new PacketList(2000000);	// 1M measurements
+    private boolean started;
+    private PacketFollower follower = null;
+
+
+
     private static Map<Integer, Long> timestamps = new HashMap<Integer, Long>();
     private static Map<Integer, String> profileMessages =
             new HashMap<Integer, String>();
 
     public PCProfiler(int myPort) {
-
         this.myPort = myPort;
         try {
             socket = new DatagramSocket(myPort);
             InetAddress myAddr = InetAddress.getLocalHost();
-            System.out.println("Waiting for messages on port: " + myPort +
+            System.out.println("Listening for messages on port: " + myPort +
                     " on IP address:" + myAddr);
         } catch (SocketException e) {
             e.printStackTrace();
@@ -98,62 +107,58 @@ public class PCProfiler extends Thread {
         }
     }
 
-    //Receives datagram packets
+    //
+    // Receives datagram packets and adds to list
+    //
     public void run() {
 
         byte[] buffer = new byte[512];
-        int read;
+	DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+	System.gc();
+	System.out.println("Ready to receive...");
+	synchronized(this) {
+	    started = true;
+	    notifyAll();
+	}
         while (true) {
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+	    PacketList list = null;
             try {
-                byte type = 0;
-                int id = 0;
-                String description = null;
                 socket.receive(packet);
-                ByteArrayInputStream bis = new ByteArrayInputStream(
-                        packet.getData(),
-                        packet.getOffset(),
-                        packet.getLength());
-                DataInputStream din = new DataInputStream(bis);
-                try {
-                    type = din.readByte();
-                    id = din.readInt();
-                    byte[] buf = new byte[(packet.getLength() - 5)];
-                    din.readFully(buf);
-                    description = new String(buf, "UTF-8");
-                } catch (IOException e) {
-                    Debug.printStackTrace(e);
-                }
-
-                if (type == Debug.TIMER_START) {
-                    long sTime = System.nanoTime();
-                    timestamps.put(id, sTime);
-                    profileMessages.put(id, description);
-
-                } else if (type == Debug.TIMER_STOP) {
-                    long eTime = System.nanoTime();
-                    long sTime = timestamps.get(id);
-                    long timeInSec = (eTime - sTime) / 1000000;
-                    description = profileMessages.get(id);
-                    System.out.println("[Time Profile," +
-                            (new Date()).toString() +
-                            "] " + description + " took " +
-                            (eTime - sTime) + " nano-seconds. or " +
-                            timeInSec + " milli-seconds");
-
-                } else {
-                    System.out.println("Received an unknown data type:" + type);
-                }
+		list = packets;
+		if (list == null) {
+		    return;
+		}
+		list.add(packet, System.nanoTime());
             } catch (IOException e) {
                 e.printStackTrace();
                 socket.close();
                 break;
             }
+	    if (list.getDone()) {
+		return;
+	    }
         }
     }
 
+    private void waitUntilStarted() {
+	synchronized(this) {
+	    for (;;) {
+		if (started) {
+		    return;
+		}
+		try {
+		    wait();
+		} catch (InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		    return;
+		}
+	    }
+	}
+    }
 
-    // Closes the receiving socket
+    /**
+     * Closes the receiving socket
+     **/
     public void closeReceiveSocket() {
         try {
             socket.close();
@@ -161,8 +166,119 @@ public class PCProfiler extends Thread {
         }
     }
 
+    public void printHelp() {
+	System.out.println();
+	System.out.println("Commands:");
+	System.out.println("    d    Dump data collected so far and run GUI");
+	System.out.println("    q    Quit");
+	System.out.println("    f    Toggle follow mode, which shows what's received on stdout");
+	System.out.println("  <eof>  Same as q (thus, nothing happens when you double-click the JAR");
+	System.out.println();
+	System.out.println("You can also launch the program with a data file as an argument.");
+	System.out.println("This will bring up the GUI on that dataset.");
+	System.out.println();
+    }
+
+    public void readCommands() throws IOException {
+	BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+	waitUntilStarted();
+	System.out.println();
+	System.out.println("Now capturing packets.");
+	printHelp();
+	for (;;) {
+	    String s = in.readLine();
+	    if (s == null) {
+		System.exit(0);
+	    }
+	    s=s.trim().toLowerCase();
+	    if ("d".equals(s)) {
+		dumpData(in);
+	    } else if ("q".equals(s)) {
+		System.exit(0);
+	    } else if ("f".equals(s)) {
+		toggleFollow();
+	    } else {
+		System.out.println("??" + ((char) 7));
+		printHelp();
+	    }
+	}
+    }
+
+   
+    // The toggle follow command from the keyboard
+    private void toggleFollow() {
+	if (follower == null) {
+	    follower = new PacketFollower(packets);
+	    follower.setPriority(3);
+	    follower.start();
+	}
+	follower.toggleRunning();
+    }
+   
+    // The dump data command from the keyboard
+    private void dumpData(BufferedReader in) {
+	packets.setDone();
+	System.out.println();
+	System.out.println("Dumping information derived from " 
+			   + packets.getLength() + " packets.");
+	System.out.println("    Writing to profile.dat");
+
+	ProfilingRun run = new ProfilingRun();
+	run.init(packets);
+	packets = null;		// Allows GC, unless there's a follower
+	run.writeData("profile.dat");
+	ResultsGui gui = new ResultsGui();
+	gui.init(run);
+	run = null;	// Allows GC
+	gui.readCommands(in);
+	System.exit(0);
+    }
+
+    //
+    // Launching the GUI from the command line
+    //
+    private static void launchGUIFromFile(String fileName) throws IOException {
+	ProfilingRun run = new ProfilingRun();
+	run.initFromFile(fileName);
+	BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+	ResultsGui gui = new ResultsGui();
+	gui.init(run);
+	run = null;	// Allows GC
+	gui.readCommands(in);
+	System.exit(0);
+    }
+
     public static void main(String args[]) {
+	if (args.length > 0) {
+	    System.out.println("Reading data file from " + args[0]);
+	    try {
+		launchGUIFromFile(args[0]);
+	    } catch (IOException ex) {
+		ex.printStackTrace();
+	    }
+	    return;
+	}
         PCProfiler prof = new PCProfiler(2008);
+	try {
+	} catch (OutOfMemoryError err) {
+	    err.printStackTrace();
+	    System.out.println();
+	    System.out.println("Try setting maximum heap size, like this:");
+	    System.out.println("    java -Xmx200m -jar build/profiler.jar");
+	    System.out.println();
+	    System.exit(1);
+
+	    // If you're as annoyed by this as I am, see why this can't be set
+	    // in the JAR file at 
+	    // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6202113
+	}
+	prof.setPriority(5);
         prof.start();
+	try {
+	    prof.readCommands();
+	} catch (IOException e) {
+	    Debug.printStackTrace(e);
+	    System.exit(0);
+	}
     }
 }

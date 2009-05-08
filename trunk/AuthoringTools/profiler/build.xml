@@ -25,6 +25,10 @@ information or have any questions.
 
 <project name="Build Profiler" default="all" basedir=".">
 
+    <presetdef name="jdktools.javac">
+        <javac debug="on"/>
+    </presetdef>
+
     <import file="../grin/preset_defs.xml"/>
     <import file="../grin/build_library.xml"/>
     <property name="PROFILER_DEST" location="${HDC_BUILD_DIR}/"/>
@@ -44,13 +48,14 @@ information or have any questions.
 	</fail>
     </target>
 
-     <target name="all" depends="init">
-        <javac      
-		destdir="${PROFILER_DEST}/classes"
-	        classpath="../grin/build/grin_library">
+     <target name="all" depends="compile, install">
+     </target>
+     <target name="compile" depends="init">
+        <jdktools.javac destdir="${PROFILER_DEST}/classes" classpath="${PROFILER_DEST}/classes">
             <src path="src" />
+	    <src path="../grin/library/src"/>
             <include name="*.java"/>
-        </javac> 
+        </jdktools.javac> 
         
         <jar jarfile="${PROFILER_JAR}">
             <fileset dir="${PROFILER_DEST}/classes"/>
@@ -58,6 +63,11 @@ information or have any questions.
                 <attribute name="Main-Class" value="PCProfiler"/>
             </manifest>
         </jar>
+     </target>
+     <target name="install" depends="init, compile">
+	<copy todir="../../bin">
+	    <fileset file="${PROFILER_JAR}"/>
+	</copy>
     </target>
     
 </project>

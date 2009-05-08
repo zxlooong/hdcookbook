@@ -88,33 +88,8 @@ public class Debug {
    
     /**
      * Variable to say if time profiling is enabled.
-     * <p>
-     * Usage:
-     * <pre>
-     *     private static byte[] PROFILE_TIMER_1;
-     *     static {
-     *          if (Debug.PROFILE) {
-     *              PROFILE_TIMER_1 = Debug.makeProfileTimer("My animation");
-     *          }
-     *      }
-     *      <...>
-     *      public void myMethod() {
-     *          int token;
-     *     	    if (Debug.PROFILE) {
-     *     	    	Debug.initProfiler(2000, "127.0.0.1");
-     *              token = Debug.startTimer(PROFILE_TIMER_1);
-     *          }
-     *          doTheThingIWantMeasured();
-     *          if (Debug.PROFILE) {
-     *          	Debug.stopTimer(token);
-     *          	Debug.doneProfiling();
-     *          }
-     *      }
-     * </pre>
      **/
     public final static boolean PROFILE = false;
-    public final static byte TIMER_START = 0;
-    public final static byte TIMER_STOP = 1;
 
     private Debug() {
     }
@@ -169,61 +144,5 @@ public class Debug {
      * </pre>
      **/
     public static void printStackTrace(Throwable t) {
-    }
-
-    /**
-     * Allocates buffer and returns UTF-8 bytes for the string representing
-     * profile information. This method is meant to be called by the application
-     * during class loading:
-     * Usage:
-     * <p>
-     * <pre>
-     *     private static byte[] PROFILE_TIMER_1;
-     *     static {
-     *          if (Debug.PROFILE) {
-     *              PROFILE_TIMER_1 = Debug.makeProfileTimer("my animation");
-     *          }
-     *     }
-     * </pre>
-     * @param description of the task that is being profiled.
-     * @return A UTF-8 encoded byte array representing the description.
-     */
-    public static byte[] makeProfileTimer(String description) {
-        return null;
-    }
-
-    /**
-     * Initializes this class with the network address of the
-     * remote computer where profiling is done.
-     *
-     * @param port The UDP port on which the remote computer is waiting for
-     *             data
-     * @param host The hostname or the IP address of the remote computer
-     */
-    public static void initProfiler(int port, String address) {
-    }
-
-    /**
-     * Indicates profiling is over, releases the network resources.
-     */
-    public static void doneProfiling() {
-    }
-
-    /**
-     * Signals starting the timer on the remote computer.
-     *
-     * @param description Description of the task that is timed
-     * @return Returns the token for the task that is timed
-     */
-    public static int startTimer(byte[] description) {
-        return 0;
-    }
-
-    /**
-     * Signals stopping the timer on the remote computer.
-     *
-     * @param token Token for the task that is done.
-     */
-    public static void stopTimer(int token) {
     }
 }

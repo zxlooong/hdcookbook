@@ -57,6 +57,7 @@ package com.hdcookbook.grin.animator;
 
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.Profile;
 import java.awt.AlphaComposite;
 import java.awt.Container;
 import java.awt.Component;
@@ -94,12 +95,36 @@ public class DirectDrawEngine extends ClockBasedEngine {
     private Image buffer;
     private Graphics2D bufferG;
     private Graphics2D componentG;
+    private byte[] profileBlitToFB;	// Profiling model update
+    private int engineNumber = 0;
+    private static int nextEngineNumber = 0;
 
     /**
      * Create a new DirectDrawEngine.  It needs to be initialized with
      * the various initXXX methods (including the inherited ones).
      **/
     public DirectDrawEngine() {
+	if (Debug.LEVEL > 0 || Debug.PROFILE) {
+	    engineNumber = getNextEngineNumber();
+	}
+	if (Debug.PROFILE) {
+	    profileBlitToFB = Profile.makeProfileTimer("blitToFB("+this+")");
+	}
+    }
+
+    private synchronized static int getNextEngineNumber() {
+	if (Debug.LEVEL > 0 || Debug.PROFILE) {
+	    nextEngineNumber++;
+	}
+	return nextEngineNumber;
+    }
+
+    public String toString() {
+	if (Debug.LEVEL > 0 || Debug.PROFILE) {
+	    return "DD engine " + engineNumber;
+	} else {
+	    return super.toString();
+	}
     }
 
     /**
@@ -191,6 +216,10 @@ public class DirectDrawEngine extends ClockBasedEngine {
      * {@inheritDoc}
      **/
     protected void finishedFrame() {
+	int tok;
+	if (Debug.PROFILE) {
+	    tok = Profile.startTimer(profileBlitToFB, Profile.TID_ANIMATION);
+	}
 	int n = renderContext.numDrawTargets;
 	if (n > 0) {
 	    for (int i = 0; i < n; i++) {
@@ -202,6 +231,9 @@ public class DirectDrawEngine extends ClockBasedEngine {
 					     null);
 	    }
 	    Toolkit.getDefaultToolkit().sync();
+	}
+	if (Debug.PROFILE) {
+	    Profile.stopTimer(tok);
 	}
 	Thread.currentThread().yield();
     }

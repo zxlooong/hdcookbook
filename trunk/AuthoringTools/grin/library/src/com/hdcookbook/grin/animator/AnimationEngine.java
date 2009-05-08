@@ -56,6 +56,7 @@
 package com.hdcookbook.grin.animator;
 
 import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.Profile;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Component;
@@ -103,6 +104,10 @@ public abstract class AnimationEngine implements Runnable {
     private boolean needsFullPaint = true;	// First frame painted fully
     protected int modelTimeSkipped = 0;
 
+    private byte[] profileDamageCalc;	// Measure damage calculation algorithm
+    private byte[] profileErase;	// Measure time spend erasing buffer
+    private byte[] profileDraw;		// Time spent drawing to buffer
+
 
     /**
      * Initialize a new AnimationEngine.
@@ -110,6 +115,12 @@ public abstract class AnimationEngine implements Runnable {
     protected AnimationEngine() {
 	worker = new Thread(this, "Animation " + this);
 	worker.setPriority(Thread.NORM_PRIORITY - 1);
+	if (Debug.PROFILE) {
+	    profileDamageCalc 
+		= Profile.makeProfileTimer("damageCalculation(" + this + ")");
+	    profileErase= Profile.makeProfileTimer("eraseBuffer(" + this + ")");
+	    profileDraw= Profile.makeProfileTimer("drawToBuffer(" + this + ")");
+	}
     }
 
     /**
@@ -695,6 +706,10 @@ public abstract class AnimationEngine implements Runnable {
 	for (int i = 0; i < clients.length; i++) {
 	    clients[i].setCaughtUp();
 	}
+	int tok;
+	if (Debug.PROFILE) {
+	    tok = Profile.startTimer(profileDamageCalc, Profile.TID_ANIMATION);
+	}
 	renderContext.setEmpty();
 	renderContext.setTarget(0);
 	boolean fullPaint;
@@ -717,12 +732,28 @@ public abstract class AnimationEngine implements Runnable {
 	renderContext.processLastFrameRecords();
 	renderContext.collapseTargets();
 	renderContext.calculateEraseTargets();
+	if (Debug.PROFILE) {
+	    Profile.stopTimer(tok);
+	}
+	if (Debug.PROFILE) {
+	    tok = Profile.startTimer(profileErase, Profile.TID_ANIMATION);
+	}
 	for (int i = 0; i < renderContext.numEraseTargets; i++) {
 	    Rectangle a = renderContext.eraseTargets[i];
 	    clearArea(a.x, a.y, a.width, a.height);
 	}
+	if (Debug.PROFILE) {
+	    Profile.stopTimer(tok);
+	}
 	try {
+	    int tok2;
+	    if (Debug.PROFILE) {
+		tok2 = Profile.startTimer(profileDraw, Profile.TID_ANIMATION);
+	    }
 	    callPaintTargets();
+	    if (Debug.PROFILE) {
+		Profile.stopTimer(tok2);
+	    }
 	} finally {
 	    for (int i = 0; i < clients.length; i++) {
 		try {

@@ -56,6 +56,7 @@
 package com.hdcookbook.grin.animator;
 
 import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.Profile;
 
 /**
  * Abstract base class for a clock-based animation engine.  A clock-based
@@ -87,10 +88,18 @@ public abstract class ClockBasedEngine extends AnimationEngine {
     private static int NEW_FPS_SKIPPED = -2;	   // see skipFrames(int)
     private static int INVALID_FPS = -3;	   // see skipFrames(int)
 
+    private byte[] profileWait;		// Profiling wait() call
+    private byte[] profileModel;	// Profiling model update
+
+
     /**
      * Create a new ClockBasedEngine
      **/
     protected ClockBasedEngine() {
+	if (Debug.PROFILE) {
+	    profileWait = Profile.makeProfileTimer("idleWait(" + this + ")");
+	    profileModel = Profile.makeProfileTimer("advanceModel("+this+")");
+	}
     }
 
     /**
@@ -309,7 +318,15 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 		// thread, or set the fps value).
 		//
 		if (currTime < nextFrameTime) {
+		    int tok;
+		    if (Debug.PROFILE) {
+			tok = Profile.startTimer(profileWait, 
+						 Profile.TID_ANIMATION);
+		    }
 		    wait(nextFrameTime - currTime);	// can be interrupted
+		    if (Debug.PROFILE) {
+			Profile.stopTimer(tok);
+		    }
 		    continue;
 		}
 	    }  // end of synchronized block
@@ -317,7 +334,14 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 	    //
 	    // Now, advance the model to the next frame.
 	    //
+	    int tok;
+	    if (Debug.PROFILE) {
+		tok = Profile.startTimer(profileModel, Profile.TID_ANIMATION);
+	    }
 	    advanceModel();
+	    if (Debug.PROFILE) {
+		Profile.stopTimer(tok);
+	    }
 	    frame++;
 	    modelTimeSkipped = 0;
 

@@ -90,6 +90,14 @@ public class SetupManager implements Runnable {
 	// if the number of managers briefly becomes 0, then becomes
 	// > 0 again.
 
+    private static byte[] profileSetup;	// Profiling setup calls
+
+    static {
+	if (Debug.PROFILE) {
+	    profileSetup = Profile.makeProfileTimer("doSomeSetup()");
+	}
+    }
+
     /**
      * Create a SetupManager for setting up a maximum of numFeatures
      * clients.
@@ -240,18 +248,25 @@ public class SetupManager implements Runnable {
 	    work = settingUp[first];
 	}
 	if (work.needsMoreSetup()) {
+	    int tok;
+	    if (Debug.PROFILE) {
+		tok = Profile.startTimer(profileSetup, Profile.TID_SETUP);
+	    }
 	    work.doSomeSetup();
-		// The check of needsMoreSetup() isn't strictly necessary,
-		// but it is possible that it's false (due to the settingUp
-		// array being purged of duplicates).  That's admittedly rare,
-		// but calling doSomeSetup() unnecessarily reduces the value
-		// of an optimization in Show.  It's also counter-intuitive
-		// that doSomeSetup() could be called even if needsMoreSetup()
-		// returns false, so doing the test makes it so that can't
-		// happen (unless, of course, another thread changes the
-		// state of the feature in the intervening time...  but
-		// that _is_ something a developer should expect to need
-		// to cope with).
+	    if (Debug.PROFILE) {
+		Profile.stopTimer(tok);
+	    }
+	    // The check of needsMoreSetup() above isn't strictly necessary,
+	    // but it is possible that it's false (due to the settingUp
+	    // array being purged of duplicates).  That's admittedly rare,
+	    // but calling doSomeSetup() unnecessarily reduces the value
+	    // of an optimization in Show.  It's also counter-intuitive
+	    // that doSomeSetup() could be called even if needsMoreSetup()
+	    // returns false, so doing the test makes it so that can't
+	    // happen (unless, of course, another thread changes the
+	    // state of the feature in the intervening time...  but
+	    // that _is_ something a developer should expect to need
+	    // to cope with).
 	}
 	synchronized(monitor) {
 	    if (hasWork() && !settingUp[first].needsMoreSetup()) {

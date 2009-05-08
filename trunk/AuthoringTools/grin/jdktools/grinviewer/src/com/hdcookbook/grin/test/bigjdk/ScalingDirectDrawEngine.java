@@ -57,6 +57,7 @@ package com.hdcookbook.grin.test.bigjdk;
 
 import com.hdcookbook.grin.animator.ClockBasedEngine;
 import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.Profile;
 import java.awt.AlphaComposite;
 import java.awt.Container;
 import java.awt.Color;
@@ -92,6 +93,10 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     private BufferedImage nonTranslucentFix;
     private boolean debugDraw = false;
     private GenericMain main;
+    private byte[] profileBlitToFB;     // Profiling model update
+    private int engineNumber = 0;
+    private static int nextEngineNumber = 0;
+
     
     /**
      * Create a new ScalingDirectDrawEngine.  It needs to be initialized with
@@ -100,6 +105,28 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
     public ScalingDirectDrawEngine(int scaleDivisor, GenericMain main) {
 	this.scaleDivisor = scaleDivisor;
 	this.main = main;
+        if (Debug.LEVEL > 0) {
+            engineNumber = getNextEngineNumber();
+        }
+        if (Debug.PROFILE) {
+            profileBlitToFB = Profile.makeProfileTimer("biltToFB("+this+")");
+        }
+    }
+
+
+    private synchronized static int getNextEngineNumber() {
+        if (Debug.LEVEL > 0) {
+            nextEngineNumber++;
+        }
+        return nextEngineNumber;
+    }
+
+    public String toString() {
+        if (Debug.LEVEL <= 0) {
+            return super.toString();
+        } else {
+            return "GrinView DD engine " + engineNumber;
+        }
     }
 
     /**
@@ -273,6 +300,10 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	//  the scaling, and it's here where we simulate the BD model
 	//  of BD-J graphics over the video plane.
 	//
+        int tok;
+        if (Debug.PROFILE) {
+            tok = Profile.startTimer(profileBlitToFB, Profile.TID_ANIMATION);
+        }
 	Image bg = background;
 	Graphics2D g = componentG;
 	Graphics2D fixG = null;
@@ -347,6 +378,10 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	}
+        if (Debug.PROFILE) {
+            Profile.stopTimer(tok);
+        }
+        Thread.currentThread().yield();
 	if (debugDraw) {
 	    main.waitForUser("Frame drawn");
 	    main.debugDrawFrameDone();
