@@ -93,7 +93,7 @@ import java.io.UnsupportedEncodingException;
  *      public void myMethod() {
  *          int token;
  *          if (Profile.PROFILE) {
- *              Profile.initProfiler(2000, "127.0.0.1");
+ *              Profile.initProfiler(2008, "127.0.0.1");
  *              token = Profile.startTimer(PROFILE_TIMER_1, 
  *                                         Profile.TID_ANIMATION);
  *          }

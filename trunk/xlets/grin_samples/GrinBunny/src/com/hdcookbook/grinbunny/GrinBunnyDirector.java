@@ -68,6 +68,7 @@ import com.hdcookbook.grinxlet.GrinXlet;
 import com.hdcookbook.grin.media.Playlist;
 import com.hdcookbook.grin.media.PlayerWrangler;
 import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.Profile;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -93,6 +94,8 @@ import java.util.Random;
  * @author Bill Foote
  */
 public class GrinBunnyDirector extends Director {
+
+    private final static String PROFILE_IP_ADDRESS = "192.168.64.47";
 
     private static int GAME_DURATION_FRAMES = 24 * 60;
     private static int CARROT_SPEED = 14;
@@ -132,6 +135,9 @@ public class GrinBunnyDirector extends Director {
     Playlist backgroundVideo;
     boolean gameRunning = false;	// Used by grinbunny_show
 
+    private byte[] profileMessageTurtle;
+    private byte[] profileMessageSaucer;
+
 	// This static class gives us a convenient place to stash references
 	// to the GRIN nodes that make up a trooper.  A trooper is one of
 	// the eight turtles along the top of the screen.
@@ -151,6 +157,9 @@ public class GrinBunnyDirector extends Director {
      * Called by a java_command in the show to initialize the game
      **/
     public void initializeGame() {
+	if (Debug.PROFILE && PROFILE_IP_ADDRESS != null) {
+	    Profile.initProfiler(2008, PROFILE_IP_ADDRESS);
+	}
 	PlayerWrangler.getInstance().initialize(
 			GrinXlet.getInstance().getAnimationEngine());
 	int[] trooperX = new int[]{ 162, 364, 566, 768, 970, 1172, 1374, 1576 };
@@ -209,6 +218,12 @@ public class GrinBunnyDirector extends Director {
 	backgroundVideo = (Playlist) getFeature("F:BackgroundVideo");
 
 	gameOverSegment = getSegment("S:GameOver");
+	if (Debug.PROFILE) {
+	    profileMessageTurtle = Profile.makeMessage(
+	    				"Turtle hit, score now XXXXX");
+	    profileMessageSaucer = Profile.makeMessage(
+	    				"Saucer hit, score now XXXXX");
+	}
     }
 
     /**
@@ -233,6 +248,9 @@ public class GrinBunnyDirector extends Director {
 		    troopers[i].top.destroyClonedSubgraph();
 		}
 	    }
+	}
+	if (Debug.PROFILE && PROFILE_IP_ADDRESS != null) {
+	    Profile.doneProfiling();
 	}
     }
 
@@ -365,6 +383,10 @@ public class GrinBunnyDirector extends Director {
 		    t.assembly.setCurrentFeature(t.blamState);
 		    	// The show has a timer that will move it to
 			// empty 10 frames later
+		    if (Debug.PROFILE) {
+			setScore(profileMessageTurtle, score);
+			Profile.sendMessage(profileMessageTurtle);
+		    }
 		}
 	    }
 
@@ -395,6 +417,10 @@ public class GrinBunnyDirector extends Director {
 		if (hit) {
 		    score += 350;
 		    saucerAssembly.setCurrentFeature(saucerBlamState);
+		    if (Debug.PROFILE) {
+			setScore(profileMessageSaucer, score);
+			Profile.sendMessage(profileMessageSaucer);
+		    }
 		}
 	    }
 
@@ -415,6 +441,19 @@ public class GrinBunnyDirector extends Director {
 	    }
 	}
 	updateShow();
+    }
+
+    //
+    // Stuff the decimal score into the end of profileMessage
+    //
+    private void setScore(byte[] profileMessage, int score) {
+	if (Debug.PROFILE) {
+	    for (int i = 1; i <= 5; i++) {
+		profileMessage[profileMessage.length-i] 
+		    = (byte) ('0' + score % 10);
+		score /= 10;
+	    }
+	}
     }
 
     /**
