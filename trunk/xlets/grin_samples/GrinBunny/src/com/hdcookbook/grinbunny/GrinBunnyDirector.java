@@ -95,7 +95,12 @@ import java.util.Random;
  */
 public class GrinBunnyDirector extends Director {
 
-    private final static String PROFILE_IP_ADDRESS = "192.168.64.47";
+    private final static String PROFILE_IP_ADDRESS = null;
+    	// If you want to use the profiler,set this to the
+	// IP address on your LAN of the PC where you'll collect
+	// the profiling data.  You can use "127.0.0.1" to profile
+	// from GrinView on the same PC.
+	// cf. https://hdcookbook.dev.java.net/profiler.html
 
     private static int GAME_DURATION_FRAMES = 24 * 60;
     private static int CARROT_SPEED = 14;
