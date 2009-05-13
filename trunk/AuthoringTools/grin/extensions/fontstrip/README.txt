@@ -83,3 +83,15 @@ is meant to be added to the grin library on a disc together with the
 
 To find an example of FontStrip extension being used in the show, go to:
 <hdcookbook>/xlets/tests/functional/FontStrip/
+
+
+A word about alpha blending
+===========================
+
+At least some font strips must be drawn in SRC_OVER mode, because the 
+individual images that hold the characters might overlap (e.g. due
+to kerning).  For this reason, the FontStripText feature checks the
+drawing mode, and if it is not a SRC_OVER drawing mode, it sets the
+mode to SRC_OVER with an alpha value of 255.  If you want to fade a
+font strip feature, be sure to use SRC_OVER drawing mode in the parent
+fade node.

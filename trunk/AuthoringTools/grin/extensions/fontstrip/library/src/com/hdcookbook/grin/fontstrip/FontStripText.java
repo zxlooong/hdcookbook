@@ -72,6 +72,12 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.HashMap;
 
+/**
+ * A feature for drawing font strip text.
+ * <p>
+ * See the file READM.TXT in the font strip extension base directory
+ * for more details.
+ **/
 public class FontStripText extends Feature implements Node, SetupClient {
     
      /**
@@ -307,12 +313,19 @@ public class FontStripText extends Feature implements Node, SetupClient {
         int y2 = alignedY;
 
 	Composite old = gr.getComposite();
-	gr.setComposite(AlphaComposite.SrcOver);        
+	boolean keepAlpha 
+	    = (old instanceof AlphaComposite) 
+	       && (((AlphaComposite) old).getRule() == AlphaComposite.SRC_OVER);
+	if (!keepAlpha) {
+	    gr.setComposite(AlphaComposite.SrcOver);        
+	}
         for (int i = 0; i < bakedStrings.length; i++) {
             drawString(gr, bakedStrings[i], alignedX, y2);
             y2 += ascent + descent + leading + vspace;
         }
-	gr.setComposite(old);            
+	if (!keepAlpha) {
+	    gr.setComposite(old);            
+	}
     }
 
     public void nextFrame() {

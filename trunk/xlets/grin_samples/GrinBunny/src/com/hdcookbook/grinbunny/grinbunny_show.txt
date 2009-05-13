@@ -296,16 +296,6 @@ feature set_target F:Carrot.Opt F:Carrot T:Carrot ;
 # Two text features for the time remaining and the score
 #
 
-#feature text F:TimeMessage
-#	left 85 top 10 
-#	"MM:SS"
-#	    Lisa plain 60 { { 240 0 0 255 } } ;
-
-#feature text F:ScoreMessage
-#	left 1410 top 10 
-#	"Score:  0"
-#	    Lisa plain 60 { { 240 0 0 255 } } ;
-
 feature extension fontstrip:text 
     F:TimeMessage 
        "images/fontstrip.png" 
