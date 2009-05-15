@@ -273,6 +273,15 @@ The project.name property is not set.  This usually has one of two causes:
 	    <param name="generate.binary.script.optimize.argument"
 	           value="-avoid_optimization"/>
 	</antcall>
+	<antcall target="quick-grinview">
+	</antcall>
+    </target>
+
+    <target name="quick-grinview">
+        <!-- This intentionally has no depends.  It's meant to be called when
+	     you know nothing needs to be recompiled, e.g. when the only
+	     change is to the show .txt file.
+	-->
         <jdktools.java classname="com.hdcookbook.grin.test.bigjdk.GrinView">
 	    <classpath>
 		<pathelement path="${grinview.jar}"/>

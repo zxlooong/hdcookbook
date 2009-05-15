@@ -28,6 +28,7 @@
     <target name="spotless" depends="clean">
 	<delete file="SampleDiscImage/keystore.store"/>
 	<delete file="SampleDiscImage/app.discroot.crt"/>
+	<delete dir="META-INF"/>
     </target>
     
     <target name="deploy" depends="bridgehead-deploy,  

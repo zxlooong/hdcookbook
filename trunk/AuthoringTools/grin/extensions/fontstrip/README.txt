@@ -26,7 +26,7 @@ How To Generate Font Image Mosaics
 The tool to generate images is included in the "fontimagemaker.jar".  To 
 generate the intermediate font image file and the final font image mosaic, do
 
-java -jar fontimagemaker.jar -config <name of the configuratin file>
+java -jar fontimagemaker.jar -config <name of the configuration file>
 
 Invoke the jar without any argument to see all possible tool options.  
 
@@ -61,6 +61,7 @@ The BNF describing the syntax of the extension feature is:
 
 fontstrip_text = feature "extension" "fontstrip:text" name 
                  font_name text_pos text_strings 
+                 ["vspace" integer] 
                  ["hspace" integer] 
                  ["background" color_entry ] ";"
 
@@ -69,8 +70,8 @@ font_name :: = string # Name of the font mosaic image file
 
 This BNF syntax is a modification of GRIN's Text feature.  Please look at 
 the standard GRIN documentation for the description of other elements.  
-"hspace" is a optional argument used to add horizontal and vertical spacing 
-between each characters, in pixels.
+"hspace" and "vspace" are optional arguments used to add horizontal and 
+vertical spacing between the characters, in pixels.
 
 The workspace creates two jars, "sefontstrip.jar" and "fontstrip.jar", to 
 support the extension.  "sefontstrip.jar" contains files needed for show's 
