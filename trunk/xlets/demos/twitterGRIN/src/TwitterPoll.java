@@ -85,6 +85,8 @@ class TwitterPoll extends Command implements Runnable {
     private ManagedImage[] icons;
     private Status[] tweets;
     private boolean destroyed = false;
+	// Access to destroyed doesn't need to be synchronized -- see
+	// the comments in destroy()
 
     /**
      * Run the networking task.  This happens in the networking thread.
@@ -109,6 +111,14 @@ class TwitterPoll extends Command implements Runnable {
 	tweets = new Status[v.size()];
 	for (int i = 0; i < v.size(); i++) {
 	    if (Thread.interrupted()) {
+	    	// Note that NetworkManager calls Thread.interrupt() for us
+		// when it wants us to terminate.  
+		//
+		// For added robustness, we could add a synchronized check
+		// of NetworkManager.destroyed here too - that would provide
+		// some robustness against buggy libraries that catch
+		// InterruptedException without re-posting the
+		// Thread.interrupt().  
 		destroy();
 		return;
 	    }
@@ -146,7 +156,11 @@ class TwitterPoll extends Command implements Runnable {
      * Cleanup the state held this command.  This is used when we're
      * exiting, and the show shut down during network activity.  It either
      * gets called before the show command is queued, or it gets called from
-     * the animation thread after it is queued.  Either is safe.
+     * the animation thread after it is queued.  Either is safe.  Essentially,
+     * a TwitterPoll is active in either the network thread, or in the
+     * animation thread, but never in both simultaneously.  When it
+     * switches from one thread to the other, there's a sinchronization
+     * point (via the enqueue/dequeue).
      **/
     public void destroy() {
 	destroyed = true;

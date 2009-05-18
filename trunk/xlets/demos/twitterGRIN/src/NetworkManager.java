@@ -112,12 +112,21 @@ public class NetworkManager {
 	    if (thread != null) {
 		thread.interrupt();
 		thread = null;
+		    // This thread.interrupt() is important.  Our network
+		    // tasks (the Runnable instances that get enqueued)
+		    // should poll Thread.interrupted() regularly, and shut
+		    // down if it is true.  This will more quickly terminate
+		    // the NetworkManager thread on xlet shutdown.
 	    }
 	}
     }
 
     /**
-     * Queue the runnable to run in the networking thread
+     * Queue the runnable to run in the networking thread.  When the
+     * Runnable executes, it should regulary check Thread.isInterrupted,
+     * and return if it finds the thread has been interrupted.
+     *
+     * @see java.lang.Thread#isInterrupted()
      **/
     public static void enqueue(Runnable r) {
 	synchronized(LOCK) {
