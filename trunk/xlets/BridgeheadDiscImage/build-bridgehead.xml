@@ -18,8 +18,8 @@
     <property name="logger-name"                  value="90001"/>
     <property name="firsttitlexlet-bdjo-name"     value="00000"/>
     <property name="orgid"                        value="56789abc"/>
-    <property name="bridgeheadxlet-bdjo-desc-file" value="${bridgehead.src.dir}/../BridgeheadBDJO.xml"/>  
-    <property name="firsttitlexlet-bdjo-desc-file" value="${bridgehead.src.dir}/../FirstTitleBDJO.xml"/>
+    <property name="bridgeheadxlet-bdjo-desc-file" value="${bridgehead.src.dir}/../bdmv/BridgeheadBDJO.xml"/>  
+    <property name="firsttitlexlet-bdjo-desc-file" value="${bridgehead.src.dir}/../bdmv/FirstTitleBDJO.xml"/>
     <property name="bridgeheadxlet.jar"           value="${bridgeheadxlet-bdjo-name}.jar"/>   
     <property name="firsttitlexlet.jar"           value="${firsttitlexlet-bdjo-name}.jar"/>
     
@@ -27,7 +27,7 @@
         <tstamp/>
         <mkdir dir="${bridgehead.build.dir}/${bridgeheadxlet}/classes"/>
         <mkdir dir="${bridgehead.build.dir}/${firsttitlexlet}/classes"/>
-        <mkdir dir="${bridgehead.dist.dir}/DiscImage"/>
+        <mkdir dir="${bridgehead.dist.dir}"/>
     </target>
     <target name="bridgehead-deploy" depends="jar, gen-bdjo-desc-file, 
                                    sign-jars, copy-to-bdmv"/>
@@ -133,7 +133,7 @@
         <available property="windvd.exists" file="${WinDVD}"/>
         <fail unless="windvd.exists" message="WinDVD executable not found at ${WinDVD}."/>
         <exec executable="${WinDVD}">
-            <arg value="${basedir}\${bridgehead.dist.dir}\DiscImage\BDMV"/>
+            <arg value="${basedir}\${bridgehead.dist.dir}\BDMV"/>
         </exec>
     </target>
     <target name="gen-bdjo-desc-file">
@@ -152,13 +152,13 @@
     </target>
     <target name="copy-to-bdmv" 
             depends="jar, gen-bdjo-desc-file, sign-jars">
-        <property name="target.dir" value="${bridgehead.dist.dir}/DiscImage"/>
+        <property name="target.dir" value="${bridgehead.dist.dir}"/>
         <copy todir="${target.dir}">
             <fileset dir="${premade.bdmv}">
                 <exclude name="**/.svn/**"/>
             </fileset>
         </copy>
-        
+
         <copy todir = "${target.dir}/BDMV/JAR" 
               file="${bridgehead.build.dir}/${bridgeheadxlet-bdjo-name}.jar"/>
         <copy todir = "${target.dir}/BDMV/JAR" 

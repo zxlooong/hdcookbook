@@ -178,6 +178,8 @@ public class Main {
 		File f = new File((String) it.next());
 		assetDirs[i++] = f;
 	    }
+	} else {
+	    assetDirs = new File[0];
 	}
         if (assetPathLL.isEmpty() && assetDirs.length == 0) {
             assetPath = new String[]{ "." }; // current dir

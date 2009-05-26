@@ -81,6 +81,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Iterator;
@@ -110,9 +111,12 @@ import javax.imageio.ImageIO;
     private HashMap<String, MosaicPart> partsByName 
     		= new HashMap<String, MosaicPart>();
     private HashMap<String, String> imageToMosaic 
-    		= new HashMap<String, String>();  // file name to mosaic name
+    		= new HashMap<String, String>();  
+	// file name to mosaic name.
+    private HashSet<String> imagesToSkip = new HashSet<String>();
     private HashMap<String, Mosaic> nameToMosaic
-                = new HashMap<String, Mosaic>(); // mosaic name to Mosaic
+                = new HashMap<String, Mosaic>(); 
+	// mosaic name to Mosaic
     Graphics2D frameG;
     private Mosaic currentMosaic = null;
 
@@ -141,6 +145,9 @@ import javax.imageio.ImageIO;
 		for (String imageName : spec.imagesToConsider) {
 		    imageToMosaic.put(imageName, name);
                 }
+		for (String imageName : spec.imagesToSkip) {
+		    imagesToSkip.add(imageName);
+		}
 		Mosaic m = new Mosaic(spec);
 		if (spec.takeAllImages) {
 		    defaultMosaic = m;
@@ -214,6 +221,9 @@ import javax.imageio.ImageIO;
 
     private void addToMosaic(ManagedImage mi) throws IOException {
 	String name = mi.getName();
+	if (imagesToSkip.contains(name)) {
+	    return;
+	}
 	MosaicPart part = partsByName.get(name);
 	if (part != null) {
 	    return;

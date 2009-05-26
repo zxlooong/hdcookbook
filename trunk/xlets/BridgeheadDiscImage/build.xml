@@ -28,6 +28,8 @@
     <target name="spotless" depends="clean">
 	<delete file="SampleDiscImage/keystore.store"/>
 	<delete file="SampleDiscImage/app.discroot.crt"/>
+	<delete file="SampleDiscImage/appcert.csr"/>
+	<delete file="SampleDiscImage/appcert.cer"/>
 	<delete dir="META-INF"/>
     </target>
     

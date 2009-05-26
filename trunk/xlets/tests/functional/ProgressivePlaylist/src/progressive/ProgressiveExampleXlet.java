@@ -98,6 +98,7 @@ import org.dvb.event.UserEventRepository;
 import org.havi.ui.HScene;
 import org.havi.ui.HSceneFactory;
 
+
 /**
  * An example of a progressive playlist.
  * <p>
@@ -202,9 +203,6 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
 		println("Exception in VFS reset:");
 		println(e.toString());
 		setMessage(true);
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(e);
-		}
                 register.setGPR(0,0);
             }
 	} else if (regValue == 1) {
@@ -216,9 +214,6 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
 		println("Exception in VFS update:");
 		println(e.toString());
 		setMessage(true);
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(e);
-		}
                 register.setGPR(0,0);
             }
         } else {
@@ -229,9 +224,6 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
 		println("Exception in playback:");
 		println(e.toString());
 		setMessage(true);
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(e);
-		}
             }
         }  
     }
@@ -239,7 +231,7 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
     /**
      * Unzips the files that are needed for the VFS update to 
      * the binding unit data area.
-     * The files are - bumf.xml, bumf.sf, and CLIPINF, PLAYLIST, and STREAM
+     * The files are - manifest.xml, manifest.sf, and CLIPINF, PLAYLIST, and STREAM
      * directories where each dir contains just one file.
      * The m2ts file under the STREAM dir is listed as a progressvie playlist.
      */
@@ -253,14 +245,15 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
         ZipInputStream zin = new ZipInputStream(
                 new BufferedInputStream(new FileInputStream(file)));
         ZipEntry e;
-	println("Unzipping to binding unit dir:");
-	println(bindingUnitDir);
+	println("Removing old files:");
 	removeAll(new File(bindingUnitDir), "    ");
 	// Verify that they're really removed:
 	removeAll(new File(bindingUnitDir), "    ");
+	println("Unzipping to binding unit dir:");
+	println(bindingUnitDir);
 
         while ((e = zin.getNextEntry()) != null) {
-	    if (e.getName().endsWith(".m2ts"))  {
+	    if (e.getName().endsWith(".m2t"))  {
 		println("    skipping " + e.getName());
 	    } else {
 		unzip(zin, e, bindingUnitDir);    
@@ -282,7 +275,7 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
 	println(bindingUnitDir);
         
 	while ((e = zin.getNextEntry()) != null) {
-	    if (e.getName().endsWith(".m2ts"))  {
+	    if (e.getName().endsWith(".m2t"))  {
 		unzip(zin, e, bindingUnitDir);    
 	    }
         }
@@ -349,8 +342,8 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
     {
 	println("Updating VFS.");
         VFSManager.getInstance().requestUpdating(
-                    bindingUnitDir + sep + "sample.xml",
-                    bindingUnitDir + sep + "sample.sf",
+                    bindingUnitDir + sep + "manifest.xml",
+                    bindingUnitDir + sep + "manifest.sf",
                     true);       
     }
 
@@ -382,8 +375,10 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
         if (manager.isEnabledClip("00001")) {
 	    println("Clip 00001 was already enabled.");
 	} else {
-	    println("Enabling clip 00001.m2ts");
-            manager.enableClip(bindingUnitDir + sep + "BDMV" + sep + "STREAM" + sep + "00001.m2ts");
+	    String name = bindingUnitDir + sep + "00001.m2t";
+	    println("Enabling clip 00001.m2t");
+	    println(name);
+            manager.enableClip(name);
         }
 	setMessage(false);
         // Then, playback the video.  Note that playlist 00000 points to clipinf and stream 00001.
@@ -452,6 +447,7 @@ public class ProgressiveExampleXlet implements Xlet, Runnable, UserEventListener
 	synchronized(messageList) {
 	    messageList.add(s);
 	}
+	System.out.println(s);
     }
        
 }

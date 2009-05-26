@@ -73,11 +73,9 @@ import javax.swing.filechooser.FileFilter;
 
 public class ClientFrame extends javax.swing.JFrame {
 
-    static final int DEFAULT_PORT = 4444;
-
     static String ipAddress       = null;
     static String file            = null;
-    static int    port            = DEFAULT_PORT;
+    static int    port            = Uploader.DEFAULT_PORT;
     
     /** Creates new form ClientFrame */
     public ClientFrame() {
@@ -121,9 +119,9 @@ public class ClientFrame extends javax.swing.JFrame {
 
         zipTextField.setText(file);
 
-        jLabel1.setText("Enter the box's IP address and the port number");
+        jLabel1.setText("Enter the player's  IP address and the port number");
 
-        jLabel2.setText("Specify the location of the zip file to load.");
+        jLabel2.setText("Specify the location of the directory  file to load.");
 
         browseButton.setText("Browse");
         browseButton.addActionListener(new java.awt.event.ActionListener() {
@@ -139,7 +137,7 @@ public class ClientFrame extends javax.swing.JFrame {
             }
         });
 
-        portTextField.setText("" + DEFAULT_PORT);
+        portTextField.setText("" + Uploader.DEFAULT_PORT);
         portTextField.setPreferredSize(new java.awt.Dimension(100, 22));
         portTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -154,26 +152,21 @@ public class ClientFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(46, 46, 46)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addContainerGap())
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel3)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(startButton)
                         .addGroup(layout.createSequentialGroup()
+                            .addComponent(zipTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(browseButton))
+                        .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                             .addComponent(ipTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(portTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addContainerGap())
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(startButton)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
-                                        .addComponent(zipTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(browseButton))
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 295, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addContainerGap(30, Short.MAX_VALUE)))))
+                            .addComponent(portTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(30, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -202,14 +195,8 @@ public class ClientFrame extends javax.swing.JFrame {
 
 private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
     JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
-    fc.addChoosableFileFilter(new FileFilter() {
-            public boolean accept(File arg0) {
-                return (arg0.getName().toLowerCase().endsWith(".zip"));
-            }
-            public String getDescription() {
-                return "Zip files";
-            }
-    });
+    fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
     int returnVal = fc.showOpenDialog(this);
 
     if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -225,61 +212,20 @@ private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     ipAddress = ipTextField.getText();
     file = zipTextField.getText();
     port = Integer.parseInt(portTextField.getText());
-    doUpload(ipAddress, port, file);
+    Uploader.doUpload(ipAddress, port, file);
 }//GEN-LAST:event_startButtonActionPerformed
 
 private void portTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_portTextFieldActionPerformed
 // TODO add your handling code here:
 }//GEN-LAST:event_portTextFieldActionPerformed
 
-    private static void doUpload(String ip, int port, String file) {
-        
-        File zipfile = new File(file);
-        if (!zipfile.exists()) {
-            System.out.println("Couldn't locate " + zipfile);
-            return;
-        }
-        
-        System.out.println("IP=" + ip + ":" + port);
-        System.out.println("file=" + zipfile);
-        Socket socket;
-        try {
-            socket = new Socket(ip, port);
-            BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
-            FileInputStream fin = new FileInputStream(zipfile);
 
-            int start = 0;
-            int length = 1024;
-            int offset = -1;
-            byte[] buffer = new byte[length];
-            while ((offset = fin.read(buffer, start, length)) != -1) {
-                out.write(buffer, start, offset);
-            }
-
-            fin.close();
-            out.close();
-            System.out.println("Finished sending data.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        if (args != null && args.length == 2) {
-            ipAddress = args[0];
-            file = args[1];
-            doUpload(ipAddress, DEFAULT_PORT, file);
-        } else {
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                   new ClientFrame().setVisible(true);
-                }
-            });
-        }
+    public static void launchGUI() {
+	EventQueue.invokeLater(new Runnable() {
+	    public void run() {
+	       new ClientFrame().setVisible(true);
+	    }
+	});
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

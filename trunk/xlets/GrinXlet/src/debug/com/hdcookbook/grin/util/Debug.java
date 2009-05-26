@@ -141,6 +141,9 @@ public class Debug {
                 DebugLog.println(o.toString());
             }
         }
+	// The following can be useful on a software player, but can
+	// cause serious performance degredation on a hardware player:
+	// System.out.println(o);
     }
 
     /**

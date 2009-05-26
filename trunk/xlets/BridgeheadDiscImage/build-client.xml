@@ -19,7 +19,7 @@
         <jar jarfile="${client.dist.dir}/${client.jar}"
              basedir="${client.build.dir}">
             <manifest>
-                <attribute name="Main-Class" value="client.ClientFrame"/>
+                <attribute name="Main-Class" value="client.Uploader"/>
             </manifest>
         </jar>        
     </target>   

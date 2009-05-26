@@ -74,6 +74,7 @@ public class LwLog extends Component {
     private int position;
     private static final int littleGap = 6;
     private static final int scrollPaneWidth = 20;
+    private boolean followEnd = true;
 
     /**
      * @param data Vector of Strings 
@@ -126,7 +127,13 @@ public class LwLog extends Component {
         repaint();
     }
 
-    public void paint(Graphics g) {
+    public synchronized void paint(Graphics g) {
+	if (followEnd) {
+	    firstDisplayedItem = data.size() - numberOfLinesDisplayed;
+	    if (firstDisplayedItem < 0) {
+		firstDisplayedItem = 0;
+	    }
+	}
         maxRecordLength = 0;
         FontMetrics fm = g.getFontMetrics(Screen.getDefaultFont());
 
@@ -172,8 +179,9 @@ public class LwLog extends Component {
      * Move the screen one line up.
      *
      */
-    public void moveUp() {
+    public synchronized void moveUp() {
         if (firstDisplayedItem > 0) {
+	    followEnd = false;
             firstDisplayedItem--;
             repaint();
         }
@@ -183,9 +191,11 @@ public class LwLog extends Component {
      * Move the screen one line down
      *
      */
-    public void moveDown() {
+    public synchronized void moveDown() {
         if (firstDisplayedItem < data.size() - numberOfLinesDisplayed) {
             firstDisplayedItem++;
+	    followEnd = firstDisplayedItem 
+			    >= data.size() - numberOfLinesDisplayed;
             repaint();
         }
     }
@@ -194,8 +204,9 @@ public class LwLog extends Component {
      * Move the selection pointer one page up
      *
      */
-    public void movePageUp() {
+    public synchronized void movePageUp() {
         if (firstDisplayedItem > 0) {
+	    followEnd = false;
             firstDisplayedItem -= numberOfLinesDisplayed;
             if (firstDisplayedItem < 0) {
                 firstDisplayedItem = 0;
@@ -208,11 +219,13 @@ public class LwLog extends Component {
      * Move the selection pointer one page down
      *
      */
-    public void movePageDown() {
+    public synchronized void movePageDown() {
         if (firstDisplayedItem < data.size() - numberOfLinesDisplayed) {
             firstDisplayedItem = Math.min(
                     data.size() - numberOfLinesDisplayed,
                     firstDisplayedItem + numberOfLinesDisplayed);
+	    followEnd = firstDisplayedItem 
+			    >= data.size() - numberOfLinesDisplayed;
 
             repaint();
         }
@@ -221,7 +234,7 @@ public class LwLog extends Component {
     /**
      * Move the screen half screen left 
      */
-    public void moveLeft() {
+    public synchronized void moveLeft() {
         if (xPos < 0) {
             xPos += horizontalScrollingStep;
             repaint();
@@ -231,7 +244,7 @@ public class LwLog extends Component {
     /**
      * Move the screen half screen right
      */
-    public void moveRight() {
+    public synchronized void moveRight() {
         if (maxRecordLength + xPos >
                 Screen.getVisibleWidth() - littleGap - scrollPaneWidth) {
             xPos -= horizontalScrollingStep;

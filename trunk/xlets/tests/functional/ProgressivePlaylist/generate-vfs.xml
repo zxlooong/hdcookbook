@@ -37,15 +37,16 @@ information or have any questions.
             <arg value="${xlet.orgid}"/>
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
+	<delete dir="${build.dir}/VFS"/>
         <jdktools.java jar="${bumfgenerator.jar}">
             <arg value="${build.dir}/id.bdmv"/>
-            <arg value="${build.dir}/VFS/BDMV"/>
+            <arg value="${build.dir}/vfstmp/BDMV"/>
             <arg value="-progressive"/>
             <arg value="00001"/>
-            <arg value="${build.dir}/VFS/sample.xml"/>
+            <arg value="${build.dir}/VFS"/>
         </jdktools.java>
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
-            <arg value="${build.dir}/VFS/sample.xml"/>
+            <arg value="${build.dir}/VFS/manifest.xml"/>
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
         <zip zipfile="${build.dir}/${vfs.jar}"
@@ -54,15 +55,15 @@ information or have any questions.
     
     <target name="assemble-vfs-dir" depends="generate-id, generate-playlist"
             description="assemble files in the build dir for vfs update">
-        <mkdir dir="${build.dir}/VFS/BDMV/CLIPINF"/>
-        <mkdir dir="${build.dir}/VFS/BDMV/PLAYLIST"/>
-        <mkdir dir="${build.dir}/VFS/BDMV/STREAM"/>
+        <mkdir dir="${build.dir}/vfstmp/BDMV/CLIPINF"/>
+        <mkdir dir="${build.dir}/vfstmp/BDMV/PLAYLIST"/>
+        <mkdir dir="${build.dir}/vfstmp/BDMV/STREAM"/>
 
-        <copy todir="${build.dir}/VFS/BDMV/CLIPINF"
+        <copy todir="${build.dir}/vfstmp/BDMV/CLIPINF"
               file="bdmv/BDMV/CLIPINF/00001.clpi"/>
-        <copy todir="${build.dir}/VFS/BDMV/PLAYLIST"
+        <copy todir="${build.dir}/vfstmp/BDMV/PLAYLIST"
               file="${build.dir}/00000.mpls"/>
-        <copy todir="${build.dir}/VFS/BDMV/STREAM"
+        <copy todir="${build.dir}/vfstmp/BDMV/STREAM"
               file="bdmv/BDMV/STREAM/00001.m2ts"/>
     </target>
     

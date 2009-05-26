@@ -130,7 +130,8 @@ public class MosaicsParser {
 	} catch (IOException ex) {
 	    lexer.reportError(ex.getMessage());
 	}
-	ArrayList<String> files = new ArrayList();
+	ArrayList<String> files = new ArrayList<String>();
+	ArrayList<String> filesToSkip = new ArrayList<String>();
 	for (;;) {
 	    String tok = lexer.getString();
 	    if (";".equals(tok)) {
@@ -162,11 +163,15 @@ public class MosaicsParser {
 		    builder.addFeature(name, lexer.getLineNumber(), im);
 		}
 		files.addAll(f);
+	    } else if ("skip_image_files".equals(tok)) {
+		List<String> f = parseStrings();
+		filesToSkip.addAll(f);
 	    } else {
 		lexer.expectString("; or mosaic_part", tok);
 	    }
 	}
 	spec.imagesToConsider = files.toArray(new String[files.size()]);
+	spec.imagesToSkip = filesToSkip.toArray(new String[filesToSkip.size()]);
     }
 
     private List<String> parseStrings() throws IOException {

@@ -742,7 +742,7 @@ A mosaics file has the following syntax:
 
     mosaic_part ::=   max_width | max_height | max_pixels
     		    | min_width | num_widths | take_all_images
-    		    | image_files | add_image_files
+    		    | image_files | add_image_files | skip_image_files
 
     max_width ::= "max_width" integer	
     	# <= 4096 recommended, cf. 3-2 G.6
@@ -776,6 +776,9 @@ A mosaics file has the following syntax:
 	# to include to use from your xlet, using the ManagedImage class.
 	# Each image will appear in only one mosaic, even if it's listed in
 	# the add_image_files part of multiple mosaics.
+
+    skip_image_files ::= "skip_image_files" "{" file_name* "}"
+	# A list of image files 
 
 </pre>
 <p>

@@ -534,6 +534,7 @@ The project.name property is not set.  This usually has one of two causes:
         <copy todir="${dist.dir}/CERTIFICATE"
               file="${build.dir}/id.bdmv"/>
               
+	<delete dir="${dist.dir}/CERTIFICATE/BACKUP"/>
         <copy todir="${dist.dir}/CERTIFICATE/BACKUP">
             <fileset dir="${dist.dir}/CERTIFICATE"/>
         </copy>
@@ -542,6 +543,7 @@ The project.name property is not set.  This usually has one of two causes:
 	    <fileset dir="${build.dir}" includes="*.png"/>
 	    <fileset dir="${build.dir}" includes="images.map"/>
 	</copy>
+	<delete dir="${dist.dir}/BDMV/BACKUP"/>
         <copy todir="${dist.dir}/BDMV/BACKUP">
             <fileset dir="${dist.dir}/BDMV">
                 <include name="index.bdmv"/>

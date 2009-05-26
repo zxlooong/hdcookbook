@@ -1,5 +1,5 @@
 /*  
- * Copyright (c) 2008, Sun Microsystems, Inc.
+ * Copyright (c) 2009, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -52,49 +52,79 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-package com.hdcookbook.grin;
-
 /**
- * MosaicSpec provides a specification to the Mosaic builder about how to 
- * group images when building a image mosaic.  This class is used only 
- * during the SEShow build time, in response to the "mosaics" entry, or to the
- * deprecated "mosaic_hint" entry of the text-based show file.
+ *
  */
 
-public class MosaicSpec {    
-    
-    public String name;
-    public int minWidth = 128;
-    public int maxWidth = 4096;
-    public int maxHeight = 4096;
-    public int maxPixels = 4963776;
-    public int numWidths = 65;
+package client;
 
-    /**
-     * If set true, this mosaic will accept all images used in shows
-     * that aren't part of another mosaic.
-     **/
-    public boolean takeAllImages = false;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.Socket;
 
-    /**
-     * The set of images to consider including.  Images are only included
-     * if they appear in a show.  In order to include images that aren't
-     * used in a show (e.g. because they're used directly in an xlet),
-     * we make a synthetic SEShow with noShowFile set, and put
-     * FixedImage features in that show.
-     **/
-    public String[] imagesToConsider = null;
+public class Uploader {
 
-    /**
-     * The set of images to skip.  These images will not appear in any
-     * mosaic, even though they might be used in a show.
-     **/
-    public String[] imagesToSkip = null;
+    public static final int DEFAULT_PORT = 4444;
 
-    /**
-     * @param name	The file name to put the mosaic in
-     **/
-    public MosaicSpec(String name) {
-        this.name = name;
+    public static void doUpload(String ip, int port, String file) {
+        
+        File srcDir = new File(file);
+        if (!srcDir.exists()) {
+            System.out.println("Couldn't locate " + srcDir);
+            return;
+        }
+        
+        System.out.println("IP=" + ip + ":" + port);
+        System.out.println("dir=" + srcDir);
+        Socket socket;
+        try {
+            socket = new Socket(ip, port);
+	    DataOutputStream out 
+		 = new DataOutputStream(
+		     new BufferedOutputStream(socket.getOutputStream()));
+	    HdcVFSMaker.sendHdcVFSImage(srcDir, out);
+	    out.flush();
+            out.close();
+            System.out.println("Finished sending data.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void usage() {
+	System.out.println();
+	System.out.println("Usage:  java client.Uploader [<dir> <dest>]");
+	System.out.println();
+	System.out.println("    This program recursively descends a directory, and makes a .hdcvfs stream");
+	System.out.println("    for upload to the bridgehead xlet.  The directory is typically created");
+	System.out.println("    with the cookbook bumfgenerator program.");
+	System.out.println();
+	System.out.println("    (no arguments)               launches upload GUI");
+	System.out.println("    <dir> <player ip address>    uploads without a GUI");
+	System.out.println("    <dir> <file>.hdcvfs          Copies stream to .hdvfs file");
+	System.out.println();
+	System.out.println("   An .hdcvfs file can be put on a web server, for upload with a");
+	System.out.println("   bridgehead xlet that downloads it .hdcvfs file.");
+	System.out.println();
+	System.exit(1);
+    }
+    public static void main(String args[]) {
+	if (args.length == 0) {
+	    System.out.println("Invoke with \"-help\" for more options.");
+	    ClientFrame.launchGUI();
+	} else if (args.length != 2) {
+	    usage();
+	} else {
+	    String dir = args[0];
+	    String dest = args[1];
+	    if (dest.endsWith(".hdcvfs")) {
+		HdcVFSMaker.makeHdcVFSFile(dir, dest);
+	    } else {
+		Uploader.doUpload(dest, DEFAULT_PORT, dir);
+	    }
+	    System.exit(0);
+	}
     }
 }

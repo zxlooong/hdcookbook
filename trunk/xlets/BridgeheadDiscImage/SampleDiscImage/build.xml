@@ -37,12 +37,13 @@
     <target name="init">
         <tstamp/>
         <mkdir dir="${build.dir}/classes"/> 
-        <mkdir dir="${dist.dir}/DiscImage"/>     
+        <mkdir dir="${dist.dir}"/>     
     </target>
     
     <target name="clean" depends="zip-clean">
         <delete dir="${build.dir}"/>
         <delete dir="${dist.dir}"/>
+        <delete dir="META-INF"/>
     </target>
     
     <target name="deploy" depends="bundle, make-zip"/>
@@ -50,7 +51,6 @@
     <target name="bundle" depends="jar, gen-bdjo-desc-file, 
                                    sign-xlet, copy-to-bdmv"
             description="Make an blu-ray disc image bundle"/>
-    
     <target name="compile"
             depends="init" description="Compiles the sources">
         

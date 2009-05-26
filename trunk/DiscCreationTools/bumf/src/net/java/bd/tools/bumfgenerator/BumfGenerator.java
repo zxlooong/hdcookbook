@@ -61,6 +61,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import javax.xml.bind.JAXBContext;
@@ -84,8 +85,16 @@ import net.java.bd.tools.id.Id;
 public class BumfGenerator {
     
    private static final String MANIFEST_ID = "0x00000001";
+
+   private int nextFile = 1;
+   private byte[] buffer = new byte[16384];
+
+   public static class Entry {
+       public File src;
+       public File dest;
+   }
     
-   public static void main(String[] args) throws Exception {
+   public static void main(String[] args) {
        if (args.length < 3) {
            usage();
        }
@@ -109,27 +118,46 @@ public class BumfGenerator {
            usage();
        }
        
-       if (!new File(input).exists() || input.indexOf("BDMV") == -1) {
+       File inputDir = new File(input);
+       File outputDir = new File(output);
+       if (!inputDir.exists() || input.indexOf("BDMV") == -1) {
            System.out.println("Input directory needs to be an existing BDMV directory " + input);
            usage();
        }
-       
-       BumfGenerator budagen = new BumfGenerator();
-       Manifest manifest = budagen.constructManifest(idFile, input, progressives);
-       budagen.writeXml(manifest, output);
-    
-   }
-   
-   public static void usage() {
-       System.out.println("\n\nUsage:\n");
-       System.out.println("" + BumfGenerator.class.getName() + " id.bdmv bdmv-directory [-progressive comma-separated-m2ts-numbers] output-xml-file");
-       System.out.println("\n\t-progressive is optional; use it to specify m2ts files that should be listed as progressive assets.");
-       System.out.println("\n\tExample: " + BumfGenerator.class.getName() + " ../../BDImage/CERTIFICATE/id.bdmv ../../BDImage/BDMV -progressive 00001,00002 sample.xml");
+       if (outputDir.exists()) {
+	   System.out.println("ERROR:  Output directory already exists - please remove it.");
+	   usage();
+       }
+
+       try {
+	   BumfGenerator budagen = new BumfGenerator();
+	   Manifest manifest 
+		= budagen.constructManifest(idFile, input, outputDir, progressives);
+	   budagen.writeXml(manifest, output+"/manifest.xml");
+       } catch (Exception ex) {
+	   ex.printStackTrace();
+	   System.exit(1);
+       }
        System.exit(0);
    }
+   
+    public static void usage() {
+	System.out.println();
+	System.out.println("Usage:");
+	System.out.println();
+	System.out.println( BumfGenerator.class.getName() + " id.bdmv bdmv-directory [-progressive comma-separated-m2ts-numbers] output-directory");
+	System.out.println();
+	System.out.println("\t-progressive is optional; use it to specify m2ts files that should be listed as progressive assets.");
+	System.out.println();
+	System.out.println("\tExample: " + BumfGenerator.class.getName() + " ../../BDImage/CERTIFICATE/id.bdmv ../../BDImage/BDMV -progressive 00001,00002 vfs_upload");
+	System.out.println();
+	System.out.println("        The output directory will be created.  It is an error if it exists already.");
+	System.exit(1);
+    }
 
-   private Manifest constructManifest(String idFile, String bdmvDir, String[] progressives) 
-       throws Exception {   
+   private Manifest constructManifest(String idFile, String bdmvDir, File outputDir,
+   				      String[] progressives) throws Exception 
+   {   
        
         Manifest m = new Manifest();
         
@@ -156,15 +184,16 @@ public class BumfGenerator {
     
         int index = bdmvDir.indexOf("BDMV");      
         File[] fs = new File[]{ new File(bdmvDir) };
-        ArrayList<File> list = new ArrayList<File>();
-        findFiles(fs, list);
+        ArrayList<Entry> list = new ArrayList<Entry>();
+        findFiles(fs, list, outputDir);
         ObjectFactory factory = new ObjectFactory();
         AssetsType assetsType = factory.createAssetsType();
         ProgressiveType progressiveType = factory.createProgressiveType();    
         
         for(int i = 0; i < list.size(); i++) {
-            String filename = list.get(i).getPath().substring(index).replace('\\', '/');
-            String buFilename = orgId + '/' + discId + '/' + filename;
+	    Entry ent = list.get(i);
+            String filename = ent.src.getPath().substring(index).replace('\\', '/');
+            String buFilename = orgId + '/' + discId + '/' + ent.dest.getName();
             
             if (isProgressive(filename, progressives)) {
                 addToProgressiveAssets(factory, progressiveType, filename, buFilename);
@@ -192,15 +221,61 @@ public class BumfGenerator {
        return false;
    }
    
-   private void findFiles(File[] fs, ArrayList<File> v) {
+   private void findFiles(File[] fs, ArrayList<Entry> v, File outputDir)
+		throws IOException 
+    {
         for (File f: fs) {
            if (!f.isDirectory()) {
-              v.add(f);
+	      File out = copyFile(f, outputDir);
+	      Entry e = new Entry();
+	      e.src = f;
+	      e.dest = out;
+              v.add(e);
            } else {
-              findFiles(f.listFiles(), v);
+              findFiles(f.listFiles(), v, outputDir);
            }
         }
    }
+
+    //
+    // Returns the output file name
+    //
+    private File copyFile(File in, File outputDir) throws IOException {
+	FileInputStream is = new FileInputStream(in);
+	if (!outputDir.exists()) {
+	    boolean ok = outputDir.mkdirs();
+	    if (ok) {
+		System.out.println("Created output directory " + outputDir);
+	    } else {
+		throw new IOException("Couldn't create " + outputDir);
+	    }
+	}
+	File out;
+	String inName = in.getName();
+	String outName;
+	if (inName.endsWith(".m2ts")) {
+	    outName = inName.substring(0, inName.length()-4) + "m2t";
+	} else if (inName.endsWith(".clpi")) {
+	    outName = inName.substring(0, inName.length()-4) + "clp";
+	} else if (inName.endsWith(".mpls")) {
+	    outName = inName.substring(0, inName.length()-4) + "mpl";
+	} else {
+	    outName = "" + nextFile + ".vfs";
+	    nextFile++;
+	}
+	out = new File(outputDir, outName);
+	FileOutputStream os = new FileOutputStream(out);
+	for (;;) {
+	    int len = is.read(buffer);
+	    if (len == -1) {
+		break;
+	    }
+	    os.write(buffer, 0, len);
+	}
+	os.close();
+	is.close();
+	return out;
+    }
    
    private void addToProgressiveAssets(ObjectFactory factory, ProgressiveType progressiveType, 
         String filename, String buFilename) {
@@ -236,4 +311,5 @@ public class BumfGenerator {
        os.flush();
        os.close();
    }
+
 }
