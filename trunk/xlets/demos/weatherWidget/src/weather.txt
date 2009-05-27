@@ -119,7 +119,7 @@ feature text F:Day left 228 top 40 { "Now" }
 feature text F:Temp left 228 top 200 { "Temp" }
     SansSerif plain 20 { { 255 255 255 255 } } ;
 
-feature text F:ZipCode left 5  top 5 { "95054" }
+feature text F:ZipCode left 5  top 5 { "94103" }
     SansSerif plain 14 { { 115 115 115 255 } } ;
 
 # The radius of the circle is used by WeatherDirector

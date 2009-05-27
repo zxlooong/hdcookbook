@@ -79,7 +79,7 @@ public class WeatherMan extends Command implements Runnable {
     private ManagedImage icons[] = new ManagedImage[3];
     private URL weatherURL;
     private boolean destroyed = false;
-    private static String zip = "95054";
+    private static String zip = "94103";
     private String weatherRsc = "http://weather.yahooapis.com/forecastrss";
 
     // This URL points to a widget size png image.
