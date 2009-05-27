@@ -62,6 +62,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.Socket;
 
 public class Uploader {
@@ -84,8 +85,16 @@ public class Uploader {
 	    DataOutputStream out 
 		 = new DataOutputStream(
 		     new BufferedOutputStream(socket.getOutputStream()));
+	    InputStream in = socket.getInputStream();
 	    HdcVFSMaker.sendHdcVFSImage(srcDir, out);
 	    out.flush();
+	    while (in.read() != -1) {
+	    	// Wait for EOF on the return socket.  On some player/PC
+		// combos, closing the output socket before the player has
+		// read all of the bytes causes a "socket reset" error
+		// in the middle of reading.
+	    }
+	    in.close();
             out.close();
             System.out.println("Finished sending data.");
         } catch (Exception e) {

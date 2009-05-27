@@ -163,8 +163,12 @@ public class DebugLog {
 	ServerSocket ss = new ServerSocket(LISTEN_PORT);
 	ss.setSoTimeout(1000);	// Check for destroy each second
 	Socket sock = null;
-	Debug.println("    InetAddress.getLocalHost gives " +
-				    InetAddress.getLocalHost());
+	try {
+	    Debug.println("    InetAddress.getLocalHost gives " +
+					InetAddress.getLocalHost());
+	} catch (Throwable t) {
+	    Debug.println("    INetAddress.getLocalHost fails with " + t);
+	}
 	boolean messaged = false;
 	for (;;) {
 	    synchronized(LOCK) {
@@ -218,7 +222,8 @@ public class DebugLog {
 			} else {
 			    while (linesSent < available) {
 				linesSent++;
-				out.println(iter.next());
+				out.print(iter.next());
+				out.println('\r');  // I ! <3 Windows 
 			    }
 			}
 		    }

@@ -60,6 +60,7 @@ import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -355,12 +356,12 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         return true;
     }
     
-    public String getHostIP() {
+    private String getHostIP() {
         try {
            return InetAddress.getLocalHost().getHostAddress(); 
-        } catch (UnknownHostException e) { 
-            XletLogger.log("", e);
-            return null;
+        } catch (Throwable t) { 
+            XletLogger.log("Can't get local host:  ", t);
+            return "<unknown>";
         }
     }
     
@@ -376,7 +377,9 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         XletLogger.log("Accepted connection, start downloading");
 
 	try {
+	    OutputStream out = clientSocket.getOutputStream();
 	    downloadFromSocket(downloadDir, clientSocket.getInputStream());
+	    out.close();
 	} finally {
 	    ssocket.close();
 	}
