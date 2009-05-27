@@ -88,11 +88,16 @@ public class Uploader {
 	    InputStream in = socket.getInputStream();
 	    HdcVFSMaker.sendHdcVFSImage(srcDir, out);
 	    out.flush();
-	    while (in.read() != -1) {
-	    	// Wait for EOF on the return socket.  On some player/PC
-		// combos, closing the output socket before the player has
-		// read all of the bytes causes a "socket reset" error
-		// in the middle of reading.
+	    try {
+		while (in.read() != -1) {
+		    // Wait for EOF on the return socket.  On some player/PC
+		    // combos, closing the output socket before the player has
+		    // read all of the bytes causes a "socket reset" error
+		    // in the middle of reading.
+		}
+	    } catch (Exception ex) {
+		// We can get client reset here if the timing is off.
+		// Semantically, it means the same to us as does EOF.
 	    }
 	    in.close();
             out.close();
