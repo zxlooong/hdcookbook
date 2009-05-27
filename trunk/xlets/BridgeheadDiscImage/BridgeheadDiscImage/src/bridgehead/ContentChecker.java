@@ -96,9 +96,10 @@ public class ContentChecker {
    
    static void checkFile(File file) throws DiscImageContentException, IOException {
        String name = file.getAbsolutePath().toLowerCase();
-       if (name.endsWith("index.bdmv")) {
+       String fileName = file.getName();
+       if (fileName.equals("index.bdmv")) {
            checkIndexBDMVContent(file);
-       } else if (name.endsWith(".bdjo")) {
+       } else if (name.endsWith(".bdj")) {
            checkBDJOName(name);
        } else if (name.endsWith(".jar")) {
            checkJarName(name);
@@ -143,7 +144,7 @@ public class ContentChecker {
     }
    
     private static void checkBDJOName(String name) throws DiscImageContentException {
-            if (name.endsWith(BRIDGEHEAD_BDJO_NAME+".bdjo")) {
+            if (name.endsWith(BRIDGEHEAD_BDJO_NAME+".bdj")) {
                 throw new DiscImageContentException("Content includes a bdjo file that" +
                         "will be overwriting the Bridgehead Xlet, " + name);
             }

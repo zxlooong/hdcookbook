@@ -259,6 +259,12 @@ public class BumfGenerator {
 	    outName = inName.substring(0, inName.length()-4) + "clp";
 	} else if (inName.endsWith(".mpls")) {
 	    outName = inName.substring(0, inName.length()-4) + "mpl";
+	} else if (inName.equals("index.bdmv")) {
+	    outName = inName.substring(0, inName.length()-4) + "bdm";
+	} else if (inName.endsWith(".jar") && inName.length() == 9) {
+	    outName = inName;
+	} else if (inName.endsWith(".bdjo") && inName.length() == 10) {
+	    outName = inName.substring(0, inName.length()-4) + "bdj";
 	} else {
 	    outName = "" + nextFile + ".vfs";
 	    nextFile++;
