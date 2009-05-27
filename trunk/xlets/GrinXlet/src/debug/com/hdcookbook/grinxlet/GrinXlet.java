@@ -302,9 +302,9 @@ public class GrinXlet
 	    } catch (Exception ex) {
 		if (Debug.LEVEL > 0) {
 		    Debug.printStackTrace(ex);
-		}
-		if (Debug.ASSERT) {
-		    Debug.assertFail();
+		    Debug.println();
+		    Debug.println(" ***  Error!  FontFactory failed to initialize  ***");
+		    Debug.println();
 		}
 	    }
 	}
