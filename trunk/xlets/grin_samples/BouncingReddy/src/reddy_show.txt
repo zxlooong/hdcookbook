@@ -32,7 +32,7 @@ java_generated_class ReddyCommands [[
 # The features used for "intro":
 #
 
-feature fixed_image F:Reddy.Scaled ( middle 960 middle 540 ) ReddyKillowatt.jpg 
+feature fixed_image F:Reddy.Scaled ( middle 960 middle 540 ) ReddyKilowatt.jpg 
 	scaling_model F:Reddy.Scaler ;
 
 feature scaling_model F:Reddy.Scaler {
