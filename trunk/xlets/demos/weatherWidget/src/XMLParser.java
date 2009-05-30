@@ -69,7 +69,6 @@ import com.hdcookbook.grin.util.Debug;
  *  StringTokenizer instead of XML parser APIs. When parsing
  *  a simple XML document and this parser is good enough.
  */
-
 class XMLParser {
 
     public static FeedData parse(InputStream in)
@@ -82,10 +81,10 @@ class XMLParser {
                 new InputStreamReader(in));
         String xmldata;
 
-	xmldata = getElement(br, "location");
-	if (xmldata == null) {
-	    return null;
-	}
+        xmldata = getElement(br, "location");
+        if (xmldata == null) {
+            return null;
+        }
         st = new StringTokenizer(xmldata, "< > = \"");
         while (st.hasMoreTokens()) {
             String attrName = st.nextToken();
@@ -105,17 +104,19 @@ class XMLParser {
                 Debug.println("location:" + fd.location);
             }
         }
-	xmldata = getElement(br, "wind");
-        st = new StringTokenizer(xmldata, "< > = \"");
-        while (st.hasMoreTokens()) {
-            String attrName = st.nextToken();
-            if (attrName.equals("direction")) {
-                fd.direction = st.nextToken();
-                Debug.println("direction:" + fd.direction);
-            }
-            if (attrName.equals("speed")) {
-                fd.speed = st.nextToken() + " mph";
-                Debug.println("speed:" + fd.speed);
+        xmldata = getElement(br, "wind");
+        if (xmldata != null) {
+            st = new StringTokenizer(xmldata, "< > = \"");
+            while (st.hasMoreTokens()) {
+                String attrName = st.nextToken();
+                if (attrName.equals("direction")) {
+                    fd.direction = st.nextToken();
+                    Debug.println("direction:" + fd.direction);
+                }
+                if (attrName.equals("speed")) {
+                    fd.speed = st.nextToken() + " mph";
+                    Debug.println("speed:" + fd.speed);
+                }
             }
         }
 
@@ -123,129 +124,135 @@ class XMLParser {
          * night. The day and night information is used in fetching the
          * yahoo icon for the current weather condition
          */
-	xmldata = getElement(br, "astronomy");
+        xmldata = getElement(br, "astronomy");
         String riseH = null, riseM = null;
         String setH = null, setM = null;
-        st = new StringTokenizer(xmldata, "< > = : / \"");
-        while (st.hasMoreTokens()) {
-            String attrName = st.nextToken();
-            if (attrName.equals("sunrise")) {
-                riseH = st.nextToken();
-                riseM = st.nextToken();
-            }
-            if (attrName.equals("sunset")) {
-                setH = st.nextToken();
-                setM = st.nextToken();
-            }
-        }
         int rh = 0, rm = 0;
         int sh = 0, sm = 0;
-        try {
-            rh = Integer.parseInt(riseH);
-            rm = Integer.parseInt(riseM);
-            sh = Integer.parseInt(setH);
-            sm = Integer.parseInt(setM);
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-        }
-
-	xmldata = getElement(br, "condition");
-        st = new StringTokenizer(xmldata, "< > = \" /");
-
-	String time = null;
-	String am_pm = null;
-        while (st.hasMoreTokens()) {
-            String attrName = st.nextToken();
-            if (attrName.equals("text")) {
-                fd.condition = st.nextToken();
-                while (!(attrName = st.nextToken()).equals("code")) {
-                    fd.condition += " " + attrName;
+        if (xmldata != null) {
+            st = new StringTokenizer(xmldata, "< > = : / \"");
+            while (st.hasMoreTokens()) {
+                String attrName = st.nextToken();
+                if (attrName.equals("sunrise")) {
+                    riseH = st.nextToken();
+                    riseM = st.nextToken();
                 }
-                Debug.println("condition:" + fd.condition);
-            }
-            if (attrName.equals("code")) {
-                fd.imageCode = st.nextToken();
-                Debug.println("code:" + fd.imageCode);
-            }
-            if (attrName.equals("temp")) {
-                fd.temp = st.nextToken() + " F";
-                Debug.println("temp:" + fd.temp);
-            }
-            if (attrName.equals("date")) {
-	       try {
-	           st.nextToken();      // ignore day of week
-	           st.nextToken();      // ignore day of month
-	           st.nextToken(); 	// ignore month
-	           st.nextToken(); 	// ignore year
-	           time = st.nextToken();
-	           am_pm = st.nextToken();
-		} catch (NoSuchElementException e) {
-		    Debug.printStackTrace(e);
-		}
-            }
-        }
-	fd.isDayTime = isItDayTime(time, am_pm, rh, rm, sh, sm);
-	Debug.println("is day time:" + fd.isDayTime);
-
-	xmldata = getElement(br, "forecast");
-        st = new StringTokenizer(xmldata, "< > = \"");
-        while (st.hasMoreTokens()) {
-            String attrName = st.nextToken();
-            if (attrName.equals("day")) {
-                fd.day1 = st.nextToken();
-            }
-            if (attrName.equals("low")) {
-                fd.day1Low = st.nextToken();
-            }
-            if (attrName.equals("high")) {
-                fd.day1High = st.nextToken();
-            }
-            if (attrName.equals("text")) {
-                fd.day1Condition = st.nextToken();
-                while (!(attrName = st.nextToken()).equals("code")) {
-                    fd.day1Condition += " " + attrName;
+                if (attrName.equals("sunset")) {
+                    setH = st.nextToken();
+                    setM = st.nextToken();
                 }
             }
-            if (attrName.equals("code")) {
-                fd.day1Code = st.nextToken();
+            try {
+                rh = Integer.parseInt(riseH);
+                rm = Integer.parseInt(riseM);
+                sh = Integer.parseInt(setH);
+                sm = Integer.parseInt(setM);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
             }
         }
-	xmldata = getElement(br, "forecast");
-        st = new StringTokenizer(xmldata, "< > = \"");
-        while (st.hasMoreTokens()) {
-            String attrName = st.nextToken();
-            if (attrName.equals("day")) {
-                fd.day2 = st.nextToken();
-            }
-            if (attrName.equals("low")) {
-                fd.day2Low = st.nextToken();
-            }
-            if (attrName.equals("high")) {
-                fd.day2High = st.nextToken();
-            }
-            if (attrName.equals("text")) {
-                fd.day2Condition = st.nextToken();
-                while (!(attrName = st.nextToken()).equals("code")) {
-                    fd.day2Condition += " " + attrName;
+        xmldata = getElement(br, "condition");
+        String time = null;
+        String am_pm = null;
+        if (xmldata != null) {
+            st = new StringTokenizer(xmldata, "< > = \" /");
+            while (st.hasMoreTokens()) {
+                String attrName = st.nextToken();
+                if (attrName.equals("text")) {
+                    fd.condition = st.nextToken();
+                    while (!(attrName = st.nextToken()).equals("code")) {
+                        fd.condition += " " + attrName;
+                    }
+                    Debug.println("condition:" + fd.condition);
+                }
+                if (attrName.equals("code")) {
+                    fd.imageCode = st.nextToken();
+                    Debug.println("code:" + fd.imageCode);
+                }
+                if (attrName.equals("temp")) {
+                    fd.temp = st.nextToken() + " F";
+                    Debug.println("temp:" + fd.temp);
+                }
+                if (attrName.equals("date")) {
+                    try {
+                        st.nextToken();      // ignore day of week
+                        st.nextToken();      // ignore day of month
+                        st.nextToken(); 	// ignore month
+                        st.nextToken(); 	// ignore year
+                        time = st.nextToken();
+                        am_pm = st.nextToken();
+                    } catch (NoSuchElementException e) {
+                        Debug.printStackTrace(e);
+                    }
                 }
             }
-            if (attrName.equals("code")) {
-                fd.day2Code = st.nextToken();
+        }
+        fd.isDayTime = isItDayTime(time, am_pm, rh, rm, sh, sm);
+        Debug.println("is day time:" + fd.isDayTime);
+
+        xmldata = getElement(br, "forecast");
+        if (xmldata != null) {
+            st = new StringTokenizer(xmldata, "< > = \"");
+            while (st.hasMoreTokens()) {
+                String attrName = st.nextToken();
+                if (attrName.equals("day")) {
+                    fd.day1 = st.nextToken();
+                }
+                if (attrName.equals("low")) {
+                    fd.day1Low = st.nextToken();
+                }
+                if (attrName.equals("high")) {
+                    fd.day1High = st.nextToken();
+                }
+                if (attrName.equals("text")) {
+                    fd.day1Condition = st.nextToken();
+                    while (!(attrName = st.nextToken()).equals("code")) {
+                        fd.day1Condition += " " + attrName;
+                    }
+                }
+                if (attrName.equals("code")) {
+                    fd.day1Code = st.nextToken();
+                }
+            }
+        }
+        xmldata = getElement(br, "forecast");
+        if (xmldata != null) {
+            st = new StringTokenizer(xmldata, "< > = \"");
+            while (st.hasMoreTokens()) {
+                String attrName = st.nextToken();
+                if (attrName.equals("day")) {
+                    fd.day2 = st.nextToken();
+                }
+                if (attrName.equals("low")) {
+                    fd.day2Low = st.nextToken();
+                }
+                if (attrName.equals("high")) {
+                    fd.day2High = st.nextToken();
+                }
+                if (attrName.equals("text")) {
+                    fd.day2Condition = st.nextToken();
+                    while (!(attrName = st.nextToken()).equals("code")) {
+                        fd.day2Condition += " " + attrName;
+                    }
+                }
+                if (attrName.equals("code")) {
+                    fd.day2Code = st.nextToken();
+                }
             }
         }
         return fd;
     }
-    
+
     static String getElement(BufferedReader br, String element)
-   		throws IOException {
-	element = "<yweather:" + element;
-	String xmldata;
- 	while ((xmldata = br.readLine()) != null) {
-     	    if (xmldata.startsWith(element)) {
-		return xmldata;
-	    }
+            throws IOException {
+        element = "<yweather:" + element;
+        String xmldata;
+        while ((xmldata = br.readLine()) != null) {
+            if (xmldata.startsWith(element)) {
+                return xmldata;
+            }
         }
-	return null;
+        return null;
     }
 
     public static void main(String args[]) throws IOException {
@@ -254,34 +261,44 @@ class XMLParser {
         in.close();
     }
 
+    /** This code will work for most time zones, where sunrise 
+     *  is before 12:00 pm and sunset is before 12:00 am.
+     *  For zones where this constraint does not hold, the
+     *  solution is not guaranteed to work. However, at this 
+     *  point in time, yahoo does not have weather report for
+     *  these places.
+     */
     public static boolean isItDayTime(String time, String am_pm,
-		   		 int rh, int rm,
-				 int sh, int sm) { 
-	int colonIndex = time.indexOf(":");
-	String hour = time.substring(0, colonIndex);
-	String min = time.substring (colonIndex + 1);	
-	int h = 0, m = 0;
-	try {
-	    h = Integer.parseInt(hour);
-	    m = Integer.parseInt(min);
-	} catch (Exception e) {
-	       Debug.printStackTrace(e);
-        }	       
-	boolean dayTime  = false;
-	if (am_pm.equalsIgnoreCase("AM")) {
-	    if (h > rh) {
-		dayTime = true;
-	    } else if ((h == rh) && (m >= rm)) {
-		dayTime = true;
-	    }
-	} else {
-	    if (h < sh) {  
-		dayTime = true;
-	    } else if ((h == sh) && (m <= sm)) {
-		 dayTime = true;
-	    }
-	}
-	return dayTime;
+            int rh, int rm,
+            int sh, int sm) {
+        if ((time == null)  || (am_pm == null)) {
+            return true;
+        }
+        int colonIndex = time.indexOf(":");
+        String hour = time.substring(0, colonIndex);
+        String min = time.substring(colonIndex + 1);
+        int h = 0, m = 0;
+        try {
+            h = Integer.parseInt(hour);
+            m = Integer.parseInt(min);
+        } catch (Exception e) {
+            Debug.printStackTrace(e);
+        }
+        boolean dayTime = false;
+        if (am_pm.equalsIgnoreCase("AM") && (h != 12)) {
+            if (h > rh) {
+                dayTime = true;
+            } else if ((h == rh) && (m >= rm)) {
+                dayTime = true;
+            }
+        } else {
+            if ((h < sh) || (h == 12)) {
+                dayTime = true;
+            } else if ((h == sh) && (m <= sm)) {
+                dayTime = true;
+            }
+        }
+        return dayTime;
     }
 }
 
