@@ -59,8 +59,7 @@ import java.io.StreamTokenizer;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.StringTokenizer;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.NoSuchElementException;
 
 import com.hdcookbook.grin.util.Debug;
 
@@ -120,7 +119,7 @@ class XMLParser {
             }
         }
 
-        /* So much of code to determine if the present time is a day or
+        /* Determine if the present time is a day or
          * night. The day and night information is used in fetching the
          * yahoo icon for the current weather condition
          */
@@ -149,29 +148,12 @@ class XMLParser {
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-        Calendar cal = Calendar.getInstance();
-        Date present = cal.getTime();
-        cal.set(Calendar.HOUR, rh);
-        cal.set(Calendar.MINUTE, rm);
-        cal.set(Calendar.AM_PM, Calendar.AM);
-        Date sunrise = cal.getTime();
-
-        cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR, sh);
-        cal.set(Calendar.MINUTE, sm);
-        cal.set(Calendar.AM_PM, Calendar.PM);
-        Date sunset = cal.getTime();
-
-        Debug.println("present=" + present +
-                " sunrise=" + sunrise +
-                " sunset=" + sunset);
-
-        // finally ..
-        fd.isDayTime = (present.after(sunrise)) &&
-                (present.before(sunset));
 
 	xmldata = getElement(br, "condition");
-        st = new StringTokenizer(xmldata, "< > = \"");
+        st = new StringTokenizer(xmldata, "< > = \" /");
+
+	String time = null;
+	String am_pm = null;
         while (st.hasMoreTokens()) {
             String attrName = st.nextToken();
             if (attrName.equals("text")) {
@@ -189,7 +171,21 @@ class XMLParser {
                 fd.temp = st.nextToken() + " F";
                 Debug.println("temp:" + fd.temp);
             }
+            if (attrName.equals("date")) {
+	       try {
+	           st.nextToken();      // ignore day of week
+	           st.nextToken();      // ignore day of month
+	           st.nextToken(); 	// ignore month
+	           st.nextToken(); 	// ignore year
+	           time = st.nextToken();
+	           am_pm = st.nextToken();
+		} catch (NoSuchElementException e) {
+		    Debug.printStackTrace(e);
+		}
+            }
         }
+	fd.isDayTime = isItDayTime(time, am_pm, rh, rm, sh, sm);
+	Debug.println("is day time:" + fd.isDayTime);
 
 	xmldata = getElement(br, "forecast");
         st = new StringTokenizer(xmldata, "< > = \"");
@@ -256,6 +252,36 @@ class XMLParser {
         FileInputStream in = new FileInputStream(args[0]);
         parse(in);
         in.close();
+    }
+
+    public static boolean isItDayTime(String time, String am_pm,
+		   		 int rh, int rm,
+				 int sh, int sm) { 
+	int colonIndex = time.indexOf(":");
+	String hour = time.substring(0, colonIndex);
+	String min = time.substring (colonIndex + 1);	
+	int h = 0, m = 0;
+	try {
+	    h = Integer.parseInt(hour);
+	    m = Integer.parseInt(min);
+	} catch (Exception e) {
+	       Debug.printStackTrace(e);
+        }	       
+	boolean dayTime  = false;
+	if (am_pm.equalsIgnoreCase("AM")) {
+	    if (h > rh) {
+		dayTime = true;
+	    } else if ((h == rh) && (m >= rm)) {
+		dayTime = true;
+	    }
+	} else {
+	    if (h < sh) {  
+		dayTime = true;
+	    } else if ((h == sh) && (m <= sm)) {
+		 dayTime = true;
+	    }
+	}
+	return dayTime;
     }
 }
 
