@@ -92,6 +92,7 @@ import com.hdcookbook.grin.features.SETranslator;
 import com.hdcookbook.grin.features.SETranslatorModel;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.parts.EasingEquation;
+import com.hdcookbook.grin.features.parts.PointsEasingEquation;
 import com.hdcookbook.grin.features.parts.SEImagePlacement;
 import com.hdcookbook.grin.features.parts.SEImagePlacementList;
 import com.hdcookbook.grin.features.parts.SEImageSeqPlacement;
@@ -1011,7 +1012,11 @@ public class ShowParser {
 		keyframes.add(new int[] { frameNum, alpha } );
 	    } else {
 		int[] destination = { frameNum, alpha };
-		easing[0].addKeyFrames(keyframes, destination);
+		try {
+		    easing[0].addKeyFrames(keyframes, destination);
+		} catch (IOException ex) {
+		    lexer.reportError("Easing:  " + ex.getMessage());
+		}
 	    }
 	}
 	tok = lexer.getString();
@@ -1177,7 +1182,11 @@ public class ShowParser {
 		keyframes.add(new int[] { frameNum, x, y } );
 	    } else {
 		int[] destination = { frameNum, x, y };
-		easing[0].addKeyFrames(keyframes, destination);
+		try {
+		    easing[0].addKeyFrames(keyframes, destination);
+		} catch (IOException ex) {
+		    lexer.reportError("Easing:  " + ex.getMessage());
+		}
 	    }
 	    if (keyframes.size() == 1) {
 		if (!thisIsRelative) {
@@ -1485,6 +1494,10 @@ public class ShowParser {
 		    return PennerEasing.easeInOutBounce(t, b, c, d);
 		}
 	    };
+	} else if ("ease-points".equals(tweenType)) {
+	    lexer.expectString("{", tok);
+	    easing[0] = parseEasePoints();
+	    tok = lexer.getString();
 	} else {
 	    lexer.reportError("unknown tween type \"" + tweenType + "\"");
 	}
@@ -1500,6 +1513,33 @@ public class ShowParser {
 	    } 
 	}
 	return tok;
+    }
+
+    private EasingEquation parseEasePoints() throws IOException {
+	ArrayList<int[]> frames = new ArrayList<int[]>();
+	for (;;) {
+	    String tok = lexer.getString();
+	    if ("}".equals(tok)) {
+		break;
+	    } else if (!("(".equals(tok))) {
+		lexer.reportError("\"(\" expected");
+	    }
+	    ArrayList<Integer> values = new ArrayList<Integer>();
+	    for (;;) {
+		tok = lexer.getString();
+		if (")".equals(tok)) {
+		    break;
+		}
+		values.add(new Integer(lexer.convertToInt(tok)));
+	    }
+	    int[] arr = new int[values.size()];
+	    for (int i = 0; i < values.size(); i++) {
+		arr[i] = values.get(i).intValue();
+	    }
+	    frames.add(arr);
+	}
+	int[][] points = frames.toArray(new int[frames.size()][]);
+	return new PointsEasingEquation(points);
     }
 
     //
@@ -1671,7 +1711,11 @@ public class ShowParser {
 		keyframes.add(new int[] { frameNum, x, y, scaleX, scaleY } );
 	    } else {
 		int[] destination = { frameNum, x, y, scaleX, scaleY };
-		easing[0].addKeyFrames(keyframes, destination);
+		try {
+		    easing[0].addKeyFrames(keyframes, destination);
+		} catch (IOException ex) {
+		    lexer.reportError("Easing:  " + ex.getMessage());
+		}
 	    }
 	    lexer.expectString("mills", tok);
 	}

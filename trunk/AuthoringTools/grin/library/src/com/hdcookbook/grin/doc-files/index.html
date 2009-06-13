@@ -342,9 +342,10 @@ Here's BNF describing the syntax of a show file:
         # region.  Use Integer.MIN_VALUE for x,y position to off-screen 
         # programatically. 
 
-    trans_key_frame ::= frame_number x y trans_tween [ "max-error" integer ]
+    trans_key_frame ::= frame_number x y trans_tween
 
-    trans_tween ::= "linear-relative" | tween_type
+    trans_tween ::=    "linear-relative"  [ "max-error" integer ]
+    		     | tween_type
     	# linear and linear-relative are special for translations.  You
 	# should always use linear-relative; that's linear interpolation
 	# using relative coordinates for the child nodes (that is, the
@@ -359,37 +360,41 @@ Here's BNF describing the syntax of a show file:
 	# to linear-relative.
 
     tween_type ::=
-              "linear" 
-	    | "ease-in-quad"
-	    | "ease-out-quad"
-	    | "ease-in-out-quad"
-	    | "ease-in-cubic"
-	    | "ease-out-cubic"
-	    | "ease-in-out-cubic"
-	    | "ease-in-quart"
-	    | "ease-out-quart"
-	    | "ease-in-out-quart"
-	    | "ease-in-quint"
-	    | "ease-out-quint"
-	    | "ease-in-out-quint"
-	    | "ease-in-sine"
-	    | "ease-out-sine"
-	    | "ease-in-out-sine"
-	    | "ease-in-expo"
-	    | "ease-out-expo"
-	    | "ease-in-out-expo"
-	    | "ease-in-circ"
-	    | "ease-out-circ"
-	    | "ease-in-out-circ"
-	    | "ease-in-elastic" [ "amplitude" double ] [ "period" double ]
-	    | "ease-out-elastic" [ "amplitude" double ] [ "period" double ]
-	    | "ease-in-out-elastic" [ "amplitude" double ] [ "period" double ]
-	    | "ease-in-back" [ "overshoot" double ]
-	    | "ease-out-back" [ "overshoot" double ]
-	    | "ease-in-out-back" [ "overshoot" double ]
-	    | "ease-in-bounce"
-	    | "ease-out-bounce"
-	    | "ease-in-out-bounce"
+              "linear"  [ "max-error" integer ]
+	    | "ease-in-quad" [ "max-error" integer ]
+	    | "ease-out-quad" [ "max-error" integer ]
+	    | "ease-in-out-quad" [ "max-error" integer ]
+	    | "ease-in-cubic" [ "max-error" integer ]
+	    | "ease-out-cubic" [ "max-error" integer ]
+	    | "ease-in-out-cubic" [ "max-error" integer ]
+	    | "ease-in-quart" [ "max-error" integer ]
+	    | "ease-out-quart" [ "max-error" integer ]
+	    | "ease-in-out-quart" [ "max-error" integer ]
+	    | "ease-in-quint" [ "max-error" integer ]
+	    | "ease-out-quint" [ "max-error" integer ]
+	    | "ease-in-out-quint" [ "max-error" integer ]
+	    | "ease-in-sine" [ "max-error" integer ]
+	    | "ease-out-sine" [ "max-error" integer ]
+	    | "ease-in-out-sine" [ "max-error" integer ]
+	    | "ease-in-expo" [ "max-error" integer ]
+	    | "ease-out-expo" [ "max-error" integer ]
+	    | "ease-in-out-expo" [ "max-error" integer ]
+	    | "ease-in-circ" [ "max-error" integer ]
+	    | "ease-out-circ" [ "max-error" integer ]
+	    | "ease-in-out-circ" [ "max-error" integer ]
+	    | "ease-in-elastic" [ "amplitude" double ] [ "period" double ] 
+	    			[ "max-error" integer ]
+	    | "ease-out-elastic" [ "amplitude" double ] [ "period" double ] 
+	    			 [ "max-error" integer ]
+	    | "ease-in-out-elastic" [ "amplitude" double ] [ "period" double ] 
+	    			    [ "max-error" integer ]
+	    | "ease-in-back" [ "overshoot" double ] [ "max-error" integer ]
+	    | "ease-out-back" [ "overshoot" double ] [ "max-error" integer ]
+	    | "ease-in-out-back" [ "overshoot" double ] [ "max-error" integer ]
+	    | "ease-in-bounce" [ "max-error" integer ]
+	    | "ease-out-bounce" [ "max-error" integer ]
+	    | "ease-in-out-bounce" [ "max-error" integer ]
+	    | "ease-points" "{" tween-point * "}" [ "max-error" integer ]
         # The tween type give the algorithm used for the transition from the
 	# previous key frame to the present one.
 	#
@@ -408,6 +413,8 @@ Here's BNF describing the syntax of a show file:
 	# memory usage.  The grin compiler tells you how many key frames
 	# are added for interpolation due to tweening; if the number looks
 	# huge, consider increasing the error tolerance.
+
+    tween_point ::= "(" integer * ")"
 
     translator ::= "feature" "translator" name translator_model_name 
     			"{" sub_feature "}" ";"

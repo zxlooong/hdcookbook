@@ -74,6 +74,7 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.Clipped;
+import com.hdcookbook.grin.features.ImageSequence;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.Text;
@@ -98,6 +99,8 @@ public class MainDirector extends Director {
     private FixedImage replaceImageImage;
     private Text f_smText;
     private Arc f_smArc;
+    private ImageSequence randomImageSequence;
+    private Clipped randomImageSequenceClip;
     private static String[] replacementImages = new String[] {
 		    "images/hat_plain.jpg", "images/pope.jpg",
 		    "images/spoo2.png"
@@ -109,6 +112,7 @@ public class MainDirector extends Director {
     private float fadeAlpha = 1.0f;
     private int smAngle;
     private int smDelay;
+    private int imageNumber = 0;
 
     public MainDirector() {
     }
@@ -174,7 +178,26 @@ public class MainDirector extends Director {
 	    myText = (Text) getFeature("F:EnterText");
 	    boxedStuffFade = (Fade) getFeature("F:BoxedStuffFade");
 	    replaceImageImage = (FixedImage) getFeature("F:ReplaceImage.Image");
+	    randomImageSequence = (ImageSequence) 
+	    			   getFeature("F:RandomImageSequence.Im");
+	    randomImageSequenceClip = (Clipped) 
+	    			   getFeature("F:RandomImageSequence");
 	    random = new Random();
+	}
+
+		// Change the image sequence around, and its clip
+
+	if (random.nextInt(48) == 42) {
+	    imageNumber = random.nextInt(3);
+	}
+	randomImageSequence.setCurrentFrame(imageNumber);
+	if (random.nextInt(20) == 5) {
+	    Rectangle r = new Rectangle();
+	    r.x = 1400;
+	    r.y = 200;
+	    r.width = 20 + random.nextInt(180);
+	    r.height = 20 + random.nextInt(180);
+	    randomImageSequenceClip.changeClipRegion(r);
 	}
 
 		// Mess around with the X,Y center of scaling, and the
@@ -383,10 +406,10 @@ public class MainDirector extends Director {
         InterpolatedModel model = (InterpolatedModel) 
                 getShow().getFeature("F:OffScreenImagePosition");
         int xPos = model.getField(Translator.X_FIELD);
-        if (xPos == Integer.MIN_VALUE) {
+        if (xPos == Translator.OFFSCREEN) {
             model.setField(Translator.X_FIELD, 0);
         } else {
-            model.setField(Translator.X_FIELD, Integer.MIN_VALUE);
+            model.setField(Translator.X_FIELD, Translator.OFFSCREEN);
         }
     }
     

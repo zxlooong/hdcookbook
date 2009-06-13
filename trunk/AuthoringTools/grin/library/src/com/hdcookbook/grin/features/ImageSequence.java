@@ -399,6 +399,44 @@ public class ImageSequence extends Feature implements Node, SetupClient {
     }
 
     /**
+     * Set the current frame within the animation.  This should only be
+     * called within the animation thread when model updates are safe,
+     * e.g. during the execution of a show command.  Note that the current
+     * frame value increments with every frame in nextFrame(), and commands
+     * execute after that.  This means that you can control the frame # of
+     * an image sequence by calling this method every frame, effectively
+     * overwriting the value just calculated automatically in nextFrame().
+     * <p>
+     * Note that the logic for calling the end commands resides in nextFrame(),
+     * so you should be careful if there are end commands - if you set the
+     * current frame to the last image, then the end commands will execute
+     * in the next animation frame.
+     * 
+     *
+     *	@param f	The frame number to set, 0..(n-1)
+     *
+     *  @throws	IllegalArgumentException if f is out of range
+     **/
+    public void setCurrentFrame(int f) {
+	if (f < 0 || f >= images.length) {
+	    throw new IllegalArgumentException();
+	}
+	currFrame = f;
+	atEnd = false;
+    }
+
+    /**
+     * Get the current frame.
+     *
+     * @return the frame number, 0..(n-1)
+     *
+     * @see #setCurrentFrame(int)
+     **/
+    public int getCurrentFrame() {
+	return currFrame;
+    }
+
+    /**
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {

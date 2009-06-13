@@ -64,6 +64,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 
+import com.hdcookbook.grin.features.Translator;	// For the constant OFFSCREEN
 import com.hdcookbook.grin.util.Debug;
 
 
@@ -258,12 +259,12 @@ public class Lexer {
     }
     
     /**
-     * @return an int.  Integer.MIN_VALUE for "offscreen".
+     * @return an int.  Translator.OFFSCREEN for "offscreen".
      */
     public int getIntOrOffscreen() throws IOException {
 	String tok = getString();
 	if ("offscreen".equals(tok)) {
-	    return Integer.MIN_VALUE;
+	    return Translator.OFFSCREEN;
 	} else {
 	    return convertToInt(tok);
 	}

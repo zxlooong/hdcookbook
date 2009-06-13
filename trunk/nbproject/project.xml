@@ -129,6 +129,31 @@
                     <type>java</type>
                     <location>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</location>
                 </source-folder>
+                <source-folder>
+                    <label>AuthoringTools/grin/extensions/fontstrip/library/src</label>
+                    <type>java</type>
+                    <location>AuthoringTools/grin/extensions/fontstrip/library/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>AuthoringTools/grin/extensions/fontstrip/jdktools/library/src</label>
+                    <type>java</type>
+                    <location>AuthoringTools/grin/extensions/fontstrip/jdktools/library/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>AuthoringTools/grin/extensions/fontstrip/jdktools/tools/src</label>
+                    <type>java</type>
+                    <location>AuthoringTools/grin/extensions/fontstrip/jdktools/tools/src</location>
+                </source-folder>
+                <source-folder>
+                    <label>AuthoringTools/grin/extensions/media/se_src</label>
+                    <type>java</type>
+                    <location>AuthoringTools/grin/extensions/media/se_src</location>
+                </source-folder>
+                <source-folder>
+                    <label>AuthoringTools/grin/extensions/media/src</label>
+                    <type>java</type>
+                    <location>AuthoringTools/grin/extensions/media/src</location>
+                </source-folder>
                 <build-file>
                     <location>/Users/billf/bd-j/references/interactive/classes.zip</location>
                 </build-file>
@@ -249,6 +274,26 @@
                     <source-folder style="packages">
                         <label>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</label>
                         <location>/Users/billf/bd-j/references/bdj_stubs/src/gem_packaged_media/interactive/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>AuthoringTools/grin/extensions/fontstrip/library/src</label>
+                        <location>AuthoringTools/grin/extensions/fontstrip/library/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>AuthoringTools/grin/extensions/fontstrip/jdktools/library/src</label>
+                        <location>AuthoringTools/grin/extensions/fontstrip/jdktools/library/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>AuthoringTools/grin/extensions/fontstrip/jdktools/tools/src</label>
+                        <location>AuthoringTools/grin/extensions/fontstrip/jdktools/tools/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>AuthoringTools/grin/extensions/media/se_src</label>
+                        <location>AuthoringTools/grin/extensions/media/se_src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>AuthoringTools/grin/extensions/media/src</label>
+                        <location>AuthoringTools/grin/extensions/media/src</location>
                     </source-folder>
                     <source-file>
                         <location>build.xml</location>
@@ -384,6 +429,26 @@
             </compilation-unit>
             <compilation-unit>
                 <package-root>DiscCreationTools/id/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/grin/extensions/fontstrip/library/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/grin/extensions/fontstrip/jdktools/library/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/grin/extensions/fontstrip/jdktools/tools/src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/grin/extensions/media/se_src</package-root>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>AuthoringTools/grin/extensions/media/src</package-root>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>

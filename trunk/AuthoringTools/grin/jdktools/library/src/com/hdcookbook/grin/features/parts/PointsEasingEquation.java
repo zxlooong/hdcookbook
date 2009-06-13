@@ -58,46 +58,20 @@ import java.util.ArrayList;
 import java.io.IOException;
 
 /**
- * This abstract class represents an easing function that can be used by the
- * GRIN compiler to generate a linear interpolation.  See ShowParser to
- * see how to tie this to a particular easing function.
+ * This class represents an degenerate case of an easing function that 
+ * consists of just listing the in between points.  It can be used by the
+ * GRIN compiler to generate a linear interpolation that approximates that
+ * list of points within a certain error.
  **/
 
-public abstract class EasingEquation {
+public class PointsEasingEquation extends EasingEquation {
 
-    /** 
-     * Total number of keyframes added to approximate interpolations.
-     **/
-    public static int framesAdded = 0;
+    private int[][] points;
 
-    private int maxError = 0;
-
-    /**
-     * Evaluate the eqsing equation.
-     *
-     * @param t	current time in frames, seconds, or any other unit
-     * @param b	beginning value
-     * @param c	change in value
-     * @param d	duration in frames, seconds, or any other unit
-     **/
-    abstract public double evaluate(double t, double b, double c, double d);
-
-    /**
-     * Set the maximum allowed error when generating linear interpolations
-     * from this equation.  Defaults to zero.
-     **/
-    public void setMaxError(int maxError) {
-	this.maxError = maxError;
+    public PointsEasingEquation(int[][] points) {
+	this.points = points;
     }
 
-    /**
-     * Approximate this easing function with linear interpolation segments,
-     * making sure that the error doesn't exceed maxError units.  We start
-     * the easing from keyFrames[size-1], and add to keyFrames.
-     *
-     * @param	keyFrames a list of { frame#, value, ... } int arrays
-     * @param   end 	  Where to ease to, { frame#, value, ... }
-     **/
     public void addKeyFrames(ArrayList<int[]> keyFrames, int[] end) 
 	    throws IOException
     {
@@ -106,73 +80,41 @@ public abstract class EasingEquation {
 	int endFrame = end[0];
 	int duration = endFrame - startFrame;
 	int[][] allFrames = new int[duration + 1][];
-	for (int f = 0; f <= duration; f++) {
+	if (points.length != duration) {
+	    throw new IOException("Expected " + duration +
+	    			  " points, got " + points.length);
+	}
+	if (start.length != end.length) {
+	    throw new IOException("Start and end frames have different number of values");
+	}
+	allFrames[0] = new int[start.length];
+	for (int i = 0; i < start.length; i++) {
+	    allFrames[0][i] = start[i];
+	}
+	for (int f = 1; f <= duration; f++) {
+	    int[] pts = points[f-1];
+	    if (pts.length != end.length - 1) {
+		throw new IOException("In point set " + f + " expected " +
+				      (end.length - 1) + " values but got " +
+				      pts.length);
+	    }
 	    allFrames[f] = new int[end.length];
 	    allFrames[f][0] = f + startFrame;
 	    for (int i = 1; i < end.length; i++) {
-		double val = evaluate(f, start[i], end[i]-start[i], duration);
-		allFrames[f][i] = (int) Math.round(val);
+		allFrames[f][i] = pts[i-1];
+	    }
+	}
+	for (int i = 1; i < end.length; i++) {
+	    if (allFrames[duration][i] != end[i]) {
+		throw new IOException("End point value " + i 
+				      + " mismatch:  " + end[i]
+				      + " != " + allFrames[duration][i]);
 	    }
 	}
 	trimUnneededKeyFrames(startFrame, keyFrames, end, allFrames);
     }
 
-    /**
-     * Approximate the list of keyFrames with a reduced list, within the error
-     * band of this easing equation.  This is called from addKeyFrames().
-     **/
-    protected void trimUnneededKeyFrames(int startFrame,
-    					 ArrayList<int[]> keyFrames, 
-					 int[] end,
-					 int[][] allFrames)
-	    throws IOException
-    {
-	for(;;) {
-	    int[] current = keyFrames.get(keyFrames.size() - 1);
-	    if (current[0] >= end[0]) {
-		return;		// All done!
-	    }
-	    int frame = current[0] + 1;
-	    // Go until at end of function, or error is too big
-	    for (;;) {
-		frame++;
-		if (frame > end[0]) {
-		    break;
-		}
-		int[] candidate = allFrames[frame - startFrame];
-		boolean tooMuchError = false;
-		// Check interpolation algorithm from InterpolatedModel
-		for (int f = current[0] + 1; f < candidate[0]; f++) {
-		    int dist = candidate[0] - current[0];
-		    int distNext = candidate[0] - f;
-		    int distLast = f - current[0];
-		    for (int i = 1; i < current.length; i++) {
-			int v = (candidate[i] * distLast
-				 + current[i] * distNext) / dist;
-			int err = v - allFrames[f - startFrame][i];
-			if (Math.abs(err) > maxError) {
-			    tooMuchError = true;
-			}
-		    }
-		}
-		if (tooMuchError) {
-		    break;
-		}
-	    }
-	    frame--;
-	    keyFrames.add(allFrames[frame - startFrame]);
-	    framesAdded++;
-	}
-    }
-
-    //
-    // Useful for debugging:
-    //
-    private String format(int[] arr) {
-	String result = "f " + arr[0] + ":  ";
-	for (int i = 1; i < arr.length; i++) {
-	    result += arr[i] + "  ";
-	}
-	return result;
+    public double evaluate(double t, double b, double c, double d) {
+	throw new RuntimeException("not implemented, shouldn't be called");
     }
 }

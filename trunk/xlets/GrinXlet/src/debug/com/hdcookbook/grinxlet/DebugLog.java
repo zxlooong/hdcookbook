@@ -63,6 +63,7 @@ import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.ServerSocket;
+import java.net.BindException;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -82,7 +83,7 @@ import java.util.ListIterator;
  **/
 
 
-public class DebugLog {
+public class DebugLog implements Runnable {
 
     private final static int LISTEN_PORT = 6000;
     static Object LOCK = new Object();		// Also needed by XletDirector
@@ -98,6 +99,12 @@ public class DebugLog {
     static final int MAX_DEBUG_LINES = 3000;
     	// Assuming average 50 characters/line, that's 300K.  Remember, Java is
 	// two bytes/character.
+
+    //
+    // No public constructor
+    //
+    private DebugLog() {
+    }
 
     /**
      * Start the DebugLog listening for incoming telnet connections.  It's
@@ -119,29 +126,29 @@ public class DebugLog {
 		return;
 	    }
 	}
-	Runnable r = new Runnable() {
-	    public void run() {
-		try {
-		    listenForDebugConnect();
-		} catch (InterruptedException ex) {
-		    if (Debug.LEVEL > 0) {
-			Debug.println("Debug log listener interrupted.");
-		    }
-		} catch (IOException ex) {
-		    if (Debug.LEVEL > 0) {
-			Debug.printStackTrace(ex);
-			Debug.println("Debug log listener failed.");
-		    }
-		}
-		if (Debug.LEVEL > 0) {
-		    Debug.println("Debug log listener thread terminated.");
-		}
-	    }
-	};
+	Runnable r = new DebugLog();
 	Thread t = new Thread(r, "Debug Log Listener");
 	t.setPriority(4);
 	t.setDaemon(true);
 	t.start();
+    }
+
+    public void run() {
+	try {
+	    listenForDebugConnect();
+	} catch (InterruptedException ex) {
+	    if (Debug.LEVEL > 0) {
+		Debug.println("Debug log listener interrupted.");
+	    }
+	} catch (IOException ex) {
+	    if (Debug.LEVEL > 0) {
+		Debug.printStackTrace(ex);
+		Debug.println("Debug log listener failed.");
+	    }
+	}
+	if (Debug.LEVEL > 0) {
+	    Debug.println("Debug log listener thread terminated.");
+	}
     }
 
     /**
@@ -160,7 +167,33 @@ public class DebugLog {
     private static void listenForDebugConnect() 
     		throws InterruptedException, IOException
     {
-	ServerSocket ss = new ServerSocket(LISTEN_PORT);
+	ServerSocket ss = null;
+	int tries = 0;
+	while (ss == null) {
+	    synchronized(LOCK) {
+		if (destroyed) {
+		    return;
+		}
+	    }
+	    try {
+		ss = new ServerSocket(LISTEN_PORT);
+	    } catch (BindException ex) {
+		// Maybe the xlet that launched us is
+		// on port 6000.  If so, it should terminate
+		// soon and release the port, so we give it 2
+		// seconds, checking every 200ms up to 10 times.
+		if (tries > 10) {
+		    throw ex;
+		}
+		tries++;
+		synchronized (LOCK) {
+		    if (destroyed) {
+			return;
+		    }
+		    LOCK.wait(200);
+		}
+	    }
+	}
 	ss.setSoTimeout(1000);	// Check for destroy each second
 	Socket sock = null;
 	try {
@@ -173,6 +206,10 @@ public class DebugLog {
 	for (;;) {
 	    synchronized(LOCK) {
 		if (destroyed) {
+		    try {
+			ss.close();
+		    } catch (Throwable ignored) {
+		    }
 		    return;
 		}
 	    }
@@ -184,9 +221,9 @@ public class DebugLog {
 		}
 		sock = ss.accept();
 	    } catch (InterruptedIOException ex) {
-		// timeout
+		// We get this when the 1 second timeout passes.
 		continue;
-	    } 
+	    }
 	    messaged = false;
 
 	    // Now sock is a socket that has requested to get the log.  We
@@ -236,6 +273,10 @@ public class DebugLog {
 	    } finally {
 		try {
 		    out.close();
+		} catch (Throwable t) {
+		}
+		try {
+		    sock.close();
 		} catch (Throwable t) {
 		}
 	    }

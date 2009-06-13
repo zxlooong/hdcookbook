@@ -95,6 +95,13 @@ public class Translator extends Modifier implements Node {
      **/
     public final static int Y_FIELD = 1;
 
+    /** 
+     * A special value to use to translate something offscreen.
+     * Set the x or the y coordinate to this value if you want it
+     * hidden.  Numerically, it's Integer.MIN_VALUE.
+     **/
+    public final static int OFFSCREEN = Integer.MIN_VALUE;
+
     protected InterpolatedModel model;
 
     protected int fx = 0;	// Feature's start position (if absolute model)
@@ -211,8 +218,8 @@ public class Translator extends Modifier implements Node {
     public void addDisplayAreas(RenderContext context) {
 	dx = model.getField(X_FIELD);
 	dy = model.getField(Y_FIELD);
-        if (dx == Integer.MIN_VALUE || dy == Integer.MIN_VALUE) {
-            return; // issue 138
+        if (dx == OFFSCREEN || dy == OFFSCREEN) {
+            return;
         }
         if (!modelIsRelative) {
             dx -= fx;
@@ -253,9 +260,9 @@ public class Translator extends Modifier implements Node {
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	if (!activated) {
-	    return;
-	}
+        if (dx == OFFSCREEN || dy == OFFSCREEN) {
+            return;
+        }
 	gr.translate(dx, dy);
 	part.paintFrame(gr);
 	gr.translate(-dx, -dy);

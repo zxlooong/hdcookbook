@@ -91,6 +91,7 @@ import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.AnimationEngine;
+import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
@@ -272,17 +273,25 @@ public class GenericMain extends Frame implements AnimationContext {
 			   + "F5 popup_menu");
 	MouseAdapter mouseL = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-		int x = (e.getX() - insets.left) * scaleDivisor;
-		int y = (e.getY() - insets.top) * scaleDivisor;
-                show.handleMouseClicked(x, y);
+		final int x = (e.getX() - insets.left) * scaleDivisor;
+		final int y = (e.getY() - insets.top) * scaleDivisor;
+		show.runCommand(new Command(show) {
+		    public void execute() {
+			show.handleMouseClicked(x, y);
+		    }
+		});
             }
         };
         addMouseListener(mouseL);
         MouseMotionAdapter mouseM = new MouseMotionAdapter() {
             public void mouseMoved(MouseEvent e) {
-		int x = (e.getX() - insets.left) * scaleDivisor;
-		int y = (e.getY() - insets.top) * scaleDivisor;
-                show.handleMouseMoved(x, y);
+		final int x = (e.getX() - insets.left) * scaleDivisor;
+		final int y = (e.getY() - insets.top) * scaleDivisor;
+		show.runCommand(new Command(show) {
+		    public void execute() {
+			show.handleMouseMoved(x, y);
+		    }
+		});
             }
         };
         addMouseMotionListener(mouseM);

@@ -23,6 +23,8 @@ exports
         F:MyShow
 	F:IC.Image
 	F:IC.Group
+	F:RandomImageSequence.Im
+	F:RandomImageSequence
     } handlers {
     } named_commands {
 	C:GotoAssemblyCloneTest
@@ -48,18 +50,30 @@ segment S:Main
     } setup {
 	F:Everything
     } rc_handlers {
-	H:1 H:2 H:3 H:4 H:5 H:6 H:7 H:8 H:9
+	H:1 H:2 H:3 H:4 H:5 H:6
 	H:EnterPress H:EnterRelease
+    }
+;
+
+segment S:RegressionMenu
+    active {
+	F:RegressionText
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:R.1 H:R.2 H:R.3 H:R.4 H:R.5
     }
 ;
 
 feature group F:Everything {
     F:MainText
+    F:RegressionText
     F:ProgrammaticDemo
     F:EnterAssembly
     F:FadeTestEverything
     F:SlowModelTest
     F:OffScreenImageTestEverything
+    F:OrbitEverything
 } ;
 
 feature text F:MainText
@@ -69,11 +83,21 @@ feature text F:MainText
 	    "     2 - Put new show on top of menu"
 	    "     3 - Show programmatic control of scene graph"
 	    "     4 - Run show with extension feature"
-	    "     5 - Run regression test for issue 121 (fade and redisplay)"
-	    "     6 - Run regression test for issues 131, 143 (assembly and cloning)"
-	    "     7 - Run test for issue 134 (falling behind in nextFrame()"
-            "     8 - Run test for issue 138 (offscreen image)"
-            "     9 - Set/Unset a clip region around the show (issue 139)"
+	    "     5 - Regression tests menu"
+	    "     6 - Run orbit test"
+	}
+	SansSerif plain 32 { { 255 255 255 255 } }
+	background { 0 0 0 255 } 
+;
+
+feature text F:RegressionText
+	left 200 top 200 {
+	    "Press a number key..."
+	    "     1 - Run regression test for issue 121 (fade and redisplay)"
+	    "     2 - Run regression test for issues 131, 143 (assembly and cloning)"
+	    "     3 - Run test for issue 134 (falling behind in nextFrame()"
+            "     4 - Run test for issue 138 (offscreen image)"
+            "     5 - Set/Unset a clip region around the show (issue 139)"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
 	background { 0 0 0 255 } 
@@ -106,6 +130,14 @@ named_command C:GotoFadeTest {
 } ;
 
 rc_handler key_pressed H:5 { 5 } execute {
+	activate_segment S:RegressionMenu ;
+} ;
+
+rc_handler key_pressed H:6 { 6 } execute {
+	activate_segment S:ShowOrbit ;
+} ;
+
+rc_handler key_pressed H:R.1 { 1 } execute {
 	run_named_commands C:GotoFadeTest ;
 		# That's right above us; we do this just as a test of
 		# named commands with one command in the list.
@@ -116,7 +148,7 @@ named_command C:GotoAssemblyCloneTest {
 	java_command [[ Debug.println("Running assemby clone test"); ]]
 } ;
 
-rc_handler key_pressed H:6 { 6 } execute {
+rc_handler key_pressed H:R.2 { 2 } execute {
 	java_command [[ 
 	    getMainDirector().runGotoAssemblyCloneTest(grinCaller); 
 	]]
@@ -125,15 +157,15 @@ rc_handler key_pressed H:6 { 6 } execute {
 	# list with > 1 commands on it.
 } ;
 
-rc_handler key_pressed H:7 { 7 } execute {
+rc_handler key_pressed H:R.3 { 3 } execute {
 	activate_segment S:SlowModelTest ;
 } ;
 
-rc_handler key_pressed H:8 { 8 } execute {
+rc_handler key_pressed H:R.4 { 4 } execute {
 	activate_segment S:OffScreenImageTest ;
 } ;
 
-rc_handler key_pressed H:9 { 9 } execute {
+rc_handler key_pressed H:R.5 { 5 } execute {
 	activate_segment S:ToplevelClippingTest ;
 } ;
 
@@ -333,6 +365,15 @@ feature group F:ReplaceImage {
     ]] } ;
 } ;
 
+
+feature image_sequence F:RandomImageSequence.Im 1400 200 "images/" {
+	hat_plain.jpg pope.jpg spoo2.png turtle_saucer.png
+    } "" repeat ;
+
+feature clipped F:RandomImageSequence F:RandomImageSequence.Im
+	( 1400 200 1600 400 )
+;
+
     #  Finaly, we put the whole scene graph in one group, which makes
     # it a bit easier to list in F:Everything.
 
@@ -343,6 +384,7 @@ feature group F:ProgrammaticDemo {
 	F:BoxedStuffPosition
 	F:Issue117
 	F:ReplaceImage
+	F:RandomImageSequence
 } ;
 
     # Then, a segment to show it, and an RC handler to get us back to the
@@ -695,4 +737,167 @@ segment S:ToplevelClippingTest
     }
 ;
 
+
+#########################################################
+#	    SHOW ORBIT					#
+#########################################################
+
+
+feature fixed_image F:Orbit.Earth ( middle 660 middle 540 ) images/earth.png ;
+
+feature fixed_image F:Orbit.Moon ( middle 660 middle 540 ) images/moon.png ;
+
+#
+# This translator shows the usage of pre-calculated points.  The
+# GRIN compiler approximates these points with a set of linear
+# interpolation segments.  The points listed below were generated
+# using ../other_src/kepler.java, which is solving the equations for
+# orbital position as a function of time using Kepler's Laws of
+# Planetary Motion 
+# (http://en.wikipedia.org/wiki/Kepler%27s_Laws_of_Planetary_Motion).
+#
+# When approximated as linear interpolation with a max-error of 2,
+# this results in only 35 added keyframes.  If the max-error is set
+# to 0, it's still just 193 keyframes to cover these 360 points.
+#
+# It is, of course, a bit absurd to go to all the trouble of using
+# a real orbit equation for an orbit that's all wrong anyway.  The
+# point of this demo is that you can pre-calculate points using any
+# path you want, using as sophisticated equations as you want, and
+# the xlet runtime is simple and fast, because it uses pre-computed
+# points.
+#
+feature translator_model F:Orbit.Moon.Pos {
+	0 	-286 0	start
+	360 -286 0 ease-points {
+		    ( -286 11 ) ( -285 21 ) ( -284 32 ) ( -283 43 ) 
+		    ( -282 53 ) ( -281 64 ) ( -279 74 ) ( -277 85 ) 
+		    ( -274 95 ) ( -272 105 ) ( -269 116 ) ( -265 126 ) 
+		    ( -262 136 ) ( -258 146 ) ( -254 156 ) ( -250 166 ) 
+		    ( -246 175 ) ( -241 185 ) ( -236 195 ) ( -231 204 ) 
+		    ( -225 213 ) ( -219 222 ) ( -214 231 ) ( -207 240 ) 
+		    ( -201 248 ) ( -195 257 ) ( -188 265 ) ( -181 273 ) 
+		    ( -174 281 ) ( -166 289 ) ( -159 297 ) ( -151 304 ) 
+		    ( -143 311 ) ( -135 318 ) ( -127 325 ) ( -119 332 ) 
+		    ( -111 338 ) ( -102 344 ) ( -93 351 ) ( -84 356 ) 
+		    ( -76 362 ) ( -67 367 ) ( -57 373 ) ( -48 378 ) 
+		    ( -39 382 ) ( -30 387 ) ( -20 391 ) ( -11 396 ) 
+		    ( -1 400 ) ( 9 403 ) ( 18 407 ) ( 28 410 ) 
+		    ( 38 413 ) ( 48 416 ) ( 57 419 ) ( 67 422 ) 
+		    ( 77 424 ) ( 87 426 ) ( 97 428 ) ( 107 430 ) 
+		    ( 116 431 ) ( 126 432 ) ( 136 434 ) ( 146 434 ) 
+		    ( 155 435 ) ( 165 436 ) ( 175 436 ) ( 184 436 ) 
+		    ( 194 436 ) ( 203 436 ) ( 213 436 ) ( 222 435 ) 
+		    ( 231 435 ) ( 241 434 ) ( 250 433 ) ( 259 432 ) 
+		    ( 268 431 ) ( 277 429 ) ( 285 428 ) ( 294 426 ) 
+		    ( 303 424 ) ( 311 422 ) ( 320 420 ) ( 328 418 ) 
+		    ( 336 415 ) ( 344 413 ) ( 352 410 ) ( 360 408 ) 
+		    ( 368 405 ) ( 376 402 ) ( 383 399 ) ( 391 396 ) 
+		    ( 398 393 ) ( 406 389 ) ( 413 386 ) ( 420 382 ) 
+		    ( 427 379 ) ( 434 375 ) ( 440 372 ) ( 447 368 ) 
+		    ( 453 364 ) ( 460 360 ) ( 466 356 ) ( 472 352 ) 
+		    ( 478 348 ) ( 484 344 ) ( 490 340 ) ( 495 335 ) 
+		    ( 501 331 ) ( 506 327 ) ( 512 322 ) ( 517 318 ) 
+		    ( 522 313 ) ( 527 309 ) ( 532 304 ) ( 536 300 ) 
+		    ( 541 295 ) ( 546 291 ) ( 550 286 ) ( 554 281 ) 
+		    ( 559 277 ) ( 563 272 ) ( 567 267 ) ( 571 263 ) 
+		    ( 575 258 ) ( 578 253 ) ( 582 248 ) ( 586 244 ) 
+		    ( 589 239 ) ( 592 234 ) ( 596 229 ) ( 599 225 ) 
+		    ( 602 220 ) ( 605 215 ) ( 608 210 ) ( 611 205 ) 
+		    ( 613 201 ) ( 616 196 ) ( 619 191 ) ( 621 186 ) 
+		    ( 624 182 ) ( 626 177 ) ( 628 172 ) ( 630 167 ) 
+		    ( 632 162 ) ( 634 158 ) ( 636 153 ) ( 638 148 ) 
+		    ( 640 144 ) ( 642 139 ) ( 644 134 ) ( 645 129 ) 
+		    ( 647 125 ) ( 648 120 ) ( 650 115 ) ( 651 111 ) 
+		    ( 652 106 ) ( 654 101 ) ( 655 97 ) ( 656 92 ) 
+		    ( 657 87 ) ( 658 83 ) ( 659 78 ) ( 660 73 ) 
+		    ( 661 69 ) ( 661 64 ) ( 662 60 ) ( 663 55 ) 
+		    ( 663 50 ) ( 664 46 ) ( 665 41 ) ( 665 37 ) 
+		    ( 665 32 ) ( 666 27 ) ( 666 23 ) ( 666 18 ) 
+		    ( 666 14 ) ( 667 9 ) ( 667 5 ) ( 667 0 ) 
+		    ( 667 -5 ) ( 667 -9 ) ( 666 -14 ) ( 666 -18 ) 
+		    ( 666 -23 ) ( 666 -27 ) ( 665 -32 ) ( 665 -37 ) 
+		    ( 665 -41 ) ( 664 -46 ) ( 663 -50 ) ( 663 -55 ) 
+		    ( 662 -60 ) ( 661 -64 ) ( 661 -69 ) ( 660 -73 ) 
+		    ( 659 -78 ) ( 658 -83 ) ( 657 -87 ) ( 656 -92 ) 
+		    ( 655 -97 ) ( 654 -101 ) ( 652 -106 ) ( 651 -111 ) 
+		    ( 650 -115 ) ( 648 -120 ) ( 647 -125 ) ( 645 -129 ) 
+		    ( 644 -134 ) ( 642 -139 ) ( 640 -144 ) ( 638 -148 ) 
+		    ( 636 -153 ) ( 634 -158 ) ( 632 -162 ) ( 630 -167 ) 
+		    ( 628 -172 ) ( 626 -177 ) ( 624 -182 ) ( 621 -186 ) 
+		    ( 619 -191 ) ( 616 -196 ) ( 613 -201 ) ( 611 -205 ) 
+		    ( 608 -210 ) ( 605 -215 ) ( 602 -220 ) ( 599 -225 ) 
+		    ( 596 -229 ) ( 592 -234 ) ( 589 -239 ) ( 586 -244 ) 
+		    ( 582 -248 ) ( 578 -253 ) ( 575 -258 ) ( 571 -263 ) 
+		    ( 567 -267 ) ( 563 -272 ) ( 559 -277 ) ( 554 -281 ) 
+		    ( 550 -286 ) ( 546 -291 ) ( 541 -295 ) ( 536 -300 ) 
+		    ( 532 -304 ) ( 527 -309 ) ( 522 -313 ) ( 517 -318 ) 
+		    ( 512 -322 ) ( 506 -327 ) ( 501 -331 ) ( 495 -335 ) 
+		    ( 490 -340 ) ( 484 -344 ) ( 478 -348 ) ( 472 -352 ) 
+		    ( 466 -356 ) ( 460 -360 ) ( 453 -364 ) ( 447 -368 ) 
+		    ( 440 -372 ) ( 434 -375 ) ( 427 -379 ) ( 420 -382 ) 
+		    ( 413 -386 ) ( 406 -389 ) ( 398 -393 ) ( 391 -396 ) 
+		    ( 383 -399 ) ( 376 -402 ) ( 368 -405 ) ( 360 -408 ) 
+		    ( 352 -410 ) ( 344 -413 ) ( 336 -415 ) ( 328 -418 ) 
+		    ( 320 -420 ) ( 311 -422 ) ( 303 -424 ) ( 294 -426 ) 
+		    ( 285 -428 ) ( 277 -429 ) ( 268 -431 ) ( 259 -432 ) 
+		    ( 250 -433 ) ( 241 -434 ) ( 231 -435 ) ( 222 -435 ) 
+		    ( 213 -436 ) ( 203 -436 ) ( 194 -436 ) ( 184 -436 ) 
+		    ( 175 -436 ) ( 165 -436 ) ( 155 -435 ) ( 146 -434 ) 
+		    ( 136 -434 ) ( 126 -432 ) ( 116 -431 ) ( 107 -430 ) 
+		    ( 97 -428 ) ( 87 -426 ) ( 77 -424 ) ( 67 -422 ) 
+		    ( 57 -419 ) ( 48 -416 ) ( 38 -413 ) ( 28 -410 ) 
+		    ( 18 -407 ) ( 9 -403 ) ( -1 -400 ) ( -11 -396 ) 
+		    ( -20 -391 ) ( -30 -387 ) ( -39 -382 ) ( -48 -378 ) 
+		    ( -57 -373 ) ( -67 -367 ) ( -76 -362 ) ( -84 -356 ) 
+		    ( -93 -351 ) ( -102 -344 ) ( -111 -338 ) ( -119 -332 ) 
+		    ( -127 -325 ) ( -135 -318 ) ( -143 -311 ) ( -151 -304 ) 
+		    ( -159 -297 ) ( -166 -289 ) ( -174 -281 ) ( -181 -273 ) 
+		    ( -188 -265 ) ( -195 -257 ) ( -201 -248 ) ( -207 -240 ) 
+		    ( -214 -231 ) ( -219 -222 ) ( -225 -213 ) ( -231 -204 ) 
+		    ( -236 -195 ) ( -241 -185 ) ( -246 -175 ) ( -250 -166 ) 
+		    ( -254 -156 ) ( -258 -146 ) ( -262 -136 ) ( -265 -126 ) 
+		    ( -269 -116 ) ( -272 -105 ) ( -274 -95 ) ( -277 -85 ) 
+		    ( -279 -74 ) ( -281 -64 ) ( -282 -53 ) ( -283 -43 ) 
+		    ( -284 -32 ) ( -285 -21 ) ( -286 -11 ) ( -286 0 ) 
+		} 
+		max-error 2
+    } repeat 1
+;
+
+feature translator F:Orbit.Moon.Translator F:Orbit.Moon.Pos {
+	F:Orbit.Moon
+} ;
+
+feature text F:Orbit.Text
+	right 1800 baseline 900 {
+	    "Press enter"
+	    "to return"
+	    "to menu"
+	}
+	SansSerif plain 32 { { 0 255 0 255 } }
+	background { 0 0 0 255 } 
+;
+
+feature group F:OrbitEverything {
+    F:Orbit.Text
+    F:Orbit.Earth
+    F:Orbit.Moon.Pos
+    F:Orbit.Moon.Translator
+} ;
+
+segment S:ShowOrbit
+    active {
+	F:OrbitEverything
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:ShowOrbit
+    } next {
+	activate_segment S:Main ;
+    }
+;
+
+rc_handler key_pressed H:ShowOrbit { enter } execute { segment_done ; } ;
+	
 end_show 

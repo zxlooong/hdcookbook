@@ -79,7 +79,8 @@ import java.util.HashMap;
 public class Clipped extends Modifier implements Node {
 
     protected Rectangle clipRegion;
-    protected Rectangle lastClipRegion = new Rectangle();
+    private Rectangle lastClipRegion = new Rectangle();
+    	// Last clip region during paint
     private Rectangle tmpI = null;
 	//
 	// Here, we make an inner class of RenderContext.  We
@@ -128,6 +129,24 @@ public class Clipped extends Modifier implements Node {
 	}
 	result.part = part.makeNewClone(clones);
 	return result;
+    }
+
+    /**
+     * Change the region being clipped.  This should only be called from
+     * the animation thread, when it is safe to update the model (e.g.
+     * from a show command).
+     *
+     * @param newRegion	The new clip region.  
+     **/
+    public void changeClipRegion(Rectangle newRegion) {
+	clipRegion.x = newRegion.x;
+	clipRegion.y = newRegion.y;
+	clipRegion.width = newRegion.width;
+	clipRegion.height = newRegion.height;
+	// The drawing framework takes care of the new clip region
+	// automatically - if we're drawing more or less of our child
+	// as the result of the clip, it notices and does the right
+	// thing.
     }
 
     /**
