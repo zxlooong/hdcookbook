@@ -83,8 +83,13 @@ public class ImageManager {
      * Get an image.  Each call to getImage should be balanced
      * by a call to ungetImage when you no longer need the image.
      * Image instances are shared, so this class does reference counting.
+     * See the ManagedImage contract for more details.
+     * <p>
+     * ImageManager first looks within known mosaics, then looks for
+     * an individual image file.
      *
      * @see #ungetImage(com.hdcookbook.grin.util.ManagedImage)
+     * @see ManagedImage
      **/
     public static ManagedImage getImage(String name) {
 	synchronized(lock) {
@@ -115,8 +120,13 @@ public class ImageManager {
      * Each call to getImage should be balanced
      * by a call to ungetImage when you no longer need the image.
      * Image instances are shared, so this class does reference counting.
+     * See the ManagedImage contract for more details.
+     * <p>
+     * ImageManager first looks within known mosaics, then looks for
+     * an individual image file.
      *
      * @see #ungetImage(com.hdcookbook.grin.util.ManagedImage)
+     * @see ManagedImage
      **/
     public static ManagedImage getImage(URL url) {
 	String name = url.toExternalForm();
@@ -135,8 +145,11 @@ public class ImageManager {
      * This is like <code>getImage(String)</code>, but for the case where
      * you already have the ManagedImage instance.  It just increments the
      * reference count, without needing to do a hash table lookup.
+     * See the ManagedImage contract for more details.
      *
      * @throws	IllegalStateException if im.isReferenced() is false
+     *
+     * @see ManagedImage
      **/
     public static void getImage(ManagedImage im) {
 	synchronized(lock) {
@@ -149,8 +162,10 @@ public class ImageManager {
 
     /**
      * Called when an image acquired with getImage is no longer needed.
+     * See the ManagedImage contract for more details.
      *
      * @see #getImage(java.lang.String)
+     * @see ManagedImage
      **/
     public static void ungetImage(ManagedImage im) {
 	synchronized(lock) {

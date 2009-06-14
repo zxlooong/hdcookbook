@@ -119,13 +119,13 @@ public class Profile {
 
     /**
      * Constant for the thread ID of the GRIN animation thread.
-     * @see #startTimer(btye[], byte)
+     * @see #startTimer(byte[], byte)
      */
     public final static byte TID_ANIMATION = (byte) 0xff;
 
     /**
      * Constant for the thread ID of the GRIN setup thread.
-     * @see #startTimer(btye[], byte)
+     * @see #startTimer(byte[], byte)
      */
     public final static byte TID_SETUP = (byte) 0xfe;
 
@@ -268,7 +268,7 @@ public class Profile {
      *			
      * @return Returns the token for the task that is timed
      *
-     * @see makeProfileTimer(String)
+     * @see #makeProfileTimer(String)
      * @see Profile
      */
     public static synchronized int startTimer(byte[] startBuf, byte threadID) {
@@ -297,7 +297,7 @@ public class Profile {
     /**
      * Signals stopping the timer on the remote computer.
      *
-     * @param token Token for the task that is done.
+     * @param tk Token for the task that is done.
      */
     public synchronized static void stopTimer(int tk) {
 	if (!Debug.PROFILE) {
@@ -322,11 +322,11 @@ public class Profile {
     /**
      * Send a message packet
      *
-     * @param startBuf  Buffer holding the message.
-     *			block of code that is time.  This byte array
+     * @param buf       Buffer holding the message.
+     *			This byte array
      *			should be obtained from makeMessage().
      *
-     * @see makeMessage(String)
+     * @see #makeMessage(String)
      * @see Profile
      */
     public static synchronized void sendMessage(byte[] buf) {
