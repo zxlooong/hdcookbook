@@ -389,10 +389,13 @@ public class GrinBinaryReader {
         Segment showTop = (Segment) in.readSegmentReference();
         Group showTopGroup     = (Group) in.readFeatureReference();
         
+	String[] fontName = in.readStringArray();
+	int[] fontStyleSize = in.readSharedIntArray();
+        
 	show.buildShow(segmentList, featureList, rcHandlerList, stickyImages,
                        showTop, showTopGroup,
 		       publicSegments, publicFeatures, publicRCHandlers,
-		       publicNamedCommands);
+		       publicNamedCommands, fontName, fontStyleSize);
     }
 
     private Hashtable readPublicNamedCommands(GrinDataInputStream in) 

@@ -102,6 +102,7 @@ import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.SECommandRCHandler;
 import com.hdcookbook.grin.input.SEVisualRCHandler;
 import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.builders.FontSpec;
 import com.hdcookbook.grin.io.builders.MenuAssemblyHelper;
 import com.hdcookbook.grin.io.builders.TranslatorHelper;
 import com.hdcookbook.grin.io.builders.VisualRCHandlerHelper;
@@ -1635,7 +1636,8 @@ public class ShowParser {
 	    vspace = lexer.getInt();
 	    tok = lexer.getString();
 	}
-	Font font = parseFontSpec(tok);
+	FontSpec fontSpec = parseFontSpec(tok);
+	int fontIndex = builder.getFontIndex(fontSpec);
 	parseExpected("{");
 	Vector colors = new Vector();
 	Color lastColor = null;
@@ -1676,7 +1678,7 @@ public class ShowParser {
 	    lexer.reportError("At least one color needed");
 	}
 	SEText text = new SEText(show, name, x, y, alignment, textStrings, 
-				 vspace, font, cols, loopCount, background);
+				 vspace, fontIndex, cols, loopCount,background);
 	builder.addFeature(name, line, text);
 	return text;
     }
@@ -1773,23 +1775,23 @@ public class ShowParser {
 	return scaleModel;
     }
 
-    private Font parseFontSpec(String tok) throws IOException {
-	String fontName = tok;
+    private FontSpec parseFontSpec(String tok) throws IOException {
+	FontSpec result = new FontSpec();
+	result.name = tok;
 	tok = lexer.getString();
-	int style = 0;
 	if ("plain".equals(tok)) {
-	    style = Font.PLAIN;
+	    result.style = Font.PLAIN;
 	} else if ("bold".equals(tok)) {
-	    style = Font.BOLD;
+	    result.style = Font.BOLD;
 	} else if ("italic".equals(tok)) {
-	    style = Font.ITALIC;
+	    result.style = Font.ITALIC;
 	} else if ("bold-italic".equals(tok)) {
-	    style = Font.BOLD | Font.ITALIC;
+	    result.style = Font.BOLD | Font.ITALIC;
 	} else {
 	    lexer.reportError("font style expected, \"" + tok + "\" seen");
 	}
-	int size = lexer.getInt();
-	return AssetFinder.getFont(fontName, style, size);
+	result.size = lexer.getInt();
+	return result;
     }
 
     private String parseFeatureName(boolean hasName) throws IOException {

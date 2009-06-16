@@ -150,22 +150,6 @@ public class GrinDataOutputStream extends DataOutputStream {
    }
    
    /**
-    * Writes out a Font instance.
-    * @param font The font to write out.
-    * @throws java.io.IOException if IO error occurs.
-    */
-   public void writeFont(Font font) throws IOException {
-       if (font == null) {
-           writeByte(Constants.NULL);
-       } else {
-           writeByte(Constants.NON_NULL);
-           writeString(font.getName());
-           writeInt(font.getStyle());
-           writeInt(font.getSize());   
-       }    
-   }  
-   
-   /**
     * Writes out an array of integers.
     * @param array An array of integers to write out.
     * @throws java.io.IOException if IO error occurs.

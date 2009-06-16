@@ -61,6 +61,7 @@ import com.hdcookbook.grin.commands.ActivateSegmentCommand;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.SetTarget;
+import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.SetupManager;
@@ -73,6 +74,7 @@ import com.hdcookbook.grin.input.RCKeyEvent;
 import java.util.Hashtable;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.io.IOException;
 
@@ -168,6 +170,10 @@ public class Show implements AnimationClient {
     private int inputOKWaiting = 0;
     	// # of threads waiting on inputOK
 
+    protected String fontName[];
+    protected int fontStyleSize[];  // style in lower two bits, >> 2 for size
+    private Font font[];	    // Populated on demand by getFont(int).
+
     /** 
      * Create a new show.
      *
@@ -205,7 +211,8 @@ public class Show implements AnimationClient {
                           Segment showTop, Group showTopGroup,
 		          Hashtable publicSegments, Hashtable publicFeatures,
 		          Hashtable publicRCHandlers, 
-			  Hashtable publicNamedCommands)
+			  Hashtable publicNamedCommands,
+			  String[] fontName, int[] fontStyleSize)
 	    throws IOException 
     {
 	this.segments = segments;
@@ -238,6 +245,26 @@ public class Show implements AnimationClient {
 	for (int i = 0; i < segments.length; i++) {
 	    segments[i].setShow(this);
 	}
+	this.fontName = fontName;
+	this.fontStyleSize = fontStyleSize;
+	font = new Font[fontName.length];
+    }
+
+    /**
+     * Get one of the fonts recorded for this show.  This is an internal
+     * method for use by the text feature, or by other extension features
+     * that use show fonts.  It should only be called from the setup thread,
+     * or from the animation thread after setup.
+     **/
+    public Font getFont(int index) {
+	// We're not synchronized, because we're called in well defined
+	// places with no possibility of conflict.
+	if (font[index] == null) {
+	    int style = fontStyleSize[index] & 0x03;
+	    int size = fontStyleSize[index] >> 2;
+	    font[index] = AssetFinder.getFont(fontName[index], style, size);
+	}
+	return font[index];
     }
 
     /**

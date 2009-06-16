@@ -68,7 +68,7 @@ import java.io.IOException;
 public class SEText extends Text implements SENode {
 
     public SEText(SEShow show, String name, int x, int y, int alignment,
-    		String[] strings, int vspace, Font font, Color[] colors, 
+    		String[] strings, int vspace, int fontIndex, Color[] colors, 
 		int loopCount, Color background) 
     {
 	super(show);
@@ -78,7 +78,7 @@ public class SEText extends Text implements SENode {
 	this.alignment = alignment;
 	this.strings = strings;
         this.vspace = vspace;
-	this.font = font;
+	this.fontIndex = fontIndex;
 	this.colors = colors;
 	this.loopCount = loopCount;
 	this.background = background;
@@ -96,8 +96,8 @@ public class SEText extends Text implements SENode {
         return vspace;
     }
     
-    public Font getFont() {
-        return font;
+    public int getFontIndex() {
+        return fontIndex;
     }
     
     public Color[] getColors() {
@@ -116,8 +116,8 @@ public class SEText extends Text implements SENode {
         this.vspace = vspace;
     }
     
-    public void setFont(Font font) {
-        this.font = font;
+    public void setFontIndex(int index) {
+        this.fontIndex = index;
     }
     
     public void setColors(Color[] colors) {
@@ -161,7 +161,7 @@ public class SEText extends Text implements SENode {
        out.writeInt(alignment);
        out.writeStringArray(getStrings());
        out.writeInt(getVspace());
-       out.writeFont(getFont());
+       out.writeInt(fontIndex);
        out.writeInt(colors.length);
        for (int i = 0; i < colors.length; i++) {
           out.writeColor(colors[i]);  

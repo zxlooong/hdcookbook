@@ -251,7 +251,8 @@ public abstract class Feature {
     }
 
     /**
-     * Check to see if this feature has been set up
+     * Check to see if this feature has been set up, or has a pending request
+     * to be set up.
      **/
     final public boolean isSetup() {
 	return setupCount > 0;

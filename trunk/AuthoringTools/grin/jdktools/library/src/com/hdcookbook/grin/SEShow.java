@@ -217,6 +217,20 @@ public class SEShow extends Show {
     }
 
     /**
+     * Get the font name array
+     **/
+    public String[] getFontName() {
+	return fontName;
+    }
+
+    /**
+     * Get they StyleSize information for the show's fonts
+     **/
+    public int[] getFontStyleSize() {
+	return fontStyleSize;
+    }
+
+    /**
      * Determine if the given Segment is public
      **/
     public boolean isPublic(Segment seg) {
@@ -267,14 +281,15 @@ public class SEShow extends Show {
                           Segment showTop, Group showTopGroup,
 		          Hashtable publicSegments, Hashtable publicFeatures,
 		          Hashtable publicRCHandlers, 
-			  Hashtable publicNamedCommands)
+			  Hashtable publicNamedCommands,
+			  String[] fontName, int[] fontStyleSize)
 	    throws IOException
     {
 
 	super.buildShow(segments, features, rcHandlers, stickyImages,
                         showTop, showTopGroup,
 		        publicSegments, publicFeatures, publicRCHandlers,
-			publicNamedCommands);
+			publicNamedCommands, fontName, fontStyleSize);
 	if (isBinary) {
 	    return;
 	}
@@ -324,7 +339,7 @@ public class SEShow extends Show {
     public MosaicSpec[] getMosaicSpecs() {
         return mosaicSpecs.toArray(new MosaicSpec[mosaicSpecs.size()]);
     }
-    
+
 
     /**
      * Visit a SEShow with a SEShowVisitor.  This will call

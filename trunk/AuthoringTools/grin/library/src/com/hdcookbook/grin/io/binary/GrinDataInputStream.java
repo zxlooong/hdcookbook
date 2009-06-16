@@ -61,7 +61,6 @@ import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.util.AssetFinder;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Rectangle;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -141,21 +140,6 @@ public class GrinDataInputStream extends DataInputStream {
        return array;       
    }
    
-   /**
-    * Reads in and constructs a Font instance.
-    * @return A Font instance reconstructed from the input stream.
-    * @throws java.io.IOException if IO error occurs.
-    */
-   public Font readFont() throws IOException {
-       byte b = readByte();
-       if (b == Constants.NULL) {
-           return null;
-       }
-       String name = readString();
-       int style = readInt();
-       int size = readInt();
-       return AssetFinder.getFont(name, style, size);
-   }  
    
    /**
     * Reads in and constructs an array of integer.

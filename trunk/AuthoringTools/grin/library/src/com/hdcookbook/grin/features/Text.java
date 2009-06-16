@@ -61,6 +61,7 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.animator.DrawRecord;
 import com.hdcookbook.grin.animator.RenderContext;
 import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.SetupClient;
 
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import java.awt.Graphics2D;
@@ -77,7 +78,7 @@ import java.util.HashMap;
  *
  * @author Bill Foote (http://jovial.com)
  */
-public class Text extends Feature implements Node {
+public class Text extends Feature implements Node, SetupClient {
  
     /**
      * Value for alignment indicating that x refers to the left side
@@ -126,7 +127,7 @@ public class Text extends Feature implements Node {
     protected int yArg;
     protected String[] strings;
     protected int vspace;
-    protected Font font;
+    protected int fontIndex; 	// Index of our font in Show.fonts[]
     protected Color[] colors;
     private Color currColor = null;
     private Color lastColor = null;
@@ -136,11 +137,12 @@ public class Text extends Feature implements Node {
     protected Color background;
 
     private boolean isActivated = false;
+    private Object setupMonitor = new Object();
     private int alignedX;
     private int alignedY;
     private int ascent;
     private int descent;
-    private int width = -1;
+    private int width = -1;	// -1 means "not setup"
     private int height = -1;
     private int colorIndex;		// index into colors
     private int loopsRemaining;	// see loopCount
@@ -156,7 +158,7 @@ public class Text extends Feature implements Node {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup() || isActivated) {
+	if (!isSetup() || width == -1 || isActivated) {
 	    throw new IllegalStateException();
 	}
 	Text result = new Text(show);
@@ -165,7 +167,7 @@ public class Text extends Feature implements Node {
 	result.yArg = yArg;
 	result.strings = strings;
 	result.vspace = vspace;
-	result.font = font;
+	result.fontIndex = fontIndex;
 	result.colors = colors;
 	result.currColor = currColor;
 	result.lastColor = lastColor;
@@ -200,24 +202,18 @@ public class Text extends Feature implements Node {
     }
 
     /**
-     * Get the font used for this text feature.  This method will always
-     * return a font for a plain Text feature, but for subclasses
-     * that don't use a Java font (like font strips), it will return null.
-     **/
-    public Font getFont() {
-	return font;
-    }
-
-    /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
      * the segments.
      **/
-    // This is also called from setText
     public void initialize() {
+    }
+
+    private void calculateMetrics() {
+	Font font = show.getFont(fontIndex);
 	changed = true;
 	FontMetrics fm = show.component.getFontMetrics(font);
-        width = 0;
+        int width = 0;
         for (int i = 0; i < strings.length; i++) {
             int w = fm.stringWidth(strings[i]);
             if (w > width) {
@@ -244,6 +240,7 @@ public class Text extends Feature implements Node {
 	} else {
 	    alignedY = yArg;
 	}
+	this.width = width;
     }
 
     /**
@@ -274,7 +271,7 @@ public class Text extends Feature implements Node {
     public void setText(String[] newText) {
 	synchronized(show) {	// Shouldn't be necessary, but doesn't hurt
 	    strings = newText;
-	    initialize();
+	    calculateMetrics();
 	}
     }
 
@@ -299,14 +296,47 @@ public class Text extends Feature implements Node {
      * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
-	return 0;
+	if (mode && width == -1) {
+		// Setup reads the font for us, and calculates our width.
+		// If, perchance, we're setup a second time (e.g. because
+		// we went out of setup/activate scope for a time and
+		// came back), there's no reason to re-calculate our
+		// metrics, and the Font instance stays with the show,
+		// so we don't need to schedule setup a second time.
+	    synchronized(setupMonitor) {
+		show.setupManager.scheduleSetup(this);
+		return 1;
+	    }
+	} else {
+	    return 0;
+	}
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void doSomeSetup() {
+	synchronized(setupMonitor) {
+	    if (!isSetup()) {
+		return;
+	    }
+	}
+	calculateMetrics();
+	synchronized(setupMonitor) {
+	    if (!isSetup()) {
+		return;
+	    }
+	}
+	sendFeatureSetup();
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	return false;
+	synchronized(setupMonitor) {
+	    return width == -1;
+	}
     }
 
     /**
@@ -360,7 +390,7 @@ public class Text extends Feature implements Node {
 	    gr.setColor(background);
 	    gr.fillRect(alignedX, alignedY, width, height);
 	}
-	gr.setFont(font);
+	gr.setFont(show.getFont(fontIndex));
 	gr.setColor(currColor);
         int y2 = alignedY + ascent;
         for (int i = 0; i < strings.length; i++) {
@@ -378,7 +408,7 @@ public class Text extends Feature implements Node {
 	this.alignment = in.readInt();
         this.strings = in.readStringArray();
         this.vspace = in.readInt();
-        this.font = in.readFont();
+        this.fontIndex = in.readInt();
         this.colors = new Color[in.readInt()];
         for (int i = 0; i < colors.length; i++) {
             colors[i] = in.readColor();

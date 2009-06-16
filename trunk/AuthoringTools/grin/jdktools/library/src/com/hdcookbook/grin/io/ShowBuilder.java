@@ -71,7 +71,9 @@ import com.hdcookbook.grin.features.SETimer;
 import com.hdcookbook.grin.features.SETranslatorModel;
 import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.io.builders.DeferredBuilder;
+import com.hdcookbook.grin.io.builders.FontSpec;
 import com.hdcookbook.grin.io.text.ExtensionParser;
+import com.hdcookbook.grin.util.IndexedSet;
 
 import java.io.IOException;
 
@@ -125,6 +127,8 @@ public class ShowBuilder {
     private SESegment showTop           = null;
 
     private boolean noMoreNodes = false;
+
+    private IndexedSet<FontSpec> fonts = new IndexedSet<FontSpec>();
     
     public ShowBuilder() {
     }
@@ -415,11 +419,21 @@ public class ShowBuilder {
 	    Command[] a = (Command[]) v.toArray(new Command[v.size()]);
 	    show.setNamedCommands(a);
 	}
-                                     
+	
+	FontSpec[] fontArray = fonts.toArray(FontSpec.class);
+	String[] fontName = new String[fontArray.length];
+	int[] fontStyleSize = new int[fontArray.length];
+	for (int i = 0; i < fontArray.length; i++) {
+	    FontSpec s = fontArray[i];
+	    fontName[i] = s.name;
+	    fontStyleSize[i] = s.style + (s.size << 2);
+	}
+
 	show.buildShow(segments, features, rcHandlers, stickyImages, 
                        showTop, (Group)showTopGroup, 
                        publicSegments,
-		       publicFeatures, publicRCHandlers, publicNamedCommands);
+		       publicFeatures, publicRCHandlers, publicNamedCommands,
+		       fontName, fontStyleSize);
         
 	if (binaryGrinFileName != null) {
 	    show.setBinaryGrinFileName(binaryGrinFileName);
@@ -564,6 +578,10 @@ public class ShowBuilder {
 	result.setup(show, name, frames, currValues, values, repeatFrame,
 		     loopCount, commands);
 	return result;
+    }
+
+    public int getFontIndex(FontSpec spec) {
+	return fonts.getIndex(spec);
     }
 
 }
