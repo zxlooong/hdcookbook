@@ -169,7 +169,17 @@ public class GenericMain extends Frame implements AnimationContext {
 	return engine;
     }
 
-    protected void setBackground(String file) {
+    protected void setBackground(URL file) {
+	if (background != null) {
+	    background.flush();
+	}
+	if (file == null) {
+	    background = null;
+	    setFps(fps);	// re-sets engine's background
+	    System.out.println("Set background null.");
+	    return;
+	}
+	System.out.println("Setting background to " + file);
     	Toolkit tk = Toolkit.getDefaultToolkit();
 	background = tk.createImage(file);
 	MediaTracker tracker = new MediaTracker(this);
@@ -179,6 +189,8 @@ public class GenericMain extends Frame implements AnimationContext {
 	} catch (InterruptedException ex) {
 	    Thread.currentThread().interrupt();
 	}
+	setFps(0);
+	System.out.println("Set fps to 0 to make new background visible.");
     }
    
     /**
@@ -384,8 +396,8 @@ public class GenericMain extends Frame implements AnimationContext {
     }
 
     protected void startEngine() {
-	engine = new ScalingDirectDrawEngine(scaleDivisor, this);
 	setFps(fps);
+	engine = new ScalingDirectDrawEngine(scaleDivisor, this);
 	engine.initialize(this);	// Calls animationInitialize() and
 				        // animationFinishInitialiation()
 	engine.start();
@@ -626,9 +638,7 @@ public class GenericMain extends Frame implements AnimationContext {
 	fps = newFps;
 	if (engine != null) {
 	    if (newFps <= 0) {
-		if (background != null) {
-		    engine.setBackground(background);
-		}
+		engine.setBackground(background);
 		try {
 		    engine.pause();
 		    engine.skipFrames(1);  // Output one more, with background.

@@ -45,6 +45,8 @@ after any target is built.
 	    <fileset dir="${asset.dir}">
 		<include name="images/hat_plain.jpg"/>
 		<include name="images/spoo2.png"/>
+		<include name="images/main_menu_background.png"/>
+		<include name="images/regression_menu_background.png"/>
 		<include name="main_show_initialize_segment.txt"/>
 		<include name="main_show_commands.txt"/>
 	    </fileset>

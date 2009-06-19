@@ -59,6 +59,7 @@ package com.hdcookbook.grin.test.bigjdk;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Feature;
+import com.hdcookbook.grin.io.builders.BackgroundSpec;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.Modifier;
@@ -90,11 +91,25 @@ public class ShowNode implements TreeNode {
      * Create a show tree, that is, a top-level ShowNode for a show.
      **/
     public ShowNode(SEShow show, String showName) {
+	BackgroundSpec[] backgrounds = show.getGrinviewBackgrounds();
+	ShowNode backgroundsNode = null;
+	if (backgrounds.length > 0) {
+	    ShowNode[] children = new ShowNode[backgrounds.length];
+	    for (int i = 0; i < children.length; i++) {
+		children[i] = new ShowNode(backgrounds[i], null);
+	    }
+	    backgroundsNode = new ShowNode("background images", children);
+	}
 	Segment[] segments = show.getSegments();
-	ShowNode[] sa = new ShowNode[segments.length];
-	for (int i = 0; i < segments.length; i++) {
-	    sa[i] = new ShowNode(segments[i], null);
-	    sa[i].expand();
+	int j = 0;
+	if (backgroundsNode != null) {
+	    j++;
+	}
+	ShowNode[] sa = new ShowNode[j + segments.length];
+	sa[0] = backgroundsNode;
+	for (int i = 0; i < segments.length; i++, j++) {
+	    sa[j] = new ShowNode(segments[i], null);
+	    sa[j].expand();
 	}
 	this.contents = showName;
 	this.leaf = false;

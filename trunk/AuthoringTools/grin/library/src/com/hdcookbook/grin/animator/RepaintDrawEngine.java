@@ -279,5 +279,13 @@ public class RepaintDrawEngine extends ClockBasedEngine {
     protected void terminatingEraseScreen() {
 	rdComponent.repaint();
 	container.remove(rdComponent);
+	Image buf = buffer;
+	if (buf != null) {
+	    synchronized(repaintMonitor) {
+		buffer = null;
+		bufferG = null;
+	    }
+	    AssetFinder.destroyImageBuffer(buf);
+	}
     }
 }

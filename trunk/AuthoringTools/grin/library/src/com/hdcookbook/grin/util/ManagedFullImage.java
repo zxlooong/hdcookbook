@@ -195,53 +195,69 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     // Implementation of the ImageObserver method.  This gets called by the
     // system on the image loading thread.
     //
-    public synchronized boolean 
+    public boolean 
     imageUpdate(Image img, int infoflags, int x, int y, int width, int height)
     {
-	if (img != image) {		
-		// They've lost interest in us.  So sad.
-		//
-		// Usually, we'd get here because image is null, because
-		// unprepare() got called.  It's possible that after image
-		// becomes null, it might become non-null with a fresh
-		// instance of Image; in this case, the old image in img
-		// is still something we don't care about, so we flush it and
-		// tell the system to stop updating us.
-	    img.flush();
-	    return false;
-	}
-	if ((infoflags & (ALLBITS | ERROR | ABORT)) != 0) {
-		// ERROR and ABORT shouldn't really happen, but if it does
-		// the best we can do is blithely accept the fact, and treat
-		// the image as though it were loaded.
-	    loaded = true;
-	    notifyAll();
-	    if (Debug.LEVEL > 1) {
-		Debug.println("Loaded image " + name);
+	synchronized(this) {
+	    if (img != image) {
+		    // They've lost interest in us.  So sad.
+		    //
+		    // Usually, we'd get here because image is null, because
+		    // unprepare() got called.  It's possible that after image
+		    // becomes null, it might become non-null with a fresh
+		    // instance of Image; in this case, the old image in img
+		    // is still something we don't care about, so we flush it
+		    // and tell the system to stop updating us.
+		img.flush();
+		return false;
 	    }
-	    return false;
-	} else {
-	    return true;
+	    if ((infoflags & (ALLBITS | ERROR | ABORT)) != 0) {
+		    // ERROR and ABORT shouldn't really happen, but if it does
+		    // the best we can do is blithely accept the fact, and treat
+		    // the image as though it were loaded.
+		loaded = true;
+		notifyAll();
+		// Fall through to notifyLoaded
+	    } else {
+		return true;
+	    }
 	}
+	// At this point, the image just finished loading completely, and we're
+	// outside of the synchronized block.
+	AssetFinder.notifyLoaded(this);
+	return false;
     }
 
     /** 
      * {@inheritDoc}
      **/
-    public synchronized void unprepare() {
+    public void unprepare() {
 	    // See ManagedImage's main class documentation under
 	    //  "ManagedImage contract - image loading and unloading".
-	numPrepares--;
-	if (numPrepares <= 0 && loaded) {
-	    if (image != null) {
-		image.flush();
-		image = null;
+	int w = 0;
+	int h = 0;
+	synchronized(this) {
+	    numPrepares--;
+	    if (numPrepares > 0) {
+		return;
+	    } else {
+		if (image != null) {
+		    if (loaded) {
+			w = image.getWidth(null);
+			h = image.getHeight(null);
+		    }
+		    image.flush();
+		    image = null;
+		}
+		if (!loaded) {
+		    return;
+		}
+		loaded = false;
 	    }
-	    if (Debug.LEVEL > 1 && loaded) {
-		Debug.println("Unloaded image " + name);
-	    }
-	    loaded = false;
 	}
+	// At this point, we just unloaded a loaded image, and we're safely
+	// outside the synchronized block.
+	AssetFinder.notifyUnloaded(this, w, h);
     }
 
     /**

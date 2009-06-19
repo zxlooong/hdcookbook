@@ -521,4 +521,66 @@ public class AssetFinder  {
      **/
     protected void abortHelper() {
     }
+
+    /**
+     * Called by ManagedFullImage when an image finishes loading.
+     *
+     * @see #notifyLoadedHelper(ManagedFullImage)
+     * @see #notifyUnloaded(ManagedFullImage, int, int)
+     **/
+    public static void notifyLoaded(ManagedFullImage mi) {
+	if (Debug.LEVEL > 1) {
+	    Debug.println("Loaded image " + mi.getName());
+	}
+	if (helper != null) {
+	    helper.notifyLoadedHelper(mi);
+	}
+    }
+
+    /**
+     * Called when a ManagedFullImage has finished loading.  By default
+     * this does nothing, but it can be overridden, e.g. for resource
+     * usage tracking.  This will be called in one of the platform's
+     * image fetcher threads.
+     *
+     * @see #notifyLoaded(ManagedFullImage)
+     * @see #notifyUnloadedHelper(ManagedFullImage, int, int)
+     **/
+    protected void notifyLoadedHelper(ManagedFullImage mi) {
+	// do nothing
+    }
+
+    /**
+     * Called by ManagedFullImage when a loaded image has been
+     * unloaded (flushed).  This will be called from
+     * ManagedImage.unprepare(), which normally happens in the
+     * animation thread.
+     *
+     * @see #notifyUnloadedHelper(ManagedFullImage)
+     * @see #notifyLoaded(ManagedFullImage, int, int)
+     **/
+    public static void notifyUnloaded(ManagedFullImage mi, 
+    				      int width, int height)
+    {
+	if (Debug.LEVEL > 1) {
+	    Debug.println("Unloaded image " + mi.getName());
+	}
+	if (helper != null) {
+	    helper.notifyUnloadedHelper(mi, width, height);
+	}
+    }
+
+    /**
+     * Called when a ManagedFullImage has been unloaded (flushed).  By 
+     * default this does nothing, but it can be overridden, e.g. for resource
+     * usage tracking.
+     *
+     * @see #notifyLoaded(ManagedFullImage)
+     * @see #notifyLoadedHelper(ManagedFullImage)
+     **/
+    protected void notifyUnloadedHelper(ManagedFullImage mi, 
+    				        int width, int height) 
+    {
+	// do nothing
+    }
 }

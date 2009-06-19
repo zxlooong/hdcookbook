@@ -57,6 +57,7 @@ package com.hdcookbook.grin.test.bigjdk;
 
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.io.builders.BackgroundSpec;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.features.Assembly;
@@ -278,6 +279,19 @@ public class GrinView extends GenericMain {
 		part = (Feature) node.getContents();
 	    } else if (node.getContents() instanceof Feature) {
 		part = (Feature) node.getContents();
+	    } else if (node.getContents() instanceof BackgroundSpec) {
+		String name = ((BackgroundSpec) node.getContents()).imageName;
+		if (name == null || "".equals(name)) {
+		    setBackground((URL) null);
+		    return "Selected background image \"\"";
+		} else {
+		    URL url = AssetFinder.tryURL(name);
+		    if (url == null) {
+			return "Can't find " + name;
+		    }
+		    setBackground(url);
+		    return "Selected background image " + name;
+		}
 	    } else {
 		part = null;
 	    }
@@ -533,7 +547,11 @@ public class GrinView extends GenericMain {
 	    m.setDirectorClassName(director);
 	}
 	if (background != null) {
-	    m.setBackground(background);
+	    try {
+		m.setBackground(new File(background).toURI().toURL());
+	    } catch (Exception ignored) {
+		ignored.printStackTrace();
+	    }
 	}
 	
 	if (scaleDivisor != null || deviceConfig != null) {

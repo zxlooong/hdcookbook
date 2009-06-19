@@ -225,7 +225,7 @@ public class GrinXlet
      * This method can be overridden by subclasses that want to look
      * for xlet arguments in places other than the default
      * XletContext.ARGS and "dvb.caller.parameters".  Subclasses that
-     * overrid this should call super.doInitXlet(args) once they've
+     * override this should call super.doInitXlet(args) once they've
      * colleded their arguments.
      **/
     protected void doInitXlet(String[] args) {

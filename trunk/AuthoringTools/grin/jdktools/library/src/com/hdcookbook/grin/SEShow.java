@@ -59,6 +59,7 @@ import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.features.Group;
 import com.hdcookbook.grin.features.Modifier;
 import com.hdcookbook.grin.input.RCHandler;
+import com.hdcookbook.grin.io.builders.BackgroundSpec;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -89,6 +90,9 @@ public class SEShow extends Show {
     private String binaryGrinFileName = null;	// null means "use default"
     private boolean isBinary = false;	
 	// This is set to true if this SEShow is created from a binary file.
+
+    // For setting the background image by segment or by selection
+    ArrayList<BackgroundSpec> grinviewBackgrounds = null;
     
     /**
      * Create a new SEShow.
@@ -306,6 +310,24 @@ public class SEShow extends Show {
      **/
     public void setBinaryGrinFileName(String name) {
 	binaryGrinFileName = name;
+    }
+
+    /**
+     * Sets the list of background images for grinview.  See
+     * grinview_background_setting in the show's BNF for the format
+     * and semantics.
+     **/
+    public void setGrinviewBackgrounds(ArrayList<BackgroundSpec> value) {
+	this.grinviewBackgrounds = value;
+    }
+
+    public BackgroundSpec[] getGrinviewBackgrounds() {
+	if (grinviewBackgrounds == null) {
+	    return new BackgroundSpec[0];
+	} else {
+	    return grinviewBackgrounds.toArray(
+	    	new BackgroundSpec[grinviewBackgrounds.size()]);
+	}
     }
 
     /**

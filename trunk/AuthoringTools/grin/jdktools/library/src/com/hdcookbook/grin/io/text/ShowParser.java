@@ -102,6 +102,7 @@ import com.hdcookbook.grin.input.RCHandler;
 import com.hdcookbook.grin.input.SECommandRCHandler;
 import com.hdcookbook.grin.input.SEVisualRCHandler;
 import com.hdcookbook.grin.io.ShowBuilder;
+import com.hdcookbook.grin.io.builders.BackgroundSpec;
 import com.hdcookbook.grin.io.builders.FontSpec;
 import com.hdcookbook.grin.io.builders.MenuAssemblyHelper;
 import com.hdcookbook.grin.io.builders.TranslatorHelper;
@@ -279,6 +280,8 @@ public class ShowParser {
 		parseStickyImages();
 	    } else if ("binary_grin_file".equals(tok)) {
 		parseBinaryGrinFile();
+	    } else if ("grinview_background".equals(tok)) {
+		parseGrinviewBackground();
 	    } else {
 		lexer.reportError("Unrecognized setting \"" + tok + "\".");
 	    }
@@ -416,6 +419,26 @@ public class ShowParser {
 	String fileName = lexer.getString();
 	parseExpected(";");
 	builder.setBinaryGrinFileName(fileName);
+    }
+
+    private void parseGrinviewBackground() throws IOException {
+	ArrayList<BackgroundSpec> specs = new ArrayList<BackgroundSpec>();
+	parseExpected("{");
+	specs.add(new BackgroundSpec()); 	// blank
+	for (;;) {
+	    String tok = lexer.getString();
+	    if ("}".equals(tok)) {
+		break;
+	    }
+	    BackgroundSpec spec = new BackgroundSpec();
+	    spec.imageName = tok;
+	    if (spec.imageName == null) {
+		lexer.reportError("Unexpected EOF");
+	    }
+	    specs.add(spec);
+	}
+	parseExpected(";");
+	show.setGrinviewBackgrounds(specs);
     }
 
     private void parseSegment(final int line) throws IOException {

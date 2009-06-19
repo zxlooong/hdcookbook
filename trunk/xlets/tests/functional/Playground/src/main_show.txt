@@ -5,6 +5,11 @@
 
 show
 
+setting grinview_background {
+	images/main_menu_background.png
+	images/regression_menu_background.png
+} ;
+
 exports
     segments { 
 	S:Initialize 
@@ -87,7 +92,7 @@ feature text F:MainText
 	    "     6 - Run orbit test"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
-	background { 0 0 0 255 } 
+	background { 0 0 0 127 } 
 ;
 
 feature text F:RegressionText
@@ -100,7 +105,7 @@ feature text F:RegressionText
             "     5 - Set/Unset a clip region around the show (issue 139)"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
-	background { 0 0 0 255 } 
+	background { 0 0 0 127 } 
 ;
 
 rc_handler key_pressed H:1 { 1 } execute {

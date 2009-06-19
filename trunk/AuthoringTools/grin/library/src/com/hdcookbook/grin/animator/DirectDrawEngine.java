@@ -246,8 +246,9 @@ public class DirectDrawEngine extends ClockBasedEngine {
 	componentG.fillRect(0, 0, getWidth(), getHeight());
 	Toolkit.getDefaultToolkit().sync();
 	container.remove(ddComponent);
-	AssetFinder.destroyImageBuffer(buffer);
+	Image buf = buffer;
 	buffer = null;
 	bufferG = null;
+	AssetFinder.destroyImageBuffer(buf);
     }
 }
