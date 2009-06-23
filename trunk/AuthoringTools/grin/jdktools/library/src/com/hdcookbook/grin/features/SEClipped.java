@@ -56,6 +56,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.ShowBuilder;
@@ -63,7 +65,7 @@ import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.awt.Rectangle;
 import java.io.IOException;
 
-public class SEClipped extends Clipped implements SENode {
+public class SEClipped extends Clipped implements SENode, SEScalableNode {
 
     public SEClipped(SEShow show) {
         super(show);
@@ -111,6 +113,16 @@ public class SEClipped extends Clipped implements SENode {
 	if (part == from) {
 	    part = to;
 	}
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	clipRegion = new Rectangle(xOffset + Show.scale(clipRegion.x, xScale),
+				   yOffset + Show.scale(clipRegion.y, yScale),
+				   Show.scale(clipRegion.width, xScale),
+				   Show.scale(clipRegion.height, yScale));
     }
 
     /**

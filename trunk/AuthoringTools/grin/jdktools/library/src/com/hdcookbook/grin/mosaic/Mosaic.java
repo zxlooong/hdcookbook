@@ -124,8 +124,8 @@ public class Mosaic {
      * Put the image represented by mi and im into the mosaic.
      * This always works, and returns a MosaicPart.
      **/
-    public MosaicPart putImage(ManagedImage mi, BufferedImage im) {
-	MosaicPart part = new MosaicPart(mi, this);
+    public MosaicPart putImage(ManagedImage mi, int maxWidth, int maxHeight) {
+	MosaicPart part = new MosaicPart(mi, this, maxWidth, maxHeight);
 	partsList.add(part);
 	return part;
     }
@@ -262,7 +262,7 @@ public class Mosaic {
 	graphics.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
 	for (MosaicPart part : parts) {
 	    Rectangle r = part.getPlacement();
-	    part.getImage().draw(graphics, r.x, r.y, null);
+	    part.getImage().drawScaled(graphics, r, null);
 	}
 	boolean ok = ImageIO.write(buffer, "PNG", out);
 	if (!ok) {

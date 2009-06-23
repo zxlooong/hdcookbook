@@ -75,6 +75,11 @@ import java.util.List;
  * A tool that converts a text based GRIN script to the binary format.
  **/
 public class Main {
+
+    private static int scaleX = 1000;	// X scale factor in mills
+    private static int scaleY = 1000;	// Y scale factor in mills
+    private static int offsetX = 0;	// X offset in pixels
+    private static int offsetY = 0;	// Y offset in pixels
    
    /**
     * A driver method for the Main.convert(String, String).
@@ -130,6 +135,30 @@ public class Main {
                     usage();
                 } 
                 outputDir = args[index];
+            } else if ("-scaleX".equals(args[index])) {
+                index++;
+                if (index == args.length) {
+                    usage();
+                } 
+                scaleX = argToMills(args[index]);
+            } else if ("-scaleY".equals(args[index])) {
+                index++;
+                if (index == args.length) {
+                    usage();
+                } 
+                scaleY = argToMills(args[index]);
+            } else if ("-offsetX".equals(args[index])) {
+                index++;
+                if (index == args.length) {
+                    usage();
+                } 
+                offsetX = argToInt(args[index]);
+            } else if ("-offsetY".equals(args[index])) {
+                index++;
+                if (index == args.length) {
+                    usage();
+                } 
+                offsetY = argToInt(args[index]);
             } else if ("-avoid_optimization".equals(args[index])) {
                 optimize = false;
             } else if ("-optimize".equals(args[index])) {
@@ -212,6 +241,33 @@ public class Main {
         System.exit(0);
    }
 
+    private static int argToInt(String s) {
+	try {
+	    return Integer.parseInt(s);
+	} catch (NumberFormatException ex) {
+	    ex.printStackTrace();
+	    System.out.println();
+	    System.out.println(s + " is not an integer");
+	    System.out.println();
+	    usage();
+	    return -1;	// not reached
+	}
+    }
+
+    private static int argToMills(String s) {
+	try {
+	    Double d = Double.parseDouble(s);
+	    return (int) Math.round(d * 1000);
+	} catch (NumberFormatException ex) {
+	    ex.printStackTrace();
+	    System.out.println();
+	    System.out.println(s + " is not a double");
+	    System.out.println();
+	    usage();
+	    return -1;	// not reached
+	}
+    }
+
    /**
     * Converts the text based GRIN script to a binary format. 
     *
@@ -247,6 +303,13 @@ public class Main {
 		builder.setExtensionParser(extensionParser);         
 		SEShow show = ShowParser.parseShow(showFiles[i], null, builder);
 		shows[i] = show;
+	    }
+	    if (scaleX != 1000 || scaleY != 1000 
+	    	|| offsetX != 0 || offsetY != 0) 
+	    {
+		for (int i = 0; i < shows.length; i++) {
+		    shows[i].scaleBy(scaleX, scaleY, offsetX, offsetY);
+		}
 	    }
 	    if (optimize) {
 		GrinCompiler compiler = new GrinCompiler();
@@ -312,6 +375,8 @@ public class Main {
         System.out.println("\t\t-debug");
         System.out.println("\t\t-avoid_optimization");
         System.out.println("\t\t-optimize");
+        System.out.println("\t\t-scaleX <double> -scaleY <double>");
+        System.out.println("\t\t-offsetX <int> -offsetY <int>");
         System.out.println("");
         System.out.println("\t-assets and -asset_dir may be repeated to form a search path.");
         System.out.println("\t-avoid_otimization prevents the conversion process from using " +
@@ -322,4 +387,4 @@ public class Main {
          
         System.exit(0);
    }
-}     
+}

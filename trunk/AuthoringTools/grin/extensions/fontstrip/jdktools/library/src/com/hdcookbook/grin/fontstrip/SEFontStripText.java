@@ -56,6 +56,8 @@ package com.hdcookbook.grin.fontstrip;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.Show;
@@ -64,7 +66,8 @@ import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.awt.Color;
 import java.io.IOException;
 
-public class SEFontStripText extends FontStripText implements SENode {
+public class SEFontStripText extends FontStripText 
+			     implements SENode, SEScalableNode {
     
     public SEFontStripText(Show show) {
         super(show);
@@ -127,6 +130,18 @@ public class SEFontStripText extends FontStripText implements SENode {
     public void changeFeatureReference(Feature from, Feature to) {
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Note that you must also build the font strip .png image with the
+     * same scale factors.
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	xArg = xOffset + Show.scale(xArg, xScale);
+	yArg = yOffset + Show.scale(yArg, xScale);
+	hspace = Show.scale(hspace, xScale);
+	vspace = Show.scale(vspace, yScale);
+    }
     /**
      * {@inheritDoc}
      **/

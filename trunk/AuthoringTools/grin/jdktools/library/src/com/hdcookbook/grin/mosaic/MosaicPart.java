@@ -71,12 +71,14 @@ public class MosaicPart {
     private ManagedImage image;
     private Rectangle placement;
 
-    public MosaicPart(ManagedImage image, Mosaic mosaic) {
+    public MosaicPart(ManagedImage image, Mosaic mosaic, 
+    		      int maxWidth, int maxHeight) 
+    {
 	this.image = image;
 	this.mosaic = mosaic;
 	this.placement = new Rectangle();
-	placement.width = image.getWidth();
-	placement.height = image.getHeight();
+	placement.width = Math.min(image.getWidth(), maxWidth);
+	placement.height = Math.min(image.getHeight(), maxHeight);
 	placement.x = 0;
 	placement.y = 0;
     }

@@ -56,16 +56,19 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.features.parts.SEImagePlacement;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import com.hdcookbook.grin.util.ManagedImage;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.IOException;
 
-public class SEFixedImage extends FixedImage implements SENode {
+public class SEFixedImage extends FixedImage implements SENode, SEScalableNode {
 
     private SEImagePlacement sePlacement;
     
@@ -95,11 +98,18 @@ public class SEFixedImage extends FixedImage implements SENode {
 	return scalingModel;
     }
     
-    /*
+    /**
      * Internal use only
-     */
+     **/
     public SEImagePlacement getPlacement() {
         return sePlacement;
+    }
+
+    /**
+     * Internal use only
+     **/
+    public Dimension getImageSize() {
+	return new Dimension(placement.width, placement.height);
     }
 
     /* 
@@ -156,6 +166,16 @@ public class SEFixedImage extends FixedImage implements SENode {
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	placement = new Rectangle(xOffset + Show.scale(placement.x, xScale),
+				  yOffset + Show.scale(placement.y, yScale),
+				  Show.scale(placement.width, xScale),
+				  Show.scale(placement.height, yScale));
     }
 
     /**

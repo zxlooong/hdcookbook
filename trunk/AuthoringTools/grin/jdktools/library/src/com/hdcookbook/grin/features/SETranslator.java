@@ -55,6 +55,8 @@
 package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.Feature;
@@ -62,7 +64,7 @@ import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
-public class SETranslator extends Translator implements SENode {
+public class SETranslator extends Translator implements SENode, SEScalableNode {
     
     public SETranslator(SEShow show) {
         super(show);
@@ -159,6 +161,17 @@ public class SETranslator extends Translator implements SENode {
 	if (part == from) {
 	    part = to;
 	}
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	if (!modelIsRelative) {
+	    fx = xOffset + Show.scale(fx, xScale);
+	    fy = yOffset + Show.scale(fy, yScale);
+	}
+	// Our translation_model gets scaled, too
     }
 
     /**

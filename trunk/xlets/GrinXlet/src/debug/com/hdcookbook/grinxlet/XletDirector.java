@@ -88,6 +88,8 @@ public class XletDirector extends Director {
     Text F_DebugLog_Lines;
     InterpolatedModel F_DebugLog_Scroller;
 
+    private int xScale;
+    private int yScale;
 
     private int currFramerate = 10;	// Default to 23.976
     private static int[] framerates = {
@@ -103,6 +105,7 @@ public class XletDirector extends Director {
     private String[] debugLogEntries;
     private String[] debugLogLineNumbers;
     private String[] debugLogLineCount;
+    private int logX = 0;
 
     public XletDirector(GrinXlet xlet) {
 	this.xlet = xlet;
@@ -118,6 +121,8 @@ public class XletDirector extends Director {
 
 
     public void initialize() {
+	xScale = getShow().getXScale();
+	yScale = getShow().getYScale();
 	F_KeyUpState = (Assembly) getFeature("F:KeyUpState");
 	F_KeyUpState_enabled = getPart(F_KeyUpState, "enabled");
 	F_KeyUpState_disabled = getPart(F_KeyUpState, "disabled");
@@ -129,7 +134,8 @@ public class XletDirector extends Director {
 	F_DebugLog_LineNumbers = (Text) getFeature("F:DebugLog.LineNumbers");
 	F_DebugLog_Lines = (Text) getFeature("F:DebugLog.Lines");
 	F_DebugLog_Scroller = (InterpolatedModel) getFeature("F:DebugLog.Scroller");
-	int lines = (1080 - 80*2) / F_DebugLog_Lines.getLineHeight();
+	int lines = Show.scale((1080 - 80*2), yScale)
+			/ F_DebugLog_Lines.getLineHeight();
 	debugLogEntries = new String[lines];
 	debugLogLineNumbers = new String[lines];
 	debugLogLineCount = new String[1];
@@ -245,7 +251,8 @@ public class XletDirector extends Director {
     }
 
     public void skipDebugLogTo(int pos) {
-	F_DebugLog_Scroller.setField(Translator.X_FIELD, 0);
+	logX = 0;
+	F_DebugLog_Scroller.setField(Translator.X_FIELD, logX);
 	synchronized(DebugLog.LOCK) {
 	    int lines = DebugLog.log.size();   
 		    // not including DebugLog.linesRemoved.
@@ -268,18 +275,18 @@ public class XletDirector extends Director {
     }
 
     public void moveDebugLogLeft() {
-	int x = F_DebugLog_Scroller.getField(Translator.X_FIELD);
-	x += 960;
-	if (x > 0) {
-	    x = 0;
+	logX += 960;
+	if (logX > 0) {
+	    logX = 0;
 	}
-	F_DebugLog_Scroller.setField(Translator.X_FIELD, x);
+	F_DebugLog_Scroller.setField(Translator.X_FIELD, 
+					Show.scale(logX, xScale));
     }
 
     public void moveDebugLogRight() {
-	int x = F_DebugLog_Scroller.getField(Translator.X_FIELD);
-	x -= 960;
-	F_DebugLog_Scroller.setField(Translator.X_FIELD, x);
+	logX -= 960;
+	F_DebugLog_Scroller.setField(Translator.X_FIELD,
+					Show.scale(logX, xScale));
     }
 
     public void moveDebugLogUp() {

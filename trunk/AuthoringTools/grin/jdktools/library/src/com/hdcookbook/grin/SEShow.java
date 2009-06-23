@@ -66,6 +66,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 
 
@@ -362,7 +363,6 @@ public class SEShow extends Show {
         return mosaicSpecs.toArray(new MosaicSpec[mosaicSpecs.size()]);
     }
 
-
     /**
      * Visit a SEShow with a SEShowVisitor.  This will call
      * visitShow on the given visitor; it's up to the visitor to
@@ -501,4 +501,60 @@ public class SEShow extends Show {
         out.println();        
     }
 
+    private void warnNotScalableNode(HashSet<Class> warnedSet, Object o) {
+	Class cl = o.getClass();
+	if (warnedSet.contains(cl)) {
+	    return;
+	}
+	warnedSet.add(cl);
+	System.err.println("   ERROR:  Node " + cl + " cannot be scaled.");
+	System.err.println("           First noticed in " + o);
+    }
+
+    /**
+     * Scale this show by the given scale factor, and apply the given offset.
+     * This will change the size of the features and RC handlers within the 
+     * show at compile time, so no special scaling action is required at 
+     * runtime.
+     *
+     * @param 	xScale	x scale factor in mills
+     * @param 	yScale	y scale factor in mills
+     * @param	xOffset	x offset in pixels
+     * @param	yOffset	y offset in pixels
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) 
+	    throws IOException 
+    {
+	setScale(xScale, yScale, xOffset, yOffset);
+	HashSet<Class> warnedSet = new HashSet<Class>();
+	for (Feature f : features) {
+	    if (f instanceof SEScalableNode) {
+		((SEScalableNode) f).scaleBy(xScale, yScale, xOffset, yOffset);
+	    } else {
+	        warnNotScalableNode(warnedSet, f);
+	    }
+	}
+	for (RCHandler h : rcHandlers) {
+	    if (h instanceof SEScalableNode) {
+		((SEScalableNode) h).scaleBy(xScale, yScale, xOffset, yOffset);
+	    } else {
+	        warnNotScalableNode(warnedSet, h);
+	    }
+	}
+	if (fontStyleSize != null && fontStyleSize.length > 0) {
+	    if (xScale != yScale) {
+		System.out.println("WARNING:  Scaling font size by y scale value only.");
+		System.out.println("          Characters may appear compressed or stretched.");
+	    }
+	    for (int i = 0; i < fontStyleSize.length; i++) {
+		int style = fontStyleSize[i] & 0x03;
+		int size = fontStyleSize[i] >> 2;
+		size = Show.scale(size, yScale);
+		fontStyleSize[i] = style | (size << 2);
+	    }
+	}
+	if (!warnedSet.isEmpty()) {
+	    throw new IOException("Can't scale show, because it contains non-scalable nodes.");
+	}
+    }
 }

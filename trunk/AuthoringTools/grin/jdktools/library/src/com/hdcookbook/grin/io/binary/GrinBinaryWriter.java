@@ -490,6 +490,11 @@ public class GrinBinaryWriter {
 
 	dos.writeStringArray(show.getFontName());
 	dos.writeSharedIntArray(show.getFontStyleSize());
+
+	dos.writeInt(show.getXScale());
+	dos.writeInt(show.getYScale());
+	dos.writeInt(show.getXOffset());
+	dos.writeInt(show.getYOffset());
         
         dos.close();  // We're through writing to baos
 

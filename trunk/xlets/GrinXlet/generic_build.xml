@@ -20,6 +20,7 @@ Game xlet project.  See the documentation in vars.properties for details.
     	      value="com.hdcookbook.grin.io.text.NullExtensionParser"/>
     <property name="xlet.class.name"
 	      value="com.hdcookbook.grinxlet.GrinXlet"/>
+    <property name="debug.screen.scale" value="1.0"/>
     <condition property="debug.is.set">
 	  <equals arg1="${debug.or.deploy}" arg2="debug"/>
     </condition>
@@ -116,12 +117,18 @@ The project.name property is not set.  This usually has one of two causes:
               .
         Could not find bd-j platform classes at ${bdj.classes}.
         Please change the value of the bdj.classes property 
-        in the /vars.properties file.
+        defined in the vars.properties file.  A good way to do
+	this is to create a file called user.vars.properites
+	in your project's base directory that overrides this 
+	property value.
                  
         Don't be alarmed, this is a configuration error.
         The HDCookbook source repository does not include BD-J platform classes
         needed for compiling applications against.  These classes need to be
         provided by you.
+
+	http://wiki.java.net/bin/view/Mobileandembedded/BDJPlatformDefinition
+	describes one way to get them.
         
         </fail> 
 
@@ -251,6 +258,10 @@ The project.name property is not set.  This usually has one of two causes:
             <arg value="-out"/>
             <arg value="${build.dir}"/>
 	    <arg value="-avoid_optimization"/>
+	    <arg value="-scaleX"/>
+	    <arg value="${debug.screen.scale}"/>
+	    <arg value="-scaleY"/>
+	    <arg value="${debug.screen.scale}"/>
             <arg value="xlet_show.txt"/>
         </jdktools.java>
 	<delete file="${build.dir}/xlet_show.grinview.java"/>

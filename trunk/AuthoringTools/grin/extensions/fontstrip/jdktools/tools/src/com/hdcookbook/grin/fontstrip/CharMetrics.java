@@ -64,14 +64,15 @@ import java.awt.Rectangle;
 class CharMetrics {
 
     private char ch;
-    private int baseline;
+    private int baseline;	// Position of baseline in design image
     private Rectangle pixRect;
     private Rectangle boundingRect;
     private int leading;
 
     public CharMetrics(char c, int baseline,
             Rectangle pixRect, Rectangle boundingRect,
-            int leading) {
+            int leading) 
+    {
         this.ch = c;
         this.baseline = baseline;
         this.pixRect = pixRect;

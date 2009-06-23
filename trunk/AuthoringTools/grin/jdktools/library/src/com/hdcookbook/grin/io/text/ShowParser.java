@@ -1195,7 +1195,6 @@ public class ShowParser {
             String tweenType = lexer.getString();
 	    boolean thisIsRelative = true;
 	    EasingEquation[] easing = new EasingEquation[1];
-	    thisIsRelative = true;
             if ("linear".equals(tweenType)) {
                 thisIsRelative = false;
             } else if ("linear-relative".equals(tweenType)) {

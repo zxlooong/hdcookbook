@@ -56,6 +56,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
@@ -63,10 +65,12 @@ import com.hdcookbook.grin.features.parts.SEImageSeqPlacement;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.awt.Rectangle;
+import java.awt.Dimension;
 import java.io.IOException;
 
-public class SEImageSequence extends ImageSequence implements SENode {
-
+public class SEImageSequence extends ImageSequence 
+			     implements SENode, SEScalableNode 
+{
     private SEImageSeqPlacement sePlacement;
 
     public SEImageSequence(SEShow show) {
@@ -99,6 +103,15 @@ public class SEImageSequence extends ImageSequence implements SENode {
     
     public SEImageSeqPlacement getPlacement() {
        return sePlacement;
+    }
+
+    public Dimension[] getImageSizes() {
+	Dimension[] result = new Dimension[placements.length];
+	for (int i = 0; i < result.length; i++) {
+	    Rectangle r = placements[i];
+	    result[i] = new Dimension(r.width, r.height);
+	}
+	return result;
     }
 
     public boolean getRepeat() {
@@ -193,6 +206,20 @@ public class SEImageSequence extends ImageSequence implements SENode {
     public void changeFeatureReference(Feature from, Feature to) 
             throws IOException
     {
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	Rectangle[] p = placements;
+	placements = new Rectangle[p.length];
+	for (int i = 0; i < placements.length; i++) {
+	    placements[i] = new Rectangle(xOffset + Show.scale(p[i].x, xScale),
+				          yOffset + Show.scale(p[i].y, yScale),
+				          Show.scale(p[i].width, xScale),
+				          Show.scale(p[i].height, yScale));
+	}
     }
 
     /**

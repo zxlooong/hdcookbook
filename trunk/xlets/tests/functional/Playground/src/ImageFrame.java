@@ -136,10 +136,10 @@ public class ImageFrame extends Box implements Node {
 	// We just inherit paintFrame() from box, but since we modify
 	// its instance variables to fit the box around us, that works.
 	Rectangle bounds = fixedImage.getMutablePlacement();
-	int bX = bounds.x - outlineWidth;
-	int bY = bounds.y - outlineWidth;
-	int bH = bounds.height + 2*outlineWidth;
-	int bW = bounds.width + 2*outlineWidth;
+	int bX = bounds.x - outlineWidthX;
+	int bY = bounds.y - outlineWidthY;
+	int bH = bounds.height + 2*outlineWidthX;
+	int bW = bounds.width + 2*outlineWidthY;
 	if (x != bX || y != bY || height != bH || width != bW) {
 	    x = bX;
 	    y = bY;
@@ -158,7 +158,8 @@ public class ImageFrame extends Box implements Node {
 	    throws IOException
     {
 	in.readSuperClassData(this);
-	outlineWidth = in.readInt();
+	outlineWidthX = in.readInt();
+	outlineWidthY = in.readInt();
 	outlineColor = in.readColor();
 	fixedImage = (FixedImage) in.readFeatureReference();
     }

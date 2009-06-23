@@ -391,6 +391,12 @@ public class GrinBinaryReader {
         
 	String[] fontName = in.readStringArray();
 	int[] fontStyleSize = in.readSharedIntArray();
+	
+	int xScale = in.readInt();
+	int yScale = in.readInt();
+	int xOffset = in.readInt();
+	int yOffset = in.readInt();
+	show.setScale(xScale, yScale, xOffset, yOffset);
         
 	show.buildShow(segmentList, featureList, rcHandlerList, stickyImages,
                        showTop, showTopGroup,

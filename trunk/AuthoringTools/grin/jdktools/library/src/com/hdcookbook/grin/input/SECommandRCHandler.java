@@ -55,6 +55,7 @@ package com.hdcookbook.grin.input;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
@@ -64,7 +65,7 @@ import java.io.IOException;
 
 public class SECommandRCHandler 
 		extends CommandRCHandler 
-		implements SENode, SERCHandler 
+		implements SENode, SEScalableNode, SERCHandler 
 {
     
     public SECommandRCHandler(String name, int mask, boolean wantKeypress,
@@ -161,6 +162,13 @@ public class SECommandRCHandler
     public void changeFeatureReference(Feature from, Feature to) 
             throws IOException
     {
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	// Do nothing
     }
 
     /**

@@ -56,13 +56,20 @@ package com.hdcookbook.grin.features;
 
 
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.features.InterpolatedModel;
 import com.hdcookbook.grin.commands.Command;
 
-public class SEScalingModel extends SEInterpolatedModel {
-
+/** 
+ * A scaling_model node.  This scales other features, with the anchor of
+ * the scaling operation specified by an absolute x,y point.
+ **/
+public class SEScalingModel extends SEInterpolatedModel 
+			    implements SEScalableNode 
+{
     public SEScalingModel() {
     }
     
@@ -96,6 +103,32 @@ public class SEScalingModel extends SEInterpolatedModel {
             }
         }
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	doScale(currValues, xScale, yScale, xOffset, yOffset);
+	for (int i = 0; i < values.length; i++)  {
+	    doScale(values[i], xScale, yScale, xOffset, yOffset);
+	}
+    }
+
+    private void doScale(int[] values, int xScale, int yScale, 
+    				       int xOffset, int yOffset) 
+    {
+	if (values == null) {
+	    return;
+	}
+	values[SCALE_X_FIELD] 
+	    = xOffset + Show.scale(values[SCALE_X_FIELD], xScale);
+	values[SCALE_Y_FIELD] 
+	    = yOffset + Show.scale(values[SCALE_Y_FIELD], yScale);
+	values[SCALE_X_FACTOR_FIELD]
+	    = Show.scale(values[SCALE_X_FACTOR_FIELD], xScale);
+	values[SCALE_Y_FACTOR_FIELD]
+	    = Show.scale(values[SCALE_Y_FACTOR_FIELD], yScale);
     }
 
     /**

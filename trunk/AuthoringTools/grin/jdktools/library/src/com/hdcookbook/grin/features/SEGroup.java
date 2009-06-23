@@ -55,13 +55,15 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
-public class SEGroup extends Group implements SENode {
+public class SEGroup extends Group implements SENode, SEScalableNode {
     
     public SEGroup(SEShow show) {
         super(show);
@@ -118,6 +120,13 @@ public class SEGroup extends Group implements SENode {
 	    }
 	}
 	setParts(parts);	// This isn't really necessary
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	// Do nothing
     }
 
     /**

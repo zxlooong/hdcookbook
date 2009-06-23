@@ -138,6 +138,7 @@ public class Text extends Feature implements Node, SetupClient {
 
     private boolean isActivated = false;
     private Object setupMonitor = new Object();
+    private boolean needsSetup = true;
     private int alignedX;
     private int alignedY;
     private int ascent;
@@ -209,6 +210,13 @@ public class Text extends Feature implements Node, SetupClient {
     public void initialize() {
     }
 
+    /** 
+     * Get the font used for this text feature
+     **/
+    public Font getFont() {
+	return show.getFont(fontIndex);
+    }
+
     private void calculateMetrics() {
 	Font font = show.getFont(fontIndex);
 	changed = true;
@@ -271,7 +279,14 @@ public class Text extends Feature implements Node, SetupClient {
     public void setText(String[] newText) {
 	synchronized(show) {	// Shouldn't be necessary, but doesn't hurt
 	    strings = newText;
-	    calculateMetrics();
+	    synchronized(setupMonitor) {
+	    	// If the feature hasn't been set up yet, there's no need
+		// to calculate the metrics - the setup thread will do
+		// this later
+		if (!needsSetup) {
+		    calculateMetrics();
+		}
+	    }
 	}
     }
 
@@ -303,10 +318,9 @@ public class Text extends Feature implements Node, SetupClient {
 		// came back), there's no reason to re-calculate our
 		// metrics, and the Font instance stays with the show,
 		// so we don't need to schedule setup a second time.
-	    synchronized(setupMonitor) {
-		show.setupManager.scheduleSetup(this);
-		return 1;
-	    }
+	    needsSetup = true;
+	    show.setupManager.scheduleSetup(this);
+	    return 1;
 	} else {
 	    return 0;
 	}
@@ -320,12 +334,13 @@ public class Text extends Feature implements Node, SetupClient {
 	    if (!isSetup()) {
 		return;
 	    }
-	}
-	calculateMetrics();
-	synchronized(setupMonitor) {
+	    if (width == -1) {
+		calculateMetrics();
+	    }
 	    if (!isSetup()) {
 		return;
 	    }
+	    needsSetup = false;
 	}
 	sendFeatureSetup();
     }
@@ -335,7 +350,7 @@ public class Text extends Feature implements Node, SetupClient {
      **/
     public boolean needsMoreSetup() {
 	synchronized(setupMonitor) {
-	    return width == -1;
+	    return needsSetup;
 	}
     }
 

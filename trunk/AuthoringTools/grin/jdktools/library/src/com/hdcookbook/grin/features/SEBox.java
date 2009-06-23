@@ -56,6 +56,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.ShowBuilder;
@@ -64,7 +66,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.IOException;
 
-public class SEBox extends Box implements SENode {
+public class SEBox extends Box implements SENode, SEScalableNode {
     
     public SEBox(SEShow show) {
         super(show);
@@ -79,7 +81,8 @@ public class SEBox extends Box implements SENode {
 	this.y = y;
 	this.width = width;
 	this.height = height;
-	this.outlineWidth = outlineWidth;
+	this.outlineWidthX = outlineWidth;
+	this.outlineWidthY = outlineWidth;
 	this.outlineColor = outlineColor;
 	this.fillColor = fillColor;
     }
@@ -92,8 +95,12 @@ public class SEBox extends Box implements SENode {
 	return height;
     }
     
-    public int getOutlineWidth() {
-       return outlineWidth;
+    public int getOutlineWidthX() {
+       return outlineWidthX;
+    }
+    
+    public int getOutlineWidthY() {
+       return outlineWidthY;
     }
     
     public Color getOutlineColor() {
@@ -131,8 +138,12 @@ public class SEBox extends Box implements SENode {
         this.height = h;
     }
     
-    public void setOutlineWidth(int w) {
-        this.outlineWidth = w;
+    public void setOutlineWidthX(int w) {
+        this.outlineWidthX = w;
+    }
+    
+    public void setOutlineWidthY(int w) {
+        this.outlineWidthY = w;
     }
     
     public void setOutlineColor(Color color) {
@@ -144,14 +155,15 @@ public class SEBox extends Box implements SENode {
     }
     
     public void writeInstanceData(GrinDataOutputStream out) 
-            throws IOException {
-        
+            throws IOException 
+    {
        out.writeSuperClassData(this);
        out.writeInt(getX());
        out.writeInt(getY());
        out.writeInt(getWidth());
        out.writeInt(getHeight());
-       out.writeInt(getOutlineWidth());
+       out.writeInt(getOutlineWidthX());
+       out.writeInt(getOutlineWidthY());
        out.writeColor(getOutlineColor());
        out.writeColor(getFillColor());
        out.writeBoolean(scalingModel != null);
@@ -178,6 +190,18 @@ public class SEBox extends Box implements SENode {
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+    	x = xOffset + Show.scale(x, xScale);
+    	y = yOffset + Show.scale(y, yScale);
+	width = Show.scale(width, xScale);
+	height = Show.scale(height, yScale);
+	outlineWidthX = Show.scale(outlineWidthX, xScale);
+	outlineWidthY = Show.scale(outlineWidthY, yScale);
     }
 
     /**

@@ -57,6 +57,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.features.Translator;
@@ -65,8 +67,9 @@ import com.hdcookbook.grin.io.ShowBuilder;
 
 import java.io.IOException;
 
-public class SETranslatorModel extends SEInterpolatedModel {
-
+public class SETranslatorModel extends SEInterpolatedModel
+			       implements SEScalableNode 
+{
     private boolean isRelative;
 
     public SETranslatorModel() {
@@ -115,6 +118,36 @@ public class SETranslatorModel extends SEInterpolatedModel {
      **/
     public void changeFeatureReference(Feature from, Feature to) {
     }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	doScale(currValues, xScale, yScale, xOffset, yOffset);
+	for (int i = 0; i < values.length; i++) {
+	    doScale(values[i], xScale, yScale, xOffset, yOffset);
+	}
+    }
+
+    private void doScale(int[] values, int xScale, int yScale, 
+    				       int xOffset, int yOffset) 
+    {
+	if (values == null) {
+	    return;
+	}
+	if (isRelative) {
+	    values[Translator.X_FIELD] 
+		= Show.scale(values[Translator.X_FIELD], xScale);
+	    values[Translator.Y_FIELD] 
+		= Show.scale(values[Translator.Y_FIELD], yScale);
+	} else {
+	    values[Translator.X_FIELD] 
+		= xOffset + Show.scale(values[Translator.X_FIELD], xScale);
+	    values[Translator.Y_FIELD] 
+		= yOffset + Show.scale(values[Translator.Y_FIELD], yScale);
+	}
+    }
+
 
     /**
      * {@inheritDoc}

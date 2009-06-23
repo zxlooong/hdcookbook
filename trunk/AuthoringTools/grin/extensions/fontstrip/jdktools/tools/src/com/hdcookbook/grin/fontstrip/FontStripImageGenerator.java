@@ -98,10 +98,17 @@ public class FontStripImageGenerator {
     File[] assetDirs  = null;
     String outputDir  = null;    
     InputData data;
+    private double scaleX;
+    private double scaleY;
     
-    public FontStripImageGenerator(String configFileName, File[] assetDirs, String outputDir) {
+    public FontStripImageGenerator(String configFileName, 
+    				   double scaleX, double scaleY, 
+				   File[] assetDirs, String outputDir) 
+    {
         this.assetDirs = assetDirs;
         this.outputDir = outputDir;
+	this.scaleX = scaleX;
+	this.scaleY = scaleY;
         
         for (int i = 0; i < assetDirs.length; i++) {
             configFile = new File(assetDirs[i], configFileName);
@@ -157,7 +164,8 @@ public class FontStripImageGenerator {
             }
 
             if (editedImageAvailable) {
-                System.out.println("Using existing " + imageFileName + " to generate final images.");
+                System.out.println("Using existing " + imageFileName 
+				   + " to generate final images.");
             } else {
                 // Editor images not available in the asset dir... generate them.
                 try {
@@ -182,7 +190,9 @@ public class FontStripImageGenerator {
                 
                 FontImageMosaic imageMosaic = imageMosaicMap.get(imageName);
                 if (imageMosaic == null) {
-                    imageMosaic = new FontImageMosaic(FontImageMosaic.DEFAULT_WIDTH, 3000);   
+                    imageMosaic = new FontImageMosaic(
+		    			FontImageMosaic.DEFAULT_WIDTH, 3000, 
+					scaleX, scaleY);
                     imageMosaicMap.put(imageName, imageMosaic);
                 }
                 FontDesignImage fontDesignImage = images[i];     
@@ -201,6 +211,8 @@ public class FontStripImageGenerator {
                 FontImageMosaic mosaic = imageMosaicMap.get(fileName);
                 dout.writeUTF(fileName);
                 dout.writeInt(mosaic.maxLeading);                 
+                dout.writeInt(mosaic.maxBoundAscent);                 
+                dout.writeInt(mosaic.maxBoundDescent);                 
                 File outputFile = new File(outputDir, fileName);
                 mosaic.setOutputFile(outputFile);              
                 mosaic.writeOutFiles(dout);

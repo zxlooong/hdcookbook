@@ -82,7 +82,8 @@ public class SEImageFrame extends ImageFrame implements SENode {
     public SEImageFrame(Show show, String name, int outlineWidth, Color color) {
 	super(show);
 	this.name = name;
-    	this.outlineWidth = outlineWidth;
+    	this.outlineWidthX = outlineWidth;
+    	this.outlineWidthY = outlineWidth;
     	this.outlineColor = color;
     }
 
@@ -96,7 +97,8 @@ public class SEImageFrame extends ImageFrame implements SENode {
 
     public void writeInstanceData(GrinDataOutputStream out) throws IOException {
 	out.writeSuperClassData(this);
-	out.writeInt(outlineWidth);
+	out.writeInt(outlineWidthX);
+	out.writeInt(outlineWidthY);
 	out.writeColor(outlineColor);
 	out.writeFeatureReference(fixedImage);
     }

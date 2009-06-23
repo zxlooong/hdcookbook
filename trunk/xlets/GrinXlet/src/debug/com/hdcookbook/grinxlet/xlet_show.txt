@@ -54,7 +54,7 @@
 
 
 #
-# This is the show file for an xlet that controls a game.  This show provides
+# This is the show file for an xlet based on a GRIN show.  This show provides
 # a pop-up menu that lets you set debug options.
 
 
@@ -266,11 +266,11 @@ feature text F:ShowLog
 	SansSerif plain 48 { { 0 255 0 255 } } ;
 
 feature text F:Done.Red
-	left 400 baseline 550 { "Return to Game - RED for debug menu" }
+	left 400 baseline 550 { "Return to Show - RED for debug menu" }
 	SansSerif plain 48 { { 0 255 0 255 } } ;
 
 feature text F:Done
-	left 400 baseline 610 { "Return to Game - POPUP for debug menu" }
+	left 400 baseline 610 { "Return to Show - POPUP for debug menu" }
 	SansSerif plain 48 { { 0 255 0 255 } } ;
 
 feature assembly F:FocusHighlight {

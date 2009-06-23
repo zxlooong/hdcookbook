@@ -55,13 +55,15 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
-public class SESetTarget extends SetTarget implements SENode {
+public class SESetTarget extends SetTarget implements SENode, SEScalableNode {
 
     /**
      * Create a new SetTarget node.
@@ -124,6 +126,13 @@ public class SESetTarget extends SetTarget implements SENode {
 	if (part == from) {
 	    part = to;
 	}
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	// Do nothing
     }
 
     /**

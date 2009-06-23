@@ -127,7 +127,8 @@ public class FontStripText extends Feature implements Node, SetupClient {
     protected int yArg;
     protected String[] strings;
     private CharImageInfo[][] bakedStrings = null;
-    protected String   fontImageFileName;
+    protected String fontImageFileName;
+    private FontImageFileInfo fontInfo;
     
     protected int hspace;
     protected int vspace;
@@ -136,22 +137,18 @@ public class FontStripText extends Feature implements Node, SetupClient {
     private boolean isActivated = false;
     private int alignedX;
     private int alignedY;
-    private int ascent;
-    private int descent;
-    private int leading;
-    private int width = -1;
-    private int height = -1;
+    private int drawX;
+    private int drawY;
+    private int drawWidth;
+    private int drawHeight;
     private boolean changed = false;
-    private int maxAscent   = 0;
-    private int maxDescent  = 0;
     private DrawRecord drawRecord = new DrawRecord();
     private Object     setupMonitor = new Object();
     private boolean    setupMode    = false;    
     private boolean imageSetup = false;
 
     private ManagedImage fontImage = null;
-    private HashMap      charMap   = null;   
-    
+
     private static boolean loadingFailed = false;
     
     public FontStripText(Show show) {
@@ -180,13 +177,8 @@ public class FontStripText extends Feature implements Node, SetupClient {
             return;
         }
      
-        fontImage = FontImageFileInfo.getImageFile(fontImageFileName);
-        if (fontImage == null) {
-            fontImage = ImageManager.getImage(fontImageFileName);
-        }
-        
-	charMap = FontImageFileInfo.getCharMap(fontImageFileName);
-        if (charMap == null) {
+	fontInfo = FontImageFileInfo.getFontInfo(fontImageFileName);
+        if (fontInfo == null) {
 	    if (Debug.ASSERT) {
 		Debug.println("ERROR: entry for " + fontImageFileName + " not found in the info file.");
 		Debug.assertFail();
@@ -194,25 +186,32 @@ public class FontStripText extends Feature implements Node, SetupClient {
             loadingFailed = true;
             return;
         }        
+	fontImage = ImageManager.getImage(fontImageFileName);
  
 	changed = true;
         
-        // We know the charactor size without loading the actual font image,
-        // since the size is recorded in the fontstrip info size.
-        width = 0;
 	bakedStrings = new CharImageInfo[strings.length][];
         for (int i = 0; i < strings.length; i++) {
-            int w = getStringWidth(strings, bakedStrings, i);
-            if (w > width) {
-                width = w;
-            }
-        }
-	ascent = this.maxAscent;
-	descent = this.maxDescent;
-        leading = FontImageFileInfo.getMaxLeading(fontImageFileName);
-        height = (vspace + leading) * (strings.length - 1)
-		 + (strings.length * (ascent + descent + 1));
+	    bakedStrings[i] = bakeString(strings[i]);
+	}
+
+        // We know the charactor size without loading the actual font image,
+        // since the size is recorded in the fontstrip info size.
 	int a = (alignment & 0x03);
+        int width = 0;
+	if (a == MIDDLE || a == RIGHT) {
+	    for (int i = 0; i < strings.length; i++) {
+		CharImageInfo[] string = bakedStrings[i];
+		int w = 0;
+		for (int j=0; j < string.length; j++) {
+		    CharImageInfo charInfo = string[i];
+		    w += charInfo.width + hspace;
+		}
+		if (w > width) {
+		    width = w;
+		}
+	    }
+        }
 	if (a == MIDDLE) {
 	    alignedX = xArg - (width / 2);
 	} else if (a == RIGHT) {
@@ -222,12 +221,60 @@ public class FontStripText extends Feature implements Node, SetupClient {
 	}
 	a = (alignment & 0x0c);
 	if (a == BASELINE) {
-	    alignedY = yArg - ascent;
+	    alignedY = yArg - fontInfo.maxAscent;
 	} else if (a == BOTTOM) {
-	    alignedY = yArg - height;
+	    int lineHeight = fontInfo.maxAscent + fontInfo.maxDescent;
+	    int h = (vspace + fontInfo.maxLeading) * (strings.length - 1)
+		     + (strings.length * lineHeight);
+	    alignedY = yArg - h;
 	} else {
 	    alignedY = yArg;
 	}
+
+	// Now we calculate the bounding box.  For this, we look at the
+	// actual drawing position of each character.
+	// The character positioning is based on
+	// the original font use to make the font strip (the "bound rect"
+	// obtained from java.awt.font.TextLayout in SE), but the actual
+	// drawing for any character can go outside those bounds.  For
+	// example, the character glyphs might have been edited by
+	// a graphics designer.
+
+	drawX = alignedX;
+	drawY = alignedY;
+	int drawMaxX = alignedX;	// One pixel to right of pixel drawn
+	int drawMaxY = alignedY;	// One pixel below pixel drawn
+
+	int thisY = alignedY;
+        for (int i = 0; i < strings.length; i++) {
+	    CharImageInfo[] string = bakedStrings[i];
+	    int thisX = alignedX;
+	    for (int j=0; j < string.length; j++) {
+		CharImageInfo charInfo = string[j];
+		if (charInfo.charRect.height != 0) {
+		    int y = thisY + fontInfo.maxAscent - charInfo.ascent;
+		    if (y < drawY) {
+			drawY = y;
+		    }
+		    int x = thisX + charInfo.xOffset;
+		    if (x < drawX) {	// xOffset can be negative
+			drawX = x;
+		    }
+		    y += charInfo.charRect.height;
+		    if (y > drawMaxY) {
+			drawMaxY = y;
+		    }
+		    x += charInfo.charRect.width;
+		    if (x > drawMaxX) {
+			drawMaxX = x;
+		    }
+		}
+		thisX += charInfo.width + hspace;
+	    }
+	    thisY += getLineHeight();
+	}
+	drawWidth = drawMaxX - drawX;
+	drawHeight = drawMaxY - drawY;
     }
 
     public void destroy() {
@@ -293,7 +340,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
     }
 
     public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(alignedX, alignedY, width, height);
+	drawRecord.setArea(drawX, drawY, drawWidth, drawHeight);
 	if (changed) {
 	    drawRecord.setChanged();
 	}
@@ -308,9 +355,9 @@ public class FontStripText extends Feature implements Node, SetupClient {
 	}
 	if (background != null) {
 	    gr.setColor(background);
-	    gr.fillRect(alignedX, alignedY, width, height);
+	    gr.fillRect(drawX, drawY, drawWidth, drawHeight);
 	}
-        int y2 = alignedY;
+        int y2 = alignedY + fontInfo.maxAscent;
 
 	Composite old = gr.getComposite();
 	boolean keepAlpha 
@@ -321,7 +368,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
 	}
         for (int i = 0; i < bakedStrings.length; i++) {
             drawString(gr, bakedStrings[i], alignedX, y2);
-            y2 += ascent + descent + leading + vspace;
+            y2 += getLineHeight();
         }
 	if (!keepAlpha) {
 	    gr.setComposite(old);            
@@ -351,58 +398,42 @@ public class FontStripText extends Feature implements Node, SetupClient {
     }
 
 
-    // Calculate the width of strings[index], and put the result in
-    // baked[index].
-    private int getStringWidth(String[] strings, CharImageInfo[][] resultCh, 
-    			       int index)
-    {
-        char[] chars = strings[index].toCharArray();
-	CharImageInfo[] infos = new CharImageInfo[chars.length];
-	resultCh[index] = infos;
-        int w = 0;
-        int maxPixelWidth  = 0;
-        CharImageInfo charInfo;
+    // Get the character info for the given string
+    private CharImageInfo[] bakeString(String string) {
+	CharImageInfo[] infos = new CharImageInfo[string.length()];
         
-        for (int i = 0; i < chars.length; i++) {
-           charInfo = (CharImageInfo) charMap.get(new Character(chars[i]));;
-            
-           if (charInfo == null) {
+        for (int i = 0; i < string.length(); i++) {
+	    Character ch = new Character(string.charAt(i));
+	    CharImageInfo charInfo = (CharImageInfo) fontInfo.charMap.get(ch);
+            if (charInfo == null) {
 	       if (Debug.LEVEL > 0) {
-		   Debug.println("No charInfo found for " + chars[i]);
+		   Debug.println("No charInfo found for " + ch);
 	       }
                charInfo = new CharImageInfo();
-               charInfo.boundRect = new Rectangle(0,0,maxAscent+maxDescent, 20);
-               charInfo.baseline  = 0;
+               charInfo.ascent = 0;
+               charInfo.xOffset = 0;
+               charInfo.width = 0;
                charInfo.charRect = new Rectangle(0,0,0,0);       
-               charMap.put(new Character(chars[i]), charInfo);
+               fontInfo.charMap.put(ch, charInfo);
            }
 	   infos[i] = charInfo;
-           
-           int charAscent = (charInfo.baseline - charInfo.boundRect.y);
-           if (this.maxAscent < charAscent) {
-               this.maxAscent = charAscent;
-           }
-           int charDescent = (charInfo.boundRect.height - charAscent);
-           if (this.maxDescent < charDescent) {
-               this.maxDescent = charDescent;
-           }
-           maxPixelWidth = Math.max(maxPixelWidth, w + charInfo.charRect.width+hspace);
-           w += charInfo.boundRect.width+hspace;
-        }
-        
-        return Math.max(maxPixelWidth, w);
+	}
+	return infos;
     }
-    
+
+   
+    //
+    // Draw string with starting at x with baseline at y
+    //
     private void drawString(Graphics2D g2, CharImageInfo[] string, int x, int y)
     {
         for (int i = 0; i < string.length; i++) {
 	    CharImageInfo charInfo = string[i];
-           fontImage.drawClipped(g2,
-                    x - charInfo.boundRect.x, 
-                    y - charInfo.boundRect.y,
+            fontImage.drawClipped(g2,
+                    x + charInfo.xOffset, y - charInfo.ascent,
                     charInfo.charRect,
                     show.component);            
-           x += charInfo.boundRect.width+hspace;
+            x += charInfo.width + hspace;
         }        
     }
     
@@ -418,7 +449,8 @@ public class FontStripText extends Feature implements Node, SetupClient {
      * to the next line.
      **/
     public int getLineHeight() {
-	return vspace + ascent + descent + 1;
+	return fontInfo.maxAscent + fontInfo.maxDescent + fontInfo.maxLeading 
+	       + vspace;
     }
 
     /** 

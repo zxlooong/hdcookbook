@@ -62,6 +62,9 @@ import java.awt.Rectangle;
 public class CharImageInfo {
     char ch;
     Rectangle charRect;  // char's location in the fontstrip image mosaic
-    int baseline;        // char's baseline, relative to charRectangle's x,y at (0,0)
-    Rectangle boundRect; // char's bounding rect, assuming charRectangle's x,y as (0,0)
+    int ascent;          // distance from top of charRect to baseline
+    int xOffset;         // distance from drawing position to start of charRect
+    			 // Can be negative - think of a cursive, italic f
+			 // that goes below the baseline and to the left.
+    int width;
 }

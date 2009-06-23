@@ -57,6 +57,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.ShowBuilder;
@@ -65,7 +67,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.io.IOException;
 
-public class SEText extends Text implements SENode {
+public class SEText extends Text implements SENode, SEScalableNode {
 
     public SEText(SEShow show, String name, int x, int y, int alignment,
     		String[] strings, int vspace, int fontIndex, Color[] colors, 
@@ -188,6 +190,15 @@ public class SEText extends Text implements SENode {
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	xArg = xOffset + Show.scale(xArg, xScale);
+	yArg = yOffset + Show.scale(yArg, yScale);
+	vspace = Show.scale(vspace, yScale);
     }
 
     /**

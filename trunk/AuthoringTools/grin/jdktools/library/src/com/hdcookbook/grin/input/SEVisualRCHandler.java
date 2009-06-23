@@ -56,6 +56,8 @@ package com.hdcookbook.grin.input;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
@@ -68,7 +70,7 @@ import java.io.IOException;
 
 public class SEVisualRCHandler 
 		extends VisualRCHandler 
-		implements SENode, SERCHandler
+		implements SENode, SEScalableNode, SERCHandler
 {
 
     private VisualRCHandlerHelper helper;
@@ -335,6 +337,21 @@ public class SEVisualRCHandler
 	for (int i = 0; i < activateFeatures.length; i++) {
 	    if (activateFeatures[i] == from) {
 		activateFeatures[i] = to;
+	    }
+	}
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	if (mouseRects != null) {
+	    for (int i = 0; i < mouseRects.length; i++) {
+		Rectangle r = mouseRects[i];
+		r.x = xOffset + Show.scale(r.x, xScale);
+		r.y = yOffset + Show.scale(r.y, yScale);
+		r.width = Show.scale(r.width, xScale);
+		r.height = Show.scale(r.height, yScale);
 	    }
 	}
     }

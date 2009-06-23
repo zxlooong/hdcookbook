@@ -56,6 +56,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
@@ -63,7 +65,7 @@ import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
-public class SEFade extends Fade implements SENode {
+public class SEFade extends Fade implements SENode, SEScalableNode {
     
     public SEFade(SEShow show) {
         super(show);
@@ -195,6 +197,13 @@ public class SEFade extends Fade implements SENode {
 	if (part == from) {
 	    part = to;
 	}
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	// Do nothing
     }
 
     /**

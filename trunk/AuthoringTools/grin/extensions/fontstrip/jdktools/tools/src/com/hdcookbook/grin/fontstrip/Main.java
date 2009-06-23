@@ -60,6 +60,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class Main {
+
+    private static double scaleX = 1.0;
+    private static double scaleY = 1.0;
     
    public static void main(String[] args) {
        
@@ -88,6 +91,18 @@ public class Main {
                     usage();
                 } 
                 outputDir = args[index];
+            } else if ("-scaleX".equals(args[index])) {
+                index++;
+                if (index == args.length) {
+                    usage();
+                } 
+                scaleX = argToDouble(args[index]);
+            } else if ("-scaleY".equals(args[index])) {
+                index++;
+                if (index == args.length) {
+                    usage();
+                } 
+                scaleY = argToDouble(args[index]);
             } else if ("-config".equals(args[index])) {
                 index++;
                 if (index == args.length) {
@@ -124,7 +139,8 @@ public class Main {
         AssetFinder.setSearchPath(null, assetDirs);
         
         FontStripImageGenerator generator 
-                = new FontStripImageGenerator(configFile, assetDirs, outputDir);
+                = new FontStripImageGenerator(configFile, scaleX, scaleY,
+					      assetDirs, outputDir);
         
         try {
             generator.generateImages(designOnly);
@@ -135,6 +151,17 @@ public class Main {
         
         System.exit(0);
    }
+
+    private static double argToDouble(String arg) {
+	try {
+	    return Double.parseDouble(arg);
+	} catch (NumberFormatException ex) {
+	    ex.printStackTrace();
+	    usage();
+	    return -1;	// not reached
+	}
+    }
+    
    
    private static void usage() {
         System.out.println("Error in tools argument.\n");
@@ -151,11 +178,12 @@ public class Main {
         System.out.println("\t\t-config <a configuration file name>");
         System.out.println("\t\t-out <output_dir>");     
         System.out.println("\t\t-design_only");   
+        System.out.println("\t\t-scaleX <double> -scaleY <double>");   
         System.out.println("");
         System.out.println("\t-asset_dir may be repeated to form a search path.");
         System.out.println("\tWith -design_only argument, the tool will only generate" +
                 "intermediate font images for editing and not the final fontstrip images for runtime.");
         
-        System.exit(0);
+        System.exit(1);
    }
 }

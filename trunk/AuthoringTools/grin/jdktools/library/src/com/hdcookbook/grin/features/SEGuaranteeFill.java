@@ -55,6 +55,8 @@ package com.hdcookbook.grin.features;
 
 import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.io.ShowBuilder;
@@ -62,8 +64,9 @@ import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.awt.Rectangle;
 import java.io.IOException;
 
-public class SEGuaranteeFill extends GuaranteeFill implements SENode {
-    
+public class SEGuaranteeFill extends GuaranteeFill 
+			     implements SENode, SEScalableNode
+{
     public SEGuaranteeFill(SEShow show) {
         super(show);
     }
@@ -143,6 +146,27 @@ public class SEGuaranteeFill extends GuaranteeFill implements SENode {
 	if (part == from) {
 	    part = to;
 	}
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	doScale(guaranteed, xScale, yScale, xOffset, yOffset);
+	if (fills != null) {
+	    for (int i = 0; i < fills.length; i++) {
+		doScale(fills[i], xScale, yScale, xOffset, yOffset);
+	    }
+	}
+    }
+
+    private void doScale(Rectangle r, int xScale, int yScale, 
+    			 int xOffset, int yOffset)
+    {
+	r.x = xOffset + Show.scale(r.x, xScale);
+	r.y = yOffset + Show.scale(r.y, yScale);
+	r.width = Show.scale(r.width, xScale);
+	r.height = Show.scale(r.height, yScale);
     }
 
     /**

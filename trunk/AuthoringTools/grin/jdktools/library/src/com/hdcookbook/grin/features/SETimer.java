@@ -56,11 +56,13 @@ package com.hdcookbook.grin.features;
 
 
 import com.hdcookbook.grin.SENode;
+import com.hdcookbook.grin.SEScalableNode;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.SEShow;
 import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.commands.Command;
 
-public class SETimer extends SEInterpolatedModel {
+public class SETimer extends SEInterpolatedModel implements SEScalableNode {
 
     public SETimer() {
     }
@@ -71,6 +73,13 @@ public class SETimer extends SEInterpolatedModel {
 
     public void accept(SEShowVisitor visitor) {
         visitor.visitTimer(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
+	// Do nothing
     }
 
     /**

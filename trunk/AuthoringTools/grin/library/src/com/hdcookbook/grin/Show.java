@@ -174,6 +174,34 @@ public class Show implements AnimationClient {
     protected int fontStyleSize[];  // style in lower two bits, >> 2 for size
     private Font font[];	    // Populated on demand by getFont(int).
 
+    /**
+     * Scale factor for use by a director's java code
+     *
+     * @see #getXScale()
+     **/
+    private int xScale = 1000;  // in mills
+
+    /**
+     * Scale factor for use by a director's java code
+     *
+     * @see #getYScale()
+     **/
+    private int yScale = 1000;  // in mills
+
+    /**
+     * Offset factor for use by a director's java code
+     *
+     * @see getXOffset();
+     **/
+    private int xOffset = 0;
+
+    /**
+     * Offset factor for use by a director's java code
+     *
+     * @see getYOffset();
+     **/
+    private int yOffset = 0;
+
     /** 
      * Create a new show.
      *
@@ -248,6 +276,16 @@ public class Show implements AnimationClient {
 	this.fontName = fontName;
 	this.fontStyleSize = fontStyleSize;
 	font = new Font[fontName.length];
+    }
+
+    /**
+     * Sets the scale and offset values for a show. 
+     **/
+    public void setScale(int xScale, int yScale, int xOffset, int yOffset) {
+	this.xScale = xScale;
+	this.yScale = yScale;
+	this.xOffset = xOffset;
+	this.yOffset = yOffset;
     }
 
     /**
@@ -942,5 +980,60 @@ public class Show implements AnimationClient {
 	if (component != null && c != component.getCursor()) {
 	    component.setCursor(c);
 	}
+    }
+
+    /**
+     * Scale a value by a scale factor in mills.  This is equivalent to
+     * <pre>
+     *     (value * mills + 500) / 1000
+     * </pre>
+     * No function is provided to recover the original value from the
+     * scaled value (and such a function would suffer from loss of
+     * precision).  In a scaled show, we recommend only setting
+     * translation values, and never getting them.
+     *
+     * @see #getXScale()
+     * @see #getYScale()
+     **/
+    public static int scale(int value, int mills) {
+	return (value * mills + 500) / 1000;
+    }
+
+    /**
+     * Get the x scale factor, in mills.  To scale, use scale(int, int)
+     *
+     * @see #scale(int, int)
+     **/
+    public int getXScale() {
+	return xScale;
+    }
+
+    /**
+     * Get the y scale factor, in mills.  To scale, use scale(int, int)
+     *
+     * @see #scale(int, int)
+     **/
+    public int getYScale()  {
+	return yScale;
+    }
+
+    /**
+     * Get the x offset that this show was built with.  This might be useful
+     * in directors designed to work with scaled shows, but usually they
+     * act relative to the fixed coordinates within the show that will
+     * have already been adjusted.
+     **/
+    public int getXOffset() {
+	return xOffset;
+    }
+
+    /**
+     * Get the y offset that this show was built with.  This might be useful
+     * in directors designed to work with scaled shows, but usually they
+     * act relative to the fixed coordinates within the show that will
+     * have already been adjusted.
+     **/
+    public int getYOffset() {
+	return yOffset;
     }
 }

@@ -60,6 +60,8 @@ import com.hdcookbook.grin.Feature;
 import com.hdcookbook.grin.MosaicSpec;
 import com.hdcookbook.grin.features.FixedImage;
 import com.hdcookbook.grin.features.ImageSequence;
+import com.hdcookbook.grin.features.SEFixedImage;
+import com.hdcookbook.grin.features.SEImageSequence;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.text.GenericExtensionParser;
 import com.hdcookbook.grin.util.ManagedImage;
@@ -67,6 +69,7 @@ import com.hdcookbook.grin.util.AssetFinder;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -106,7 +109,12 @@ import javax.imageio.ImageIO;
     private String[] assetPath;
     private SEShow[] showTrees;
 
-    private ArrayList<ManagedImage> images = new ArrayList<ManagedImage>();
+    private static class ImageRecord {
+	ManagedImage image;
+	int maxWidth;
+	int maxHeight;
+    }
+    private ArrayList<ImageRecord> images = new ArrayList<ImageRecord>();
     private Mosaic defaultMosaic = null;
     private HashMap<String, MosaicPart> partsByName 
     		= new HashMap<String, MosaicPart>();
@@ -194,10 +202,26 @@ import javax.imageio.ImageIO;
 	}
     }
 
-    private void addImage(ManagedImage mi) {
+    private void addImage(ManagedImage mi, Dimension size) {
+	for (int i = 0; i < images.size(); i++) {
+	    ImageRecord rec = images.get(i);
+	    if (rec.image == mi) {
+		if (rec.maxWidth < size.width) {
+		    rec.maxWidth = size.width;
+		}
+		if (rec.maxHeight < size.height) {
+		    rec.maxHeight = size.height;
+		}
+		return;
+	    }
+	}
 	mi.prepare();
 	mi.load(this);
-	images.add(mi);
+	ImageRecord rec = new ImageRecord();
+	rec.image = mi;
+	rec.maxWidth = size.width;
+	rec.maxHeight = size.height;
+	images.add(rec);
 	mi.draw(frameG, 0, 30, null);
     }
 
@@ -205,10 +229,10 @@ import javax.imageio.ImageIO;
 	// Sort by maximum dimension, since the maximum dimension of a
 	// rectangle constrains the placement of subsequent rectangles
 	// more.
-	Collections.sort(images, new Comparator<ManagedImage>() {
-	    public int compare(ManagedImage m1, ManagedImage m2) {
-		int d1 = Math.max(m1.getWidth(), m1.getHeight());
-		int d2 = Math.max(m2.getWidth(), m2.getHeight());
+	Collections.sort(images, new Comparator<ImageRecord>() {
+	    public int compare(ImageRecord m1, ImageRecord m2) {
+		int d1 = Math.max(m1.maxWidth, m1.maxHeight);
+		int d2 = Math.max(m2.maxWidth, m2.maxHeight);
 		return d2 - d1;
 	    }
 	});
@@ -219,8 +243,8 @@ import javax.imageio.ImageIO;
 	}
     }
 
-    private void addToMosaic(ManagedImage mi) throws IOException {
-	String name = mi.getName();
+    private void addToMosaic(ImageRecord rec) throws IOException {
+	String name = rec.image.getName();
 	if (imagesToSkip.contains(name)) {
 	    return;
 	}
@@ -228,19 +252,19 @@ import javax.imageio.ImageIO;
 	if (part != null) {
 	    return;
 	}
-	BufferedImage imAdded = ImageIO.read(AssetFinder.getURL(mi.getName()));
-	String special = (String) imageToMosaic.get(mi.getName());
+	String special = (String) imageToMosaic.get(name);
 	if (special != null) {
-	    imageToMosaic.remove(mi.getName());	  // image has been taken
+	    imageToMosaic.remove(name);	  // image has been taken
 	    Mosaic m = nameToMosaic.get(special);
 	    assert m != null;
-	    part = m.putImage(mi, imAdded);
+	    part = m.putImage(rec.image, rec.maxWidth, rec.maxHeight);
 	} else {
 	    if (defaultMosaic == null) {
 		defaultMosaic = new Mosaic(new MosaicSpec("im0.png"));
 		addMosaic("im0.png", defaultMosaic);
 	    }
-	    part = defaultMosaic.putImage(mi, imAdded);
+	    part = defaultMosaic.putImage(rec.image, rec.maxWidth,
+	    					     rec.maxHeight);
 	}
 	assert part != null;
 	partsByName.put(name, part);
@@ -264,17 +288,24 @@ import javax.imageio.ImageIO;
 	    Feature[] features = show.getFeatures();
 	    for (int j = 0; j < features.length; j++) {
 		Feature f = features[j];
-		if (f instanceof FixedImage) {
-		    FixedImage fi = (FixedImage) f;
-		    addImage(fi.getImage());
-		} else if (f instanceof ImageSequence) {
-		    ImageSequence is = (ImageSequence) f;
+		if (f instanceof SEFixedImage) {
+		    SEFixedImage fi = (SEFixedImage) f;
+		    addImage(fi.getImage(), fi.getImageSize());
+		} else if (f instanceof SEImageSequence) {
+		    SEImageSequence is = (SEImageSequence) f;
 		    ManagedImage[] ims = is.getImages();
+		    Dimension[] sizes = is.getImageSizes();
 		    for (int k = 0; k < ims.length; k++) {
 			if (ims[k] != null) {
-			    addImage(ims[k]);
+			    addImage(ims[k], sizes[i]);
 			}
 		    }
+		} else if (f instanceof FixedImage) {
+		    throw new IOException("Internal error: Feature " + f 
+		    		+ " is a FixedImage, not an SEFixedImage");
+		} else if (f instanceof ImageSequence) {
+		    throw new IOException("Internal error: Feature " + f 
+			      + " is an ImageSequence, not an SEImageSequence");
 		}
 	    }
 	}

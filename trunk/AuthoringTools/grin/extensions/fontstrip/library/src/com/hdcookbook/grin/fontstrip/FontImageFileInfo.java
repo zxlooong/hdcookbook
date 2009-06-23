@@ -71,11 +71,14 @@ public class FontImageFileInfo {
     // Version number for the font image info file.
     // The value should match the version number in 
     // com.hdcookbook.grin.fontstrip.FontImageMosaic class.
-    private final static int VERSION_NUMBER = 1;
+    private final static int VERSION_NUMBER = 2;
     
-    private  ManagedImage fontImage = null;
-    private  int     maxLeading = 0;
-    private  HashMap charMap     = null;
+    int maxLeading;
+    int maxAscent;
+    int maxDescent;
+    	// maxAscent and maxDescent are based on the bound rects of
+	// the characters during font construction.
+    HashMap charMap;
     
     public static void initFontImageFileInfo(String infoFile) 
             throws IOException {
@@ -101,6 +104,8 @@ public class FontImageFileInfo {
             fileNames[i] = dis.readUTF();
             FontImageFileInfo info = new FontImageFileInfo();
             info.maxLeading = dis.readInt();
+	    info.maxAscent = dis.readInt();
+	    info.maxDescent = dis.readInt();
             info.charMap = new HashMap();
             int count = dis.readInt();
             for (int j = 0; j < count; j++) {
@@ -111,12 +116,9 @@ public class FontImageFileInfo {
                 charImage.charRect.y = dis.readInt();
                 charImage.charRect.width = dis.readInt();
                 charImage.charRect.height = dis.readInt();
-                charImage.baseline = dis.readInt();
-                charImage.boundRect = new Rectangle();
-                charImage.boundRect.x = dis.readInt();
-                charImage.boundRect.y = dis.readInt();
-                charImage.boundRect.width = dis.readInt();
-                charImage.boundRect.height = dis.readInt();
+                charImage.ascent = dis.readInt();
+                charImage.xOffset = dis.readInt();
+                charImage.width = dis.readInt();
 
                 info.charMap.put(new Character(charImage.ch), charImage);
             }
@@ -124,30 +126,12 @@ public class FontImageFileInfo {
         }
     }
     
-    static HashMap getCharMap(String fileName) {
+    static FontImageFileInfo getFontInfo(String fileName) {
         for (int i = 0; i < fileNames.length; i++) {
             if (fileName.equals(fileNames[i])) {
-                return fileInfos[i].charMap;
+                return fileInfos[i];
             }
         }
         return null;
-    }
-    
-    static ManagedImage getImageFile(String fileName) {
-        for (int i = 0; i < fileNames.length; i++) {
-            if (fileName.equals(fileNames[i])) {
-                return fileInfos[i].fontImage;
-            }
-        }
-        return null;
-    }
-    
-    static int getMaxLeading(String fileName) {
-        for (int i = 0; i < fileNames.length; i++) {
-            if (fileName.equals(fileNames[i])) {
-                return fileInfos[i].maxLeading;
-            }
-        }
-        return 0;
     }
 }

@@ -87,7 +87,7 @@ public class FontDesignImage {
     int currBaseline    = 0;
     int currAscent      = 0;
     int fontSize        = 0;
-    int whitespace      = 0; // how much pixels to leave around each char
+    int whitespace      = 0; // how many pixels to leave around each char
     
     Color backgroundColor = Color.WHITE;
     Color pixRectColor    = Color.RED;
@@ -304,6 +304,10 @@ public class FontDesignImage {
         public int getLeading() {
             return (int) layout.getLeading();
         }
+
+	public int getAscent() {
+	    return (int) Math.round(layout.getAscent());
+	}
          
         private Font getFont() {
             return font;

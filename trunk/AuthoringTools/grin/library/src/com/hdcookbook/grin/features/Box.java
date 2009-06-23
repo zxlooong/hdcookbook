@@ -83,7 +83,8 @@ public class Box extends Feature implements Node {
     protected int y;
     protected int width;
     protected int height;
-    protected int outlineWidth;
+    protected int outlineWidthX;	// in x dimension
+    protected int outlineWidthY;	// in y dimension
     protected Color outlineColor;
     protected Color fillColor;
     protected InterpolatedModel scalingModel = null;
@@ -108,7 +109,8 @@ public class Box extends Feature implements Node {
 	result.y = y;
 	result.width = width;
 	result.height = height;
-	result.outlineWidth = outlineWidth;
+	result.outlineWidthX = outlineWidthX;
+	result.outlineWidthY = outlineWidthY;
 	result.outlineColor = outlineColor;
 	result.fillColor = fillColor;
 	if (scaledBounds != null) {
@@ -245,27 +247,29 @@ public class Box extends Feature implements Node {
 		y1 -= h;
 	    }
 	    // We don't scale outlineWidth.  This would be complicated
-	    // to do.
+	    // to do, and it's not likely to be what's meant anyway.
 	}
 	int x2 = x1 + w - 1;
 	int y2 = y1 + h - 1;
-	if (outlineWidth > 0 && outlineColor != null) {
+	if ((outlineWidthX > 0 || outlineWidthY > 0) && outlineColor != null) {
 	    gr.setColor(outlineColor);
-	    int t = outlineWidth;
-	    int t2 = 2*t;
-	    gr.fillArc(x1, y1, t2, t2, 90, 90);		// upper-left
-	    gr.fillArc(x1, y2-t2, t2, t2, 180, 90); 	// lower-left
-	    gr.fillArc(x2-t2, y2-t2, t2, t2, 270, 90); // lower-right
-	    gr.fillArc(x2-t2, y1, t2, t2, 0, 90);	// upper-right
+	    int tx = outlineWidthX;
+	    int t2x = 2*tx;
+	    int ty = outlineWidthY;
+	    int t2y = 2*ty;
+	    gr.fillArc(x1, y1, t2x, t2y, 90, 90);	// upper-left
+	    gr.fillArc(x1, y2-t2y, t2x, t2y, 180, 90); 	// lower-left
+	    gr.fillArc(x2-t2x, y2-t2y, t2x, t2y, 270, 90); // lower-right
+	    gr.fillArc(x2-t2x, y1, t2x, t2y, 0, 90);	// upper-right
 	    // Issue #4 - subtract the right and bottom most pixels by one
-	    gr.fillRect(x1, y1+t, t, h-t2-1);	        // left
-	    gr.fillRect(x1+t, y2-t+1, w-t2-1, t);        // bottom
-	    gr.fillRect(x2-t+1, y1+t, t, h-t2-1);      // right
-	    gr.fillRect(x1+t, y1, w-t2-1, t);            // top
-	    x1 += t;
-	    y1 += t;
-	    w -= t2;
-	    h -= t2;
+	    gr.fillRect(x1, y1+ty, tx, h-t2y-1);	// left
+	    gr.fillRect(x1+tx, y2-ty+1, w-t2x-1, ty);   // bottom
+	    gr.fillRect(x2-tx+1, y1+ty, tx, h-t2y-1);   // right
+	    gr.fillRect(x1+tx, y1, w-t2x-1, ty);        // top
+	    x1 += tx;
+	    y1 += ty;
+	    w -= t2x;
+	    h -= t2y;
 	}
 	if (fillColor != null) {
 	    gr.setColor(fillColor);
@@ -282,7 +286,8 @@ public class Box extends Feature implements Node {
 	this.y = in.readInt();
 	this.width = in.readInt();
 	this.height = in.readInt();
-        this.outlineWidth = in.readInt();
+        this.outlineWidthX = in.readInt();
+        this.outlineWidthY = in.readInt();
         this.outlineColor = in.readColor();
         this.fillColor = in.readColor();   
         if (in.readBoolean()) {
