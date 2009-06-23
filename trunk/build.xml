@@ -82,7 +82,7 @@
         Could not find bd-j platform classes at 
 	${HDC_BDJ_PLATFORM_CLASSES}.
         Please change the value of the "HDC_BDJ_PLATFORM_CLASSES" property 
-        in the ${basedir}/vars.properties file.  
+        defined in the ${basedir}/vars.properties file.  
 	A good way to do this is to create a file called
 	${basedir}/user.vars.propreties
 	contining the line "HDC_BDJ_PLATFORM_CLASSES=&lt;your path>/classes.zip"
@@ -91,6 +91,9 @@
         The HDCookbook source repository does not include BD-J platform classes
         needed for compiling applications against.  These classes need to be
         provided by you.
+
+	http://wiki.java.net/bin/view/Mobileandembedded/BDJPlatformDefinition
+	describes one way to get them.
         
         </fail>      
     </target>
