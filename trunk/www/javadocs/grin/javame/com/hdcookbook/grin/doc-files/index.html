@@ -154,6 +154,7 @@ Here's BNF describing the syntax of a show file:
                  | draw_targets_setting
 		 | sticky_images_setting
 		 | binary_grin_file_setting 
+		 | grinview_background_setting
 
     segment_stack_depth_setting := "setting" "segment_stack_depth" integer ";"
 
@@ -172,6 +173,12 @@ Here's BNF describing the syntax of a show file:
 	# Sets the file name of the binary grin file that's produced by
 	# the compiler.  This can be used to make the extension be ".grn"
 	# instead of ".grin".
+
+    grinview_background_setting 
+	::= "setting" "grinview_background" "{" grinview_background* "}" ";"
+
+    grinview_background ::= string
+	# An image file name.  
         
     show_top ::= "show_top" string ;
         # Sets the name of show's top node for rendering.

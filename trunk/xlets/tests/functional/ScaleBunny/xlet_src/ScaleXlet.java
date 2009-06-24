@@ -194,6 +194,7 @@ public class ScaleXlet extends GrinXlet implements ResourceClient {
 	    pixelAspectRatio = new Dimension(120, 99);
 	    	// Note that this pixel aspect ratio is based on a theoretical
 		// displayable area of 704x480, as per the BD spec.  
+		// cf. part 3-2 sectoin 13.2 table 13-3.
 	} else if (Debug.ASSERT) {
 	    Debug.assertFail();
 	}

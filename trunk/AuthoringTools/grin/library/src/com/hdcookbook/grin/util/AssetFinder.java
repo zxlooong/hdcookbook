@@ -556,8 +556,8 @@ public class AssetFinder  {
      * ManagedImage.unprepare(), which normally happens in the
      * animation thread.
      *
-     * @see #notifyUnloadedHelper(ManagedFullImage)
-     * @see #notifyLoaded(ManagedFullImage, int, int)
+     * @see #notifyUnloadedHelper(ManagedFullImage, int, int)
+     * @see #notifyLoaded(ManagedFullImage)
      **/
     public static void notifyUnloaded(ManagedFullImage mi, 
     				      int width, int height)
