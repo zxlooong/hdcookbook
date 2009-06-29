@@ -109,7 +109,11 @@ public class SEImageSequence extends ImageSequence
 	Dimension[] result = new Dimension[placements.length];
 	for (int i = 0; i < result.length; i++) {
 	    Rectangle r = placements[i];
-	    result[i] = new Dimension(r.width, r.height);
+        if (r == null) {
+           result[i] = null;
+        } else {
+	       result[i] = new Dimension(r.width, r.height);
+        }
 	}
 	return result;
     }

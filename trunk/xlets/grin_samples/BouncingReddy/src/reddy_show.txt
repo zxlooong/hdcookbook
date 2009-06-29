@@ -60,7 +60,7 @@ feature group F:Intro {
 # The features used for "running":
 #
 
-feature fixed_image F:Reddy.Image ( middle 1200 middle 840 ) ReddyKillowatt.jpg ;
+feature fixed_image F:Reddy.Image ( middle 1200 middle 840 ) ReddyKilowatt.jpg ;
 
 feature translator F:Reddy F:Reddy.Coords {
     F:Reddy.Image
