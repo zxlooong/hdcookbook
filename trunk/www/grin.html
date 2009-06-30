@@ -618,6 +618,7 @@ handlers in
 
 <h2>Commands</h2>
 
+<p>
 Commands can be triggered in many places in a GRIN show.  Many features
 have one or more command lists associated with them.  For example,
 features that animate, like image sequences and translations, have
@@ -780,11 +781,12 @@ examples in the show file,
 	]]
     } ;
 </pre>
+<p>
 This calls the method <code>heartbeat()</code> once per frame, but
 only while the game is actually playing.  The 
 method <code>GrinBunnyDirector.heartbeat()</code> is a normal Java method.
-It does most of its work by modifying parameter in the scene graph.
-<p>
+It does most of its work by modifying parameters in the scene graph.
+</p><p>
 A director can look up named features within a show (provided that the
 show exports those features).  A number of features have methods that
 are designed to be called from a director's scripting code.  For example,
@@ -818,11 +820,11 @@ to be called from scripting code to modify the parameters of interest.
 </td></tr></table>
 
 <h2>The GRIN Show Compiler</h2>
-
+<p>
 The GRIN package includes a compiler that parses a show file, and
 turns it into various more efficient forms for use on a player at
 runtime.  Different parts of the GRIN compiler are discussed below.
-<p>
+</p><p>
 The sample projects that use GRIN in the cookbook
 repository all have build files that run the compiler automatically&nbsp;-- look
 at the GrinXlet framework to get started.  Setting up a build file the
