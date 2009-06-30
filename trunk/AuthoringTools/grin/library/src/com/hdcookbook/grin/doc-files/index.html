@@ -257,7 +257,7 @@ Here's BNF describing the syntax of a show file:
     name_or_continuation ::= "+" | "-" | name	# "+" means "repeat last frame",
      						# "-" means "empty"
 
-    assembly ::= "feature" "assembly" "{" assembly_part * "}" ";"
+    assembly ::= "feature" "assembly" name "{" assembly_part * "}" ";"
 
     assembly_part ::= name sub_feature
 

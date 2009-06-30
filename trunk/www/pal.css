@@ -4,3 +4,9 @@
 	color: #000000;
 	padding: 13px;
 }
+pre, code {
+	font-family: Courier New, Courier;
+	font-size: 15px;
+	color: #000000;
+	padding: 0px;
+}
