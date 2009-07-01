@@ -13,6 +13,7 @@
             <ant dir="tests/functional/StorageAccessXlets"/>
             <ant dir="tests/functional/VFSTest"/>
             <ant dir="tests/performance/classload"/>
+            <ant dir="demos"/>
         </target>           
         
 	<target name="clean">         
@@ -27,6 +28,7 @@
             <ant dir="tests/functional/SFAATest" target="clean"/> 
             <ant dir="tests/functional/VFSTest" target="clean"/>     
             <ant dir="tests/performance/classload" target="clean"/>
+            <ant dir="demos" target="clean"/>
 	</target>
 
 	<target name="spotless">         
@@ -41,6 +43,7 @@
             <ant dir="tests/functional/SFAATest" target="spotless"/> 
             <ant dir="tests/functional/VFSTest" target="spotless"/>     
             <ant dir="tests/performance/classload" target="spotless"/>
+            <ant dir="demos" target="spotless"/>
 	</target>
         
 </project>
