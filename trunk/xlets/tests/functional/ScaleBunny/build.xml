@@ -70,8 +70,8 @@ set up a new project using this build file.
 	<!-- Copy the fontstrip stuff to assets, so grinview will work -->
 	<copy file="${build.dir}/FullHD/images/fontstrip.png"
 	      tofile="${asset.dir}/images/fontstrip.png"/>
-	<copy file="${build.dir}/FullHD/fontstrip.inf"
-	      tofile="${asset.dir}/fontstrip.inf"/>
+	<copy file="${build.dir}/FullHD/fontstrp.inf"
+	      tofile="${asset.dir}/fontstrp.inf"/>
 
 	<antcall target="post-generate-binary-script"/>
     </target>
@@ -112,7 +112,7 @@ set up a new project using this build file.
             <arg value="-asset_dir"/>
             <arg value="${asset.dir.2}"/>
             <arg value="-asset_dir"/>
-            <arg value="${build.dir}/${res.name}"/>  <!-- for fontstrip.inf -->
+            <arg value="${build.dir}/${res.name}"/>  <!-- for fontstrp.inf -->
 	    <arg value="-extension_parser"/>
 	    <arg value="${extension.parser}"/>
 	    <arg value="${generate.binary.script.optimize.argument}"/>
@@ -172,7 +172,7 @@ set up a new project using this build file.
 
     <target name="post-clean">
 	<delete file="${asset.dir}/images/fontstrip.png"/>
-	<delete file="${asset.dir}/fontstrip.inf"/>
+	<delete file="${asset.dir}/fontstrp.inf"/>
     </target>
 
 </project>

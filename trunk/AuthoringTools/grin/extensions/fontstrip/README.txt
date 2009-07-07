@@ -47,7 +47,7 @@ An example of the configuration file can be seen at
 <hdcookbook>/xlets/tests/functional/FontStrip/src/assets/input1.xml.
 
 The final character image mosaics are associated with an information file, 
-"fontstrip.inf".  This file includes FontMetrics information for the set of 
+"fontstrp.inf".  This file includes FontMetrics information for the set of 
 characters in all the mosaics, as well as other essential data for properly 
 rendering characters from the mosaics at application runtime.  Make sure to 
 include this information file to the final disc as well as image files. 
@@ -80,7 +80,7 @@ ExtensionParser classname is
 "com.hdcookbook.grin.fontstrip.FontStripExtensionCompiler".  "fontstrip.jar" is
 a set of classes needed to support fontstrip extension feature for GRIN, and it
 is meant to be added to the grin library on a disc together with the 
-"fontstrip.inf" and fontstrip image mosaic files.
+"fontstrp.inf" and fontstrip image mosaic files.
 
 To find an example of FontStrip extension being used in the show, go to:
 <hdcookbook>/xlets/tests/functional/FontStrip/

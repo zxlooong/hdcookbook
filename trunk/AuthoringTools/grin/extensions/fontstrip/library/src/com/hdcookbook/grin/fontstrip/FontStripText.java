@@ -70,7 +70,6 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * A feature for drawing font strip text.
@@ -123,6 +122,11 @@ public class FontStripText extends Feature implements Node, SetupClient {
      **/
     protected int alignment;
 
+    /**
+     * The name of the fontstrip information file.
+     */
+    public final static String INFOFILE ="fontstrp.inf";
+
     protected int xArg;
     protected int yArg;
     protected String[] strings;
@@ -166,7 +170,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
     public void initialize() {
         if (!FontImageFileInfo.initialized) {
             try {
-                FontImageFileInfo.initFontImageFileInfo("fontstrip.inf");
+                FontImageFileInfo.initFontImageFileInfo(INFOFILE);
             } catch (IOException e) {
 		Debug.printStackTrace(e);
                 loadingFailed = true;

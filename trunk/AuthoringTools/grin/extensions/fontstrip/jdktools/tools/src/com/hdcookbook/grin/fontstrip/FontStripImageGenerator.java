@@ -84,7 +84,7 @@ import javax.xml.bind.helpers.DefaultValidationEventHandler;
  *    Read in the FontDesignImage png files, discard all the unnecessary pixel 
  *    data, and pack them into FontImageMosaic that the xlet can load at runtime.
  *    While writing FontImageMosaic files, also generate associated information file,
- *    "fontstrip.inf".
+ *    "fontstrp.inf".
  * 
  * Since the character order and positioning of them in the FontDesignImage 
  * need to be known for creating final FontImageMosaics,
@@ -152,6 +152,9 @@ public class FontStripImageGenerator {
             boolean editedImageAvailable = false;
             FontImageFile file = fileDescriptions[i];
             FontDesignImage fontImage = images[i];
+            if (fontImage == null) {
+                continue;
+            }
             String imageFileName = file.getDesignImage();
             fontImage.setCharactorArray(file.getCharList().toCharArray());
             for (File assetDir : assetDirs) {
@@ -195,12 +198,15 @@ public class FontStripImageGenerator {
 					scaleX, scaleY);
                     imageMosaicMap.put(imageName, imageMosaic);
                 }
-                FontDesignImage fontDesignImage = images[i];     
-                imageMosaic.addFontImages(fontDesignImage);   
+                FontDesignImage fontDesignImage = images[i];
+
+                if (fontDesignImage != null) {
+                   imageMosaic.addFontImages(fontDesignImage);
+                }
             }
             
 
-            String infoFileName = "fontstrip.inf";
+            String infoFileName = FontStripText.INFOFILE;
             File   infoFile = new File(outputDir, infoFileName);
             DataOutputStream dout = new DataOutputStream(
                         new BufferedOutputStream(new FileOutputStream(infoFile))); 
@@ -229,19 +235,28 @@ public class FontStripImageGenerator {
         FontDesignImage[] images   = new FontDesignImage[fileDescriptions.length];
         
         for (int i = 0; i < fileDescriptions.length; i++) {
-            FontImageFile fileDescrition = fileDescriptions[i];
-            FontDescription fontDescription = data.getFontDescription(fileDescrition);
+            FontImageFile fileDescription = fileDescriptions[i];
+            FontDescription fontDescription = data.getFontDescription(fileDescription);
 
-            int maxWidth = fileDescrition.getMaxImageWidth();
+            if (fontDescription == null) {
+                System.err.println(
+                        "<fontDescription> section in the file \"fontstrip-config.xml\" \n" + "" +
+                        "lacks information about the font \"" + fileDescription.getFontName() + "\".\n" +
+                        "Ignoring the corresponding <fontImageFile> entry.");
+                images[i] = null;
+                continue;
+            }
+
+            int maxWidth = fileDescription.getMaxImageWidth();
             if (maxWidth == 0)
                 maxWidth = FontDesignImage.DEFAULT_WIDTH;
-            int maxHeight = fileDescrition.getMaxImageHeight();
+            int maxHeight = fileDescription.getMaxImageHeight();
             if (maxHeight == 0)
                 maxHeight = FontDesignImage.DEFAULT_HEIGHT;            
             FontDesignImage fontImage = 
                     new FontDesignImage(fontDescription,
                                         maxWidth, maxHeight);
-	    images[i] = fontImage;
+	        images[i] = fontImage;
         }
         
         return images;

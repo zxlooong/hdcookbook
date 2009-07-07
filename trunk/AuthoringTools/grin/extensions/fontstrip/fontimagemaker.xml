@@ -16,7 +16,7 @@
     </target>
     <target name="compile" depends="init"
         description="compile the source">
-        <javac srcdir="${jdktools-src}" destdir="${jdktools-build}" debug="true">
+        <javac srcdir="${jdktools-src}:${metools.src}" destdir="${jdktools-build}" debug="true">
             <classpath location="${grin.classes}"/>
         </javac>
         <copy todir="${jdktools-build}">

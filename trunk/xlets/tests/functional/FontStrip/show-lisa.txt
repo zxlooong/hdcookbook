@@ -6,42 +6,42 @@ feature extension fontstrip:text
     F:LisaFontStrip1 
        "Lisa.png" 
        left 400 top 200 
-       { "Hit Enter to BEGIN!" "FontStrip, top left" }
+       { "Hit ENTER to switch" "FontStrip, top left" }
        background { 0 0 100 255 } ; 
 
 feature extension fontstrip:text 
     F:LisaFontStrip2 
        "Lisa.png" 
        middle 1000 baseline 500 
-       { "Hit Enter to BEGIN!" "FontStrip, middle baseline" } 
+       { "Hit ENTER to switch" "FontStrip, middle baseline" }
        background { 0 0 100 255 } ; 
 
 feature extension fontstrip:text 
     F:LisaFontStrip3 
        "Lisa.png" 
        right 1600 bottom 800 
-       { "Hit Enter to BEGIN!" "FontStrip, right bottom" } 
+       { "Hit ENTER to switch" "FontStrip, right bottom" }
        background { 0 0 100 255 } ; 
 
 
 feature text 
     F:LisaText1 
        left 400 top 200 
-       { "Hit Enter to BEGIN!" "Text, top left" } 
+       { "Hit ENTER to switch" "Text, top left" }
        lisa plain 60 { { 255 255 255 255 } }
        background { 0 0 100 255 } ; 
 
 feature text 
     F:LisaText2 
        middle 1000 baseline 500 
-       { "Hit Enter to BEGIN!" "Text, middle baseline" } 
+       { "Hit ENTER to switch" "Text, middle baseline" }
        lisa plain 60 { { 255 255 255 255 } }
        background { 0 0 100 255 } ; 
 
 feature text 
     F:LisaText3 
        right 1600 bottom 800 
-       { "Hit Enter to BEGIN!" "Text, right bottom" } 
+       { "Hit ENTER to switch" "Text, right bottom" }
        lisa plain 60 { { 255 255 255 255 } }
        background { 0 0 100 255 } ; 
 

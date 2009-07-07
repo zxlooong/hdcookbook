@@ -58,7 +58,7 @@ import java.awt.Rectangle;
 /**
  * This class holds various FontMetrics info for a particular charactor of a particular font.
  * The data here is used for positioning and generating FontDesignImage, as well as
- * providing FontMetrics measurement recorded into "fontstrip.inf" and used during xlet 
+ * providing FontMetrics measurement recorded into "fontstrp.inf" and used during xlet 
  * runtime to position characters.
  */
 class CharMetrics {
