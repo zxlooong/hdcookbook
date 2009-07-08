@@ -24,6 +24,8 @@ information or have any questions.
 -->
 
 <project name="Build Profiler" default="all" basedir=".">
+    <property file="user.vars.properties"/>
+    <property file="vars.properties"/>
 
     <presetdef name="jdktools.javac">
         <javac debug="on"/>
@@ -46,15 +48,45 @@ information or have any questions.
 	    Please compile the grin library first; the profiler depends
 	    on: com.hdcookbook.grin.util.Debug class.
 	</fail>
+	<condition property="use.prefuse">
+	        <istrue value="${advanced.ui}"/>
+	</condition>
+	<available file="${PREFUSE_LIB_CLASSES}"
+		  type="file" property="prefuse.present"/>
+	<echo  message="${prefuse.present}"/>
+	<echo  message="${use.prefuse}"/>
+	<echo  message="${advanced.ui}"/>
+	 <fail>
+	    <condition>
+	 	<and>
+		  <isset property="use.prefuse"/>
+		   <not>
+         	   <isset property="prefuse.present"/>
+       		  </not>		    
+		</and>
+	    </condition>
+	    For advance UI the profiler uses Prefuse Visualization Kit
+	    Please download it from "http://prefuse.org"
+	</fail>
     </target>
 
+    <target name="setcp" if="use.prefuse">
+	<property name="CP" value="${PROFILER_DEST}/classes:${PREFUSE_LIB_CLASSES}"/>
+	<property name="EXCL" value=" "/>
+    </target>
+    <target name="setexclude" unless="use.prefuse">
+	<property name="CP" value="${PROFILER_DEST}/classes"/>
+	<property name="EXCL" value="ProfileBrowser.java,TimeUnit.java,RectRenderer.java"/>
+    </target>
      <target name="all" depends="compile, install">
      </target>
-     <target name="compile" depends="init">
-        <jdktools.javac destdir="${PROFILER_DEST}/classes" classpath="${PROFILER_DEST}/classes">
+     <target name="compile" depends="init, setcp, setexclude">
+	<echo message="${CP}"/>
+	<echo message="${EXCL}"/>
+        <jdktools.javac destdir="${PROFILER_DEST}/classes"
+	    classpath="${CP}" sourcepath="" excludes="${EXCL}">
             <src path="src" />
 	    <src path="../grin/library/src"/>
-            <include name="*.java"/>
         </jdktools.javac> 
         
         <jar jarfile="${PROFILER_JAR}">
