@@ -1,5 +1,5 @@
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2009, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -76,6 +76,7 @@ public class BDSigner {
         }
         List<String> jarfiles = new ArrayList<String>();
         boolean isBUMF = false;
+        boolean noDiscroot = false;
         FileType fileType = FileType.NONE;
         SecurityUtil.Builder builder = new SecurityUtil.Builder();
         
@@ -95,21 +96,36 @@ public class BDSigner {
                builder = builder.contentSignerPassword(args[i]);
             } else if (opt.equals("-original-only")) {
                 builder = builder.originalOnly();
+            } else if (opt.equals("-onlinekey")) {
+                 if (++i == args.length) errorNeedArgument(opt);
+                 builder = builder.onlinePvtKeyFile(args[i]);
+                  if (!new File(args[i]).exists()) {
+                      printUsageAndExit("File " + args[i] + " not found.");
+                  }
+            } else if (opt.equals("-onlinecrt")) {
+                 if (++i == args.length) errorNeedArgument(opt);
+                 builder = builder.onlineCrtFile(args[i]);
+                  if (!new File(args[i]).exists()) {
+                      printUsageAndExit("File " + args[i] + " not found.");
+                  }
+            } else if (opt.equals("-nodiscroot")) {
+                builder = builder.noDiscroot();
+		noDiscroot = true;
             } else if (opt.equals("-help")) {
                 printUsageAndExit("");
             } else if (opt.equals("-debug")) {
-                 builder = builder.debug();
+                builder = builder.debug();
             } else {
-                  if (args[i].endsWith(".xml")) {
-                      builder = builder.bumf(args[i]);
-                      fileType = FileType.BUMF;
-                  } else if (args[i].endsWith("app.discroot.crt")) {
-                      builder = builder.discRootFile(args[i]);
-                      fileType = FileType.DISCROOT;
-                  } else {
-                      fileType = FileType.JAR;
-                      jarfiles.add(args[i]);
-                  }
+                if (args[i].endsWith(".xml")) {
+                    builder = builder.bumf(args[i]);
+                    fileType = FileType.BUMF;
+                } else if (args[i].endsWith("app.discroot.crt")) {
+                    builder = builder.discRootFile(args[i]);
+                    fileType = FileType.DISCROOT;
+                } else {
+                    fileType = FileType.JAR;
+                    jarfiles.add(args[i]);
+                }
 	          if (!new File(args[i]).exists()) {
                       printUsageAndExit("File " + args[i] + " not found.");
                   } 
@@ -124,7 +140,11 @@ public class BDSigner {
         // class. Lets proceed with signing.
         switch (fileType) {
             case NONE:
-                printUsageAndExit("No BUMF, jar files or app.discroot.crt to sign..");
+		if (noDiscroot) {
+                    util.generateOnlineSigFile(); break;
+		} else {
+                    printUsageAndExit("No BUMF, jar files or app.discroot.crt to sign..");
+		}
                 break;
             case JAR:
                 util.signJars(); break;
@@ -159,11 +179,14 @@ public class BDSigner {
          System.err.println(" -keystore filename  \t:Keystore containing the key used in signing");
          System.err.println("                     \tIn the absense of this option, a default store:\"keystore.store\"");
          System.out.println("                     \tis used from the current working directory.");
-	 System.err.println(" -storepass password \t:Keystore password");
+         System.err.println(" -storepass password \t:Keystore password");
          System.err.println(" -alias alias        \t:Alias for the signing key");
          System.err.println(" -keypass password   \t:Password for accessing the signing key");
          System.err.println(" -original-only      \t:During re-signing of the jar only include files");
          System.err.println("                     \tthat were orginally signed (as listed in signature file)");
+         System.err.println(" -onlinekey          \t:Path to binary file (from BDA) containing RSA private key for creating online.sig file"); 
+         System.err.println(" -onlinecrt          \t:Path to online.crt file (from BDA)"); 
+         System.err.println(" -nodiscroot         \t:Generate online.sig file without app.discroot.crt");
          System.err.println(" -debug              \t:Prints debug messages");
          System.err.println(" -help               \t:Prints this message");
          System.err.println("\nExample: java net.java.bd.tools.security.BDSigner 00000.jar\n");

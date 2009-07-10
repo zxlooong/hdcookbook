@@ -1,5 +1,5 @@
 /*  
- * Copyright (c) 2007, Sun Microsystems, Inc.
+ * Copyright (c) 2009, Sun Microsystems, Inc.
  * 
  * All rights reserved.
  * 
@@ -59,7 +59,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.BufferedOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -74,7 +73,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -118,10 +116,9 @@ import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.jce.X509KeyUsage;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.jce.provider.X509CertificateObject;
 
 /**
- * A generic security util class that generates the certificates for the BD-J
+ * A generic security utility class that generates the certificates for the BD-J
  * applications and signs the jars or the BUMF.
  * This methods of this class wrap around jarsigner and keytool to perform bd-j
  * required signing.
@@ -142,6 +139,7 @@ public class SecurityUtil {
     static final String DEF_KEYSTORE_PASSWORD = "keystorepassword";
     static final String DEF_NEWKEY_PASSWORD = "appcertpassword";
     static final String DEF_ROOTKEY_PASSWORD = "rootcertpassword";
+    static final String DEF_ONLINEKEY_PASSWORD = "onlinecertpassword";
     static final String DEF_APPCERT_ALIAS = "appcert";
     static final String DEF_ROOTCERT_ALIAS = "rootcert";
     static final String DEF_BUCERT_ALIAS = "bucert";
@@ -179,6 +177,9 @@ public class SecurityUtil {
     boolean isRootCert = false;
     boolean isAppCert = false;
     boolean isBindingUnitCert = false;
+    String onlinePvtKeyFile;
+    String onlineCrtFile;
+    boolean noDiscroot = false;
 
     // This is a special flag indicating newly added
     // jar entries (not present in the signature file of an already
@@ -218,6 +219,9 @@ public class SecurityUtil {
         this.discRootFile = b.discRootFile;
         this.jarfiles = b.jarfiles;
         this.signOriginalOnly = b.signOriginalOnly;
+        this.onlinePvtKeyFile = b.onlinePvtKeyFile;
+        this.onlineCrtFile = b.onlineCrtFile;
+        this.noDiscroot = b.noDiscroot;
 
         // Minor processing;append the orgid to the names
         dn = appendOrgId(dn);
@@ -228,13 +232,10 @@ public class SecurityUtil {
 
         String keystoreFile = DEF_KEYSTORE_FILE;
         String keystorePassword = DEF_KEYSTORE_PASSWORD;
-
         String newCertAlias;  // initialized based on root/app/binding cert
         String newKeyPassword;
-
         String contentSignerAlias; // initialized based on jar or bumf file
         String contentSignerPassword;
-
         String certSignerAlias;
         String certSignerPassword = DEF_ROOTKEY_PASSWORD;
 
@@ -250,6 +251,9 @@ public class SecurityUtil {
         boolean signOriginalOnly = false;
         String BUMFile;
         String discRootFile;
+        String onlinePvtKeyFile;
+        String onlineCrtFile;
+        boolean noDiscroot;
 
         public Builder() {
         }
@@ -293,7 +297,7 @@ public class SecurityUtil {
                 newKeyPassword = DEF_ROOTKEY_PASSWORD;
             }
             if (certSignerAlias == null) {
-                 if (isRootCert) {
+                if (isRootCert) {
                     certSignerAlias = DEF_ROOTCERT_ALIAS;
                 } else {
                     certSignerAlias = DEF_BUCERT_ALIAS;
@@ -400,11 +404,34 @@ public class SecurityUtil {
 
         public Builder discRootFile(String file) {
             this.discRootFile = file;
+	    initOnline();
+            return this;
+	}
+
+	private void initOnline() {
             if (contentSignerAlias == null) {
                 contentSignerAlias = DEF_ONLINE_CERT_ALIAS;
             }
+            if (contentSignerPassword == null) {
+                contentSignerPassword = DEF_ONLINEKEY_PASSWORD;
+            }
+        }
+
+        public Builder onlinePvtKeyFile(String file) {
+            this.onlinePvtKeyFile = file;
             return this;
         }
+
+        public Builder onlineCrtFile(String file) {
+            this.onlineCrtFile = file;
+            return this;
+        }
+
+        public Builder noDiscroot() {
+            this.noDiscroot = true;
+	    initOnline();
+            return this;
+	}
 
         public Builder jarfiles(List<String> files) {
             this.jarfiles = files;
@@ -450,25 +477,61 @@ public class SecurityUtil {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("orgID = ");
-        sb.append(orgId); sb.append("\n");
-        sb.append("keystoreFile = "); sb.append(keystoreFile); sb.append("\n");
-        sb.append("keystorePassword = "); sb.append(keystorePassword); sb.append("\n");
-        sb.append("newCertAlias = "); sb.append(newCertAlias); sb.append("\n");
-        sb.append("newKeyPassword = "); sb.append(newKeyPassword); sb.append("\n");
-        sb.append("contentSignerPassword = "); sb.append(contentSignerPassword); sb.append("\n");
-        sb.append("contentSignerAlias = "); sb.append(contentSignerAlias); sb.append("\n");
-        sb.append("certSignerAlias = "); sb.append(certSignerAlias); sb.append("\n");
-        sb.append("certSignerPassword = "); sb.append(certSignerPassword); sb.append("\n");
-        sb.append("dn = "); sb.append(dn); sb.append("\n");
-        sb.append("altName = "); sb.append(altName); sb.append("\n");
-        sb.append("debug = "); sb.append(debug); sb.append("\n");
-        sb.append("isAppCert = "); sb.append(isAppCert); sb.append("\n");
-        sb.append("isRootCert = "); sb.append(isRootCert); sb.append("\n");
-        sb.append("isBindingUnitCert = "); sb.append(isBindingUnitCert); sb.append("\n");
-        sb.append("BUMFile = "); sb.append(BUMFile); sb.append("\n");
-        sb.append("discRootFile ="); sb.append(discRootFile); sb.append("\n");
-        sb.append("jarfiles = "); sb.append(jarfiles); sb.append("\n");
-        sb.append("signOriginalOnly ="); sb.append(signOriginalOnly);
+        sb.append(orgId);
+        sb.append("\n");
+        sb.append("keystoreFile = ");
+        sb.append(keystoreFile);
+        sb.append("\n");
+        sb.append("keystorePassword = ");
+        sb.append(keystorePassword);
+        sb.append("\n");
+        sb.append("newCertAlias = ");
+        sb.append(newCertAlias);
+        sb.append("\n");
+        sb.append("newKeyPassword = ");
+        sb.append(newKeyPassword);
+        sb.append("\n");
+        sb.append("contentSignerPassword = ");
+        sb.append(contentSignerPassword);
+        sb.append("\n");
+        sb.append("contentSignerAlias = ");
+        sb.append(contentSignerAlias);
+        sb.append("\n");
+        sb.append("certSignerAlias = ");
+        sb.append(certSignerAlias);
+        sb.append("\n");
+        sb.append("certSignerPassword = ");
+        sb.append(certSignerPassword);
+        sb.append("\n");
+        sb.append("dn = ");
+        sb.append(dn);
+        sb.append("\n");
+        sb.append("altName = ");
+        sb.append(altName);
+        sb.append("\n");
+        sb.append("debug = ");
+        sb.append(debug);
+        sb.append("\n");
+        sb.append("isAppCert = ");
+        sb.append(isAppCert);
+        sb.append("\n");
+        sb.append("isRootCert = ");
+        sb.append(isRootCert);
+        sb.append("\n");
+        sb.append("isBindingUnitCert = ");
+        sb.append(isBindingUnitCert);
+        sb.append("\n");
+        sb.append("BUMFile = ");
+        sb.append(BUMFile);
+        sb.append("\n");
+        sb.append("discRootFile =");
+        sb.append(discRootFile);
+        sb.append("\n");
+        sb.append("jarfiles = ");
+        sb.append(jarfiles);
+        sb.append("\n");
+        sb.append("signOriginalOnly =");
+        sb.append(signOriginalOnly);
         return sb.toString();
     }
 
@@ -682,31 +745,64 @@ public class SecurityUtil {
         byte[] typeIndicator = "OSIG".getBytes(ISO);
         byte[] versionNo = "0200".getBytes(ISO);
         byte[] reservedBytes = new byte[32];
-        byte[] rootCert = readIntoBuffer(discRootFile);
-        Signature signer = Signature.getInstance(SIG_ALG);
+        byte[] rootCert;
+        byte[] signature;
+
         initKeyStore();
-        if (!store.containsAlias(contentSignerAlias)) {
+        PrivateKey key;
+
+        if (onlinePvtKeyFile != null) {
+            // import the online keys into the keystore
+            OnlineKeytool tool = new OnlineKeytool(onlinePvtKeyFile,
+                    onlineCrtFile, debug);
+            store = tool.importKeys(store, DEF_ONLINE_CERT_ALIAS,
+                    DEF_ONLINEKEY_PASSWORD);
+            
+            // make the updated keystore persistent
+            FileOutputStream fos = new FileOutputStream(keystoreFile);
+            store.store(fos, keystorePassword.toCharArray());
+            fos.close();
+            key = (PrivateKey) store.getKey(DEF_ONLINE_CERT_ALIAS,
+                    DEF_ONLINEKEY_PASSWORD.toCharArray());
             if (debug) {
-                System.out.println("The alias:" + contentSignerAlias +
-                        " does not exist");
+                System.out.println("Imported online keys into keystore: " +
+                        keystoreFile + " with an alias: \"" + DEF_ONLINE_CERT_ALIAS +
+                        "\"");
             }
+        } else if (store.containsAlias(contentSignerAlias)) {
+            if (debug) {
+                System.out.println("Using alias: \"" + contentSignerAlias +
+                        "\" from the keystore to generate online.sig file");
+            }
+            key = (PrivateKey) store.getKey(contentSignerAlias,
+                    contentSignerPassword.toCharArray());
+        } else {
+            System.err.println("Error: the alias:" + contentSignerAlias +
+                    " does not exist in the keystore and no private key file found" +
+                    " to generate online.sig file");
+            System.err.println("Please provide private key sent by BDA" +
+                    " for online authentication");
             return;
         }
-        PrivateKey key = (PrivateKey) store.getKey(contentSignerAlias,
-                contentSignerPassword.toCharArray());
+	if (noDiscroot) {
+	    rootCert = new byte[1];
+	} else {
+            rootCert = readIntoBuffer(discRootFile);
+	}
+        Signature signer = Signature.getInstance(SIG_ALG);
         signer.initSign(key);
         signer.update(rootCert);
         signer.update(typeIndicator);
         signer.update(versionNo);
         signer.update(reservedBytes);
-        byte[] signedData = signer.sign();
+        signature = signer.sign();
 
         // Write the online.sig file
         FileOutputStream fout = new FileOutputStream(ONLINE_SIG_FILE);
         fout.write(typeIndicator);
         fout.write(versionNo);
         fout.write(reservedBytes);
-        fout.write(signedData);
+        fout.write(signature);
         fout.close();
         System.out.println("Signed online cert stored in file <" +
                 ONLINE_SIG_FILE + ">");
@@ -738,20 +834,42 @@ public class SecurityUtil {
         }
         dis.close();
         byte[] signature = baos.toByteArray();
+        Certificate cert;
+        if (onlineCrtFile != null) {
+            cert = store.getCertificate(DEF_ONLINE_CERT_ALIAS);
+        } else {
+            cert = store.getCertificate(contentSignerAlias);
+        }
+        if (cert == null) {
+            if (debug) {
+                System.out.println("Could not find public key for " +
+                        ONLINE_SIG_FILE + " verification");
+            }
+            return;
+        }
+        boolean verified = verifyUsingCert(cert, typeIndicator, versionNo, signature);
 
-        Signature verifier = Signature.getInstance(SIG_ALG);
-        Certificate cert = store.getCertificate(contentSignerAlias);
-        verifier.initVerify(cert);
-        verifier.update(readIntoBuffer(discRootFile));
-        verifier.update(typeIndicator.getBytes(ISO));
-        verifier.update(versionNo.getBytes(ISO));
-        verifier.update(new byte[32]);
-        boolean verified = verifier.verify(signature);
         if (verified) {
             System.out.println("Online Cert signature verification PASSED");
         } else {
             System.out.println("Online Cert signature verification FAILED");
         }
+    }
+
+    private boolean verifyUsingCert(
+            Certificate cert, String typeIndicator, String versionNo, byte[] signature)
+            throws Exception {
+        Signature verifier = Signature.getInstance(SIG_ALG);
+        verifier.initVerify(cert);
+	if (noDiscroot) {
+	    verifier.update(new byte[1]);
+	} else {
+             verifier.update(readIntoBuffer(discRootFile));
+	}
+        verifier.update(typeIndicator.getBytes(ISO));
+        verifier.update(versionNo.getBytes(ISO));
+        verifier.update(new byte[32]);
+        return verifier.verify(signature);
     }
 
     public static String iso646String(byte[] buf) {
@@ -1055,7 +1173,7 @@ public class SecurityUtil {
 
         // Assuming that the root certificate was generated using our tool,
         // the certificate should have IssuerAlternativeNames as an extension.
-	if (rootCert.getIssuerAlternativeNames() == null) {
+        if (rootCert.getIssuerAlternativeNames() == null) {
             System.out.println("ERROR: the root certificate must have an alternate name");
             System.exit(1);
         }
