@@ -176,7 +176,7 @@ public class ProfileBrowser extends JPanel implements
     static double UIstartTime;
     static double UIendTime;
 
-    static double extent = 12000; //corresponds to nano secs.
+    static double extent = 10000; //corresponds to nano secs.
 
     static int totalMethods = 0;
     static HashMap<String, Double> stdDeviations = new HashMap<String, Double>();
@@ -327,13 +327,9 @@ public class ProfileBrowser extends JPanel implements
 	Double sd = toCurrentUnit(stdDeviations.get(method));     
 	Double mean = toCurrentUnit(means.get(method));     
 
-	// used for debugging purpose, remove it later.	
-	//if (method.equals("eraseBuffer")) {
-	//    System.out.println("sd:" + sd + "	mean:" + mean +
-	//		"	duration:" + duration);
-	//}
-	return (duration > ((sd * sdf) + mean)) ||
-		(duration < (mean - (sd * sdf)));	
+	// Lets only indicate longer execution times.
+	return (duration > ((sd * sdf) + mean)); 
+		//|| (duration < (mean - (sd * sdf)));	
     }
 
     static double toCurrentUnit(double value) {
@@ -519,12 +515,11 @@ public class ProfileBrowser extends JPanel implements
         m_total.setHorizontalAlignment(SwingConstants.RIGHT);
         m_total.setVerticalAlignment(SwingConstants.BOTTOM);
        
-        /* Needs to be properly implemented ***** 
-        ToolTipControl ttc = new ToolTipControl("label");
+        /* Needs to be properly implemented */ 
+        ToolTipControl ttc = new ToolTipControl(currTimeUnit.durationField());
         Control hoverc = new ControlAdapter() {
             public void itemEntered(VisualItem item, MouseEvent evt) {
-                if ( item.isInGroup(group) ) {
-                  m_total.setText(item.getString("label"));
+                if (item.isInGroup(group) ) {
                   item.setFillColor(item.getStrokeColor());
                   item.setStrokeColor(ColorLib.rgb(0,0,0));
                   item.getVisualization().repaint();
@@ -539,7 +534,7 @@ public class ProfileBrowser extends JPanel implements
             }
         };
         m_display.addControlListener(ttc);
-        m_display.addControlListener(hoverc); */
+        m_display.addControlListener(hoverc);
         
         // --------------------------------------------------------------------        
         // STEP 5: launching the visualization
@@ -575,7 +570,7 @@ public class ProfileBrowser extends JPanel implements
         
         JRangeSlider slider = timelineQ.createVerticalRangeSlider();
         slider.setThumbColor(null);
-        //slider.setMinExtent((int)toCurrentUnit(extent)); // uncommenting this slows down the slider
+        slider.setMinExtent((int)toCurrentUnit(extent)); // uncommenting this slows down the slider
         slider.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 m_display.setHighQuality(false);
@@ -590,9 +585,6 @@ public class ProfileBrowser extends JPanel implements
 	            Double high  = (Double) nm.getHighValue();
 		    UIstartTime = low.doubleValue();
 		    UIendTime = high.doubleValue();
-		    System.out.println("new start:" + low +
-					"new end:" + high);
-		    
 		}
                 m_display.repaint();
             }
