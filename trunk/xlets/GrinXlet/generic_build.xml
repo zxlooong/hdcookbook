@@ -572,7 +572,8 @@ The project.name property is not set.  This usually has one of two causes:
     </target>
 
     <target name="generate-grinview-args" depends="init">
-	<concat destfile="${build.dir}/gensrc/grinview/grinview_args.txt"><![CDATA[#
+        <property name="grinview.args.extra" value=""/>
+ 	<concat destfile="${build.dir}/gensrc/grinview/grinview_args.txt"><![CDATA[#
 # This file contains command-line arguments for use with
 # a launchable GrinView JAR file.  See the grinview-jar and
 # generate-grinview-args targets in build.xml.
@@ -584,6 +585,7 @@ ${extension.parser}
 ${show.director}
 -segment
 ${show.initial.segment}
+${grinview.args.extra}
 ${show.file}.txt
 ]]></concat>
 	<antcall target="post-generate-grinview-args"/>
