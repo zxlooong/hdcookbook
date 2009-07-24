@@ -93,7 +93,7 @@ public class GrinViewJar {
 		String arg = r.readLine();
 		if (arg == null) {
 		    break;
-		} else if (!arg.startsWith("#")) {
+		} else if (!arg.startsWith("#") && !arg.equals("")) {
 		    args.add(arg);
 		}
 	    }
