@@ -147,7 +147,16 @@ public class GenericMain extends Frame implements AnimationContext {
 	// This creates a facade for controlling us, e.g. from an xlet
 	// built on the generic game framework.
     }
-
+    public GenericMain(String grinxlet) {
+        try {
+            Class clazz = Class.forName(grinxlet);
+            clazz.getConstructor(GenericMain.class).newInstance(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+	// This creates a facade for controlling us, e.g. from an xlet
+	// built on the generic game framework.
+    }
     /**
      * Get the list of animation clients
      **/

@@ -92,6 +92,7 @@ public class Box extends Feature implements Node {
 
     private boolean isActivated;
     private DrawRecord drawRecord = new DrawRecord();
+    private boolean boxSizeChanged = false;
 
     public Box(Show show) {
         super(show);
@@ -141,6 +142,26 @@ public class Box extends Feature implements Node {
      **/
     public int getY() {
 	return y;
+    }
+
+    /**
+     * Resizes the box.
+     * <p>
+     * This method must only be called when it is safe to do so, according to
+     * the threading model, and with the Show lock held.  Usually, this means
+     * calling it from a Show command.
+     * <p>
+     **/
+    public void resize(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        boxSizeChanged = true;
+    }
+
+    public void setResized() {
+	   boxSizeChanged = true;
     }
     
     /**
@@ -212,6 +233,10 @@ public class Box extends Feature implements Node {
 	    if (changed) {
 		drawRecord.setChanged();
 	    }
+	}
+	if (boxSizeChanged) {
+	    drawRecord.setChanged();
+	    boxSizeChanged = false;
 	}
 	drawRecord.setSemiTransparent();
 	context.addArea(drawRecord);

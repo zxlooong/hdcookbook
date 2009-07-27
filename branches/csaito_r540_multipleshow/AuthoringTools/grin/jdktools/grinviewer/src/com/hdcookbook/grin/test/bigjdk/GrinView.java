@@ -101,7 +101,9 @@ public class GrinView extends GenericMain {
         
     public GrinView() {
     }
-
+    public GrinView(String grinxlet) {
+        super(grinxlet);
+    }
     private void buildControlGUI(String showName, boolean isBinary) {
 	screen = new GrinViewScreen(this, new ShowNode(show, showName));
 	screen.setNameText("GRIN show viewer:  " + showName);
@@ -390,7 +392,8 @@ public class GrinView extends GenericMain {
         System.out.println("                -scale <number>");
         System.out.println("                -segment <segment name to activate>");      
         System.out.println("                -extension_parser <a fully qualified classname>");       
-        System.out.println("                -director <a fully qualified classname>");       
+        System.out.println("                -director <a fully qualified classname>");
+        System.out.println("                -grinxlet <a fully qualified classname>");
         System.out.println("                -binary");
         System.out.println("                -stdin_commands");
         System.out.println("");
@@ -406,6 +409,7 @@ public class GrinView extends GenericMain {
         System.out.println("                              uses a custom feature or command subclass.");
 	System.out.println("            -binary tells GrinView to read a binary .grin file.");
 	System.out.println("            -director tells GrinView to instantiate the given class as Direcor.");
+	System.out.println("            -grinxlet tells GrinView to instantiate the given class instead of the default GrinXlet class.");
 	System.out.println();
 	System.exit(1);
     }
@@ -425,6 +429,7 @@ public class GrinView extends GenericMain {
 	boolean noUI = false;
         String director = null;
         boolean doAutoTest = false;
+        String grinxlet = null;
 	while (argsUsed < args.length - 1) {
 	    if ("-fps".equals(args[argsUsed])) {
 		argsUsed++;
@@ -494,7 +499,14 @@ public class GrinView extends GenericMain {
                 }
 		argsUsed++;
 		director = args[argsUsed];
-		argsUsed++; 
+		argsUsed++;
+	    } else if ("-grinxlet".equals(args[argsUsed])) {
+                if (grinxlet != null) {
+                    usage();
+                }
+		argsUsed++;
+		grinxlet = args[argsUsed];
+		argsUsed++;
             } else if ("-binary".equals(args[argsUsed])) {
                 isBinary = true;
                 argsUsed++;
@@ -542,7 +554,12 @@ public class GrinView extends GenericMain {
         if (imageMap != null) {
             AssetFinder.setImageMap(imageMap);
         }
-	GrinView m = new GrinView();
+
+	GrinView m;
+    if (grinxlet == null)
+        m = new GrinView();
+    else
+        m = new GrinView(grinxlet);
 	if (director != null) {
 	    m.setDirectorClassName(director);
 	}
