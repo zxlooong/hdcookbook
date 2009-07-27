@@ -31,7 +31,8 @@
 	    <arg value="-scale"/>
 	    <arg value="1"/>
 	    <arg value="-screensize"/>
-	    <arg value="ntsc"/>
+	    <!-- arg value="ntsc"/-->
+	    <arg value="qhd"/>
             <arg value="${show.file}.txt"/>
         </jdktools.java>
     </target>
@@ -53,7 +54,8 @@ ${show.initial.segment}
 -scale
 1
 -screensize
-ntsc
+#ntsc
+qhd
 ${show.file}.txt
 ]]></concat>
 	<antcall target="post-generate-grinview-args"/>
