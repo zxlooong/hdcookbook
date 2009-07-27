@@ -1,0 +1,197 @@
+#
+# Start of segments
+#
+
+feature group F:Digest.Container {
+    sub_feature box ( 0 0 299 139 )
+	outline 3 	{ 75 75 75 192 }
+	fill 		{ 75 75 75 192 }
+    ;
+    sub_feature box ( 3 3 296 136 )
+	outline 3	{ 0 0 0 192 }
+    ;
+} ;
+
+feature translator_model F:Tweet1.Position
+    { 0 0 0 linear-relative }
+;
+
+feature translator F:Tweet1.Translator F:Tweet1.Position {
+    F:Tweet1.Position
+    F:TweetView.1
+} ;
+
+feature translator_model F:Tweet2.Position
+    { 0 0 -90 linear-relative }
+;
+
+feature translator F:Tweet2.Translator F:Tweet2.Position {
+    F:Tweet2.Position
+    F:TweetView.2
+} ;
+
+feature translator_model F:Tweet3.Position
+    { 0 0 -180 linear-relative }
+;
+
+feature translator F:Tweet3.Translator F:Tweet3.Position {
+    F:Tweet3.Position
+    F:TweetView.3
+} ;
+
+feature translator_model F:Tweet4.Position
+    { 0 0 -270 linear-relative }
+;
+
+feature translator F:Tweet4.Translator F:Tweet4.Position {
+    F:Tweet4.Position
+    F:TweetView.4
+} ;
+
+feature translator_model F:Buttons.Digest.Position
+    { 0 0 -270 linear-relative }
+;
+
+feature translator F:Buttons.Digest.Translator F:Buttons.Digest.Position {
+    F:Buttons.Digest.Position
+    F:Buttons
+} ;
+
+feature group F:Digest.Everything {
+   F:Digest.Container
+   F:Buttons.Digest.Translator
+} ;
+
+rc_handler key_pressed H:Up1 {
+	left
+    } execute {
+    activate_part F:Buttons back ;
+    activate_segment S:Tweet4.Showing ;
+	java_command [[ getDirector().pageBack(); ]]
+    }
+;
+
+rc_handler key_pressed H:Down1 {
+	right
+    } execute {
+    activate_part F:Buttons next ;
+    activate_segment S:Tweet2.Showing ;
+    }
+;
+
+rc_handler key_pressed H:Up2 {
+	left
+    } execute {
+    activate_part F:Buttons back ;
+    activate_segment S:Tweet1.Showing ;
+    }
+;
+
+rc_handler key_pressed H:Down2 {
+	right
+    } execute {
+    activate_part F:Buttons next ;
+    activate_segment S:Tweet3.Showing ;
+    }
+;
+
+rc_handler key_pressed H:Up3 {
+	left
+    } execute {
+    activate_part F:Buttons back ;
+    activate_segment S:Tweet2.Showing ;
+    }
+;
+
+rc_handler key_pressed H:Down3 {
+	right
+    } execute {
+    activate_part F:Buttons next ;
+    activate_segment S:Tweet4.Showing ;
+    }
+;
+
+rc_handler key_pressed H:Up4 {
+	left
+    } execute {
+    activate_part F:Buttons back ;
+    activate_segment S:Tweet3.Showing ;
+    }
+;
+
+rc_handler key_pressed H:Down4 {
+	right
+    } execute {
+    activate_part F:Buttons next ;
+    activate_segment S:Tweet1.Showing ;
+	java_command [[ getDirector().pageNext(); ]]
+    }
+;
+
+
+segment S:Initialize.Digest
+    setup {
+	F:Everything
+    } on_entry {
+	java_command [[ getDirector().initialize(); ]]
+    } setup_done {
+	java_command [[
+	    TwitterDirector dir = getDirector();
+	    dir.initializeProfileImages();
+	    dir.pollTwitter();
+	]]
+    activate_segment S:Tweet1.Showing ;
+    }
+;
+
+segment S:Tweet1.Showing
+    active {
+    F:Digest.Container
+	F:Tweet1.Translator
+    F:Buttons.Digest.Translator
+	F:PollingTimer
+    } setup {
+	F:Everything
+    } rc_handlers {
+    H:Up1 H:Down1 
+    }
+;
+
+segment S:Tweet2.Showing
+    active {
+    F:Digest.Container
+	F:Tweet2.Translator
+    F:Buttons.Digest.Translator
+	F:PollingTimer
+    } setup {
+	F:Everything
+    } rc_handlers {
+    H:Up2 H:Down2 
+    }
+;
+
+segment S:Tweet3.Showing
+    active {
+    F:Digest.Container
+	F:Tweet3.Translator
+    F:Buttons.Digest.Translator
+	F:PollingTimer
+    } setup {
+	F:Everything
+    } rc_handlers {
+    H:Up3 H:Down3 
+    }
+;
+
+segment S:Tweet4.Showing
+    active {
+    F:Digest.Container
+	F:Tweet4.Translator
+    F:Buttons.Digest.Translator
+	F:PollingTimer
+    } setup {
+	F:Everything
+    } rc_handlers {
+    H:Up4 H:Down4 
+    }
+;
