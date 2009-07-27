@@ -2,11 +2,12 @@
 #  GRIN show file with the scene graph for the twitter xlet.
 #
 
-show 
+show
 
 exports 
     segments {
 	S:Initialize
+    S:Showing
     } features {
 	F:Window.Mover
 	F:ProfileImage.*
@@ -39,6 +40,8 @@ java_generated_class TwitterCommands [[
 
     }
 ]]
+
+$include twitter_digest_show.txt ;
 
 show_top F:ShowTop ;
 
@@ -268,6 +271,14 @@ rc_handler key_pressed H:Right {
     }
 ;
 
+rc_handler key_pressed H:Exit {
+	enter
+    } execute {
+    activate_segment S:Empty ;
+	java_command [[ getDirector().notifyDestroyed(); ]]
+    }
+;
+
 feature group F:Bottom {
     sub_feature box ( 3 363 296 396 )
 	fill { 0 0 0 192 }
@@ -294,8 +305,10 @@ segment S:Initialize
 	    TwitterDirector dir = getDirector();
 	    dir.initializeProfileImages();
 	    dir.pollTwitter();
+        dir.moveWindow(330, 375);
 	]]
-	activate_segment S:Showing ;
+    activate_segment S:Tweet1.Showing ;
+#	activate_segment S:Showing ;
     }
 ;
 
@@ -308,8 +321,21 @@ segment S:Showing
     } setup {
 	F:Everything
     } rc_handlers {
-	H:Left H:Right
+	H:Left H:Right H:Exit
+    } on_entry {
+java_command [[
+	    TwitterDirector dir = getDirector();
+       dir.moveWindow(600, 100);
+]]
     }
 ;
+
+segment S:Empty
+    active {
+    } setup {
+    } rc_handlers {
+    }
+;
+
 
 end_show

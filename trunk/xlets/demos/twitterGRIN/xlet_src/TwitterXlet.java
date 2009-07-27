@@ -54,6 +54,7 @@
 
 import com.hdcookbook.grinxlet.GrinXlet;
 import com.hdcookbook.grin.util.Debug;
+import com.hdcookbook.grin.util.NetworkManager;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -77,6 +78,16 @@ import org.havi.ui.HScreen;
  * a QHD version of the debug screen, though; filed as P4 RFE 149.
  **/
 public class TwitterXlet extends GrinXlet implements ResourceClient {
+
+    public void startXlet() {
+        super.startXlet();
+        NetworkManager.start();
+    }
+
+    public void destroyXlet(boolean unconditional) {
+        super.destroyXlet(unconditional);
+        NetworkManager.shutdown();
+    }
 
     private HGraphicsDevice graphicsDevice;
 

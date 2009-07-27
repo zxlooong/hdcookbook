@@ -6,7 +6,6 @@
     <property file="vars.properties"/>
     <import file="${grin.xlet}/generic_build.xml"/>
     
-
     <!-- re-define run-grinview target to run at NTSC SD resolution -->
 
     <target name="run-grinview" depends="init"
@@ -58,6 +57,14 @@ ntsc
 ${show.file}.txt
 ]]></concat>
 	<antcall target="post-generate-grinview-args"/>
+    </target>
+        <target name="post-grinview-jar">
+
+	<zip destfile="${project.name}-grinview.jar" update="true">
+	    <fileset dir="${asset.dir}">
+		   <include name="twitter_digest_show.txt"/>
+	    </fileset>
+	</zip>
     </target>
 </project>
 

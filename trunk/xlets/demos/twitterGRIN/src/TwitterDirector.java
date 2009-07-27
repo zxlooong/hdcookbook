@@ -56,13 +56,17 @@
 import com.hdcookbook.grin.Director;
 
 import com.hdcookbook.grin.features.FixedImage;
+import com.hdcookbook.grin.features.InterpolatedModel;
+import com.hdcookbook.grin.features.Translator;
 import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
+import com.hdcookbook.grin.util.NetworkManager;
 import com.substanceofcode.twitter.model.Status;
 import com.substanceofcode.twitter.TwitterApi;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.text.SimpleDateFormat;
 import java.util.StringTokenizer;
@@ -89,12 +93,13 @@ public class TwitterDirector extends Director {
     private ManagedImage[] tweetIcon = new ManagedImage[0];
     private Status[] tweetStatus = new Status[0];
 
-    private NetworkManager manager;
     private TwitterPoll pendingCommand;
     private SimpleDateFormat dateFormat=new SimpleDateFormat("hh:mm a MMM dd");
 
     private int page = 1;
     private String[] emptyStringArray = new String[0];
+
+    public  InterpolatedModel windowMover;
 
     TwitterApi twitter = new TwitterApi(null);	// Used by TwitterPoll
     Component component;
@@ -112,6 +117,7 @@ public class TwitterDirector extends Director {
 	    defaultProfilePicture = fi.getImage();
 	    ImageManager.getImage(defaultProfilePicture);
 	    defaultProfilePicture.prepare();
+        windowMover = (InterpolatedModel) getFeature("F:Window.Mover");
 	}
 	tweets = new TweetView[4];
 	for (int i = 0; i < tweets.length; i++) {
@@ -129,7 +135,7 @@ public class TwitterDirector extends Director {
 
 	footer = (Text) getFeature("F:Footer");
 	fontMetrics = getShow().component.getFontMetrics(tweets[0].tweet.getFont());
-	NetworkManager.start();
+	//NetworkManager.start();
     }
 
     public void initializeProfileImages() {
@@ -148,7 +154,7 @@ public class TwitterDirector extends Director {
 	    defaultProfilePicture.unprepare();
 	    ImageManager.ungetImage(defaultProfilePicture);
 	}
-	NetworkManager.shutdown();
+	//NetworkManager.shutdown();
 	TwitterPoll poll = null;
 	synchronized(this) {
 	    poll = pendingCommand;
@@ -278,6 +284,23 @@ public class TwitterDirector extends Director {
 		pendingCommand = null;
 	    }
 	}
+    }
+
+    public Dimension getPaneModeDimension() {
+        return new Dimension(300, 140);
+    }
+
+    /**
+     * Move this show to the absolute coordinate of the screen
+     *
+     * @param x
+     * @param y
+     */
+    public void moveWindow(int x, int y) {
+        int xPos = windowMover.getField(Translator.X_FIELD);
+        int yPos = windowMover.getField(Translator.Y_FIELD);
+        windowMover.setField(Translator.X_FIELD, x);
+        windowMover.setField(Translator.Y_FIELD, y);
     }
 
 }
