@@ -66,6 +66,7 @@ import com.hdcookbook.grin.features.Text;
 import com.hdcookbook.grin.features.Assembly;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
+import com.hdcookbook.grin.util.NetworkManager;
 
 import java.awt.Component;
 import java.awt.FontMetrics;
@@ -104,6 +105,8 @@ public class WeatherDirector extends Director {
     private int nextDay = 0;
     private StringBuffer zipBuf;
 
+    public  InterpolatedModel windowMover;
+
     public WeatherDirector() {
     }
 
@@ -124,7 +127,8 @@ public class WeatherDirector extends Director {
 	zipCode = (Text) getFeature("F:ZipCode");
 	String[] zip = zipCode.getText();
 	zipBuf = new StringBuffer(zip[0]);
-        NetworkManager.start();
+
+        windowMover = (InterpolatedModel) getFeature("F:Window.Mover");
     }
 
     public void pollWeather() {
@@ -143,7 +147,7 @@ public class WeatherDirector extends Director {
             blankWeatherImage.unprepare();
             ImageManager.ungetImage(blankWeatherImage);
         }
-        NetworkManager.shutdown();
+        //NetworkManager.shutdown();
         WeatherMan man = null;
         synchronized (this) {
             man = pendingCommand;
@@ -288,5 +292,18 @@ public class WeatherDirector extends Director {
                 pendingCommand = null;
             }
         }
+    }
+
+    /**
+     * Move this show to the absolute coordinate of the screen
+     *
+     * @param x
+     * @param y
+     */
+    public void moveWindow(int x, int y) {
+        int xPos = windowMover.getField(Translator.X_FIELD);
+        int yPos = windowMover.getField(Translator.Y_FIELD);
+        windowMover.setField(Translator.X_FIELD, x);
+        windowMover.setField(Translator.Y_FIELD, y);
     }
 }
