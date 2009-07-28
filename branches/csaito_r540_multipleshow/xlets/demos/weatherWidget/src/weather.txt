@@ -330,7 +330,6 @@ segment S:Initialize
 	java_command [[
 	    WeatherDirector dir = getDirector();
 	    dir.pollWeather();
-        dir.moveWindow(330, 270);
  	]]	
   	activate_segment S:Showing ;
     }
@@ -340,38 +339,8 @@ segment S:Initialize
 # The show ordering is critical as the weather image overlaps
 # with the bottom graphic elements
 #
+
 segment S:Showing
-    active {
-    	F:LocationBar
-        F:Location
-	F:WindSelector
-    	F:StatusBar
-	F:WeatherUpdater
-	F:TempBar
-   	F:Condition
-	F:Day
-	F:Temp
-	F:PollingTimer
-    } setup {
-	F:Everything
-    } rc_handlers {
-	H:DownRight
-	H:Left
-	H:Up
-#	H:Enter
-#	H:Zero
-#	H:One
-#	H:Two
-#	H:Three
-#	H:Four
-#	H:Five
-#	H:Six
-#	H:Seven
-#	H:Eight
-#	H:Nine
-    } 
-;
-segment S:ShowingAll
     active {
 	F:ZipChooser
 	F:ZipCode
@@ -402,12 +371,6 @@ segment S:ShowingAll
 #	H:Seven
 #	H:Eight
 #	H:Nine
-    } on_entry {
-        java_command [[
-	    WeatherDirector dir = getDirector();
-	    dir.pollWeather();
-        dir.moveWindow(530, 290);
-        ]]
-    }
+    } 
 ;
 end_show

@@ -305,7 +305,6 @@ segment S:Initialize
 	    TwitterDirector dir = getDirector();
 	    dir.initializeProfileImages();
 	    dir.pollTwitter();
-        dir.moveWindow(330, 375);
 	]]
     activate_segment S:Tweet1.Showing ;
 #	activate_segment S:Showing ;
@@ -322,11 +321,6 @@ segment S:Showing
 	F:Everything
     } rc_handlers {
 	H:Left H:Right H:Exit
-    } on_entry {
-java_command [[
-	    TwitterDirector dir = getDirector();
-       dir.moveWindow(600, 100);
-]]
     }
 ;
 
