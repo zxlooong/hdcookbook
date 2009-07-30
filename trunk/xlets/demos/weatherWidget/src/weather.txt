@@ -3,13 +3,12 @@
 
 show 
 
+
 # The features controlled by WeatherDirector
 #
 exports 
     segments {
-	S:Initialize
-    S:Showing
-    S:ShowingAll
+	S:Initialize 
     } features { 
        F:Window.Mover
        F:WeatherImage
@@ -166,11 +165,10 @@ feature assembly F:WindSelector  {
 feature assembly F:ZipChooser {
 
    default	F:ZipBar
-   editing	F:ZipBar
 
-#   editing	sub_feature group {
-#		    F:ZipEditBar
-#		} ;
+   editing	sub_feature group {
+		    F:ZipEditBar
+		} ;
 } ;
 
 # Shows that Day is changing 
@@ -330,7 +328,6 @@ segment S:Initialize
 	java_command [[
 	    WeatherDirector dir = getDirector();
 	    dir.pollWeather();
-        dir.moveWindow(330, 270);
  	]]	
   	activate_segment S:Showing ;
     }
@@ -341,37 +338,6 @@ segment S:Initialize
 # with the bottom graphic elements
 #
 segment S:Showing
-    active {
-    	F:LocationBar
-        F:Location
-	F:WindSelector
-    	F:StatusBar
-	F:WeatherUpdater
-	F:TempBar
-   	F:Condition
-	F:Day
-	F:Temp
-	F:PollingTimer
-    } setup {
-	F:Everything
-    } rc_handlers {
-	H:DownRight
-	H:Left
-	H:Up
-#	H:Enter
-#	H:Zero
-#	H:One
-#	H:Two
-#	H:Three
-#	H:Four
-#	H:Five
-#	H:Six
-#	H:Seven
-#	H:Eight
-#	H:Nine
-    } 
-;
-segment S:ShowingAll
     active {
 	F:ZipChooser
 	F:ZipCode
@@ -391,23 +357,17 @@ segment S:ShowingAll
 	H:DownRight
 	H:Left
 	H:Up
-#	H:Enter
-#	H:Zero
-#	H:One
-#	H:Two
-#	H:Three
-#	H:Four
-#	H:Five
-#	H:Six
-#	H:Seven
-#	H:Eight
-#	H:Nine
-    } on_entry {
-        java_command [[
-	    WeatherDirector dir = getDirector();
-	    dir.pollWeather();
-        dir.moveWindow(530, 290);
-        ]]
+	H:Enter
+	H:Zero
+	H:One
+	H:Two
+	H:Three
+	H:Four
+	H:Five
+	H:Six
+	H:Seven
+	H:Eight
+	H:Nine
     }
 ;
 end_show

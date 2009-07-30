@@ -129,6 +129,7 @@ public class WeatherDirector extends Director {
 	zipBuf = new StringBuffer(zip[0]);
 
         windowMover = (InterpolatedModel) getFeature("F:Window.Mover");
+        NetworkManager.start();
     }
 
     public void pollWeather() {
@@ -147,7 +148,7 @@ public class WeatherDirector extends Director {
             blankWeatherImage.unprepare();
             ImageManager.ungetImage(blankWeatherImage);
         }
-        //NetworkManager.shutdown();
+        NetworkManager.shutdown();
         WeatherMan man = null;
         synchronized (this) {
             man = pendingCommand;

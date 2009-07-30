@@ -135,7 +135,7 @@ public class TwitterDirector extends Director {
 
 	footer = (Text) getFeature("F:Footer");
 	fontMetrics = getShow().component.getFontMetrics(tweets[0].tweet.getFont());
-	//NetworkManager.start();
+	NetworkManager.start();
     }
 
     public void initializeProfileImages() {
@@ -154,7 +154,7 @@ public class TwitterDirector extends Director {
 	    defaultProfilePicture.unprepare();
 	    ImageManager.ungetImage(defaultProfilePicture);
 	}
-	//NetworkManager.shutdown();
+	NetworkManager.shutdown();
 	TwitterPoll poll = null;
 	synchronized(this) {
 	    poll = pendingCommand;
