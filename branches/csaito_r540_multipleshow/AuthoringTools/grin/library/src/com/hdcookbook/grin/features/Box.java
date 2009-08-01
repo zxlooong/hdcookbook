@@ -147,9 +147,11 @@ public class Box extends Feature implements Node {
     /**
      * Resizes the box.
      * <p>
-     * This method must only be called when it is safe to do so, according to
-     * the threading model, and with the Show lock held.  Usually, this means
-     * calling it from a Show command.
+     * This should not be directly called by clients of the GRIN
+     * framework, unless it is done from the animation thread (within
+     * a command body, or inside an implementation of Director.nextFrame()).
+     * Calls are synchronized to only occur within
+     * model updates, with the show lock held.
      * <p>
      **/
     public void resize(int x, int y, int width, int height) {
@@ -160,10 +162,6 @@ public class Box extends Feature implements Node {
         boxSizeChanged = true;
     }
 
-    public void setResized() {
-	   boxSizeChanged = true;
-    }
-    
     /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes

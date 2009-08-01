@@ -51,9 +51,7 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package com.hdcookbook.grinxlet;
-
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -68,14 +66,20 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
-import com.hdcookbook.grin.animator.AnimationClient; 
+import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
+import com.hdcookbook.grin.command.Command;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
@@ -94,10 +98,10 @@ import org.bluray.ui.event.HRcEvent;
  * The xlet class for a game project.  This is the deployment version
  * of the xlet, with debug support turned off.
  **/
-
 public class GrinXlet
-	implements Xlet, AnimationContext, UserEventListener
-{
+        implements Xlet, AnimationContext, UserEventListener,
+        MouseListener, MouseMotionListener {
+
     /**
      * The XletContext of our game xlet.  This is exposed as a public static
      * variable so that client code can access the XletContext.  It's set
@@ -108,36 +112,33 @@ public class GrinXlet
      **/
     public static XletContext xletContext;
     private static GrinXlet theInstance;
-
     public Show show;
     Container rootContainer;
     FontFactory fontFactory = null;
     AnimationEngine animationEngine;
     Director director;
-
     private String showFileName;
     private String showInitialSegment;
     private String showDirectorName;
     private boolean definesFonts;
     private File resourcesDir;
-
     private int redKeyCode;
     private int greenKeyCode;
     private int blueKeyCode;
     private int yellowKeyCode;
-
     private int xletWidth;
     private int xletHeight;
+    private Show[] keyInterestOrder;
 
     public GrinXlet() {
-	theInstance = this;
+        theInstance = this;
     }
 
     /**
      * Get the instance of this singleton
      **/
     public static GrinXlet getInstance() {
-	return theInstance;
+        return theInstance;
     }
 
     /**
@@ -158,19 +159,18 @@ public class GrinXlet
      * Get the animation engine
      **/
     public AnimationEngine getAnimationEngine() {
-	return animationEngine;
+        return animationEngine;
     }
 
     public void initXlet(XletContext context) {
         this.xletContext = context;
 
-	String[] args = 
-	    (String[]) xletContext.getXletProperty(xletContext.ARGS);
-	if (args == null || args.length == 0) {
-	    args = (String[]) 
-		xletContext.getXletProperty("dvb.caller.parameters");
-	}
-	doInitXlet(args);
+        String[] args =
+                (String[]) xletContext.getXletProperty(xletContext.ARGS);
+        if (args == null || args.length == 0) {
+            args = (String[]) xletContext.getXletProperty("dvb.caller.parameters");
+        }
+        doInitXlet(args);
     }
 
     /**
@@ -189,7 +189,7 @@ public class GrinXlet
     protected Container getRootContainer() {
         Container c = TVContainer.getRootContainer(xletContext);
         c.setSize(1920, 1080);
-	return c;
+        return c;
     }
 
     /**
@@ -200,21 +200,21 @@ public class GrinXlet
      * colleded their arguments.
      **/
     protected void doInitXlet(String[] args) {
-	if (Debug.ASSERT && args.length != 5) {
-	    Debug.assertFail("Parameters:  <grin file> <initial segment> <director> <fontflag> <resources dir>\n    fontflag is -fonts or -nofonts");
-	}
-	showFileName = args[0];
-	showInitialSegment = args[1];
-	showDirectorName = args[2];
-	definesFonts = "-fonts".equals(args[3]);
-	String root = System.getProperty("bluray.vfs.root") + "/";
-	resourcesDir = new File(root + args[4]);
-       
-        rootContainer = getRootContainer();
-	xletWidth = rootContainer.getWidth();
-	xletHeight = rootContainer.getHeight();
+        if (Debug.ASSERT && args.length != 5) {
+            Debug.assertFail("Parameters:  <grin file> <initial segment> <director> <fontflag> <resources dir>\n    fontflag is -fonts or -nofonts");
+        }
+        showFileName = args[0];
+        showInitialSegment = args[1];
+        showDirectorName = args[2];
+        definesFonts = "-fonts".equals(args[3]);
+        String root = System.getProperty("bluray.vfs.root") + "/";
+        resourcesDir = new File(root + args[4]);
 
-	animationEngine = createAnimationEngine();
+        rootContainer = getRootContainer();
+        xletWidth = rootContainer.getWidth();
+        xletHeight = rootContainer.getHeight();
+
+        animationEngine = createAnimationEngine();
         animationEngine.initialize(this);
     }
 
@@ -223,146 +223,144 @@ public class GrinXlet
      * framerate.
      **/
     protected AnimationEngine createAnimationEngine() {
-	DirectDrawEngine result = new DirectDrawEngine();
-	result.setFps(24000);
-	return result;
+        DirectDrawEngine result = new DirectDrawEngine();
+        result.setFps(24000);
+        return result;
     }
-    
+
     public void startXlet() {
-       rootContainer.setVisible(true);
-       animationEngine.start(); 	   
+        rootContainer.setVisible(true);
+        animationEngine.start();
     }
-    
+
     public void pauseXlet() {
-       rootContainer.setVisible(false);
-       animationEngine.pause();
+        rootContainer.setVisible(false);
+        animationEngine.pause();
     }
-    
+
     public void destroyXlet(boolean unconditional) {
-       rootContainer = null;
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Destroying animation engine...");
-	}
-       animationEngine.destroy();
-       EventManager.getInstance().removeUserEventListener(this);          
-	if (Debug.LEVEL > 0) {
-	    Debug.println("destroyXlet() completes successfully.");
-	    Debug.println();
-	    Debug.println();
-	    Debug.println();
-	    Debug.println();
-	}
-	xletContext = null;
-	theInstance = null;
+        rootContainer = null;
+        if (Debug.LEVEL > 0) {
+            Debug.println("Destroying animation engine...");
+        }
+        animationEngine.destroy();
+        EventManager.getInstance().removeUserEventListener(this);
+        if (Debug.LEVEL > 0) {
+            Debug.println("destroyXlet() completes successfully.");
+            Debug.println();
+            Debug.println();
+            Debug.println();
+            Debug.println();
+        }
+        xletContext = null;
+        theInstance = null;
     }
-    
+
     public void animationInitialize() throws InterruptedException {
-	try {
-	    director = (Director) Class.forName(showDirectorName).newInstance();
-	} catch (Throwable t) {
-	    Debug.assertFail("Can't create director:  " + t);
-	}
-	if (definesFonts) {
-	    try {
-	       fontFactory = new FontFactory();
-	    } catch (Exception ex) {
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(ex);
-		    Debug.println();
-		    Debug.println(" ***  Error!  FontFactory failed to initialize  ***");
-		    Debug.println();
-		}
-	    }
-	}
+        try {
+            director = (Director) Class.forName(showDirectorName).newInstance();
+        } catch (Throwable t) {
+            Debug.assertFail("Can't create director:  " + t);
+        }
+        if (definesFonts) {
+            try {
+                fontFactory = new FontFactory();
+            } catch (Exception ex) {
+                if (Debug.LEVEL > 0) {
+                    Debug.printStackTrace(ex);
+                    Debug.println();
+                    Debug.println(" ***  Error!  FontFactory failed to initialize  ***");
+                    Debug.println();
+                }
+            }
+        }
 
-	assignColorKeys();
+        assignColorKeys();
 
-	try {
-	    AssetFinder.setHelper(new AssetFinder() {
-		// Set up AssetFinder so we use DVBBufferedImage.
-		// See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
-		protected Image createCompatibleImageBufferHelper
-				    (Component c, int width, int height) 
-		{
-		    return new DVBBufferedImage(width, height);
-		}
-		protected Graphics2D createGraphicsFromImageBufferHelper
-				    (Image buffer) 
-		{
-		    Object g = ((DVBBufferedImage) buffer).createGraphics();
-		    return (Graphics2D) g;
-		}
-		protected void destroyImageBufferHelper(Image buffer) {
-		    ((DVBBufferedImage) buffer).dispose();
-		}
+        try {
+            AssetFinder.setHelper(new AssetFinder() {
+                // Set up AssetFinder so we use DVBBufferedImage.
+                // See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
 
-		//
-		// Manage font loading
-		//
-		protected Font getFontHelper(String name, int style, int size)
-		{
-		    if (fontFactory != null) {
-			try {
-			    return fontFactory.createFont(name, style, size);
-			} catch (Exception ex) {
-			    // ignored - an error is already reported by
-			    // AssetFinder, if appropriate
-			}
-		    }
-		    return null;
-		}
+                protected Image createCompatibleImageBufferHelper(Component c, int width, int height) {
+                    return new DVBBufferedImage(width, height);
+                }
 
-		//
-		// Map the color keys according to the HAVi API.
-		// cf. HD cookbook 19-4, "Those Crazy Color Keys".
-		//
-		protected int getColorKeyCodeHelper(Color c) {
-		    if (c == Color.red) {
-			return redKeyCode;
-		    } else if (c == Color.green) {
-			return greenKeyCode;
-		    } else if (c == Color.blue) {
-			return blueKeyCode;
-		    } else if (c == Color.yellow) {
-			return yellowKeyCode;
-		    } else {
-			if (Debug.ASSERT) {
-			    Debug.assertFail("unknown color key");
-			}
-			return 0;
-		    }
-		}
-	    });
+                protected Graphics2D createGraphicsFromImageBufferHelper(Image buffer) {
+                    Object g = ((DVBBufferedImage) buffer).createGraphics();
+                    return (Graphics2D) g;
+                }
 
-	   AssetFinder.setSearchPath(null, new File[] {resourcesDir});      
-	   if (AssetFinder.tryURL("images.map") != null) {
-	       AssetFinder.setImageMap("images.map");
-	       if (Debug.LEVEL > 0) {
-		   Debug.println("Found images.map, using mosaic.");
-	       }
-	    } else {
-	       if (Debug.LEVEL > 0) {
-		   Debug.println("No images.map, not using mosaic.");
-	       }
-	    }
+                protected void destroyImageBufferHelper(Image buffer) {
+                    ((DVBBufferedImage) buffer).dispose();
+                }
 
-	   GrinBinaryReader reader = 
-		   new GrinBinaryReader(AssetFinder.getURL(
-			    showFileName).openStream());
-	   show = new Show(director);
-	   reader.readShow(show);
-	} catch (IOException e) {
-	   if (Debug.LEVEL > 0) {
-	       Debug.printStackTrace(e);
-	   }
-	   Debug.println("Error in reading the show file");
-	   throw new InterruptedException();
-	}
+                //
+                // Manage font loading
+                //
+                protected Font getFontHelper(String name, int style, int size) {
+                    if (fontFactory != null) {
+                        try {
+                            return fontFactory.createFont(name, style, size);
+                        } catch (Exception ex) {
+                            // ignored - an error is already reported by
+                            // AssetFinder, if appropriate
+                        }
+                    }
+                    return null;
+                }
 
-	animationEngine.checkDestroy();
-	animationEngine.initClients(new AnimationClient[] { show });
-	animationEngine.initContainer(rootContainer, 
-				     new Rectangle(0, 0, xletWidth, xletHeight));
+                //
+                // Map the color keys according to the HAVi API.
+                // cf. HD cookbook 19-4, "Those Crazy Color Keys".
+                //
+                protected int getColorKeyCodeHelper(Color c) {
+                    if (c == Color.red) {
+                        return redKeyCode;
+                    } else if (c == Color.green) {
+                        return greenKeyCode;
+                    } else if (c == Color.blue) {
+                        return blueKeyCode;
+                    } else if (c == Color.yellow) {
+                        return yellowKeyCode;
+                    } else {
+                        if (Debug.ASSERT) {
+                            Debug.assertFail("unknown color key");
+                        }
+                        return 0;
+                    }
+                }
+            });
+
+            AssetFinder.setSearchPath(null, new File[]{resourcesDir});
+            if (AssetFinder.tryURL("images.map") != null) {
+                AssetFinder.setImageMap("images.map");
+                if (Debug.LEVEL > 0) {
+                    Debug.println("Found images.map, using mosaic.");
+                }
+            } else {
+                if (Debug.LEVEL > 0) {
+                    Debug.println("No images.map, not using mosaic.");
+                }
+            }
+
+            GrinBinaryReader reader =
+                    new GrinBinaryReader(AssetFinder.getURL(
+                    showFileName).openStream());
+            show = new Show(director);
+            reader.readShow(show);
+        } catch (IOException e) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(e);
+            }
+            Debug.println("Error in reading the show file");
+            throw new InterruptedException();
+        }
+
+        animationEngine.checkDestroy();
+        animationEngine.initClients(new AnimationClient[]{show});
+        animationEngine.initContainer(rootContainer,
+                new Rectangle(0, 0, xletWidth, xletHeight));
     }
 
     //
@@ -370,77 +368,78 @@ public class GrinXlet
     // cf. HD cookbook 19-4, "Those Crazy Color Keys".
     //
     private void assignColorKeys() {
-	float[] hues = { getKeyHue(0), getKeyHue(1), 
-			 getKeyHue(2), getKeyHue(3) };
-	redKeyCode = getClosest(hues, Color.red);
-	hues[redKeyCode] = 1000f;
-	redKeyCode += HRcEvent.VK_COLORED_KEY_0;
+        float[] hues = {getKeyHue(0), getKeyHue(1),
+            getKeyHue(2), getKeyHue(3)};
+        redKeyCode = getClosest(hues, Color.red);
+        hues[redKeyCode] = 1000f;
+        redKeyCode += HRcEvent.VK_COLORED_KEY_0;
 
-	greenKeyCode = getClosest(hues, Color.green);
-	hues[greenKeyCode] = 1000f;
-	greenKeyCode += HRcEvent.VK_COLORED_KEY_0;
+        greenKeyCode = getClosest(hues, Color.green);
+        hues[greenKeyCode] = 1000f;
+        greenKeyCode += HRcEvent.VK_COLORED_KEY_0;
 
-	blueKeyCode = getClosest(hues, Color.blue);
-	hues[blueKeyCode] = 1000f;
-	blueKeyCode += HRcEvent.VK_COLORED_KEY_0;
+        blueKeyCode = getClosest(hues, Color.blue);
+        hues[blueKeyCode] = 1000f;
+        blueKeyCode += HRcEvent.VK_COLORED_KEY_0;
 
-	yellowKeyCode = getClosest(hues, Color.yellow);
-	hues[yellowKeyCode] = 1000f;
-	yellowKeyCode += HRcEvent.VK_COLORED_KEY_0;
+        yellowKeyCode = getClosest(hues, Color.yellow);
+        hues[yellowKeyCode] = 1000f;
+        yellowKeyCode += HRcEvent.VK_COLORED_KEY_0;
     }
 
     //
     // Used by assignColorKeys()
     //
     private int getClosest(float[] hues, Color goal) {
-	float goalHue = getHue(goal);
-	int result = -1;
-	float resultDiff = 100f;
-	for (int i = 0; i < hues.length; i++) {
-	    float diff = Math.abs(goalHue - hues[i]);
-	    if (diff > 0.5f && diff <= 1f) {
-		diff = 1f - diff;
-	    }
-	    if (resultDiff >= diff) {
-		result = i;
-		resultDiff = diff;
-	    }
-	}
-	return result;
+        float goalHue = getHue(goal);
+        int result = -1;
+        float resultDiff = 100f;
+        for (int i = 0; i < hues.length; i++) {
+            float diff = Math.abs(goalHue - hues[i]);
+            if (diff > 0.5f && diff <= 1f) {
+                diff = 1f - diff;
+            }
+            if (resultDiff >= diff) {
+                result = i;
+                resultDiff = diff;
+            }
+        }
+        return result;
     }
 
     //
     // Used by assignColorKeys()
     //
     private float getKeyHue(int key) {
-	key += HRcEvent.VK_COLORED_KEY_0;
-	Color c = HRcCapabilities.getRepresentation(key).getColor();
-	return getHue(c);
+        key += HRcEvent.VK_COLORED_KEY_0;
+        Color c = HRcCapabilities.getRepresentation(key).getColor();
+        return getHue(c);
     }
 
     //
     // Used by assignColorKeys()
     //
     private float getHue(Color c) {
-	float[] hsb = Color.RGBtoHSB(c.getRed(), c.getGreen(),
-				     c.getBlue(), null);
-	return hsb[0] - ((float) Math.floor(hsb[0]));
+        float[] hsb = Color.RGBtoHSB(c.getRed(), c.getGreen(),
+                c.getBlue(), null);
+        return hsb[0] - ((float) Math.floor(hsb[0]));
     }
-   
-
 
     public void animationFinishInitialization() {
-	show.activateSegment(show.getSegment(showInitialSegment));	
-       
-	UserEventRepository userEventRepo = new UserEventRepository("x");
-	userEventRepo.addAllArrowKeys();
-	userEventRepo.addAllColourKeys();
-	userEventRepo.addAllNumericKeys();
-	userEventRepo.addKey(HRcEvent.VK_ENTER);
-	userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
+        show.activateSegment(show.getSegment(showInitialSegment));
 
-	EventManager.getInstance().addUserEventListener(this, userEventRepo);          
-	rootContainer.requestFocus();          
+        UserEventRepository userEventRepo = new UserEventRepository("x");
+        userEventRepo.addAllArrowKeys();
+        userEventRepo.addAllColourKeys();
+        userEventRepo.addAllNumericKeys();
+        userEventRepo.addKey(HRcEvent.VK_ENTER);
+        userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
+
+        EventManager.getInstance().addUserEventListener(this, userEventRepo);
+        pushKeyInterest(show);
+        rootContainer.addMouseMotionListener(this);
+	    rootContainer.addMouseListener(this);
+        rootContainer.requestFocus();
     }
 
     /**
@@ -448,14 +447,134 @@ public class GrinXlet
      * org.dvb.event.UserEventListener
      **/
     public void userEventReceived(UserEvent e) {
-	int type = e.getType();
+        int type = e.getType();
         if (type == HRcEvent.KEY_PRESSED) {
-	    int code = e.getCode();
-	    show.handleKeyPressed(code);
+            int code = e.getCode();
+            for (int i = 0; i < keyInterestOrder.length; i++) {
+                boolean isHandled = keyInterestOrder[i].handleKeyPressed(code);
+                if (isHandled) {
+                    break;
+                }
+            }
         } else if (type == HRcEvent.KEY_RELEASED) {
-	    int code = e.getCode();
-	    show.handleKeyReleased(code);
-	}
-    }	
+            int code = e.getCode();
+            for (int i = 0; i < keyInterestOrder.length; i++) {
+                boolean isHandled = keyInterestOrder[i].handleKeyReleased(code);
+                if (isHandled) {
+                    break;
+                }
+            }
+        }
+    }
 
+   /**
+     * Inserts a new Show at the top of the key interest stack.
+     * KeyEvents are delivered to the shows
+     * starting from the top of the key interest stack.
+     * If the show's currently active segment do not have any rc_handler
+     * that uses the key, then the the event
+     * is sent to the next show on the stack.
+     * MouseEvents are sent to all the shows in the key interest list.
+     */
+    public synchronized void pushKeyInterest(Show show) {
+        if (keyInterestOrder == null) {
+            keyInterestOrder = new Show[] {show} ;
+            return;
+        }
+
+        Show[] newList = new Show[keyInterestOrder.length+1];
+        newList[0] = show;
+        for (int i = 0; i < keyInterestOrder.length; i++) {
+            newList[i+1] = keyInterestOrder[i];
+        }
+        keyInterestOrder = newList;
+    }
+    /**
+     * Removes the show at the top of the key interest stack.
+     * KeyEvents are delivered to a show in the order
+     * starting from the top of the key interest stack.
+     * If the show's currently active segment do not have any rc_handler
+     * that uses the key, then the the event
+     * is sent to the next show on the stack.
+     * MouseEvents are sent to all the shows in the key interest list.
+     */
+    public synchronized void popKeyInterest() {
+        Show[] newList = new Show[keyInterestOrder.length-1];
+        for (int i = 1; i < keyInterestOrder.length; i++) {
+            newList[i-1] = keyInterestOrder[i];
+        }
+        keyInterestOrder = newList;
+    }
+
+    /**
+     * Mouse motion callback
+     **/
+    public void mouseMoved(MouseEvent e) {
+        final int x = e.getX();
+        final int y = e.getY();
+        for (int i = 0; i < keyInterestOrder.size(); i++) {
+            Show show = (Show) keyInterestOrder.elementAt(i);
+            show.runCommand(new Command(show) {
+                public void execute() {
+                   show.handleMouseMoved(x, y);
+                }
+            });
+        }
+    }
+
+    /**
+     * Mouse motion callback (when a button is down)
+     **/
+    public void mouseDragged(MouseEvent e) {
+        final int x = e.getX();
+        final int y = e.getY();
+        for (int i = 0; i < keyInterestOrder.length; i++) {
+            Show show = (Show) keyInterestOrder[i];
+            show.runCommand(new Command(show) {
+                public void execute() {
+                   show.handleMouseMoved(x, y);
+                }
+            });
+        }
+    }
+
+    /**
+     * Mouse clicked callback
+     **/
+    public void mouseClicked(MouseEvent e) {
+        final int x = e.getX();
+        final int y = e.getY();
+        for (int i = 0; i < keyInterestOrder.length; i++) {
+            Show show = (Show) keyInterestOrder[i];
+            show.runCommand(new Command(show) {
+                public void execute() {
+                   show.handleMouseClicked(x, y);
+                }
+            });
+        }
+    }
+
+    /**
+     * Mouse pressed callback
+     **/
+    public void mousePressed(MouseEvent e) {
+    }
+
+    /**
+     * Mouse released callback
+     **/
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    /**
+     * Mouse entered callback
+     **/
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    /**
+     * Mouse exited callback
+     **/
+    public void mouseExited(MouseEvent e) {
+    }
 }

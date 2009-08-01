@@ -136,6 +136,8 @@ public class GenericMain extends Frame implements AnimationContext {
 
     private String directorClassName = GenericDirector.class.getName();
 
+    private GrinXlet grinXlet;
+
     /**
      * Monitor to be held while coordinating a pause in the animation
      * for debug.
@@ -143,14 +145,14 @@ public class GenericMain extends Frame implements AnimationContext {
     protected Object debugWaitingMonitor = new Object();
 
     public GenericMain() {
-	new GrinXlet(this);
+	   grinXlet = new GrinXlet(this);
 	// This creates a facade for controlling us, e.g. from an xlet
 	// built on the generic game framework.
     }
     public GenericMain(String grinxlet) {
         try {
             Class clazz = Class.forName(grinxlet);
-            clazz.getConstructor(GenericMain.class).newInstance(this);
+            grinXlet = (GrinXlet) clazz.getConstructor(GenericMain.class).newInstance(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -229,93 +231,40 @@ public class GenericMain extends Frame implements AnimationContext {
     }
     
    
-    protected void init(String showName, boolean isBinary, 
-    			ShowBuilder builder, 
-			String initialSegmentName, boolean doAutoTest) 
-    {
+    protected void init(String showName, boolean isBinary,
+            ShowBuilder builder,
+            String initialSegmentName, boolean doAutoTest) {
 
-	this.initialSegmentName = initialSegmentName;
+        this.initialSegmentName = initialSegmentName;
         this.doAutoTest = doAutoTest;
-      
-	try {
-	    Class cl = Class.forName(directorClassName);
-	    director = (Director) cl.newInstance();
-	} catch (Throwable t) {
-	    t.printStackTrace();
-	    System.exit(1);
-	}
-	show = createShow(showName, director, builder, isBinary);
+
+        try {
+            Class cl = Class.forName(directorClassName);
+            director = (Director) cl.newInstance();
+        } catch (Throwable t) {
+            t.printStackTrace();
+            System.exit(1);
+        }
+        show = createShow(showName, director, builder, isBinary);
 
         setBackground(Color.black);
         setLayout(null);
-	pack();
-	insets = getInsets();
-        setSize(screenWidth + insets.left + insets.right, 
-		screenHeight + insets.top + insets.bottom);  
-        
+        pack();
+        insets = getInsets();
+        setSize(screenWidth + insets.left + insets.right,
+                screenHeight + insets.top + insets.bottom);
+
         addWindowListener(new java.awt.event.WindowAdapter() {
+
             public void windowClosing(java.awt.event.WindowEvent e) {
-		exitGrinview();
+                exitGrinview();
             }
         });
-
-        java.awt.event.KeyAdapter listener = new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent e) {
-	    	int code = e.getKeyCode();
-		// Translate F1..F4 into red/green/yellow/blue
-		if (code >= KeyEvent.VK_F1 && code <= KeyEvent.VK_F4) {
-		    code = code - KeyEvent.VK_F1 + RCKeyEvent.KEY_RED.getKeyCode();
-		} else if (code >= KeyEvent.VK_NUMPAD0 && code <= KeyEvent.VK_NUMPAD9) {
-		    code = code - KeyEvent.VK_NUMPAD0 + RCKeyEvent.KEY_0.getKeyCode();
-		} else if (code == KeyEvent.VK_F5) {
-		    code = RCKeyEvent.KEY_POPUP_MENU.getKeyCode();
-		}
-		if (sendKeyUp) {
-		    show.handleKeyReleased(code);
-		}
-            }
-            public void keyPressed(java.awt.event.KeyEvent e) {
-	    	int code = e.getKeyCode();
-		// Translate F1..F4 into red/green/yellow/blue
-		if (code >= KeyEvent.VK_F1 && code <= KeyEvent.VK_F4) {
-		    code = code - KeyEvent.VK_F1 + RCKeyEvent.KEY_RED.getKeyCode();
-		} else if (code >= KeyEvent.VK_NUMPAD0 && code <= KeyEvent.VK_NUMPAD9) {
-		    code = code - KeyEvent.VK_NUMPAD0 + RCKeyEvent.KEY_0.getKeyCode();
-		} else if (code == KeyEvent.VK_F5) {
-		    code =RCKeyEvent.KEY_POPUP_MENU.getKeyCode();
-		}
-		show.handleKeyPressed(code);
-            }
-            public void keyTyped(java.awt.event.KeyEvent e) {
-            }
-        };
-        addKeyListener(listener);
-	System.out.println("F1..F4 will generate red/green/yellow/blue, "
-			   + "F5 popup_menu");
-	MouseAdapter mouseL = new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-		final int x = (e.getX() - insets.left) * scaleDivisor;
-		final int y = (e.getY() - insets.top) * scaleDivisor;
-		show.runCommand(new Command(show) {
-		    public void execute() {
-			show.handleMouseClicked(x, y);
-		    }
-		});
-            }
-        };
-        addMouseListener(mouseL);
-        MouseMotionAdapter mouseM = new MouseMotionAdapter() {
-            public void mouseMoved(MouseEvent e) {
-		final int x = (e.getX() - insets.left) * scaleDivisor;
-		final int y = (e.getY() - insets.top) * scaleDivisor;
-		show.runCommand(new Command(show) {
-		    public void execute() {
-			show.handleMouseMoved(x, y);
-		    }
-		});
-            }
-        };
-        addMouseMotionListener(mouseM);
+        grinXlet.pushKeyInterest(show);
+        addKeyListener(grinXlet);
+        System.out.println("F1..F4 will generate red/green/yellow/blue, " + "F5 popup_menu");
+        addMouseListener(grinXlet);
+        addMouseMotionListener(grinXlet);
         setVisible(true);
     }
 
@@ -642,6 +591,10 @@ public class GenericMain extends Frame implements AnimationContext {
     public void setSendKeyUp(boolean v) {
 	sendKeyUp = v;
     }
+
+    public boolean getSendKeyUp() {
+        return sendKeyUp;
+    }
     
     protected String setFps(float newFps) {
 	fps = newFps;
@@ -715,7 +668,11 @@ public class GenericMain extends Frame implements AnimationContext {
                 }
             }.start();
         }
-    } 
+    }
+
+    public int getScaleDivisor() {
+        return scaleDivisor;
+    }
     
     static class DeviceConfig {
        public int width;
