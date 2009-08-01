@@ -79,7 +79,7 @@ import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.animator.DirectDrawEngine;
-import com.hdcookbook.grin.command.Command;
+import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.io.binary.GrinBinaryReader;
 import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
@@ -512,8 +512,8 @@ public class GrinXlet
     public void mouseMoved(MouseEvent e) {
         final int x = e.getX();
         final int y = e.getY();
-        for (int i = 0; i < keyInterestOrder.size(); i++) {
-            Show show = (Show) keyInterestOrder.elementAt(i);
+        for (int i = 0; i < keyInterestOrder.length; i++) {
+            Show show = (Show) keyInterestOrder[i];
             show.runCommand(new Command(show) {
                 public void execute() {
                    show.handleMouseMoved(x, y);
