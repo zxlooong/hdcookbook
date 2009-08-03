@@ -328,7 +328,7 @@ public class ProfileBrowser extends JPanel implements
 	Double mean = toCurrentUnit(means.get(method));     
 
 	// Lets only indicate longer execution times.
-	return (duration > ((sd * sdf) + mean)); 
+	return (duration > ((sd * sdf) + mean + 0.5)); 
 		//|| (duration < (mean - (sd * sdf)));	
     }
 
@@ -515,7 +515,6 @@ public class ProfileBrowser extends JPanel implements
         m_total.setHorizontalAlignment(SwingConstants.RIGHT);
         m_total.setVerticalAlignment(SwingConstants.BOTTOM);
        
-        /* Needs to be properly implemented */ 
         ToolTipControl ttc = new ToolTipControl(currTimeUnit.durationField());
         Control hoverc = new ControlAdapter() {
             public void itemEntered(VisualItem item, MouseEvent evt) {
