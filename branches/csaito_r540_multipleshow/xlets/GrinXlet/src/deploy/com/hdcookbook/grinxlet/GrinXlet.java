@@ -498,12 +498,18 @@ public class GrinXlet
      * is sent to the next show on the stack.
      * MouseEvents are sent to all the shows in the key interest list.
      */
-    public synchronized void popKeyInterest() {
+    public synchronized Show popKeyInterest() {
+        if (keyInterestOrder == null || keyInterestOrder.length == 0) {
+            return null;
+        }
+
+        Show show = keyInterestOrder[0];
         Show[] newList = new Show[keyInterestOrder.length-1];
         for (int i = 1; i < keyInterestOrder.length; i++) {
             newList[i-1] = keyInterestOrder[i];
         }
         keyInterestOrder = newList;
+        return show;
     }
 
     /**
