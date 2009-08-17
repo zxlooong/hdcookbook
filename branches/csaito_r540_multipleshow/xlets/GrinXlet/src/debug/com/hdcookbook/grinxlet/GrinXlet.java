@@ -1,4 +1,4 @@
-/*  
+*  
  * Copyright (c) 2008, Sun Microsystems, Inc.
  * 
  * All rights reserved.
@@ -479,7 +479,6 @@ public class GrinXlet
 
         EventManager.getInstance().addUserEventListener(this, userEventRepo);
         pushKeyInterest(show);
-        pushKeyInterest(xletShow);
         rootContainer.addMouseMotionListener(this);
 	    rootContainer.addMouseListener(this);
         rootContainer.requestFocus();
@@ -493,6 +492,7 @@ public class GrinXlet
         int type = e.getType();
         if (type == HRcEvent.KEY_PRESSED) {
             int code = e.getCode();
+            xletShow.handleKeyPressed(code);  // debug menu always gets the key
             for (int i = 0; i < keyInterestOrder.length; i++) {
                 boolean isHandled = keyInterestOrder[i].handleKeyPressed(code);
                 if (isHandled) {
@@ -500,7 +500,8 @@ public class GrinXlet
                 }
             }
         } else if (sendKeyUp && type == HRcEvent.KEY_RELEASED) {
-            int code = e.getCode();
+            int code = e.getCode(); 
+            xletShow.handleKeyPressed(code); // debug menu always gets the key
             for (int i = 0; i < keyInterestOrder.length; i++) {
                 boolean isHandled = keyInterestOrder[i].handleKeyReleased(code);
                 if (isHandled) {
@@ -569,6 +570,12 @@ public class GrinXlet
     public void mouseMoved(MouseEvent e) {
         final int x = e.getX();
         final int y = e.getY();
+        xletShow.runCommand(new Command(show) {
+                public void execute() {
+                   show.handleMouseMoved(x, y);
+                }
+            });
+
         for (int i = 0; i < keyInterestOrder.length; i++) {
             Show show = (Show) keyInterestOrder[i];
             show.runCommand(new Command(show) {
