@@ -415,6 +415,33 @@ public class GrinView extends GenericMain {
     }
 
     public static void main(String[] args) {
+        try {
+	    String java_version = System.getProperty("java.version");
+	    String os_name = System.getProperty("os.name");
+	    String os_arch = System.getProperty("os.arch");
+		
+	    System.out.println("Java version: " + java_version);
+	    System.out.println("O/S name: " + os_name);
+	    System.out.println("O/S architecture: " + os_arch);
+		
+	    if (java_version.startsWith("1.5.")
+		&& os_name.startsWith("Mac")
+	        && (os_arch.startsWith("i386") || os_arch.startsWith("x86")))
+	    {
+		System.setProperty("apple.awt.graphics.UseQuartz", "false");
+
+		System.out.println();
+		System.out.println("NOTE:  Java 5 on Mac/Intel detected.  Due to known issues, Quartz is being");
+		System.out.println("       disabled.  You may wish to switch to Java 6 to get better performance.");
+		System.out.println("       You can set your default java runtime from Applications -> Utilities");
+		System.out.println("       -> Java Preferences.");
+		System.out.println();
+		System.out.println("       See also https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=183");
+		System.out.println();
+	    }
+	} catch (Throwable t) {
+	    t.printStackTrace();
+	}
         LinkedList assetPathLL = new LinkedList();
         LinkedList assetDirsLL = new LinkedList();
         String imageMap = null;
