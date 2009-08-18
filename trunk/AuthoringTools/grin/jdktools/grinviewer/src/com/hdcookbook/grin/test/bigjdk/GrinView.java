@@ -411,10 +411,18 @@ public class GrinView extends GenericMain {
     }
 
     public static void main(String[] args) {
-	try {
-	    if (System.getProperty("java.version").startsWith("1.5.")
-		&& System.getProperty("os.name").startsWith("Mac")
-	        && System.getProperty("os.arch").startsWith("i386"))
+        try {
+	    String java_version = System.getProperty("java.version");
+	    String os_name = System.getProperty("os.name");
+	    String os_arch = System.getProperty("os.arch");
+		
+	    System.out.println("Java version: " + java_version);
+	    System.out.println("O/S name: " + os_name);
+	    System.out.println("O/S architecture: " + os_arch);
+		
+	    if (java_version.startsWith("1.5.")
+		&& os_name.startsWith("Mac")
+	        && (os_arch.startsWith("i386") || os_arch.startsWith("x86")))
 	    {
 		System.setProperty("apple.awt.graphics.UseQuartz", "false");
 
