@@ -54,6 +54,7 @@
  */
 package com.hdcookbook.grinxlet;
 
+import com.hdcookbook.grin.GrinXHelper;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.test.bigjdk.GenericMain;	// that's GrinView
 import com.hdcookbook.grin.animator.AnimationClient;
@@ -61,6 +62,7 @@ import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.input.RCKeyEvent;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -236,11 +238,10 @@ public class GrinXlet implements KeyListener, MouseListener, MouseMotionListener
         synchronized(this) {
             for (int i = 0; i < keyInterestOrder.length; i++) {
                 Show show = (Show) keyInterestOrder[i];
-                show.runCommand(new Command(show) {
-                    public void execute() {
-                        show.handleMouseClicked(x, y);
-                    }
-                });
+                GrinXHelper helper = new GrinXHelper(show);
+                helper.setCommandNumber(GrinXHelper.MOUSE_CLICK);
+                helper.setCommandObject(new Point(x,y));
+                show.runCommand(helper);
             }
         }
     }
@@ -263,16 +264,15 @@ public class GrinXlet implements KeyListener, MouseListener, MouseMotionListener
     public void mouseMoved(MouseEvent e) {
         Insets insets = grinView.getInsets();
         int    scaleDivisor = grinView.getScaleDivisor();
-        final int x = (e.getX() - insets.left) * scaleDivisor;
-        final int y = (e.getY() - insets.top) * scaleDivisor;
+        int x = (e.getX() - insets.left) * scaleDivisor;
+        int y = (e.getY() - insets.top) * scaleDivisor;
         synchronized(this) {
             for (int i = 0; i < keyInterestOrder.length; i++) {
                 Show show = (Show) keyInterestOrder[i];
-                show.runCommand(new Command(show) {
-                    public void execute() {
-                        show.handleMouseMoved(x, y);
-                    }
-                });
+                GrinXHelper helper = new GrinXHelper(show);
+                helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
+                helper.setCommandObject(new Point(x,y));
+                show.runCommand(helper);
             }
         }
     }

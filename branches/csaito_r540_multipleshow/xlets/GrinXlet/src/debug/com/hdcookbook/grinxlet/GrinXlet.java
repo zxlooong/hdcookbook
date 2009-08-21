@@ -66,6 +66,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -75,6 +76,7 @@ import java.awt.event.MouseMotionListener;
 import com.hdcookbook.grin.Director;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.Segment;
+import com.hdcookbook.grin.GrinXHelper;
 import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationContext;
 import com.hdcookbook.grin.animator.AnimationEngine;
@@ -568,21 +570,19 @@ public class GrinXlet
      * Mouse motion callback
      **/
     public void mouseMoved(MouseEvent e) {
-        final int x = e.getX();
-        final int y = e.getY();
-        xletShow.runCommand(new Command(show) {
-                public void execute() {
-                   show.handleMouseMoved(x, y);
-                }
-            });
+        int x = e.getX();
+        int y = e.getY();
+        GrinXHelper helper = new GrinXHelper(xletShow);
+        helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
+        helper.setCommandObject(new Point(x,y));
+        xletShow.runCommand(helper);
 
         for (int i = 0; i < keyInterestOrder.length; i++) {
             Show show = (Show) keyInterestOrder[i];
-            show.runCommand(new Command(show) {
-                public void execute() {
-                   show.handleMouseMoved(x, y);
-                }
-            });
+            helper = new GrinXHelper(show);
+            helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
+            helper.setCommandObject(new Point(x, y));
+            show.runCommand(helper);
         }
     }
 
@@ -590,15 +590,19 @@ public class GrinXlet
      * Mouse motion callback (when a button is down)
      **/
     public void mouseDragged(MouseEvent e) {
-        final int x = e.getX();
-        final int y = e.getY();
+        int x = e.getX();
+        int y = e.getY();
+        GrinXHelper helper = new GrinXHelper(xletShow);
+        helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
+        helper.setCommandObject(new Point(x,y));
+        xletShow.runCommand(helper);
+
         for (int i = 0; i < keyInterestOrder.length; i++) {
             Show show = (Show) keyInterestOrder[i];
-            show.runCommand(new Command(show) {
-                public void execute() {
-                   show.handleMouseMoved(x, y);
-                }
-            });
+            helper = new GrinXHelper(show);
+            helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
+            helper.setCommandObject(new Point(x, y));
+            show.runCommand(helper);
         }
     }
 
@@ -606,15 +610,19 @@ public class GrinXlet
      * Mouse clicked callback
      **/
     public void mouseClicked(MouseEvent e) {
-        final int x = e.getX();
-        final int y = e.getY();
+        int x = e.getX();
+        int y = e.getY();
+        GrinXHelper helper = new GrinXHelper(xletShow);
+        helper.setCommandNumber(GrinXHelper.MOUSE_CLICK);
+        helper.setCommandObject(new Point(x,y));
+        xletShow.runCommand(helper);
+
         for (int i = 0; i < keyInterestOrder.length; i++) {
             Show show = (Show) keyInterestOrder[i];
-            show.runCommand(new Command(show) {
-                public void execute() {
-                   show.handleMouseClicked(x, y);
-                }
-            });
+            helper = new GrinXHelper(show);
+            helper.setCommandNumber(GrinXHelper.MOUSE_CLICK);
+            helper.setCommandObject(new Point(x, y));
+            show.runCommand(helper);
         }
     }
 
