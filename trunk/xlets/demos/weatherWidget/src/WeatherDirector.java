@@ -105,8 +105,6 @@ public class WeatherDirector extends Director {
     private int nextDay = 0;
     private StringBuffer zipBuf;
 
-    public  InterpolatedModel windowMover;
-
     public WeatherDirector() {
     }
 
@@ -127,8 +125,7 @@ public class WeatherDirector extends Director {
 	zipCode = (Text) getFeature("F:ZipCode");
 	String[] zip = zipCode.getText();
 	zipBuf = new StringBuffer(zip[0]);
-
-        windowMover = (InterpolatedModel) getFeature("F:Window.Mover");
+        NetworkManager.start(); // will be ignored if the manager is already started.
         NetworkManager.start();
     }
 
@@ -295,16 +292,5 @@ public class WeatherDirector extends Director {
         }
     }
 
-    /**
-     * Move this show to the absolute coordinate of the screen
-     *
-     * @param x
-     * @param y
-     */
-    public void moveWindow(int x, int y) {
-        int xPos = windowMover.getField(Translator.X_FIELD);
-        int yPos = windowMover.getField(Translator.Y_FIELD);
-        windowMover.setField(Translator.X_FIELD, x);
-        windowMover.setField(Translator.Y_FIELD, y);
-    }
+
 }

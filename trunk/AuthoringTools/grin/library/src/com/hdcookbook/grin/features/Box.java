@@ -92,6 +92,7 @@ public class Box extends Feature implements Node {
 
     private boolean isActivated;
     private DrawRecord drawRecord = new DrawRecord();
+    private boolean boxSizeChanged = false;
 
     public Box(Show show) {
         super(show);
@@ -142,7 +143,25 @@ public class Box extends Feature implements Node {
     public int getY() {
 	return y;
     }
-    
+
+    /**
+     * Resizes the box.
+     * <p>
+     * This should not be directly called by clients of the GRIN
+     * framework, unless it is done from the animation thread (within
+     * a command body, or inside an implementation of Director.nextFrame()).
+     * Calls are synchronized to only occur within
+     * model updates, with the show lock held.
+     * <p>
+     **/
+    public void resize(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        boxSizeChanged = true;
+    }
+
     /**
      * Initialize this feature.  This is called on show initialization.
      * A show will initialize all of its features after it initializes
@@ -212,6 +231,10 @@ public class Box extends Feature implements Node {
 	    if (changed) {
 		drawRecord.setChanged();
 	    }
+	}
+	if (boxSizeChanged) {
+	    drawRecord.setChanged();
+	    boxSizeChanged = false;
 	}
 	drawRecord.setSemiTransparent();
 	context.addArea(drawRecord);

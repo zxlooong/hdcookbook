@@ -51,13 +51,13 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package com.hdcookbook.grin;
 
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
 import com.hdcookbook.grin.util.Debug;
 import java.io.IOException;
+import java.awt.Point;
 
 /**
  * This class has three distinct functions.  It's mostly a helper
@@ -132,40 +132,59 @@ import java.io.IOException;
  *  @author     Bill Foote (http://jovial.com)
  **/
 public class GrinXHelper extends Command implements Node {
-    
+
     protected int commandNumber;
     protected Command[] subCommands;
-
     /**
      * The commandNumber for a sync_display command
      **/
     protected final static int SYNC_DISPLAY = 0;
-
     /**
      * The commandNumber for a segment_done command
      **/
     protected final static int SEGMENT_DONE = 1;
-    
     /**
      * The commandNumber for the GRIN-internal feature setup command
      **/
     final static int FEATURE_SETUP = 2;
-
     /**
      * The commandNumber for the GRIN internal list-of-commands command
      **/
     protected final static int COMMAND_LIST = 3;
-    
+    /**
+     * The commandNumber for handling MOUSE_MOVE event
+     **/
+    public final static int MOUSE_MOVE = 4;
+    /**
+     * The commandNumber for handling MOUSE_CLICK event
+     **/
+    public final static int MOUSE_CLICK = 5;
+    /*
+     * A data member that can be used to hold additional info for
+     * executing a command.  For MOUSE_MOVE and MOUSE_CLICK commands,
+     * this data is expected to be java.awt.Point that holds x,y of the
+     * mouse event.
+     */
+    private Object data = null;
+
     public GrinXHelper(Show show) {
         super(show);
     }
-  
+
     /**
      * Sets the command number for this class when used as a command.
      * This should only be called as part of initializing this object.
      */
     public void setCommandNumber(int commandNumber) {
         this.commandNumber = commandNumber;
+    }
+
+    /**
+     * Sets the additional data for this class when used as a command.
+     * This should only be called as part of initializing this object.
+     */
+    public void setCommandObject(Object object) {
+        this.data = object;
     }
 
     /**
@@ -188,16 +207,15 @@ public class GrinXHelper extends Command implements Node {
     protected void runSubCommand(int num, Show caller) {
         subCommands[num].execute(caller);
     }
-    
+
     /**
      * {@inheritDoc}
      **/
-    public void readInstanceData(GrinDataInputStream in, int length) 
-            throws IOException 
-    {
+    public void readInstanceData(GrinDataInputStream in, int length)
+            throws IOException {
         in.readSuperClassData(this);
-	this.commandNumber = in.readInt();
-	this.subCommands = in.readCommands();
+        this.commandNumber = in.readInt();
+        this.subCommands = in.readCommands();
     }
 
     /**
@@ -207,20 +225,20 @@ public class GrinXHelper extends Command implements Node {
      * some built-in GRIN commands.
      **/
     public void execute(Show caller) {
-	switch (commandNumber) {
-	    case SYNC_DISPLAY: {
-		show.deferNextCommands();
-		break;
-	    }
-	    case SEGMENT_DONE: {
-		// This command only makes sense inside a show, so
-		// we are being called within Show.nextFrame(),
-		// with the show lock held.  That means we don't have to
-		// worry about a race condition with the show moving to
-		// a different segment before this gets executed.
-		show.doSegmentDone();
-		break;
-	    }
+        switch (commandNumber) {
+            case SYNC_DISPLAY: {
+                show.deferNextCommands();
+                break;
+            }
+            case SEGMENT_DONE: {
+                // This command only makes sense inside a show, so
+                // we are being called within Show.nextFrame(),
+                // with the show lock held.  That means we don't have to
+                // worry about a race condition with the show moving to
+                // a different segment before this gets executed.
+                show.doSegmentDone();
+                break;
+            }
             case FEATURE_SETUP: {
                 Segment s = show.getCurrentSegment();
                 if (s != null) {
@@ -228,35 +246,44 @@ public class GrinXHelper extends Command implements Node {
                 }
                 break;
             }
-	    case COMMAND_LIST: {
-		for (int i = 0; i < subCommands.length; i++) {
-		    subCommands[i].execute(caller);
-		}
-		break;
-	    }
-	    default: {
-		if (Debug.ASSERT) {
-		    Debug.assertFail();
-		}
-	    }
-	}
+            case COMMAND_LIST: {
+                for (int i = 0; i < subCommands.length; i++) {
+                    subCommands[i].execute(caller);
+                }
+                break;
+            }
+            case MOUSE_MOVE: {
+                Point p = (Point) data;
+                show.handleMouseMoved(p.x, p.y);
+                break;
+            }
+            case MOUSE_CLICK: {
+                Point p = (Point) data;
+                show.handleMouseClicked(p.x, p.y);
+                break;
+            }
+            default: {
+                if (Debug.ASSERT) {
+                    Debug.assertFail();
+                }
+            }
+        }
     }
-
 
     /**
      * {@inheritDoc}
      **/
     public void execute() {
-	if (Debug.ASSERT) {
-	    Debug.assertFail();
-	}
+        if (Debug.ASSERT) {
+            Debug.assertFail();
+        }
     }
-   
+
     /**
      * Instantiate an extension class.  This method must be overridden
      * by the show's sublcass of GrinXHelper.
      **/
     public Node getInstanceOf(Show show, int id) throws IOException {
-	throw new IOException();
+        throw new IOException();
     }
 }

@@ -52,13 +52,22 @@
  *             A copy of the license(s) governing this code is located
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
-
 package com.hdcookbook.grinxlet;
 
+import com.hdcookbook.grin.GrinXHelper;
+import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.test.bigjdk.GenericMain;	// that's GrinView
 import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationEngine;
-
+import com.hdcookbook.grin.commands.Command;
+import com.hdcookbook.grin.input.RCKeyEvent;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 /**
  * This is a facade to the main controller in GrinView.  It allows GrinView
@@ -84,18 +93,18 @@ import com.hdcookbook.grin.animator.AnimationEngine;
  *    }
  * </pre>
  **/
-
-public class GrinXlet {
+public class GrinXlet implements KeyListener, MouseListener, MouseMotionListener {
 
     private static GrinXlet theInstance = null;
     private static GenericMain grinView;
+    private Show[] keyInterestOrder;
 
     /**
      * This constructor is used by GrinView
      **/
     public GrinXlet(GenericMain grinView) {
-	this.grinView = grinView;
-	theInstance = this;
+        this.grinView = grinView;
+        theInstance = this;
     }
 
     /**
@@ -108,27 +117,163 @@ public class GrinXlet {
      * Get the instance of this singleton.
      **/
     public static GrinXlet getInstance() {
-	return theInstance;
+        return theInstance;
     }
 
     /**
      * Get the list of animation clients
      **/
     public AnimationClient[] getAnimationClients() {
-	return grinView.getAnimationClients();
+        return grinView.getAnimationClients();
     }
 
     /**
      * Reset the list of animation clients
      **/
     public void resetAnimationClients(AnimationClient[] clients) {
-	grinView.resetAnimationClients(clients);
+        grinView.resetAnimationClients(clients);
     }
 
     /**
      * Get the animation engine
      **/
     public AnimationEngine getAnimationEngine() {
-	return grinView.getAnimationEngine();
+        return grinView.getAnimationEngine();
+    }
+
+    /**
+     * Inserts a new Show at the top of the key interest stack.
+     * KeyEvents are delivered to the shows
+     * starting from the top of the key interest stack.
+     * If the show's currently active segment do not have any rc_handler
+     * that uses the key, then the the event
+     * is sent to the next show on the stack.
+     * MouseEvents are sent to all the shows in the key interest list.
+     */
+    public synchronized void pushKeyInterest(Show show) {
+        if (keyInterestOrder == null) {
+            keyInterestOrder = new Show[] {show} ;
+            return;
+        }
+
+        Show[] newList = new Show[keyInterestOrder.length+1];
+        newList[0] = show;
+        for (int i = 0; i < keyInterestOrder.length; i++) {
+            newList[i+1] = keyInterestOrder[i];
+        }
+        keyInterestOrder = newList;
+    }
+    /**
+     * Removes the show at the top of the key interest stack.
+     * KeyEvents are delivered to a show in the order
+     * starting from the top of the key interest stack.
+     * If the show's currently active segment do not have any rc_handler
+     * that uses the key, then the the event
+     * is sent to the next show on the stack.
+     * MouseEvents are sent to all the shows in the key interest list.
+     */
+    public synchronized Show popKeyInterest() {
+        if (keyInterestOrder == null || keyInterestOrder.length == 0) {
+            return null;
+        }
+
+        Show show = keyInterestOrder[0];
+        Show[] newList = new Show[keyInterestOrder.length-1];
+        for (int i = 1; i < keyInterestOrder.length; i++) {
+            newList[i-1] = keyInterestOrder[i];
+        }
+        keyInterestOrder = newList;
+        return show;
+    }
+
+    public void keyTyped(KeyEvent arg0) {
+    }
+
+    public void keyPressed(java.awt.event.KeyEvent e) {
+        int code = e.getKeyCode();
+        // Translate F1..F4 into red/green/yellow/blue
+        if (code >= KeyEvent.VK_F1 && code <= KeyEvent.VK_F4) {
+            code = code - KeyEvent.VK_F1 + RCKeyEvent.KEY_RED.getKeyCode();
+        } else if (code >= KeyEvent.VK_NUMPAD0 && code <= KeyEvent.VK_NUMPAD9) {
+            code = code - KeyEvent.VK_NUMPAD0 + RCKeyEvent.KEY_0.getKeyCode();
+        } else if (code == KeyEvent.VK_F5) {
+            code = RCKeyEvent.KEY_POPUP_MENU.getKeyCode();
+        }
+
+        synchronized(this) {
+            for (int i = 0; i < keyInterestOrder.length; i++) {
+                boolean isHandled = keyInterestOrder[i].handleKeyPressed(code);
+                if (isHandled) {
+                    break;
+                }
+            }
+        }
+    }
+
+    public void keyReleased(java.awt.event.KeyEvent e) {
+        int code = e.getKeyCode();
+        // Translate F1..F4 into red/green/yellow/blue
+        if (code >= KeyEvent.VK_F1 && code <= KeyEvent.VK_F4) {
+            code = code - KeyEvent.VK_F1 + RCKeyEvent.KEY_RED.getKeyCode();
+        } else if (code >= KeyEvent.VK_NUMPAD0 && code <= KeyEvent.VK_NUMPAD9) {
+            code = code - KeyEvent.VK_NUMPAD0 + RCKeyEvent.KEY_0.getKeyCode();
+        } else if (code == KeyEvent.VK_F5) {
+            code = RCKeyEvent.KEY_POPUP_MENU.getKeyCode();
+        }
+        synchronized(this) {
+            for (int i = 0; i < keyInterestOrder.length; i++) {
+                boolean isHandled = keyInterestOrder[i].handleKeyReleased(code);
+                if (isHandled) {
+                    break;
+                }
+            }
+        }
+    }
+
+    public void mouseClicked(MouseEvent e) {
+        Insets insets       = grinView.getInsets();
+        int    scaleDivisor = grinView.getScaleDivisor();
+        final int x = (e.getX() - insets.left) * scaleDivisor;
+        final int y = (e.getY() - insets.top) * scaleDivisor;
+        synchronized(this) {
+            for (int i = 0; i < keyInterestOrder.length; i++) {
+                Show show = (Show) keyInterestOrder[i];
+                GrinXHelper helper = new GrinXHelper(show);
+                helper.setCommandNumber(GrinXHelper.MOUSE_CLICK);
+                helper.setCommandObject(new Point(x,y));
+                show.runCommand(helper);
+            }
+        }
+    }
+
+    public void mousePressed(MouseEvent arg0) {
+    }
+
+    public void mouseReleased(MouseEvent arg0) {
+    }
+
+    public void mouseEntered(MouseEvent arg0) {
+    }
+
+    public void mouseExited(MouseEvent arg0) {
+    }
+
+    public void mouseDragged(MouseEvent arg0) {
+    }
+
+    public void mouseMoved(MouseEvent e) {
+        Insets insets = grinView.getInsets();
+        int    scaleDivisor = grinView.getScaleDivisor();
+        int x = (e.getX() - insets.left) * scaleDivisor;
+        int y = (e.getY() - insets.top) * scaleDivisor;
+        synchronized(this) {
+            for (int i = 0; i < keyInterestOrder.length; i++) {
+                Show show = (Show) keyInterestOrder[i];
+                GrinXHelper helper = new GrinXHelper(show);
+                helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
+                helper.setCommandObject(new Point(x,y));
+                show.runCommand(helper);
+            }
+        }
     }
 }

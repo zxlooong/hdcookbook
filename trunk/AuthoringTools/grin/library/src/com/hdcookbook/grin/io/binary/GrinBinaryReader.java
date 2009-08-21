@@ -192,7 +192,13 @@ public class GrinBinaryReader {
     /*
      * If true, the binary file contains some debugging information.
      */
-    boolean debuggable = false; 
+    boolean debuggable = false;
+
+    /*
+     * If non-null, then use this classloader to find and instantiate
+     * the extension classes.
+     */
+    private ClassLoader classLoader = null;
     
     /**
      * Constructs a GrinBinaryReader instance.
@@ -210,6 +216,19 @@ public class GrinBinaryReader {
        
     }
 
+    /**
+     * Constructs a GrinBinaryReader instance.
+     *
+     * @param stream    An InputStream to the grin binary format data.  It is recommended to be
+     *                  an instance of BufferedInputStream for a performance improvement.
+     * @param loader    An ClassLoader to use for finding needed classes to construct
+     *                  the Show object.  Extensions and Command subclasses will be searched
+     *                  using this classloader, if given.
+     */
+    public GrinBinaryReader(InputStream stream, ClassLoader loader) {
+       this(stream);
+       this.classLoader = loader;
+    }
     /**
      * Returns an instace of feature that corresponds to the index number
      * that this GrinBinaryReader keeps track of.
@@ -608,8 +627,13 @@ public class GrinBinaryReader {
 	for (int i = 0; i <length; i++) {
 	    String name = in.readUTF();
 	    try {
-		Class cl = Class.forName(name);
-		result[i] = cl.getDeclaredConstructor(paramTypes);
+            Class cl = null;
+            if (classLoader == null) {
+		        cl = Class.forName(name);
+            } else {
+                cl = Class.forName(name, true, classLoader);
+            }
+		    result[i] = cl.getDeclaredConstructor(paramTypes);
 	    } catch (ClassNotFoundException ex) {
 		throw new IOException("Extension class " + name 
 				       + " is missing:  " + ex);
@@ -630,7 +654,11 @@ public class GrinBinaryReader {
 	    return;
 	}
 	try {
-	    showCommandsClass = Class.forName(className);
+        if (classLoader == null) {
+            showCommandsClass = Class.forName(className);
+        } else {
+            showCommandsClass = Class.forName(className, true, classLoader);
+        }
 	} catch (Exception ex) {
 	    throw new IOException(ex.toString());
 	}
