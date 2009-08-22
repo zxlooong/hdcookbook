@@ -236,6 +236,10 @@ public class Group extends Feature implements Node {
      * the set up state.  If the argument is null and we're not set up,
      * then we must also not be activated.
      * <p>
+     * If this group node is activated, then the new child features of this
+     * node will be activated by calling this method, and the old children
+     * will be deactivated.  This is done synchronously, within this method.
+     * <p>
      * This method relies on resetVisiblePartsNoAssert(Feature[]) after 
      * performing appropriate parameter and state checks.
      *
