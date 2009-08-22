@@ -236,8 +236,8 @@ public class Group extends Feature implements Node {
      * the set up state.  If the argument is null and we're not set up,
      * then we must also not be activated.
      * <p>
-     * This method relies on resetVisiblePartsNoAssert(HashMap) after performing 
-     * appropriate parameter and state checks.
+     * This method relies on resetVisiblePartsNoAssert(Feature[]) after 
+     * performing appropriate parameter and state checks.
      *
      * @param visibleParts	An array of parts.  We take
      *				ownership of the array.  A value of null
