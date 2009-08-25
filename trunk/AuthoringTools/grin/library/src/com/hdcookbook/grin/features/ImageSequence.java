@@ -141,14 +141,16 @@ public class ImageSequence extends Feature implements Node, SetupClient {
 	result.images = images;
 	for (int i = 0; i < images.length; i++) {
 	    ManagedImage mi = images[i]; 
-	    ImageManager.getImage(mi);
-		// This increments the reference count of this ManagedImage,
-		// which is necessary because when the clone is destroyed,
-		// it will decrement that reference count.
-	    mi.prepare();
-	    	// This is balanced by a call to unprepare() in destroy()
-	    if (Debug.ASSERT && mi != images[i]) {
-		Debug.assertFail();
+	    if (mi != null) {
+		ImageManager.getImage(mi);
+		    // This increments the reference count of this ManagedImage,
+		    // which is necessary because when the clone is destroyed,
+		    // it will decrement that reference count.
+		mi.prepare();
+		    // This is balanced by a call to unprepare() in destroy()
+		if (Debug.ASSERT && mi != images[i]) {
+		    Debug.assertFail();
+		}
 	    }
 	}
 	result.setupMode = true;

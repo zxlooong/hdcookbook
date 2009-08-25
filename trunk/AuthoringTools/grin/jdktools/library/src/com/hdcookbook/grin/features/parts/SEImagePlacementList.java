@@ -91,7 +91,11 @@ public class SEImagePlacementList implements SEImageSeqPlacement {
 	}
 	Rectangle[] result = new Rectangle[images.length];
 	for (int i = 0; i < images.length; i++) {
-	    result[i] = placements.get(i).getImagePlacementRect(images[i]);
+	    if (images[i] == null) {
+		result[i] = null;
+	    } else {
+		result[i] = placements.get(i).getImagePlacementRect(images[i]);
+	    }
 	}
 	return result;
     }
