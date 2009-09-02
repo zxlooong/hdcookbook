@@ -503,7 +503,7 @@ public class GrinXlet
             }
         } else if (sendKeyUp && type == HRcEvent.KEY_RELEASED) {
             int code = e.getCode(); 
-            xletShow.handleKeyPressed(code); // debug menu always gets the key
+            xletShow.handleKeyReleased(code); // debug menu always gets the key
             for (int i = 0; i < keyInterestOrder.length; i++) {
                 boolean isHandled = keyInterestOrder[i].handleKeyReleased(code);
                 if (isHandled) {
