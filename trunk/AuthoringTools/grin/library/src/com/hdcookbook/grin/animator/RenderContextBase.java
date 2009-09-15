@@ -60,13 +60,10 @@ import com.hdcookbook.grin.util.Debug;
 import java.awt.Rectangle;
 
 /**
- * This class represents a context for tracking the updates that will be
- * needed to render the next frame of animation.  It tracks areas that will
- * need to be displayed, and areas that will need to be erased and then
- * displayed.  The animation framework collapses these areas into an optimized
- * set.
+ * This class is the render context at the base of a stack of render contexts.
+ * It's where the real data lives that's used to track drawing.
  **/
-public class RenderContextBase extends RenderContext {
+class RenderContextBase extends RenderContext {
 
 
     private int currTarget; 
@@ -109,6 +106,10 @@ public class RenderContextBase extends RenderContext {
 	// as thisFrameList, and nodes are taken off of lastFrameList
 	// as they are added to thisFrameList.
 
+    private int collapseThreshold = 200*200;
+	// We collapse two rectangles into one when doing so adds at most this
+	// many pixels.  See setCollapseThreshold.
+
     RenderContextBase(int numTargets) {
 	this.currTarget = 0;
 	if (numTargets < 1) {
@@ -129,6 +130,22 @@ public class RenderContextBase extends RenderContext {
 	    r[i] = new Rectangle();
 	}
 	return r;
+    }
+
+    // 
+    // Sets the threshold of the number of pixels of increased drawing the
+    // engine is willing to tolerate in order to collapse two draw targets
+    // into one.  It's more efficient to draw one slightly bigger area than
+    // two smaller areas, but at some threshold it's better to leave them
+    // divided.  By default, this threshold is set to 40,000 pixels
+    // (e.g. a 200x200 area), but this is a guess.
+    //
+    // This value may be set to 0, or to -1.  Setting it to -1 can be valuable
+    // to totally disable the collapse optimization, for clients that want a 
+    // predictable and consistent render time.
+    //
+    void setCollapseThreshold(int collapseThreshold) {
+	this.collapseThreshold = collapseThreshold;
     }
 
     /**
@@ -311,8 +328,8 @@ public class RenderContextBase extends RenderContext {
 
 		// Next, figure out which areas should be collapsed.
 		// As a SWAG, we collapse areas when combining them
-		// at most adds 200x200 pixels to the area of the screen
-		// drawn to.
+		// at most adds collapseThreshold pixels to the area 
+		// of the screen drawn to.
 		//
 		// This is an area where it would be worth measuring what
 		// is optimal, and perhaps even using different heuristics
@@ -350,7 +367,7 @@ public class RenderContextBase extends RenderContext {
 			int a = targets[i].width * targets[i].height
 			       + targets[j].width * targets[j].height;
 
-			combine = ac <= a + 200*200;
+			combine = ac <= a + collapseThreshold;
 		    }
 		    if (combine) {
 			// combine them

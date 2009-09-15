@@ -108,6 +108,8 @@ public abstract class AnimationEngine implements Runnable {
     private byte[] profileErase;	// Measure time spend erasing buffer
     private byte[] profileDraw;		// Time spent drawing to buffer
 
+    private int drawTargetCollapseThreshold = Integer.MIN_VALUE;
+
 
     /**
      * Initialize a new AnimationEngine.
@@ -162,6 +164,32 @@ public abstract class AnimationEngine implements Runnable {
 	    clients[i].mapDrawTargets(targets);
 	}
 	renderContext = new RenderContextBase(targets.size());
+	if (drawTargetCollapseThreshold != Integer.MIN_VALUE) {  
+	    // If it's been set
+	    renderContext.setCollapseThreshold(drawTargetCollapseThreshold);
+	}
+    }
+
+    /**
+     * Sets the threshold of the number of pixels of increased drawing the
+     * engine is willing to tolerate in order to collapse two draw targets
+     * into one.  It's more efficient to draw one slightly bigger area than
+     * two smaller areas, but at some threshold it's better to leave them
+     * divided.  By default, this threshold is set to 40,000 pixels
+     * (e.g. a 200x200 area), but this is a guess.
+     * <p>
+     * This value may be set to 0, or to -1.  Setting it to -1 can be valuable
+     * to totally disable the collapse optimization, for clients that want a 
+     * predictable and consistent render time.
+     **/
+    public synchronized void setDrawTargetCollapseThreshold(int t) {
+	if (t < 0) {
+	    t = -1;
+	}
+	drawTargetCollapseThreshold = t;
+	if (renderContext != null) {
+	    renderContext.setCollapseThreshold(t);
+	}
     }
 
     /**
