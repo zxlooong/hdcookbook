@@ -158,6 +158,30 @@ public abstract class ClockBasedEngine extends AnimationEngine {
     }
 
     /**
+     * Get the current framerate, in 1001ths of a second.  The returned
+     * value might be 0, e.g. if animation is paused, or if a
+     * skipFrames() request is currently being processed.
+     *
+     * @return the current fps value in 1001ths of a second, or 0 if
+     *	       the value is unknown.
+     *
+     * @see #setFps(int)
+     * @see #skipFrames(int)
+     **/
+    public synchronized int getFps() {
+	if (newFps < 0) {
+	    return 0;
+		// We could maintain another instance variable with the current
+		// fps value even when we're skipping frames, but that feels
+		// like overkill.  Skipping frames is a rarely-used feature,
+		// and so is getFps() -- getFps() is only really here for
+		// initializing the debug menu in GrinXlet and similar
+		// uses.
+	}
+	return newFps;
+    }
+
+    /**
      * Skip ahead the given number of frames.  After skipping ahead, the
      * framerate will be restored.  If the animation is paused, 
      * the current

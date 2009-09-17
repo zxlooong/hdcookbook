@@ -91,7 +91,7 @@ public class XletDirector extends Director {
     private int xScale;
     private int yScale;
 
-    private int currFramerate = 10;	// Default to 23.976
+    private int currFramerate = 10;    // Default to 23.976 (usually overridden)
     private static int[] framerates = {
     	31, 62, 125, 250, 500, 1001, 2002, 3003, 6006, 12012, 24000,
 	24024, 30000, 30030, 60000, 60060, 120000, 120120
@@ -154,6 +154,15 @@ public class XletDirector extends Director {
 	    F_DebugDraw.setCurrentFeature(F_DebugDraw_enabled);
 	} else {
 	    F_DebugDraw.setCurrentFeature(F_DebugDraw_disabled);
+	}
+	int fps = xlet.debugEngine.getFps();
+	if (fps > 0) {
+	    currFramerate = 0;
+	    while (currFramerate+1 < framerates.length
+	    	   && fps > framerates[currFramerate])
+	    {
+		currFramerate++;
+	    }
 	}
 	setFramerate();
     }
