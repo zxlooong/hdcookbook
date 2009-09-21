@@ -128,6 +128,7 @@ public class GenericMain extends Frame implements AnimationContext {
     private int screenHeight = deviceConfig.height / scaleDivisor;
 
     private boolean debugWaiting = false;
+    private boolean debugDraw = false;
     private boolean initialized = false;
     private String initialSegmentName = null;
     private boolean doAutoTest = false;
@@ -410,7 +411,7 @@ public class GenericMain extends Frame implements AnimationContext {
      **/
     protected final void doWaitForUser() {
 	synchronized(debugWaitingMonitor) {
-	    debugWaiting = true;
+	    debugWaiting = debugDraw;
 	    while (debugWaiting) {
 		try { 
 		    debugWaitingMonitor.wait();
@@ -585,6 +586,13 @@ public class GenericMain extends Frame implements AnimationContext {
     }
 
     public void setDebugDraw(boolean doDebugDraw) {
+	debugDraw = doDebugDraw;
+	synchronized(debugWaitingMonitor) {
+	    if (!debugDraw) {
+		debugWaiting = false;
+		debugWaitingMonitor.notifyAll();
+	    }
+	}
 	engine.setDebugDraw(doDebugDraw);
     }
 
@@ -597,6 +605,15 @@ public class GenericMain extends Frame implements AnimationContext {
     }
     
     protected String setFps(float newFps) {
+	if ((fps > 0) && (newFps <= 0)) {
+	    setDebugDraw(false);
+	    // Going into single-step mode when in debug draw
+	    // can lead to deadlocks.  Fixing this would probably require
+	    // cleaning up GrinView's locking model, which isn't worth
+	    // doing for just this, so when the framerate goes to 0, we
+	    // just uncheck the debug draw checkbox, and re-set debug draw
+	    // mode.
+	}
 	fps = newFps;
 	if (engine != null) {
 	    if (newFps <= 0) {

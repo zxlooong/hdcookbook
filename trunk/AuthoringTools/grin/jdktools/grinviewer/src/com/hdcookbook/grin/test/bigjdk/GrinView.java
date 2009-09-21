@@ -104,6 +104,7 @@ public class GrinView extends GenericMain {
     public GrinView(String grinxlet) {
         super(grinxlet);
     }
+
     private void buildControlGUI(String showName, boolean isBinary) {
 	screen = new GrinViewScreen(this, new ShowNode(show, showName));
 	screen.setNameText("GRIN show viewer:  " + showName);
@@ -313,13 +314,26 @@ public class GrinView extends GenericMain {
      * {@inheritDoc}
      **/
     protected void waitForUser(String msg) {
-	    // Make sure that there's no race condition where a button
-	    // press happens after we set the button visible but before
-	    // we get down into doWaitForUser
-	synchronized(debugWaitingMonitor) {
-	    screen.forceNextDrawButtonVisible(true);
-	    screen.setResultText(msg);
-	    doWaitForUser();
+	float fps = getFps();
+	if (fps <= 0f) {
+		// Make sure that there's no race condition where a button
+		// press happens after we set the button visible but before
+		// we get down into doWaitForUser
+	    synchronized(debugWaitingMonitor) {
+		screen.forceNextDrawButtonVisible(true);
+		screen.setResultText(msg);
+		doWaitForUser();
+	    }
+	} else {
+	    // If we aren't stopped, we pause 1/4 frame.
+	    long ms = (long) ((0.25 / fps) * 1000 + 0.5);
+	    if (ms > 0) {
+		try {
+		    Thread.sleep(ms);
+		} catch (InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		}
+	    }
 	}
     }
 
@@ -635,6 +649,10 @@ public class GrinView extends GenericMain {
 	    System.exit(0);
 	}
     }
-    
+
+    public void setDebugDraw(boolean value) {
+	super.setDebugDraw(value);
+	screen.setDebugDrawToggle(value);
+    }
     
 }

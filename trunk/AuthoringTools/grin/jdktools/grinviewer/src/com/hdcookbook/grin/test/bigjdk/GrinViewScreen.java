@@ -354,6 +354,10 @@ public class GrinViewScreen extends javax.swing.JFrame {
 	main.setDebugDraw(debugDraw);
     }
 
+    void setDebugDrawToggle(boolean value) {
+	debugDrawCB.setSelected(value);
+    }
+
     private void nextDrawButtonActionPerformed(java.awt.event.ActionEvent evt){
 	forceNextDrawButtonVisible(false);
 	main.userWaitingDone();

@@ -92,7 +92,7 @@ public class Box extends Feature implements Node {
 
     private boolean isActivated;
     private DrawRecord drawRecord = new DrawRecord();
-    private boolean boxSizeChanged = false;
+    private boolean boxPropertiesChanged = false;
 
     public Box(Show show) {
         super(show);
@@ -152,14 +152,56 @@ public class Box extends Feature implements Node {
      * a command body, or inside an implementation of Director.nextFrame()).
      * Calls are synchronized to only occur within
      * model updates, with the show lock held.
-     * <p>
      **/
     public void resize(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        boxSizeChanged = true;
+        boxPropertiesChanged = true;
+    }
+
+    /**
+     * Resizes the outline around the box.
+     * <p>
+     * This should not be directly called by clients of the GRIN
+     * framework, unless it is done from the animation thread (within
+     * a command body, or inside an implementation of Director.nextFrame()).
+     * Calls are synchronized to only occur within
+     * model updates, with the show lock held.
+     **/
+    public void resizeOutline(int outlineWidthX, int outlineWidthY) {
+	this.outlineWidthX = outlineWidthX;
+	this.outlineWidthY = outlineWidthY;
+	boxPropertiesChanged = true;
+    }
+
+    /**
+     * Changes the color of the box.
+     * <p>
+     * This should not be directly called by clients of the GRIN
+     * framework, unless it is done from the animation thread (within
+     * a command body, or inside an implementation of Director.nextFrame()).
+     * Calls are synchronized to only occur within
+     * model updates, with the show lock held.
+     **/
+    public void changeBoxColor(Color c) {
+	this.fillColor = c;
+	boxPropertiesChanged = true;
+    }
+
+    /**
+     * Changes the color of the box outline.
+     * <p>
+     * This should not be directly called by clients of the GRIN
+     * framework, unless it is done from the animation thread (within
+     * a command body, or inside an implementation of Director.nextFrame()).
+     * Calls are synchronized to only occur within
+     * model updates, with the show lock held.
+     **/
+    public void changeBoxOutlineColor(Color c) {
+	this.outlineColor = c;
+	boxPropertiesChanged = true;
     }
 
     /**
@@ -232,9 +274,9 @@ public class Box extends Feature implements Node {
 		drawRecord.setChanged();
 	    }
 	}
-	if (boxSizeChanged) {
+	if (boxPropertiesChanged) {
 	    drawRecord.setChanged();
-	    boxSizeChanged = false;
+	    boxPropertiesChanged = false;
 	}
 	drawRecord.setSemiTransparent();
 	context.addArea(drawRecord);
