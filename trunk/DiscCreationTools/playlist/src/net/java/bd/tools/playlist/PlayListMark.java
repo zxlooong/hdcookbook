@@ -65,7 +65,7 @@ import javax.xml.bind.annotation.XmlElement;
  */
 public class PlayListMark {
     
-    private Mark[] marks;
+    private Mark[] marks = null;
     
     public void readObject(DataInputStream din) throws IOException {
         // 32 bit length
@@ -83,6 +83,10 @@ public class PlayListMark {
     }
     public void writeObject(DataOutputStream dout) throws IOException {    
         Mark[] lmarks = getMarks();
+  
+        if (lmarks == null) {
+           throw new IOException("There is a playlist without any mark.  There should be an entry mark at the beginning of the PlayList.");
+        }
         
         dout.writeInt(14 * lmarks.length + 2);
         dout.writeShort(lmarks.length);
