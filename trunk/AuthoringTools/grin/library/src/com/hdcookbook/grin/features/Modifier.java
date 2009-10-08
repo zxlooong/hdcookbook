@@ -157,6 +157,7 @@ public abstract class Modifier extends Feature {
 	activated = mode;
 	if (mode) {
 	    part.activate();
+	    setChildChanged();
 	} else {
 	    part.deactivate();
 	    setChildChanged();
@@ -172,7 +173,8 @@ public abstract class Modifier extends Feature {
      **/
     protected void setChildChanged() {
 	// When we're deactivated, our child might not be, and we might modify
-	// the child.  See als
+	// the child.  Further, when we're activated, our child might already
+	// have been.  See also
 	// https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=121
 	//
 	part.markDisplayAreasChanged();

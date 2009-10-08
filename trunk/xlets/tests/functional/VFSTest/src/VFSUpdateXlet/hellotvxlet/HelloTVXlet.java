@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import javax.tv.service.SIManager;
 import javax.tv.service.selection.ServiceContextFactory;
 import javax.tv.service.selection.ServiceContextException;
 import javax.tv.xlet.XletContext;

@@ -2308,7 +2308,11 @@ public class ShowParser {
             return null;
         } else {
             String typeName = tok;
-            return extParser.getCommand(show, typeName, lexer);
+            Command result = extParser.getCommand(show, typeName, lexer);
+	    if (result == null) {
+		lexer.reportError("command expected, " + tok + " seen");
+	    }
+	    return result;
         }
     }
 

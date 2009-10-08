@@ -187,6 +187,9 @@ public class ShowBuilder {
 	if (noMoreNodes) {
 	    throw new IOException("Can't add new node:  The show's build phase is over.");
 	}
+	if (node == null) {
+	    throw new NullPointerException();
+	}
 	allNodes.add(node);
     }
 
