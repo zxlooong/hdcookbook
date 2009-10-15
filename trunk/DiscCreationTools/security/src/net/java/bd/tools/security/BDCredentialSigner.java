@@ -169,6 +169,8 @@ public class BDCredentialSigner {
                 updateCerts = false;
             } else if (opt.equals("-updatecerts")) {
                 generateCred = false;
+	    } else if (opt.equals("-buda")) {
+		cBuilder = cBuilder.budaCredential();
             } else if (opt.equals("-gastore")) {
                 if (++i == args.length) errorNeedArgument(opt);
                 cBuilder = cBuilder.grantorKeyStore(args[i]);
@@ -241,6 +243,7 @@ public class BDCredentialSigner {
 	System.err.println("usage: BDCredentialSigner [options] permission-request-file jarfile\n");
         System.err.println("Valid Options:");
         System.err.println(" -gencred             \t:Generate credentials;Output:PRF with credentials");
+        System.err.println(" -buda		  \t:Generate BUDA credentials (default: Persistence storage credentials)");
         System.err.println(" -gastore filename    \t:Grantor's keystore;default used:\"grantor.store\"");
         System.err.println("                      \t from the current working directory");
         System.err.println(" -gastorepass password\t:Grantor's keystore password");
@@ -262,6 +265,7 @@ public class BDCredentialSigner {
         System.err.println();
         System.err.println("net.java.bd.tools.security.BDCredentialSigner -updatecert -gacerts grantorchain.crt bluray.MyXlet.perm 00000.jar");
         System.err.println();
+        System.err.println("net.java.bd.tools.security.BDCredentialSigner -gencert -buda discroot.crt bluray.MyXlet.perm");
         System.err.println("For testing:");
         System.err.println("net.java.bd.tools.security.BDCredentialSigner bluray.MyXlet.perm 00000.jar");
         System.err.println();

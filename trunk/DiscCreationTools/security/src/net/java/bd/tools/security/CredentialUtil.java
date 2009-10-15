@@ -181,6 +181,7 @@ class CredentialUtil {
     boolean debug;
     String permReqFile;
     String discRootFile;
+    boolean isBudaCredential;
     
     List<? extends Certificate> grantorCerts;
     
@@ -192,6 +193,7 @@ class CredentialUtil {
     static final String ENCR_ALGO ="RSA";   
     static final String PERM_REQ_FILE_TAG = "permissionrequestfile";
     static final String FILE_CRED_TAG =  "persistentfilecredential";
+    static final String BUDA_CRED_TAG =  "bd-bindingunitareacredential";
     static final String GRANTOR_ID_TAG = "grantoridentifier";
     static final String EXP_DATE_TAG =   "expirationdate";
     static final String FILE_NAME_TAG =  "filename";  
@@ -210,6 +212,7 @@ class CredentialUtil {
         this.grantorCertFile = b.grantorCertFile;
         this.jarFileName = b.jarFileName;
         this.debug = b.debug;
+	this.isBudaCredential = b.isBudaCredential;
         this.permReqFile = b.permReqFile;
         this.discRootFile = b.discRootFile;
         if (debug) {
@@ -236,6 +239,7 @@ class CredentialUtil {
         String permReqFile;
         String discRootFile;
         boolean debug = false;
+        boolean isBudaCredential = false;
         
         public Builder() {}
         public Builder grantorKeyStore(String storefile) {
@@ -286,6 +290,10 @@ class CredentialUtil {
             this.debug = true;
             return this;
         }
+        public Builder budaCredential() {
+            this.isBudaCredential = true;
+            return this;
+        }
         public CredentialUtil build() {
             return new CredentialUtil(this);
         }
@@ -303,7 +311,12 @@ class CredentialUtil {
         Element e = doc.getDocumentElement();
         String orgId = e.getAttribute("orgid");
         String appId = e.getAttribute("appid");
-        Node credNode = getNodeWithTag(e, FILE_CRED_TAG);
+        Node credNode;
+        if (isBudaCredential) {
+	    credNode = getNodeWithTag(e, BUDA_CRED_TAG);
+	} else {
+	    credNode = getNodeWithTag(e, FILE_CRED_TAG);
+	}
         ArrayList<Files> fileList = new ArrayList<Files>();
         NodeList cns = credNode.getChildNodes();
         String gaOrgId = null;
