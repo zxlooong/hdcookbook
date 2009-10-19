@@ -66,6 +66,7 @@ import java.io.File;
 public class BDCredentialSigner {
     
     static boolean debug = false;
+    static boolean isBudaCredential = false;
     static String jarFileName;
     static String permReqFileName;
     static SecurityUtil.Builder sBuilder;
@@ -86,8 +87,9 @@ public class BDCredentialSigner {
                 System.out.println("[Debug] extracting permission request file from the jar ..");
             }
             
-            if (jarFileName != null)
+            if (jarFileName != null) {
                 extractFile(jarFileName, permReqFileName);
+	    }
 
             // 2. Generate credentials
             if (debug) {
@@ -105,8 +107,9 @@ public class BDCredentialSigner {
         }
         if (jarFileName == null) {
             printUsageAndExit("Please specify the jarfile tobe updated and signed");
-        } else
+        } else {
             System.err.println("jarfilename:" + jarFileName);
+	}
         updateJar(jarFileName, permReqFileName);
         // 4. sign the updated jar file
         if (debug) {
@@ -122,7 +125,8 @@ public class BDCredentialSigner {
         cUtil.updateCerts();
         
         if (debug) {
-            CredentialVerifier.verify(jarFileName, permReqFileName, "app.discroot.crt");
+            CredentialVerifier.verify(jarFileName, permReqFileName, 
+	    				"app.discroot.crt", isBudaCredential);
         }
     }
     
@@ -170,6 +174,7 @@ public class BDCredentialSigner {
             } else if (opt.equals("-updatecerts")) {
                 generateCred = false;
 	    } else if (opt.equals("-buda")) {
+		isBudaCredential = true;
 		cBuilder = cBuilder.budaCredential();
             } else if (opt.equals("-gastore")) {
                 if (++i == args.length) errorNeedArgument(opt);

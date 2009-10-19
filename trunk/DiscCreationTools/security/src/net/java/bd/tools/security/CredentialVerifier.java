@@ -109,7 +109,8 @@ class CredentialVerifier {
     
    public static void verify(String jarfile,
                              String permReqFileName,
-                             String rootCert)
+                             String rootCert,
+			     boolean isBudaCredential)
                 throws Exception {
         JarFile jf = new JarFile(jarfile);
         ZipEntry je = jf.getEntry(permReqFileName);
@@ -119,7 +120,12 @@ class CredentialVerifier {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();    
 	Document doc = factory.newDocumentBuilder().parse(jf.getInputStream(je));
         Element e = doc.getDocumentElement();;
-        Node credNode = getNodeWithTag(e, FILE_CRED_TAG);
+        Node credNode;
+	if (isBudaCredential) {
+	    credNode = getNodeWithTag(e, BUDA_CRED_TAG);
+	} else {
+	    credNode = getNodeWithTag(e, FILE_CRED_TAG);
+	}
         Node grantorNode = getNodeWithTag(credNode, GRANTOR_ID_TAG);
         String grantorOrg = ((Element) grantorNode).getAttribute("id");
         System.out.println("*************** Verifying Credentials ***********");
@@ -134,7 +140,7 @@ class CredentialVerifier {
             verifyError("Unable to find grantor certificates");
         }
         System.out.println("####### <certchainfileid> Verification PASSED #######");  
-        verifySignature(e, grantorId, jarfile, rootCert, grantorCerts);
+        verifySignature(e, grantorId, jarfile, rootCert, grantorCerts,isBudaCredential);
         System.out.println("*************** Verification Done ***********");
     }
     
@@ -162,6 +168,8 @@ class CredentialVerifier {
         byte[] issuerBytes = issuerAndSerialNumber[0].toByteArray();
         
         X500Principal issuerName = new X500Principal(issuerBytes);
+		// 3-2 s. 12.1.10:  "Issuer that matches the issuer of the
+		//		     leaf certificate used for authentication"
         BigInteger certificateSerialNumber = issuerAndSerialNumber[1].getBigInteger();
      
         System.out.println("Looking for the certificate with issuerName:" +
@@ -199,9 +207,12 @@ class CredentialVerifier {
                                             cert.getSubjectX500Principal());
                     returnCerts.add(cert);
                 }
-            } if ((issuerName.equals(cert.getSubjectX500Principal())) &&
+            } 
+	    if ((issuerName.equals(cert.getSubjectX500Principal())) &&
                       (issuerName.equals(cert.getIssuerX500Principal()))) {
                 // Self signed certificate must be the root.
+		System.out.println("Found the self signed certificate at the root:" +
+				  	cert.getIssuerX500Principal());
                 returnCerts.add(cert);
             }
        }
@@ -210,8 +221,12 @@ class CredentialVerifier {
     
     private static void verifySignature(Element e, long grantorId, String jarfile,
                                 String granteeRootCertName,
-                                List<X509Certificate> grantorCerts) throws Exception {   
+                                List<X509Certificate> grantorCerts,
+				boolean isBudaCredential) throws Exception {   
         byte credentialUsage = 0x00;
+	if (isBudaCredential) {
+	    credentialUsage = 0x01;	// cf. 3-2 s. 12.1.10 table 12-4
+	}
         String geOrgId = e.getAttribute("orgid");
         geOrgId = geOrgId.substring(2);
         long granteeOrgId = Long.parseLong(geOrgId, 16);
@@ -227,7 +242,12 @@ class CredentialVerifier {
         byte[] granteeRootCertDigest = getCertDigest(granteeRootCert);
         byte[] grantorRootCertDigest = getCertDigest(grantorCerts.get(1));
         
-        Node credNode = getNodeWithTag(e, FILE_CRED_TAG);
+        Node credNode;
+	if (isBudaCredential) {
+	    credNode = getNodeWithTag(e, BUDA_CRED_TAG);
+	} else {
+	    credNode = getNodeWithTag(e, FILE_CRED_TAG);
+	}
         NodeList credAttrs = credNode.getChildNodes();
         String expDate = null;
         ArrayList<Files> fileList = new ArrayList<Files>();

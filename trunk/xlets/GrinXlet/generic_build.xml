@@ -11,6 +11,7 @@ Game xlet project.  See the documentation in vars.properties for details.
     	Some default values for properties.  These can be overridden
 	in vars.properties.
     -->
+    <property name="disc.id" value="00000000000000000000000000000001"/>
     <condition property="mosaics.file.txt" value="${mosaics.file}.txt">
 	<isset property="mosaics.file"/>
     </condition>
@@ -499,9 +500,9 @@ The project.name property is not set.  This usually has one of two causes:
         <!-- Projects that include this build file can re-define this target -->
     </target>
     
-    <target name="gen-bdmv-files" depends="init">
+    <target name="gen-bdmv-files" depends="init, gen-id-xml.tmp">
         <jdktools.java jar="${id.jar}">
-            <arg value="${grin.xlet}/bdmv/id.xml"/>
+            <arg value="${build.dir}/id.xml"/>
             <arg value="${build.dir}/id.bdmv"/>              
         </jdktools.java>
         <jdktools.java jar="${index.jar}">
@@ -627,10 +628,19 @@ ${show.file}.txt
         <!-- Projects that include this build file can re-define this target -->
     </target>
 
+    <target name="gen-id-xml.tmp" depends="init">
+        <concat destfile="${build.dir}/id.xml"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<id>
+    <discId>0x${disc.id}</discId>
+    <orgId>0x${disc.orgid}</orgId>
+    <version>0200</version>
+</id>
+        ]]></concat>
+    </target>
     <target name="gen-bdjo-desc.tmp" depends="init">
         
         <concat destfile="${bdjo-desc-file}.tmp"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- This file contains information taken from build.xml -->
+<!-- This file contains information taken from generic_build.xml -->
 <!-- AUTO-GENERATED - DO NOT EDIT -->
 <bdjo>
     <appCacheInfo>

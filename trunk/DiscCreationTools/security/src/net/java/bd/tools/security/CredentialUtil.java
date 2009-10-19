@@ -338,6 +338,9 @@ class CredentialUtil {
         }       
         String fileId = genCertChainFileId();
         byte credentialUsage = 0;
+	if (isBudaCredential) {
+	    credentialUsage = 0x01;	// 3-2 s. 12.1.10 table 12-4
+	}
         String signature = genCredSignature(credentialUsage, orgId, appId,
                                             gaOrgId, expDate, fileList);
         Element se;
@@ -381,8 +384,9 @@ class CredentialUtil {
                 getCerts(grantorKeyStore, grantorStorePass, grantorAlias);
         grantorCerts = getCertPath(certs);
 	X509Certificate leafCert = (X509Certificate) grantorCerts.get(0);
-        if (debug) 
+        if (debug) {
 	    printDebugMsg("Using the grantor cert for generating <certchainfileid> :" + leafCert);
+	}
 
 	// read the issuer name
 	byte[] issuerName = leafCert.getIssuerX500Principal().getEncoded();
@@ -409,6 +413,7 @@ class CredentialUtil {
 		"-export", "-alias", grantorAlias, "-keypass", grantorPassword, 
 		"-keystore", grantorKeyStore, "-storepass", grantorStorePass,
 		"-v", "-file", GRANTOR_CERT_FILE};
+
 	KeyTool.main(exportRootCertificateArgs);
     }
     
@@ -465,7 +470,8 @@ class CredentialUtil {
                                     String grantorOrgIdStr,
                                     String expDateStr,
                                     List<Files> fileList)
-                throws Exception {
+                throws Exception 
+    {
         if (debug) {
             printDebugMsg("Generating the signature using- granteeId:" + granteeOrgIdStr +
                                 ", granteeAppId:" + granteeAppIdStr +
@@ -598,7 +604,7 @@ class CredentialUtil {
             grantorCerts = getCerts(grantorKeyStore, grantorStorePass, grantorAlias);
         }
 	X509Certificate[] addedCerts =
-			new X509Certificate[certs.length + grantorCerts.length];	
+			new X509Certificate[certs.length + grantorCerts.length];
 	int len = 0;
         for (;len < certs.length; len++) {
 	    addedCerts[len] = (X509Certificate) certs[len];
