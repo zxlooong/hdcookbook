@@ -107,18 +107,18 @@ public class DataAccessTest  {
     public String tryRead(String path) {
         try {
             testRead(path);
-            return "passed";
+            return "Y";
         } catch (Exception e) {
-            return "failed (" + e.getClass().getName() + ")";
+            return "N (" + e.getClass().getName() + ")";
         }
     }
     
     public String tryWrite(String path, String file) {
         try {
             testWrite(path, file);
-            return "passed";
+            return "Y";
         } catch (Exception e) {       
-            return "failed (" + e.getClass().getName() + ")";
+            return "N (" + e.getClass().getName() + ")";
         }
     }      
 }

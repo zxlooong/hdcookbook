@@ -335,7 +335,7 @@ class CredentialUtil {
                 Files f = new Files(read, write, filePath);
                 fileList.add(f);
             }
-        }       
+        }
         String fileId = genCertChainFileId();
         byte credentialUsage = 0;
 	if (isBudaCredential) {
@@ -354,7 +354,9 @@ class CredentialUtil {
         }
         fe.setTextContent(fileId);
         credNode.appendChild(se);
+	credNode.appendChild(doc.createTextNode("\n        "));
         credNode.appendChild(fe);
+	credNode.appendChild(doc.createTextNode("\n        "));
         Source domSource = new DOMSource(doc);
         Result fileResult = new StreamResult(new File(permReqFile));
         TransformerFactory tfactory = TransformerFactory.newInstance();
@@ -401,11 +403,7 @@ class CredentialUtil {
         issuerAndSerialNumber.putInteger(certificateSerialNumber);
         seq.write(DerValue.tag_Sequence, issuerAndSerialNumber);
 
-	// encode with base64
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
-   	BASE64Encoder base64 = new BASE64Encoder();
-	base64.encode(seq.toByteArray(), out);
-        return out.toString("US-ASCII");
+	return base64Encode(seq.toByteArray());
     }
     
     void exportGrantorCert() throws Exception {
@@ -546,11 +544,24 @@ class CredentialUtil {
         sig.update(data);
         byte[] signature = sig.sign();
         
+	return base64Encode(signature);
+    }
+    
+    private static String base64Encode(byte[] src) throws Exception {
 	// encode with base64
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	BASE64Encoder base64 = new BASE64Encoder();
-        base64.encode(signature, out);
-	return out.toString("US-ASCII");
+        base64.encode(src, out);
+	out.close();
+	return out.toString("US-ASCII").replace("\r","").replace("\n","");
+		// Having whitespace in the base64 encoding makes the
+		// credentials fail, at least on some players.  Note that
+		// RFC 1521 apparently says there's supposed to be newlines
+		// at least every 76 characters in base-64 encoding, so
+		// stripping out the newlines would seem to be wrong.  Perhaps
+		// something somewhere says RFC 1521 doesn't apply in this
+		// context, and there are to be no newlines here?
+		// Ref:  http://www.developer.com/java/other/article.php/3386271/Understanding-Base64-Data.htm
     }
     
     static void printHex(byte[] value) {
