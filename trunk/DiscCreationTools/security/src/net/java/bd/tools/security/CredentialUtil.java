@@ -555,13 +555,25 @@ class CredentialUtil {
 	out.close();
 	return out.toString("US-ASCII").replace("\r","").replace("\n","");
 		// Having whitespace in the base64 encoding makes the
-		// credentials fail, at least on some players.  Note that
-		// RFC 1521 apparently says there's supposed to be newlines
-		// at least every 76 characters in base-64 encoding, so
-		// stripping out the newlines would seem to be wrong.  Perhaps
-		// something somewhere says RFC 1521 doesn't apply in this
-		// context, and there are to be no newlines here?
-		// Ref:  http://www.developer.com/java/other/article.php/3386271/Understanding-Base64-Data.htm
+		// credentials fail, at least on some players.  MHP references
+		// IETF RFC 2045 as the specification for Base64.  Section 6.8
+		// says that there are supposed to be newlines at least every
+		// 76 characters in base-64 encoding, so stripping out the
+		// newlines is actually non-compliant to the spec.  However, 
+		// encoders are required to ignore newlines, so this non-compliance
+		// won't cause problems on correct Base64 decoder implementations.
+		// See http://tools.ietf.org/html/rfc2045#section-6.8 .
+		//
+		// After diligent searching in the BD spec, I (Bill) was unable
+		// to find anything that removes the requirement to put newlines
+		// in.  However, in testing performed in October 2009 on several
+		// players, *no* players were identified that worked if the
+		// base 64 encoding used in a BUDA credential had a newline.
+		// Removing the newlines fixed it.
+		//
+		// BDA spec clarification on this matter will be sought, but for
+		// credential generation, the safe course of action is to never
+		// put a newline in the base64 encoding of these values.
     }
     
     static void printHex(byte[] value) {
