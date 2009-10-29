@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Buda Credentials" default="deploy" basedir=".">
+
+    <target name="clean">
+	<ant inheritAll="false" dir="creator" target="clean"/>
+	<ant inheritAll="false" dir="middle" target="clean"/>
+	<ant inheritAll="false" dir="destroyer" target="clean"/>
+    </target>
+
+    <target name="spotless">
+	<ant inheritAll="false" dir="creator" target="spotless"/>
+	<ant inheritAll="false" dir="middle" target="spotless"/>
+	<ant inheritAll="false" dir="destroyer" target="spotless"/>
+    </target>
+
+    <target name="deploy">
+	<ant inheritAll="false" dir="middle" target="deploy"/>
+	<ant inheritAll="false" dir="creator" target="deploy"/>
+	<ant inheritAll="false" dir="destroyer" target="deploy"/>
+    </target>
+
+
+</project>
