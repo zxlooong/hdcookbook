@@ -97,6 +97,7 @@ public class UOMaskTable {
     static {
         //register all known flags       
         register("chapterSearchMask");
+        register("timeSearchMask");
         register("skipToNextPointMask");
         register("skipBackToPreviousPointMask");
         register("stopMask");
