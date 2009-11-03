@@ -5,18 +5,24 @@
 	<ant inheritAll="false" dir="creator" target="clean"/>
 	<ant inheritAll="false" dir="middle" target="clean"/>
 	<ant inheritAll="false" dir="destroyer" target="clean"/>
+	<ant inheritAll="false" dir="root" target="clean"/>
+	<ant inheritAll="false" dir="wildcard" target="clean"/>
     </target>
 
     <target name="spotless">
 	<ant inheritAll="false" dir="creator" target="spotless"/>
 	<ant inheritAll="false" dir="middle" target="spotless"/>
 	<ant inheritAll="false" dir="destroyer" target="spotless"/>
+	<ant inheritAll="false" dir="root" target="spotless"/>
+	<ant inheritAll="false" dir="wildcard" target="spotless"/>
     </target>
 
     <target name="deploy">
 	<ant inheritAll="false" dir="middle" target="deploy"/>
 	<ant inheritAll="false" dir="creator" target="deploy"/>
 	<ant inheritAll="false" dir="destroyer" target="deploy"/>
+	<!-- <ant inheritAll="false" dir="root" target="deploy"/> -->
+	<ant inheritAll="false" dir="wildcard" target="deploy"/>
     </target>
 
 

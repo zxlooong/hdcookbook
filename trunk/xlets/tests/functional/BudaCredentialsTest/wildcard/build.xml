@@ -52,12 +52,13 @@ after any target is built.
     <bd-bindingunitarea value="true"></bd-bindingunitarea>
      <bd-bindingunitareacredential>
        <grantoridentifier id="0x7fff0002"/>
-       <expirationdate date="10/12/2999"/>
-       <filename read="true" write="true">7fff0002/output_1.txt</filename>
+       <expirationdate date="31/12/9999"/>
+       <filename read="true" write="true">7fff0002/*</filename>
+       <filename read="true" write="true">7fff0002/mydir/-</filename>
      </bd-bindingunitareacredential>
-    <bd-vfs value="true"></bd-vfs>
+     <bd-vfs value="true"></bd-vfs>
 </n:permissionrequestfile>
-        ]]></concat>
+]]></concat>
         <path id="sec.tools.path">
             <pathelement location="${security.jar}"/>
             <pathelement location="${bouncycastle.jar}"/>
@@ -84,18 +85,20 @@ after any target is built.
             <pathelement location="${bouncycastle.jar}"/>
             <pathelement location="${java.home}/../lib/tools.jar"/>   
         </path>
-        <jdktools.java classname="net.java.bd.tools.security.BDCredentialSigner" dir="build/classes">
+	<copy file="build/classes/com/hdcookbook/grinxlet/bluray.GrinXlet.perm" todir="com/hdcookbook/grinxlet"/>
+        <jdktools.java classname="net.java.bd.tools.security.BDCredentialSigner">
 	    <classpath refid="sec.tools.path"/>
 	    <arg value="-debug"/>
 	    <arg value="-buda"/>
 	    <arg value="-store"/>
-	    <arg value="../../keystore.store"/>
+	    <arg value="keystore.store"/>
 	    <arg value="-updatecerts"/>
-	    <arg value="-gacerts"/>
-	    <arg value="../../grantorchain.crt"/>
+	    <arg value="-gastore"/>
+	    <arg value="../middle/keystore.store"/>
 	    <arg value="com/hdcookbook/grinxlet/bluray.GrinXlet.perm"/>
-	    <arg value="../../${xlet.jar}"/>
+	    <arg value="${xlet.jar}"/>
         </jdktools.java>
+	<delete dir="com"/>
 	<antcall target="post-sign-xlet"/>
     </target>
 
