@@ -95,7 +95,9 @@ public class NetworkManager {
 	    }
 	};
 	thread = new Thread(r, "Network Manager");
-	thread.setPriority(5);
+        // Set the priority as the same as SetupManager, and one less than
+        // AnimationEngine.
+	thread.setPriority(3); 
 	thread.setDaemon(true);
 	thread.start();
     }
@@ -149,6 +151,15 @@ public class NetworkManager {
 		}
 	    }
 	    try {
+        // In runnable.run(), most likely the code will be doing some
+        // network access, and if it's http, then it'll take time.
+        // This seems to slow down the animation engine trying to do
+        // the screen update.  Hence, yielding before invoking the
+        // runnable - just like we do in ManagedFullImage class.
+        // By yielding we increase the odds that higher-priority animation
+        // will be given a chance before  the NetworkManager thread 
+        // possibly blocks.
+                Thread.currentThread().yield();
 		runnable.run();
 	    } catch (Throwable t) {
 		if (t instanceof InterruptedException) {
