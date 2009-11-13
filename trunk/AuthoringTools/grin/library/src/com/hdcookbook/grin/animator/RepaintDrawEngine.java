@@ -137,6 +137,7 @@ public class RepaintDrawEngine extends ClockBasedEngine {
 	    bufferG.setColor(transparent);
 	    bufferG.fillRect(0, 0, bounds.width, bounds.height);
 	}
+        repaintBounds = new Rectangle();
     }
 
     //
@@ -191,6 +192,26 @@ public class RepaintDrawEngine extends ClockBasedEngine {
 	return rdComponent;
     }
 
+    /**
+     * Sets this engine so that the given region of the image buffer is 
+     * forced to be repainted at next frame.   This can be used
+     * if some section of the framebuffer was damaged somehow.
+     *
+     * If there are multiple calls to this method before the next frame
+     * drawing comes around, then the regions are combined together.
+     **/
+    public synchronized void addRepaintArea(int x, int y, int width, int height) {
+       if (width <= 0 || height <= 0) {
+           return;
+       }
+       if (repaintBounds.isEmpty()) {
+           repaintBounds.setBounds(x, y, width, height);
+       } else {
+           // See DrawRecord.addToRect(..) for the explanation.
+           repaintBounds.add(x, y);
+           repaintBounds.add(x+width, y+height);
+       }
+    }
 
     /**
      * {@inheritDoc}

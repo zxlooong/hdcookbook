@@ -86,6 +86,14 @@ public abstract class AnimationEngine implements Runnable {
      **/
     protected RenderContextBase renderContext;
 
+    /**
+     * The area that has been damaged and need to be repainted in the
+     * next cycle.  This can be used by the AnimationEngine subclass
+     * that has knowledge about the damaged area, and would rather
+     * not repaint the entire Frame via needsFullPaint variable.
+     */
+    protected Rectangle repaintBounds = null;
+
     private AnimationClient[] clients;
     private AnimationClient[] newClients;	// cf. resetAnimationClients
     private Thread worker;
@@ -741,18 +749,34 @@ public abstract class AnimationEngine implements Runnable {
 	renderContext.setEmpty();
 	renderContext.setTarget(0);
 	boolean fullPaint;
+	boolean partialPaint;
+        int x = 0, y = 0, w = 0, h = 0;
 	synchronized(this) {
 	    fullPaint = needsFullPaint || needsFullRedrawInAnimationLoop();
+            partialPaint = (repaintBounds != null && !repaintBounds.isEmpty());
+            if (fullPaint) { 
+                x = 0; 
+                y = 0; 
+                w = getWidth();
+                h = getHeight();
+            } else if (partialPaint) {
+                x = repaintBounds.x;
+                y = repaintBounds.y;
+                w = repaintBounds.width;
+                h = repaintBounds.height;
+                repaintBounds.setSize(0,0);
+            }
 	    needsFullPaint = false;
 	}
-	if (fullPaint) {
-	    renderContext.setFullPaint(0, 0, getWidth(), getHeight());
+	if (fullPaint || partialPaint) {
+	    renderContext.setFullPaint(x,y,w,h);
 	    // We still add the display areas, because that's also where
 	    // the client tracks state
 	    // from frame to frame.  The contract of AnimationClient
 	    // requires that addDisplayAreas be called exactly once per
 	    // frame displayed.
-	}
+        }
+
 	for (int i = 0; i < clients.length; i++) {
 	    clients[i].addDisplayAreas(renderContext);	
 	    	// renderContext contains targets
