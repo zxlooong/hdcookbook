@@ -92,8 +92,8 @@ after any target is built.
 	    <arg value="-store"/>
 	    <arg value="keystore.store"/>
 	    <arg value="-updatecerts"/>
-	    <arg value="-gastore"/>
-	    <arg value="../middle/keystore.store"/>
+	    <arg value="-gacerts"/>
+	    <arg value="grantorchain.crt"/>
 	    <arg value="com/hdcookbook/grinxlet/bluray.GrinXlet.perm"/>
 	    <arg value="${xlet.jar}"/>
         </jdktools.java>
