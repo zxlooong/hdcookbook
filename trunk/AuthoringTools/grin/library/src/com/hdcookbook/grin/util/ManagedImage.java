@@ -154,8 +154,16 @@ abstract public class ManagedImage {
 	return super.toString() + " : " + getName();
     }
 
+    /**
+     * Get the width of this image.  This may return 0 if the image has
+     * not yet been loaded.
+     **/
     abstract public int getWidth();
 
+    /**
+     * Get the height of this image.  This may return 0 if the image has
+     * not yet been loaded.
+     **/
     abstract public int getHeight();
 
     /**

@@ -78,6 +78,8 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     Image image = null;		// Accessed by ManagedSubImage
     private boolean loaded = false;
     	// If image == null && !loaded, then we're loading.
+    private int width = 0;
+    private int height = 0;
 
     ManagedFullImage(String name) {
 	this.name = name;
@@ -93,13 +95,11 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     }
 
     public int getWidth() {
-	// assert image != null
-	return image.getWidth(null);
+	return width;
     }
     
     public int getHeight() {
-	// assert image != null
-	return image.getHeight(null);
+	return height;
     }
 
     synchronized void addReference() {
@@ -216,6 +216,8 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 		    // the best we can do is blithely accept the fact, and treat
 		    // the image as though it were loaded.
 		loaded = true;
+		this.width = width;
+		this.height = height;
 		notifyAll();
 		// Fall through to notifyLoaded
 	    } else {
@@ -242,10 +244,10 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 		return;
 	    } else {
 		if (image != null) {
-		    if (loaded) {
-			w = image.getWidth(null);
-			h = image.getHeight(null);
-		    }
+		    w = width;
+		    h = height;
+		    width = 0;
+		    height = 0;
 		    image.flush();
 		    image = null;
 		}
@@ -273,8 +275,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
 	gr.drawImage(image, bounds.x, bounds.y, 
 			    bounds.x+bounds.width, bounds.y+bounds.height,
-			    0, 0, image.getWidth(null), image.getHeight(null), 
-			    comp);
+			    0, 0, width, height, comp);
     }
     
     /**
@@ -290,6 +291,18 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 			    comp);
     }
     void destroy() {
+	if (Debug.LEVEL > 0 && loaded) {
+	    Debug.println("Warning:  Destroying loaded image " + this + ".");
+	    Debug.println("          unprepare() should always be called before ungetImage().");
+	    	// A bit of explanation here:  destroy() is called from
+		// ImageManger.ungetImage() when the ref count drops to 0.
+		// This is supposed to mean that the application no longer
+		// references the ManagedImage, so it should be impossible
+		// for the application to call unprepare().
+		//
+		// An xlet should always unprepare() its images before
+		// calling ImageManager.ungetImage().
+	}
 	Image im = image;
 	if (im != null) {
 	    im.flush();	// Shouldn't be necessary, but doesn't hurt.
