@@ -7,6 +7,8 @@
 	<ant inheritAll="false" dir="destroyer" target="clean"/>
 	<ant inheritAll="false" dir="root" target="clean"/>
 	<ant inheritAll="false" dir="wildcard" target="clean"/>
+	<ant inheritAll="false" dir="creatorWithMultiOrgs" target="clean"/>
+	<ant inheritAll="false" dir="destroyerForMultiOrgs" target="clean"/>
     </target>
 
     <target name="spotless">
@@ -15,6 +17,8 @@
 	<ant inheritAll="false" dir="destroyer" target="spotless"/>
 	<ant inheritAll="false" dir="root" target="spotless"/>
 	<ant inheritAll="false" dir="wildcard" target="spotless"/>
+	<ant inheritAll="false" dir="creatorWithMultiOrgs" target="spotless"/>
+	<ant inheritAll="false" dir="destroyerForMultiOrgs" target="spotless"/>
     </target>
 
     <target name="deploy">
@@ -23,6 +27,9 @@
 	<ant inheritAll="false" dir="destroyer" target="deploy"/>
 	<!-- <ant inheritAll="false" dir="root" target="deploy"/> -->
 	<ant inheritAll="false" dir="wildcard" target="deploy"/>
+	<ant inheritAll="false" dir="creatorWithMultiOrgs" target="deploy"/>
+	<ant inheritAll="false" dir="destroyerForMultiOrgs" target="deploy"/>
+
     </target>
 
 
