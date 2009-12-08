@@ -130,6 +130,13 @@ public class BDCertGenerator {
                     errorNeedArgument(opt);
                 }
                 builder = builder.certSignerPassword(args[i]);
+            } else if (opt.equals("-file")) {
+                if (++i == args.length) {
+                    errorNeedArgument(opt);
+                }
+                builder = builder.outputDiscrootFile(args[i]);
+            } else if (opt.equals("-nodiscroot")) {
+                builder = builder.dontWriteDiscroot();
             } else if (opt.equals("-help")) {
                 printUsageAndExit("");
             } else if (opt.equals("-debug")) {
@@ -202,6 +209,9 @@ public class BDCertGenerator {
         System.err.println(" -keypass     password\t:Password for the newly generated key");
         System.err.println(" -signeralias name    \t:Alias of the application certificate signer");
         System.err.println(" -signerpass  password\t:Key password of the application certificate signer");
+        System.err.println(" -file                \t:Name of the resulting app disc root crt file");
+        System.err.println("                      \t If none is specified the cert is stored in the file: app.discroot.crt\n");
+        System.err.println(" -nodiscroot          \t Do not write out app disc root crt file");
         System.err.println(" -debug               \t:Prints debug messages");
         System.err.println(" -help                \t:Prints this message");
         System.err.println("\nExample: java net.java.bd.tools.security.BDCertGenerator -root 56789abc \n");

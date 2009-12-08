@@ -148,8 +148,8 @@ public class SecurityUtil {
     static final String DEF_ROOT_ALT_NAME = "root@studio.com";
     static final String DEF_APP_CERT_DN = "CN=Producer, OU=Codesigning Department, O=BDJCompany, C=US";
     static final String DEF_ROOT_CERT_DN = "CN=Studio, OU=Codesigning Department, O=BDJCompany, C=US";
-    static final String APP_ROOT_DISC_FILE = "app.discroot.crt";
-    static final String BU_ROOT_DISC_FILE = "bu.discroot.crt";
+    static final String APP_DISC_ROOT_FILE = "app.discroot.crt";
+    static final String BU_DISC_ROOT_FILE = "bu.discroot.crt";
     static final String ONLINE_SIG_FILE = "online.sig";
     static final String SIG_ALG = "SHA1WithRSA";
     static final int KEY_LENGTH = 1024;
@@ -172,14 +172,16 @@ public class SecurityUtil {
     String orgId;
     String dn;
     String altName;
+    String outputDiscrootFile;
+    boolean writeDiscroot = true;
     String BUMFile;   // Binding Unit Manifest File
-    String discRootFile;
+    String onlineDiscRootFile;
     boolean isRootCert = false;
     boolean isAppCert = false;
     boolean isBindingUnitCert = false;
     String onlinePvtKeyFile;
     String onlineCrtFile;
-    boolean noDiscroot = false;
+    boolean skipOnlineDiscroot = false;
 
     // This is a special flag indicating newly added
     // jar entries (not present in the signature file of an already
@@ -214,14 +216,16 @@ public class SecurityUtil {
         this.debug = b.debug;
         this.isAppCert = b.isAppCert;
         this.isRootCert = b.isRootCert;
+        this.outputDiscrootFile = b.outputDiscrootFile;
+        this.writeDiscroot = b.writeDiscroot;
         this.isBindingUnitCert = b.isBindingUnitCert;
         this.BUMFile = b.BUMFile;
-        this.discRootFile = b.discRootFile;
+        this.onlineDiscRootFile = b.onlineDiscRootFile;
         this.jarfiles = b.jarfiles;
         this.signOriginalOnly = b.signOriginalOnly;
         this.onlinePvtKeyFile = b.onlinePvtKeyFile;
         this.onlineCrtFile = b.onlineCrtFile;
-        this.noDiscroot = b.noDiscroot;
+        this.skipOnlineDiscroot = b.skipOnlineDiscroot;
 
         // Minor processing;append the orgid to the names
         dn = appendOrgId(dn);
@@ -238,6 +242,8 @@ public class SecurityUtil {
         String contentSignerPassword;
         String certSignerAlias;
         String certSignerPassword = DEF_ROOTKEY_PASSWORD;
+        String outputDiscrootFile = APP_DISC_ROOT_FILE;
+        boolean writeDiscroot = true;
 
         // Certificate data.
         String dn;
@@ -250,10 +256,10 @@ public class SecurityUtil {
         boolean isBindingUnitCert = false;
         boolean signOriginalOnly = false;
         String BUMFile;
-        String discRootFile;
+        String onlineDiscRootFile;
         String onlinePvtKeyFile;
         String onlineCrtFile;
-        boolean noDiscroot;
+        boolean skipOnlineDiscroot;
 
         public Builder() {
         }
@@ -381,6 +387,16 @@ public class SecurityUtil {
             return this;
         }
 
+        public Builder outputDiscrootFile(String file) {
+            this.outputDiscrootFile = file;
+            return this;
+        }
+
+        public Builder dontWriteDiscroot() {
+            this.writeDiscroot = false;
+            return this;
+        }
+
         public Builder originalOnly() {
             this.signOriginalOnly = true;
             return this;
@@ -402,9 +418,9 @@ public class SecurityUtil {
             return this;
         }
 
-        public Builder discRootFile(String file) {
-            this.discRootFile = file;
-	    initOnline();
+        public Builder onlineDiscRootFile(String file) {
+            this.onlineDiscRootFile = file;
+            initOnline();
             return this;
 	}
 
@@ -427,11 +443,11 @@ public class SecurityUtil {
             return this;
         }
 
-        public Builder noDiscroot() {
-            this.noDiscroot = true;
-	    initOnline();
+        public Builder skipOnlineDiscroot() {
+            this.skipOnlineDiscroot = true;
+            initOnline();
             return this;
-	}
+        }
 
         public Builder jarfiles(List<String> files) {
             this.jarfiles = files;
@@ -524,8 +540,8 @@ public class SecurityUtil {
         sb.append("BUMFile = ");
         sb.append(BUMFile);
         sb.append("\n");
-        sb.append("discRootFile =");
-        sb.append(discRootFile);
+        sb.append("onlineDiscRootFile =");
+        sb.append(onlineDiscRootFile);
         sb.append("\n");
         sb.append("jarfiles = ");
         sb.append(jarfiles);
@@ -566,7 +582,7 @@ public class SecurityUtil {
             initKeyStore();
             generateSelfSignedCertificate(dn, newCertAlias,
                     newKeyPassword, true);
-            exportRootCertificate();
+            exportRootCertificate(true);
         } catch (Exception e) {
             e.printStackTrace();
             failed = true;
@@ -588,7 +604,9 @@ public class SecurityUtil {
             if (debug) {
                 verifyCertificate("app", APPCERTFILE);
             }
-            exportRootCertificate();
+            if (writeDiscroot) {
+                exportRootCertificate(false);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             failed = true;
@@ -784,10 +802,10 @@ public class SecurityUtil {
                     " for online authentication");
             return;
         }
-	if (noDiscroot) {
+	if (skipOnlineDiscroot) {
 	    rootCert = new byte[1];
 	} else {
-            rootCert = readIntoBuffer(discRootFile);
+            rootCert = readIntoBuffer(onlineDiscRootFile);
 	}
         Signature signer = Signature.getInstance(SIG_ALG);
         signer.initSign(key);
@@ -861,10 +879,10 @@ public class SecurityUtil {
             throws Exception {
         Signature verifier = Signature.getInstance(SIG_ALG);
         verifier.initVerify(cert);
-	if (noDiscroot) {
+	if (skipOnlineDiscroot) {
 	    verifier.update(new byte[1]);
 	} else {
-             verifier.update(readIntoBuffer(discRootFile));
+             verifier.update(readIntoBuffer(onlineDiscRootFile));
 	}
         verifier.update(typeIndicator.getBytes(ISO));
         verifier.update(versionNo.getBytes(ISO));
@@ -1009,11 +1027,11 @@ public class SecurityUtil {
         jar.run(jarArgs);
     }
 
-    private void exportRootCertificate() throws Exception {
-        String exportFileName = APP_ROOT_DISC_FILE;
+    private void exportRootCertificate(boolean verify) throws Exception {
+        String exportFileName = outputDiscrootFile;
         String type = "root";
         if (isBindingUnitCert) {
-            exportFileName = BU_ROOT_DISC_FILE;
+            exportFileName = BU_DISC_ROOT_FILE;
             type = "binding";
         }
         String[] exportRootCertificateArgs = {
@@ -1021,7 +1039,7 @@ public class SecurityUtil {
             "-keystore", keystoreFile, "-storepass", keystorePassword,
             "-v", "-file", exportFileName};
         KeyTool.main(exportRootCertificateArgs);
-        if (debug) {
+        if (debug && verify) {
             verifyCertificate(type, exportFileName);
         }
     }
