@@ -220,7 +220,7 @@ Here's BNF describing the syntax of a show file:
     feature ::= fixed_image | image_sequence | box | assembly | menu_assembly
     		  | sound | text | translator_model | translator | group 
 		  | timer | clipped | src_over | fade | scaling_model
-		  | gurantee_fill | set_target | showtop_group
+		  | guarantee_fill | set_target | showtop_group
 		  | extension_feature | extension_modifier
 
     fixed_image ::= "feature" "fixed_image" name image_placement file_name 
@@ -257,7 +257,7 @@ Here's BNF describing the syntax of a show file:
     name_or_continuation ::= "+" | "-" | name	# "+" means "repeat last frame",
      						# "-" means "empty"
 
-    assembly ::= "feature" "assembly" "{" assembly_part * "}" ";"
+    assembly ::= "feature" "assembly" name "{" assembly_part * "}" ";"
 
     assembly_part ::= name sub_feature
 
@@ -544,8 +544,8 @@ Here's BNF describing the syntax of a show file:
     				name "{" rc_key * "}" 
     				"execute" commands ";"
 	#  Note that only key_pressed is guaranteed to be available
-	#  on all devices.  OCAP and MHP don't guarantee it, and
-	#  BD part J.1.2 looks like it's not guarnateed in BD-J, either.
+	#  on all devices.  OCAP and MHP don't guarantee key_released, and
+	#  BD part J.1.2 looks like it's not guaranteed in BD-J, either.
 
     rc_key ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
                | "right" | "left" | "up" | "down" | "enter"

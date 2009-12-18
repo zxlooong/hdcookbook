@@ -205,11 +205,14 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * will be thrown.
      * <p>
      * Note that if you have a ManagedImage instance that you want to forget
-     * about after you give it to FixedImage, you'll have to call
-     * ManagedImage.unprepare() and ImageManager.ungetImage() after giving
-     * FixedImage the instance.  You give FixedImage the instance, it
-     * increments the reference counts, but you have to decrement the
-     * reference counts you added when you first referenced the ManagedImage.
+     * about after you give it to FixedImage, if you've prepared it you'll 
+     * have to call ManagedImage.unprepare() after giving FixedImage the
+     * instance (because FixedImage itself calls prepare()).  Similarly,
+     * you'll need to call ImageManager.ungetImage() after giving
+     * FixedImage the instance.  In other words, when give FixedImage the 
+     * instance, it increments the reference counts, so you have to 
+     * decrement the  reference counts you added when you first referenced 
+     * the ManagedImage.
      * <p>
      * This method must only be called when it is safe to do so, according to 
      * the threading model, and with the Show lock held.  Usually, this means 
@@ -227,8 +230,18 @@ public class FixedImage extends Feature implements Node, SetupClient {
      *			from mi.getWidth() and mi.getHeight()
      * fi.setImageSizeChanged();
      *</pre>
-     *
-     *
+     * Code that gets a new image from the ImageManager and swaps it into a 
+     * new image to FixedImage instance that <i>isn't</i>
+     * set up is fairly straightforward:
+     * </pre>
+     * {
+     *     FixedImage fi = ... the feature
+     *     URL url = ... the place the image comes from
+     *     ManagedImage mi = ImageManager.getImage(url);
+     *     fi.replaceImage(mi);
+     *     ImageManager.ungetImage(mi);	    // mi goes out of scope
+     * }
+     * 
      * @throws  IllegalStateException if this feature is set up, and 
      *			newImage has not been loaded.  Also thrown if
      *		        newImage.isReferenced() is false.
