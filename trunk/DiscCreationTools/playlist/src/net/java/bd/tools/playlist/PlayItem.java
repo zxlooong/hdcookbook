@@ -173,7 +173,7 @@ public class PlayItem {
             substream.write(new byte[2]);
         }
         if (getIsMultiAngle()) {
-            substream.writeByte(angles.length - 1);
+            substream.writeByte(angles.length); // Issue 205
             value = getIsDifferentAudios() ? 0x02 : 0;
             value |= getIsSeamlessAngleChange() ? 0x01 : 0; 
             substream.writeByte(value);
