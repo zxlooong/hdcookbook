@@ -79,13 +79,13 @@ public class StreamCodingType {
         register(new StreamCodingType(0x82, "DTS audio stream for Primary audio"));
         register(new StreamCodingType(0x83, "Dolby Lossless audio stream for Primary audio"));
         register(new StreamCodingType(0x84, "Dolby Digital Plus audio stream for Primary audio"));
-        register(new StreamCodingType(0x85, "DTS-HD audo stream except XLL for Primary audio"));
-        register(new StreamCodingType(0x86, "DTS-HD audo stream XLL for Primary audio"));
+        register(new StreamCodingType(0x85, "DTS-HD audio stream except XLL for Primary audio"));
+        register(new StreamCodingType(0x86, "DTS-HD audio stream XLL for Primary audio"));
         register(new StreamCodingType(0xA1, "Dolby digital Plus audio stream for secondary audio"));
         register(new StreamCodingType(0xA2, "DTS-HD audio stream for secondary audio"));
         register(new StreamCodingType(0x90, "Presentation Graphics Stream"));
         register(new StreamCodingType(0x91, "Interactive Graphics Stream"));
-        register(new StreamCodingType(0x93, "Text Subtitle stream"));
+        register(new StreamCodingType(0x92, "Text Subtitle stream"));
     }
     
     static void register(StreamCodingType type) {
