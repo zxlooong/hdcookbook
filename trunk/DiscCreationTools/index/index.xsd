@@ -16,7 +16,13 @@
   </xs:complexType>
 
   <xs:complexType name="appInfoBDMV">
-    <xs:sequence/>
+    <xs:sequence>
+      <xs:element name="frameRate" type="frameRate" minOccurs="0"/>
+      <xs:element name="initialOutputModePreference" 
+                  type="initialOutputModePreference" minOccurs="0"/>
+      <xs:element name="SSContentExistFlag" type="xs:boolean"/>
+      <xs:element name="videoFormat" type="videoFormat" minOccurs="0"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="extensionData">
@@ -70,5 +76,40 @@
       <xs:enumeration value="V_11"/>
     </xs:restriction>
   </xs:simpleType>
+
+  <xs:simpleType name="frameRate">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="IGNORED"/>
+      <xs:enumeration value="Hz_24000_1001"/>
+      <xs:enumeration value="Hz_24"/>
+      <xs:enumeration value="Hz_25"/>
+      <xs:enumeration value="Hz_30000_1001"/>
+      <xs:enumeration value="RESERVED_5"/>
+      <xs:enumeration value="Hz_50"/>
+      <xs:enumeration value="Mz_60000_1001"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="initialOutputModePreference">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Mode2D"/>
+      <xs:enumeration value="Mode3D"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="videoFormat">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="IGNORED"/>
+      <xs:enumeration value="VIDEO_480i"/>
+      <xs:enumeration value="VIDEO_576i"/>
+      <xs:enumeration value="VIDEO_480p"/>
+      <xs:enumeration value="VIDEO_1080i"/>
+      <xs:enumeration value="VIDEO_720p"/>
+      <xs:enumeration value="VIDEO_1080p"/>
+      <xs:enumeration value="VIDEO_576p"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
 </xs:schema>
 
