@@ -72,10 +72,10 @@ public class SubPlayItem {
     private ClipInfo[] subClipEntries;
     private int spConnectionCondition;
     private boolean isMultiClipEntries;
-    private int subPlayItemInTime;
-    private int subPlayItemOutTime;
+    private long subPlayItemInTime;
+    private long subPlayItemOutTime;
     private int syncPlayItemId;
-    private int syncStartPtsOfPlayItem;
+    private long syncStartPtsOfPlayItem;
     
     public SubPlayItem() {}
     public SubPlayItem(int id) {
@@ -90,10 +90,10 @@ public class SubPlayItem {
         // 4 bit sp_connection_condition
         // 1 bit isMultiClipEntries
         // 8 bit clipinfo[0] STC_id
-        // 32 bit SubPlayItem in_time
-        // 32 bit SubPlayItem out_time
+        // 32 bit unsigned SubPlayItem in_time
+        // 32 bit unsigned SubPlayItem out_time
         // 16 bit sync_playitem id
-        // 32 bit sync_start_PTS
+        // 32 bit unsigned sync_start_PTS
         // if (isMultiClipEntries)
         // 8 bit number of entries
         // 8 bit reserved
@@ -107,6 +107,9 @@ public class SubPlayItem {
         String codecId;
         int    stdId;
         ClipInfo info;
+        byte[] inTimeBytes = new byte[4];
+        byte[] outTimeBytes = new byte[4];
+        byte[] syncStartPtsBytes = new byte[4];
         
         din.skipBytes(2);        
         name = StringIOHelper.readISO646String(din, 5);
@@ -116,10 +119,13 @@ public class SubPlayItem {
         setSpConnectionCondition(b & 0x1e);
         setIsMultiClipEntries((b & 0x01) != 0);  
         stdId = din.readByte();
-        setSubPlayItemInTime(din.readInt());
-        setSubPlayItemOutTime(din.readInt());
+        din.readFully(inTimeBytes);
+        setSubPlayItemInTime(UnsignedIntHelper.convertToLong(inTimeBytes));
+        din.readFully(outTimeBytes);
+        setSubPlayItemOutTime(UnsignedIntHelper.convertToLong(outTimeBytes));
         setSyncPlayItemId(din.readUnsignedShort());
-        setSyncStartPtsOfPlayItem(din.readInt());
+        din.readFully(syncStartPtsBytes);
+        setSyncStartPtsOfPlayItem(UnsignedIntHelper.convertToLong(syncStartPtsBytes));
         info = new ClipInfo(0, name, codecId, stdId);
         subClipList.add(info);
         if (getIsMultiClipEntries()) {
@@ -151,10 +157,10 @@ public class SubPlayItem {
         value |= getIsMultiClipEntries() ? 0x01 : 0 ;
         substream.writeByte(value);
         substream.writeByte(infos[0].getStcId());
-        substream.writeInt(getSubPlayItemInTime());
-        substream.writeInt(getSubPlayItemOutTime());
+        substream.write(UnsignedIntHelper.convertToBytes(getSubPlayItemInTime()));
+        substream.write(UnsignedIntHelper.convertToBytes(getSubPlayItemOutTime()));
         substream.writeShort(getSyncPlayItemId());
-        substream.writeInt(getSyncStartPtsOfPlayItem());
+        substream.write(UnsignedIntHelper.convertToBytes(getSyncStartPtsOfPlayItem()));
         if (getIsMultiClipEntries()) {
             substream.writeByte(infos.length);
             substream.writeByte(0);
@@ -212,19 +218,19 @@ public class SubPlayItem {
         this.isMultiClipEntries = isMultiClipEntries;
     }
 
-    public int getSubPlayItemInTime() {
+    public long getSubPlayItemInTime() {
         return subPlayItemInTime;
     }
 
-    public void setSubPlayItemInTime(int subPlayItemInTime) {
+    public void setSubPlayItemInTime(long subPlayItemInTime) {
         this.subPlayItemInTime = subPlayItemInTime;
     }
 
-    public int getSubPlayItemOutTime() {
+    public long getSubPlayItemOutTime() {
         return subPlayItemOutTime;
     }
 
-    public void setSubPlayItemOutTime(int subPlayItemOutTime) {
+    public void setSubPlayItemOutTime(long subPlayItemOutTime) {
         this.subPlayItemOutTime = subPlayItemOutTime;
     }
 
@@ -236,11 +242,11 @@ public class SubPlayItem {
         this.syncPlayItemId = syncPlayItemId;
     }
 
-    public int getSyncStartPtsOfPlayItem() {
+    public long getSyncStartPtsOfPlayItem() {
         return syncStartPtsOfPlayItem;
     }
 
-    public void setSyncStartPtsOfPlayItem(int syncStartPtsOfPlayItem) {
+    public void setSyncStartPtsOfPlayItem(long syncStartPtsOfPlayItem) {
         this.syncStartPtsOfPlayItem = syncStartPtsOfPlayItem;
     }
 }

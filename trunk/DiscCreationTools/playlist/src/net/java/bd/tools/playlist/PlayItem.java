@@ -69,8 +69,8 @@ public class PlayItem {
     private ClipInfo[] angles;
     private boolean isMultiAngle;
     private int connectionCondition;
-    private int inTime;
-    private int outTime;
+    private long inTime;
+    private long outTime;
     private UOMaskTable uoMaskTable = new UOMaskTable();
     private boolean playItemRandomAccessFlag;
     private int stillMode;
@@ -93,8 +93,8 @@ public class PlayItem {
         // 1 bit isMultiAngle
         // 4 bit connectionCondition
         // 8 bit ClipInfo[0] STC id ref
-        // 32 bit inTime
-        // 32 bit outTime
+        // 32 bit unsigned inTime
+        // 32 bit unsigned outTime
         // UOMaskTable
         // 1 bit playItemRandomAccessFlag
         // 7 bit reserve
@@ -108,6 +108,8 @@ public class PlayItem {
         String codecId;
         int stcId;
         byte b;
+        byte[] inTimeBytes  = new byte[4];
+        byte[] outTimeBytes = new byte[4];
        
         din.skipBytes(2); // length
         clipName = StringIOHelper.readISO646String(din, 5);
@@ -117,8 +119,10 @@ public class PlayItem {
         setIsMultiAngle((b & 0x10) != 0);
         setConnectionCondition(b & 0x0f);
         stcId = din.readByte();
-        setInTime(din.readInt());
-        setOutTime(din.readInt());
+        din.readFully(inTimeBytes);
+        setInTime(UnsignedIntHelper.convertToLong(inTimeBytes));
+        din.readFully(outTimeBytes);
+        setOutTime(UnsignedIntHelper.convertToLong(outTimeBytes));
         uoMaskTable.readObject(din);
         b = din.readByte();
         setPlayItemRandomAccessFlag((b & 0x80) != 0);
@@ -162,8 +166,8 @@ public class PlayItem {
         value |= getConnectionCondition();
         substream.writeByte(value);
         substream.writeByte(angle.getStcId());
-        substream.writeInt(getInTime());
-        substream.writeInt(getOutTime());
+        substream.write(UnsignedIntHelper.convertToBytes(getInTime()));
+        substream.write(UnsignedIntHelper.convertToBytes(getOutTime()));
         uoMaskTable.writeObject(substream);
         substream.writeByte(getPlayItemRandomAccessFlag() ? 0x80 : 0);
         substream.writeByte(getStillMode());
@@ -235,19 +239,19 @@ public class PlayItem {
         this.connectionCondition = connectionCondition;
     }
 
-    public int getInTime() {
+    public long getInTime() {
         return inTime;
     }
 
-    public void setInTime(int inTime) {
+    public void setInTime(long inTime) {
         this.inTime = inTime;
     }
 
-    public int getOutTime() {
+    public long getOutTime() {
         return outTime;
     }
 
-    public void setOutTime(int outTime) {
+    public void setOutTime(long outTime) {
         this.outTime = outTime;
     }
 

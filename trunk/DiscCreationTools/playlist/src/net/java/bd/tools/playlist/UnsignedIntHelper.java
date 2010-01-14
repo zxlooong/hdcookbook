@@ -52,112 +52,34 @@
  *             at https://hdcookbook.dev.java.net/misc/license.html
  */
 
-
 package net.java.bd.tools.playlist;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-/**
- * BD-ROM Part 3-1 5.3.7 PlayListMark Mark item.
+/*
+ * A helper class for converting 4 byte unsigned integer to 
+ * long and back.  Issue 206.
  */
-public class Mark {
-    private int id;
-    private int type;
-    private int playItemIdRef;
-    private long markTimeStamp;
-    private int entryEsPid;
-    private long duration;
-    
-    public Mark() {}
-    public Mark(int id) {
-        this.id = id;
-    }
-    
-    public void readObject(DataInputStream din) throws IOException {
-        // 8 bit reserved        1
-        // 8 bit markType        1
-        // 16 bit playItemIdRef  2
-        // 32 bit markTimeStamp  4 unsigned
-        // 16 bit entryESPID     2
-        // 32 bit duration       4 unsigned
+public class UnsignedIntHelper {
 
-        byte[] timeStampBytes = new byte[4];
-        byte[] durationBytes  = new byte[4];
-
-        din.skipBytes(1);
-        setType((int)din.readByte());
-        setPlayItemIdRef(din.readUnsignedShort());
-        din.readFully(timeStampBytes);
-        setMarkTimeStamp(UnsignedIntHelper.convertToLong(timeStampBytes));
-        setEntryEsPid(din.readUnsignedShort());
-        din.readFully(durationBytes);
-        setDuration(UnsignedIntHelper.convertToLong(durationBytes));
+    /**
+     * Converts 4 byte unsigned integer to long.
+     */
+    static long convertToLong(byte[] buf) {
+        return ( ((long)((0xff & buf[0]) << 24  
+                         | (0xff & buf[1]) << 16
+                         | (0xff & buf[2]) << 8 
+                         | (0xff & buf[3])))
+                & 0xFFFFFFFFL);
     }
     
-    public void writeObject(DataOutputStream dout) throws IOException {
-        dout.writeByte(0);
-        dout.writeByte(getType());
-        dout.writeShort(getPlayItemIdRef());
-        dout.write(UnsignedIntHelper.convertToBytes(getMarkTimeStamp()));
-        dout.writeShort(getEntryEsPid());
-        dout.write(UnsignedIntHelper.convertToBytes(getDuration()));
-    }
-
-    @XmlAttribute
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @XmlJavaTypeAdapter(HexStringIntegerAdapter.class)    
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        if (type != 0x01 && type != 0x02) {
-            throw new IllegalArgumentException("Unexpected type " + type);
-        }
-        this.type = type;
-    }
-
-    public int getPlayItemIdRef() {
-        return playItemIdRef;
-    }
-
-    public void setPlayItemIdRef(int playItemIdRef) {
-        this.playItemIdRef = playItemIdRef;
-    }
-
-    public long getMarkTimeStamp() {
-        return markTimeStamp;
-    }
-
-    public void setMarkTimeStamp(long markTimeStamp) {
-        this.markTimeStamp = markTimeStamp;
-    }
-    
-    @XmlJavaTypeAdapter(HexStringIntegerAdapter.class)  
-    public Integer getEntryEsPid() {
-        return entryEsPid;
-    }
-
-    public void setEntryEsPid(Integer entryEsPid) {
-        this.entryEsPid = entryEsPid;
-    }
-
-    public long getDuration() {
-        return duration;
-    }
-
-    public void setDuration(long duration) {
-        this.duration = duration;
-    }
+    /**
+     * Returns long's lower 4 bytes as an array.
+     */
+    static byte[] convertToBytes(long num) {
+        return new byte[] {
+              (byte)(0xff & (num >> 24)),
+              (byte)(0xff & (num >> 16)),
+              (byte)(0xff & (num >>  8)),
+              (byte)(0xff & num)
+        };
+    } 
 }
