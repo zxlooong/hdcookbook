@@ -221,6 +221,7 @@ information or have any questions.
             <arg value="-out"/>
             <arg value="${MENUASSETS_DEST}"/>
             <arg value="-debug"/>
+            <arg value="-show_mosaic"/>
             <arg value="menu.txt"/>
             <arg value="mosaics.txt"/>
         </grincompiler.jdktools.java>	

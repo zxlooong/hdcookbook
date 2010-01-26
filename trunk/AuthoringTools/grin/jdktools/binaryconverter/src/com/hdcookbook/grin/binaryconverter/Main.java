@@ -80,6 +80,7 @@ public class Main {
     private static int scaleY = 1000;	// Y scale factor in mills
     private static int offsetX = 0;	// X offset in pixels
     private static int offsetY = 0;	// Y offset in pixels
+    private static boolean headless = true;
    
    /**
     * A driver method for the Main.convert(String, String).
@@ -123,6 +124,8 @@ public class Main {
 		assetDirsLL.add(path);
             } else if ("-debug".equals(args[index])){
                 debug = true;
+            } else if ("-show_mosaic".equals(args[index])){
+                headless = false;
             } else if ("-extension_parser".equals(args[index])) {
                 index++;
                 if (index == args.length) {
@@ -175,6 +178,9 @@ public class Main {
         if (showFilesLL.isEmpty()) {
             usage();
         }
+	if (headless) {
+	    System.setProperty("java.awt.headless", "true");
+	}
         
         ExtensionParser extensionParser = null;
         
@@ -313,6 +319,7 @@ public class Main {
 	    }
 	    if (optimize) {
 		GrinCompiler compiler = new GrinCompiler();
+		compiler.setHeadless(headless);
 		compiler.optimizeShows(shows, outputDir);
 	    }
 	    for (int i = 0; i < showFiles.length; i++) {
@@ -373,6 +380,7 @@ public class Main {
         System.out.println("\t\t-extension_parser <a fully-qualified-classname>");
         System.out.println("\t\t-out <output_dir>");      
         System.out.println("\t\t-debug");
+        System.out.println("\t\t-show_mosaic");
         System.out.println("\t\t-avoid_optimization");
         System.out.println("\t\t-optimize");
         System.out.println("\t\t-scaleX <double> -scaleY <double>");
@@ -383,8 +391,8 @@ public class Main {
                 "GrinCompiler methods.");
         System.out.println("\t-optimize undoes an -avoid_optimization earlier on the command line.");
         System.out.println("\t-debug includes debugging information to the generated binary file.");
-        
-         
+        System.out.println("\t-show_mosaic  creates a GUI to show mosaic building");
+
         System.exit(0);
    }
 }

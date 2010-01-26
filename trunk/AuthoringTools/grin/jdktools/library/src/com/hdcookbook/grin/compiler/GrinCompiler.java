@@ -62,8 +62,14 @@ import java.io.IOException;
  * A tool which takes an SEShow instance and applies optimization.
  */
 public class GrinCompiler {
+
+    private boolean headless = false;
     
     public GrinCompiler() {
+    }
+
+    public void setHeadless(boolean v) {
+	headless = v;
     }
 
     /**
@@ -82,7 +88,7 @@ public class GrinCompiler {
             throw new IOException("output directory " + outputDir 
 	    			+ " not found.");
         }
-        MosaicMaker mm = new MosaicMaker(shows, f);         
+        MosaicMaker mm = new MosaicMaker(shows, f, headless);
 	mm.init();
 	mm.makeMosaics();        
         mm.destroy();

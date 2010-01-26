@@ -65,6 +65,7 @@ import com.hdcookbook.grin.features.SEImageSequence;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.text.GenericExtensionParser;
 import com.hdcookbook.grin.util.ManagedImage;
+import com.hdcookbook.grin.util.HeadlessManagedImage;
 import com.hdcookbook.grin.util.AssetFinder;
 
 import java.awt.AlphaComposite;
@@ -103,7 +104,7 @@ import javax.imageio.ImageIO;
  *
  *   @author     Bill Foote (http://jovial.com)
  **/
- public class MosaicMaker extends Frame {
+ public class MosaicMaker {
 
     private File outputDir;
     private String[] assetPath;
@@ -125,8 +126,11 @@ import javax.imageio.ImageIO;
     private HashMap<String, Mosaic> nameToMosaic
                 = new HashMap<String, Mosaic>(); 
 	// mosaic name to Mosaic
-    Graphics2D frameG;
+    Graphics2D frameG = null;
     private Mosaic currentMosaic = null;
+    private Frame mosaicFrame = null;
+    private HashMap<ManagedImage, HeadlessManagedImage>
+    	headlessImageMap = new HashMap<ManagedImage, HeadlessManagedImage>();
 
     /**
      * Create a mosaic maker
@@ -134,9 +138,16 @@ import javax.imageio.ImageIO;
      * @param showTrees	The GRIN shows these mosaics are for
      * @param outputDir Where to write the mosaics
      **/
-    public MosaicMaker(SEShow[] showTrees, File outputDir) {
+    public MosaicMaker(SEShow[] showTrees, File outputDir, boolean headless) {
 	this.showTrees = showTrees;
 	this.outputDir = outputDir;
+	if (!headless) {
+	    mosaicFrame = new Frame() {
+		public void paint(Graphics g) {
+		    paintFrame(g);
+		}
+	    };
+	}
     }
 
     public void init() throws IOException {
@@ -164,35 +175,39 @@ import javax.imageio.ImageIO;
             }
         }
 
-	setLayout(null);
-	setSize(960, 570);
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosing(java.awt.event.WindowEvent e) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                }
-                destroy();
-		System.out.println("Window closed; compilation aborted.");
-                System.exit(1);
-            }
-        });
-	setVisible(true);
-	frameG = (Graphics2D) getGraphics();
-	frameG.setComposite(AlphaComposite.Src);
+	if (mosaicFrame != null) {
+	    mosaicFrame.setLayout(null);
+	    mosaicFrame.setSize(960, 570);
+	    mosaicFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+		public void windowClosing(java.awt.event.WindowEvent e) {
+		    try {
+			Thread.sleep(100);
+		    } catch (InterruptedException ex) {
+		    }
+		    destroy();
+		    System.out.println("Window closed; compilation aborted.");
+		    System.exit(1);
+		}
+	    });
+	    mosaicFrame.setVisible(true);
+	    frameG = (Graphics2D) mosaicFrame.getGraphics();
+	    frameG.setComposite(AlphaComposite.Src);
+	}
     }
 
     public void destroy() {
         // close the window
-        dispose();
+	if (mosaicFrame != null) {
+	    mosaicFrame.dispose();
+	}
     }
 
     /**
      * Paint something.  
      **/
-    public void paint(Graphics g) {
+    public void paintFrame(Graphics g) {
 	g.setColor(Color.black);
-	g.fillRect(0, 0, getWidth(), getHeight());
+	g.fillRect(0, 0, mosaicFrame.getWidth(), mosaicFrame.getHeight());
 	g.setColor(Color.white);
 	Mosaic m = currentMosaic;
 	if (m == null) {
@@ -203,6 +218,10 @@ import javax.imageio.ImageIO;
     }
 
     private void addImage(ManagedImage mi, Dimension size) {
+	HeadlessManagedImage hmi = headlessImageMap.get(mi);
+	if (hmi != null) {
+	    mi = hmi;
+	}
 	for (int i = 0; i < images.size(); i++) {
 	    ImageRecord rec = images.get(i);
 	    if (rec.image == mi) {
@@ -215,14 +234,24 @@ import javax.imageio.ImageIO;
 		return;
 	    }
 	}
+	if (mosaicFrame == null) {
+	    if (hmi != null) {
+		throw new RuntimeException("assertion failure");
+	    }
+	    hmi = new HeadlessManagedImage(mi.getName());
+	    headlessImageMap.put(mi, hmi);
+	    mi = hmi;
+	} 
 	mi.prepare();
-	mi.load(this);
+	mi.load(mosaicFrame);
 	ImageRecord rec = new ImageRecord();
 	rec.image = mi;
 	rec.maxWidth = size.width;
 	rec.maxHeight = size.height;
 	images.add(rec);
-	mi.draw(frameG, 0, 30, null);
+	if (mosaicFrame != null) {
+	    mi.draw(frameG, 0, 30, null);
+	}
     }
 
     private void addAllToMosaics() throws IOException {
@@ -284,7 +313,7 @@ import javax.imageio.ImageIO;
     public void makeMosaics() throws IOException {
 	for (int i = 0; i < showTrees.length; i++) {
 	    SEShow show = showTrees[i];
-	    show.initialize(this);
+	    show.initialize(mosaicFrame);
 	    Feature[] features = show.getFeatures();
 	    for (int j = 0; j < features.length; j++) {
 		Feature f = features[j];
@@ -309,8 +338,11 @@ import javax.imageio.ImageIO;
 		}
 	    }
 	}
-	frameG.setColor(Color.black);
-	frameG.fillRect(0, 0, getWidth(), getHeight());
+	if (frameG != null) {
+	    frameG.setColor(Color.black);
+	    frameG.fillRect(0, 0, mosaicFrame.getWidth(), 
+	    			  mosaicFrame.getHeight());
+	}
 	addAllToMosaics();
 	LinkedList<Mosaic> mosaics = new LinkedList<Mosaic>();
         for (Map.Entry<String, Mosaic> special : nameToMosaic.entrySet()) {
@@ -367,7 +399,7 @@ import javax.imageio.ImageIO;
 
     private boolean compile(Mosaic m) {
 	currentMosaic = m;
-	boolean result = m.compile(this);
+	boolean result = m.compile(mosaicFrame);
 	return result;
     }
 }
