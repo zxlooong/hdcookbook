@@ -79,14 +79,17 @@ public class VisualRCHandlerHelper {
 
     private String handlerName;
     private boolean startSelected = false;
-    private ArrayList<ArrayList<VisualRCHandlerCell>> grid;
+    private ArrayList<String> gridAlternateNames = new ArrayList<String>();
+    private ArrayList<ArrayList<ArrayList<VisualRCHandlerCell>>> grids
+    	= new ArrayList<ArrayList<ArrayList<VisualRCHandlerCell>>>();
     private Map<String, Integer> states = new HashMap<String, Integer>();
     	// Maps state name to number, counting from 0
-    private Map<String, VisualRCHandlerCell> stateToCell
-	= new HashMap<String, VisualRCHandlerCell>();
-	// Maps state name to the defining cell
-    private Map<String, String> rcOverrides = new HashMap<String, String>();
-	// See setRCOverrides
+    private ArrayList<Map<String, VisualRCHandlerCell>> stateToCell
+	    = new ArrayList<Map<String, VisualRCHandlerCell>>();
+	// Maps state name to the defining cell for each grid
+    private ArrayList<Map<String, String>> rcOverrides 
+	    = new ArrayList<Map<String, String>>();
+	// See addRCOverrides
     private Command[][] selectCommands;
     private Command[][] activateCommands;
     private Rectangle[] mouseRects = null;
@@ -113,13 +116,13 @@ public class VisualRCHandlerHelper {
     }
 
     /**
-     * Sets the RC grid.
+     * Adds an RC grid.
      *
      * @return null 	if all goes well, or an error message if there's
      *			a problem.
      **/
-    public String setGrid(ArrayList<ArrayList<VisualRCHandlerCell>> grid) {
-	this.grid = grid;
+    public String addGrid(ArrayList<ArrayList<VisualRCHandlerCell>> grid) {
+	this.grids.add(grid);
 	if (grid.size() == 0) {
 	    return "Empty grid";
 	}
@@ -140,17 +143,22 @@ public class VisualRCHandlerHelper {
 	    List<VisualRCHandlerCell> row = grid.get(y);
 	    for (int x = 0; x < row.size(); x++) {
 		VisualRCHandlerCell cell = row.get(x);
-		cell.setHelper(this);
+		int alternate = this.grids.size() - 1;
+		cell.setHelper(this, alternate);
 		cell.setXY(x, y);
 	    }
 	}
 
 	    // For each cell, populate the states map
 
+	Map<String, VisualRCHandlerCell> newStateToCell 
+		= new HashMap<String, VisualRCHandlerCell>();
+	stateToCell.add(newStateToCell);
+	HashSet<String> dupCheck = new HashSet<String>();
 	for (int y = 0; y < grid.size(); y++) {
 	    for (int x = 0; x < columns; x++) {
 		VisualRCHandlerCell cell = grid.get(y).get(x);
-		String msg = cell.addState(states, stateToCell);
+		String msg = cell.addState(states, dupCheck, newStateToCell);
 		if (msg != null) {
 		    return msg;
 		}
@@ -185,8 +193,12 @@ public class VisualRCHandlerHelper {
 	return null;	// null means "no error to report"
     }
 
-    public ArrayList<ArrayList<VisualRCHandlerCell>> getGrid() {
-	return grid;
+    public void addGridAlternateName(String name) {
+	gridAlternateNames.add(name);
+    }
+
+    public ArrayList<ArrayList<VisualRCHandlerCell>> getGrid(int i) {
+	return grids.get(i);
     }
 
     /**
@@ -199,12 +211,12 @@ public class VisualRCHandlerHelper {
      * The value of the map is the state to go to, or the special string
      * "&lt;activate>".
      **/
-    public void setRCOverrides(Map<String, String> rcOverrides) {
-	this.rcOverrides = rcOverrides;
+    public void addRCOverrides(Map<String, String> rcOverrides) {
+	this.rcOverrides.add(rcOverrides);
     }
 
-    public Map<String, String> getRCOverrides() {
-	return rcOverrides;
+    public Map<String, String> getRCOverrides(int i) {
+	return rcOverrides.get(i);
     }
 
     public void setSelectCommands(Command[][] commands) {
@@ -238,16 +250,16 @@ public class VisualRCHandlerHelper {
 	return states;
     }
 
-    Map<String, VisualRCHandlerCell> getStateToCell() {
-	return stateToCell;
+    Map<String, VisualRCHandlerCell> getStateToCell(int i) {
+	return stateToCell.get(i);
     }
 
     /**
      * @return The state number referred to by the given cell, or -1 if 
      *	       that cell isn't a state or doesn't refer to one.
      **/
-    public int getState(int column, int row) {
-	String name = grid.get(row).get(column).getState();
+    public int getState(int alternate, int column, int row) {
+	String name = grids.get(alternate).get(row).get(column).getState();
 	if (name == null) {
 	    return -1;
 	}
@@ -258,22 +270,38 @@ public class VisualRCHandlerHelper {
      * @throws IOException if there's an inconsistency in the handler
      **/
     public SEVisualRCHandler getFinishedHandler() throws IOException {
-	int[] upDown = new int[states.size()];
-	int[] rightLeft = new int[states.size()];
+	int[][] upDownAlternates = new int[grids.size()][];
+	int[][] rightLeftAlternates = new int[grids.size()][];
+	String[] gridNames = gridAlternateNames.toArray(
+				new String[gridAlternateNames.size()]);
 	String[] stateNames = new String[states.size()];
 	for (Map.Entry<String, Integer> entry : states.entrySet()) {
 	    int stateNum = entry.getValue().intValue();
 	    stateNames[stateNum] = entry.getKey();
-	    VisualRCHandlerCell cell = stateToCell.get(entry.getKey());
-	    upDown[stateNum] = cell.getUpDown();
-	    rightLeft[stateNum] = cell.getRightLeft();
+	}
+	for (int i = 0; i < grids.size(); i++) {
+	    int[] upDown = new int[states.size()];
+	    upDownAlternates[i] = upDown;
+	    int[] rightLeft = new int[states.size()];
+	    rightLeftAlternates[i] = rightLeft;
+	    for (Map.Entry<String, Integer> entry : states.entrySet()) {
+		int stateNum = entry.getValue().intValue();
+		VisualRCHandlerCell cell 
+			= stateToCell.get(i).get(entry.getKey());
+		if (cell != null) {
+		    upDown[stateNum] = cell.getUpDown();
+		    rightLeft[stateNum] = cell.getRightLeft();
+		}
+	    }
 	}
 	SEVisualRCHandler result
-	    = new SEVisualRCHandler(handlerName,  stateNames, upDown, rightLeft,
-	    			  selectCommands, activateCommands,
-				  mouseRects, mouseRectStates,
-				  timeout, timeoutCommands, startSelected, 
-				  this);
+	    = new SEVisualRCHandler(handlerName,  gridNames,
+	    			    stateNames, 
+				    upDownAlternates, rightLeftAlternates,
+	    			    selectCommands, activateCommands,
+				    mouseRects, mouseRectStates,
+				    timeout, timeoutCommands, startSelected, 
+				    this);
 	return result;
     }
 }

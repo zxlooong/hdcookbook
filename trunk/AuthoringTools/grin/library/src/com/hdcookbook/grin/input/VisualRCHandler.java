@@ -134,6 +134,10 @@ public class VisualRCHandler extends RCHandler implements Node {
 			     // then there's no movement, but the feature is
 			     // activated.
 
+    protected int[][] upDownAlternates;     // alternate grid, 
+    protected int[][] rightLeftAlternates;  // cf. visual_grid_alternate
+    protected String[] gridAlternateNames;  // non-null, can be length 0
+
     protected String[] stateNames;   // The names corresponding to state numbers.
     protected Assembly assembly;     // can be null
     protected Feature[] selectFeatures; // By state #, array can be null, and
@@ -216,6 +220,20 @@ public class VisualRCHandler extends RCHandler implements Node {
     }
 
     /**
+     * Look up an alternate grid by name.  Used for parsing, or by xlets.
+     *
+     * @return -1 if not found
+     **/
+    public int lookupGrid(String gridAlternateName) {
+	for (int i = 0; i < gridAlternateNames.length; i++) {
+	    if (gridAlternateNames[i].equals(gridAlternateName)) {
+		return i;
+	    }
+	}
+	return -1;
+    }
+
+    /**
      * {@inheritDoc}
      **/
     public boolean handleKeyPressed(RCKeyEvent ke, Show caller) {
@@ -287,7 +305,8 @@ public class VisualRCHandler extends RCHandler implements Node {
     /**
      * Called from InvokeVisualCellCommand, and from internal methods.
      * This is synchronized on our show, to only occur during model
-     * updated.
+     * updates.  This method may also be called from a java_command or
+     * from the director, within the animation thread.
      *
      * @param newState	     New state, -1 means "current"
      * @param newActivated   New value for activated
@@ -297,7 +316,30 @@ public class VisualRCHandler extends RCHandler implements Node {
     public void setState(int newState, boolean newActivated,
 		         boolean runCommands) 
     {
+	setState(newState, newActivated, runCommands, -1);
+    }
+
+    /**
+     * Called from InvokeVisualCellCommand, and from internal methods.
+     * This is synchronized on our show, to only occur during model
+     * updates.  This method may also be called from a java_command or
+     * from the director, within the animation thread.
+     *
+     * @param newState	     New state, -1 means "current"
+     * @param newActivated   New value for activated
+     * @param runCommands    If true, run the commands normally associated
+     *			     with entering this state due to a keypress.
+     * @param gridAlternate  Alternate grid # to select, 0..max, or -1 to
+     *			     leave grid unchanged.
+     **/
+    public void setState(int newState, boolean newActivated,
+		         boolean runCommands, int gridAlternate) 
+    {
 	synchronized(show) {
+	    if (gridAlternate != -1)  {
+		upDown = upDownAlternates[gridAlternate];
+		rightLeft = rightLeftAlternates[gridAlternate];
+	    }
 	    if (newState == GRID_ACTIVATE) {
 		newState = currState;
 		newActivated = true;
@@ -401,9 +443,16 @@ public class VisualRCHandler extends RCHandler implements Node {
         
         in.readSuperClassData(this);
         
-        this.upDown = in.readIntArray();
-        this.rightLeft = in.readIntArray();
-        this.stateNames = in.readStringArray();
+	gridAlternateNames = in.readStringArray();
+	upDownAlternates = new int[in.readInt()][];
+	rightLeftAlternates = new int[upDownAlternates.length][];
+	for (int i = 0; i < upDownAlternates.length; i++) {
+	    upDownAlternates[i] = in.readSharedIntArray();
+	    rightLeftAlternates[i] = in.readSharedIntArray();
+	}
+        upDown = upDownAlternates[0];
+        rightLeft = rightLeftAlternates[0];
+        stateNames = in.readStringArray();
         if (in.isNull()) {
             this.selectCommands = null;
         } else {

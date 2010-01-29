@@ -63,6 +63,7 @@ import com.hdcookbook.grin.input.RCKeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import java.io.IOException;
 
@@ -78,6 +79,7 @@ import java.io.IOException;
 public abstract class VisualRCHandlerCell {
 
     protected VisualRCHandlerHelper helper;
+    protected int alternate;
 
     private int xCoord;
     private int yCoord;
@@ -86,8 +88,9 @@ public abstract class VisualRCHandlerCell {
     private VisualRCHandlerCell() {
     }
 
-    void setHelper(VisualRCHandlerHelper helper) {
+    void setHelper(VisualRCHandlerHelper helper, int alternate) {
 	this.helper = helper;
+	this.alternate = alternate;
     }
 
     void setXY(int x, int y) {
@@ -109,6 +112,7 @@ public abstract class VisualRCHandlerCell {
      * @return null if OK, or an error message if not
      **/
     abstract public String addState(Map<String, Integer> stateMap,
+    				    Set<String> dupCheck,
     			            Map<String, VisualRCHandlerCell> cellMap);
 
     /**
@@ -166,8 +170,9 @@ public abstract class VisualRCHandlerCell {
     private int getStateFor(String overrideKey, int x, int y, String stateFrom) 
     		throws IOException
     {
-	Map<String, String> overrides = helper.getRCOverrides();
-	ArrayList<ArrayList<VisualRCHandlerCell>> grid = helper.getGrid();
+	Map<String, String> overrides = helper.getRCOverrides(alternate);
+	ArrayList<ArrayList<VisualRCHandlerCell>> grid 
+		= helper.getGrid(alternate);
 	Map<String, Integer> states = helper.getStates();
 
 	String state = overrides.get(overrideKey);
@@ -266,16 +271,20 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public String addState(Map<String, Integer> stateMap,
+			       Set<String> dupCheck,
 			       Map<String, VisualRCHandlerCell> cellMap) 
 	{
 	    if (added) {
 		return null;
 	    }
 	    added = true;
-	    if (stateMap.get(name) != null) {
+	    if (dupCheck.contains(name)) {
 		return "Duplicate state \"" + name + "\".";
 	    }
-	    stateMap.put(name, new Integer(stateMap.size()));
+	    dupCheck.add(name);
+	    if (stateMap.get(name) == null) {
+		stateMap.put(name, new Integer(stateMap.size()));
+	    }
 	    cellMap.put(name, this);
 	    return null;
         }
@@ -302,12 +311,14 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public VisualRCHandlerCell getRefersTo() {
-	    VisualRCHandlerCell result = helper.getStateToCell().get(name);
+	    VisualRCHandlerCell result 
+	    	= helper.getStateToCell(alternate).get(name);
 	    assert result != null;
 	    return result;
 	}
 
 	public String addState(Map<String, Integer> stateMap,
+    			       Set<String> dupCheck,
 			       Map<String, VisualRCHandlerCell> cellMap) 
 	{
 	    // do nothing
@@ -329,7 +340,8 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public String check() {
-	    VisualRCHandlerCell result = helper.getStateToCell().get(name);
+	    VisualRCHandlerCell result 
+	    	= helper.getStateToCell(alternate).get(name);
 	    if (result == null) {
 		return "State \"" + name + "\" not found";
 	    } else {
@@ -355,12 +367,14 @@ public abstract class VisualRCHandlerCell {
         }
 
 	public VisualRCHandlerCell getRefersTo() {
-	    VisualRCHandlerCell result = helper.getGrid().get(y).get(x);
+	    VisualRCHandlerCell result 
+	    	= helper.getGrid(alternate).get(y).get(x);
 	    assert result != null;
 	    return result;
 	}
 
 	public String addState(Map<String, Integer> stateMap,
+			       Set<String> dupCheck,
 			       Map<String, VisualRCHandlerCell> cellMap) 
 	{
 	    // do nothing
@@ -378,7 +392,8 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public String check() {
-	    ArrayList<ArrayList<VisualRCHandlerCell>> grid = helper.getGrid();
+	    ArrayList<ArrayList<VisualRCHandlerCell>> grid 
+	    	= helper.getGrid(alternate);
 	    if (x < 0 || x >= grid.get(0).size() || y < 0 || y >= grid.size()) {
 		return "" + x + ", " + y + " is an illegal cell.  "
 		       + "Cell numbers count from zero.";
@@ -396,6 +411,7 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public String addState(Map<String, Integer> stateMap,
+			       Set<String> dupCheck,
 			       Map<String, VisualRCHandlerCell> cellMap) {
 	    // do nothing
 	    return null;
@@ -425,6 +441,7 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public String addState(Map<String, Integer> stateMap,
+			       Set<String> dupCheck,
 			       Map<String, VisualRCHandlerCell> cellMap) {
 	    // do nothing
 	    return null;
@@ -454,6 +471,7 @@ public abstract class VisualRCHandlerCell {
 	}
 
 	public String addState(Map<String, Integer> stateMap,
+    			       Set<String> dupCheck,
 			       Map<String, VisualRCHandlerCell> cellMap) {
 	    // do nothing
 	    return null;

@@ -55,7 +55,7 @@ segment S:Main
     } setup {
 	F:Everything
     } rc_handlers {
-	H:1 H:2 H:3 H:4 H:5 H:6
+	H:1 H:2 H:3 H:4 H:5 H:6 H:7
 	H:EnterPress H:EnterRelease
     }
 ;
@@ -79,6 +79,7 @@ feature group F:Everything {
     F:SlowModelTest
     F:OffScreenImageTestEverything
     F:OrbitEverything
+    F:GridSwitchEverything
 } ;
 
 feature text F:MainText
@@ -90,6 +91,7 @@ feature text F:MainText
 	    "     4 - Run show with extension feature"
 	    "     5 - Regression tests menu"
 	    "     6 - Run orbit test"
+	    "     7 - Visual RC handler grid switch test"
 	}
 	SansSerif plain 32 { { 255 255 255 255 } }
 	background { 0 0 0 127 } 
@@ -140,6 +142,10 @@ rc_handler key_pressed H:5 { 5 } execute {
 
 rc_handler key_pressed H:6 { 6 } execute {
 	activate_segment S:ShowOrbit ;
+} ;
+
+rc_handler key_pressed H:7 { 7 } execute {
+	activate_segment S:GridSwitch ;
 } ;
 
 rc_handler key_pressed H:R.1 { 1 } execute {
@@ -905,4 +911,184 @@ segment S:ShowOrbit
 
 rc_handler key_pressed H:ShowOrbit { enter } execute { segment_done ; } ;
 	
+
+#########################################################
+#	    VISUAL RC HANDLER GRID SWITCH		#
+#########################################################
+
+feature text F:GridSwitch.Text.1
+	left 270 top 200 "Do Nothing"
+	SansSerif plain 32 { { 255 255 255 255 } }
+;
+
+feature text F:GridSwitch.Arrow.1
+	left 200 top 200 "-->"
+	SansSerif plain 32 { { 255 255 255 255 } }
+;
+
+feature text F:GridSwitch.Arrow.Activated.1
+	left 200 top 200 "-->"
+	SansSerif plain 32 { { 255 96 96 255 } }
+;
+
+feature text F:GridSwitch.Text.2.Enabled
+	left 270 top 250 "Enable Third Choice"
+	SansSerif plain 32 { { 255 255 255 255 } }
+;
+
+feature text F:GridSwitch.Text.2.Disabled
+	left 270 top 250 "Enable Third Choice"
+	SansSerif plain 32 { { 96 96 96 255 } }
+;
+
+feature assembly F:GridSwitch.Text.2 {
+    enabled	F:GridSwitch.Text.2.Enabled
+    disabled	F:GridSwitch.Text.2.Disabled
+} ;
+
+feature text F:GridSwitch.Arrow.2
+	left 200 top 250 "-->"
+	SansSerif plain 32 { { 255 255 255 255 } }
+;
+
+feature text F:GridSwitch.Arrow.Activated.2
+	left 200 top 250 "-->"
+	SansSerif plain 32 { { 255 96 96 255 } }
+;
+
+feature text F:GridSwitch.Text.3.Enabled
+	left 270 top 300 "Disable Third Choice"
+	SansSerif plain 32 { { 255 255 255 255 } }
+;
+
+feature text F:GridSwitch.Text.3.Disabled
+	left 270 top 300 "Disable Third Choice"
+	SansSerif plain 32 { { 96 96 96 255 } }
+;
+
+feature assembly F:GridSwitch.Text.3 {
+    enabled	F:GridSwitch.Text.3.Enabled
+    disabled	F:GridSwitch.Text.3.Disabled
+} ;
+
+
+feature text F:GridSwitch.Arrow.3
+	left 200 top 300 "-->"
+	SansSerif plain 32 { { 255 255 255 255 } }
+;
+
+feature text F:GridSwitch.Arrow.Activated.3
+	left 200 top 300 "-->"
+	SansSerif plain 32 { { 255 96 96 255 } }
+;
+
+feature text F:GridSwitch.Text.4
+	left 270 top 350 "Return to Main Menu"
+	SansSerif plain 32 { { 255 255 255 255 } }
+;
+
+feature text F:GridSwitch.Arrow.4
+	left 200 top 350 "-->"
+	SansSerif plain 32 { { 255 255 255 255 } }
+;
+
+feature text F:GridSwitch.Arrow.Activated.4
+	left 200 top 350 "-->"
+	SansSerif plain 32 { { 255 96 96 255 } }
+;
+
+feature assembly F:GridSwitch.Arrows {
+	1	F:GridSwitch.Arrow.1
+	2	F:GridSwitch.Arrow.2
+	3	F:GridSwitch.Arrow.3
+	4	F:GridSwitch.Arrow.4
+	1a	sub_feature group {
+		    F:GridSwitch.Arrow.Activated.1
+		    sub_feature timer 18 {
+			set_visual_rc H:GridSwitch current selected ;
+		    } ;
+		} ;
+	2a	sub_feature group {
+		    F:GridSwitch.Arrow.Activated.2
+		    sub_feature timer 18 {
+			set_visual_rc H:GridSwitch state 3 selected
+				      grid_alternate three ;
+			activate_part F:GridSwitch.Text.2 disabled ;
+			activate_part F:GridSwitch.Text.3 enabled ;
+		    } ;
+		} ;
+	3a	sub_feature group {
+		    F:GridSwitch.Arrow.Activated.3
+		    sub_feature timer 18 {
+			set_visual_rc H:GridSwitch state 2 selected
+				      grid_alternate two ;
+			activate_part F:GridSwitch.Text.2 enabled ;
+			activate_part F:GridSwitch.Text.3 disabled ;
+		    } ;
+		} ;
+	4a	sub_feature group {
+		    sub_feature timer 18 {
+			segment_done ;
+		    } ;
+		    F:GridSwitch.Arrow.Activated.4
+		} ;
+} ;
+
+feature group F:GridSwitchEverything {
+	F:GridSwitch.Arrows
+	F:GridSwitch.Text.1
+	F:GridSwitch.Text.2
+	F:GridSwitch.Text.3
+	F:GridSwitch.Text.4
+} ;
+
+segment S:GridSwitch
+    active {
+	F:GridSwitchEverything
+    } setup {
+	F:Everything
+    } rc_handlers {
+	H:GridSwitch
+    } on_entry {
+	set_visual_rc H:GridSwitch state 1 selected ;
+	activate_part F:GridSwitch.Text.2 enabled ;
+	activate_part F:GridSwitch.Text.3 disabled ;
+    } next {
+	activate_segment S:Main ;
+    }
+;
+
+rc_handler visual H:GridSwitch
+    grid_alternates {
+	two { 
+	    { 1 }
+	    { 2 }
+	    { 4 }
+	    rc_override {
+		    # Define some random overrides to test the mechanism...
+		    # These aren't designed to produce a particularly reasonable
+		    # user experience!
+		{ 4 down 1 }
+		{ 2 right 4 }
+	    }
+	} three {
+	    { 1 }
+	    { 3 }
+	    { 4 }
+	}
+    }
+    assembly F:GridSwitch.Arrows
+    select {
+	1	1
+	2	2
+	3	3
+	4	4
+    } activate {
+	1	1a
+	2	2a
+	3	3a
+	4	4a
+    }
+;
+
 end_show 

@@ -1914,10 +1914,11 @@ public class ShowParser {
 		row.add(VisualRCHandlerCell.newState("" + x + "," + y));
 	    }
 	}
-	String msg = helper.setGrid(grid);
+	String msg = helper.addGrid(grid);
 	if (msg != null) {
 	   lexer.reportError(msg);
 	}
+	helper.addRCOverrides(new HashMap<String, String>());
 	helper.setSelectCommands(null);
 	helper.setActivateCommands(activateCommands);
 	helper.setMouseRects(null);
@@ -1945,15 +1946,33 @@ public class ShowParser {
 	String handlerName = lexer.getString();
 	helper.setHandlerName(handlerName);
 	visualRCHelpers.put(handlerName, helper);
-	parseExpected("grid");
-	String msg = helper.setGrid(parseVisualGrid());
-	if (msg != null) {
-	    lexer.reportError(msg);
-	}
 	String tok = lexer.getString();
-	if ("rc_override".equals(tok)) {
-	    helper.setRCOverrides(parseRCOverride());
+	if ("grid".equals(tok)) {
+	    String msg = helper.addGrid(parseVisualGrid(null));
+	    if (msg != null) {
+		lexer.reportError(msg);
+	    }
 	    tok = lexer.getString();
+	    if ("rc_override".equals(tok)) {
+		helper.addRCOverrides(parseRCOverride());
+		tok = lexer.getString();
+	    } else {
+		helper.addRCOverrides(new HashMap<String, String>());
+	    }
+	} else if ("grid_alternates".equals(tok)) {
+	    parseExpected("{");
+	    for (;;) {
+		tok = lexer.getString();
+		if ("}".equals(tok)) {
+		    tok = lexer.getString();
+		    break;
+		}
+		helper.addGrid(parseVisualGrid(helper));
+		helper.addGridAlternateName(tok);
+	    }
+	} else {
+	   lexer.reportError("\"grid\" or \"grid_alternates\" expected, \"" 
+	   			+ tok + "\" seen");
 	}
 	if ("assembly".equals(tok)) {
 	    tok = lexer.getString();	// Assembly name
@@ -2030,7 +2049,8 @@ public class ShowParser {
 	deferred.get(1).add(fw);
     }
 
-    private ArrayList<ArrayList<VisualRCHandlerCell>> parseVisualGrid() 
+    private ArrayList<ArrayList<VisualRCHandlerCell>> 
+    parseVisualGrid(VisualRCHandlerHelper helper) 
     		throws IOException 
     {
 	ArrayList<ArrayList<VisualRCHandlerCell>>  result = new ArrayList();
@@ -2038,6 +2058,16 @@ public class ShowParser {
 	for (;;) {
 	    String tok = lexer.getString();
 	    if ("}".equals(tok)) {
+		if (helper != null) {
+		    helper.addRCOverrides(new HashMap<String, String>());
+		}
+		break;
+	    } else if (helper != null && "rc_override".equals(tok)) {
+		    // If we have a helper, that means we're in
+		    // visual_grid_alternates, and therefore the rc_override
+		    // happens within the grid, and not outside of it.
+		helper.addRCOverrides(parseRCOverride());
+		parseExpected("}");
 		break;
 	    } else if ("{".equals(tok)) {
 		result.add(parseVisualGridRow());
@@ -2407,12 +2437,12 @@ public class ShowParser {
 		if (row > -1) {
 		    VisualRCHandlerHelper helper 
 			= visualRCHelpers.get(handlerName);
-		    state = helper.getState(column, row);
+		    state = helper.getState(0, column, row);
 		    if (state == -1) {
 			reportError("Illegal cell - doesn't refer to state");
 		    }
 		}
-		cmd.setup(true, state, handler, false);
+		cmd.setup(true, state, handler, false, -1);
 	    }
 	};
 	deferred.get(0).add(fw);
@@ -2442,6 +2472,11 @@ public class ShowParser {
         
         boolean runCommands = false;
         tok = lexer.getString();
+	String gridAlternate = null;
+        if ("grid_alternate".equals(tok)) {
+            gridAlternate = lexer.getString();
+            tok = lexer.getString();
+        }
         if ("run_commands".equals(tok)) {
             runCommands = true;
             tok = lexer.getString();
@@ -2453,6 +2488,7 @@ public class ShowParser {
 	final String stateF = state;
 	final boolean activateF = activate;
         final boolean runCommandsF = runCommands;
+	final String gridAlternateF = gridAlternate;
 	ForwardReference fw = new ForwardReference(lexer) {
 	    public void resolve() throws IOException {
 		RCHandler h = builder.getNamedRCHandler(handlerName);
@@ -2467,7 +2503,15 @@ public class ShowParser {
 			lexer.reportError("State \"" + stateF + "\" not found");
 		    }
 		}
-		cmd.setup(activateF, state, handler, runCommandsF);
+		int ga = -1;
+		if (gridAlternateF != null) {
+		    ga = handler.lookupGrid(gridAlternateF);
+		    if (ga == -1) {
+			lexer.reportError("Grid alternate \"" + gridAlternateF
+					   + "\" not found");
+		    }
+		}
+		cmd.setup(activateF, state, handler, runCommandsF, ga);
 	    }
 	};
 	deferred.get(0).add(fw);

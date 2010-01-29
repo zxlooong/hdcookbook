@@ -262,7 +262,7 @@ Here's BNF describing the syntax of a show file:
     assembly_part ::= name sub_feature
 
     menu_assembly ::= "feature" "menu_assembly" name
-    				"template" "{" menu_assembly_features * "}" ";"
+    				"template" "{" menu_assembly_features * "}"
 				"parts" "{" menu_assembly_part "}" ";"
 
     menu_assembly_features ::= id "{" sub_feature * "}"
@@ -463,7 +463,12 @@ Here's BNF describing the syntax of a show file:
 	 ::= "set_visual_rc" handler_name 
 	 	("state" state_name | "current")
 	        ("selected" | "activated") 
+		[ "grid_alternate" name ]
                 [ "run_commands" ] ";"
+    #
+    # grid_alternate can be used to swap in a different grid in the visual
+    # RC handler.  See the "visual_grid_alternates" part of visual_rc_handler
+    #
 
     reset_feature ::= "reset_feature" feature_name ";"
 
@@ -483,16 +488,17 @@ Here's BNF describing the syntax of a show file:
 
     visual_rc_handler
 	::= "rc_handler" "visual" name
-	        "grid" visual_grid
-		[ "rc_override" visual_overrides ]
+		( visual_rc_grid | visual_grid_alternates )
 	        [ "assembly" assembly_name [ "start_selected" boolean ] ]
 	        "select" action_by_state
 	        "activate" action_by_state
-		[ "mouse" mouse_locations ]
-		[ "timeout" integer "frames" commands ]  ";"
+	        [ "mouse" mouse_locations ]
+	        [ "timeout" integer "frames" commands ]  ";"
 	# start_selected defaults false.  If true, when the handler is
 	# activated, if the assembly is in one of the activated states, it
 	# will be taken to the corresponding selected state.
+
+    visual_rc_grid ::= "grid" visual_grid [ "rc_override" visual_overrides ]
 
     visual_grid ::= "{" visual_grid_row * "}"
 
@@ -508,6 +514,18 @@ Here's BNF describing the syntax of a show file:
 	    #   navigated to, it goes to the state that is located at
 	    #   the cell x,y (counting from 0).  The same effect can be
 	    #   achieved in a clearer way with the "[ state_name ]" syntax.
+
+    visual_grid_alternates ::= "grid_alternates" "{" visual_grid_alternate * "}"
+	    # see also the visual_grid_alternate parameter to the
+	    # set_visual_rc command.  This lets you swap in a different
+	    # grid, e.g. to disable certain buttons.  By default the first
+	    # grid is active.  The active grid can ge changed by the
+	    # set_visual_rc command, or from Java.
+
+    visual_grid_alternate ::= name visual_grid_with_override
+
+    visual_grid_with_override ::= 
+    	    "{" ( visual_grid_entry * ) [ "rc_override" visual_overrides ] "}"
 
     visual_overrides ::= "{" visual_override * "}"
 

@@ -15,7 +15,7 @@ can just put a <target> tag in build.xml to add actions to be performed
 after any target is built.
 -->
 
-<project name="Game xlet" default="deploy" basedir=".">
+<project name="Playground" default="deploy" basedir=".">
 
     <property file="user.vars.properties"/>
     <property file="vars.properties"/>

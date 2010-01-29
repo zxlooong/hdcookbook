@@ -81,20 +81,25 @@ public class SEVisualRCHandler
         this.helper = helper;
     }
 
-    public SEVisualRCHandler(String name, String[] stateNames,
-			   int[] upDown, int[] rightLeft,
-			   Command[][] selectCommands, 
-			   Command[][] activateCommands, 
-			   Rectangle[] mouseRects, int[] mouseRectStates,
-			   int timeout, Command[] timeoutCommands,
-			   boolean startSelected,
-			   VisualRCHandlerHelper helper) 
+    public SEVisualRCHandler(String name, String[] gridAlternateNames,
+    			     String[] stateNames,
+			     int[][] upDownAlternates, 
+			     int[][] rightLeftAlternates,
+			     Command[][] selectCommands, 
+			     Command[][] activateCommands, 
+			     Rectangle[] mouseRects, int[] mouseRectStates,
+			     int timeout, Command[] timeoutCommands,
+			     boolean startSelected,
+			     VisualRCHandlerHelper helper) 
     {
         super();
 	this.name = name;
+	this.gridAlternateNames = gridAlternateNames;
 	this.stateNames = stateNames;
-	this.upDown = upDown;
-	this.rightLeft = rightLeft;
+	this.upDownAlternates = upDownAlternates;
+	this.rightLeftAlternates = rightLeftAlternates;
+	this.upDown = upDownAlternates[0];
+	this.rightLeft = rightLeftAlternates[0];
 	this.selectCommands = selectCommands;
 	this.activateCommands = activateCommands;
 	this.mouseRects = mouseRects;
@@ -105,135 +110,6 @@ public class SEVisualRCHandler
         this.helper = helper;
     }
 
-    public VisualRCHandlerHelper getHelper() {
-        return helper;
-    }
-
-    /** used by the binaryconverter */  
-    public int[] getUpDown() {
-        return upDown;
-    }
-
-    /** used by the binaryconverter */  
-    public int[] getRightLeft() {
-        return rightLeft;
-    }
-
-    /** used by the binaryconverter */  
-    public String[] getStateNames() {
-        return stateNames;
-    }
-    
-    /** used by the binaryconverter */  
-    public Command[][] getSelectCommands() {
-        return selectCommands;
-    }
-    
-    /** used by the binaryconverter */  
-    public Command[][] getActivateCommands() {
-        return activateCommands;
-    }
-
-    /** used by the binaryconverter */  
-    public Rectangle[] getMouseRects() {
-        return mouseRects;
-    }
-    
-    /** used by the binaryconverter */  
-    public int[] getMouseRectStates() {
-        return mouseRectStates;
-    }
-    
-    /** used by the binaryconverter */  
-    public int getTimeout() {
-        return timeout;
-    }
-    
-    /** used by the binaryconverter */  
-    public Command[] getTimeoutCommands() {
-        return timeoutCommands;
-    }
-
-    /** used by the binaryconverter */
-    public boolean getStartSelected() {
-	return startSelected;
-    }
-    
-    /* used by the binaryconverter */  
-    public Assembly getAssembly() {
-        return assembly;
-    }
-
-    /* used by the binaryconverter */      
-    public Feature[] getSelectFeatures() {
-        return selectFeatures;
-    }
-    
-    /* used by the binaryconverter */  
-    public Feature[] getActivateFeatures() {
-        return activateFeatures;
-    }
-
-    /** used by the binaryconverter */  
-    public void setUpDown(int[] upDown) {
-        this.upDown = upDown;
-    }
-
-    /** used by the binaryconverter */  
-    public void setRightLeft(int[] rightLeft) {
-        this.rightLeft = rightLeft;
-    }
-
-    /** used by the binaryconverter */  
-    public void setStateNames(String[] stateNames) {
-        this.stateNames = stateNames;
-    }
-    
-    /** used by the binaryconverter */  
-    public void setSelectCommands(Command[][] selectCommands) {
-        this.selectCommands = selectCommands;
-    }
-    
-    /** used by the binaryconverter */  
-    public void setActivateCommands(Command[][] activeCommands) {
-        this.activateCommands = activeCommands;
-    }
-
-    /** used by the binaryconverter */  
-    public void setMouseRects(Rectangle[] mouseRects) {
-        this.mouseRects = mouseRects;
-    }
-    
-    /** used by the binaryconverter */  
-    public void setMouseRectStates(int[] mouseRectStates) {
-        this.mouseRectStates = mouseRectStates;
-    }
-    
-    /** used by the binaryconverter */  
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
-    }
-    
-    /** used by the binaryconverter */  
-    public void setTimeoutCommands(Command[] timeoutCommands) {
-        this.timeoutCommands = timeoutCommands;
-    }
-    
-    /* used by the binaryconverter */  
-    public void setAssembly(Assembly assembly) {
-        this.assembly = assembly;
-    }
-
-    /* used by the binaryconverter */      
-    public void setSelectFeatures(Feature[] selectFeatures) {
-        this.selectFeatures = selectFeatures;
-    }
-    
-    /* used by the binaryconverter */  
-    public void setActivateFeatures(Feature[] activateFeatures) {
-        this.activateFeatures = activateFeatures;
-    }
-    
     /**
      * Called from the parser
      **/
@@ -272,9 +148,13 @@ public class SEVisualRCHandler
         
         out.writeSuperClassData(this);
         
-        out.writeIntArray(getUpDown());
-        out.writeIntArray(getRightLeft());
-        out.writeStringArray(getStateNames());
+	out.writeStringArray(gridAlternateNames);
+	out.writeInt(upDownAlternates.length);
+	for (int i = 0; i < upDownAlternates.length; i++) {
+	    out.writeSharedIntArray(upDownAlternates[i]);
+	    out.writeSharedIntArray(rightLeftAlternates[i]);
+	}
+        out.writeStringArray(stateNames);
         if (selectCommands == null) {
             out.writeNull();
         } else {
@@ -294,18 +174,18 @@ public class SEVisualRCHandler
             }
         }
         
-        out.writeRectangleArray(getMouseRects());
-        out.writeIntArray(getMouseRectStates());
-        out.writeInt(getTimeout());
-        out.writeCommands(getTimeoutCommands());
+        out.writeRectangleArray(mouseRects);
+        out.writeIntArray(mouseRectStates);
+        out.writeInt(timeout);
+        out.writeCommands(timeoutCommands);
        
         out.writeBoolean(assembly != null);
 	if (assembly != null) {
 	    out.writeFeatureReference(assembly);
 	}
         
-        out.writeFeaturesArrayReference(getSelectFeatures());
-        out.writeFeaturesArrayReference(getActivateFeatures());
+        out.writeFeaturesArrayReference(selectFeatures);
+        out.writeFeaturesArrayReference(activateFeatures);
 	out.writeBoolean(startSelected);
     }
 

@@ -76,17 +76,24 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
         super(show, activated, state, handler, runCommands);
     }
     
+    public SESetVisualRCStateCommand(SEShow show, boolean activated, int state,
+            VisualRCHandler handler, boolean runCommands, int gridNumber) 
+    {
+        super(show, activated, state, handler, runCommands, gridNumber);
+    }
+    
     /**
      * Called from parser 
      *  
      * @param state State number, -1 means "current state"
      **/
     public void setup(boolean activated, int state, 
-            VisualRCHandler handler, boolean runCommands)  {
+            VisualRCHandler handler, boolean runCommands, int gridNumber)  {
 	this.activated = activated;
       	this.state = state;
 	this.handler = handler;
 	this.runCommands = runCommands;
+	this.gridNumber = gridNumber;
     }
     
     public void setActivated(boolean activated) {
@@ -119,7 +126,8 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
 	       && this.activated == o.activated
 	       && this.state == o.state
 	       && this.handler == o.handler
-	       && this.runCommands == o.runCommands;
+	       && this.runCommands == o.runCommands
+	       && this.gridNumber == o.gridNumber;
     }
 
     /**
@@ -133,6 +141,7 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
 	if (activated) {
 	    result = result + 11;
 	}
+	result += gridNumber << 12;
 	return show.hashCode() ^ handler.hashCode() ^ result;
     }
 
@@ -144,6 +153,7 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
         out.writeInt(getState());
         out.writeRCHandlerReference(getVisualRCHandler());
         out.writeBoolean(getRunCommands());        
+        out.writeInt(gridNumber);
     }
 
     public String getRuntimeClassName() {
@@ -173,6 +183,6 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
 	return "set_visual_rc " + handler 
 				+ " (" + activated + ", " 
 				+ handler.getStateName(state) + ", "
-				+ runCommands + " )";
+				+ runCommands + ", " + gridNumber + " )";
     }
 }
