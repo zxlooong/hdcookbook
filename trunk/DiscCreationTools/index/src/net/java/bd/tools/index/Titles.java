@@ -82,7 +82,12 @@ public class Titles {
     public void writeObject(DataOutputStream dout) throws IOException {
         dout.writeShort((short) titles.length);
         for (int i = 0; i < titles.length; i++) {
-            titles[i].writeObject(dout);
+	    try {
+		titles[i].writeObject(dout);
+	    } catch (RuntimeException ex) {
+		System.err.println("***  Error writing title number " + (i+1));
+		throw ex;
+	    }
         }        
     }
 }
