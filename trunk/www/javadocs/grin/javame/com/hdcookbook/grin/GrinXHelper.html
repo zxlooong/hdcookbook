@@ -174,7 +174,7 @@ This class has three distinct functions.  It's mostly a helper
  "registers.setGPR(10, 42)".
  <p>
  A better pattern might be to divide your director into an abstract superclass,
- with to implementations of the subclass, one for GrinView and one for a real xlet.
+ with two implementations of the subclass, one for GrinView and one for a real xlet.
  That way, the common director can have an abstract method like "getPSR(int)" that you
  implement for GrinView in terms of an array, or maybe in terms of BDRegisterEmulator.
  This same abstract director pattern can be used for other player functionality, too.
