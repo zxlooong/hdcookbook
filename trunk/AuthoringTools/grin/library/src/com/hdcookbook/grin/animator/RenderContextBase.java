@@ -79,10 +79,6 @@ class RenderContextBase extends RenderContext {
     Rectangle[] eraseTargets;
     	// Targets for erasing
 
-    int numEraseTargets;
-    	// Number of eraseTargets that need to be drawn in the current
-	// frame
-
     private Rectangle collapsed = new Rectangle(); 
     	// see collapseTargets(Rectangle[])
 
@@ -106,9 +102,11 @@ class RenderContextBase extends RenderContext {
 	// as thisFrameList, and nodes are taken off of lastFrameList
 	// as they are added to thisFrameList.
 
-    private int collapseThreshold = 200*200;
+    private int collapseThreshold = 385*385;
 	// We collapse two rectangles into one when doing so adds at most this
 	// many pixels.  See setCollapseThreshold.
+
+    private boolean targetsCanOverlap;
 
     RenderContextBase(int numTargets) {
 	this.currTarget = 0;
@@ -146,6 +144,10 @@ class RenderContextBase extends RenderContext {
     //
     void setCollapseThreshold(int collapseThreshold) {
 	this.collapseThreshold = collapseThreshold;
+    }
+
+    void setTargetsCanOverlap(boolean v) {
+	targetsCanOverlap = v;
     }
 
     /**
@@ -351,7 +353,8 @@ class RenderContextBase extends RenderContext {
 		for (int j = i+1; j <= n; j++) {
 		    collapsed.setBounds(targets[i]);
 		    collapsed.add(targets[j]);
-			// We conservatively combine intersecting draw rects
+			// If there's a seperate erase step,
+			// we conservatively combine intersecting draw rects
 			// here, since it's not OK to draw an area twice
 			// in SrcOver mode.
 			//
@@ -361,7 +364,8 @@ class RenderContextBase extends RenderContext {
 			// all on one side of the other.  In this case,
 			// instead of collapsing, the other rectangle
 			// could be made smaller.
-		    boolean combine = targets[i].intersects(targets[j]);
+		    boolean combine = !targetsCanOverlap
+		    		      && targets[i].intersects(targets[j]);
 		    if (!combine) {
 			int ac = collapsed.width * collapsed.height;
 			int a = targets[i].width * targets[i].height
@@ -425,16 +429,20 @@ class RenderContextBase extends RenderContext {
 
     //
     // Called by the animation engine just after collapsing targets,
-    // this process the areas that are guaranteed to be painted, in an
+    // this processes the areas that are guaranteed to be painted, in an
     // effort to minimize erasing.
     //
+    // The erase targets correspond 1:1 with the draw targets.  Some erase
+    // targets might be empty due to erase guarantees 
+    // (see guaranteeAreaFilled()), so the caller should check every
+    // eraseTarget with RenderContextBase.isEmpty() before erasing.
+    //
     void calculateEraseTargets() {
-	numEraseTargets = numDrawTargets;
-	for (int i = 0; i < numEraseTargets; i++) {
+	for (int i = 0; i < numDrawTargets; i++) {
 	    eraseTargets[i].setBounds(drawTargets[i]);
 	}
 	while (guaranteeList != null) {
-	    for (int i = 0; i < numEraseTargets; i++) {
+	    for (int i = 0; i < numDrawTargets; i++) {
 		Rectangle area = eraseTargets[i];
 		if (!isEmpty(area)) {
 		    guaranteeList.applyGuarantee(area);
@@ -443,7 +451,6 @@ class RenderContextBase extends RenderContext {
 	    guaranteeList = guaranteeList.next;
 	}
 	guaranteeListLast = null;
-	numEraseTargets = purgeEmpty(eraseTargets, numEraseTargets);
     }
 
 }

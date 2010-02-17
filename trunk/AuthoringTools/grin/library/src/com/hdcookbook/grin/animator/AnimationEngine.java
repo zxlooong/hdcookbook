@@ -117,6 +117,7 @@ public abstract class AnimationEngine implements Runnable {
     private byte[] profileDraw;		// Time spent drawing to buffer
 
     private int drawTargetCollapseThreshold = Integer.MIN_VALUE;
+    protected boolean targetsCanOverlap = false;
 
 
     /**
@@ -176,6 +177,7 @@ public abstract class AnimationEngine implements Runnable {
 	    // If it's been set
 	    renderContext.setCollapseThreshold(drawTargetCollapseThreshold);
 	}
+	renderContext.setTargetsCanOverlap(targetsCanOverlap);
     }
 
     /**
@@ -183,20 +185,39 @@ public abstract class AnimationEngine implements Runnable {
      * engine is willing to tolerate in order to collapse two draw targets
      * into one.  It's more efficient to draw one slightly bigger area than
      * two smaller areas, but at some threshold it's better to leave them
-     * divided.  By default, this threshold is set to 40,000 pixels
-     * (e.g. a 200x200 area), but this is a guess.
+     * divided.  By default, this threshold is set to about 150,000 pixels
+     * (e.g. a 385x385 area), but this is a guess.
      * <p>
-     * This value may be set to 0, or to -1.  Setting it to -1 can be valuable
-     * to totally disable the collapse optimization, for clients that want a 
+     * This value may be set to 0, or even a negative number.  This might be
+     * valuable to disable the collapse optimization, for clients that want a 
      * predictable and consistent render time.
      **/
     public synchronized void setDrawTargetCollapseThreshold(int t) {
-	if (t < 0) {
-	    t = -1;
+	if (t == Integer.MIN_VALUE) {
+	    t = Integer.MIN_VALUE + 1;	// MIN_VALUE is reserved
 	}
 	drawTargetCollapseThreshold = t;
 	if (renderContext != null) {
 	    renderContext.setCollapseThreshold(t);
+	}
+    }
+
+    /**
+     * Sets whether or not overlapping draw targets are allowed.  By default
+     * they are not, that is, any draw targets that overlap will be combined
+     * into one.  When overlapping targets are allowed, then erasing is
+     * not done as a separate step.  Rather, it is done for each draw target
+     * just before painting.  For this reason, gurantee_fill has no effect
+     * when this mode is set true.
+     * <p>
+     * This method must only be called during the model update.
+     * <p>
+     * The default value of this parameter is false.
+     **/
+    public synchronized void setAllowOverlappingTargets(boolean v) {
+	targetsCanOverlap = v;
+	if (renderContext != null) {
+	    renderContext.setTargetsCanOverlap(targetsCanOverlap);
 	}
     }
 
@@ -292,12 +313,13 @@ public abstract class AnimationEngine implements Runnable {
      * @return The number of erase areas active for this frame
      **/
     protected int getNumEraseTargets() {
-	return renderContext.numEraseTargets;
+	return renderContext.numDrawTargets;
     }
 
     /**
      * @return the total pool of erase areas.  Iterate this from 0..n-1,
-     *	       n=getNumEraseTargets()
+     *	       n=getNumEraseTargets().  Some might be empty, which is indicated
+     *	       by a width <= 0, which makes Rectangle.isEmpty() return true.
      **/
     protected Rectangle[] getEraseTargets() {
 	return renderContext.eraseTargets;
@@ -787,15 +809,19 @@ public abstract class AnimationEngine implements Runnable {
 	if (Debug.PROFILE) {
 	    Profile.stopTimer(tok);
 	}
-	if (Debug.PROFILE) {
-	    tok = Profile.startTimer(profileErase, Profile.TID_ANIMATION);
-	}
-	for (int i = 0; i < renderContext.numEraseTargets; i++) {
-	    Rectangle a = renderContext.eraseTargets[i];
-	    clearArea(a.x, a.y, a.width, a.height);
-	}
-	if (Debug.PROFILE) {
-	    Profile.stopTimer(tok);
+	if (!targetsCanOverlap) {
+	    if (Debug.PROFILE) {
+		tok = Profile.startTimer(profileErase, Profile.TID_ANIMATION);
+	    }
+	    for (int i = 0; i < renderContext.numDrawTargets; i++) {
+		Rectangle a = renderContext.eraseTargets[i];
+		if (!renderContext.isEmpty(a)) {
+		    clearArea(a.x, a.y, a.width, a.height);
+		}
+	    }
+	    if (Debug.PROFILE) {
+		Profile.stopTimer(tok);
+	    }
 	}
 	try {
 	    int tok2;
@@ -844,6 +870,12 @@ public abstract class AnimationEngine implements Runnable {
 	g.getClipBounds(lastClip);
 	for (int i = 0; i < renderContext.numDrawTargets; i++) {
 	    g.setClip(renderContext.drawTargets[i]);
+	    if (targetsCanOverlap) {
+		Rectangle a = renderContext.eraseTargets[i];
+		if (!renderContext.isEmpty(a)) {
+		    clearArea(a.x, a.y, a.width, a.height);
+		}
+	    }
 	    for (int j = 0; j < clients.length; j++) {
 		clients[j].paintFrame(g);
 	    }

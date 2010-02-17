@@ -476,6 +476,10 @@ The project.name property is not set.  This usually has one of two causes:
             <arg value="${xlet.orgid}"/>
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
+	<antcall target="post-generate-certs"/>
+    </target>
+    <target name="post-generate-certs">
+        <!-- Projects that include this build file can re-define this target -->
     </target>
 
     <target name="check-keystore">

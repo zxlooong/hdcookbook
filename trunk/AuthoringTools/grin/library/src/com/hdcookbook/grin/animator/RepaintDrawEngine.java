@@ -251,11 +251,11 @@ public class RepaintDrawEngine extends ClockBasedEngine {
 	}
 	//
 	// With repaint draw, we have to collapse it all into one big
-	// damage area, because tehre's no AWT repaint() call taking
+	// damage area, because there's no AWT repaint() call taking
 	// multiple damage rectangles.  It's not safe to call repaint()
 	// a bunch of times in succession, because that might result
 	// in multiple paints, which would be slow and would result
-	// in user-visible partial screen
+	// in user-visible partial screens
 	//
 	Rectangle a = damageArea;
 	synchronized (repaintMonitor) {

@@ -122,7 +122,9 @@ public class DebugDirectDrawEngine extends DirectDrawEngine {
 	    containerG.setComposite(AlphaComposite.SrcOver);
 	    for (int i = 0; i < getNumEraseTargets(); i++) {
 		Rectangle a = getEraseTargets()[i];
-		containerG.fillRect(a.x, a.y, a.width, a.height);
+		if (!a.isEmpty()) {
+		    containerG.fillRect(a.x, a.y, a.width, a.height);
+		}
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	    sleepQuarterFrame();

@@ -256,7 +256,9 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    componentG.setComposite(AlphaComposite.SrcOver);
 	    for (int i = 0; i < getNumEraseTargets(); i++) {
 		Rectangle a = getEraseTargets()[i];
-		componentG.fillRect(a.x/s, a.y/s, a.width/s, a.height/s);
+		if (!a.isEmpty()) {
+		    componentG.fillRect(a.x/s, a.y/s, a.width/s, a.height/s);
+		}
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	    main.waitForUser("To be erased areas shown with red overlay");
