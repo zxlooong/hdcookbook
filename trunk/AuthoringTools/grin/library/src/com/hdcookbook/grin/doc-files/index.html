@@ -208,6 +208,11 @@ Here's BNF describing the syntax of a show file:
         #   XLET_ONLY_[[ java_source ]]
         #   GRINVIEW_ONLY_[[ java_source ]]
         #   GRIN_COMMAND_[[ command ]]
+	# 
+	# See the comments at the end of the main class documentation of
+	# com.hdcookbook.grin.GrinXHelper for comments on how these are
+	# used, and for the Abstract Director pattern that can also be used
+	# to make xlets that work under GrinView.
 
     segment ::= "segment" name ["active" feature_list] ["setup" feature_list]
     			[ "rc_handlers" name_list ]

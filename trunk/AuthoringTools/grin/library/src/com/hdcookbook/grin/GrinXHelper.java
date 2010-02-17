@@ -70,7 +70,7 @@ import java.awt.Point;
  * expensive operation, so we do this overloading to optimize
  * xlet start-up time.
  * <p>
- * This class has three disctinct functions.  To illustrate, assume a
+ * To illustrate the different functions of this class, assume a
  * show that defines a class called MenuShowCommands as the helper
  * classname in the show file.  The functions of GrinXHelper are:
  * <ul>
@@ -128,6 +128,13 @@ import java.awt.Point;
  * With that, your commands can have statements like
  * "int angleNumber = registers.getPSR(3)" or
  * "registers.setGPR(10, 42)".
+ * <p>
+ * A better pattern might be to divide your director into an abstract superclass,
+ * with to implementations of the subclass, one for GrinView and one for a real xlet.
+ * That way, the common director can have an abstract method like "getPSR(int)" that you
+ * implement for GrinView in terms of an array, or maybe in terms of BDRegisterEmulator.
+ * This same abstract director pattern can be used for other player functionality, too.
+ * This is a more powerful and general technique than GRINVIEW_ONLY and XLET_ONLY.
  *
  *  @author     Bill Foote (http://jovial.com)
  **/
