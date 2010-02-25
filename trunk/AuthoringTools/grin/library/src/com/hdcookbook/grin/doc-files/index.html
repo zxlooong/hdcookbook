@@ -146,7 +146,7 @@ Here's BNF describing the syntax of a show file:
 </p>
 <pre>
     show ::= "show" setting*  [ exports ] [ java_generated_class ]
-    	     ( segment | feature | rc_handler | named_commands 
+    	     ( segment | feature | rc_handler | named_command 
 		   | mosaic_hint | show_top )* 
     	     "end_show"
 
@@ -588,7 +588,7 @@ Here's BNF describing the syntax of a show file:
     mosaic_hint ::= "mosaic_hint" name width height "{" file_name * "}" ";"
 	# mosaic_hint is deprecated.  See "mosaics"
 
-    named_commands ::= "named_commands" name commands ";"
+    named_command ::= "named_command" name commands ";"
 
     sub_feature ::= feature_name
     		    | "sub_feature" feature_without_name
