@@ -93,7 +93,7 @@ public class SetupManager implements Runnable {
     private static byte[] profileSetup;	// Profiling setup calls
 
     static {
-	if (Debug.PROFILE) {
+	if (Debug.PROFILE && Debug.PROFILE_SETUP) {
 	    profileSetup = Profile.makeProfileTimer("doSomeSetup()");
 	}
     }
@@ -249,11 +249,11 @@ public class SetupManager implements Runnable {
 	}
 	if (work.needsMoreSetup()) {
 	    int tok;
-	    if (Debug.PROFILE) {
+	    if (Debug.PROFILE && Debug.PROFILE_SETUP) {
 		tok = Profile.startTimer(profileSetup, Profile.TID_SETUP);
 	    }
 	    work.doSomeSetup();
-	    if (Debug.PROFILE) {
+	    if (Debug.PROFILE && Debug.PROFILE_SETUP) {
 		Profile.stopTimer(tok);
 	    }
 	    // The check of needsMoreSetup() above isn't strictly necessary,

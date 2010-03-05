@@ -375,7 +375,9 @@ public class ProfileBrowser extends JPanel implements
 		System.exit(1);
 	    }
 	    int idx = value.indexOf('(');
-	    value = value.substring(0, idx);
+	    if (idx > -1) {
+		value = value.substring(0, idx);
+	    }
 	    t.setString(rowIndex, METHOD_FIELD, value);
 	}
 	return t;

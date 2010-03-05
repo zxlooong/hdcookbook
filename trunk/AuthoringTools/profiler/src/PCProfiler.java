@@ -221,12 +221,12 @@ public class PCProfiler extends Thread {
 	System.out.println();
 	System.out.println("Dumping information derived from " 
 			   + packets.getLength() + " packets.");
-	System.out.println("    Writing to profile.dat");
 
 	ProfilingRun run = new ProfilingRun();
 	run.init(packets);
 	packets = null;		// Allows GC, unless there's a follower
 	run.writeData("profile.dat");
+	System.out.println("    Wrote data to profile.dat");
 	ResultsGui gui = new ResultsGui();
 	gui.init(run);
 	run = null;	// Allows GC

@@ -124,6 +124,20 @@ public class Debug {
      **/
     public final static boolean PROFILE = true;
 
+    /**
+     * Variable to say if animation profiling is enabled.
+     *
+     * @see Profile
+     **/
+    public final static boolean PROFILE_ANIMATION = false;
+
+    /**
+     * Variable to say if setup profiling is enabled.
+     *
+     * @see Profile
+     **/
+    public final static boolean PROFILE_SETUP = false;
+
     private Debug() {
     }
 

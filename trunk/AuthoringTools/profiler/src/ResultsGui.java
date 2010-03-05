@@ -68,6 +68,7 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.swing.JFileChooser;
@@ -96,6 +97,7 @@ public class ResultsGui extends Frame {
     				      Color.orange, Color.pink, Color.red, Color.yellow };
     private static String[] colorNames = { "blue   ", "cyan   ", "green  ", "magenta",
     					   "orange ", "pink   ", "red    ", "yellow " };
+    private int H_BORDER = 35;
 
     public ResultsGui() {
     }
@@ -167,6 +169,7 @@ public class ResultsGui extends Frame {
 	System.out.println("    m <a> <b>  Move row a to row b, counting from 0");
 	System.out.println("    p <num>    Print debug message <num>");
 	System.out.println("    s          Save snapshot of screen as .png");
+	System.out.println("    t          Print text report to stdout");
 	System.out.println("    q          Quit");
 	System.out.println("  <eof>        Same as q");
 	System.out.println();
@@ -193,11 +196,19 @@ public class ResultsGui extends Frame {
 	    }
 	}
         int height = getHeight();
-	int width = getWidth();
+	int width = getWidth() - 2 * H_BORDER;
+	if (width < 0) {
+	    return;
+	}
 	g.setColor(Color.black);
-	g.fillRect(0, 0, width, height);
+	g.fillRect(0, 0, width + 2 * H_BORDER, height);
+
+	g.translate(H_BORDER, 0);
 
 	g.setFont(debugMessageFont);
+	g.setColor(new Color(164, 164, 164, 255));
+	drawScale(g, displayStart, displayEnd, width, 160 + 70*timings.length);
+
 	for (int i = 0; i < debugMessages.length; i++) {
 	    if (i == lastMessageShown) {
 		g.setColor(Color.white);
@@ -239,6 +250,100 @@ public class ResultsGui extends Frame {
 	}
     }
 
+    //
+    // Draw the scale along the bottom.
+    //
+    // This tries to do a reasonable job of making intuitive numbers along
+    // the bottom, but the algorithm could stand some improvement.  It does
+    // make sure the numbers don't run into eachother, but it doesn't make sure
+    // they don't get clipped at the left and right edges of the screen.  If
+    // you're zoomed into a small area a good way into the data, the numbers
+    // get big.  For example, if you display 10s to 10s+100ns, it will express 
+    // the numbers in ns, and 10s expressed in ns is a big number.
+    //
+    private void drawScale(Graphics g, long start, long end, int width, int y) {
+	long delta = end - start;
+	if (delta <= 0) {
+	    return;
+	}
+	String units;
+	long divisor;
+	long increment;
+	if (delta >= 10000000000L) { // 10 s
+	    divisor = 1000000000L; 
+	    increment = 1000000000L; 
+	    units = "s";
+	} else if (delta >= 1000000000L) { // 1 s
+	    divisor = 1000000; 
+	    increment = 100000000L; 
+	    units = "ms";
+	} else if (delta >= 100000000) { // 100 ms
+	    divisor = 1000000; 
+	    increment = 10000000; 
+	    units = "ms";
+	} else if (delta >= 10000000) { // 10 ms
+	    divisor = 1000000; 
+	    increment = 1000000; 
+	    units = "ms";
+	} else if (delta >= 1000000) { // 1 ms
+	    divisor = 1000; 
+	    increment = 100000; 
+	    units = "\u00B5s";	// 00B5 is micro
+	} else if (delta >= 100000) { // 100 us
+	    divisor = 1000; 
+	    increment = 10000; 
+	    units = "\u00B5s";
+	} else if (delta >= 10000) { // 10 us
+	    divisor = 1000; 
+	    increment = 1000; 
+	    units = "\u00B5s";
+	} else if (delta >= 1000) { // 1 us
+	    divisor = 1; 
+	    increment = 100; 
+	    units = "ns";
+	} else if (delta >= 100) { // 100 ns
+	    divisor = 1; 
+	    increment = 10; 
+	    units = "ns";
+	} else { // 10 ns
+	    divisor = 1; 
+	    increment = 1; 
+	    units = "ns";
+	}
+	int r = (int) (delta / increment); 	// 10..100
+	if (r <= 10) {
+	    // do nothing;
+	} else if (r <= 20) {
+	    increment *= 2;
+	} else {
+	    increment *= 5;
+	}
+	int lastX = -100000;
+	int i = ((int) (start / increment));
+	for (;;) {
+	    long v = i * increment;
+	    int d = (int) (v / divisor);
+	    double x = v;
+	    x -= start;
+	    x *= width;
+	    x /= (end - start);
+	    int ix = (int) (x + 0.5);
+	    g.drawLine(ix, 90, ix, y);
+	    FontMetrics fm = g.getFontMetrics();
+	    String msg = "" + d + " " + units;
+	    int w = fm.stringWidth(msg);
+	    int sx = ix - (w / 2);
+	    if (sx > lastX +6) {
+		lastX = sx + w;
+		g.drawString(msg, ix - (w / 2), y + 20);
+	    }
+	    if (v >= end + increment) {
+		break;
+	    }
+	    i++;
+	}
+    }
+
     public void readCommands(BufferedReader in) {
 	String blankPattern = "\\p{Blank}+";
 	for (;;) {
@@ -268,10 +373,44 @@ public class ResultsGui extends Frame {
 		printMessage(s.substring(1).trim().split(blankPattern));
 	    } else if ("s".equals(s)) {
 		snapshot();
+	    } else if ("t".equals(s)) {
+		printTextReport();
 	    } else {
 		System.out.println("??" + ((char) 7));
 	    }
 	}
+    }
+
+    public void printTextReport() {
+	System.out.println();
+	System.out.println();
+	System.out.println("    PROFILING REPORT");
+	System.out.println();
+	for (int i = 0; i < timerName.length; i++) {
+	    System.out.println(timerName[i] + ":");
+	    ProfileTiming[] list = timings[i];
+	    for (int j = 0; j < list.length; j++) {
+		ProfileTiming t = list[j];
+		System.out.println("    start " + formatTime(t.startTime) + " for "
+				   + formatTime(t.duration) + ", thread "
+				   + t.threadID);
+	    }
+	    System.out.println();
+	}
+	System.out.println();
+	for (int i = 0; i < debugMessages.length; i++) {
+	    Packet m = debugMessages[i];
+	    System.out.println(formatTime(m.timestamp - earliestTimestamp) 
+	    			+ " thread " + m.threadID);
+	    System.out.println(m.getDebugMessage());
+	}
+	System.out.println();
+	System.out.println();
+    }
+
+    private static String formatTime(long ns) {
+	float ms = ns / 1000000f;
+	return "" + ms + "ms";
     }
 
     private void setRange(String[] args) {

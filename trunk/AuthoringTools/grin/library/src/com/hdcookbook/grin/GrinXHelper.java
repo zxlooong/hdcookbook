@@ -293,4 +293,11 @@ public class GrinXHelper extends Command implements Node {
     public Node getInstanceOf(Show show, int id) throws IOException {
         throw new IOException();
     }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public String toString() {
+	return super.toString() + "(" + commandNumber + ")";
+    }
 }

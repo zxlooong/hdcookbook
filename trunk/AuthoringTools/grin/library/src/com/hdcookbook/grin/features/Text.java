@@ -183,6 +183,7 @@ public class Text extends Feature implements Node, SetupClient {
 	result.colorIndex = colorIndex;
 	result.loopsRemaining = loopsRemaining;
 	result.changed = changed;
+	result.needsSetup = needsSetup;
 	return result;
 	    // initializeClone() not needed
     }

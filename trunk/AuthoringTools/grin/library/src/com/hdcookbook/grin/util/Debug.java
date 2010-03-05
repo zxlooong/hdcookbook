@@ -118,15 +118,33 @@ public class Debug {
     public final static boolean ASSERT = true;
     /**
      * Debug level.  2 = noisy, 1 = some debug, 0 = none.
+     * See the comments about setting this value in the class comments.
      */
     public final static int LEVEL = 2;
 
     /**
      * Variable to say if time profiling is enabled.
+     * See the comments about setting this value in the class comments.
      *
      * @see Profile
      **/
     public final static boolean PROFILE = true;
+
+    /**
+     * Variable to say if animation profiling is enabled.
+     * See the comments about setting this value in the class comments.
+     *
+     * @see Profile
+     **/
+    public final static boolean PROFILE_ANIMATION = false;
+
+    /**
+     * Variable to say if setup profiling is enabled.
+     * See the comments about setting this value in the class comments.
+     *
+     * @see Profile
+     **/
+    public final static boolean PROFILE_SETUP = false;
 
     private Debug() {
     }

@@ -165,6 +165,23 @@ public class Profile {
     }
 
     /**
+     * Initialize the starting point of counting for tokens.  This usually
+     * isn't needed, but it makes it possible for one xlet's tokens to
+     * start from where a previous xlet's ended.  This lets you use the
+     * profiler to do things like time xlet startup time.
+     **/
+    public static void initTokenStart(int tokenStart) {
+	if (!Debug.PROFILE) {
+	    return;
+	}
+	if (Debug.ASSERT && tokenStart < token) {
+	    Debug.assertFail("Illegal token start value " + tokenStart
+	    		     + " < " + token);
+	}
+	token = tokenStart;
+    }
+
+    /**
      * Allocates buffer and returns UTF-8 bytes for the string representing
      * profile information. This method is meant to be called by the application
      * during class loading:

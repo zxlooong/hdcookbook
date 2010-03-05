@@ -384,11 +384,17 @@ class RenderContextBase extends RenderContext {
 			setEmpty(targets[n]);  
 			    // Not necessary, but fast and adds some robustness
 			n--;
-			continue collapse;   // yay goto!
+			continue collapse;   // yay goto!  :-)
+			    // Transfers control to top of for(;;) loop
+			    // labeled by collapse, see
+			    // http://java.sun.com/docs/books/tutorial/java/nutsandbolts/branch.html
 		    }
 		}
 	    }
 	    break collapse;
+		// Transfers control outside of the for(;;) loop 
+		// labeled by collapse, see
+		// http://java.sun.com/docs/books/tutorial/java/nutsandbolts/branch.html
 	}
 
 	// At this point, targets[0..n] represents an optimal set of

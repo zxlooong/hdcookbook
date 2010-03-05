@@ -108,7 +108,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
         if (Debug.LEVEL > 0) {
             engineNumber = getNextEngineNumber();
         }
-        if (Debug.PROFILE) {
+        if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
             profileBlitToFB = Profile.makeProfileTimer("biltToFB("+this+")");
         }
     }
@@ -303,7 +303,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	//  of BD-J graphics over the video plane.
 	//
         int tok;
-        if (Debug.PROFILE) {
+        if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
             tok = Profile.startTimer(profileBlitToFB, Profile.TID_ANIMATION);
         }
 	Image bg = background;
@@ -380,7 +380,7 @@ public class ScalingDirectDrawEngine extends ClockBasedEngine {
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	}
-        if (Debug.PROFILE) {
+        if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
             Profile.stopTimer(tok);
         }
         Thread.currentThread().yield();

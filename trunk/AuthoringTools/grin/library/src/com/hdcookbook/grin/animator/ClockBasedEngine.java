@@ -96,7 +96,7 @@ public abstract class ClockBasedEngine extends AnimationEngine {
      * Create a new ClockBasedEngine
      **/
     protected ClockBasedEngine() {
-	if (Debug.PROFILE) {
+	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 	    profileWait = Profile.makeProfileTimer("idleWait(" + this + ")");
 	    profileModel = Profile.makeProfileTimer("advanceModel("+this+")");
 	}
@@ -343,12 +343,12 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 		//
 		if (currTime < nextFrameTime) {
 		    int tok;
-		    if (Debug.PROFILE) {
+		    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 			tok = Profile.startTimer(profileWait, 
 						 Profile.TID_ANIMATION);
 		    }
 		    wait(nextFrameTime - currTime);	// can be interrupted
-		    if (Debug.PROFILE) {
+		    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 			Profile.stopTimer(tok);
 		    }
 		    continue;
@@ -359,11 +359,11 @@ public abstract class ClockBasedEngine extends AnimationEngine {
 	    // Now, advance the model to the next frame.
 	    //
 	    int tok;
-	    if (Debug.PROFILE) {
+	    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 		tok = Profile.startTimer(profileModel, Profile.TID_ANIMATION);
 	    }
 	    advanceModel();
-	    if (Debug.PROFILE) {
+	    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 		Profile.stopTimer(tok);
 	    }
 	    frame++;

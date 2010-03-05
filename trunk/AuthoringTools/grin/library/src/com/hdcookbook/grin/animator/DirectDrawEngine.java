@@ -104,23 +104,23 @@ public class DirectDrawEngine extends ClockBasedEngine {
      * the various initXXX methods (including the inherited ones).
      **/
     public DirectDrawEngine() {
-	if (Debug.LEVEL > 0 || Debug.PROFILE) {
+	if (Debug.LEVEL > 0 || (Debug.PROFILE && Debug.PROFILE_ANIMATION)) {
 	    engineNumber = getNextEngineNumber();
 	}
-	if (Debug.PROFILE) {
+	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 	    profileBlitToFB = Profile.makeProfileTimer("blitToFB("+this+")");
 	}
     }
 
     private synchronized static int getNextEngineNumber() {
-	if (Debug.LEVEL > 0 || Debug.PROFILE) {
+	if (Debug.LEVEL > 0 || (Debug.PROFILE && Debug.PROFILE_ANIMATION)) {
 	    nextEngineNumber++;
 	}
 	return nextEngineNumber;
     }
 
     public String toString() {
-	if (Debug.LEVEL > 0 || Debug.PROFILE) {
+	if (Debug.LEVEL > 0 || (Debug.PROFILE && Debug.PROFILE_ANIMATION)) {
 	    return "DD engine " + engineNumber;
 	} else {
 	    return super.toString();
@@ -217,7 +217,7 @@ public class DirectDrawEngine extends ClockBasedEngine {
      **/
     protected void finishedFrame() {
 	int tok;
-	if (Debug.PROFILE) {
+	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 	    tok = Profile.startTimer(profileBlitToFB, Profile.TID_ANIMATION);
 	}
 	int n = renderContext.numDrawTargets;
@@ -232,7 +232,7 @@ public class DirectDrawEngine extends ClockBasedEngine {
 	    }
 	    Toolkit.getDefaultToolkit().sync();
 	}
-	if (Debug.PROFILE) {
+	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 	    Profile.stopTimer(tok);
 	}
 	Thread.currentThread().yield();

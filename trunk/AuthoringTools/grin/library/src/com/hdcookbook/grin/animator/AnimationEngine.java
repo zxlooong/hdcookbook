@@ -126,7 +126,7 @@ public abstract class AnimationEngine implements Runnable {
     protected AnimationEngine() {
 	worker = new Thread(this, "Animation " + this);
 	worker.setPriority(Thread.NORM_PRIORITY - 1);
-	if (Debug.PROFILE) {
+	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 	    profileDamageCalc 
 		= Profile.makeProfileTimer("damageCalculation(" + this + ")");
 	    profileErase= Profile.makeProfileTimer("eraseBuffer(" + this + ")");
@@ -616,7 +616,13 @@ public abstract class AnimationEngine implements Runnable {
 	    if (c != null) {
 		for (int i = 0; i < c.length; i++) {
 		    try {
+			if (Debug.LEVEL > 0) {
+			    Debug.println("Destroying animation client " + i);
+			}
 			c[i].destroy();
+			if (Debug.LEVEL > 0) {
+			    Debug.println("Destroyed animation client " + i);
+			}
 		    } catch (Throwable t) {
 			if (Debug.LEVEL > 1) {
 			    Debug.println(this);
@@ -765,7 +771,7 @@ public abstract class AnimationEngine implements Runnable {
 	    clients[i].setCaughtUp();
 	}
 	int tok;
-	if (Debug.PROFILE) {
+	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 	    tok = Profile.startTimer(profileDamageCalc, Profile.TID_ANIMATION);
 	}
 	renderContext.setEmpty();
@@ -806,11 +812,11 @@ public abstract class AnimationEngine implements Runnable {
 	renderContext.processLastFrameRecords();
 	renderContext.collapseTargets();
 	renderContext.calculateEraseTargets();
-	if (Debug.PROFILE) {
+	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 	    Profile.stopTimer(tok);
 	}
 	if (!targetsCanOverlap) {
-	    if (Debug.PROFILE) {
+	    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 		tok = Profile.startTimer(profileErase, Profile.TID_ANIMATION);
 	    }
 	    for (int i = 0; i < renderContext.numDrawTargets; i++) {
@@ -819,17 +825,17 @@ public abstract class AnimationEngine implements Runnable {
 		    clearArea(a.x, a.y, a.width, a.height);
 		}
 	    }
-	    if (Debug.PROFILE) {
+	    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 		Profile.stopTimer(tok);
 	    }
 	}
 	try {
 	    int tok2;
-	    if (Debug.PROFILE) {
+	    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 		tok2 = Profile.startTimer(profileDraw, Profile.TID_ANIMATION);
 	    }
 	    callPaintTargets();
-	    if (Debug.PROFILE) {
+	    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
 		Profile.stopTimer(tok2);
 	    }
 	} finally {
