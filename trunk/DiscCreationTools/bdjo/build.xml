@@ -15,7 +15,7 @@
     </target>
     <target name="bdjo-compile" depends="bdjo-init"
         description="compile the source " >
-        <javac srcdir="${bdjo-src}" destdir="${bdjo-build}"/>
+        <javac srcdir="${bdjo-src}" destdir="${bdjo-build}" debug="on"/>
         <copy todir="${bdjo-build}">
             <fileset dir="${bdjo-src}" includes="**/jaxb.index"/>
         </copy>

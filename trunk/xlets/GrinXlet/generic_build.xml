@@ -559,6 +559,14 @@ The project.name property is not set.  This usually has one of two causes:
 	    <fileset dir="${build.dir}" includes="*.png"/>
 	    <fileset dir="${build.dir}" includes="images.map"/>
 	</copy>
+	<antcall target="post-copy-to-bdmv"/>
+	<antcall target="copy-to-bdmv-backup"/>
+    </target>
+    <target name="post-copy-to-bdmv">
+        <!-- Projects that include this build file can re-define this target -->
+    </target>
+
+    <target name="copy-to-bdmv-backup">
 	<delete dir="${dist.dir}/BDMV/BACKUP"/>
         <copy todir="${dist.dir}/BDMV/BACKUP">
             <fileset dir="${dist.dir}/BDMV">
@@ -569,10 +577,9 @@ The project.name property is not set.  This usually has one of two causes:
                 <include name="JAR/**"/> 
                 <include name="PLAYLIST/**"/>                    
             </fileset>            
-        </copy>        
-	<antcall target="post-copy-to-bdmv"/>
+        </copy>
     </target>
-    <target name="post-copy-to-bdmv">
+    <target name="post-copy-to-bdmv-backup">
         <!-- Projects that include this build file can re-define this target -->
     </target>
 

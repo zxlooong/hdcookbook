@@ -515,6 +515,12 @@ public final class BDJOWriter {
         }
         dos.writeByte(appDesc.getPriority());
         
+	if (appDesc.getBinding() == null) {
+	    throw new IOException("Missing binding for application description whose initial class name is " + initClassName);
+	}
+	if (appDesc.getVisibility() == null) {
+	    throw new IOException("Missing visibility for application description whose initial class name is " + initClassName);
+	}
         int b = (appDesc.getBinding().ordinal() << 6) |
                 (appDesc.getVisibility().ordinal() << 4);
         // application_binding + application_visibility + 4 bit align
