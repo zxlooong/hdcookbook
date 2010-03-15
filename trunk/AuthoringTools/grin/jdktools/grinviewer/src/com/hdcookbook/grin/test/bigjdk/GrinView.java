@@ -89,6 +89,7 @@ public class GrinView extends GenericMain {
     private GrinViewScreen screen;
             
      // Possible screen sizes supported.
+    static final DeviceConfig VGA = new DeviceConfig(640, 480);
     static final DeviceConfig NTSC = new DeviceConfig(720, 480);
     static final DeviceConfig PAL  = new DeviceConfig(720, 576);
     static final DeviceConfig P720 = new DeviceConfig(1280, 720);
@@ -381,6 +382,8 @@ public class GrinView extends GenericMain {
             "1080p".equals(arg) || "1080i".equals(arg) || 
             "fullhd".equalsIgnoreCase(arg)) {
             return FULLHD;
+        } else if ("640x480".equals(arg) || "vga".equals(arg)) {
+            return VGA;
         }
         
         // Nothing matched... print usage and exit.
@@ -412,7 +415,7 @@ public class GrinView extends GenericMain {
         System.out.println("                -stdin_commands");
         System.out.println("");
         System.out.println("            -assets and -asset_dir may be repeated to form a search path.");
-        System.out.println("            -screensize keyword can be fullhd, pal, ntsc, 720p, or 960x540.");
+        System.out.println("            -screensize keyword can be fullhd, pal, ntsc, 720p, vga, or 960x540.");
         System.out.println("                        Default screen size is fullhd (1920x1080), with a scale ");
 	System.out.println("                        factor 2.  Some synonymous names are also allowed.");
         System.out.println("            -automate option will launch a testing thread which activates");       

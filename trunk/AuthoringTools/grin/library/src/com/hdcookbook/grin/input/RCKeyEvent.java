@@ -119,6 +119,7 @@ public class RCKeyEvent extends Command {
     public static RCKeyEvent KEY_SECONDARY_VIDEO_ENABLE_DISABLE;
     public static RCKeyEvent KEY_SECONDARY_AUDIO_ENABLE_DISABLE;
     public static RCKeyEvent KEY_PG_TEXTST_ENABLE_DISABLE;
+    public static RCKeyEvent KEY_INFO;
 
     //  NOTE:  If you add a new key, check the note at the end of
     //         generatePerfectHashOfEventCodes().
@@ -206,6 +207,13 @@ public class RCKeyEvent extends Command {
 	KEY_PG_TEXTST_ENABLE_DISABLE
 		       = new RCKeyEvent("pg_textst_enable_disable",
 		       				      465, 0x40000000);
+  
+        // The info key support is mandatory in OCAP (tru2way) devices.
+        // The constant, 457, is defined in org.havi.ui.event.HRcEvent.
+	KEY_INFO
+		       = new RCKeyEvent("info",
+		       				      457, 0x80000000);
+
 
 	RCKeyEvent[] keys = new RCKeyEvent[] {
 	    KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, 
@@ -216,7 +224,8 @@ public class RCKeyEvent extends Command {
 	    KEY_TRACK_NEXT, KEY_TRACK_PREV, KEY_FAST_FWD, KEY_REWIND,
 	    KEY_PAUSE, KEY_SECONDARY_VIDEO_ENABLE_DISABLE,
 	    KEY_SECONDARY_AUDIO_ENABLE_DISABLE,
-	    KEY_PG_TEXTST_ENABLE_DISABLE
+	    KEY_PG_TEXTST_ENABLE_DISABLE,
+            KEY_INFO
 	};
 	//
 	// IMPORTANT NOTE:  If a key is added to this table, then
