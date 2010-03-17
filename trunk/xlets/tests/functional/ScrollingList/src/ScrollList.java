@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 
-public class ScrollListDirector extends Director {
+public class ScrollList {
 
     public static final int MAX_NUM_OF_FILMS = 50;
 
@@ -44,73 +44,35 @@ public class ScrollListDirector extends Director {
     private int maximumYForFilms;
     private final static int SCROLL_CONSTANT = 175;
 
-    // The test string array to populate the scrollable list with.
-    private static String[] films = new String[] {
-       "Citizen Kane",
-       "Casablanca",
-       "The Godfathe",
-       "Gone with the Wind",
-       "Lawrence of Arabia",
-       "The Wizard of Oz",
-       "The Graduate",
-       "On the Waterfront",
-       "Schindler's List",
-       "Singin' in the Rain",
-       "It's a Wonderful Life",
-       "Sunset Blvd",
-       "The Bridge on the River Kwa",
-       "Some Like It Hot",
-       "Star Wars Episode IV: A New Hope",
-       "All About Ev",
-       "The African Queen",
-       "Psych",
-       "Chinatown",
-       "One Flew Over the Cuckoo's Nest	",
-       "The Grapes of Wrath",
-       "2001: A Space Odyssey",
-       "The Maltese Falcon",
-       "Raging Bull",
-       "E.T. the Extra-Terrestrial",
-       "Dr. Strangelove",
-       "Bonnie and Clyde",
-       "Apocalypse Now",
-       "Mr. Smith Goes to Washington"
-    } ;
-    
-    public ScrollListDirector() {
-    }
+    private Director d;
 
-    /**
-     * Initialize the director. If you need to access GRIN features or other
-     * scene graph elements, it's a good idea to look them up once, during
-     * initialization, and then keep them in an instance variable. That's faster
-     * than looking them up every time.
-     **/
-    public void initialize() {
+    public ScrollList(Director director) {
 
-        scroller = (InterpolatedModel) getFeature("F:FilmDetailsScrollCoords");
-        filmScrollingAssembly = (Assembly) getFeature("F:FilmNamesScrollerAssembly");
+        this.d = director;
+
+        scroller = (InterpolatedModel) d.getFeature("F:FilmDetailsScrollCoords");
+        filmScrollingAssembly = (Assembly) d.getFeature("F:FilmNamesScrollerAssembly");
         scrollUp = filmScrollingAssembly.findPart("up");
         scrollDown = filmScrollingAssembly.findPart("down");
         notScrolling = filmScrollingAssembly.findPart("default");
         
-        upArrowImageAssembly = (Assembly) getFeature("F:ScrollList.UpArrow");
+        upArrowImageAssembly = (Assembly) d.getFeature("F:ScrollList.UpArrow");
         upDisabled = upArrowImageAssembly.findPart("disabled");
         upShown    = upArrowImageAssembly.findPart("default");
         upSelected = upArrowImageAssembly.findPart("selected");        
-        downArrowImageAssembly = (Assembly) getFeature("F:ScrollList.DownArrow");
+        downArrowImageAssembly = (Assembly) d.getFeature("F:ScrollList.DownArrow");
         downDisabled = downArrowImageAssembly.findPart("disabled");
         downShown    = downArrowImageAssembly.findPart("default");
         downSelected = downArrowImageAssembly.findPart("selected");
 
         // Cloning FilmDiscription items.  
         originalFilmDescription = new FilmDescription();
-        originalFilmDescription.top = (Feature) getFeature("F:FilmDescription");
-        originalFilmDescription.pos = (InterpolatedModel) getFeature("F:FilmDescription.Pos");
-        originalFilmDescription.bullet = (FixedImage) getFeature("F:ScrollList.Bullet");
-        originalFilmDescription.description = (Text) getFeature("F:ScrollList.FilmName");
+        originalFilmDescription.top = (Feature) d.getFeature("F:FilmDescription");
+        originalFilmDescription.pos = (InterpolatedModel) d.getFeature("F:FilmDescription.Pos");
+        originalFilmDescription.bullet = (FixedImage) d.getFeature("F:ScrollList.Bullet");
+        originalFilmDescription.description = (Text) d.getFeature("F:ScrollList.FilmName");
 
-        filmDescriptionsGroup = (Group) getFeature("F:FilmDetailsGroup");
+        filmDescriptionsGroup = (Group) d.getFeature("F:FilmDetailsGroup");
 
         cloneFilmDescriptions(MAX_NUM_OF_FILMS);
     }
@@ -139,7 +101,7 @@ public class ScrollListDirector extends Director {
         }
     }
 
-    public void populateListItems() {
+    public void populateListItems(String[] films) {
 
         Feature[] groupMembers = new Feature[films.length];
         
@@ -187,7 +149,7 @@ public class ScrollListDirector extends Director {
      * for display, and if there is more film to display, then initiate
      * scrolling.
      */
-    public void maybeScrollDown() {
+    public void startScrollDown() {
 
         if (this.filmScrollingAssembly.getCurrentPart() != notScrolling) {
             // In the middle of the scrolling - do nothing
@@ -207,7 +169,7 @@ public class ScrollListDirector extends Director {
      * for display, and if there is more film to display, then initiate
      * scrolling.
      */
-    public void maybeScrollUp() {
+    public void startScrollUp() {
       
         if (this.filmScrollingAssembly.getCurrentPart() != notScrolling) {
             // In the middle of the scrolling - do nothing
@@ -225,7 +187,7 @@ public class ScrollListDirector extends Director {
      * Invoked by GRIN to scroll up the text area containing list of film names
      * that a selected Contributor has taken a part of.
      */
-    public void scrollUp() {
+    public void finishScrollUp() {
         scroller.setField(Translator.Y_FIELD, currentYForFilms);  
         
         if (!canScrollUp()) {
@@ -238,7 +200,7 @@ public class ScrollListDirector extends Director {
      * Invoked by GRIN to scroll down the text area containing list of film
      * names that a selected Contributor has taken a part of.
      */
-    public void scrollDown() {
+    public void finishScrollDown() {
         scroller.setField(Translator.Y_FIELD, currentYForFilms);  
   
         if (!canScrollDown()) {
@@ -252,7 +214,7 @@ public class ScrollListDirector extends Director {
         scroller.setField(Translator.Y_FIELD, currentYForFilms); 
     }
     
-    public void notifyDestroyed() {
+    public void destroy() {
         
         if (filmDescriptionsGroup != null) {
             filmDescriptionsGroup.resetVisibleParts(null);

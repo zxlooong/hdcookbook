@@ -30,8 +30,8 @@ java_generated_class ScrollListCommands [[
 		super(show); 
 	    }
 
-	    public ScrollListDirector getDirector() {
-		return (ScrollListDirector) show.getDirector();
+	    public MainDirector getDirector() {
+		return (MainDirector) show.getDirector();
 	    }
 	
 	    JAVA_COMMAND_BODY
@@ -161,7 +161,7 @@ feature translator_model F:ScrollingDownMovement {
                  8 0 -175 ease-out-circ 
              } end_commands {                
                  java_command [[
-                    getDirector().scrollDown();
+                    getDirector().scrollList.finishScrollDown();
                   ]]
                  activate_part F:FilmNamesScrollerAssembly default ;
              } ;
@@ -176,7 +176,7 @@ feature translator_model F:ScrollingUpMovement {
                  8 0 175 ease-out-circ 
              } end_commands {     
                  java_command [[
-                    getDirector().scrollUp();
+                    getDirector().scrollList.finishScrollUp();
                  ]]
                  activate_part F:FilmNamesScrollerAssembly default ;
              } ;
@@ -201,7 +201,6 @@ segment S:Initialize
     } next {  
         java_command [[ 
                 getDirector().initialize(); 
-                getDirector().populateListItems(); 
         ]]
   	activate_segment S:ShowScrollList ;
     }
@@ -238,14 +237,14 @@ rc_handler key_pressed H:Right {
 rc_handler key_pressed H:ScrollFilmUp {
 	up
     } execute {
-        java_command [[ getDirector().maybeScrollUp(); ]]
+        java_command [[ getDirector().scrollList.startScrollUp(); ]]
     }
 ;
 
 rc_handler key_pressed H:ScrollFilmDown {
 	down
     } execute {
-        java_command [[ getDirector().maybeScrollDown(); ]]
+        java_command [[ getDirector().scrollList.startScrollDown(); ]]
     }
 ;
 
