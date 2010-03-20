@@ -247,7 +247,7 @@ public class MPLSObject {
         }       
         playListMark.writeObject(playListMarkStream);
         for (int i = 0; i < paddingN3; i++) {
-           playListStream.writeShort((short)0);
+           playListMarkStream.writeShort((short)0);
         } 
         appInfoStream.flush();
         playListStream.flush();
