@@ -55,16 +55,22 @@
 
 package net.java.bd.tools.playlist;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import javax.xml.bind.annotation.XmlType;
+
 /*
  * BD-ROM 3-1 5.3.8 ExtensionData (Base syntax is from 5.2.4)
  */
+@XmlType(propOrder={"extDataEntry", "paddingL1", "extDataBlock"})
 public class ExtensionData {
     
-    private byte[] data;
+	private ExtDataEntry[] extDataEntry;
+	private int paddingL1;
+	private ExtDataBlock[] extDataBlock;
     
     public void readObject(DataInputStream din) throws IOException {
         // 32 bit length
@@ -80,22 +86,111 @@ public class ExtensionData {
         // for i = 0 ... L1
         // 32 bit padding
         // data_block() - ex. i...N pip_metadata()
-        int length = din.readInt();
-        data = new byte[length];
-        din.read(data);
+    	din.skipBytes(4);		// length
+        int dataBlockStartAddress = din.readInt();
+        din.skipBytes(3);
+        int n = din.readUnsignedByte();
+        ExtDataEntry[] entries = new ExtDataEntry[n];
+        int[] extensionDataSize = new int[n];
+        for (int i = 0; i < n; i++) {
+        	entries[i] = new ExtDataEntry();
+        	entries[i].readObject(din);
+        	din.skipBytes(4); // ext_data_start_address
+        	extensionDataSize[i] = din.readInt(); // ext_data_length
+        }
+        setExtDataEntry(entries);
+        int paddingL1 = (dataBlockStartAddress - (12 + (n * 12))) / 4;
+        setPaddingL1(paddingL1);
+        ExtDataBlock[] data = new ExtDataBlock[n];
+        for (int i = 0; i < n; i++) {
+        	ExtDataBlock.BlockType type;
+        	if (entries[i].getID1() == 0x0001 && entries[i].getID2() == 0x0001) {
+        		type = ExtDataBlock.BlockType.pip_metadata;
+        	} else {
+        		type = ExtDataBlock.BlockType.unknown;
+        	}
+        	data[i] = new ExtDataBlock(type, extensionDataSize[i]); 
+        	data[i].readObject(din);
+        }
+        setExtDataBlock(data);
     }
     
     public void writeObject(DataOutputStream dout) throws IOException {
-        data = getData();
-        dout.writeInt(data.length);
-        dout.write(data);
+    	
+    	int length;
+        int dataBlockStartAddress;
+        byte[] reserved = new byte[3];
+        
+        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+        DataOutputStream extDataBlockStream = new DataOutputStream(baos2);
+        
+        // We need to write out the ExtensionDataBlock to figure out the ExtensionDataEntry's
+        // ext_data_start_address and ext_data_length
+        
+        ExtDataBlock[] extDataBlock = getExtDataBlock();        
+        int[] dataBlockSize = new int[extDataBlock.length]; 
+        int previousSize = 0;
+        int currentSize = 0;
+        for (int i = 0; i < extDataBlock.length; i++) {
+        	extDataBlock[i].writeObject(extDataBlockStream);
+        	extDataBlockStream.flush();
+            previousSize = currentSize;
+        	currentSize = baos2.size() - previousSize;
+        	dataBlockSize[i] = currentSize;	
+        }
+        extDataBlockStream.flush();
+        extDataBlockStream.close();
+        
+        // Calculate offsets and lengths
+        // The header is 12 bytes, each ExtDataEntry is 12 bytes, PaddingL1 is 4 bytes
+        dataBlockStartAddress = 12 + (12 * getExtDataEntry().length) + 4 * getPaddingL1();
+        length = dataBlockStartAddress + baos2.size() - 4;
+    
+        // Now write out the entire dataset to the file.
+        dout.writeInt(length);
+        dout.writeInt(dataBlockStartAddress);
+        dout.write(reserved);
+        
+        ExtDataEntry[] extDataEntry = getExtDataEntry();
+        dout.writeByte(extDataEntry.length);
+
+        int startAddress = dataBlockStartAddress;
+        for (int i = 0; i < extDataEntry.length; i++) {
+            extDataEntry[i].writeObject(dout);  // ID1, ID2
+            dout.writeInt(startAddress);        // ext_data_start_address
+            dout.writeInt(dataBlockSize[i]);    // ext_data_length
+            startAddress += dataBlockSize[i];
+        }    
+        
+        for (int i = 0; i < getPaddingL1(); i++) {
+        	dout.writeShort(0);
+        	dout.writeShort(0);
+        }
+        
+        dout.write(baos2.toByteArray());   // ExtDataBlock[]
     }
     
-    public void setData(byte[] data) {
-        this.data = data;
+    public ExtDataEntry[] getExtDataEntry() {
+    	return extDataEntry;
     }
     
-    public byte[] getData() {
-        return data;
+    public void setExtDataEntry(ExtDataEntry[] extDataEntry) {
+    	this.extDataEntry = extDataEntry;
+    }
+    
+    public int getPaddingL1() {
+    	return paddingL1;
+    }
+    
+    public void setPaddingL1(int paddingL1) {
+    	this.paddingL1 = paddingL1;
+    }
+    
+    public ExtDataBlock[] getExtDataBlock() {
+    	return extDataBlock;
+    }
+    
+    public void setExtDataBlock(ExtDataBlock[] extDataBlock) {
+    	this.extDataBlock = extDataBlock;
     }
 }

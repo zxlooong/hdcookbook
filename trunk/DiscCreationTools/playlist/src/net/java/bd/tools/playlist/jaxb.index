@@ -1,10 +1,15 @@
 AppInfoPlayList
 ClipInfo
+ExtDataBlock
+ExtDataEntry
 ExtensionData
 IGStreamEntry
 Mark
+MetadataBlockData
+MetadataBlockHeader
 MPLSObject
 PGTextSTStreamEntry
+PIPMetadataEntry
 PlayItem
 PlayList
 PlayListMark
@@ -12,8 +17,8 @@ PrimaryAudioStreamEntry
 PrimaryVideoStreamEntry
 SecondaryAudioStreamEntry
 SecondaryVideoStreamEntry
-StreamAttribute
 STNTable
+StreamAttribute
 StreamEntry
 SubPath
 SubPlayItem

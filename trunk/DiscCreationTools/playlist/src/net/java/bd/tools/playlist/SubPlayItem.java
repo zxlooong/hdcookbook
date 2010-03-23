@@ -116,7 +116,7 @@ public class SubPlayItem {
         codecId = StringIOHelper.readISO646String(din, 4);
         din.skipBytes(3);
         byte b = din.readByte();
-        setSpConnectionCondition((b & 0x1e)>>1);
+        setSpConnectionCondition((b & 0x1e) >> 1);
         setIsMultiClipEntries((b & 0x01) != 0);  
         stdId = din.readByte();
         din.readFully(inTimeBytes);
@@ -207,13 +207,6 @@ public class SubPlayItem {
     }
 
     public void setSpConnectionCondition(int spConnectionCondition) {
-       
-        if (spConnectionCondition != 1 &&
-            spConnectionCondition != 5 &&
-            spConnectionCondition != 6) {
-           throw new IllegalArgumentException("sp_connection_condition should be either 1, 5 or 6 " + spConnectionCondition);
-        }
-
         this.spConnectionCondition = spConnectionCondition;
     }
 
