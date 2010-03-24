@@ -11,6 +11,20 @@ Game xlet project.  See the documentation in vars.properties for details.
     	Some default values for properties.  These can be overridden
 	in vars.properties.
     -->
+    <property name="keystore.storepass" value="keystorepassword"/>
+    <property name="keystore.root.alias" value="rootcert"/>
+    <property name="keystore.root.keypass" value="rootcertpassword"/>
+    <property name="keystore.app.alias" value="appcert"/>
+    <property name="keystore.app.keypass" value="appcertpassword"/>
+    	<!-- The keystore defaults above match the defaults of 
+	     BDCertGenerator.  If you're doing a binding unit cert,
+	     then you might want to define keystore.bu.alias and
+	     keystore.bu.keypass.  keystore.bu.alias defaults to
+	     "bucert".  I'm not sure what keystore.bu.keypass defaults
+	     to, but if you're creating a new keystore, you can use
+	     whatever you want.
+	-->
+
     <property name="disc.id" value="00000000000000000000000000000001"/>
     <condition property="mosaics.file.txt" value="${mosaics.file}.txt">
 	<isset property="mosaics.file"/>
@@ -449,6 +463,12 @@ The project.name property is not set.  This usually has one of two causes:
 
         <jdktools.java classname="net.java.bd.tools.security.BDSigner">
             <arg value="${xlet.jar}"/>
+	    <arg value="-storepass"/>
+    	    <arg value="${keystore.storepass}"/>
+	    <arg value="-alias"/>
+    	    <arg value="${keystore.app.alias}"/>
+	    <arg value="-keypass"/>
+	    <arg value="${keystore.app.keypass}"/>
             <classpath refid="sec.tools.path"/>	   
         </jdktools.java>
 	<antcall target="post-sign-xlet"/>
@@ -468,12 +488,28 @@ The project.name property is not set.  This usually has one of two causes:
         <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
             <arg value="-root"/>
             <arg value="${disc.orgid}"/>
+	    <arg value="-storepass"/>
+    	    <arg value="${keystore.storepass}"/>
+	    <arg value="-alias"/>
+    	    <arg value="${keystore.root.alias}"/>
+	    <arg value="-keypass"/>
+    	    <arg value="${keystore.root.keypass}"/>
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
         
         <jdktools.java classname="net.java.bd.tools.security.BDCertGenerator">
             <arg value="-app"/>
             <arg value="${xlet.orgid}"/>
+	    <arg value="-storepass"/>
+    	    <arg value="${keystore.storepass}"/>
+	    <arg value="-signeralias"/>
+    	    <arg value="${keystore.root.alias}"/>
+	    <arg value="-signerpass"/>
+	    <arg value="${keystore.root.keypass}"/>
+	    <arg value="-alias"/>
+    	    <arg value="${keystore.app.alias}"/>
+	    <arg value="-keypass"/>
+    	    <arg value="${keystore.app.keypass}"/>
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
 	<antcall target="post-generate-certs"/>
