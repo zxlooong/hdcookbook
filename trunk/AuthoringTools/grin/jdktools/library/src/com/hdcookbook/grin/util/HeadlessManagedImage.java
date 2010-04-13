@@ -140,6 +140,13 @@ public class HeadlessManagedImage extends ManagedImage {
         return loaded;
     }
 
+    /**
+     * {@inheritDoc}
+     **/
+    public synchronized boolean hadErrorLoading() {
+	return false;
+    }
+
 
     /**
      * {@inheritDoc}
@@ -188,6 +195,9 @@ public class HeadlessManagedImage extends ManagedImage {
 	    image = ImageIO.read(url);
 	} catch (IOException ex) {
 	    throw new RuntimeException(ex);
+		// If this class later supports more graceful failure
+		// when there's an error loading, the implementation of
+		// hadErrorLoading() would need to change.
 	}
 	loaded = true;
 	width = image.getWidth();

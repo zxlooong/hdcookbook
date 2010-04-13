@@ -215,6 +215,13 @@ abstract public class ManagedImage {
     abstract public boolean isLoaded();
 
     /**
+     * Tells whether or not the image had an error loading, e.g. because
+     * the path didn't refer to a valid image.  This is always false if
+     * isLoaded() is false.
+     **/
+    abstract public boolean hadErrorLoading();
+
+    /**
      * Load this image for display in the given component, or any
      * other component for the same graphics device.  The image will
      * only be loaded if an interest in loading this ManagedImage has

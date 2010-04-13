@@ -77,9 +77,10 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     private int numPrepares = 0;
     Image image = null;		// Accessed by ManagedSubImage
     private boolean loaded = false;
-    	// If image == null && !loaded, then we're loading.
+    	// If image != null && !loaded, then we're loading.
     private int width = 0;
     private int height = 0;
+	// If there's an error loading, width and height are left at 0
 
     ManagedFullImage(String name) {
 	this.name = name;
@@ -130,6 +131,13 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 	    //  See ManagedImage's main class documentation under
 	    //  "ManagedImage contract - image loading and unloading".
 	return loaded;
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public synchronized boolean hadErrorLoading() {
+	return loaded && height == 0 && width == 0;
     }
 
     /**
@@ -211,10 +219,19 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 		img.flush();
 		return false;
 	    }
-	    if ((infoflags & (ALLBITS | ERROR | ABORT)) != 0) {
-		    // ERROR and ABORT shouldn't really happen, but if it does
-		    // the best we can do is blithely accept the fact, and treat
-		    // the image as though it were loaded.
+	    if ((infoflags & (ERROR | ABORT)) != 0) {
+		// ERROR and ABORT shouldn't really happen, but if it does
+		// the best we can do is accept the fact, and externally
+		// treat the image as though it were loaded.
+		if (Debug.LEVEL > 1) {
+		    Debug.println("Error loading image " + this);
+		}
+		loaded = true;
+		this.width = 0;
+		this.height = 0;
+		notifyAll();
+		// Fall through to notifyLoaded
+	    } else if ((infoflags & ALLBITS) != 0) {
 		loaded = true;
 		this.width = width;
 		this.height = height;
@@ -266,16 +283,20 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
      * {@inheritDoc}
      **/
     public void draw(Graphics2D gr, int x, int y, Component comp) {
-        gr.drawImage(image, x, y, comp);
+	if (width > 0) {
+	    gr.drawImage(image, x, y, comp);
+	}
     }
 
     /**
      * {@inheritDoc}
      **/
     public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
-	gr.drawImage(image, bounds.x, bounds.y, 
+	if (width > 0) {
+	    gr.drawImage(image, bounds.x, bounds.y, 
 			    bounds.x+bounds.width, bounds.y+bounds.height,
 			    0, 0, width, height, comp);
+	}
     }
     
     /**
@@ -284,11 +305,13 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     public void drawClipped(Graphics2D gr, int x, int y, 
     			    Rectangle subsection, Component comp) 
     {
-	gr.drawImage(image, x, y, x+ subsection.width, y+subsection.height,
+	if (width > 0) {
+	    gr.drawImage(image, x, y, x+ subsection.width, y+subsection.height,
 			    subsection.x, subsection.y, 
 			    subsection.x+subsection.width, 
 			    subsection.y+subsection.height, 
 			    comp);
+	}
     }
     void destroy() {
 	if (Debug.LEVEL > 0 && loaded) {

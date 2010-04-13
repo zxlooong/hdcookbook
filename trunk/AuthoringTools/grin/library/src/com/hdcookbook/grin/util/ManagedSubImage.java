@@ -121,6 +121,13 @@ public class ManagedSubImage extends ManagedImage {
     /**
      * {@inheritDoc}
      **/
+    public boolean hadErrorLoading() {
+	return mosaic.hadErrorLoading();
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
     public void load(Component comp) {
 	mosaic.load(comp);
     }
