@@ -140,7 +140,7 @@ public class ShowParser {
     private Lexer lexer;
     private ExtensionParser extParser;
     private ArrayList<ArrayList<ForwardReference>> deferred;
-    private static final int NUM_DEFERRED_LISTS = 3;	// We use 3 slots
+    private static final int NUM_DEFERRED_LISTS = 4;	// We use 4 slots
     private Map<String, VisualRCHandlerHelper> visualRCHelpers
 	= new HashMap<String, VisualRCHandlerHelper>();
 
@@ -2046,7 +2046,7 @@ public class ShowParser {
 		hand.setup(assembly, realSelParts, realActParts);
 	    }
 	};
-	deferred.get(1).add(fw);
+	deferred.get(2).add(fw);
     }
 
     private ArrayList<ArrayList<VisualRCHandlerCell>> 
@@ -2376,7 +2376,7 @@ public class ShowParser {
 		}
 	    }
 	};
-	deferred.get(2).add(fw);
+	deferred.get(3).add(fw);
 	return cmd;
     }
 
@@ -2395,7 +2395,7 @@ public class ShowParser {
 		cmd.setup(a, f);
 	    }
 	};
-	deferred.get(2).add(fw);
+	deferred.get(3).add(fw);
 	return cmd;
     }
 
