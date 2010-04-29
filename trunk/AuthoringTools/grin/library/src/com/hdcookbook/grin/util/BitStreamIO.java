@@ -65,7 +65,7 @@ import java.io.DataOutputStream;
  * This contains utility methods to help read and write bit streams.
  * This can be handy, for example, to read and write things like the
  * BDJO data structure (part 3-2 section 10.2.1.2) or the index.bdmv
- * structure (part 3-2 section 5.2.3.2). For example, a strucure like
+ * structure (part 3-2 section 5.2.3.2). For example, a structure like
  * this:
  * <pre>
  *      isFirst			 1 uimsbf
