@@ -6,6 +6,7 @@
     
   <!-- set global properties for this build -->
     <property name="bdjo-src" location="src"/>
+    <property name="hdc-lib-src" location="../../AuthoringTools/grin/library/src"/>
     <property name="bdjo-build" location="build"/>
     <property name="bdjo-dist"  location="dist"/>
     <property name="main.class"  value="net.java.bd.tools.bdjo.Converter"/>
@@ -15,7 +16,9 @@
     </target>
     <target name="bdjo-compile" depends="bdjo-init"
         description="compile the source " >
-        <javac srcdir="${bdjo-src}" destdir="${bdjo-build}" debug="on"/>
+        <javac srcdir="${bdjo-src}" destdir="${bdjo-build}" debug="on">
+	    <src path="${hdc-lib-src}"/>
+	</javac>
         <copy todir="${bdjo-build}">
             <fileset dir="${bdjo-src}" includes="**/jaxb.index"/>
         </copy>

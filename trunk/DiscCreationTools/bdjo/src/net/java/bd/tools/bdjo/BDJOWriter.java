@@ -77,6 +77,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.bind.helpers.DefaultValidationEventHandler;
 
+import com.hdcookbook.grin.util.BitStreamIO;
+
 /**
  * A class to write BDJO object as JavaFX object literal
  * or as a XML document.
@@ -271,9 +273,11 @@ public final class BDJOWriter {
     
     // section 10.2.2.2 TerminalInfo - Syntax
     private static byte[] writeTerminalInfoBuf(TerminalInfo ti) 
-            throws IOException {
+            throws IOException 
+    {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
+	BitStreamIO bio = new BitStreamIO();
         // write "length" field
         final int length = 5 /* default font file name */ +
                      1 /* havi config, menu call mask, title search mask */ +
@@ -290,25 +294,20 @@ public final class BDJOWriter {
         // Title_search_mask fields (4 bits + 1 bit + 1 bit)
         HaviDeviceConfig config = ti.getInitialHaviConfig();
         int id = config.getId();
-        int b = (id << 4);
-        if (ti.isMenuCallMask()) {
-            b |= 0x08;
-        }
-        if (ti.isTitleSearchMask()) {
-            b |= 0x04;
-        }
-        dos.writeByte(b);
-        // write "reserved_for_future_use" field (34 bits -- but
-        // 2 bits included already in the last byte
-        dos.writeInt(0);
+	bio.writeBits(dos, 4, config.getId());
+	bio.writeBits(dos, 1, (ti.isMenuCallMask() ? 1 : 0));
+	bio.writeBits(dos, 1, (ti.isTitleSearchMask() ? 1 : 0));
+	bio.writeBitsLong(dos, 34, 0);	// padding
         
+	bio.assertByteAligned(1);
         dos.flush();
         return bos.toByteArray();
     }
     
     // section 10.2.3.2 AppCacheInfo - Syntax
     private static byte[] writeAppCacheInfoBuf(AppCacheInfo aci)
-            throws IOException {
+            throws IOException 
+    {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
         AppCacheEntry[] entries = aci.getEntries();
@@ -352,9 +351,11 @@ public final class BDJOWriter {
     
     // section 10.2.4.2 TableOfAccessiblePlayLists - Syntax
     private static byte[] writeTableOfAccessiblePlayListsBuf(
-            TableOfAccessiblePlayLists tapl) throws IOException {
+            TableOfAccessiblePlayLists tapl) throws IOException 
+    {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
+	BitStreamIO bio = new BitStreamIO();
         String[] playLists = tapl.getPlayListFileNames();
         if (playLists == null) {
             playLists = new String[0];
@@ -370,14 +371,12 @@ public final class BDJOWriter {
         dos.writeInt(length);
         // 11 bit number_of_acc_PlayLists + 1 bit access_to_all_flag +
         // 1 bit autostart_first_PlayList_flag
-        int word = (playLists.length << 5);
-        if (tapl.isAccessToAllFlag()) {
-            word |= 0x010;
-        }
-        if (tapl.isAutostartFirstPlayListFlag()) {
-            word |= 0x08;
-        }
-        dos.writeShort(word);
+	bio.writeBits(dos, 11, playLists.length);
+	bio.writeBits(dos, 1, (tapl.isAccessToAllFlag() ? 1 : 0));
+	bio.writeBits(dos, 1, (tapl.isAutostartFirstPlayListFlag() ? 1 : 0));
+	bio.writeBits(dos, 3, 0);	// padding
+	bio.assertByteAligned(1);
+
         // reserved_for_future_use bits
         dos.writeShort(0);
         for (String pl : playLists) {
@@ -393,10 +392,13 @@ public final class BDJOWriter {
         return bos.toByteArray();
     }
     
-    private static byte[] writeApplicationDescriptorBuf(ApplicationDescriptor appDesc)
-            throws IOException {
+    private static byte[] 
+	writeApplicationDescriptorBuf(ApplicationDescriptor appDesc)
+            throws IOException 
+    {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
+	BitStreamIO bio = new BitStreamIO();
         
         AppProfile[] profiles = appDesc.getProfiles();
         if (profiles == null) {
@@ -505,7 +507,9 @@ public final class BDJOWriter {
         dos.writeByte(0); // reserved_for_word_align 
         dos.writeInt(length); // descriptor_length
         dos.writeInt(0); // reserved_for_future_use
-        dos.writeShort(profiles.length << 12); // application_profile_count + reserved_for_word_align
+	bio.writeBits(dos, 4, profiles.length);
+	bio.writeBits(dos, 12, 0);	// padding
+	bio.assertByteAligned(1);
         for (AppProfile ap : profiles) {
             dos.writeShort(ap.getProfile());
             dos.writeByte(ap.getMajorVersion());
@@ -521,10 +525,10 @@ public final class BDJOWriter {
 	if (appDesc.getVisibility() == null) {
 	    throw new IOException("Missing visibility for application description whose initial class name is " + initClassName);
 	}
-        int b = (appDesc.getBinding().ordinal() << 6) |
-                (appDesc.getVisibility().ordinal() << 4);
-        // application_binding + application_visibility + 4 bit align
-        dos.writeByte(b);
+	bio.writeBits(dos, 2, appDesc.getBinding().ordinal());
+	bio.writeBits(dos, 2, appDesc.getVisibility().ordinal());
+	bio.writeBits(dos, 4, 0);	// padding
+	bio.assertByteAligned(1);
         dos.writeShort(totalNameLen);
         
         for (AppName an : names) {
@@ -534,7 +538,7 @@ public final class BDJOWriter {
             }
             dos.write(getISO646Bytes(lang));
             String name = an.getName();
-            if (name == null) {
+           if (name == null) {
                 name = "";
             }
             byte[] utf8Bytes = getUTF8Bytes(name);
@@ -599,8 +603,10 @@ public final class BDJOWriter {
     }
     
     // section 10.2.5.2 ApplicationManagementTable - Syntax
-    private static byte[] writeApplicationManagementTableBuf(
-            ApplicationManagementTable amt) throws IOException {
+    private static byte[] 
+	writeApplicationManagementTableBuf(ApplicationManagementTable amt) 
+	    throws IOException 
+    {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
         AppInfo[] apps = amt.getApplications();
@@ -685,7 +691,7 @@ public final class BDJOWriter {
             dos = new DataOutputStream(out);
         }
         dos.write(getISO646Bytes("BDJO"));
-        dos.write(getISO646Bytes(bdjo.getVersion().getValue()));
+        dos.write(getISO646Bytes(bdjo.getVersion().getValue()));	// four bytes
         
         final int terminalInfoStart = 4 /* type_indicator */ +
                 4 /* version_number */ +
