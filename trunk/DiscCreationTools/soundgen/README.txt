@@ -39,6 +39,6 @@ There is a backup copy of the above mentioned Tritonous jar files at
 How to use Tritonous PCM codec?
 
     
-java -cp soundgen.jar:tritonus_share-0.3.6.jar:tritonus_remaining-0.3.6.jar net.java.bd.tools.BDJSoundGenetator <args>
+java -cp soundgen.jar:tritonus_share-0.3.6.jar:tritonus_remaining-0.3.6.jar net.java.bd.tools.BDJSoundGenerator <args>
 
 
