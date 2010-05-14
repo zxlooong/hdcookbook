@@ -234,6 +234,9 @@ public class Director {
      * <p>
      * The default implementation of this method does nothing,
      * so there is no need to call super.notifyAssemblyPartSelected().
+     * <p>
+     * Note that during the callback, the current part of the assembly is
+     * undefined, and might not reflect the new value.
      *
      * @param assembly		The assembly within which a new part was
      *				selected
