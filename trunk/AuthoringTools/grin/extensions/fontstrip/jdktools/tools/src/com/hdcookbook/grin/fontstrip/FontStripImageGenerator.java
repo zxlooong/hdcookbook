@@ -276,7 +276,7 @@ public class FontStripImageGenerator {
         String name = file.getName().toLowerCase();
         int index = name.lastIndexOf(".");
         if (index != -1) {
-            String suffix = name.substring(index);
+            String suffix = name.substring(index+1).toLowerCase();
             if (suffix.equals("png")) {
                 return "png";
             } else if (suffix.equals("tiff") || suffix.equals("tif")) {
