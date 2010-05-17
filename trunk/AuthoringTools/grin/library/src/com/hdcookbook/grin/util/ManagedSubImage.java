@@ -170,12 +170,14 @@ public class ManagedSubImage extends ManagedImage {
      * {@inheritDoc}
      **/
     public void drawClipped(Graphics2D gr, int x, int y, 
-            Rectangle subsection, Component comp) {
+			    Rectangle subsection, Component comp) 
+    {
 	Rectangle p = placement;
 	gr.drawImage(mosaic.image, 
-                     x, y, x+ subsection.width,y+subsection.height,
+                     x, y, x+subsection.width, y+subsection.height,
 		     p.x+subsection.x, p.y+subsection.y, 
-                     p.x+subsection.width, p.y+subsection.height, comp);
+                     p.x+subsection.x+subsection.width, 
+		     p.y+subsection.y+subsection.height, comp);
     }
 
     void destroy() {
