@@ -655,7 +655,9 @@ public class GrinView extends GenericMain {
 
     public void setDebugDraw(boolean value) {
 	super.setDebugDraw(value);
-	screen.setDebugDrawToggle(value);
+	if (screen != null) {
+	    screen.setDebugDrawToggle(value);
+	}
     }
     
 }

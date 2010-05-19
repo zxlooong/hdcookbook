@@ -186,8 +186,7 @@ public class GenericMain extends Frame implements AnimationContext {
 	    background.flush();
 	}
 	if (file == null) {
-	    background = null;
-	    setFps(fps);	// re-sets engine's background
+	    engine.setBackground(null);
 	    System.out.println("Set background null.");
 	    return;
 	}
@@ -201,8 +200,7 @@ public class GenericMain extends Frame implements AnimationContext {
 	} catch (InterruptedException ex) {
 	    Thread.currentThread().interrupt();
 	}
-	setFps(0);
-	System.out.println("Set fps to 0 to make new background visible.");
+	engine.setBackground(background);
     }
    
     /**
@@ -593,7 +591,9 @@ public class GenericMain extends Frame implements AnimationContext {
 		debugWaitingMonitor.notifyAll();
 	    }
 	}
-	engine.setDebugDraw(doDebugDraw);
+	if (engine != null) {
+	    engine.setDebugDraw(doDebugDraw);
+	}
     }
 
     public void setSendKeyUp(boolean v) {
@@ -617,16 +617,12 @@ public class GenericMain extends Frame implements AnimationContext {
 	fps = newFps;
 	if (engine != null) {
 	    if (newFps <= 0) {
-		engine.setBackground(background);
 		try {
 		    engine.pause();
 		    engine.skipFrames(1);  // Output one more, with background.
 		} catch (InterruptedException ignored) {
 		}
 	    } else {
-		if (background != null) {
-		    engine.setBackground(null);
-		}
 		engine.setFps((int) (newFps * 1001));
 		engine.start();
 	    }
