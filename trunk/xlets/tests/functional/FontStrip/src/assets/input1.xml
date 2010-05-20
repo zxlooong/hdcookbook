@@ -12,10 +12,10 @@
     </fontDescription>
 
     <fontImageFile>
-        <fontName>Liza</fontName> <!-- Points to fontDescription -->
+        <fontName>Lisa</fontName> <!-- Points to fontDescription -->
         <maxImageWidth>1000</maxImageWidth>
         <maxImageHeight>4000</maxImageHeight>
-        <designImage>LisaEdit.jpg</designImage>
+        <designImage>LisaEdit.png</designImage>
         <finalImage>Lisa.png</finalImage>
         <charList>abcdefghijklmnopqrstuvwxyz TRWFHEBGINS!,1234567890</charList>
     </fontImageFile>
