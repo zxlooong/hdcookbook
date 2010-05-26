@@ -128,6 +128,20 @@ public class AssetFinder  {
 	}
 	filePath = filePathArg;
     }
+
+    /**
+     * Get the filePathArg as set by setSearchPath()
+     **/
+    public static String[] getSearchPathJar() {
+	return appJarPath;
+    }
+
+    /**
+     * Get the appJarPathArg as set by setSearchPath()
+     **/
+    public static File[] getSearchPathFile() {
+	return filePath;
+    }
     
     /**
      * Sets the image map.  This is used for mosaic
