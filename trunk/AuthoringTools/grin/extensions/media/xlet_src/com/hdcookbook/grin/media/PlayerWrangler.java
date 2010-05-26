@@ -122,7 +122,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 
     /**
      * Initialize the playback engine.  This must be called after the xlet
-     * startes, and before playback of video clips is attempted.
+     * starts, and before playback of video clips is attempted.
      **/
     public void initialize(AnimationEngine engine) {
 	this.engine = engine;
