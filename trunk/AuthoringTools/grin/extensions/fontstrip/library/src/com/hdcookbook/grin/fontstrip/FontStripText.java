@@ -282,7 +282,11 @@ public class FontStripText extends Feature implements Node, SetupClient {
     }
 
     public void destroy() {
-	ImageManager.ungetImage(fontImage);
+	if (!loadingFailed) {
+	    ImageManager.ungetImage(fontImage);
+	} else if (Debug.ASSERT && fontImage != null) {
+	    Debug.assertFail();
+	}
     }
 
     /**

@@ -327,10 +327,15 @@ public class GenericMain extends Frame implements AnimationContext {
 
     protected void exitGrinview() {
 	try {
-	    Thread.sleep(100);
-	} catch (InterruptedException ex) {
+	    try {
+		Thread.sleep(100);
+	    } catch (InterruptedException ex) {
+	    }
+	    show.destroy();
+	} catch (Exception ex) {
+	    ex.printStackTrace();
+	    System.exit(1);
 	}
-	show.destroy();
 	System.exit(0);
     }
 

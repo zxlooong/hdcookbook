@@ -366,7 +366,7 @@ The project.name property is not set.  This usually has one of two causes:
                 <include name="**/*.class"/>
             </fileset>
             <fileset dir="${asset.dir}">
-                <include name="${show.file}.txt"/>
+                <include name="*.txt"/>
             </fileset>
 	    <fileset dir="${build.dir}">
 		<include name="*.png"/>
@@ -444,7 +444,7 @@ The project.name property is not set.  This usually has one of two causes:
     </target>
 
     <target name="jar" depends="compile, gen-permission-file" description="Creates an xlet jar file">
-        <jar destfile="${xlet.jar}">
+        <jar compress="false" destfile="${xlet.jar}">
             <fileset dir="${build.dir}/classes"/>
         </jar>
 	<antcall target="post-jar"/>
