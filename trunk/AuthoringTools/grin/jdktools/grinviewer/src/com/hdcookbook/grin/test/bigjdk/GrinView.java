@@ -607,13 +607,6 @@ public class GrinView extends GenericMain {
 	if (director != null) {
 	    m.setDirectorClassName(director);
 	}
-	if (background != null) {
-	    try {
-		m.setBackground(new File(background).toURI().toURL());
-	    } catch (Exception ignored) {
-		ignored.printStackTrace();
-	    }
-	}
 	
 	if (scaleDivisor != null || deviceConfig != null) {
 	    m.adjustScreenSize(scaleDivisor, deviceConfig);
@@ -643,6 +636,14 @@ public class GrinView extends GenericMain {
 	    m.buildControlGUI(showFile, isBinary);
 	}
 	m.startEngine();
+
+	if (background != null) {
+	    try {
+		m.setBackground(new File(background).toURI().toURL());
+	    } catch (Exception ignored) {
+		ignored.printStackTrace();
+	    }
+	}
 	if (fps != null) {
 	    m.doKeyboardCommand("f " + fps); // set fps	 
 	}
