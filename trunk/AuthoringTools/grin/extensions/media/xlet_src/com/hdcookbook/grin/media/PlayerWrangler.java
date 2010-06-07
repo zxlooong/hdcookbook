@@ -70,6 +70,8 @@ import javax.media.RestartingEvent;
 import javax.media.StartEvent;
 import javax.media.StopEvent;
 import javax.media.protocol.DataSource;
+import javax.tv.media.AWTVideoSizeControl;
+import javax.tv.media.AWTVideoSize;
 import javax.tv.locator.InvalidLocatorException;
 
 import org.davic.media.MediaLocator;
@@ -106,6 +108,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
     private Player thePlayer;
     private PlayListChangeControl playlistControl;
     private PlaybackControl playbackControl;
+    private AWTVideoSizeControl sizeControl;
     private BDLocator locatorRequest = null;
     	// If locatorRequest is set, that means that we want the playlist
 	// to stop whatever it's doing, and play that locator.
@@ -223,14 +226,18 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 		thePlayer.addControllerListener(this);
 		Control[] controls = thePlayer.getControls();
 		for (int i = 0; i < controls.length; i++) {
-		    if (controls[i] instanceof PlayListChangeControl) {
-			playlistControl = (PlayListChangeControl) controls[i];
-		    } else if (controls[i] instanceof PlaybackControl) {
-			playbackControl = (PlaybackControl) controls[i];
+		    Control c = controls[i];
+		    if (c instanceof PlayListChangeControl) {
+			playlistControl = (PlayListChangeControl) c;
+		    } else if (c instanceof PlaybackControl) {
+			playbackControl = (PlaybackControl) c;
+		    } else if (c instanceof AWTVideoSizeControl) {
+			sizeControl = (AWTVideoSizeControl) c;
 		    }
 		}
 		if (Debug.ASSERT &&
-		    (playbackControl == null || playlistControl == null))
+		    (playbackControl == null || playlistControl == null
+		     || sizeControl == null))
 		{
 		    Debug.assertFail();
 		}
@@ -295,6 +302,28 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 	} else {
 	    return p.getMediaTime().getNanoseconds();
 	}
+    }
+
+    /**
+     * Returns an AWTVideoSizeControl that can be used to scale the video.
+     * This returns null if a playlist hasn't been started yet.  That's
+     * inconvenient, but it's a function of how the underlying API is
+     * structured, where you can't get a JMF player until you start it
+     * on something.
+     * <p>
+     * This method is only available on the Xlet version of this class,
+     * because AWTVideoSizeControl is a JavaTV API.
+     * <p>
+     * In the future, it might be intersting to integrate InterpolatedModel
+     * or some other way of declaratively controlling the display size
+     * with the Playlist API.
+     * Doing that is non-trivial, though, partly because of 
+     * AWTVideoSizeControl.checkSize().
+     * As of this writing, that has not been done, so scripting from Java is
+     * needed to adjust the video size.
+     **/
+    public AWTVideoSizeControl getSizeControl() {
+	return sizeControl;
     }
 
 
