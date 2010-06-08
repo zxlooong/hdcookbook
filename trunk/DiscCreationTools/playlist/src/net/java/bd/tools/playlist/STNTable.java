@@ -79,13 +79,13 @@ public class STNTable {
         
         int length = din.readUnsignedShort();
         din.skipBytes(2);
-        int primaryVideoStreamLength   = din.readByte();
-        int primaryAudioStreamLength   = din.readByte();
-        int pgTextStStreamLength       = din.readByte();
-        int igStreamLength             = din.readByte();
-        int secondaryAudioStreamLength = din.readByte();
-        int secondaryVideoStreamLength = din.readByte();
-        int pipPGTextStStreamLength    = din.readByte();
+        int primaryVideoStreamLength   = din.readUnsignedByte();
+        int primaryAudioStreamLength   = din.readUnsignedByte();
+        int pgTextStStreamLength       = din.readUnsignedByte();
+        int igStreamLength             = din.readUnsignedByte();
+        int secondaryAudioStreamLength = din.readUnsignedByte();
+        int secondaryVideoStreamLength = din.readUnsignedByte();
+        int pipPGTextStStreamLength    = din.readUnsignedByte();
         din.skipBytes(5);
         
         if (primaryVideoStreamLength > 0) {

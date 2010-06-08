@@ -89,7 +89,7 @@ public class Mark {
         byte[] durationBytes  = new byte[4];
 
         din.skipBytes(1);
-        setType((int)din.readByte());
+        setType(din.readUnsignedByte());
         setPlayItemIdRef(din.readUnsignedShort());
         din.readFully(timeStampBytes);
         setMarkTimeStamp(UnsignedIntHelper.convertToLong(timeStampBytes));

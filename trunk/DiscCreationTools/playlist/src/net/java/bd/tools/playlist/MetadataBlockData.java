@@ -88,13 +88,12 @@ public class MetadataBlockData {
     		pipMetadataEntry[i].readObject(din);
     	}
     	setPipMetadataEntry(pipMetadataEntry);
-    	if (this.size > 8 * n) {
-    		int paddingY = (int) ((this.size - (8 * n)) / 2);
-    		for (int i = 0; i < paddingY; i++) {
-    			din.readShort();
-    		}
-    		setPaddingY(paddingY);
+    	// Padding Y
+    	int paddingY = (int) ((this.size - (2 + (8 * n))) / 2);
+    	for (int i = 0; i < paddingY; i++) {
+    		din.readShort();
     	}
+    	setPaddingY(paddingY);
     }
     
     public void writeObject(DataOutputStream dout) throws IOException {

@@ -72,7 +72,7 @@ public class StreamEntry {
     
     public void readObject(DataInputStream din) throws IOException {
         din.skipBytes(1);
-        byte stype = din.readByte();
+        int stype = din.readUnsignedByte();
         Enum[] streamTypes = StreamType.values();  
         for (int i = 0; i < streamTypes.length; i++ ) {
            if (streamTypes[i].ordinal() == stype) {
@@ -85,12 +85,12 @@ public class StreamEntry {
             setRefToStreamPIDOfMainClip(din.readUnsignedShort());
             din.skipBytes(6);
         } else if (type == StreamType.STREAM_FOR_SUBPATH) {
-            setRefToSubPathId(din.readByte());
-            setRefToSubClipEntryId(din.readByte());
+            setRefToSubPathId(din.readUnsignedByte());
+            setRefToSubClipEntryId(din.readUnsignedByte());
             setRefToStreamPIDOfSubClip(din.readUnsignedShort());
             din.skipBytes(4);
         } else if (type == StreamType.STREAM_FOR_IN_MUX_SUBPATH) {
-            setRefToSubPathId(din.readByte());
+            setRefToSubPathId(din.readUnsignedByte());
             setRefToStreamPIDOfMainClip(din.readUnsignedShort());
             din.skipBytes(5);
         } else {

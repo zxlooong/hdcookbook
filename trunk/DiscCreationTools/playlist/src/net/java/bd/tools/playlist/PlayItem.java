@@ -118,7 +118,7 @@ public class PlayItem {
         b = din.readByte();
         setIsMultiAngle((b & 0x10) != 0);
         setConnectionCondition(b & 0x0f);
-        stcId = din.readByte();
+        stcId = din.readUnsignedByte();
         din.readFully(inTimeBytes);
         setInTime(UnsignedIntHelper.convertToLong(inTimeBytes));
         din.readFully(outTimeBytes);
@@ -126,7 +126,7 @@ public class PlayItem {
         uoMaskTable.readObject(din);
         b = din.readByte();
         setPlayItemRandomAccessFlag((b & 0x80) != 0);
-        setStillMode(din.readByte());
+        setStillMode(din.readUnsignedByte());
         if (getStillTime() == 1) {
             setStillTime(din.readUnsignedShort());
         } else {
@@ -136,14 +136,14 @@ public class PlayItem {
         ClipInfo entry = new ClipInfo(0, clipName, codecId, stcId);
         angleList.add(entry);
         if (getIsMultiAngle()) { // more ClipInfo data here
-            int entries = din.readByte();
+            int entries = din.readUnsignedByte();
             b = din.readByte();
             setIsDifferentAudios((b & 0x02) != 0);
             setIsSeamlessAngleChange((b & 0x01) != 0);
             for (int i = 1; i < entries; i++) {
                clipName = StringIOHelper.readISO646String(din, 5);
                codecId = StringIOHelper.readISO646String(din, 4);
-               stcId = din.readByte();
+               stcId = din.readUnsignedByte();
                entry = new ClipInfo(i, clipName, codecId, stcId);
                angleList.add(entry);
             }

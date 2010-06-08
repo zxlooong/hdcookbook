@@ -85,14 +85,14 @@ public class StreamAttribute {
       
     public void readObject(DataInputStream din) throws IOException {
         din.skipBytes(1); // length
-        int t = din.readByte() & 0xff ; // type
+        int t = din.readUnsignedByte();		// type
         setStreamCodingType(t);
         StreamCodingType type = StreamCodingType.getType(t);
         if (type == null) {
             throw new IOException("Error in getting StreamCodingType " + Integer.toHexString(t));
         }
         if (type.isVideoStream()) {
-            int value = din.readByte();
+            int value = din.readUnsignedByte();
             int format = value >> 4;
             Enum[] videoFormats = VideoFormat.values();
             for (int i = 0; i < videoFormats.length; i++) {
@@ -111,7 +111,7 @@ public class StreamAttribute {
             }              
             din.skipBytes(3);
         } else if (type.isAudioStream()) {
-            int value = din.readByte();
+            int value = din.readUnsignedByte();
             int presentationType = value >> 4;
             Enum[] presentationTypes = AudioPresentationType.values();
             for (int i = 0; i < presentationTypes.length; i++) {
@@ -136,7 +136,7 @@ public class StreamAttribute {
             setIGLanguageCode(StringIOHelper.readISO646String(din, 3));   
             din.skipBytes(1);
         } else if (type.isTextSubTitleStream()) {
-            setCharactorCode((int)din.readByte());
+            setCharactorCode(din.readUnsignedByte());
             setTextSTLanguageCode(StringIOHelper.readISO646String(din, 3));   
         } else {
             throw new IOException("Error in reading StreamAttribute, type = " + type);

@@ -127,7 +127,7 @@ public class AppInfoPlayList {
         // 13 bit reserved
         
         din.skipBytes(5);
-        int type = din.readByte();
+        int type = din.readUnsignedByte();
         int count = din.readUnsignedShort();
         Enum[] playbackTypes = PlaybackType.values();  
         for (int i = 0; i < playbackTypes.length; i++ ) {

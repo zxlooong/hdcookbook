@@ -84,12 +84,12 @@ public class SecondaryVideoStreamEntry {
         setStreamEntry(entry);
         setStreamAttribute(attribute);
         
-        int length = din.readByte();
+        int length = din.readUnsignedByte();
         din.skipBytes(1);
         if (length > 0) {
             int[] array = new int[length];
             for (int i = 0; i < length; i++) {
-                array[i] = din.readByte();
+                array[i] = din.readUnsignedByte();
             }
             if ((length % 2) != 0) {
                 din.skipBytes(1); // word_align
@@ -97,12 +97,12 @@ public class SecondaryVideoStreamEntry {
             setSecondaryAudioReferences(array);
         }
         
-        length = din.readByte();
+        length = din.readUnsignedByte();
         din.skipBytes(1);
         if (length > 0) {
             int[] array = new int[length];
             for (int i = 0; i < length; i++) {
-                array[i] = din.readByte();
+                array[i] = din.readUnsignedByte();
             }
             if ((length % 2) != 0) {
                 din.skipBytes(1); // word_align

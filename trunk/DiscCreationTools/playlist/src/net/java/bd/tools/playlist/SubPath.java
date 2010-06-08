@@ -86,7 +86,7 @@ public class SubPath {
         // SubPlayItems[]
         
         din.skipBytes(5);
-        int stype = din.readByte();
+        int stype = din.readUnsignedByte();
         Enum[] subPathTypes = SubPathType.values();  
         for (int i = 0; i < subPathTypes.length; i++ ) {
            if (subPathTypes[i].ordinal() == stype) {
@@ -98,7 +98,7 @@ public class SubPath {
         byte b = din.readByte();
         setIsRepeatSubPath( (b & 0x01) != 0);
         din.skipBytes(1);
-        int length = din.readByte();
+        int length = din.readUnsignedByte();
         SubPlayItem[] items = new SubPlayItem[length];
         for (int i = 0; i < items.length; i++) {
             items[i] = new SubPlayItem(i);
