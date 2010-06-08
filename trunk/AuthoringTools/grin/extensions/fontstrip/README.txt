@@ -85,6 +85,29 @@ is meant to be added to the grin library on a disc together with the
 To find an example of FontStrip extension being used in the show, go to:
 <hdcookbook>/xlets/tests/functional/FontStrip/
 
+An Explanation of the Font Design Image
+=======================================
+There are three rectangles drawn around each font character image 
+in the intermediate design image.
+
+1. The biggest rectangle around the character shows the area that gets scanned 
+by the tool for generating the final image.  The size of this rectangle is 
+specified by the input xml (with a "margin" element in inputData).  
+The graphic designer needs to make sure that any changes that's added to 
+the font image is contained within this outer rectangle.
+
+2. The second rectangle, which is drawn with the same color as the outer 
+rectangle, shows the font's current spacing for the actual positioning.  This 
+rect shows how the image is actually placed in relations to one another.  These corresponds to java.awt.text.TextLayout's ascent, descent and advance.  
+
+3. The inner rectangle, which is drawn with a different color from the above 
+two rect, shows the physical area in which the font's pixel currently occupies.
+  It's for guidance in editing, and the graphics designer is free to ignore it 
+and move the font image away from that rect.  
+
+The two colors that are used to draw the rectangles are replaced with 
+transparency during the generation of the final image.  The colors can be
+configured in the configuration xml file.  
 
 A word about alpha blending
 ===========================
