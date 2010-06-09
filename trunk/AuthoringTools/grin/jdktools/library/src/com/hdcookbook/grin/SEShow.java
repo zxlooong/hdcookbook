@@ -84,6 +84,10 @@ public class SEShow extends Show {
     private SEShowCommands showCommands = new SEShowCommands(this);
     private Command[] namedCommands;   
 
+    // For extra code added to the command class.  This is used by
+    // MediaExtensionParser for a playlist's java_constant.
+    private StringBuffer commandClassCode = new StringBuffer();
+
     // For mosaic building.
     private ArrayList<MosaicSpec> mosaicSpecs = new ArrayList();
     private boolean noShowFile = false;
@@ -556,5 +560,21 @@ public class SEShow extends Show {
 	if (!warnedSet.isEmpty()) {
 	    throw new IOException("Can't scale show, because it contains non-scalable nodes.");
 	}
+    }
+
+    /**
+     * Append a declaration that will be emitted with the command class.
+     * This can be used, for example, to add a public final static int 
+     * constant.
+     **/
+    public void appendCommandClassCode(String s) {
+	commandClassCode.append(s);
+    }
+
+    /**
+     * Get the extra code that goes in the command class
+     **/
+    public String getCommandClassCode() {
+	return commandClassCode.toString();
     }
 }

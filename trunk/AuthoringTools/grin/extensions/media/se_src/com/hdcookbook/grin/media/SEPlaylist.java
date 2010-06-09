@@ -81,7 +81,8 @@ public class SEPlaylist extends Playlist implements SENode {
     public SEPlaylist(Show show, String name, String locator, 
     		      Command[] onActivate, Command[] onMediaStart,
 		      Command[] onMediaEnd, Command[] onDeactivate,
-		      boolean autoStart, boolean autoStop)
+		      boolean autoStart, boolean autoStop,
+		      int[] markTimes, Command[][] onEntryCommands)
     {
 	super(show);
 	this.name = name;
@@ -92,6 +93,8 @@ public class SEPlaylist extends Playlist implements SENode {
 	this.autoStart = autoStart;
 	this.autoStop = autoStop;
 	this.setLocator(locator);
+	this.markTimes = markTimes;
+	this.onEntryCommands = onEntryCommands;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) throws IOException {
@@ -103,6 +106,16 @@ public class SEPlaylist extends Playlist implements SENode {
 	out.writeCommands(onDeactivate);
 	out.writeBoolean(autoStart);
 	out.writeBoolean(autoStop);
+	out.writeSharedIntArray(markTimes);
+	if (onEntryCommands == null) {
+	    out.writeByte(0);
+	} else {
+	    out.writeByte(1);
+	    out.writeInt(onEntryCommands.length);
+	    for (int i = 0; i < onEntryCommands.length; i++) {
+		out.writeCommands(onEntryCommands[i]);
+	    }
+	}
     }
 
     /**

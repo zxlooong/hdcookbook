@@ -292,7 +292,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
     }
 
     /**
-     * Returns the current media time, or -1 if no playlist has
+     * Returns the current media time in ns, or -1 if no playlist has
      * started.
      **/
     public long getMediaTime() {
@@ -303,6 +303,59 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
 	    return p.getMediaTime().getNanoseconds();
 	}
     }
+
+    /**
+     * Returns the current media time in ms, or -1 if no playlist has
+     * started.
+     **/
+    public int getMediaTimeMS() {
+	Player p = thePlayer;
+	if (p == null) {
+	    return -1;
+	} else {
+	    return (int) (p.getMediaTime().getNanoseconds() / 1000000);
+	}
+    }
+
+    /**
+     * Sets the current media time in ns.
+     * This method can only be called after the first playlist is
+     * started, because that's the first time a JMF player is acquired.
+     **/
+    public void setMediaTime(long time) {
+	thePlayer.setMediaTime(new Time(time));
+    }
+
+    /**
+     * Sets the current media time in ns.
+     * This method can only be called after the first playlist is
+     * started, because that's the first time a JMF player is acquired.
+     **/
+    public void setMediaTimeMS(int time) {
+	thePlayer.setMediaTime(new Time(((long) time) * 1000000));
+    }
+
+    /**
+     * Sets the rate of playback, subject to the restrictions of the
+     * BD spec.  This is just a pass-through to the JMF Player.setRate()
+     * method.  
+     * This method can only be called after the first playlist is
+     * started, because that's the first time a JMF player is acquired.
+     **/
+    public void setRate(float rate) {
+	thePlayer.setRate(rate);
+    }
+
+    /**
+     * Gets the rate of playback.  This is just a pass-through to the JMF
+     * Player.getRate method.  
+     * This method can only be called after the first playlist is
+     * started, because that's the first time a JMF player is acquired.
+     **/
+    public float getRate() {
+	return thePlayer.getRate();
+    }
+
 
     /**
      * Returns an AWTVideoSizeControl that can be used to scale the video.

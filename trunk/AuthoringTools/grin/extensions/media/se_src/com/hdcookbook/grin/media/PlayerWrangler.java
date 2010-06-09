@@ -94,6 +94,51 @@ public class PlayerWrangler
     }
 
     /**
+     * Returns the current media time in ms, or -1 if no playlist has
+     * started.
+     **/
+    public int getMediaTimeMS() {
+	return -1;
+    }
+
+    /**
+     * Sets the current media time in ns.
+     * This method can only be called after the first playlist is
+     * started, because that's the first time a JMF player is acquired.
+     **/
+    public void setMediaTime(long time) {
+    }
+
+    /**
+     * Sets the current media time in ns.
+     * This method can only be called after the first playlist is
+     * started, because that's the first time a JMF player is acquired.
+     **/
+    public void setMediaTimeMS(int time) {
+    }
+
+    /**
+     * Sets the rate of playback, subject to the restrictions of the
+     * BD spec.  This is just a pass-through to the JMF Player.setRate()
+     * method.  
+     * This method can only be called after the first playlist is
+     * started, because that's the first time a JMF player is acquired.
+     **/
+    public void setRate(float rate) {
+    }
+
+    /**
+     * Gets the rate of playback.  This is just a pass-through to the JMF
+     * Player.getRate method.  
+     * This method can only be called after the first playlist is
+     * started, because that's the first time a JMF player is acquired.
+     **/
+    public float getRate() {
+	return -1;
+    }
+
+
+    /**
      * Destroy the playback engine.  This must be called on xlet termination.
      * Once destroyed, any attempt at media control fill fail, because
      * PlayerWrangler.getInstance() will return null.

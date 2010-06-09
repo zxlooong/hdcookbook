@@ -775,12 +775,16 @@ public class GrinBinaryWriter {
            return;      // No java generated class
        }
        FileWriter w = new FileWriter(file);
-       String extensionCode = generateExtensionCode();
+       String extensionCode = show.getCommandClassCode()
+       			      + generateExtensionCode();
        w.write(cmds.getJavaSource(forXlet, extensionCode));
        w.close();
    }
    
    private String generateExtensionCode() {     
+
+       // Generate the switch statement used to parse the node type in
+       // a binary file
        
        String[] list = (String[]) runtimeClassNames.toArray(String.class);
        assert (extensionIndex <= list.length);
