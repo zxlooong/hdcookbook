@@ -199,7 +199,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
 	    bakedStrings[i] = bakeString(strings[i]);
 	}
 
-        // We know the charactor size without loading the actual font image,
+        // We know the character size without loading the actual font image,
         // since the size is recorded in the fontstrip info size.
 	int a = (alignment & 0x03);
         int width = 0;
@@ -208,7 +208,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
 		CharImageInfo[] string = bakedStrings[i];
 		int w = 0;
 		for (int j=0; j < string.length; j++) {
-		    CharImageInfo charInfo = string[i];
+		    CharImageInfo charInfo = string[j];
 		    w += charInfo.width + hspace;
 		}
 		if (w > width) {
