@@ -583,6 +583,10 @@ public class ShowBuilder {
 	return result;
     }
 
+    /**
+     * Get the index of the given font spec in the pool of fonts.  If that
+     * font hasn't been seen before, add it to the pool and return the index.
+     **/
     public int getFontIndex(FontSpec spec) {
 	return fonts.getIndex(spec);
     }

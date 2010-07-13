@@ -205,6 +205,18 @@ public class ShowParser {
     }
 
     /**
+     * Get the builder used as a helper to build the show.  This can be useful
+     * for extension parsers, and was added in response to
+     * http://forums.java.net/jive/post!reply.jspa?messageID=477501 .  There,
+     * an extension parser wanted to call getFontIndex(FontSpec) for a rich
+     * text extension feature, so that it could use the pool of fonts in a
+     * .grin file.  
+     **/
+    public ShowBuilder getBuilder() {
+	return builder;
+    }
+
+    /**
      * Adds a forward reference to a show feature.  The forward reference
      * will be resolved after the entire show has been read.  This is
      * useful from an extension parser for looking up other parts of a show, 
