@@ -19,7 +19,9 @@
             <ant dir="soundgen"/>
             <ant dir="soundsplit"/>  
             <ant dir="bumf"/>  
-            <ant dir="logger"/>    
+            <ant dir="logger"/>
+
+            <ant dir="bdview" antfile="hdcookbook-build.xml"/>
         </target>        
         
 	<target name="clean">         
@@ -34,7 +36,9 @@
           <ant dir="bumf" target="clean"/>  
           <ant dir="playlist" target="clean"/>             
           <ant dir="logger" target="clean"/>         
-          <ant dir="xmldata/bumf" target="clean"/>         
+          <ant dir="xmldata/bumf" target="clean"/>
+          
+          <ant dir="bdview" target="bdview-clean" antfile="hdcookbook-build.xml"/>
 	</target>
 
 	<target name="spotless" depends="clean">
