@@ -461,6 +461,34 @@ public class FontStripText extends Feature implements Node, SetupClient {
 	       + vspace;
     }
 
+    /**
+     * Give the width of the string when drawn.  This method can be used
+     * to format text.  If possible, this is better done off-line.
+     * <p>
+     * The actual bounding
+     * box might be a bit larger, if the character's bounding box extends
+     * to the left or to the right of the character starting position plus
+     * its width.
+     **/
+    public int getStringWidth(String string) {
+	int width = 0;
+	int len = string.length();
+	if (len > 0) {
+	    for (int i = 0; i < len; i++) {
+		Character ch = new Character(string.charAt(i));
+		CharImageInfo charInfo 
+		    = (CharImageInfo) fontInfo.charMap.get(ch);
+		if (charInfo != null) {
+		    width += charInfo.width;
+		}
+		width += hspace;
+	    }
+	    width -= hspace;
+	}
+	return width;
+    }
+
+
     /** 
      * Change the text to display.
      * This should only be called with the show lock held, at an

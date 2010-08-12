@@ -239,10 +239,11 @@ public class FontStripImageGenerator {
             FontDescription fontDescription = data.getFontDescription(fileDescription);
 
             if (fontDescription == null) {
+		System.err.println("** ERROR **");
                 System.err.println(
                         "<fontDescription> section in the file \"fontstrip-config.xml\" \n" + "" +
-                        "lacks information about the font \"" + fileDescription.getFontName() + "\".\n" +
-                        "Ignoring the corresponding <fontImageFile> entry.");
+                        "lacks information about the font \"" + fileDescription.getFontName() + "\".\n");
+		System.exit(1);
                 images[i] = null;
                 continue;
             }
