@@ -121,7 +121,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     //	    numPrepares > 0
     //	    image = null
     //	    loaded = false
-    //	    flushing = ?
+    //	    flushing = false
     //
     //  LOADING:
     //	    numPrepares > 0
@@ -136,9 +136,9 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     //	    flushing = false
     //
     //  FLUSHING:
-    //	    numPrepares = ?
-    //	    image = ? 
-    //	    loaded = ? 
+    //	    numPrepares = ? (usually 0)
+    //	    image = ? (usually null, but maybe a different instance of Image)
+    //	    loaded = ? (usually false)
     //	    flushing = true
     //
     // The FLUSHING state is a solution to what should probably be considered
