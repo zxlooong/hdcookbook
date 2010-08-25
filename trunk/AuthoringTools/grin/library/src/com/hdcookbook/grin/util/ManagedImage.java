@@ -275,6 +275,10 @@ abstract public class ManagedImage {
      * <p>
      * See ManagedImage's main class documentation under
      * "ManagedImage contract - image loading and unloading".
+     * <p>
+     * This should never be called with a lock held on this instance of
+     * ManagedImage.  Of course, it's always a Bad Idea to hold a lock
+     * on an external object like that!
      *
      * @see #prepare()
      * @see #load(Component)

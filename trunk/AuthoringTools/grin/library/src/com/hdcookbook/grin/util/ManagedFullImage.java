@@ -81,14 +81,91 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
     private int width = 0;
     private int height = 0;
 	// If there's an error loading, width and height are left at 0
+    private boolean flushing = false;
+
+    /////////////////////////////////
+    //    STATE MODEL              //
+    /////////////////////////////////
+    //
+    // The state model of ManagedFullImage deserves some explanation.
+    // First a word about what it does, and doesn't do.
+    //
+    // The state model of ManagedFullImage has a certain complexity
+    // that largely comes from working with Java's rather complex and
+    // sometimes inconsistently implemented image loading model.
+    // ManagedFullImage deals with that.  What the state model does
+    // _not_ attempt to do is manage a multi-threaded client, where
+    // (for example) prepare(), unprepare() and load() might be called
+    // at the same time as a different thread is calling paint().  Rather,
+    // ManagedFullImage is designed to work with a framework like
+    // com.hdcookbook.grin.animator.AnimationEngine, where paint is only
+    // called when the framework knows the ManagedFullImage is in the
+    // loaded state.  Image loading can be managed asynchronously from 
+    // the animation thread (using startLoading()), or synchronously from 
+    // the setup thread (using load()).  
+    //
+    // The image loading state of a ManagedFullImage is determined by the 
+    // values of the variables numPrepares, image, loaded, and flushing.
+    // Synchronization is done by synchronizing on "this."  Of course, we
+    // trust that no external code synchronizes on our instance!  When the
+    // lock is not held (outside of a synchronized block, or during a wait()),
+    // ManagedFullImage has five valid states, as follows.
+    //
+    //  UNLOADED:
+    //	    numPrepares = 0
+    //	    image = null
+    //	    loaded = false
+    //	    flushing = false
+    //
+    //  READY TO LOAD:
+    //	    numPrepares > 0
+    //	    image = null
+    //	    loaded = false
+    //	    flushing = ?
+    //
+    //  LOADING:
+    //	    numPrepares > 0
+    //	    image != null
+    //	    loaded = false
+    //	    flushing = false
+    //
+    //  LOADED:
+    //	    numPrepares > 0
+    //	    image != null
+    //	    loaded = true
+    //	    flushing = false
+    //
+    //  FLUSHING:
+    //	    numPrepares = ?
+    //	    image = ? 
+    //	    loaded = ? 
+    //	    flushing = true
+    //
+    // The FLUSHING state is a solution to what should probably be considered
+    // a bug in PBP.  Under certain circumstances, a call to Image.flush()
+    // blocks, while a callback _in_ _a_ _different_ _thread_ (presumably
+    // an image fetcher) to imageUpdate() occurs.  Of course, our 
+    // implementation of imageUpdate() needs to take out a lock, so this
+    // means that the ManagedFullImage lock /cannot/ be held while
+    // Image.flush() is called.  This behavior was observed on players
+    // from two major manufacturers, and seems to be triggered by calling
+    // flush() immediately after Component.prepareImage().  This behavior
+    // was not observed on desktop JDK (1.6); in other words, this subtle
+    // bug got fixed :-)
+    //
+    // LOADED includes the case where there was an error loading an image,
+    // e.g. because of a network error, or because the .png or .jpg file
+    // isn't there or is invalid.
 
     ManagedFullImage(String name) {
 	this.name = name;
+	// We are now in the UNLOADED state
     }
 
     ManagedFullImage(String name, URL url) {
 	this.name = name;
 	this.url = url;
+	// We are now in the UNLOADED state
     }
 
     public String getName() {
@@ -105,10 +182,14 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 
     synchronized void addReference() {
 	numReferences++;
+	// This does not change our loading/unloading state
     }
 
     synchronized void removeReference() {
 	numReferences--;
+	// This does not change our loading/unloading state, but
+	// ImageManager notices when the reference count drops to
+	// 0, and calls destroy() when this happens.
     }
 
     synchronized boolean isReferenced() {
@@ -122,6 +203,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 	    // See ManagedImage's main class documentation under
 	    //  "ManagedImage contract - image loading and unloading".
 	numPrepares++;
+	// This might move us from UNLOADED to READY TO LOAD
     }
 
     /**
@@ -149,6 +231,8 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 	synchronized(this) {
 	    while (true) {
 		if (loaded || numPrepares <= 0) {
+			// If we're in the UNLOADED or LOADED state, bail.
+			//
 			// If load is done in a different thread than
 			// unprepare, it's possible for our client to lose
 			// interest in us before we even start preparing.
@@ -159,11 +243,14 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 		    return;
 		}
 		if (image == null) {
+		    // If we're in READY TO LOAD, or possibly FLUSHING
 		    startLoading(comp);	// Sets image to non-null
 		} else {
-		    // Image is being loaded, so we wait.
+		    // We are in the LOADING state, so we wait.
 		    try {
-			wait();	// Until that other thread loads image
+			wait();	
+			// Wait until the image fetcher loads image, or
+			// until we lose interest.
 		    } catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
 			return;
@@ -178,14 +265,30 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
      * {@inheritDoc}
      **/
     public synchronized void startLoading(Component  comp) {
+	while (flushing) {
+	    // If we're FLUSHING, we need to wait until we're not.  When
+	    // we get out of FLUSHING, we could be in any other state, but
+	    // normally we'll be in UNLOADED, or perhaps READY TO LOAD.
+	    try {
+		wait();	
+	    } catch (InterruptedException ex) {
+		Thread.currentThread().interrupt();
+		return;
+	    }
+	}
 	if (image != null || numPrepares <= 0) {
+	    // if we're UNLOADED, LOADING or LOADED
 	    return;
 	}
+	// Now we know we're in READY TO LOAD
 	if (url == null) {
 	    image = AssetFinder.loadImage(name);
 	} else {
 	    image = Toolkit.getDefaultToolkit().createImage(url);
 	}
+	notifyAll();
+	// Now our state is LOADING
+
 	//
 	// The JDK seems to put the image fetching thread priority
 	// really high, which is the opposite of what we want.  By
@@ -216,10 +319,14 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 		    // instance of Image; in this case, the old image in img
 		    // is still something we don't care about, so we flush it
 		    // and tell the system to stop updating us.
-		img.flush();
+		    //
+		    // We used to call flush() here, but that's not necessary.
+		    // The only time the image instance variable is set null,
+		    // we call flush().  "image" is only set non-null when
+		    // it's already null.  Thus, every time we get here,
+		    // img.flush() will have been called.
 		return false;
-	    }
-	    if ((infoflags & (ERROR | ABORT)) != 0) {
+	    } else if ((infoflags & (ERROR | ABORT)) != 0) {
 		// ERROR and ABORT shouldn't really happen, but if it does
 		// the best we can do is accept the fact, and externally
 		// treat the image as though it were loaded.
@@ -241,9 +348,12 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 		return true;
 	    }
 	}
-	// At this point, the image just finished loading completely, and we're
-	// outside of the synchronized block.
+
+	// At this point, the image just finished loading completely, and
+	// we are outside of the synchronized block.  Our thread might
+	// be holding locks, however.
 	AssetFinder.notifyLoaded(this);
+
 	return false;
     }
 
@@ -255,28 +365,54 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 	    //  "ManagedImage contract - image loading and unloading".
 	int w = 0;
 	int h = 0;
+	boolean notify = false;
+	Image flush = null;
 	synchronized(this) {
 	    numPrepares--;
 	    if (numPrepares > 0) {
+	    	// If we're in READY TO LOAD, LOADING, LOADED, or
+		// perhaps FLUSHING
 		return;
 	    } else {
+		// Now we want to be in UNLOADED, but we're going to have
+		// to go through FLUSHING first.
 		if (image != null) {
 		    w = width;
 		    h = height;
 		    width = 0;
 		    height = 0;
-		    image.flush();
+		    flush = image;
+		    flushing = true;
 		    image = null;
 		}
-		if (!loaded) {
-		    return;
-		}
+		notify = loaded;
 		loaded = false;
+		notifyAll();
 	    }
 	}
+	if (flush != null) {
+		// We needed to pull the flush() call outside of the 
+		// synchronized block.  See the discussion about the PBP
+		// bug under the state model at the beginning of this
+		// class.
+	    flush.flush();
+	    synchronized(this) {
+		flushing = false;
+		    // Since we let go of the lock, we might be in some other
+		    // state now.  But we're probably in UNLOADED.
+		notifyAll();
+	    }
+	}
+	//
 	// At this point, we just unloaded a loaded image, and we're safely
-	// outside the synchronized block.
-	AssetFinder.notifyUnloaded(this, w, h);
+	// outside the synchronized block.  This is even true if we started
+	// re-loading it.  Note that our caller might be holding
+	// locks, so the implementation of notifyUnloaded can't take out
+	// non-local locks.
+	//
+	if (notify) {
+	    AssetFinder.notifyUnloaded(this, w, h);
+	}
     }
 
     /**
@@ -313,6 +449,7 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 			    comp);
 	}
     }
+
     void destroy() {
 	if (Debug.LEVEL > 0 && loaded) {
 	    Debug.println("Warning:  Destroying loaded image " + this + ".");
@@ -328,7 +465,11 @@ public class ManagedFullImage extends ManagedImage implements ImageObserver {
 	}
 	Image im = image;
 	if (im != null) {
-	    im.flush();	// Shouldn't be necessary, but doesn't hurt.
+	    im.flush();	
+	    // This should never happen, since the  unprepare() called for
+	    // above will have set image null.  However, a buggy application
+	    // might fail to do this; calling flush() here adds some
+	    // robustness.
 	}
     }
 }

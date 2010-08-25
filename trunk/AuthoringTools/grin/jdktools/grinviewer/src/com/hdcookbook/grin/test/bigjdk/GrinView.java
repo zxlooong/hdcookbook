@@ -600,10 +600,11 @@ public class GrinView extends GenericMain {
         }
 
 	GrinView m;
-    if (grinxlet == null)
-        m = new GrinView();
-    else
-        m = new GrinView(grinxlet);
+	if (grinxlet == null) {
+	    m = new GrinView();
+	} else {
+	    m = new GrinView(grinxlet);
+	}
 	if (director != null) {
 	    m.setDirectorClassName(director);
 	}

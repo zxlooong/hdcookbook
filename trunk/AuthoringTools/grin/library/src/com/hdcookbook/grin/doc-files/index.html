@@ -189,7 +189,7 @@ Here's BNF describing the syntax of a show file:
 
     exports ::= "exports" "segments" name_list
     			"features" name_list
-			"handlers" name_list ";"
+			"handlers" name_list
 			[ "named_commands" name_list ]
 			";"
 	# If this isn't set, then everything is public
@@ -775,7 +775,7 @@ A mosaics file has the following syntax:
     mosaics ::= "mosaics" mosaic* "end_mosaics"
 
     mosaic ::= "mosaic" file_name mosaic_part* ";"
-    	# file_name is the name of tne PNG image that will contain the mosaic.
+    	# file_name is the name of the PNG image that will contain the mosaic.
 	# If the same mosaic_part is repeated, the result is undefined.
 
     mosaic_part ::=   max_width | max_height | max_pixels

@@ -537,7 +537,9 @@ public class AssetFinder  {
     }
 
     /**
-     * Called by ManagedFullImage when an image finishes loading.
+     * Called by ManagedFullImage when an image finishes loading.  
+     * Note that the calling thread might be holdling locks, so the 
+     * implementation of this method should never acquire non-local locks.
      *
      * @see #notifyLoadedHelper(ManagedFullImage)
      * @see #notifyUnloaded(ManagedFullImage, int, int)
@@ -569,6 +571,8 @@ public class AssetFinder  {
      * unloaded (flushed).  This will be called from
      * ManagedImage.unprepare(), which normally happens in the
      * animation thread.
+     * Note that the calling thread might be holdling locks, so the 
+     * implementation of this method should never acquire non-local locks.
      *
      * @see #notifyUnloadedHelper(ManagedFullImage, int, int)
      * @see #notifyLoaded(ManagedFullImage)
@@ -588,6 +592,8 @@ public class AssetFinder  {
      * Called when a ManagedFullImage has been unloaded (flushed).  By 
      * default this does nothing, but it can be overridden, e.g. for resource
      * usage tracking.
+     * Note that the calling thread might be holdling locks, so the 
+     * implementation of this method should never acquire non-local locks.
      *
      * @see #notifyLoaded(ManagedFullImage)
      * @see #notifyLoadedHelper(ManagedFullImage)
