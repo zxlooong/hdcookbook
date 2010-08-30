@@ -152,6 +152,8 @@ public class Group extends Feature implements Node {
 
     /**
      * Get the parts that make up this group in the original scene graph.
+     * A copy of the internal parts array is returned; the caller may not
+     * modify this array.
      **/
     public Feature[] getParts() {
 	return parts;
