@@ -809,7 +809,7 @@ public abstract class AnimationEngine implements Runnable {
 	    clients[i].addDisplayAreas(renderContext);	
 	    	// renderContext contains targets
 	}
-	renderContext.processLastFrameRecords();
+	renderContext.processDrawRecordLists();
 	renderContext.collapseTargets();
 	renderContext.calculateEraseTargets();
 	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {

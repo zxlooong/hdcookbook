@@ -56,6 +56,7 @@
 package com.hdcookbook.grin.animator;
 
 import java.awt.Rectangle;
+import com.hdcookbook.grin.util.Debug;
 
 /**
  * This class represents a record of drawing to a rectangular area.  It
@@ -104,6 +105,13 @@ public class DrawRecord {
 
     // RenderContextBase keeps track of which target we were sent to
     int target;
+
+    // We record the draw sequence as an integer; each DrawRecord in the
+    // render sequence is numbered sequentially.  The first is numbered "1".
+    // "0" represents an area that wasn't drawn in the previous frame.
+    private int drawSequence = 0;
+
+    private static boolean drawSequenceWarningGiven = false;
 
     /**
      * Create a new, empty DrawRecord
@@ -159,9 +167,44 @@ public class DrawRecord {
     // changed and opaque, in order to ready this DrawRecord for the next
     // frame, if it is visible in that next frame.
     //
-    void finishedFrame() {
-	this.changed = false;
-	this.opaque = true;
+    // We also check for changes in thee Z order here.  
+    //
+    // Return the new lastDrawSequence value.  If we are out of order 
+    // (and therefore we erased ourselves), it's the value passed in.
+    // Otherwise, it's our drawSequence value from the last frame.
+    // The returned value is always >= the value passed in.
+    //
+    int finishedFrame(int newDrawSequence, int lastDrawSequence,
+		      Rectangle drawTarget)
+    {
+	if (drawSequence == 0) {
+	    // Do nothing.  This draw area wasn't visible in the last frame,
+	    // so its area has already been added to the damage list.
+	    // The lastDrawSequence in our loop remains unchanged.
+	} else if (drawSequence < lastDrawSequence) {
+	    // We have changed Z order
+	    addToRect(drawTarget, lastX, lastY, lastWidth, lastHeight);
+	    // We return the current value of lastDrawSequence
+
+	    if (Debug.LEVEL >= 2 && !drawSequenceWarningGiven) {
+		Debug.println("");
+		Debug.println("NOTE:  An area of the screen is being re-drawn due to a change in z-order.");
+		Debug.println("       If this is unexpected, then you may get more efficient drawing if you");
+		Debug.println("       re-structure your show to have a consistent ordering of the features.");
+		Debug.println("       See also https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=215 .");
+		Debug.println("       This warning will not repeat.");
+		Debug.println();
+		drawSequenceWarningGiven = true;
+	    }
+	} else {
+	    // drawSequence > lastDrawSequence.  It can't be ==, because
+	    // non-zero values are unique.
+	    lastDrawSequence = drawSequence;
+	}
+	drawSequence = newDrawSequence;
+	changed = false;
+	opaque = true;
+	return lastDrawSequence;
     }
 
     /**
@@ -343,6 +386,7 @@ public class DrawRecord {
 	if (lastWidth > 0 && lastHeight > 0) {
 	    addToRect(drawTarget, lastX, lastY, lastWidth, lastHeight);
 	}
+	drawSequence = 0;
     }
 
     //

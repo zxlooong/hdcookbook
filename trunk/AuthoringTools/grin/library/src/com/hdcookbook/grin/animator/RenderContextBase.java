@@ -220,18 +220,34 @@ class RenderContextBase extends RenderContext {
     }
 
     //
-    // Process any DrawRecord instances that were used in the previous
-    // frame of animation, but that aren't used in this frame.  This is
-    // done after AnimationClient.addDisplayAreas()
+    // Process the two draw record lists, lastFrameList and
+    // thisFrameList.
     //
-    void processLastFrameRecords() {
+    // In lastFrameList, we process
+    // any DrawRecord instances that were used in the previous
+    // frame of animation, but that aren't used in this frame.  The
+    // area of such a draw record needs to be erased.
+    // 
+    // In thisFrameList, we look for changes in z-order between this
+    // frame of animation, and the last frame.  Any DrawRecord
+    // that is in a different order represents an area that might have
+    // to be re-drawn, because it might be involved in an overlay with
+    // something else.  See
+    // https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=215
+    //
+    // This is done after AnimationClient.addDisplayAreas()
+    //
+    void processDrawRecordLists() {
 	//
-	// First, run through the list in reverse order, which gets us
-	// the original order of calls to addArea()
+	// First, run through the list in reverse order, which is
+	// the original order of calls to addArea().  On each node,
+	// we add in the area of what now needs to be erased.
 	//
 	DrawRecord n = lastFrameList.prev;
 	while (n != lastFrameList) {
 	    n.eraseLastFrame(drawTargets[n.target]);
+	    	// This also does bookkeeping on DrawRecord.drawSequence
+		// for us.
 	    DrawRecord tmp = n;
 	    n = n.prev;
 	    tmp.prev = null;
@@ -253,8 +269,12 @@ class RenderContextBase extends RenderContext {
 	thisFrameList = null;
 	n = lastFrameList.next;
 	DrawRecord prev = lastFrameList;
+	int drawSequence = 1;
+	int lastDrawSequence = 0;
 	while (n != null) {
-	    n.finishedFrame();
+	    lastDrawSequence = n.finishedFrame(drawSequence, lastDrawSequence, 
+	    				       drawTargets[n.target]);
+	    drawSequence++;
 	    n.prev = prev;
 	    prev = n;
 	    n = n.next;

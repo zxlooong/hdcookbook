@@ -200,6 +200,10 @@ public class GenericMain extends Frame implements AnimationContext {
 	} catch (InterruptedException ex) {
 	    Thread.currentThread().interrupt();
 	}
+	if (background.getWidth(null) <= 0) {
+	    System.out.println("Error reading background image " + file);
+	    System.exit(1);
+	}
 	engine.setBackground(background);
     }
    

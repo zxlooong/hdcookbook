@@ -46,9 +46,9 @@ information or have any questions.
                 <arg value="-asset_dir"/>
                 <arg value="${MENUASSETS_DEST}"/>
                 <arg value="-asset_dir"/>
-                <arg value="xlets/bookmenu/src/com/hdcookbook/bookmenu/assets"/>
+                <arg value="bookmenu/src/com/hdcookbook/bookmenu/assets"/>
                 <arg value="-background"/>
-                <arg value="xlets/bookmenu/src/com/hdcookbook/bookmenu/menu/test_assets/MenuScreenBG_gray.png"/>
+                <arg value="bookmenu/src/com/hdcookbook/bookmenu/menu/test_assets/MenuScreenBG_gray.png"/>
                 <arg value="-fps"/>
                 <arg value="24"/>
             </grinview.jdktools.java>
