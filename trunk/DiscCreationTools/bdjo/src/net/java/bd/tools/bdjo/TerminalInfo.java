@@ -67,21 +67,33 @@ public class TerminalInfo {
     private String defaultFontFile;
     // initial_HAVi_configuation_id
     private HaviDeviceConfig initialHaviConfig = HaviDeviceConfig.HD_1920_1080;
-    // Table 10.2 - menu_call_mask flag
+    // Table 10.2. - menu_call_mask flag
     private boolean menuCallMask;
-    // Table 10.4 - title_search_mask flag
+    // Table 10.3 - title_search_mask flag
     private boolean titleSearchMask;
+    private boolean mouseSupported;
+    private boolean mouseInterest;
+    private int initialOutputMode;
+    private int initialFrameRate;
     
     public TerminalInfo() {
-        this("*****", HaviDeviceConfig.HD_1920_1080, false, false);
+        this("*****", HaviDeviceConfig.HD_1920_1080, false, false, 
+	     false, false, 0, 0);
     }
     
     public TerminalInfo(String defaultFontFile, HaviDeviceConfig initialHaviConfig,
-            boolean menuCallMask, boolean titleSearchMask) {
+            boolean menuCallMask, boolean titleSearchMask,
+	    boolean mouseSupported, boolean mouseInterest,
+	    int initialOutputMode, int initialFrameRate) 
+    {
         setDefaultFontFile(defaultFontFile);
         setInitialHaviConfig(initialHaviConfig);
         setMenuCallMask(menuCallMask);
         setTitleSearchMask(titleSearchMask);
+	setMouseSupported(mouseSupported);
+	setMouseInterest(mouseInterest);
+	setInitialOutputMode(initialOutputMode);
+	setInitialFrameRate(initialFrameRate);
     }
     
     public String getDefaultFontFile() {
@@ -121,5 +133,37 @@ public class TerminalInfo {
     
     public void setTitleSearchMask(boolean titleSearchMask) {
         this.titleSearchMask = titleSearchMask;
+    }
+
+    public boolean isMouseSupported() {
+	return mouseSupported;
+    }
+
+    public void setMouseSupported(boolean mouseSupported) {
+	this.mouseSupported = mouseSupported;
+    }
+
+    public boolean isMouseInterest() {
+	return mouseInterest;
+    }
+
+    public void setMouseInterest(boolean mouseInterest) {
+	this.mouseInterest = mouseInterest;
+    }
+
+    public int getInitialOutputMode() {
+	return initialOutputMode;
+    }
+
+    public void setInitialOutputMode(int initialOutputMode) {
+	this.initialOutputMode = initialOutputMode;
+    }
+
+    public int getInitialFrameRate() {
+	return initialFrameRate;
+    }
+
+    public void setInitialFrameRate(int initialFrameRate) {
+	this.initialFrameRate = initialFrameRate;
     }
 }

@@ -91,6 +91,10 @@
       <xs:element name="initialHaviConfig" type="haviDeviceConfig" minOccurs="0"/>
       <xs:element name="menuCallMask" type="xs:boolean"/>
       <xs:element name="titleSearchMask" type="xs:boolean"/>
+      <xs:element name="mouseSupported" type="xs:boolean"/>
+      <xs:element name="mouseInterest" type="xs:boolean"/>
+      <xs:element name="initialOutputMode" type="xs:boolean"/>
+      <xs:element name="initialFrameRate" type="xs:boolean"/>
     </xs:all>
   </xs:complexType>
 

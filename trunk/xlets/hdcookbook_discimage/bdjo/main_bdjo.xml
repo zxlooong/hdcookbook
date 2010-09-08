@@ -119,6 +119,8 @@
         <initialHaviConfig>HD_1920_1080</initialHaviConfig>
         <menuCallMask>false</menuCallMask>
         <titleSearchMask>false</titleSearchMask>
+	<mouseInterest>true</mouseInterest>
+	<mouseSupported>true</mouseSupported>
     </terminalInfo>
     <version>V_0200</version>
 </bdjo>

@@ -297,7 +297,11 @@ public final class BDJOWriter {
 	bio.writeBits(dos, 4, config.getId());
 	bio.writeBits(dos, 1, (ti.isMenuCallMask() ? 1 : 0));
 	bio.writeBits(dos, 1, (ti.isTitleSearchMask() ? 1 : 0));
-	bio.writeBitsLong(dos, 34, 0);	// padding
+	bio.writeBits(dos, 1, (ti.isMouseSupported() ? 1 : 0));
+	bio.writeBits(dos, 1, (ti.isMouseInterest() ? 1 : 0));
+	bio.writeBits(dos, 2, ti.getInitialOutputMode());
+	bio.writeBits(dos, 4, ti.getInitialFrameRate());
+	bio.writeBitsLong(dos, 26, 0);	// padding
         
 	bio.assertByteAligned(1);
         dos.flush();

@@ -283,7 +283,13 @@ public final class BDJOReader {
         ti.setMenuCallMask(b);
 	b = readBits("    title search mask", dis, bio, 1) != 0;
         ti.setTitleSearchMask(b);
-	readBitsLong("    padding", dis, bio, 34);
+	b = readBits("    mouse supported", dis, bio, 1) != 0;
+        ti.setMouseSupported(b);
+	b = readBits("    mouse interest", dis, bio, 1) != 0;
+        ti.setMouseInterest(b);
+	ti.setInitialOutputMode(readBits("    initial output mode", dis,bio,2));
+	ti.setInitialFrameRate(readBits("    initial frame rate", dis, bio, 4));
+	readBitsLong("    padding", dis, bio, 26);
         
         return ti;
     }
