@@ -64,7 +64,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 
-import com.hdcookbook.grin.features.Translator;	// For the constant OFFSCREEN
+import com.hdcookbook.grin.features.Translator; // For the constant OFFSCREEN
 import com.hdcookbook.grin.util.Debug;
 
 
@@ -86,17 +86,17 @@ import com.hdcookbook.grin.util.Debug;
 public class Lexer {
 
     private Reader input;
-    private int putbackChar = -1;	// see nextChar, putbackChar
+    private int putbackChar = -1;       // see nextChar, putbackChar
     private int lineNum = 1;
     private StringBuffer strBuf = new StringBuffer(512);
     private String fileName;
     private ShowParser parser;
-    private Lexer child = null;	// For processing $include
+    private Lexer child = null; // For processing $include
 
     public Lexer (Reader input, String fileName, ShowParser parser) {
-	this.input = input;
-	this.fileName = fileName;
-	this.parser = parser;
+        this.input = input;
+        this.fileName = fileName;
+        this.parser = parser;
     }
 
     /**
@@ -106,24 +106,24 @@ public class Lexer {
      * to another feature.
      **/
     public ShowParser getParser() {
-	return parser;
+        return parser;
     }
 
     /**
      * @return the next character, or -1 on EOF
      */
     private int nextChar() throws IOException {
-	int r;
-	if (putbackChar != -1) {
-	    r = putbackChar;
-	    putbackChar = -1;
-	} else {
-	    r = input.read();
-	    if (r == ((int) '\n')) {
-		lineNum++;
-	    }
-	}
-	return r;
+        int r;
+        if (putbackChar != -1) {
+            r = putbackChar;
+            putbackChar = -1;
+        } else {
+            r = input.read();
+            if (r == ((int) '\n')) {
+                lineNum++;
+            }
+        }
+        return r;
     }
 
     /**
@@ -131,24 +131,24 @@ public class Lexer {
      * It's OK to put EOF (-1) back.
      */
     private void putback(int ch) {
-	if (putbackChar != -1) {
-	    throw new RuntimeException("Lexer: Attempt to putback two characters");
-	}
-	putbackChar = ch;
+        if (putbackChar != -1) {
+            throw new RuntimeException("Lexer: Attempt to putback two characters");
+        }
+        putbackChar = ch;
     }
 
     /**
      * Report a nice error message with the current line number.
      **/
     public void reportError(String msg) throws IOException {
-	throw new IOException(msg + " on line " + lineNum + " of " + fileName);
+        throw new IOException(msg + " on line " + lineNum + " of " + fileName);
     }
 
     /**
      * Give a warning with the current line number
      **/
     public void reportWarning(String msg) {
-	System.err.println(msg + " on line " + lineNum);
+        System.err.println(msg + " on line " + lineNum);
     }
 
     /**
@@ -157,7 +157,7 @@ public class Lexer {
      * include directive.
      **/
     public int getLineNumber() {
-	return lineNum;
+        return lineNum;
     }
 
     /**
@@ -165,7 +165,7 @@ public class Lexer {
      * being included, this won't be that file name.
      **/
     public String getFileName() {
-	return fileName;
+        return fileName;
     }
 
     /**
@@ -173,20 +173,20 @@ public class Lexer {
      * might be an included file.
      **/
     int getRealLineNumber() {
-	if (child == null) {
-	    return lineNum;
-	} else {
-	    return child.getRealLineNumber();
-	}
+        if (child == null) {
+            return lineNum;
+        } else {
+            return child.getRealLineNumber();
+        }
     }
 
 
     String getRealFileName() {
-	if (child == null) {
-	    return fileName;
-	} else {
-	    return child.getRealFileName();
-	}
+        if (child == null) {
+            return fileName;
+        } else {
+            return child.getRealFileName();
+        }
     }
 
     /**
@@ -195,118 +195,118 @@ public class Lexer {
      * than the last line in the show file.
      **/
     void setLineNumberAndName(int num, String name) {
-	this.lineNum = num;
-	this.fileName = name;
+        this.lineNum = num;
+        this.fileName = name;
     }
 
     //
     // Skips whitespace.  Comments are considered to be
     // whitespace.
     private void skipWhitespace() throws IOException {
-	for (;;) {
-	    int ch = nextChar();
-	    if (ch == -1 || !Character.isWhitespace((char) ch)) {
-		if (ch == '#') {
-		    skipPastEOL();
-		} else {
-		    putback(ch);
-		    return;
-		}
-	    }
-	}
+        for (;;) {
+            int ch = nextChar();
+            if (ch == -1 || !Character.isWhitespace((char) ch)) {
+                if (ch == '#') {
+                    skipPastEOL();
+                } else {
+                    putback(ch);
+                    return;
+                }
+            }
+        }
     }
 
     private void skipPastEOL() throws IOException {
-	for (;;) {
-	    int ch = nextChar();
-	    if (ch == -1 || ch == '\n') {
-		return;
-	    }
-	}
+        for (;;) {
+            int ch = nextChar();
+            if (ch == -1 || ch == '\n') {
+                return;
+            }
+        }
     }
 
     private String strBufAsString() {
-	int len = strBuf.length();
-	char[] buf = new char[len];
-	strBuf.getChars(0, len, buf, 0);
-	return new String(buf);
+        int len = strBuf.length();
+        char[] buf = new char[len];
+        strBuf.getChars(0, len, buf, 0);
+        return new String(buf);
     }
 
     /**
      * @return an int.  It's an error to see EOF.
      */
     public int getInt() throws IOException {
-	return convertToInt(getString());
+        return convertToInt(getString());
     }
 
     /**
      * @return a double.  It's an error to see EOF.
      */
     public double getDouble() throws IOException {
-	return convertToDouble(getString());
+        return convertToDouble(getString());
     }
 
     /**
      * @return an int.  Integer.MAX_VALUE for "infinite".
      */
     public int getIntOrInfinite() throws IOException {
-	String tok = getString();
-	if ("infinite".equals(tok)) {
-	    return Integer.MAX_VALUE;
-	} else {
-	    return convertToInt(tok);
-	}
+        String tok = getString();
+        if ("infinite".equals(tok)) {
+            return Integer.MAX_VALUE;
+        } else {
+            return convertToInt(tok);
+        }
     }
     
     /**
      * @return an int.  Translator.OFFSCREEN for "offscreen".
      */
     public int getIntOrOffscreen() throws IOException {
-	String tok = getString();
-	if ("offscreen".equals(tok)) {
-	    return Translator.OFFSCREEN;
-	} else {
-	    return convertToInt(tok);
-	}
+        String tok = getString();
+        if ("offscreen".equals(tok)) {
+            return Translator.OFFSCREEN;
+        } else {
+            return convertToInt(tok);
+        }
     }
 
     public int convertToInt(String tok) throws IOException {
-	if (tok == null) {
-	    reportError("int expected, EOF seen");
-	}
-	try {
-	    return Integer.decode(tok).intValue();
-	} catch (NumberFormatException ex) {
-	    reportError(ex.toString());
-	    return -1;	// not reached
-	}
+        if (tok == null) {
+            reportError("int expected, EOF seen");
+        }
+        try {
+            return Integer.decode(tok).intValue();
+        } catch (NumberFormatException ex) {
+            reportError(ex.toString());
+            return -1;  // not reached
+        }
     }
 
     public double convertToDouble(String tok) throws IOException {
-	if (tok == null) {
-	    reportError("double expected, EOF seen");
-	}
-	try {
-	    return Double.parseDouble(tok);
-	} catch (NumberFormatException ex) {
-	    reportError(ex.toString());
-	    return -1;	// not reached
-	}
+        if (tok == null) {
+            reportError("double expected, EOF seen");
+        }
+        try {
+            return Double.parseDouble(tok);
+        } catch (NumberFormatException ex) {
+            reportError(ex.toString());
+            return -1;  // not reached
+        }
     }
 
     /**
      * @return a boolean.  It's an error to see EOF.
      */
     public boolean getBoolean() throws IOException {
-	String tok = getString();
-	if ("true".equals(tok)) {
-	    return true;
-	} else if ("false".equals(tok)) {
-	    return false;
-	} else {
-	    reportError("boolean expected, \"" + tok + "\" seen");
-	    return false;	// not reached
-	}
+        String tok = getString();
+        if ("true".equals(tok)) {
+            return true;
+        } else if ("false".equals(tok)) {
+            return false;
+        } else {
+            reportError("boolean expected, \"" + tok + "\" seen");
+            return false;       // not reached
+        }
     }
 
     /**
@@ -315,47 +315,47 @@ public class Lexer {
      * @throws IOException on any unexpected characters
      */
     public String getString() throws IOException {
-	// All reading from the input stream goes through this method or
-	// getStringExact()
-	if (child != null) {
-	    String result = child.getString();
-	    if (result != null) {
-		return result;
-	    }
-	    closeInclude();
-	}
-	skipWhitespace();
-	strBuf.setLength(0);
-	int ch = nextChar();
-	if (ch == -1) {
-	    return null;
-	}
-	if (ch == '"') {
-	    return getQuotedString();
-	}
-	String result;
-	for (;;) {
-	    if (ch != -1 && !Character.isWhitespace((char) ch)) {
-		strBuf.append((char) ch);
-	    } else if (strBuf.length() == 0) {
-		reportError("Word expected");
-		return null;
-	    } else {
-		putback(ch);
-		result = strBufAsString();
-		break;
-	    }
-	    ch = nextChar();
-	}
-	if (checkInclude(result)) {
-	    return getString();
-	}
-	if (Debug.LEVEL >= 1 && result.length() > 1 && result.endsWith(";")) {
-	    Debug.println();
-	    Debug.println("==> Warning:  token \"" + result 
-	    		  + "\" ends with ';' on line " + lineNum);
-	}
-	return result;
+        // All reading from the input stream goes through this method or
+        // getStringExact()
+        if (child != null) {
+            String result = child.getString();
+            if (result != null) {
+                return result;
+            }
+            closeInclude();
+        }
+        skipWhitespace();
+        strBuf.setLength(0);
+        int ch = nextChar();
+        if (ch == -1) {
+            return null;
+        }
+        if (ch == '"') {
+            return getQuotedString();
+        }
+        String result;
+        for (;;) {
+            if (ch != -1 && !Character.isWhitespace((char) ch)) {
+                strBuf.append((char) ch);
+            } else if (strBuf.length() == 0) {
+                reportError("Word expected");
+                return null;
+            } else {
+                putback(ch);
+                result = strBufAsString();
+                break;
+            }
+            ch = nextChar();
+        }
+        if (checkInclude(result)) {
+            return getString();
+        }
+        if (Debug.LEVEL >= 1 && result.length() > 1 && result.endsWith(";")) {
+            Debug.println();
+            Debug.println("==> Warning:  token \"" + result 
+                          + "\" ends with ';' on line " + lineNum);
+        }
+        return result;
     }
 
     //
@@ -363,32 +363,32 @@ public class Lexer {
     // a child lexer will be created, and true will be returned.
     //
     private boolean checkInclude(String tok) throws IOException {
-	if (!("$include".equals(tok))) {
-	    return false;
-	}
-	String fileName = getString();
-	//
-	// We expect a ; here, but we hold of parsing it until we close the
-	// include file.  That way, the line number in GrinView points to the
-	// include directive, rather than the line after it.
-	//
-	URL source = AssetFinder.getURL(fileName);
-	if (source == null) {
-	    reportError("Can't find included show file " + fileName);
-	}
-	BufferedReader rdr = new BufferedReader(
-		new InputStreamReader(source.openStream(), "UTF-8"));
-	child = new Lexer(rdr, fileName, parser);
-	return true;
+        if (!("$include".equals(tok))) {
+            return false;
+        }
+        String fileName = getString();
+        //
+        // We expect a ; here, but we hold of parsing it until we close the
+        // include file.  That way, the line number in GrinView points to the
+        // include directive, rather than the line after it.
+        //
+        URL source = AssetFinder.getURL(fileName);
+        if (source == null) {
+            reportError("Can't find included show file " + fileName);
+        }
+        BufferedReader rdr = new BufferedReader(
+                new InputStreamReader(source.openStream(), "UTF-8"));
+        child = new Lexer(rdr, fileName, parser);
+        return true;
     }
 
     //
     // Close the include file, and parse the final semicolon
     //
     private void closeInclude() throws IOException {
-	child.input.close();
-	child = null;
-	parseExpected(";");
+        child.input.close();
+        child = null;
+        parseExpected(";");
     }
     
     /**
@@ -402,15 +402,15 @@ public class Lexer {
      * @return next word or next section of whitespace, or null on eof
      */
     public String getStringExact() throws IOException {
-	// All reading from the input stream goes through this method or
-	// getStringExact()
-	if (child != null) {
-	    String result = child.getStringExact();
-	    if (result != null) {
-		return result;
-	    }
-	    closeInclude();
-	}
+        // All reading from the input stream goes through this method or
+        // getStringExact()
+        if (child != null) {
+            String result = child.getStringExact();
+            if (result != null) {
+                return result;
+            }
+            closeInclude();
+        }
         strBuf.setLength(0);
         int ch = nextChar();
         if (ch == -1) {
@@ -432,10 +432,10 @@ public class Lexer {
                 if (ch == -1 || Character.isWhitespace((char) ch)) {
                     putback(ch);
                     String result = strBufAsString();
-		    if (checkInclude(result)) {
-			return getStringExact();
-		    } 
-		    return result;
+                    if (checkInclude(result)) {
+                        return getStringExact();
+                    } 
+                    return result;
                 }
                 strBuf.append((char) ch);
             }
@@ -449,8 +449,8 @@ public class Lexer {
      * end of various constructs.
      **/
     public void parseExpected(String expected) throws IOException {
-	String tok = getString();
-	expectString(expected, tok);
+        String tok = getString();
+        expectString(expected, tok);
     }
 
     /**
@@ -460,29 +460,29 @@ public class Lexer {
      * end of various constructs.
      **/
     public void expectString(String expected, String tok) throws IOException {
-	if (!(expected.equals(tok))) {
-	   reportError("\"" + expected + "\" expected, \"" + tok 
-	   		     + "\" seen");
-	}
+        if (!(expected.equals(tok))) {
+           reportError("\"" + expected + "\" expected, \"" + tok 
+                             + "\" seen");
+        }
     }
     //
     //  Called from getString
     //
     private String getQuotedString() throws IOException {
-	int startLine = lineNum;
-	for (;;) {
-	    int ch = nextChar();
-	    if (ch == '"') {
-		return strBufAsString();
-	    }
-	    if (ch == '\\') {
-		ch = nextChar();
-	    }
-	    if (ch == -1) {
-		reportError("Matching close-quote never seen for string " 
-			    + "starting at line " + startLine + "...  ");
-	    }
-	    strBuf.append((char) ch);
-	}
+        int startLine = lineNum;
+        for (;;) {
+            int ch = nextChar();
+            if (ch == '"') {
+                return strBufAsString();
+            }
+            if (ch == '\\') {
+                ch = nextChar();
+            }
+            if (ch == -1) {
+                reportError("Matching close-quote never seen for string " 
+                            + "starting at line " + startLine + "...  ");
+            }
+            strBuf.append((char) ch);
+        }
     }
 }

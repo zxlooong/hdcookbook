@@ -75,7 +75,7 @@ public class PlayerWrangler
     }
 
     public static PlayerWrangler getInstance() {
-	return theWrangler;
+        return theWrangler;
     }
 
     /**
@@ -90,7 +90,7 @@ public class PlayerWrangler
      * started.
      **/
     public long getMediaTime() {
-	return -1;
+        return -1;
     }
 
     /**
@@ -98,7 +98,7 @@ public class PlayerWrangler
      * started.
      **/
     public int getMediaTimeMS() {
-	return -1;
+        return -1;
     }
 
     /**
@@ -134,7 +134,7 @@ public class PlayerWrangler
      * started, because that's the first time a JMF player is acquired.
      **/
     public float getRate() {
-	return -1;
+        return -1;
     }
 
 
@@ -144,6 +144,6 @@ public class PlayerWrangler
      * PlayerWrangler.getInstance() will return null.
      **/
     public void destroy() {
-	theWrangler = null;
+        theWrangler = null;
     }
 }

@@ -70,20 +70,20 @@ import java.io.IOException;
 public class SEText extends Text implements SENode, SEScalableNode {
 
     public SEText(SEShow show, String name, int x, int y, int alignment,
-    		String[] strings, int vspace, int fontIndex, Color[] colors, 
-		int loopCount, Color background) 
+                String[] strings, int vspace, int fontIndex, Color[] colors, 
+                int loopCount, Color background) 
     {
-	super(show);
+        super(show);
         this.name = name;
-	this.xArg = x;
-	this.yArg = y;
-	this.alignment = alignment;
-	this.strings = strings;
+        this.xArg = x;
+        this.yArg = y;
+        this.alignment = alignment;
+        this.strings = strings;
         this.vspace = vspace;
-	this.fontIndex = fontIndex;
-	this.colors = colors;
-	this.loopCount = loopCount;
-	this.background = background;
+        this.fontIndex = fontIndex;
+        this.colors = colors;
+        this.loopCount = loopCount;
+        this.background = background;
     }
     
     public SEText(SEShow show) {
@@ -147,11 +147,11 @@ public class SEText extends Text implements SENode, SEScalableNode {
     }
 
     public int getAlignment() {
-	return alignment;
+        return alignment;
     }
 
     public int getLoopCount() {
-	return loopCount;
+        return loopCount;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) 
@@ -196,19 +196,19 @@ public class SEText extends Text implements SENode, SEScalableNode {
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	xArg = xOffset + Show.scale(xArg, xScale);
-	yArg = yOffset + Show.scale(yArg, yScale);
-	vspace = Show.scale(vspace, yScale);
+        xArg = xOffset + Show.scale(xArg, xScale);
+        yArg = yOffset + Show.scale(yArg, yScale);
+        vspace = Show.scale(vspace, yScale);
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "text @" + Integer.toHexString(hashCode());
-	} else {
-	    return "text " + name;
-	}
+        if (name == null) {
+            return "text @" + Integer.toHexString(hashCode());
+        } else {
+            return "text " + name;
+        }
     }
 }

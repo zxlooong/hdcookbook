@@ -6,7 +6,7 @@ show
 
 segment S:Initialize  
    setup  {
-	F:Everything
+        F:Everything
    } setup_done {
       # triggerred when F:Everything is done loading
       activate_segment S:1 ;  
@@ -18,7 +18,7 @@ segment S:1
         F:example.relative
         F:example.absolute
    } setup  {
-	F:Everything
+        F:Everything
    } 
 ; 
 
@@ -29,7 +29,7 @@ segment S:1
 # of every segment, I can assure that all of the features stay loaded 
 # and ready to be activated at any moment.
 feature group F:Everything {
-	F:bug.image1
+        F:bug.image1
         F:bug.image2
         F:bug.image3
         F:bug.image4
@@ -39,27 +39,27 @@ feature group F:Everything {
         F:bug.coords.absolute
         F:bug.mover.relative
         F:bug.mover.absolute
-	F:background.relative
+        F:background.relative
         F:background.absolute
 } ;
 
 # White background strip behind the bug.
 feature box F:background.relative ( 200 600 1650 950 ) 
-	fill { 255 255 255 255 }
+        fill { 255 255 255 255 }
 ;
 # White background strip behind the bug.
 feature box F:background.absolute ( 200 200 1650 550 ) 
-	fill { 255 255 255 255 }
+        fill { 255 255 255 255 }
 ;
 
 feature fixed_image F:bug.image1 1150 600
-	"bug.png" ;
+        "bug.png" ;
 
 feature fixed_image F:bug.image2 1300 750
         "bug.png" ;
 
 feature fixed_image F:bug.image3 1150 600
-	"bug.png" ;
+        "bug.png" ;
 
 feature fixed_image F:bug.image4 1300 750
         "bug.png" ;
@@ -67,17 +67,17 @@ feature fixed_image F:bug.image4 1300 750
 
 
 feature translation F:bug.coords.relative {
-	 0	  200 600	linear
-	120	  1150 600      linear
-#	 0	  -950 0	linear-relative
-#	120	  0  0	linear-relative
+         0        200 600       linear
+        120       1150 600      linear
+#        0        -950 0        linear-relative
+#       120       0  0  linear-relative
     }
     repeat 10
 ;
 
 feature translation F:bug.coords.absolute {
-	 0	  200 200	linear
-	120	  1150 200      linear
+         0        200 200       linear
+        120       1150 200      linear
     }
     repeat 10
 ;

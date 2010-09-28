@@ -85,55 +85,55 @@ public class MessageKey {
     }
     
     public void set(byte[] data, int start, int length) {
-	this.data = data;
-	this.start = start;
-	this.length = length;
-	hash = length;
-	int lim = start + length;
-	for (int i = start; i < lim; i++) {
-	    hash = 31 * hash + (int) data[i];
-	}
+        this.data = data;
+        this.start = start;
+        this.length = length;
+        hash = length;
+        int lim = start + length;
+        for (int i = start; i < lim; i++) {
+            hash = 31 * hash + (int) data[i];
+        }
     }
 
     public MessageKey makeCopy() {
-	MessageKey k = new MessageKey();
-	k.data = new byte[length];
-	for (int i = 0; i < length; i++) {
-	    k.data[i] = data[start + i];
-	}
-	k.start = 0;
-	k.length = length;
-	k.hash = hash;
-	return k;
+        MessageKey k = new MessageKey();
+        k.data = new byte[length];
+        for (int i = 0; i < length; i++) {
+            k.data[i] = data[start + i];
+        }
+        k.start = 0;
+        k.length = length;
+        k.hash = hash;
+        return k;
     }
 
     public int hashCode() {
-	return hash;
+        return hash;
     }
 
     public boolean equals(Object other) {
-	if (!(other instanceof MessageKey)) {
-	    return false;
-	}
-	MessageKey mk = (MessageKey) other;
-	if (this.length != mk.length) {
-	    return false;
-	}
-	for (int i = 0; i < length; i++) {
-	    if (this.data[this.start + i] != mk.data[mk.start + i]) {
-		return false;
-	    }
-	}
-	return true;
+        if (!(other instanceof MessageKey)) {
+            return false;
+        }
+        MessageKey mk = (MessageKey) other;
+        if (this.length != mk.length) {
+            return false;
+        }
+        for (int i = 0; i < length; i++) {
+            if (this.data[this.start + i] != mk.data[mk.start + i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
      * Gives the string represented by this MessageKey
      **/
     public synchronized String toString() {
-	if (stringRep == null) {
-	    stringRep = new String(data, start, length, UTF_8);
-	}
-	return stringRep;
+        if (stringRep == null) {
+            stringRep = new String(data, start, length, UTF_8);
+        }
+        return stringRep;
     }
 }

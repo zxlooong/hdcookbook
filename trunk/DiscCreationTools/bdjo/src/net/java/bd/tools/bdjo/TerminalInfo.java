@@ -78,22 +78,22 @@ public class TerminalInfo {
     
     public TerminalInfo() {
         this("*****", HaviDeviceConfig.HD_1920_1080, false, false, 
-	     false, false, 0, 0);
+             false, false, 0, 0);
     }
     
     public TerminalInfo(String defaultFontFile, HaviDeviceConfig initialHaviConfig,
             boolean menuCallMask, boolean titleSearchMask,
-	    boolean mouseSupported, boolean mouseInterest,
-	    int initialOutputMode, int initialFrameRate) 
+            boolean mouseSupported, boolean mouseInterest,
+            int initialOutputMode, int initialFrameRate) 
     {
         setDefaultFontFile(defaultFontFile);
         setInitialHaviConfig(initialHaviConfig);
         setMenuCallMask(menuCallMask);
         setTitleSearchMask(titleSearchMask);
-	setMouseSupported(mouseSupported);
-	setMouseInterest(mouseInterest);
-	setInitialOutputMode(initialOutputMode);
-	setInitialFrameRate(initialFrameRate);
+        setMouseSupported(mouseSupported);
+        setMouseInterest(mouseInterest);
+        setInitialOutputMode(initialOutputMode);
+        setInitialFrameRate(initialFrameRate);
     }
     
     public String getDefaultFontFile() {
@@ -136,34 +136,34 @@ public class TerminalInfo {
     }
 
     public boolean isMouseSupported() {
-	return mouseSupported;
+        return mouseSupported;
     }
 
     public void setMouseSupported(boolean mouseSupported) {
-	this.mouseSupported = mouseSupported;
+        this.mouseSupported = mouseSupported;
     }
 
     public boolean isMouseInterest() {
-	return mouseInterest;
+        return mouseInterest;
     }
 
     public void setMouseInterest(boolean mouseInterest) {
-	this.mouseInterest = mouseInterest;
+        this.mouseInterest = mouseInterest;
     }
 
     public int getInitialOutputMode() {
-	return initialOutputMode;
+        return initialOutputMode;
     }
 
     public void setInitialOutputMode(int initialOutputMode) {
-	this.initialOutputMode = initialOutputMode;
+        this.initialOutputMode = initialOutputMode;
     }
 
     public int getInitialFrameRate() {
-	return initialFrameRate;
+        return initialFrameRate;
     }
 
     public void setInitialFrameRate(int initialFrameRate) {
-	this.initialFrameRate = initialFrameRate;
+        this.initialFrameRate = initialFrameRate;
     }
 }

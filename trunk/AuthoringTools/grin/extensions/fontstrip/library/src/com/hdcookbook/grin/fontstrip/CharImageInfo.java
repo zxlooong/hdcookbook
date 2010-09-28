@@ -64,7 +64,7 @@ public class CharImageInfo {
     Rectangle charRect;  // char's location in the fontstrip image mosaic
     int ascent;          // distance from top of charRect to baseline
     int xOffset;         // distance from drawing position to start of charRect
-    			 // Can be negative - think of a cursive, italic f
-			 // that goes below the baseline and to the left.
+                         // Can be negative - think of a cursive, italic f
+                         // that goes below the baseline and to the left.
     int width;
 }

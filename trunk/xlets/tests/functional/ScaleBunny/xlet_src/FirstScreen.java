@@ -82,7 +82,7 @@ public class FirstScreen extends Component implements UserEventListener {
     private ScaleXlet xlet;
 
     public FirstScreen(ScaleXlet xlet) {
-	this.xlet = xlet;
+        this.xlet = xlet;
     }
 
     /**
@@ -90,40 +90,40 @@ public class FirstScreen extends Component implements UserEventListener {
      * org.dvb.event.UserEventListener
      **/
     public void userEventReceived(UserEvent e) {
-	if (e.getType() != HRcEvent.KEY_PRESSED) {
-	    return;
-	}
-	int code = e.getCode();
-	if (code == KeyEvent.VK_1) {
-	    xlet.launchRealXlet(ScaleXlet.FULL_HD, false);
-	} else if (code == KeyEvent.VK_2) {
-	    xlet.launchRealXlet(ScaleXlet.HD_720, false);
-	} else if (code == KeyEvent.VK_3) {
-	    xlet.launchRealXlet(ScaleXlet.QHD, false);
-	} else if (code == KeyEvent.VK_4) {
-	    xlet.launchRealXlet(ScaleXlet.NTSC_SD, false);
-	} else if (code == KeyEvent.VK_5) {
-	    xlet.launchRealXlet(ScaleXlet.HD_720, true);
-	} else if (code == KeyEvent.VK_6) {
-	    xlet.launchRealXlet(ScaleXlet.QHD, true);
-	} else if (code == KeyEvent.VK_7) {
-	    xlet.launchRealXlet(ScaleXlet.NTSC_SD, true);
-	}
+        if (e.getType() != HRcEvent.KEY_PRESSED) {
+            return;
+        }
+        int code = e.getCode();
+        if (code == KeyEvent.VK_1) {
+            xlet.launchRealXlet(ScaleXlet.FULL_HD, false);
+        } else if (code == KeyEvent.VK_2) {
+            xlet.launchRealXlet(ScaleXlet.HD_720, false);
+        } else if (code == KeyEvent.VK_3) {
+            xlet.launchRealXlet(ScaleXlet.QHD, false);
+        } else if (code == KeyEvent.VK_4) {
+            xlet.launchRealXlet(ScaleXlet.NTSC_SD, false);
+        } else if (code == KeyEvent.VK_5) {
+            xlet.launchRealXlet(ScaleXlet.HD_720, true);
+        } else if (code == KeyEvent.VK_6) {
+            xlet.launchRealXlet(ScaleXlet.QHD, true);
+        } else if (code == KeyEvent.VK_7) {
+            xlet.launchRealXlet(ScaleXlet.NTSC_SD, true);
+        }
     }
 
     public void paint(Graphics g) {
-	g.setColor(Color.white);
-	g.fillRect(0, 0, 1920, 1080);
-	g.setColor(Color.blue);
-	g.setFont(new Font("Lisa", Font.PLAIN, 48));
-	g.drawString("Select HGraphicsConfiguration", 300, 300);
-	g.drawString("1 - Full HD (1920x1080)", 350, 400);
-	g.drawString("2 - 720 HD (1080x720)", 350, 460);
-	g.drawString("3 - QHD (960x540)", 350, 520);
-	g.drawString("4 - NTSC SD (720x480)", 350, 580);
-	g.drawString("5 - Full HD with 720 HD show", 350, 660);
-	g.drawString("6 - Full HD with QHD show", 350, 720);
-	g.drawString("7 - Full HD with NTSC SD show", 350, 780);
+        g.setColor(Color.white);
+        g.fillRect(0, 0, 1920, 1080);
+        g.setColor(Color.blue);
+        g.setFont(new Font("Lisa", Font.PLAIN, 48));
+        g.drawString("Select HGraphicsConfiguration", 300, 300);
+        g.drawString("1 - Full HD (1920x1080)", 350, 400);
+        g.drawString("2 - 720 HD (1080x720)", 350, 460);
+        g.drawString("3 - QHD (960x540)", 350, 520);
+        g.drawString("4 - NTSC SD (720x480)", 350, 580);
+        g.drawString("5 - Full HD with 720 HD show", 350, 660);
+        g.drawString("6 - Full HD with QHD show", 350, 720);
+        g.drawString("7 - Full HD with NTSC SD show", 350, 780);
     }
 
 }

@@ -111,8 +111,8 @@ public class GrinTestRyan extends Frame {
     }
     
     private void init() {
-	director = new MainRyanDirector();
-	show = director.createShow();
+        director = new MainRyanDirector();
+        show = director.createShow();
         show.initialize(this);
 
         int sbHeight = 0;
@@ -141,16 +141,16 @@ public class GrinTestRyan extends Frame {
                 // ignored
             }
             public void keyPressed(java.awt.event.KeyEvent e) {
-	    	int code = e.getKeyCode();
-		// Translate F1..F4 into red/green/yellow/blue
-		if (code >= e.VK_F1 && code <= e.VK_F4) {
-		    code = code - e.VK_F1 + RCKeyEvent.KEY_RED.getKeyCode();
-		} else if (code >= e.VK_NUMPAD0 && code <= e.VK_NUMPAD9) {
-		    code = code - e.VK_NUMPAD0 + RCKeyEvent.KEY_0.getKeyCode();
-		} else if (code == e.VK_F5) {
-		    code = RCKeyEvent.KEY_POPUP_MENU.getKeyCode();
-		}
-		show.handleKeyPressed(code);
+                int code = e.getKeyCode();
+                // Translate F1..F4 into red/green/yellow/blue
+                if (code >= e.VK_F1 && code <= e.VK_F4) {
+                    code = code - e.VK_F1 + RCKeyEvent.KEY_RED.getKeyCode();
+                } else if (code >= e.VK_NUMPAD0 && code <= e.VK_NUMPAD9) {
+                    code = code - e.VK_NUMPAD0 + RCKeyEvent.KEY_0.getKeyCode();
+                } else if (code == e.VK_F5) {
+                    code = RCKeyEvent.KEY_POPUP_MENU.getKeyCode();
+                }
+                show.handleKeyPressed(code);
             }
             public void keyTyped(java.awt.event.KeyEvent e) {
             }
@@ -168,7 +168,7 @@ public class GrinTestRyan extends Frame {
             }
         };
         addMouseMotionListener(mouseM);
-	System.out.println("F1..F4 will generate red/green/yellow/blue, F5 popup_menu");
+        System.out.println("F1..F4 will generate red/green/yellow/blue, F5 popup_menu");
         if (scrollbar != null) {
             scrollbar.addKeyListener(listener);
         }
@@ -176,71 +176,71 @@ public class GrinTestRyan extends Frame {
     }
 
     private void run() throws InterruptedException {
-	Segment sInitialize = show.getSegment("initialize");
-	Segment sStartShow = show.getSegment("start_show");
+        Segment sInitialize = show.getSegment("initialize");
+        Segment sStartShow = show.getSegment("start_show");
 
-	show.activateSegment(sInitialize);
+        show.activateSegment(sInitialize);
 
-	show.nextFrame();
-	director.init();
-	director.waitForVideoStartOK();
-	System.out.println("Pretend the video is starting...");
-	show.activateSegment(sStartShow);
-	Graphics2D frameGr = (Graphics2D) getGraphics();
-	BufferedImage bufIm = getGraphicsConfiguration()
-					.createCompatibleImage(WIDTH, HEIGHT);
-	Graphics2D bufGr = bufIm.createGraphics();
-	bufGr.setColor(Color.black);
-	bufGr.fillRect(0,0,WIDTH, HEIGHT);
-	frameGr.drawImage(bufIm,0, FRAME_CHEAT, WIDTH, FRAME_CHEAT+HEIGHT,this);
-	long startTime = System.currentTimeMillis();
-	int fps = 25;	// Run at 25p
-	director.setFrame(0);
-	Color transparentColor = new Color(0,0,0,0);
-	for (int frame = 1; ; frame++) {
-	    for (;;) {
-		director.setFrame(frame);
-		long tm = startTime + (frame * 1000) / fps;
-		long delta = System.currentTimeMillis() - tm;
-		if (delta < 0) {
-		    Thread.sleep(-delta);
-		} else if (delta > (1000 / fps)) {
-		    // We've fallen behind, skip a frame
-		    System.out.println("Behind by " + (delta  - (1000 / fps))
-		    			+"ms, Skipping frame " + frame + "...");
-		    frame++;
-		} else {
-		    break;
-		}
-	    }
-	    bufGr.setComposite(AlphaComposite.Src);
-	    bufGr.setColor(transparentColor);
-	    show.nextFrame();
-	    synchronized(show) {
-		bufGr.fillRect(0, 0, WIDTH, HEIGHT);
-		bufGr.setComposite(AlphaComposite.SrcOver);
-		show.paintFrame(bufGr);
-	    }
-	    frameGr.setComposite(AlphaComposite.Src);
-	    frameGr.drawImage(bufIm, 
-		  	      0, FRAME_CHEAT, 
-			      WIDTH, FRAME_CHEAT+HEIGHT,
-			      0, 0, WIDTH, HEIGHT,
-			      this);
-	    Toolkit.getDefaultToolkit().sync();
-	}
+        show.nextFrame();
+        director.init();
+        director.waitForVideoStartOK();
+        System.out.println("Pretend the video is starting...");
+        show.activateSegment(sStartShow);
+        Graphics2D frameGr = (Graphics2D) getGraphics();
+        BufferedImage bufIm = getGraphicsConfiguration()
+                                        .createCompatibleImage(WIDTH, HEIGHT);
+        Graphics2D bufGr = bufIm.createGraphics();
+        bufGr.setColor(Color.black);
+        bufGr.fillRect(0,0,WIDTH, HEIGHT);
+        frameGr.drawImage(bufIm,0, FRAME_CHEAT, WIDTH, FRAME_CHEAT+HEIGHT,this);
+        long startTime = System.currentTimeMillis();
+        int fps = 25;   // Run at 25p
+        director.setFrame(0);
+        Color transparentColor = new Color(0,0,0,0);
+        for (int frame = 1; ; frame++) {
+            for (;;) {
+                director.setFrame(frame);
+                long tm = startTime + (frame * 1000) / fps;
+                long delta = System.currentTimeMillis() - tm;
+                if (delta < 0) {
+                    Thread.sleep(-delta);
+                } else if (delta > (1000 / fps)) {
+                    // We've fallen behind, skip a frame
+                    System.out.println("Behind by " + (delta  - (1000 / fps))
+                                        +"ms, Skipping frame " + frame + "...");
+                    frame++;
+                } else {
+                    break;
+                }
+            }
+            bufGr.setComposite(AlphaComposite.Src);
+            bufGr.setColor(transparentColor);
+            show.nextFrame();
+            synchronized(show) {
+                bufGr.fillRect(0, 0, WIDTH, HEIGHT);
+                bufGr.setComposite(AlphaComposite.SrcOver);
+                show.paintFrame(bufGr);
+            }
+            frameGr.setComposite(AlphaComposite.Src);
+            frameGr.drawImage(bufIm, 
+                              0, FRAME_CHEAT, 
+                              WIDTH, FRAME_CHEAT+HEIGHT,
+                              0, 0, WIDTH, HEIGHT,
+                              this);
+            Toolkit.getDefaultToolkit().sync();
+        }
     }
     
     private static void usage() {
-	System.out.println();
-	System.out.println("Usage:  java com.hdcookbook.grin.test.bigjdk.GrinTestRyan \\");
+        System.out.println();
+        System.out.println("Usage:  java com.hdcookbook.grin.test.bigjdk.GrinTestRyan \\");
         System.out.println("        -assets <asset_dir>");
         System.out.println("        -imagemap <mapfile>");
-	System.out.println("        <show file>");
+        System.out.println("        <show file>");
         System.out.println("");
         System.out.println("    -assets may be repeated");
-	System.out.println();
-	System.exit(1);
+        System.out.println();
+        System.exit(1);
     }
     
     /**
@@ -248,27 +248,27 @@ public class GrinTestRyan extends Frame {
     public static void main(String[] args) {
         LinkedList assetPathLL = new LinkedList();
         String imageMap = null;
-	int argsUsed = 0;
-	while (argsUsed < args.length - 1) {
-	    if ("-assets".equals(args[argsUsed])) {
-		argsUsed++;
+        int argsUsed = 0;
+        while (argsUsed < args.length - 1) {
+            if ("-assets".equals(args[argsUsed])) {
+                argsUsed++;
                 String path = args[argsUsed];
                 if (!path.endsWith("/")) {
                     path = path + "/";
                 }
-		assetPathLL.add(path);
-		argsUsed++;
-	    } else if ("-imagemap".equals(args[argsUsed])) {
+                assetPathLL.add(path);
+                argsUsed++;
+            } else if ("-imagemap".equals(args[argsUsed])) {
                 if (imageMap != null) {
                     usage();
                 }
-		argsUsed++;
-		imageMap = args[argsUsed];
-		argsUsed++;
-	    } else {
-		break;
-	    }
-	}
+                argsUsed++;
+                imageMap = args[argsUsed];
+                argsUsed++;
+            } else {
+                break;
+            }
+        }
         if (argsUsed != args.length) {
             usage();
         }
@@ -279,25 +279,25 @@ public class GrinTestRyan extends Frame {
             assetPath = (String[]) 
                         assetPathLL.toArray(new String[assetPathLL.size()]);
         }
-	AssetFinder.setHelper(new AssetFinder() {
-	    protected void abortHelper() {
-		System.exit(1);
-	    }
-	});
-       	AssetFinder.setSearchPath(assetPath, null);
+        AssetFinder.setHelper(new AssetFinder() {
+            protected void abortHelper() {
+                System.exit(1);
+            }
+        });
+        AssetFinder.setSearchPath(assetPath, null);
         if (imageMap != null) {
             AssetFinder.setImageMap(imageMap);
         }
         
         GrinTestRyan t = new GrinTestRyan();
         t.init();
-	try {
-	    t.run();
-	} catch (InterruptedException ex) {
-	    ex.printStackTrace();
-	    System.exit(1);
-	}
-	System.exit(0);
+        try {
+            t.run();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+        System.exit(0);
     }
     
 }

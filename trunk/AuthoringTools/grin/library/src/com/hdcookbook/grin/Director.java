@@ -85,14 +85,14 @@ public class Director {
     // Called from Show constructor
     //
     void setShow(Show show) {
-	this.show = show;
+        this.show = show;
     }
 
     /**
      * Get the show we're managing.
      **/
     public Show getShow() {
-	return show;
+        return show;
     }
 
     /**
@@ -104,11 +104,11 @@ public class Director {
      * frequently; it's best used during initialization.
      **/
     public Feature getFeature(String name) {
-	Feature f = getShow().getFeature(name);
-	if (Debug.ASSERT && f == null) {
-	    Debug.assertFail("Feature \"" + name + "\" not found.");
-	}
-	return f;
+        Feature f = getShow().getFeature(name);
+        if (Debug.ASSERT && f == null) {
+            Debug.assertFail("Feature \"" + name + "\" not found.");
+        }
+        return f;
     }
 
     /**
@@ -124,11 +124,11 @@ public class Director {
      * show, the results are undefined.
      **/
     public Command getNamedCommand(String name) {
-	Command c = getShow().getNamedCommand(name);
-	if (Debug.ASSERT && c == null) {
-	    Debug.assertFail("Named command \"" + name + "\" not found.");
-	}
-	return c;
+        Command c = getShow().getNamedCommand(name);
+        if (Debug.ASSERT && c == null) {
+            Debug.assertFail("Named command \"" + name + "\" not found.");
+        }
+        return c;
     }
 
     /**
@@ -138,17 +138,17 @@ public class Director {
      * frequently; it's best used during initialization.
      **/
     public Feature getPart(Assembly assembly, String partName) {
-	Feature[] parts = assembly.getParts();
-	String[] partNames = assembly.getPartNames();
-	for (int i = 0; i < parts.length; i++) {
-	    if (partName.equals(partNames[i])) {
-		return parts[i];
-	    }
-	}
-	if (Debug.ASSERT) {
-	    Debug.assertFail();
-	}
-	return null;
+        Feature[] parts = assembly.getParts();
+        String[] partNames = assembly.getPartNames();
+        for (int i = 0; i < parts.length; i++) {
+            if (partName.equals(partNames[i])) {
+                return parts[i];
+            }
+        }
+        if (Debug.ASSERT) {
+            Debug.assertFail();
+        }
+        return null;
     }
 
     /**
@@ -160,11 +160,11 @@ public class Director {
      * frequently; it's best used during initialization.
      **/
     public Segment getSegment(String name) {
-	Segment s = getShow().getSegment(name);
-	if (Debug.ASSERT && s == null) {
-	    Debug.assertFail("Segment \"" + name + "\" not found.");
-	}
-	return s;
+        Segment s = getShow().getSegment(name);
+        if (Debug.ASSERT && s == null) {
+            Debug.assertFail("Segment \"" + name + "\" not found.");
+        }
+        return s;
     }
 
 
@@ -198,7 +198,7 @@ public class Director {
      * a timer that goes off every frame, invoking a java_command.
      **/
     public void notifyNextFrame() {
-	show.runPendingCommands();
+        show.runPendingCommands();
     }
 
     /**
@@ -214,8 +214,8 @@ public class Director {
      * The default implementation of this method does nothing,
      * so there is no need to call super.notifySegmentActivated().
      *
-     * @param newSegment	The new segment that was activated
-     * @param oldSegment	The old segment that was previously active
+     * @param newSegment        The new segment that was activated
+     * @param oldSegment        The old segment that was previously active
      **/
     public void 
     notifySegmentActivated(Segment newSegment, Segment oldSegment) {
@@ -238,16 +238,16 @@ public class Director {
      * Note that during the callback, the current part of the assembly is
      * undefined, and might not reflect the new value.
      *
-     * @param assembly		The assembly within which a new part was
-     *				selected
-     * @param newPart		The new part that's now selected
-     * @param oldPart		The old part that used to be selected.
-     * @param assemblyIsActive	True if assembly is currently active, that
-     *				is, being displayed.
+     * @param assembly          The assembly within which a new part was
+     *                          selected
+     * @param newPart           The new part that's now selected
+     * @param oldPart           The old part that used to be selected.
+     * @param assemblyIsActive  True if assembly is currently active, that
+     *                          is, being displayed.
      **/
     public void notifyAssemblyPartSelected(Assembly assembly, 
-					   Feature newPart, Feature oldPart,
-					   boolean assemblyIsActive) 
+                                           Feature newPart, Feature oldPart,
+                                           boolean assemblyIsActive) 
     {
     }
 

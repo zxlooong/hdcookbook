@@ -127,13 +127,13 @@ public class Text extends Feature implements Node, SetupClient {
     protected int yArg;
     protected String[] strings;
     protected int vspace;
-    protected int fontIndex; 	// Index of our font in Show.fonts[]
+    protected int fontIndex;    // Index of our font in Show.fonts[]
     protected Color[] colors;
     private Color currColor = null;
     private Color lastColor = null;
-    protected int loopCount;	
-    	// # of times to repeat images before sending end commands
-	// Integer.MAX_VALUE means "infinite"
+    protected int loopCount;    
+        // # of times to repeat images before sending end commands
+        // Integer.MAX_VALUE means "infinite"
     protected Color background;
 
     private boolean isActivated = false;
@@ -143,10 +143,10 @@ public class Text extends Feature implements Node, SetupClient {
     private int alignedY;
     private int ascent;
     private int descent;
-    private int width = -1;	// -1 means "not setup"
+    private int width = -1;     // -1 means "not setup"
     private int height = -1;
-    private int colorIndex;		// index into colors
-    private int loopsRemaining;	// see loopCount
+    private int colorIndex;             // index into colors
+    private int loopsRemaining; // see loopCount
 
     private boolean changed = false;
     private DrawRecord drawRecord = new DrawRecord();
@@ -159,33 +159,33 @@ public class Text extends Feature implements Node, SetupClient {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup() || width == -1 || isActivated) {
-	    throw new IllegalStateException();
-	}
-	Text result = new Text(show);
-	result.alignment = alignment;
-	result.xArg = xArg;
-	result.yArg = yArg;
-	result.strings = strings;
-	result.vspace = vspace;
-	result.fontIndex = fontIndex;
-	result.colors = colors;
-	result.currColor = currColor;
-	result.lastColor = lastColor;
-	result.loopCount = loopCount;
-	result.background = background;
-	result.alignedX = alignedX;
-	result.alignedY = alignedY;
-	result.ascent = ascent;
-	result.descent = descent;
-	result.width = width;
-	result.height = height;
-	result.colorIndex = colorIndex;
-	result.loopsRemaining = loopsRemaining;
-	result.changed = changed;
-	result.needsSetup = needsSetup;
-	return result;
-	    // initializeClone() not needed
+        if (!isSetup() || width == -1 || isActivated) {
+            throw new IllegalStateException();
+        }
+        Text result = new Text(show);
+        result.alignment = alignment;
+        result.xArg = xArg;
+        result.yArg = yArg;
+        result.strings = strings;
+        result.vspace = vspace;
+        result.fontIndex = fontIndex;
+        result.colors = colors;
+        result.currColor = currColor;
+        result.lastColor = lastColor;
+        result.loopCount = loopCount;
+        result.background = background;
+        result.alignedX = alignedX;
+        result.alignedY = alignedY;
+        result.ascent = ascent;
+        result.descent = descent;
+        result.width = width;
+        result.height = height;
+        result.colorIndex = colorIndex;
+        result.loopsRemaining = loopsRemaining;
+        result.changed = changed;
+        result.needsSetup = needsSetup;
+        return result;
+            // initializeClone() not needed
     }
 
     
@@ -193,14 +193,14 @@ public class Text extends Feature implements Node, SetupClient {
      * {@inheritDoc}
      **/
     public int getX() {
-	return alignedX;
+        return alignedX;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getY() {
-	return alignedY;
+        return alignedY;
     }
 
     /**
@@ -215,13 +215,13 @@ public class Text extends Feature implements Node, SetupClient {
      * Get the font used for this text feature
      **/
     public Font getFont() {
-	return show.getFont(fontIndex);
+        return show.getFont(fontIndex);
     }
 
     private void calculateMetrics() {
-	Font font = show.getFont(fontIndex);
-	changed = true;
-	FontMetrics fm = show.component.getFontMetrics(font);
+        Font font = show.getFont(fontIndex);
+        changed = true;
+        FontMetrics fm = show.component.getFontMetrics(font);
         int width = 0;
         for (int i = 0; i < strings.length; i++) {
             int w = fm.stringWidth(strings[i]);
@@ -229,34 +229,34 @@ public class Text extends Feature implements Node, SetupClient {
                 width = w;
             }
         }
-	ascent = fm.getMaxAscent();
-	descent = fm.getMaxDescent();
+        ascent = fm.getMaxAscent();
+        descent = fm.getMaxDescent();
         height = vspace * (strings.length - 1)
-		 + strings.length * (ascent + descent + 1);
-	int a = (alignment & 0x03);
-	if (a == MIDDLE) {
-	    alignedX = xArg - (width / 2);
-	} else if (a == RIGHT) {
-	    alignedX = xArg - width;
-	} else {
-	    alignedX = xArg;
-	}
-	a = (alignment & 0x0c);
-	if (a == BASELINE) {
-	    alignedY = yArg - ascent;
-	} else if (a == BOTTOM) {
-	    alignedY = yArg - height;
-	} else {
-	    alignedY = yArg;
-	}
-	this.width = width;
+                 + strings.length * (ascent + descent + 1);
+        int a = (alignment & 0x03);
+        if (a == MIDDLE) {
+            alignedX = xArg - (width / 2);
+        } else if (a == RIGHT) {
+            alignedX = xArg - width;
+        } else {
+            alignedX = xArg;
+        }
+        a = (alignment & 0x0c);
+        if (a == BASELINE) {
+            alignedY = yArg - ascent;
+        } else if (a == BOTTOM) {
+            alignedY = yArg - height;
+        } else {
+            alignedY = yArg;
+        }
+        this.width = width;
     }
 
     /**
      * Get the text that's being displayed.
      **/
     public String[] getText() {
-	return strings;
+        return strings;
     }
 
     /**
@@ -264,7 +264,7 @@ public class Text extends Feature implements Node, SetupClient {
      * to the next line.
      **/
     public int getLineHeight() {
-	return vspace + ascent + descent + 1;
+        return vspace + ascent + descent + 1;
     }
 
     /** 
@@ -278,17 +278,17 @@ public class Text extends Feature implements Node, SetupClient {
      * cookbook menu.
      **/
     public void setText(String[] newText) {
-	synchronized(show) {	// Shouldn't be necessary, but doesn't hurt
-	    strings = newText;
-	    synchronized(setupMonitor) {
-	    	// If the feature hasn't been set up yet, there's no need
-		// to calculate the metrics - the setup thread will do
-		// this later
-		if (!needsSetup) {
-		    calculateMetrics();
-		}
-	    }
-	}
+        synchronized(show) {    // Shouldn't be necessary, but doesn't hurt
+            strings = newText;
+            synchronized(setupMonitor) {
+                // If the feature hasn't been set up yet, there's no need
+                // to calculate the metrics - the setup thread will do
+                // this later
+                if (!needsSetup) {
+                    calculateMetrics();
+                }
+            }
+        }
     }
 
     public void destroy() {
@@ -298,116 +298,116 @@ public class Text extends Feature implements Node, SetupClient {
      * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
-	// This is synchronized to only occur within model updates.
-	isActivated = mode;
-	if (mode) {
-	    colorIndex = 0;
-	    lastColor = null;
-	    currColor = colors[colorIndex];
-	    loopsRemaining = loopCount;
-	}
+        // This is synchronized to only occur within model updates.
+        isActivated = mode;
+        if (mode) {
+            colorIndex = 0;
+            lastColor = null;
+            currColor = colors[colorIndex];
+            loopsRemaining = loopCount;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
-	if (mode && width == -1) {
-		// Setup reads the font for us, and calculates our width.
-		// If, perchance, we're setup a second time (e.g. because
-		// we went out of setup/activate scope for a time and
-		// came back), there's no reason to re-calculate our
-		// metrics, and the Font instance stays with the show,
-		// so we don't need to schedule setup a second time.
-	    needsSetup = true;
-	    show.setupManager.scheduleSetup(this);
-	    return 1;
-	} else {
-	    return 0;
-	}
+        if (mode && width == -1) {
+                // Setup reads the font for us, and calculates our width.
+                // If, perchance, we're setup a second time (e.g. because
+                // we went out of setup/activate scope for a time and
+                // came back), there's no reason to re-calculate our
+                // metrics, and the Font instance stays with the show,
+                // so we don't need to schedule setup a second time.
+            needsSetup = true;
+            show.setupManager.scheduleSetup(this);
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void doSomeSetup() {
-	synchronized(setupMonitor) {
-	    if (!isSetup()) {
-		return;
-	    }
-	    if (width == -1) {
-		calculateMetrics();
-	    }
-	    if (!isSetup()) {
-		return;
-	    }
-	    needsSetup = false;
-	}
-	sendFeatureSetup();
+        synchronized(setupMonitor) {
+            if (!isSetup()) {
+                return;
+            }
+            if (width == -1) {
+                calculateMetrics();
+            }
+            if (!isSetup()) {
+                return;
+            }
+            needsSetup = false;
+        }
+        sendFeatureSetup();
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	synchronized(setupMonitor) {
-	    return needsSetup;
-	}
+        synchronized(setupMonitor) {
+            return needsSetup;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	colorIndex++;
-	if (colorIndex >= colors.length) {
-	    if (loopCount != Integer.MAX_VALUE) {
-		loopsRemaining--;
-	    }
-	    if (loopsRemaining > 0) {
-		colorIndex = 0;
-	    } else {
-		loopsRemaining = loopCount;
-		colorIndex = colors.length - 1;
-	    }
-	}
-	currColor = colors[colorIndex];
+        colorIndex++;
+        if (colorIndex >= colors.length) {
+            if (loopCount != Integer.MAX_VALUE) {
+                loopsRemaining--;
+            }
+            if (loopsRemaining > 0) {
+                colorIndex = 0;
+            } else {
+                loopsRemaining = loopCount;
+                colorIndex = colors.length - 1;
+            }
+        }
+        currColor = colors[colorIndex];
     }
 
     /**
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
-	drawRecord.setChanged();
+        drawRecord.setChanged();
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(alignedX, alignedY, width, height);
-	if (lastColor != currColor || changed) {
-	    drawRecord.setChanged();
-	}
-	drawRecord.setSemiTransparent();
-	context.addArea(drawRecord);
-	lastColor = currColor;
-	changed = false;
+        drawRecord.setArea(alignedX, alignedY, width, height);
+        if (lastColor != currColor || changed) {
+            drawRecord.setChanged();
+        }
+        drawRecord.setSemiTransparent();
+        context.addArea(drawRecord);
+        lastColor = currColor;
+        changed = false;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	if (!isActivated) {
-	    return;
-	}
-	if (background != null) {
-	    gr.setColor(background);
-	    gr.fillRect(alignedX, alignedY, width, height);
-	}
-	gr.setFont(show.getFont(fontIndex));
-	gr.setColor(currColor);
+        if (!isActivated) {
+            return;
+        }
+        if (background != null) {
+            gr.setColor(background);
+            gr.fillRect(alignedX, alignedY, width, height);
+        }
+        gr.setFont(show.getFont(fontIndex));
+        gr.setColor(currColor);
         int y2 = alignedY + ascent;
         for (int i = 0; i < strings.length; i++) {
             gr.drawString(strings[i], alignedX, y2);
@@ -421,7 +421,7 @@ public class Text extends Feature implements Node, SetupClient {
         in.readSuperClassData(this);
         this.xArg = in.readInt();
         this.yArg = in.readInt();
-	this.alignment = in.readInt();
+        this.alignment = in.readInt();
         this.strings = in.readStringArray();
         this.vspace = in.readInt();
         this.fontIndex = in.readInt();
@@ -429,7 +429,7 @@ public class Text extends Feature implements Node, SetupClient {
         for (int i = 0; i < colors.length; i++) {
             colors[i] = in.readColor();
         }
-	loopCount = in.readInt();
+        loopCount = in.readInt();
         this.background = in.readColor();        
     }
 }

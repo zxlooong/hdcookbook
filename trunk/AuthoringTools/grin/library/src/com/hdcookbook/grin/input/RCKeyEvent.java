@@ -156,85 +156,85 @@ public class RCKeyEvent extends Command {
     private static RCKeyEvent[] keyByEventCode; // see getKeyByEventCode()
 
     static {
-	keyByName = new Hashtable();
-	KEY_0 = new RCKeyEvent("0", KeyEvent.VK_0, 0x00000001);
-	KEY_1 = new RCKeyEvent("1", KeyEvent.VK_1, 0x00000002);
-	KEY_2 = new RCKeyEvent("2", KeyEvent.VK_2, 0x00000004);
-	KEY_3 = new RCKeyEvent("3", KeyEvent.VK_3, 0x00000008);
-	KEY_4 = new RCKeyEvent("4", KeyEvent.VK_4, 0x00000010);
-	KEY_5 = new RCKeyEvent("5", KeyEvent.VK_5, 0x00000020);
-	KEY_6 = new RCKeyEvent("6", KeyEvent.VK_6, 0x00000040);
-	KEY_7 = new RCKeyEvent("7", KeyEvent.VK_7, 0x00000080);
-	KEY_8 = new RCKeyEvent("8", KeyEvent.VK_8, 0x00000100);
-	KEY_9 = new RCKeyEvent("9", KeyEvent.VK_9, 0x00000200);
-	KEY_RIGHT = new RCKeyEvent("right", KeyEvent.VK_RIGHT, 0x00000400);
-	KEY_LEFT = new RCKeyEvent("left", KeyEvent.VK_LEFT,    0x00000800);
-	KEY_UP = new RCKeyEvent("up", KeyEvent.VK_UP,          0x00001000);
-	KEY_DOWN = new RCKeyEvent("down", KeyEvent.VK_DOWN,    0x00002000);
-	KEY_ENTER = new RCKeyEvent("enter", KeyEvent.VK_ENTER, 0x00004000);
+        keyByName = new Hashtable();
+        KEY_0 = new RCKeyEvent("0", KeyEvent.VK_0, 0x00000001);
+        KEY_1 = new RCKeyEvent("1", KeyEvent.VK_1, 0x00000002);
+        KEY_2 = new RCKeyEvent("2", KeyEvent.VK_2, 0x00000004);
+        KEY_3 = new RCKeyEvent("3", KeyEvent.VK_3, 0x00000008);
+        KEY_4 = new RCKeyEvent("4", KeyEvent.VK_4, 0x00000010);
+        KEY_5 = new RCKeyEvent("5", KeyEvent.VK_5, 0x00000020);
+        KEY_6 = new RCKeyEvent("6", KeyEvent.VK_6, 0x00000040);
+        KEY_7 = new RCKeyEvent("7", KeyEvent.VK_7, 0x00000080);
+        KEY_8 = new RCKeyEvent("8", KeyEvent.VK_8, 0x00000100);
+        KEY_9 = new RCKeyEvent("9", KeyEvent.VK_9, 0x00000200);
+        KEY_RIGHT = new RCKeyEvent("right", KeyEvent.VK_RIGHT, 0x00000400);
+        KEY_LEFT = new RCKeyEvent("left", KeyEvent.VK_LEFT,    0x00000800);
+        KEY_UP = new RCKeyEvent("up", KeyEvent.VK_UP,          0x00001000);
+        KEY_DOWN = new RCKeyEvent("down", KeyEvent.VK_DOWN,    0x00002000);
+        KEY_ENTER = new RCKeyEvent("enter", KeyEvent.VK_ENTER, 0x00004000);
 
-	// For the color keys, I just lifted the constants out of the
-	// HAVi stubs.  This avoids a compilation dependency on HAVi.
-	KEY_RED = new RCKeyEvent("red", 
-			AssetFinder.getColorKeyCode(Color.red),   0x00008000);
-	KEY_GREEN = new RCKeyEvent("green", 
-			AssetFinder.getColorKeyCode(Color.green), 0x00010000);
-	KEY_YELLOW = new RCKeyEvent("yellow", 
-			AssetFinder.getColorKeyCode(Color.yellow),0x00020000);
-	KEY_BLUE = new RCKeyEvent("blue", 
-			AssetFinder.getColorKeyCode(Color.blue),  0x00040000);
+        // For the color keys, I just lifted the constants out of the
+        // HAVi stubs.  This avoids a compilation dependency on HAVi.
+        KEY_RED = new RCKeyEvent("red", 
+                        AssetFinder.getColorKeyCode(Color.red),   0x00008000);
+        KEY_GREEN = new RCKeyEvent("green", 
+                        AssetFinder.getColorKeyCode(Color.green), 0x00010000);
+        KEY_YELLOW = new RCKeyEvent("yellow", 
+                        AssetFinder.getColorKeyCode(Color.yellow),0x00020000);
+        KEY_BLUE = new RCKeyEvent("blue", 
+                        AssetFinder.getColorKeyCode(Color.blue),  0x00040000);
 
-	// For the popup key and other BD-specific keys, I just use the 
-	// integer value, rather than introduce
-	// a compile-time AI dependency.  The values are documented in
-	// the DAVIC and Blu-ray specifications -- look for the VK_
-	// key constants.
-	KEY_POPUP_MENU = new RCKeyEvent("popup_menu", 461, 0x00080000);
-	KEY_PLAY       = new RCKeyEvent("play",       415, 0x00100000);
-	KEY_STOP       = new RCKeyEvent("stop",       413, 0x00200000);
-	KEY_STILL_OFF  = new RCKeyEvent("still_off",  462, 0x00400000);
-	KEY_TRACK_NEXT = new RCKeyEvent("track_next", 425, 0x00800000);
-	KEY_TRACK_PREV = new RCKeyEvent("track_prev", 424, 0x01000000);
-	KEY_FAST_FWD   = new RCKeyEvent("fast_fwd",   417, 0x02000000);
-	KEY_REWIND     = new RCKeyEvent("rewind",     412, 0x04000000);
-	KEY_PAUSE      = new RCKeyEvent("pause",       19, 0x08000000);
-	KEY_SECONDARY_VIDEO_ENABLE_DISABLE 
-		       = new RCKeyEvent("secondary_video_enable_disable",
-		       				      464, 0x10000000);
-	KEY_SECONDARY_AUDIO_ENABLE_DISABLE 
-		       = new RCKeyEvent("secondary_audio_enable_disable",
-		       				      463, 0x20000000);
-	KEY_PG_TEXTST_ENABLE_DISABLE
-		       = new RCKeyEvent("pg_textst_enable_disable",
-		       				      465, 0x40000000);
+        // For the popup key and other BD-specific keys, I just use the 
+        // integer value, rather than introduce
+        // a compile-time AI dependency.  The values are documented in
+        // the DAVIC and Blu-ray specifications -- look for the VK_
+        // key constants.
+        KEY_POPUP_MENU = new RCKeyEvent("popup_menu", 461, 0x00080000);
+        KEY_PLAY       = new RCKeyEvent("play",       415, 0x00100000);
+        KEY_STOP       = new RCKeyEvent("stop",       413, 0x00200000);
+        KEY_STILL_OFF  = new RCKeyEvent("still_off",  462, 0x00400000);
+        KEY_TRACK_NEXT = new RCKeyEvent("track_next", 425, 0x00800000);
+        KEY_TRACK_PREV = new RCKeyEvent("track_prev", 424, 0x01000000);
+        KEY_FAST_FWD   = new RCKeyEvent("fast_fwd",   417, 0x02000000);
+        KEY_REWIND     = new RCKeyEvent("rewind",     412, 0x04000000);
+        KEY_PAUSE      = new RCKeyEvent("pause",       19, 0x08000000);
+        KEY_SECONDARY_VIDEO_ENABLE_DISABLE 
+                       = new RCKeyEvent("secondary_video_enable_disable",
+                                                      464, 0x10000000);
+        KEY_SECONDARY_AUDIO_ENABLE_DISABLE 
+                       = new RCKeyEvent("secondary_audio_enable_disable",
+                                                      463, 0x20000000);
+        KEY_PG_TEXTST_ENABLE_DISABLE
+                       = new RCKeyEvent("pg_textst_enable_disable",
+                                                      465, 0x40000000);
   
         // The info key support is mandatory in OCAP (tru2way) devices.
         // The constant, 457, is defined in org.havi.ui.event.HRcEvent.
-	KEY_INFO
-		       = new RCKeyEvent("info",
-		       				      457, 0x80000000);
+        KEY_INFO
+                       = new RCKeyEvent("info",
+                                                      457, 0x80000000);
 
 
-	RCKeyEvent[] keys = new RCKeyEvent[] {
-	    KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, 
-	    KEY_5, KEY_6, KEY_7, KEY_8, KEY_9,
-	    KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN,
-	    KEY_ENTER, KEY_RED, KEY_GREEN, KEY_YELLOW, KEY_BLUE,
-	    KEY_POPUP_MENU, KEY_PLAY, KEY_STOP, KEY_STILL_OFF,
-	    KEY_TRACK_NEXT, KEY_TRACK_PREV, KEY_FAST_FWD, KEY_REWIND,
-	    KEY_PAUSE, KEY_SECONDARY_VIDEO_ENABLE_DISABLE,
-	    KEY_SECONDARY_AUDIO_ENABLE_DISABLE,
-	    KEY_PG_TEXTST_ENABLE_DISABLE,
+        RCKeyEvent[] keys = new RCKeyEvent[] {
+            KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, 
+            KEY_5, KEY_6, KEY_7, KEY_8, KEY_9,
+            KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN,
+            KEY_ENTER, KEY_RED, KEY_GREEN, KEY_YELLOW, KEY_BLUE,
+            KEY_POPUP_MENU, KEY_PLAY, KEY_STOP, KEY_STILL_OFF,
+            KEY_TRACK_NEXT, KEY_TRACK_PREV, KEY_FAST_FWD, KEY_REWIND,
+            KEY_PAUSE, KEY_SECONDARY_VIDEO_ENABLE_DISABLE,
+            KEY_SECONDARY_AUDIO_ENABLE_DISABLE,
+            KEY_PG_TEXTST_ENABLE_DISABLE,
             KEY_INFO
-	};
-	//
-	// IMPORTANT NOTE:  If a key is added to this table, then
-	// you need to go into generatePerfectHashOfEventCodes()
-	// and make sure it still produces a reasonable result.  I recommend
-	// starting the algorithm off at what you know to be the right
-	// answer, to save startup time.
-	//
-	keyByEventCode = generatePerfectHashOfEventCodes(keys);
+        };
+        //
+        // IMPORTANT NOTE:  If a key is added to this table, then
+        // you need to go into generatePerfectHashOfEventCodes()
+        // and make sure it still produces a reasonable result.  I recommend
+        // starting the algorithm off at what you know to be the right
+        // answer, to save startup time.
+        //
+        keyByEventCode = generatePerfectHashOfEventCodes(keys);
     }
     
     private String name;    // human-readable name, used in script file.
@@ -242,13 +242,13 @@ public class RCKeyEvent extends Command {
     private int mask;       // Mask value that we assign
 
     private RCKeyEvent keyReleased;
-	// The key released event for this key.  If this instance represents
-	// a key pressed event, this will be null, or a value that's != this.
-	// For a subclass defined to represent key typed events, this will
-	// be null, and won't be accessed.
+        // The key released event for this key.  If this instance represents
+        // a key pressed event, this will be null, or a value that's != this.
+        // For a subclass defined to represent key typed events, this will
+        // be null, and won't be accessed.
     
     private RCKeyEvent(String name, int keyCode, int mask) {
-	super(null);	// The show data member of Command will be null
+        super(null);    // The show data member of Command will be null
         this.name = name;
         this.keyCode = keyCode;
         this.mask = mask;
@@ -271,28 +271,28 @@ public class RCKeyEvent extends Command {
      * <p>
      * NOTE:  If you subclass RCKeyEvent, be sure to override execute(Show)
      *
-     * @param	keyCode	The VK code of the key.  This can be zero.  A subclass
-     *			will likely add a char data member to contain the 
-     *			character that is typed.
+     * @param   keyCode The VK code of the key.  This can be zero.  A subclass
+     *                  will likely add a char data member to contain the 
+     *                  character that is typed.
      *
-     * @param   mask 	The bitmask of this key event.  A bit in the bitmask
-     *			can be used to identify groups of related keys.  The
-     *			bitmask is used to identify whether or not a segment
-     *			is interested in receiving key typed events from the
-     *			corresponding key group.
+     * @param   mask    The bitmask of this key event.  A bit in the bitmask
+     *                  can be used to identify groups of related keys.  The
+     *                  bitmask is used to identify whether or not a segment
+     *                  is interested in receiving key typed events from the
+     *                  corresponding key group.
      *
      * @see #execute(Show)
      * @see Segment#keyTypedInterest
      **/
     protected RCKeyEvent(int keyCode, int mask) {
-	super(null);	// The show data member of Command will be null
-	this.keyCode = keyCode;
-	this.mask = mask;
+        super(null);    // The show data member of Command will be null
+        this.keyCode = keyCode;
+        this.mask = mask;
     }
 
         // constructor for key released instances.  See getKeyReleased().
     private RCKeyEvent() {
-	super(null);
+        super(null);
     }
 
     /**
@@ -300,14 +300,14 @@ public class RCKeyEvent extends Command {
      * Useful for debugging.
      **/
     public String getName() {
-	return name;
+        return name;
     }
 
     /**
      * @return the VK_ key code corresponding to this key
      **/
     public int getKeyCode() {
-	return keyCode;
+        return keyCode;
     }
 
     /**
@@ -319,7 +319,7 @@ public class RCKeyEvent extends Command {
      * @return The mask for this key.
      **/
      public int getBitMask() {
-	return mask;
+        return mask;
     }
 
     /**
@@ -327,21 +327,21 @@ public class RCKeyEvent extends Command {
      * a key release.
      **/
     public boolean isKeyPress() {
-	return keyReleased != this;	// see keyReleased comment above
+        return keyReleased != this;     // see keyReleased comment above
     }
 
     /**
      * Give the RCKeyEvent for this VK code that represents a key release.
      **/
     public synchronized RCKeyEvent getKeyReleased() {
-	if (this.keyReleased == null) {
-	    this.keyReleased = new RCKeyEvent();	// doesn't add to table
-	    keyReleased.name = this.name;
-	    keyReleased.keyCode = this.keyCode;
-	    keyReleased.mask = this.mask;
-	    keyReleased.keyReleased = this.keyReleased;
-	}
-	return keyReleased;
+        if (this.keyReleased == null) {
+            this.keyReleased = new RCKeyEvent();        // doesn't add to table
+            keyReleased.name = this.name;
+            keyReleased.keyCode = this.keyCode;
+            keyReleased.mask = this.mask;
+            keyReleased.keyReleased = this.keyReleased;
+        }
+        return keyReleased;
     }
 
     /**
@@ -353,20 +353,20 @@ public class RCKeyEvent extends Command {
      * method so that it calls Show.internalHandleKeyTypedEvent().
      **/
     public void execute(Show caller) {
-	if (isKeyPress()) {
-	    caller.internalHandleKeyPressed(this, caller);
-	} else {
-	    caller.internalHandleKeyReleased(this, caller);
-	}
+        if (isKeyPress()) {
+            caller.internalHandleKeyPressed(this, caller);
+        } else {
+            caller.internalHandleKeyReleased(this, caller);
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void execute() {
-	if (Debug.ASSERT) {
-	    Debug.assertFail();
-	}
+        if (Debug.ASSERT) {
+            Debug.assertFail();
+        }
     }
 
     /**
@@ -382,12 +382,12 @@ public class RCKeyEvent extends Command {
      * @see #getKeyReleased()
      **/
     public static RCKeyEvent getKeyByEventCode(int key) {
-	RCKeyEvent result = keyByEventCode[key % keyByEventCode.length];
-	if (result != null && result.keyCode == key) {
-	    return result;
-	} else {
-	    return null;
-	}
+        RCKeyEvent result = keyByEventCode[key % keyByEventCode.length];
+        if (result != null && result.keyCode == key) {
+            return result;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -396,7 +396,7 @@ public class RCKeyEvent extends Command {
      * @return the RCKeyEvent, or null if there's no corresponding event.
      **/
     public static RCKeyEvent getKeyByName(String name) {
-	return (RCKeyEvent) keyByName.get(name);
+        return (RCKeyEvent) keyByName.get(name);
     }
 
     /**
@@ -404,62 +404,62 @@ public class RCKeyEvent extends Command {
      */
     public static Vector getEventsFromMask(int mask) {
         Collection values = keyByName.values();
-	Vector result = new Vector();
+        Vector result = new Vector();
         for (Iterator itr = values.iterator(); itr.hasNext();) {
-	    RCKeyEvent keyEvent = (RCKeyEvent)itr.next();
+            RCKeyEvent keyEvent = (RCKeyEvent)itr.next();
             if ((mask & keyEvent.getBitMask()) != 0) {
-	        result.add(keyEvent);
+                result.add(keyEvent);
             }
         }
-        return result;	
+        return result;  
     }
 
     private static RCKeyEvent[] 
             generatePerfectHashOfEventCodes(RCKeyEvent[] keys) 
     {
-	//
-	// This is a time-consuming consistency check, so I disable it
-	// even when assertions are enabled.  It only needs to be re-run
-	// when a key is added to the table of keys.
-	//
-	if (false && Debug.ASSERT) {
-	    for (int i = 0; i < keys.length-1; i++) {
-		for (int j = i+1; j < keys.length; j++) {
-		    if (keys[i].getKeyCode() == keys[j].getKeyCode()
-		        || keys[i].getBitMask() == keys[j].getBitMask())
-		    {
-			Debug.assertFail(keys[i].getName() + " key is same as "
-			                 + keys[j].getName());
-		    }
-		}
-	    }
-	}
-	int remainder = 78;	// At 31 keys, algorithm terminates there.
-	for (;;) {
-	    boolean ok = true;
-	    RCKeyEvent[] result = new RCKeyEvent[remainder];
-	    for (int i = 0; i < keys.length; i++) {
-		int x = keys[i].keyCode % remainder;
-		if (result[x] != null) {
-		    ok = false;
-		    break;
-		} else {
-		    result[x] = keys[i];
-		}
-	    }
-	    if (ok) {
-		return result;
-	    }
-	    remainder++;
-		// This might look a little crazy, but it terminates
-		// after eleven iterations with the 20 keys we have
-		// defined (as of 12/19/06).  Given what I saw in
-		// http://www.onjava.com/pub/a/onjava/2001/01/25/hash_functions.html ,
-		// this is a safe thing to do.  Still, if a key is added,
-		// it wouldn't hurt to check that this terminates quickly.
-	    if (Debug.ASSERT && remainder > 120) {
-		Debug.assertFail("Find a better algorithm!");
-	    }
-	}
+        //
+        // This is a time-consuming consistency check, so I disable it
+        // even when assertions are enabled.  It only needs to be re-run
+        // when a key is added to the table of keys.
+        //
+        if (false && Debug.ASSERT) {
+            for (int i = 0; i < keys.length-1; i++) {
+                for (int j = i+1; j < keys.length; j++) {
+                    if (keys[i].getKeyCode() == keys[j].getKeyCode()
+                        || keys[i].getBitMask() == keys[j].getBitMask())
+                    {
+                        Debug.assertFail(keys[i].getName() + " key is same as "
+                                         + keys[j].getName());
+                    }
+                }
+            }
+        }
+        int remainder = 78;     // At 31 keys, algorithm terminates there.
+        for (;;) {
+            boolean ok = true;
+            RCKeyEvent[] result = new RCKeyEvent[remainder];
+            for (int i = 0; i < keys.length; i++) {
+                int x = keys[i].keyCode % remainder;
+                if (result[x] != null) {
+                    ok = false;
+                    break;
+                } else {
+                    result[x] = keys[i];
+                }
+            }
+            if (ok) {
+                return result;
+            }
+            remainder++;
+                // This might look a little crazy, but it terminates
+                // after eleven iterations with the 20 keys we have
+                // defined (as of 12/19/06).  Given what I saw in
+                // http://www.onjava.com/pub/a/onjava/2001/01/25/hash_functions.html ,
+                // this is a safe thing to do.  Still, if a key is added,
+                // it wouldn't hurt to check that this terminates quickly.
+            if (Debug.ASSERT && remainder > 120) {
+                Debug.assertFail("Find a better algorithm!");
+            }
+        }
     }
 }

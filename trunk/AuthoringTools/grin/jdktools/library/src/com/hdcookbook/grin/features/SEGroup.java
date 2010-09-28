@@ -77,7 +77,7 @@ public class SEGroup extends Group implements SENode, SEScalableNode {
      * Called from the parser
      **/
     public void setup(Feature[] parts) { 
-	setParts(parts);
+        setParts(parts);
     }
 
    /**
@@ -85,7 +85,7 @@ public class SEGroup extends Group implements SENode, SEScalableNode {
      **/
     @Override
     public void setParts(Feature[] parts) {
-	super.setParts(parts);
+        super.setParts(parts);
     }
     
     public void writeInstanceData(GrinDataOutputStream out) 
@@ -113,30 +113,30 @@ public class SEGroup extends Group implements SENode, SEScalableNode {
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
-	Feature[] parts = getParts();
-	for (int i = 0; i < parts.length; i++) {
-	    if (parts[i] == from) {
-		parts[i] = to;
-	    }
-	}
-	setParts(parts);	// This isn't really necessary
+        Feature[] parts = getParts();
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i] == from) {
+                parts[i] = to;
+            }
+        }
+        setParts(parts);        // This isn't really necessary
     }
 
     /**
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	// Do nothing
+        // Do nothing
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "group @" + Integer.toHexString(hashCode());
-	} else {
-	    return "group " + name;
-	}
+        if (name == null) {
+            return "group @" + Integer.toHexString(hashCode());
+        } else {
+            return "group " + name;
+        }
     }
 }

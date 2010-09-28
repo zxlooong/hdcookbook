@@ -92,11 +92,11 @@ public class HeadlessManagedImage extends ManagedImage {
      * their lifecycle managed by ImageManager.
      **/
     public HeadlessManagedImage(String name) {
-	this.name = name;
-	this.url = AssetFinder.getURL(name);
-	if (this.url == null) {
-	    throw new NullPointerException();
-	}
+        this.name = name;
+        this.url = AssetFinder.getURL(name);
+        if (this.url == null) {
+            throw new NullPointerException();
+        }
     }
 
     public String getName() {
@@ -144,7 +144,7 @@ public class HeadlessManagedImage extends ManagedImage {
      * {@inheritDoc}
      **/
     public synchronized boolean hadErrorLoading() {
-	return false;
+        return false;
     }
 
 
@@ -154,84 +154,84 @@ public class HeadlessManagedImage extends ManagedImage {
      *  This version works with a null component.
      **/
     public void load(Component comp) {
-	    // See ManagedImage's main class documentation under
-	    //  "ManagedImage contract - image loading and unloading".
-	synchronized(this) {
-	    while (true) {
-		if (loaded || numPrepares <= 0) {
-			// If load is done in a different thread than
-			// unprepare, it's possible for our client to lose
-			// interest in us before we even start preparing.
-			// For example, in GRIN, the show could possibly
-			// move to a different segment before the setup
-			// thread starts preparing an image from the previous
-			// segment.
-		    return;
-		}
-		if (image == null) {
-		    startLoading(comp);	// Sets image to non-null
-		} else {
-		    // Image is being loaded, so we wait.
-		    try {
-			wait();	// Until that other thread loads image
-		    } catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-			return;
-		    }
-		    // Now, go back around the loop
-		}
-	    }
-	}
+            // See ManagedImage's main class documentation under
+            //  "ManagedImage contract - image loading and unloading".
+        synchronized(this) {
+            while (true) {
+                if (loaded || numPrepares <= 0) {
+                        // If load is done in a different thread than
+                        // unprepare, it's possible for our client to lose
+                        // interest in us before we even start preparing.
+                        // For example, in GRIN, the show could possibly
+                        // move to a different segment before the setup
+                        // thread starts preparing an image from the previous
+                        // segment.
+                    return;
+                }
+                if (image == null) {
+                    startLoading(comp); // Sets image to non-null
+                } else {
+                    // Image is being loaded, so we wait.
+                    try {
+                        wait(); // Until that other thread loads image
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                    // Now, go back around the loop
+                }
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public synchronized void startLoading(Component  comp) {
-	if (image != null || numPrepares <= 0) {
-	    return;
-	}
-	try {
-	    image = ImageIO.read(url);
-	} catch (IOException ex) {
-	    throw new RuntimeException(ex);
-		// If this class later supports more graceful failure
-		// when there's an error loading, the implementation of
-		// hadErrorLoading() would need to change.
-	}
-	loaded = true;
-	width = image.getWidth();
-	height = image.getHeight();
-	notifyAll();
+        if (image != null || numPrepares <= 0) {
+            return;
+        }
+        try {
+            image = ImageIO.read(url);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+                // If this class later supports more graceful failure
+                // when there's an error loading, the implementation of
+                // hadErrorLoading() would need to change.
+        }
+        loaded = true;
+        width = image.getWidth();
+        height = image.getHeight();
+        notifyAll();
     }
 
     /** 
      * {@inheritDoc}
      **/
     public void unprepare() {
-	    // See ManagedImage's main class documentation under
-	    //  "ManagedImage contract - image loading and unloading".
-	int w = 0;
-	int h = 0;
-	synchronized(this) {
-	    numPrepares--;
-	    if (numPrepares > 0) {
-		return;
-	    } else {
-		if (image != null) {
-		    w = width;
-		    h = height;
-		    width = 0;
-		    height = 0;
-		    image.flush();
-		    image = null;
-		}
-		if (!loaded) {
-		    return;
-		}
-		loaded = false;
-	    }
-	}
+            // See ManagedImage's main class documentation under
+            //  "ManagedImage contract - image loading and unloading".
+        int w = 0;
+        int h = 0;
+        synchronized(this) {
+            numPrepares--;
+            if (numPrepares > 0) {
+                return;
+            } else {
+                if (image != null) {
+                    w = width;
+                    h = height;
+                    width = 0;
+                    height = 0;
+                    image.flush();
+                    image = null;
+                }
+                if (!loaded) {
+                    return;
+                }
+                loaded = false;
+            }
+        }
     }
 
     /**
@@ -245,41 +245,41 @@ public class HeadlessManagedImage extends ManagedImage {
      * {@inheritDoc}
      **/
     public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
-	gr.drawImage(image, bounds.x, bounds.y, 
-			    bounds.x+bounds.width, bounds.y+bounds.height,
-			    0, 0, width, height, comp);
+        gr.drawImage(image, bounds.x, bounds.y, 
+                            bounds.x+bounds.width, bounds.y+bounds.height,
+                            0, 0, width, height, comp);
     }
     
     /**
      * {@inheritDoc}
      **/
     public void drawClipped(Graphics2D gr, int x, int y, 
-    			    Rectangle subsection, Component comp) 
+                            Rectangle subsection, Component comp) 
     {
-	gr.drawImage(image, x, y, x+ subsection.width, y+subsection.height,
-			    subsection.x, subsection.y, 
-			    subsection.x+subsection.width, 
-			    subsection.y+subsection.height, 
-			    comp);
+        gr.drawImage(image, x, y, x+ subsection.width, y+subsection.height,
+                            subsection.x, subsection.y, 
+                            subsection.x+subsection.width, 
+                            subsection.y+subsection.height, 
+                            comp);
     }
 
     void destroy() {
-	if (Debug.LEVEL > 0 && loaded) {
-	    Debug.println("Warning:  Destroying loaded image " + this + ".");
-	    Debug.println("          unprepare() should always be called before ungetImage().");
-	    	// A bit of explanation here:  destroy() is called from
-		// ImageManger.ungetImage() when the ref count drops to 0.
-		// This is supposed to mean that the application no longer
-		// references the ManagedImage, so it should be impossible
-		// for the application to call unprepare().
-		//
-		// An xlet should always unprepare() its images before
-		// calling ImageManager.ungetImage().
-	}
-	Image im = image;
-	if (im != null) {
-	    im.flush();	// Shouldn't be necessary, but doesn't hurt.
-	}
+        if (Debug.LEVEL > 0 && loaded) {
+            Debug.println("Warning:  Destroying loaded image " + this + ".");
+            Debug.println("          unprepare() should always be called before ungetImage().");
+                // A bit of explanation here:  destroy() is called from
+                // ImageManger.ungetImage() when the ref count drops to 0.
+                // This is supposed to mean that the application no longer
+                // references the ManagedImage, so it should be impossible
+                // for the application to call unprepare().
+                //
+                // An xlet should always unprepare() its images before
+                // calling ImageManager.ungetImage().
+        }
+        Image im = image;
+        if (im != null) {
+            im.flush(); // Shouldn't be necessary, but doesn't hurt.
+        }
     }
 
 }

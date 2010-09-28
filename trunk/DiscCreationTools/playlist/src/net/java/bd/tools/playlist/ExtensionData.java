@@ -68,9 +68,9 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(propOrder={"extDataEntry", "paddingL1", "extDataBlock"})
 public class ExtensionData {
     
-	private ExtDataEntry[] extDataEntry;
-	private int paddingL1;
-	private ExtDataBlock[] extDataBlock;
+        private ExtDataEntry[] extDataEntry;
+        private int paddingL1;
+        private ExtDataBlock[] extDataBlock;
     
     public void readObject(DataInputStream din) throws IOException {
         // 32 bit length
@@ -86,38 +86,38 @@ public class ExtensionData {
         // for i = 0 ... L1
         // 32 bit padding
         // data_block() - ex. i...N pip_metadata()
-    	din.skipBytes(4);		// length
+        din.skipBytes(4);               // length
         int dataBlockStartAddress = din.readInt();
         din.skipBytes(3);
         int n = din.readUnsignedByte();
         ExtDataEntry[] entries = new ExtDataEntry[n];
         int[] extensionDataSize = new int[n];
         for (int i = 0; i < n; i++) {
-        	entries[i] = new ExtDataEntry();
-        	entries[i].readObject(din);
-        	din.skipBytes(4); // ext_data_start_address
-        	extensionDataSize[i] = din.readInt(); // ext_data_length
+                entries[i] = new ExtDataEntry();
+                entries[i].readObject(din);
+                din.skipBytes(4); // ext_data_start_address
+                extensionDataSize[i] = din.readInt(); // ext_data_length
         }
         setExtDataEntry(entries);
         int paddingL1 = (dataBlockStartAddress - (12 + (n * 12))) / 4;
         setPaddingL1(paddingL1);
         ExtDataBlock[] data = new ExtDataBlock[n];
         for (int i = 0; i < n; i++) {
-        	ExtDataBlock.BlockType type;
-        	if (entries[i].getID1() == 0x0001 && entries[i].getID2() == 0x0001) {
-        		type = ExtDataBlock.BlockType.pip_metadata;
-        	} else {
-        		type = ExtDataBlock.BlockType.unknown;
-        	}
-        	data[i] = new ExtDataBlock(type, extensionDataSize[i]); 
-        	data[i].readObject(din);
+                ExtDataBlock.BlockType type;
+                if (entries[i].getID1() == 0x0001 && entries[i].getID2() == 0x0001) {
+                        type = ExtDataBlock.BlockType.pip_metadata;
+                } else {
+                        type = ExtDataBlock.BlockType.unknown;
+                }
+                data[i] = new ExtDataBlock(type, extensionDataSize[i]); 
+                data[i].readObject(din);
         }
         setExtDataBlock(data);
     }
     
     public void writeObject(DataOutputStream dout) throws IOException {
-    	
-    	int length;
+        
+        int length;
         int dataBlockStartAddress;
         byte[] reserved = new byte[3];
         
@@ -132,11 +132,11 @@ public class ExtensionData {
         int previousSize = 0;
         int currentSize = 0;
         for (int i = 0; i < extDataBlock.length; i++) {
-        	extDataBlock[i].writeObject(extDataBlockStream);
-        	extDataBlockStream.flush();
+                extDataBlock[i].writeObject(extDataBlockStream);
+                extDataBlockStream.flush();
             previousSize = currentSize;
-        	currentSize = baos2.size() - previousSize;
-        	dataBlockSize[i] = currentSize;	
+                currentSize = baos2.size() - previousSize;
+                dataBlockSize[i] = currentSize; 
         }
         extDataBlockStream.flush();
         extDataBlockStream.close();
@@ -163,34 +163,34 @@ public class ExtensionData {
         }    
         
         for (int i = 0; i < getPaddingL1(); i++) {
-        	dout.writeShort(0);
-        	dout.writeShort(0);
+                dout.writeShort(0);
+                dout.writeShort(0);
         }
         
         dout.write(baos2.toByteArray());   // ExtDataBlock[]
     }
     
     public ExtDataEntry[] getExtDataEntry() {
-    	return extDataEntry;
+        return extDataEntry;
     }
     
     public void setExtDataEntry(ExtDataEntry[] extDataEntry) {
-    	this.extDataEntry = extDataEntry;
+        this.extDataEntry = extDataEntry;
     }
     
     public int getPaddingL1() {
-    	return paddingL1;
+        return paddingL1;
     }
     
     public void setPaddingL1(int paddingL1) {
-    	this.paddingL1 = paddingL1;
+        this.paddingL1 = paddingL1;
     }
     
     public ExtDataBlock[] getExtDataBlock() {
-    	return extDataBlock;
+        return extDataBlock;
     }
     
     public void setExtDataBlock(ExtDataBlock[] extDataBlock) {
-    	this.extDataBlock = extDataBlock;
+        this.extDataBlock = extDataBlock;
     }
 }

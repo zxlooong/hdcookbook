@@ -105,31 +105,31 @@ public class SEAssembly extends Assembly implements SENode, SEScalableNode {
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
-	for (int i = 0; i < parts.length; i++) {
-	    if (parts[i] == from) {
-		parts[i] = to;
-	    }
-	}
-	if (currentFeature == from) {
-	    currentFeature = to;
-	}
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i] == from) {
+                parts[i] = to;
+            }
+        }
+        if (currentFeature == from) {
+            currentFeature = to;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	// Do nothing
+        // Do nothing
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "assembly @" + Integer.toHexString(hashCode());
-	} else {
-	    return "assembly " + name;
-	}
+        if (name == null) {
+            return "assembly @" + Integer.toHexString(hashCode());
+        } else {
+            return "assembly " + name;
+        }
     }
 }

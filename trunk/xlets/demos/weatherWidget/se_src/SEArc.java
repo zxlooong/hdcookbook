@@ -78,36 +78,36 @@ import java.io.IOException;
 public class SEArc extends Arc implements SENode {
 
     public SEArc(Show show, String name, int x, int y, int width, int height,
-		 int startAngle, int arcAngle, Color color)
+                 int startAngle, int arcAngle, Color color)
     {
-	super(show);
-	this.name = name;
-    	this.x = x;
-    	this.y = y;
-    	this.width = width;
-    	this.height = height;
-    	this.startAngle = startAngle;
-    	this.arcAngle = arcAngle;
-    	this.color = color;
+        super(show);
+        this.name = name;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.startAngle = startAngle;
+        this.arcAngle = arcAngle;
+        this.color = color;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) throws IOException {
-	out.writeSuperClassData(this);
-	out.writeColor(color);
-	out.writeInt(x);
-	out.writeInt(y);
-	out.writeInt(width);
-	out.writeInt(height);
-	out.writeInt(startAngle);
-	out.writeInt(arcAngle);
+        out.writeSuperClassData(this);
+        out.writeColor(color);
+        out.writeInt(x);
+        out.writeInt(y);
+        out.writeInt(width);
+        out.writeInt(height);
+        out.writeInt(startAngle);
+        out.writeInt(arcAngle);
     }
 
     public String getRuntimeClassName() {
-	return Arc.class.getName();
+        return Arc.class.getName();
     }
 
     public void accept(SEShowVisitor visitor) {
-	visitor.visitUserDefinedFeature(this);
+        visitor.visitUserDefinedFeature(this);
     }
 
     /**
@@ -126,10 +126,10 @@ public class SEArc extends Arc implements SENode {
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "Weather:arc @" + Integer.toHexString(hashCode());
-	} else {
-	    return "Weather:arc " + name;
-	}
+        if (name == null) {
+            return "Weather:arc @" + Integer.toHexString(hashCode());
+        } else {
+            return "Weather:arc " + name;
+        }
     }
 }

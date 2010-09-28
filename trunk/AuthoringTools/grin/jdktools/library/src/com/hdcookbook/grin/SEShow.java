@@ -92,9 +92,9 @@ public class SEShow extends Show {
     private ArrayList<MosaicSpec> mosaicSpecs = new ArrayList();
     private boolean noShowFile = false;
 
-    private String binaryGrinFileName = null;	// null means "use default"
-    private boolean isBinary = false;	
-	// This is set to true if this SEShow is created from a binary file.
+    private String binaryGrinFileName = null;   // null means "use default"
+    private boolean isBinary = false;   
+        // This is set to true if this SEShow is created from a binary file.
 
     // For setting the background image by segment or by selection
     ArrayList<BackgroundSpec> grinviewBackgrounds = null;
@@ -102,11 +102,11 @@ public class SEShow extends Show {
     /**
      * Create a new SEShow.
      *
-     * @param director	A Director helper class that can be used to
-     *			control the show.
+     * @param director  A Director helper class that can be used to
+     *                  control the show.
      **/
     public SEShow(Director director) {
-	super(director);
+        super(director);
     }
 
     /** 
@@ -114,7 +114,7 @@ public class SEShow extends Show {
      * file.  The double-use checker won't be run on such a show file.
      **/
     public void setIsBinary(boolean isBinary) {
-	this.isBinary = isBinary;
+        this.isBinary = isBinary;
     }
 
     /**
@@ -123,7 +123,7 @@ public class SEShow extends Show {
      * used to collect mosaic definitions.
      **/
     public void setNoShowFile(boolean val) {
-	noShowFile = val;
+        noShowFile = val;
     }
 
     /**
@@ -132,21 +132,21 @@ public class SEShow extends Show {
      * used to collect mosaic definitions.
      **/
     public boolean getNoShowFile() {
-	return noShowFile;
+        return noShowFile;
     }
 
     /**
      * Get the list of sticky images as a string array of the image file names.
      **/
     public String[] getStickyImages() {
-	if (stickyImages == null) {
-	    return null;
-	}
-	String[] result = new String[stickyImages.length];
-	for (int i = 0; i < result.length; i++) {
-	    result[i] = stickyImages[i].getName();
-	}
-	return result;
+        if (stickyImages == null) {
+            return null;
+        }
+        String[] result = new String[stickyImages.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = stickyImages[i].getName();
+        }
+        return result;
     }
     
     /**
@@ -184,11 +184,11 @@ public class SEShow extends Show {
      * Get all of the segments in the show
      **/
     public Segment[] getSegments() {
-	return segments;
+        return segments;
     }
 
     public Hashtable getPublicNamedCommands() {
-	return publicNamedCommands;
+        return publicNamedCommands;
     }
 
 
@@ -196,14 +196,14 @@ public class SEShow extends Show {
      * Get all of the features in the show
      **/
     public Feature[] getFeatures() {
-	return features;
+        return features;
     }
 
     /**
      * Get all of the remote control handlers in the show
      **/
     public RCHandler[] getRCHandlers() {
-	return rcHandlers;
+        return rcHandlers;
     }
 
     /**
@@ -212,42 +212,42 @@ public class SEShow extends Show {
      * reasons we expect even binary files will do this.
      **/
     public Segment getPrivateSegment(String name) {
-	synchronized(internalMonitor) {
-	    if (privateSegments == null) {
-		privateSegments = new HashMap<String, Segment>();
-		for (int i = 0; i < segments.length; i++) {
-		    if (segments[i].getName() != null) {
-			privateSegments.put(segments[i].getName(), segments[i]);
-		    }
-		}
-	    }
-	    return privateSegments.get(name);
-	}
+        synchronized(internalMonitor) {
+            if (privateSegments == null) {
+                privateSegments = new HashMap<String, Segment>();
+                for (int i = 0; i < segments.length; i++) {
+                    if (segments[i].getName() != null) {
+                        privateSegments.put(segments[i].getName(), segments[i]);
+                    }
+                }
+            }
+            return privateSegments.get(name);
+        }
     }
 
     /**
      * Get the font name array
      **/
     public String[] getFontName() {
-	return fontName;
+        return fontName;
     }
 
     /**
      * Get they StyleSize information for the show's fonts
      **/
     public int[] getFontStyleSize() {
-	return fontStyleSize;
+        return fontStyleSize;
     }
 
     /**
      * Determine if the given Segment is public
      **/
     public boolean isPublic(Segment seg) {
-	if (seg.getName() == null) {
-	    return false;
-	} else {
-	    return publicSegments.get(seg.getName()) != null;
-	}
+        if (seg.getName() == null) {
+            return false;
+        } else {
+            return publicSegments.get(seg.getName()) != null;
+        }
     }
 
 
@@ -255,11 +255,11 @@ public class SEShow extends Show {
      * Determine if the given Feature is public
      **/
     public boolean isPublic(Feature f) {
-	if (f.getName() == null) {
-	    return false;
-	} else {
-	    return publicFeatures.get(f.getName()) != null;
-	}
+        if (f.getName() == null) {
+            return false;
+        } else {
+            return publicFeatures.get(f.getName()) != null;
+        }
     }
 
 
@@ -267,15 +267,15 @@ public class SEShow extends Show {
      * Determine if the given RCHandler is public
      **/
     public boolean isPublic(RCHandler hand) {
-	if (hand.getName() == null) {
-	    return false;
-	} else {
-	    return publicRCHandlers.get(hand.getName()) != null;
-	}
+        if (hand.getName() == null) {
+            return false;
+        } else {
+            return publicRCHandlers.get(hand.getName()) != null;
+        }
     }
 
     public void setNamedCommands(Command[] namedCommands) {
-	this.namedCommands = namedCommands;
+        this.namedCommands = namedCommands;
     }
 
     /**
@@ -286,25 +286,25 @@ public class SEShow extends Show {
      **/
     @Override
     public void buildShow(Segment[] segments, Feature[] features, 
-    		          RCHandler[] rcHandlers, String[] stickyImages,
+                          RCHandler[] rcHandlers, String[] stickyImages,
                           Segment showTop, Group showTopGroup,
-		          Hashtable publicSegments, Hashtable publicFeatures,
-		          Hashtable publicRCHandlers, 
-			  Hashtable publicNamedCommands,
-			  String[] fontName, int[] fontStyleSize)
-	    throws IOException
+                          Hashtable publicSegments, Hashtable publicFeatures,
+                          Hashtable publicRCHandlers, 
+                          Hashtable publicNamedCommands,
+                          String[] fontName, int[] fontStyleSize)
+            throws IOException
     {
 
-	super.buildShow(segments, features, rcHandlers, stickyImages,
+        super.buildShow(segments, features, rcHandlers, stickyImages,
                         showTop, showTopGroup,
-		        publicSegments, publicFeatures, publicRCHandlers,
-			publicNamedCommands, fontName, fontStyleSize);
-	if (isBinary) {
-	    return;
-	}
-	SEDoubleUseChecker checker = new SEDoubleUseChecker();
-	accept(checker);
-	checker.reportAnyProblems();
+                        publicSegments, publicFeatures, publicRCHandlers,
+                        publicNamedCommands, fontName, fontStyleSize);
+        if (isBinary) {
+            return;
+        }
+        SEDoubleUseChecker checker = new SEDoubleUseChecker();
+        accept(checker);
+        checker.reportAnyProblems();
     }
     
     /**
@@ -314,7 +314,7 @@ public class SEShow extends Show {
      * @param name  The file name, including any extension
      **/
     public void setBinaryGrinFileName(String name) {
-	binaryGrinFileName = name;
+        binaryGrinFileName = name;
     }
 
     /**
@@ -323,16 +323,16 @@ public class SEShow extends Show {
      * and semantics.
      **/
     public void setGrinviewBackgrounds(ArrayList<BackgroundSpec> value) {
-	this.grinviewBackgrounds = value;
+        this.grinviewBackgrounds = value;
     }
 
     public BackgroundSpec[] getGrinviewBackgrounds() {
-	if (grinviewBackgrounds == null) {
-	    return new BackgroundSpec[0];
-	} else {
-	    return grinviewBackgrounds.toArray(
-	    	new BackgroundSpec[grinviewBackgrounds.size()]);
-	}
+        if (grinviewBackgrounds == null) {
+            return new BackgroundSpec[0];
+        } else {
+            return grinviewBackgrounds.toArray(
+                new BackgroundSpec[grinviewBackgrounds.size()]);
+        }
     }
 
     /**
@@ -340,23 +340,23 @@ public class SEShow extends Show {
      * Gives null if the default file name should be used.
      **/
     public String getBinaryGrinFileName() {
-	return binaryGrinFileName;
+        return binaryGrinFileName;
     }
 
     /**
      * Called by the ShowParser when a new mosaic or mosaic_hint is found.
      *
-     * @throws	IOException if name is a duplicate
+     * @throws  IOException if name is a duplicate
      */
     public MosaicSpec newMosaicSpec(String name) throws IOException {
-	for (MosaicSpec s : mosaicSpecs) {
-	    if (name.equals(s.name)) {
-		throw new IOException("Duplicate mosaic \"" + name + "\".");
-	    }
-	}
-	MosaicSpec ms = new MosaicSpec(name);
+        for (MosaicSpec s : mosaicSpecs) {
+            if (name.equals(s.name)) {
+                throw new IOException("Duplicate mosaic \"" + name + "\".");
+            }
+        }
+        MosaicSpec ms = new MosaicSpec(name);
         mosaicSpecs.add(ms);
-	return ms;
+        return ms;
     }
 
     /**
@@ -373,7 +373,7 @@ public class SEShow extends Show {
      * call SEShow.accept(xxx) for any children it wants to visit.
      **/
     public void accept(SEShowVisitor visitor) {
-	visitor.visitShow(this);
+        visitor.visitShow(this);
     }
 
     /**
@@ -382,7 +382,7 @@ public class SEShow extends Show {
      **/
     public static void acceptSegments(SEShowVisitor visitor, Segment[] segments)
     {
-	for (Segment e : segments) {
+        for (Segment e : segments) {
             if (e instanceof SENode) {
                 ((SENode)e).accept(visitor);
             }
@@ -395,9 +395,9 @@ public class SEShow extends Show {
      **/
     public static void acceptFeatures(SEShowVisitor visitor, Feature[] features)
     {
-	for (Feature e : features) {
-	    acceptFeature(visitor, e);
-	}
+        for (Feature e : features) {
+            acceptFeature(visitor, e);
+        }
     }
 
     /**
@@ -405,11 +405,11 @@ public class SEShow extends Show {
      * call acceptRCHandler() on each of the handlers.
      **/
     public static void acceptRCHandlers(SEShowVisitor visitor, 
-    					RCHandler[] rcHandlers) 
+                                        RCHandler[] rcHandlers) 
     {
-	for (RCHandler e : rcHandlers) {
-	    acceptRCHandler(visitor, e);
-	}
+        for (RCHandler e : rcHandlers) {
+            acceptRCHandler(visitor, e);
+        }
     }
 
     /**
@@ -418,13 +418,13 @@ public class SEShow extends Show {
      * feature passed in.
      **/
     public static void acceptFeature(SEShowVisitor visitor, Feature feature) {
-	if (feature instanceof SENode) {
+        if (feature instanceof SENode) {
             ((SENode)feature).accept(visitor);
-	} else if (feature instanceof Modifier) {
-	    visitor.visitUserDefinedModifier((Modifier) feature);
-	} else {
-	    visitor.visitUserDefinedFeature(feature);
-	}
+        } else if (feature instanceof Modifier) {
+            visitor.visitUserDefinedModifier((Modifier) feature);
+        } else {
+            visitor.visitUserDefinedFeature(feature);
+        }
     }
     
     /**
@@ -434,11 +434,11 @@ public class SEShow extends Show {
      **/
     public static void acceptRCHandler(SEShowVisitor visitor, RCHandler handler)
     {
-	if (handler instanceof SENode) {
-	    ((SENode)handler).accept(visitor);
-	} else {
-	    assert false;
-	}
+        if (handler instanceof SENode) {
+            ((SENode)handler).accept(visitor);
+        } else {
+            assert false;
+        }
     }
 
     /**
@@ -446,11 +446,11 @@ public class SEShow extends Show {
      * call acceptCommand() on each of the commands.
      **/
     public static void acceptCommands(SEShowVisitor visitor, 
-    					Command[] commands) 
+                                        Command[] commands) 
     {
-	for (Command e : commands) {
-	    acceptCommand(visitor, e);
-	}
+        for (Command e : commands) {
+            acceptCommand(visitor, e);
+        }
     }
 
     /**
@@ -460,11 +460,11 @@ public class SEShow extends Show {
      **/
     public static void acceptCommand(SEShowVisitor visitor, Command command)
     {
-	if (command instanceof SENode) {
-	    ((SENode)command).accept(visitor);
-	} else {
-	    visitor.visitUserDefinedCommand(command);
-	}
+        if (command instanceof SENode) {
+            ((SENode)command).accept(visitor);
+        } else {
+            visitor.visitUserDefinedCommand(command);
+        }
     }
     
     /**
@@ -506,13 +506,13 @@ public class SEShow extends Show {
     }
 
     private void warnNotScalableNode(HashSet<Class> warnedSet, Object o) {
-	Class cl = o.getClass();
-	if (warnedSet.contains(cl)) {
-	    return;
-	}
-	warnedSet.add(cl);
-	System.err.println("   ERROR:  Node " + cl + " cannot be scaled.");
-	System.err.println("           First noticed in " + o);
+        Class cl = o.getClass();
+        if (warnedSet.contains(cl)) {
+            return;
+        }
+        warnedSet.add(cl);
+        System.err.println("   ERROR:  Node " + cl + " cannot be scaled.");
+        System.err.println("           First noticed in " + o);
     }
 
     /**
@@ -521,45 +521,45 @@ public class SEShow extends Show {
      * show at compile time, so no special scaling action is required at 
      * runtime.
      *
-     * @param 	xScale	x scale factor in mills
-     * @param 	yScale	y scale factor in mills
-     * @param	xOffset	x offset in pixels
-     * @param	yOffset	y offset in pixels
+     * @param   xScale  x scale factor in mills
+     * @param   yScale  y scale factor in mills
+     * @param   xOffset x offset in pixels
+     * @param   yOffset y offset in pixels
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) 
-	    throws IOException 
+            throws IOException 
     {
-	setScale(xScale, yScale, xOffset, yOffset);
-	HashSet<Class> warnedSet = new HashSet<Class>();
-	for (Feature f : features) {
-	    if (f instanceof SEScalableNode) {
-		((SEScalableNode) f).scaleBy(xScale, yScale, xOffset, yOffset);
-	    } else {
-	        warnNotScalableNode(warnedSet, f);
-	    }
-	}
-	for (RCHandler h : rcHandlers) {
-	    if (h instanceof SEScalableNode) {
-		((SEScalableNode) h).scaleBy(xScale, yScale, xOffset, yOffset);
-	    } else {
-	        warnNotScalableNode(warnedSet, h);
-	    }
-	}
-	if (fontStyleSize != null && fontStyleSize.length > 0) {
-	    if (xScale != yScale) {
-		System.out.println("WARNING:  Scaling font size by y scale value only.");
-		System.out.println("          Characters may appear compressed or stretched.");
-	    }
-	    for (int i = 0; i < fontStyleSize.length; i++) {
-		int style = fontStyleSize[i] & 0x03;
-		int size = fontStyleSize[i] >> 2;
-		size = Show.scale(size, yScale);
-		fontStyleSize[i] = style | (size << 2);
-	    }
-	}
-	if (!warnedSet.isEmpty()) {
-	    throw new IOException("Can't scale show, because it contains non-scalable nodes.");
-	}
+        setScale(xScale, yScale, xOffset, yOffset);
+        HashSet<Class> warnedSet = new HashSet<Class>();
+        for (Feature f : features) {
+            if (f instanceof SEScalableNode) {
+                ((SEScalableNode) f).scaleBy(xScale, yScale, xOffset, yOffset);
+            } else {
+                warnNotScalableNode(warnedSet, f);
+            }
+        }
+        for (RCHandler h : rcHandlers) {
+            if (h instanceof SEScalableNode) {
+                ((SEScalableNode) h).scaleBy(xScale, yScale, xOffset, yOffset);
+            } else {
+                warnNotScalableNode(warnedSet, h);
+            }
+        }
+        if (fontStyleSize != null && fontStyleSize.length > 0) {
+            if (xScale != yScale) {
+                System.out.println("WARNING:  Scaling font size by y scale value only.");
+                System.out.println("          Characters may appear compressed or stretched.");
+            }
+            for (int i = 0; i < fontStyleSize.length; i++) {
+                int style = fontStyleSize[i] & 0x03;
+                int size = fontStyleSize[i] >> 2;
+                size = Show.scale(size, yScale);
+                fontStyleSize[i] = style | (size << 2);
+            }
+        }
+        if (!warnedSet.isEmpty()) {
+            throw new IOException("Can't scale show, because it contains non-scalable nodes.");
+        }
     }
 
     /**
@@ -568,13 +568,13 @@ public class SEShow extends Show {
      * constant.
      **/
     public void appendCommandClassCode(String s) {
-	commandClassCode.append(s);
+        commandClassCode.append(s);
     }
 
     /**
      * Get the extra code that goes in the command class
      **/
     public String getCommandClassCode() {
-	return commandClassCode.toString();
+        return commandClassCode.toString();
     }
 }

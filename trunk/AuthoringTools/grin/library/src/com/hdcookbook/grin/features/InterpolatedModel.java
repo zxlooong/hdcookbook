@@ -113,30 +113,30 @@ public class InterpolatedModel extends Feature implements Node {
      * reconstructed using GrinDataInputStream.getSharedIntArray, while
      * currValues are mutable, and reconstructed using getIntArray.
      */
-    protected int[] frames;	// Frame number of keyframes, [0] is always 0
-    protected int[] currValues;	// Current value of each field
-    protected int[][] values;	// Values at keyframe, indexed by field.
-    				// The array for a field can be null, in which
-				// case the initial value of currValues will be
-				// maintained.
-    protected int repeatFrame;	// Frame to go to after the end.  
-    				// Integer.MAX_VALUE means "stick at end"
-				// 0 will cause a cycle.
-    protected int loopCount;	
-    	// # of times to repeat images before sending end commands
-	// Integer.MAX_VALUE means "infinite"
+    protected int[] frames;     // Frame number of keyframes, [0] is always 0
+    protected int[] currValues; // Current value of each field
+    protected int[][] values;   // Values at keyframe, indexed by field.
+                                // The array for a field can be null, in which
+                                // case the initial value of currValues will be
+                                // maintained.
+    protected int repeatFrame;  // Frame to go to after the end.  
+                                // Integer.MAX_VALUE means "stick at end"
+                                // 0 will cause a cycle.
+    protected int loopCount;    
+        // # of times to repeat images before sending end commands
+        // Integer.MAX_VALUE means "infinite"
 
     private boolean isActivated = false;
     private int currFrame;      // Current frame in cycle
     private int currIndex;      // frames[index] <= currFrame < frames[index+1]
-    private int repeatIndex;	// Index when currFrame is repeatFrame-1
-    private int loopsRemaining;	// see loopCount
+    private int repeatIndex;    // Index when currFrame is repeatFrame-1
+    private int loopsRemaining; // see loopCount
     protected Command[] endCommands;
 
     /**
-     * @param show	The show this feature is attached to.  The value
-     *			can be null, as long as it's set to a real value
-     *			before the feature is used.
+     * @param show      The show this feature is attached to.  The value
+     *                  can be null, as long as it's set to a real value
+     *                  before the feature is used.
      **/
     public InterpolatedModel(Show show) {
         super(show);
@@ -146,44 +146,44 @@ public class InterpolatedModel extends Feature implements Node {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup() || isActivated) {
-	    throw new IllegalStateException();
-	}
-	InterpolatedModel result = new InterpolatedModel(show);
-	result.frames = frames;
-	result.currValues = new int[currValues.length];
-	System.arraycopy(currValues, 0, result.currValues, 0,currValues.length);
-	result.values = values;
-	result.repeatFrame = repeatFrame;
-	result.loopCount = loopCount;
-	result.currFrame = currFrame;
-	result.currIndex = currIndex;
-	result.repeatIndex = repeatIndex;
-	result.loopsRemaining = loopsRemaining;
-	return result;
+        if (!isSetup() || isActivated) {
+            throw new IllegalStateException();
+        }
+        InterpolatedModel result = new InterpolatedModel(show);
+        result.frames = frames;
+        result.currValues = new int[currValues.length];
+        System.arraycopy(currValues, 0, result.currValues, 0,currValues.length);
+        result.values = values;
+        result.repeatFrame = repeatFrame;
+        result.loopCount = loopCount;
+        result.currFrame = currFrame;
+        result.currIndex = currIndex;
+        result.repeatIndex = repeatIndex;
+        result.loopsRemaining = loopsRemaining;
+        return result;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
-	super.initializeClone(original, clones);
-	InterpolatedModel other = (InterpolatedModel) original;
-	endCommands = Feature.cloneCommands(other.endCommands, clones);
+        super.initializeClone(original, clones);
+        InterpolatedModel other = (InterpolatedModel) original;
+        endCommands = Feature.cloneCommands(other.endCommands, clones);
     }
  
     /**
      * Give the current value for the given field
      *
-     * @param	fieldNum 	The field number, counting from 0
+     * @param   fieldNum        The field number, counting from 0
      **/
     public final int getField(int fieldNum) {
-	if (Debug.ASSERT && !isActivated && values[fieldNum] != null) {
-		// If this is an automatically generated value, then it only
-		// has a meaningful value if we're activated.
-	    Debug.assertFail("InterpolatedModel " + getName()+" not activated");
-	}
-	return currValues[fieldNum];
+        if (Debug.ASSERT && !isActivated && values[fieldNum] != null) {
+                // If this is an automatically generated value, then it only
+                // has a meaningful value if we're activated.
+            Debug.assertFail("InterpolatedModel " + getName()+" not activated");
+        }
+        return currValues[fieldNum];
     }
 
     /**
@@ -203,10 +203,10 @@ public class InterpolatedModel extends Feature implements Node {
      * @see com.hdcookbook.grin.features.Translator#Y_FIELD
      **/
     public final void setField(int fieldNum, int value) {
-	if (Debug.ASSERT && values[fieldNum] != null) {
-	    Debug.assertFail();		// This is a value that is interpolated
-	}
-	currValues[fieldNum] = value;
+        if (Debug.ASSERT && values[fieldNum] != null) {
+            Debug.assertFail();         // This is a value that is interpolated
+        }
+        currValues[fieldNum] = value;
     }
 
     /**
@@ -216,7 +216,7 @@ public class InterpolatedModel extends Feature implements Node {
      * (Integer.MAX_VALUE)
      **/
     public int getX() {
-	return Integer.MAX_VALUE;
+        return Integer.MAX_VALUE;
     }
 
     /**
@@ -226,7 +226,7 @@ public class InterpolatedModel extends Feature implements Node {
      * (Integer.MAX_VALUE)
      **/
     public int getY() {
-	return Integer.MAX_VALUE;
+        return Integer.MAX_VALUE;
     }
 
     /**
@@ -234,11 +234,11 @@ public class InterpolatedModel extends Feature implements Node {
      * of doing our translation.
      **/
     public Command[] getEndCommands() {
-	return endCommands;
+        return endCommands;
     }
 
     final boolean getIsActivated() {
-	return isActivated;
+        return isActivated;
     }
 
     /**
@@ -247,18 +247,18 @@ public class InterpolatedModel extends Feature implements Node {
      * the segments.
      **/
     public void initialize() {
- 	if (repeatFrame == Integer.MAX_VALUE) {
-	    repeatIndex = Integer.MAX_VALUE;
-	}  else {
-	    repeatIndex = 0;
-	    // This is tricky.  We must calculate the index such
-	    // that frames[i] <= (repeatFrame - 1) < frames[i+1]
-	    while (repeatFrame-1 >= frames[repeatIndex + 1]) {
-		repeatIndex++;
-	    }
-	    // now repeatFrame-1 < frames[repeatIndex + 1]
-	    // and repeatFrame-1 >= frames[repeatIndex]
-	}
+        if (repeatFrame == Integer.MAX_VALUE) {
+            repeatIndex = Integer.MAX_VALUE;
+        }  else {
+            repeatIndex = 0;
+            // This is tricky.  We must calculate the index such
+            // that frames[i] <= (repeatFrame - 1) < frames[i+1]
+            while (repeatFrame-1 >= frames[repeatIndex + 1]) {
+                repeatIndex++;
+            }
+            // now repeatFrame-1 < frames[repeatIndex + 1]
+            // and repeatFrame-1 >= frames[repeatIndex]
+        }
     }
 
     /**
@@ -272,118 +272,118 @@ public class InterpolatedModel extends Feature implements Node {
     // This is synchronized to only occur within model updates.
     //
     protected void setActivateMode(boolean mode) {
-	isActivated = mode;
-	if (mode) {
-	    loopsRemaining = loopCount;
-	    if (frames.length <= 1) {
-		currFrame = Integer.MAX_VALUE;
-		currIndex = Integer.MAX_VALUE;
-	    } else {
-		currFrame = 0;
-		currIndex = 0;
-		for (int i = 0; i < currValues.length; i++) {
-		    if (values[i] != null) {
-			currValues[i] = values[i][0];
-		    }
-		}
-	    }
-	}
+        isActivated = mode;
+        if (mode) {
+            loopsRemaining = loopCount;
+            if (frames.length <= 1) {
+                currFrame = Integer.MAX_VALUE;
+                currIndex = Integer.MAX_VALUE;
+            } else {
+                currFrame = 0;
+                currIndex = 0;
+                for (int i = 0; i < currValues.length; i++) {
+                    if (values[i] != null) {
+                        currValues[i] = values[i][0];
+                    }
+                }
+            }
+        }
     }
 
     protected int setSetupMode(boolean mode) {
-	// do nothing
-	return 0;
+        // do nothing
+        return 0;
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	return false;
+        return false;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	if (Debug.ASSERT && !isActivated) {
-	    Debug.assertFail("InterpolatedModel " + getName()+" not activated");
-	}
-	if (currFrame == Integer.MAX_VALUE) {
-	    return;
-	}
-	currFrame++;
-	int nextIndex  = currIndex + 1;
-	int dist = frames[nextIndex] - frames[currIndex];
-	int distNext = frames[nextIndex] - currFrame;
-	int distLast = currFrame - frames[currIndex];
-	if (Debug.ASSERT && (distLast < 0 
-			     || (distNext < 0 && frames[nextIndex] != 0))) 
-	{
-	    // Let me unpack that.  distNext, the distance to the next value,
-	    // should never be less than zero, except for one special
-	    // case.  That special case is a one-frame timer, because
-	    // the frames array for a one-frame timer contains { 0 , 0 }
-	    Debug.assertFail();
-	}
-	for (int i = 0; i < currValues.length; i++) {
-	    int[] vs = values[i];
+        if (Debug.ASSERT && !isActivated) {
+            Debug.assertFail("InterpolatedModel " + getName()+" not activated");
+        }
+        if (currFrame == Integer.MAX_VALUE) {
+            return;
+        }
+        currFrame++;
+        int nextIndex  = currIndex + 1;
+        int dist = frames[nextIndex] - frames[currIndex];
+        int distNext = frames[nextIndex] - currFrame;
+        int distLast = currFrame - frames[currIndex];
+        if (Debug.ASSERT && (distLast < 0 
+                             || (distNext < 0 && frames[nextIndex] != 0))) 
+        {
+            // Let me unpack that.  distNext, the distance to the next value,
+            // should never be less than zero, except for one special
+            // case.  That special case is a one-frame timer, because
+            // the frames array for a one-frame timer contains { 0 , 0 }
+            Debug.assertFail();
+        }
+        for (int i = 0; i < currValues.length; i++) {
+            int[] vs = values[i];
             
-	    if (vs != null) {
-		currValues[i] = (vs[nextIndex] * distLast 
-			          + vs[currIndex] * distNext) /dist;
-	    }
-	}
-	if (distNext <= 0) {
-		// It will be -1 in the case of a one-frame timer
-	    currIndex = nextIndex;
-	    if (currIndex+1 >= frames.length) {
-		if (loopCount != Integer.MAX_VALUE) {
-		    loopsRemaining--;
-		}
-		if (loopsRemaining > 0) {
-		    if (repeatFrame == Integer.MAX_VALUE) {
-			currFrame = 0;
-			currIndex = 0;
-		    } else {
-			currFrame = repeatFrame;
-			if (currFrame  != Integer.MAX_VALUE) {
-			    currFrame--;
-			}
-			currIndex = repeatIndex;
-		    }
-		} else {
-		    loopsRemaining = loopCount;
-		    currFrame = repeatFrame;
-		    if (currFrame  != Integer.MAX_VALUE) {
-			currFrame--;
-		    }
-		    currIndex = repeatIndex;
-		    show.runCommands(endCommands);
-		}
-	    }
-	}
+            if (vs != null) {
+                currValues[i] = (vs[nextIndex] * distLast 
+                                  + vs[currIndex] * distNext) /dist;
+            }
+        }
+        if (distNext <= 0) {
+                // It will be -1 in the case of a one-frame timer
+            currIndex = nextIndex;
+            if (currIndex+1 >= frames.length) {
+                if (loopCount != Integer.MAX_VALUE) {
+                    loopsRemaining--;
+                }
+                if (loopsRemaining > 0) {
+                    if (repeatFrame == Integer.MAX_VALUE) {
+                        currFrame = 0;
+                        currIndex = 0;
+                    } else {
+                        currFrame = repeatFrame;
+                        if (currFrame  != Integer.MAX_VALUE) {
+                            currFrame--;
+                        }
+                        currIndex = repeatIndex;
+                    }
+                } else {
+                    loopsRemaining = loopCount;
+                    currFrame = repeatFrame;
+                    if (currFrame  != Integer.MAX_VALUE) {
+                        currFrame--;
+                    }
+                    currIndex = repeatIndex;
+                    show.runCommands(endCommands);
+                }
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
-	// do nothing
+        // do nothing
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	// do nothing
+        // do nothing
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	// do nothing
+        // do nothing
     }
     
     public void readInstanceData(GrinDataInputStream in, int length) 
@@ -393,12 +393,12 @@ public class InterpolatedModel extends Feature implements Node {
         
         this.frames = in.readSharedIntArray();
         this.currValues = in.readIntArray(); // mutable array
-	this.values = new int[currValues.length][];
-	for (int i = 0; i < values.length; i++) {
-	    values[i] = in.readSharedIntArray();
-	}
+        this.values = new int[currValues.length][];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = in.readSharedIntArray();
+        }
         this.repeatFrame = in.readInt();
-	this.loopCount = in.readInt();
+        this.loopCount = in.readInt();
         this.endCommands = in.readCommands();       
     }
 
@@ -410,62 +410,62 @@ public class InterpolatedModel extends Feature implements Node {
      * values in it, which means that this is a scaling_model.
      *
      * @return true if the value of scaledBounds have changed, false
-     *			otherwise.
+     *                  otherwise.
      **/
     public boolean scaleBounds(int x, int y, int width, int height,
-    			       Rectangle scaledBounds)
+                               Rectangle scaledBounds)
     {
-	if (Debug.ASSERT && !isActivated) {
-	    Debug.assertFail("InterpolatedModel " + getName()+" not activated");
-	}
+        if (Debug.ASSERT && !isActivated) {
+            Debug.assertFail("InterpolatedModel " + getName()+" not activated");
+        }
 
-	int dx = getField(SCALE_X_FIELD);
-	int dy = getField(SCALE_Y_FIELD);
-	int xf = getField(SCALE_X_FACTOR_FIELD);
-	int yf = getField(SCALE_Y_FACTOR_FIELD);
+        int dx = getField(SCALE_X_FIELD);
+        int dy = getField(SCALE_Y_FIELD);
+        int xf = getField(SCALE_X_FACTOR_FIELD);
+        int yf = getField(SCALE_Y_FACTOR_FIELD);
 
-	x = (x - dx) * xf;
-	if (x < 0) {
-	    x -= 500;
-	} else {
-	    x += 500;
-	}
-	x = (x / 1000) + dx;
+        x = (x - dx) * xf;
+        if (x < 0) {
+            x -= 500;
+        } else {
+            x += 500;
+        }
+        x = (x / 1000) + dx;
 
-	y = (y - dy) * yf;
-	if (y < 0) {
-	    y -= 500;
-	} else {
-	    y += 500;
-	}
-	y = (y / 1000) + dy;
+        y = (y - dy) * yf;
+        if (y < 0) {
+            y -= 500;
+        } else {
+            y += 500;
+        }
+        y = (y / 1000) + dy;
 
-	width *= xf;
-	if (width < 0) {
-	    width -= 500;
-	} else {
-	    width += 500;
-	}
-	width /= 1000;
+        width *= xf;
+        if (width < 0) {
+            width -= 500;
+        } else {
+            width += 500;
+        }
+        width /= 1000;
 
-	height *= yf;
-	if (height < 0) {
-	    height -= 500;
-	} else {
-	    height += 500;
-	}
-	height /= 1000;
+        height *= yf;
+        if (height < 0) {
+            height -= 500;
+        } else {
+            height += 500;
+        }
+        height /= 1000;
 
-	if (x != scaledBounds.x || y != scaledBounds.y
-	    || width != scaledBounds.width || height != scaledBounds.height)
-	{
-	    scaledBounds.x = x;
-	    scaledBounds.y = y;
-	    scaledBounds.width = width;
-	    scaledBounds.height = height;
-	    return true;
-	} else {
-	    return false;
-	}
+        if (x != scaledBounds.x || y != scaledBounds.y
+            || width != scaledBounds.width || height != scaledBounds.height)
+        {
+            scaledBounds.x = x;
+            scaledBounds.y = y;
+            scaledBounds.width = width;
+            scaledBounds.height = height;
+            return true;
+        } else {
+            return false;
+        }
     }
 }

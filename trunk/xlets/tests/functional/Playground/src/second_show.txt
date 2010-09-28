@@ -11,8 +11,8 @@ setting binary_grin_file second_show.grn ;
 
 exports
     segments { 
-	S:Initialize 
-	S:ExtensionTest
+        S:Initialize 
+        S:ExtensionTest
     } features {
     } handlers {
     }
@@ -20,18 +20,18 @@ exports
 
 segment S:Initialize
     setup {
-	F:Everything
+        F:Everything
     } setup_done {
-	sync_display ;
-	activate_segment S:Main ;
+        sync_display ;
+        activate_segment S:Main ;
     }
 ;
 
 segment S:Main 
     active {
-	F:MainText
+        F:MainText
     } setup {
-	F:Everything
+        F:Everything
     }
 ;
 
@@ -42,48 +42,48 @@ feature group F:Everything {
 feature src_over F:MainText F:MainText.Text ;
 
 feature text F:MainText.Text
-	left 250 top 250 {
-	    "This text"
-	    "is displayed"
-	    "over the menu"
-	    "and is in a"
-	    "second show"
-	}
-	SansSerif plain 96 { 
-	    { 0 255 0 255 }
-	    + + + + + + + +
-	    + + + + + + + +
-	    + + + + + + + +
-	    + + + + + + + +
-	    { 0 255 0 250 }
-	    { 0 255 0 240 }
-	    { 0 255 0 230 }
-	    { 0 255 0 220 }
-	    { 0 255 0 210 }
-	    { 0 255 0 200 }
-	    { 0 255 0 190 }
-	    { 0 255 0 180 }
-	    { 0 255 0 170 }
-	    { 0 255 0 160 }
-	    { 0 255 0 150 }
-	    { 0 255 0 140 }
-	    { 0 255 0 130 }
-	    { 0 255 0 120 }
-	    { 0 255 0 110 }
-	    { 0 255 0 90 }
-	    { 0 255 0 80 }
-	    { 0 255 0 70 }
-	    { 0 255 0 60 }
-	    { 0 255 0 50 }
-	    { 0 255 0 40 }
-	    { 0 255 0 30 }
-	    { 0 255 0 20 }
-	    { 0 255 0 10 }
-	    { 0 255 0 0 }
-	    + + + + + + + +
-	    + + + + + + + +
-	    + + + + + + + +
-	    + + + + + + + +
+        left 250 top 250 {
+            "This text"
+            "is displayed"
+            "over the menu"
+            "and is in a"
+            "second show"
+        }
+        SansSerif plain 96 { 
+            { 0 255 0 255 }
+            + + + + + + + +
+            + + + + + + + +
+            + + + + + + + +
+            + + + + + + + +
+            { 0 255 0 250 }
+            { 0 255 0 240 }
+            { 0 255 0 230 }
+            { 0 255 0 220 }
+            { 0 255 0 210 }
+            { 0 255 0 200 }
+            { 0 255 0 190 }
+            { 0 255 0 180 }
+            { 0 255 0 170 }
+            { 0 255 0 160 }
+            { 0 255 0 150 }
+            { 0 255 0 140 }
+            { 0 255 0 130 }
+            { 0 255 0 120 }
+            { 0 255 0 110 }
+            { 0 255 0 90 }
+            { 0 255 0 80 }
+            { 0 255 0 70 }
+            { 0 255 0 60 }
+            { 0 255 0 50 }
+            { 0 255 0 40 }
+            { 0 255 0 30 }
+            { 0 255 0 20 }
+            { 0 255 0 10 }
+            { 0 255 0 0 }
+            + + + + + + + +
+            + + + + + + + +
+            + + + + + + + +
+            + + + + + + + +
             { 0 255 0 10 }
             { 0 255 0 20 }
             { 0 255 0 30 }
@@ -108,8 +108,8 @@ feature text F:MainText.Text
             { 0 255 0 230 }
             { 0 255 0 240 }
             { 0 255 0 250 }
-	} loop_count infinite
-	background { 0 0 200 50 } 
+        } loop_count infinite
+        background { 0 0 200 50 } 
 ;
 
 
@@ -125,30 +125,30 @@ feature text F:MainText.Text
 
 segment S:ExtensionTest 
     setup {
-	F:ArcTest
-	F:BouncingArcTest
+        F:ArcTest
+        F:BouncingArcTest
     } setup_done {
-	activate_segment S:ExtensionTest.Showing ;
+        activate_segment S:ExtensionTest.Showing ;
     }
 ;
 
 segment S:ExtensionTest.Showing
     active {
-	F:ArcTest
-	F:BouncingArcTest
+        F:ArcTest
+        F:BouncingArcTest
     }
 ;
 
 feature extension Playground:arc F:ArcTest
-	{ 255 0 0 255 }		# Red
-	x 200 y 400 width 600 height 300 startAngle 45 arcAngle 315
+        { 255 0 0 255 }         # Red
+        x 200 y 400 width 600 height 300 startAngle 45 arcAngle 315
 ;
 
 
 feature extension Playground:bouncing_arc F:BouncingArcTest
-	{ 255 0 0 255 }		# Red
-	x 1000 y 100 width 600 height 300 startAngle 180 arcAngle 315
-	bounceHeight 600 bouncePeriod 48
+        { 255 0 0 255 }         # Red
+        x 1000 y 100 width 600 height 300 startAngle 180 arcAngle 315
+        bounceHeight 600 bouncePeriod 48
 ;
 
 

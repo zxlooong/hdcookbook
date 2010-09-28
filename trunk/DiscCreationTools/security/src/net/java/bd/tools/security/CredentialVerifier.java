@@ -194,7 +194,7 @@ class CredentialVerifier {
 
         X500Principal issuerName = new X500Principal(issuerBytes);
         // 3-2 s. 12.1.10:  "Issuer that matches the issuer of the
-        //		     leaf certificate used for authentication"
+        //                   leaf certificate used for authentication"
         BigInteger certificateSerialNumber = issuerAndSerialNumber[1].getBigInteger();
 
         System.out.println("Looking for the certificate with issuerName:" +
@@ -281,7 +281,7 @@ class CredentialVerifier {
             boolean isBudaCredential) throws Exception {
         byte credentialUsage = 0x00;
         if (isBudaCredential) {
-            credentialUsage = 0x01;	// cf. 3-2 s. 12.1.10 table 12-4
+            credentialUsage = 0x01;     // cf. 3-2 s. 12.1.10 table 12-4
         }
         String geOrgId = e.getAttribute("orgid");
         geOrgId = geOrgId.substring(2);

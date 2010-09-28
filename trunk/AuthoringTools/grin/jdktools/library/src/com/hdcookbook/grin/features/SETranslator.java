@@ -71,7 +71,7 @@ public class SETranslator extends Translator implements SENode, SEScalableNode {
     }
     
     public SETranslator(SEShow show, String name) {
-	super(show);
+        super(show);
         setName(name);
     }    
 
@@ -79,29 +79,29 @@ public class SETranslator extends Translator implements SENode, SEScalableNode {
      * Used by binary writer
      **/
     public int getAbsoluteXOffset() {
-	return fx;
+        return fx;
     }
     /**
      * Used by binary writer
      **/
     public int getAbsoluteYOffset() {
-	return fy;
+        return fy;
     }
 
     /**
      * Used by binary writer
      **/
     public boolean getModelIsRelative() {
-	return modelIsRelative;
+        return modelIsRelative;
     }    
     
     public void setModel(InterpolatedModel model) {
-	this.model = model;
+        this.model = model;
     }
 
     public void setup(InterpolatedModel model, Feature part) {
-	super.setup(part);
-	this.model = model;
+        super.setup(part);
+        this.model = model;
     }
     
     /**
@@ -109,7 +109,7 @@ public class SETranslator extends Translator implements SENode, SEScalableNode {
      * only when our model uses absolute coordinates
      **/
     public void setupAbsoluteXOffset(int x) {
-	this.fx = x;
+        this.fx = x;
     }
 
     /**
@@ -117,7 +117,7 @@ public class SETranslator extends Translator implements SENode, SEScalableNode {
      * only when our model uses absolute coordinates
      **/
     public void setupAbsoluteYOffset(int y) {
-	this.fy = y;
+        this.fy = y;
     }
 
     /**
@@ -125,7 +125,7 @@ public class SETranslator extends Translator implements SENode, SEScalableNode {
      * uses absolute coordinates.  Absolute coordinates are deeprecated.
      **/
     public void setupModelIsRelative(boolean b) {
-	modelIsRelative = b;
+        modelIsRelative = b;
     }
 
 
@@ -136,7 +136,7 @@ public class SETranslator extends Translator implements SENode, SEScalableNode {
         out.writeSuperClassData(this);
         out.writeInt(getAbsoluteXOffset());
         out.writeInt(getAbsoluteYOffset());
-	out.writeBoolean(getModelIsRelative());
+        out.writeBoolean(getModelIsRelative());
         out.writeFeatureReference(getModel());   
     }
 
@@ -158,30 +158,30 @@ public class SETranslator extends Translator implements SENode, SEScalableNode {
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
-	if (part == from) {
-	    part = to;
-	}
+        if (part == from) {
+            part = to;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	if (!modelIsRelative) {
-	    fx = xOffset + Show.scale(fx, xScale);
-	    fy = yOffset + Show.scale(fy, yScale);
-	}
-	// Our translation_model gets scaled, too
+        if (!modelIsRelative) {
+            fx = xOffset + Show.scale(fx, xScale);
+            fy = yOffset + Show.scale(fy, yScale);
+        }
+        // Our translation_model gets scaled, too
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "translator @" + Integer.toHexString(hashCode());
-	} else {
-	    return "translator " + name;
-	}
+        if (name == null) {
+            return "translator @" + Integer.toHexString(hashCode());
+        } else {
+            return "translator " + name;
+        }
     }
 }

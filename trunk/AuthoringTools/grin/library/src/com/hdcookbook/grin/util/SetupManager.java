@@ -76,26 +76,26 @@ import java.util.Iterator;
 public class SetupManager implements Runnable {
 
     private SetupClient[] settingUp;
-    int first;	     // index into setting up.  Wraps.
+    int first;       // index into setting up.  Wraps.
     int lastPlusOne; // index into setting up.  Wraps.
     private static Object monitor = new Object();
     private static SetupManager worker = null;
     private ArrayList managers;
-    	// ArrayList<SetupManager>, contains all running managers managed
-	// by a given thread.  This is null for most SetupManager instances,
-	// but populated for the worker singleton.
-	//
-	// Making this an instance variable rather than a static only
-	// costs four bytes, and is a simple way to avoid a race condition
-	// if the number of managers briefly becomes 0, then becomes
-	// > 0 again.
+        // ArrayList<SetupManager>, contains all running managers managed
+        // by a given thread.  This is null for most SetupManager instances,
+        // but populated for the worker singleton.
+        //
+        // Making this an instance variable rather than a static only
+        // costs four bytes, and is a simple way to avoid a race condition
+        // if the number of managers briefly becomes 0, then becomes
+        // > 0 again.
 
-    private static byte[] profileSetup;	// Profiling setup calls
+    private static byte[] profileSetup; // Profiling setup calls
 
     static {
-	if (Debug.PROFILE && Debug.PROFILE_SETUP) {
-	    profileSetup = Profile.makeProfileTimer("doSomeSetup()");
-	}
+        if (Debug.PROFILE && Debug.PROFILE_SETUP) {
+            profileSetup = Profile.makeProfileTimer("doSomeSetup()");
+        }
     }
 
     /**
@@ -103,10 +103,10 @@ public class SetupManager implements Runnable {
      * clients.
      **/
     public SetupManager(int numFeatures) {
-	managers = null;
-	settingUp = new SetupClient[numFeatures + 1];
-	first = 0;
-	lastPlusOne = 0;
+        managers = null;
+        settingUp = new SetupClient[numFeatures + 1];
+        first = 0;
+        lastPlusOne = 0;
     }
 
     //
@@ -118,11 +118,11 @@ public class SetupManager implements Runnable {
     // in BD.
     //
     private SetupManager() {
-	managers = new ArrayList(4);
-	    // A capacity of 4 is small enough so the memory doesn't matter,
-	    // and big enough so it will almost never grow.  Managers has
-	    // as many entries as there are active shows, which will usually
-	    // be 1 or 2, and should never be large.
+        managers = new ArrayList(4);
+            // A capacity of 4 is small enough so the memory doesn't matter,
+            // and big enough so it will almost never grow.  Managers has
+            // as many entries as there are active shows, which will usually
+            // be 1 or 2, and should never be large.
     }
 
     /**
@@ -132,21 +132,21 @@ public class SetupManager implements Runnable {
      * @see #stop()
      **/
     public void start() {
-	synchronized(monitor) {
-	    if (worker == null) {
-		worker = new SetupManager();
-		Thread t = new Thread(worker, "SetupManager");
-		t.setDaemon(true);
-		t.setPriority(3);
-		t.start();
-	    }
-	    if (Debug.ASSERT && worker.managers.indexOf(this) != -1) {
-		// Called start() twice on the same SetupManager
-		Debug.assertFail();
-	    }
-	    worker.managers.add(this);
-	    monitor.notifyAll();
-	}
+        synchronized(monitor) {
+            if (worker == null) {
+                worker = new SetupManager();
+                Thread t = new Thread(worker, "SetupManager");
+                t.setDaemon(true);
+                t.setPriority(3);
+                t.start();
+            }
+            if (Debug.ASSERT && worker.managers.indexOf(this) != -1) {
+                // Called start() twice on the same SetupManager
+                Debug.assertFail();
+            }
+            worker.managers.add(this);
+            monitor.notifyAll();
+        }
     }
 
     /**
@@ -156,172 +156,172 @@ public class SetupManager implements Runnable {
      * @see #start()
      **/
     public void stop() {
-	synchronized(monitor) {
-	    int i = worker.managers.indexOf(this);
-	    if (Debug.ASSERT && i < 0) {
-		Debug.assertFail();
-	    }
-	    if (i >= 0) {
-		worker.managers.remove(i);
-	    }
-	    if (worker.managers.size() == 0) {
-		monitor.notifyAll();
-		// run() will set worker null, unless more work
-		// arrives before it gets scheduled.
-	    }
-	}
+        synchronized(monitor) {
+            int i = worker.managers.indexOf(this);
+            if (Debug.ASSERT && i < 0) {
+                Debug.assertFail();
+            }
+            if (i >= 0) {
+                worker.managers.remove(i);
+            }
+            if (worker.managers.size() == 0) {
+                monitor.notifyAll();
+                // run() will set worker null, unless more work
+                // arrives before it gets scheduled.
+            }
+        }
     }
 
     public void scheduleSetup(SetupClient f) {
-	synchronized(monitor) {
-	    int nextLastPlusOne = next(lastPlusOne);
-	    if (first == nextLastPlusOne) {
-		//
-		// This is a little complicated to explain...  settingUp
-		// is intentionally one bigger than the maximum number of
-		// clients we can possibly have.  However, there's an
-		// outside possibility that a feature might call scheduleSetup()
-		// a second time, before the first setup is done -- this might
-		// happen if the feature goes out of setting up state, and
-		// back into it, before it gets a chance to set up.
-		//
-		// Normally, this is harmless - there would just be two
-		// entries on settingUp, and the thread would get to them
-		// in order.  The contract of SetupClient says to just
-		// return if no setup is required, so the second time it's
-		// called would be a NOP.  However, it's just
-		// possible that the duplicate entries on settingUp might
-		// cause us to fill up the array.
-		//
-		// In this rare case, we need to purge the array of
-		// duplicates.  Since it's rare, we go ahead and
-		// create heap traffic by using a HashSet.
-		HashSet set = new HashSet();
-		for (int i = first; i != lastPlusOne; i = next(i)) {
-		    set.add(settingUp[i]);
-		}
-		set.add(f);
-		if (Debug.ASSERT && set.size() >= settingUp.length) {
-		    // If this happens, settingUp is too small, but it
-		    // can't be, because it's one bigger than the total
-		    // number of features.
-		    Debug.assertFail();
-		}
-		first = 0;
-		lastPlusOne = 0;
-		for (Iterator it = set.iterator(); it.hasNext(); ) {
-		    settingUp[lastPlusOne] = (SetupClient) it.next();
-		    lastPlusOne++;
-		}
-		for (int i = lastPlusOne; i < settingUp.length; i++) {
-		    settingUp[i] = null;
-		}
-	    } else {
-		// Otherwise, we've got room in settingUp, so we just
-		// append
-		settingUp[lastPlusOne] = f;
-		lastPlusOne = nextLastPlusOne;
-	    }
-	    monitor.notifyAll();
-	}
+        synchronized(monitor) {
+            int nextLastPlusOne = next(lastPlusOne);
+            if (first == nextLastPlusOne) {
+                //
+                // This is a little complicated to explain...  settingUp
+                // is intentionally one bigger than the maximum number of
+                // clients we can possibly have.  However, there's an
+                // outside possibility that a feature might call scheduleSetup()
+                // a second time, before the first setup is done -- this might
+                // happen if the feature goes out of setting up state, and
+                // back into it, before it gets a chance to set up.
+                //
+                // Normally, this is harmless - there would just be two
+                // entries on settingUp, and the thread would get to them
+                // in order.  The contract of SetupClient says to just
+                // return if no setup is required, so the second time it's
+                // called would be a NOP.  However, it's just
+                // possible that the duplicate entries on settingUp might
+                // cause us to fill up the array.
+                //
+                // In this rare case, we need to purge the array of
+                // duplicates.  Since it's rare, we go ahead and
+                // create heap traffic by using a HashSet.
+                HashSet set = new HashSet();
+                for (int i = first; i != lastPlusOne; i = next(i)) {
+                    set.add(settingUp[i]);
+                }
+                set.add(f);
+                if (Debug.ASSERT && set.size() >= settingUp.length) {
+                    // If this happens, settingUp is too small, but it
+                    // can't be, because it's one bigger than the total
+                    // number of features.
+                    Debug.assertFail();
+                }
+                first = 0;
+                lastPlusOne = 0;
+                for (Iterator it = set.iterator(); it.hasNext(); ) {
+                    settingUp[lastPlusOne] = (SetupClient) it.next();
+                    lastPlusOne++;
+                }
+                for (int i = lastPlusOne; i < settingUp.length; i++) {
+                    settingUp[i] = null;
+                }
+            } else {
+                // Otherwise, we've got room in settingUp, so we just
+                // append
+                settingUp[lastPlusOne] = f;
+                lastPlusOne = nextLastPlusOne;
+            }
+            monitor.notifyAll();
+        }
     }
 
     private int next(int i) {
-	i++;
-	if (i >= settingUp.length) {
-	    return 0;
-	} else {
-	    return i;
-	}
+        i++;
+        if (i >= settingUp.length) {
+            return 0;
+        } else {
+            return i;
+        }
     }
 
     private boolean hasWork() {
-	return first != lastPlusOne;
+        return first != lastPlusOne;
     }
     
     private void doWork() {
-	SetupClient work;
-	synchronized(monitor) {
-	    if (!hasWork()) {
-		return;
-	    }
-	    work = settingUp[first];
-	}
-	if (work.needsMoreSetup()) {
-	    int tok;
-	    if (Debug.PROFILE && Debug.PROFILE_SETUP) {
-		tok = Profile.startTimer(profileSetup, Profile.TID_SETUP);
-	    }
-	    work.doSomeSetup();
-	    if (Debug.PROFILE && Debug.PROFILE_SETUP) {
-		Profile.stopTimer(tok);
-	    }
-	    // The check of needsMoreSetup() above isn't strictly necessary,
-	    // but it is possible that it's false (due to the settingUp
-	    // array being purged of duplicates).  That's admittedly rare,
-	    // but calling doSomeSetup() unnecessarily reduces the value
-	    // of an optimization in Show.  It's also counter-intuitive
-	    // that doSomeSetup() could be called even if needsMoreSetup()
-	    // returns false, so doing the test makes it so that can't
-	    // happen (unless, of course, another thread changes the
-	    // state of the feature in the intervening time...  but
-	    // that _is_ something a developer should expect to need
-	    // to cope with).
-	}
-	synchronized(monitor) {
-	    if (hasWork() && !settingUp[first].needsMoreSetup()) {
-		// There's a slight chance that settingUp changed out from
-		// under us, but even if it did, this logic is safe.  At
-		// worst, the client we just set up is somewhere else in
-		// settingUp, and will therefore be quickly eliminated when
-		// we get to it in the future.
-		settingUp[first] = null;
-		first = next(first);
-	    }
-	}
+        SetupClient work;
+        synchronized(monitor) {
+            if (!hasWork()) {
+                return;
+            }
+            work = settingUp[first];
+        }
+        if (work.needsMoreSetup()) {
+            int tok;
+            if (Debug.PROFILE && Debug.PROFILE_SETUP) {
+                tok = Profile.startTimer(profileSetup, Profile.TID_SETUP);
+            }
+            work.doSomeSetup();
+            if (Debug.PROFILE && Debug.PROFILE_SETUP) {
+                Profile.stopTimer(tok);
+            }
+            // The check of needsMoreSetup() above isn't strictly necessary,
+            // but it is possible that it's false (due to the settingUp
+            // array being purged of duplicates).  That's admittedly rare,
+            // but calling doSomeSetup() unnecessarily reduces the value
+            // of an optimization in Show.  It's also counter-intuitive
+            // that doSomeSetup() could be called even if needsMoreSetup()
+            // returns false, so doing the test makes it so that can't
+            // happen (unless, of course, another thread changes the
+            // state of the feature in the intervening time...  but
+            // that _is_ something a developer should expect to need
+            // to cope with).
+        }
+        synchronized(monitor) {
+            if (hasWork() && !settingUp[first].needsMoreSetup()) {
+                // There's a slight chance that settingUp changed out from
+                // under us, but even if it did, this logic is safe.  At
+                // worst, the client we just set up is somewhere else in
+                // settingUp, and will therefore be quickly eliminated when
+                // we get to it in the future.
+                settingUp[first] = null;
+                first = next(first);
+            }
+        }
     }
 
     /**
      * This isn't really public; it's only called by our worker thread.
      **/
     public void run() {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Setup thread starts.");
-	}
-	SetupManager found = null;
-	for (;;) {
-	    synchronized(monitor) {
-		if (managers.size() == 0) {
-		    if (Debug.ASSERT && worker != this) {
-			Debug.assertFail();
-		    }
-		    worker = null;
-		    break;	// exits thread
-		}
-		if (found != null && !found.hasWork()) {
-		    found = null;
-		}
-		for (int i = 0; found == null && i < managers.size(); i++)  {
-		    SetupManager m = (SetupManager) managers.get(i);
-		    if (m.hasWork()) {
-			found = m;
-		    }
-		}
-		if (found == null) {
-		    try {
-			monitor.wait();
-		    } catch (InterruptedException ex) {
-			break;		// bail out of thread
-		    }
-		}
-	    }
-	    if (found != null) {
-		found.doWork();
-	    }
-	}
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Setup thread exits.");
-	}
+        if (Debug.LEVEL > 0) {
+            Debug.println("Setup thread starts.");
+        }
+        SetupManager found = null;
+        for (;;) {
+            synchronized(monitor) {
+                if (managers.size() == 0) {
+                    if (Debug.ASSERT && worker != this) {
+                        Debug.assertFail();
+                    }
+                    worker = null;
+                    break;      // exits thread
+                }
+                if (found != null && !found.hasWork()) {
+                    found = null;
+                }
+                for (int i = 0; found == null && i < managers.size(); i++)  {
+                    SetupManager m = (SetupManager) managers.get(i);
+                    if (m.hasWork()) {
+                        found = m;
+                    }
+                }
+                if (found == null) {
+                    try {
+                        monitor.wait();
+                    } catch (InterruptedException ex) {
+                        break;          // bail out of thread
+                    }
+                }
+            }
+            if (found != null) {
+                found.doWork();
+            }
+        }
+        if (Debug.LEVEL > 0) {
+            Debug.println("Setup thread exits.");
+        }
     }
 }
 

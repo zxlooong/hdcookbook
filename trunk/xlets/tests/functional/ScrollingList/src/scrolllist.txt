@@ -4,7 +4,7 @@ show
 
 exports 
     segments {
-	S:Initialize 
+        S:Initialize 
     } features { 
    F:FilmDetailsBaseCoords
    F:FilmDetailsScrollCoords
@@ -24,19 +24,19 @@ java_generated_class ScrollListCommands [[
 
         import com.hdcookbook.grin.Show;
         
-	public class ScrollListCommands extends com.hdcookbook.grin.GrinXHelper {
-	
-	    public ScrollListCommands(Show show) { 
-		super(show); 
-	    }
+        public class ScrollListCommands extends com.hdcookbook.grin.GrinXHelper {
+        
+            public ScrollListCommands(Show show) { 
+                super(show); 
+            }
 
-	    public MainDirector getDirector() {
-		return (MainDirector) show.getDirector();
-	    }
-	
-	    JAVA_COMMAND_BODY
-	
-	}
+            public MainDirector getDirector() {
+                return (MainDirector) show.getDirector();
+            }
+        
+            JAVA_COMMAND_BODY
+        
+        }
 
 ]]
 
@@ -197,12 +197,12 @@ feature clipped F:FilmDetailsClipped F:FilmNamesScrollerAssembly
 
 segment S:Initialize 
     setup { 
-	F:Everything
+        F:Everything
     } next {  
         java_command [[ 
                 getDirector().initialize(); 
         ]]
-  	activate_segment S:ShowScrollList ;
+        activate_segment S:ShowScrollList ;
     }
 ;
 
@@ -228,30 +228,30 @@ rc_handler key_pressed H:Left {
 ;
 
 rc_handler key_pressed H:Right {
-	right
+        right
     } execute {
        segment_done ;
     }
 ;
 
 rc_handler key_pressed H:ScrollFilmUp {
-	up
+        up
     } execute {
         java_command [[ getDirector().scrollList.startScrollUp(); ]]
     }
 ;
 
 rc_handler key_pressed H:ScrollFilmDown {
-	down
+        down
     } execute {
         java_command [[ getDirector().scrollList.startScrollDown(); ]]
     }
 ;
 
 rc_handler key_pressed H:Enter {
-	enter
+        enter
     } execute {
-	    segment_done ;
+            segment_done ;
     }
 ;
 

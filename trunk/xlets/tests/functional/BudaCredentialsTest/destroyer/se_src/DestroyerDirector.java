@@ -31,44 +31,44 @@ public class DestroyerDirector extends Director implements Runnable {
     Text pfFeature;
 
     public void startTest() {
-	(new Thread(this)).start();
+        (new Thread(this)).start();
     }
 
     public void run() {
-	pfFeature = (Text) getFeature("F:PassOrFail");
-	resultsFeature = (Text) getFeature("F:Results");
-	ArrayList results = new ArrayList();
-	boolean fail = false;
-	try {
-	    throw new RuntimeException("Java SE has no BUDA");
-	} catch (Throwable ex) {
-	    Debug.println("Got exception:  " + ex);
-	    Debug.printStackTrace(ex);
-	    fail = true;
-	    results.add(ex.toString());
-	}
-	String[] sa = (String[]) results.toArray(new String[results.size()]);
-	if (fail) {
-	    pfFeature.setText(new String[] { "FAIL" });
-	} else {
-	    pfFeature.setText(new String[] { "PASS" });
-	}
-	resultsFeature.setText(sa);
-	Debug.println("********  results *********");
-	Debug.println();
-	if (fail) {
-	    Debug.println("       FAIL");
-	} else {
-	    Debug.println("       PASS");
-	}
-	Debug.println();
-	for (int i = 0; i < sa.length; i++) {
-	    Debug.println(sa[i]);
-	}
-	Debug.println();
-	Debug.println("**************************");
+        pfFeature = (Text) getFeature("F:PassOrFail");
+        resultsFeature = (Text) getFeature("F:Results");
+        ArrayList results = new ArrayList();
+        boolean fail = false;
+        try {
+            throw new RuntimeException("Java SE has no BUDA");
+        } catch (Throwable ex) {
+            Debug.println("Got exception:  " + ex);
+            Debug.printStackTrace(ex);
+            fail = true;
+            results.add(ex.toString());
+        }
+        String[] sa = (String[]) results.toArray(new String[results.size()]);
+        if (fail) {
+            pfFeature.setText(new String[] { "FAIL" });
+        } else {
+            pfFeature.setText(new String[] { "PASS" });
+        }
+        resultsFeature.setText(sa);
+        Debug.println("********  results *********");
+        Debug.println();
+        if (fail) {
+            Debug.println("       FAIL");
+        } else {
+            Debug.println("       PASS");
+        }
+        Debug.println();
+        for (int i = 0; i < sa.length; i++) {
+            Debug.println(sa[i]);
+        }
+        Debug.println();
+        Debug.println("**************************");
 
-	getShow().segmentDone();
+        getShow().segmentDone();
     }
 
 }

@@ -83,17 +83,17 @@ public class ImageFrame extends Box implements Node {
     protected FixedImage fixedImage;
 
     public ImageFrame(Show show) {
-	super(show);
-	this.width = Integer.MIN_VALUE;
-	this.fillColor = null;
+        super(show);
+        this.width = Integer.MIN_VALUE;
+        this.fillColor = null;
     }
 
     /**
      * We un-implement Box's version of createClone()
      **/
     protected Feature createClone(HashMap clones) {
-	throw new UnsupportedOperationException(getClass().getName()
-						    + ".createClone()");
+        throw new UnsupportedOperationException(getClass().getName()
+                                                    + ".createClone()");
     }
 
     /**
@@ -106,48 +106,48 @@ public class ImageFrame extends Box implements Node {
      * {@inheritDoc}
      **/
     public int getX() {
-	return fixedImage.getX();
+        return fixedImage.getX();
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getY() {
-	return fixedImage.getY();
+        return fixedImage.getY();
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	// We don't animate, so there's nothing to update
+        // We don't animate, so there's nothing to update
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-    	//
-	// This is a bit tricky.  Whenever this is called, we know the
-	// scene graph is stable.  Namely, our fixedImage is stable, so
-	// we grab its bounds, and re-size ourselves (if needed) to still
-	// fit around the image.
-	//
-	// We just inherit paintFrame() from box, but since we modify
-	// its instance variables to fit the box around us, that works.
-	Rectangle bounds = fixedImage.getMutablePlacement();
-	int bX = bounds.x - outlineWidthX;
-	int bY = bounds.y - outlineWidthY;
-	int bH = bounds.height + 2*outlineWidthX;
-	int bW = bounds.width + 2*outlineWidthY;
-	if (x != bX || y != bY || height != bH || width != bW) {
-	    x = bX;
-	    y = bY;
-	    height = bH;
-	    width = bW;
-	    markDisplayAreasChanged();
-	}
-	super.addDisplayAreas(context);
+        //
+        // This is a bit tricky.  Whenever this is called, we know the
+        // scene graph is stable.  Namely, our fixedImage is stable, so
+        // we grab its bounds, and re-size ourselves (if needed) to still
+        // fit around the image.
+        //
+        // We just inherit paintFrame() from box, but since we modify
+        // its instance variables to fit the box around us, that works.
+        Rectangle bounds = fixedImage.getMutablePlacement();
+        int bX = bounds.x - outlineWidthX;
+        int bY = bounds.y - outlineWidthY;
+        int bH = bounds.height + 2*outlineWidthX;
+        int bW = bounds.width + 2*outlineWidthY;
+        if (x != bX || y != bY || height != bH || width != bW) {
+            x = bX;
+            y = bY;
+            height = bH;
+            width = bW;
+            markDisplayAreasChanged();
+        }
+        super.addDisplayAreas(context);
     }
 
 
@@ -155,13 +155,13 @@ public class ImageFrame extends Box implements Node {
      * {@inheritDoc}
      **/
     public void readInstanceData(GrinDataInputStream in, int length)
-	    throws IOException
+            throws IOException
     {
-	in.readSuperClassData(this);
-	outlineWidthX = in.readInt();
-	outlineWidthY = in.readInt();
-	outlineColor = in.readColor();
-	fixedImage = (FixedImage) in.readFeatureReference();
+        in.readSuperClassData(this);
+        outlineWidthX = in.readInt();
+        outlineWidthY = in.readInt();
+        outlineColor = in.readColor();
+        fixedImage = (FixedImage) in.readFeatureReference();
     }
 
 }

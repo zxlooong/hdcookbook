@@ -82,7 +82,7 @@ public abstract class Animator {
      * given frame.
      **/
     public abstract void initAtFrame(int frame, Container container,
-    				     Rectangle position);
+                                     Rectangle position);
 
     public abstract void destroy();
 
@@ -105,7 +105,7 @@ public abstract class Animator {
      * the same rectangle, rather than generating heap traffic.
      **/
     public Rectangle getScratchRectangle() {
-	return scratchRectangle;
+        return scratchRectangle;
     }
 
     /**
@@ -118,5 +118,5 @@ public abstract class Animator {
      * Called by the main loop once per frame.
      **/
     public abstract void animateGame(int frame, Game game) 
-    		throws InterruptedException;
+                throws InterruptedException;
 }

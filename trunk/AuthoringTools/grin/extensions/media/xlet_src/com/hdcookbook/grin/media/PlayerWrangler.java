@@ -110,8 +110,8 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
     private PlaybackControl playbackControl;
     private AWTVideoSizeControl sizeControl;
     private BDLocator locatorRequest = null;
-    	// If locatorRequest is set, that means that we want the playlist
-	// to stop whatever it's doing, and play that locator.
+        // If locatorRequest is set, that means that we want the playlist
+        // to stop whatever it's doing, and play that locator.
     private boolean newPlayer = false;
     private boolean playerRunning = false;
     private boolean playPending = false;
@@ -120,7 +120,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
     }
 
     public static PlayerWrangler getInstance() {
-	return theWrangler;
+        return theWrangler;
     }
 
     /**
@@ -128,7 +128,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * starts, and before playback of video clips is attempted.
      **/
     public void initialize(AnimationEngine engine) {
-	this.engine = engine;
+        this.engine = engine;
     }
 
     /**
@@ -137,16 +137,16 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * PlayerWrangler.getInstance() will return null.
      **/
     public void destroy() {
-	if (Debug.ASSERT && engine == null) {
-	    Debug.assertFail();
-	}
-	PlaybackControl c = null;
-	Player p = null;
-	synchronized(this) {
-	    theWrangler = null;	 	// Now, getInstance gives null
-	    c = playbackControl;
-	    p = thePlayer;
-	}
+        if (Debug.ASSERT && engine == null) {
+            Debug.assertFail();
+        }
+        PlaybackControl c = null;
+        Player p = null;
+        synchronized(this) {
+            theWrangler = null;         // Now, getInstance gives null
+            c = playbackControl;
+            p = thePlayer;
+        }
         if (c != null) {
             c.removePlaybackControlListener(this);
         }
@@ -160,24 +160,24 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * Create a BD locator. 
      **/
     public BDLocator createLocator(String str) {
-	try {
-	    return new BDLocator(str);
-	} catch (Exception ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-	    }
-	    if (Debug.ASSERT) {
-		Debug.assertFail();
-	    }
-	    return null;
-	}
+        try {
+            return new BDLocator(str);
+        } catch (Exception ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+            }
+            if (Debug.ASSERT) {
+                Debug.assertFail();
+            }
+            return null;
+        }
     }
 
     /**
      * Create a MediaLocator, given a BD locator string
      **/
     public MediaLocator createMediaLocator(String loc) {
-	return new MediaLocator(createLocator(loc));
+        return new MediaLocator(createLocator(loc));
     }
 
 
@@ -185,79 +185,79 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
     // Start playback of a playlist
     //
     void start(Playlist playlist, BDLocator locator) {
-	if (Debug.ASSERT && engine == null) {
-	    Debug.assertFail();
-	}
-	Player stopPlayer = null;
-	BDLocator startLocator = null;
-	Player startPlayer = null;
-	synchronized(this) {
-	    playPending = true;
-	    currentPlaylist = playlist;
-	    if (thePlayer != null) {
-		if (playerRunning) {
-		    stopPlayer = thePlayer;
-		    locatorRequest = locator;
-			// when we get the StopEvent, we'll position to
-			// this locator
-		} else {
-		    locatorRequest = null;	
-			// It should already be null, but it's just possible
-			// there's a race condition that might leave a previous
-			// request outstanding, so we cancel it.
-		    startLocator = locator;
-		}
-	    } else {
-		try {
-		    MediaLocator ml = new MediaLocator(locator);
-		    thePlayer = Manager.createPlayer(ml);
-		    newPlayer = true;
-		    if (Debug.LEVEL > 1) {
-			Debug.println("Created player on " + locator);
-		    }
-		} catch (Exception ignored) {
-		    if (Debug.LEVEL > 0) {
-			Debug.printStackTrace(ignored);
-		    }
-		    if (Debug.ASSERT) {
-			Debug.assertFail();
-		    }
-		}
-		thePlayer.addControllerListener(this);
-		Control[] controls = thePlayer.getControls();
-		for (int i = 0; i < controls.length; i++) {
-		    Control c = controls[i];
-		    if (c instanceof PlayListChangeControl) {
-			playlistControl = (PlayListChangeControl) c;
-		    } else if (c instanceof PlaybackControl) {
-			playbackControl = (PlaybackControl) c;
-		    } else if (c instanceof AWTVideoSizeControl) {
-			sizeControl = (AWTVideoSizeControl) c;
-		    }
-		}
-		if (Debug.ASSERT &&
-		    (playbackControl == null || playlistControl == null
-		     || sizeControl == null))
-		{
-		    Debug.assertFail();
-		}
-		playbackControl.addPlaybackControlListener(this);
-		startPlayer = thePlayer;
-	    }
-	}
-	//
-	// Out of general paranoia, we put any non-necessary interactions
-	// with JMF outside of the synchronized part of the code.
-	//
-	if (stopPlayer != null) {
-	    stopPlayer.stop();
-	}
-	if (startLocator != null) {
-	    startExisting(locator);
-	}
-	if (startPlayer != null) {
-	    startPlayer.start();
-	}
+        if (Debug.ASSERT && engine == null) {
+            Debug.assertFail();
+        }
+        Player stopPlayer = null;
+        BDLocator startLocator = null;
+        Player startPlayer = null;
+        synchronized(this) {
+            playPending = true;
+            currentPlaylist = playlist;
+            if (thePlayer != null) {
+                if (playerRunning) {
+                    stopPlayer = thePlayer;
+                    locatorRequest = locator;
+                        // when we get the StopEvent, we'll position to
+                        // this locator
+                } else {
+                    locatorRequest = null;      
+                        // It should already be null, but it's just possible
+                        // there's a race condition that might leave a previous
+                        // request outstanding, so we cancel it.
+                    startLocator = locator;
+                }
+            } else {
+                try {
+                    MediaLocator ml = new MediaLocator(locator);
+                    thePlayer = Manager.createPlayer(ml);
+                    newPlayer = true;
+                    if (Debug.LEVEL > 1) {
+                        Debug.println("Created player on " + locator);
+                    }
+                } catch (Exception ignored) {
+                    if (Debug.LEVEL > 0) {
+                        Debug.printStackTrace(ignored);
+                    }
+                    if (Debug.ASSERT) {
+                        Debug.assertFail();
+                    }
+                }
+                thePlayer.addControllerListener(this);
+                Control[] controls = thePlayer.getControls();
+                for (int i = 0; i < controls.length; i++) {
+                    Control c = controls[i];
+                    if (c instanceof PlayListChangeControl) {
+                        playlistControl = (PlayListChangeControl) c;
+                    } else if (c instanceof PlaybackControl) {
+                        playbackControl = (PlaybackControl) c;
+                    } else if (c instanceof AWTVideoSizeControl) {
+                        sizeControl = (AWTVideoSizeControl) c;
+                    }
+                }
+                if (Debug.ASSERT &&
+                    (playbackControl == null || playlistControl == null
+                     || sizeControl == null))
+                {
+                    Debug.assertFail();
+                }
+                playbackControl.addPlaybackControlListener(this);
+                startPlayer = thePlayer;
+            }
+        }
+        //
+        // Out of general paranoia, we put any non-necessary interactions
+        // with JMF outside of the synchronized part of the code.
+        //
+        if (stopPlayer != null) {
+            stopPlayer.stop();
+        }
+        if (startLocator != null) {
+            startExisting(locator);
+        }
+        if (startPlayer != null) {
+            startPlayer.start();
+        }
     }
 
     //
@@ -265,30 +265,30 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
     // stopped state.
     //
     private void startExisting(BDLocator locator) {
-	if (Debug.ASSERT && (playerRunning || locatorRequest != null)) {
-	    Debug.assertFail();
-	}
-	try {
-	    playlistControl.selectPlayList(locator);
-	    if (Debug.LEVEL > 1) {
-		Debug.println("Selected locator for player with " + locator);
-	    }
-	    thePlayer.start();
-	} catch (ClockStartedError ex) {
-	    // We are only called if playerStarted is false, so this must
-	    // represent a race condition, where start() was just called
-	    // a moment ago, perhaps for a different playlist.  In this
-	    // case, we're about to get a StartEvent, so we set locatorRequest
-	    // to what we want, and let the callback figure it out.
-	    locatorRequest = locator;
-	} catch (Exception ignored) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ignored);
-	    }
-	    if (Debug.ASSERT) {
-		Debug.assertFail();
-	    }
-	}
+        if (Debug.ASSERT && (playerRunning || locatorRequest != null)) {
+            Debug.assertFail();
+        }
+        try {
+            playlistControl.selectPlayList(locator);
+            if (Debug.LEVEL > 1) {
+                Debug.println("Selected locator for player with " + locator);
+            }
+            thePlayer.start();
+        } catch (ClockStartedError ex) {
+            // We are only called if playerStarted is false, so this must
+            // represent a race condition, where start() was just called
+            // a moment ago, perhaps for a different playlist.  In this
+            // case, we're about to get a StartEvent, so we set locatorRequest
+            // to what we want, and let the callback figure it out.
+            locatorRequest = locator;
+        } catch (Exception ignored) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ignored);
+            }
+            if (Debug.ASSERT) {
+                Debug.assertFail();
+            }
+        }
     }
 
     /**
@@ -296,12 +296,12 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * started.
      **/
     public long getMediaTime() {
-	Player p = thePlayer;
-	if (p == null) {
-	    return -1;
-	} else {
-	    return p.getMediaTime().getNanoseconds();
-	}
+        Player p = thePlayer;
+        if (p == null) {
+            return -1;
+        } else {
+            return p.getMediaTime().getNanoseconds();
+        }
     }
 
     /**
@@ -309,12 +309,12 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * started.
      **/
     public int getMediaTimeMS() {
-	Player p = thePlayer;
-	if (p == null) {
-	    return -1;
-	} else {
-	    return (int) (p.getMediaTime().getNanoseconds() / 1000000);
-	}
+        Player p = thePlayer;
+        if (p == null) {
+            return -1;
+        } else {
+            return (int) (p.getMediaTime().getNanoseconds() / 1000000);
+        }
     }
 
     /**
@@ -323,7 +323,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * started, because that's the first time a JMF player is acquired.
      **/
     public void setMediaTime(long time) {
-	thePlayer.setMediaTime(new Time(time));
+        thePlayer.setMediaTime(new Time(time));
     }
 
     /**
@@ -332,7 +332,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * started, because that's the first time a JMF player is acquired.
      **/
     public void setMediaTimeMS(int time) {
-	thePlayer.setMediaTime(new Time(((long) time) * 1000000));
+        thePlayer.setMediaTime(new Time(((long) time) * 1000000));
     }
 
     /**
@@ -343,7 +343,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * started, because that's the first time a JMF player is acquired.
      **/
     public void setRate(float rate) {
-	thePlayer.setRate(rate);
+        thePlayer.setRate(rate);
     }
 
     /**
@@ -353,7 +353,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * started, because that's the first time a JMF player is acquired.
      **/
     public float getRate() {
-	return thePlayer.getRate();
+        return thePlayer.getRate();
     }
 
 
@@ -376,7 +376,7 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * needed to adjust the video size.
      **/
     public AWTVideoSizeControl getSizeControl() {
-	return sizeControl;
+        return sizeControl;
     }
 
 
@@ -384,27 +384,27 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * Stop playing a playlist.  
      **/
     void stop(Playlist playlist) {
-	if (Debug.ASSERT && engine == null) {
-	    Debug.assertFail();
-	}
-	if (Debug.LEVEL > 1) {
-	    Debug.println("Stopping playlist " + playlist);
-	}
-	Player stopPlayer = null;
-	synchronized(this) {
-	    if (currentPlaylist != playlist) {
-		return;
-	    }
-	    playPending = false;
-	    currentPlaylist = null;
-	    if (thePlayer != null) {
-		stopPlayer = thePlayer;   // NOP if it's already stopped
-	    }
-	    locatorRequest = null;
-	}
-	if (stopPlayer != null) {
-	    stopPlayer.stop();	// NOP if it's already stopped
-	}
+        if (Debug.ASSERT && engine == null) {
+            Debug.assertFail();
+        }
+        if (Debug.LEVEL > 1) {
+            Debug.println("Stopping playlist " + playlist);
+        }
+        Player stopPlayer = null;
+        synchronized(this) {
+            if (currentPlaylist != playlist) {
+                return;
+            }
+            playPending = false;
+            currentPlaylist = null;
+            if (thePlayer != null) {
+                stopPlayer = thePlayer;   // NOP if it's already stopped
+            }
+            locatorRequest = null;
+        }
+        if (stopPlayer != null) {
+            stopPlayer.stop();  // NOP if it's already stopped
+        }
     }
 
     /**
@@ -425,73 +425,73 @@ public class PlayerWrangler implements PlaybackListener, ControllerListener
      * Callback from ControllerListener
      **/
     public void controllerUpdate(ControllerEvent event) {
-	if (Debug.LEVEL > 1) {
-	    Debug.println("Player gets controllerUpdate " + event);
-	}
-	if (event instanceof RestartingEvent) {
-	    // The restarting event is a subtype of StopEvent, and can
-	    // be generated for things like a rate change.  It's not
-	    // a StopEvent that we care about, because the player
-	    // is just going to Start again automatically, so we ignore
-	    // it.
-	    return;
-	} else if (event instanceof StartEvent) {
-	    Player stopPlayer = null;
-	    synchronized(this)  {
-		playerRunning = true;
-		if (locatorRequest != null) {
-		    // If there's a pending request to move to another locator,
-		    // stop the player, so we can select it.
-		    stopPlayer = thePlayer;
-		} else if (playPending) {
-		    playPending = false;
-		    if (currentPlaylist != null) {
-			currentPlaylist.notifyMediaStart();
-			    // This just enqueues commands, so it's safe here.
-		    }
-		}
-		if (newPlayer) {
-		    newPlayer = false;
-		    engine.paintNextFrameFully();
-			// Some players, including at least one PC player, mess
-			// up the FrameBuffer display when the main player first
-			// starts showing video.
-			//
-			// This method just sets a flag, so it's safe here.
-		}
-	    }
-	    if (stopPlayer != null) {
-		stopPlayer.stop();
-	    }
-	} else if (event instanceof StopEvent) {
-		//
-		// When end of media is reached, at least some players
-		// give both a StopEvent, and an EndOfMediaEvent.
-		// EndOfMediaEvent is a subtype of StopEvent.  Due
-		// to the boolean playerRunning, only the first one
-		// will have any effect.
-		//
-	    BDLocator startLocator;
-	    boolean playerWasRunning;
-	    Playlist p;
-	    synchronized(this) {
-		startLocator = locatorRequest;
-		locatorRequest = null;
-		playerWasRunning = playerRunning;
-		playerRunning = false;
-		p = currentPlaylist;
-	    }
-	    if (startLocator != null) {
-		startExisting(startLocator);
-	    } else if (playerWasRunning && p != null) {
-		if (Debug.LEVEL > 1) {
-		    Debug.println("Notifying media end to playlist " + p);
-		}
-		p.notifyMediaEnd();
-		    // In the case where a new playlist has taken over
-		    // the player, startLocator will be non-null, so
-		    // we correctly won't send the media end commands.
-	    }
-	}
+        if (Debug.LEVEL > 1) {
+            Debug.println("Player gets controllerUpdate " + event);
+        }
+        if (event instanceof RestartingEvent) {
+            // The restarting event is a subtype of StopEvent, and can
+            // be generated for things like a rate change.  It's not
+            // a StopEvent that we care about, because the player
+            // is just going to Start again automatically, so we ignore
+            // it.
+            return;
+        } else if (event instanceof StartEvent) {
+            Player stopPlayer = null;
+            synchronized(this)  {
+                playerRunning = true;
+                if (locatorRequest != null) {
+                    // If there's a pending request to move to another locator,
+                    // stop the player, so we can select it.
+                    stopPlayer = thePlayer;
+                } else if (playPending) {
+                    playPending = false;
+                    if (currentPlaylist != null) {
+                        currentPlaylist.notifyMediaStart();
+                            // This just enqueues commands, so it's safe here.
+                    }
+                }
+                if (newPlayer) {
+                    newPlayer = false;
+                    engine.paintNextFrameFully();
+                        // Some players, including at least one PC player, mess
+                        // up the FrameBuffer display when the main player first
+                        // starts showing video.
+                        //
+                        // This method just sets a flag, so it's safe here.
+                }
+            }
+            if (stopPlayer != null) {
+                stopPlayer.stop();
+            }
+        } else if (event instanceof StopEvent) {
+                //
+                // When end of media is reached, at least some players
+                // give both a StopEvent, and an EndOfMediaEvent.
+                // EndOfMediaEvent is a subtype of StopEvent.  Due
+                // to the boolean playerRunning, only the first one
+                // will have any effect.
+                //
+            BDLocator startLocator;
+            boolean playerWasRunning;
+            Playlist p;
+            synchronized(this) {
+                startLocator = locatorRequest;
+                locatorRequest = null;
+                playerWasRunning = playerRunning;
+                playerRunning = false;
+                p = currentPlaylist;
+            }
+            if (startLocator != null) {
+                startExisting(startLocator);
+            } else if (playerWasRunning && p != null) {
+                if (Debug.LEVEL > 1) {
+                    Debug.println("Notifying media end to playlist " + p);
+                }
+                p.notifyMediaEnd();
+                    // In the case where a new playlist has taken over
+                    // the player, startLocator will be non-null, so
+                    // we correctly won't send the media end commands.
+            }
+        }
     }
 }

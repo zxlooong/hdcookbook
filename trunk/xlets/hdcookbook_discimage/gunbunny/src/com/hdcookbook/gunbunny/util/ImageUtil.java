@@ -85,17 +85,17 @@ public class ImageUtil {
      **/
     public static Image getImage(String path, MediaTracker tracker) {
         URL url = theClass.getResource("/" + path);
-	if (Debug.LEVEL > 1) {
-	    Debug.println("Loading image " + url);
-	    Debug.println("    path:  " + path);
-	}
+        if (Debug.LEVEL > 1) {
+            Debug.println("Loading image " + url);
+            Debug.println("    path:  " + path);
+        }
         Image img = Toolkit.getDefaultToolkit().createImage(url);
         if(tracker != null){
             tracker.addImage(img, 0);
         }
-	synchronized(theClass) {
-	    imagesList.add(img);
-	}
+        synchronized(theClass) {
+            imagesList.add(img);
+        }
         return img;
     }
 
@@ -104,15 +104,15 @@ public class ImageUtil {
      * list that records these images.
      **/
     public static void discardImages() {
-	LinkedList ll;
-	synchronized(theClass) {
-	    ll = imagesList;
-	    imagesList = new LinkedList();
-	}
-	for (Iterator it = ll.iterator(); it.hasNext();) {
-	    Image im = (Image) it.next();
-	    im.flush();
-	}
+        LinkedList ll;
+        synchronized(theClass) {
+            ll = imagesList;
+            imagesList = new LinkedList();
+        }
+        for (Iterator it = ll.iterator(); it.hasNext();) {
+            Image im = (Image) it.next();
+            im.flush();
+        }
     }
     
 

@@ -69,11 +69,11 @@ public class BackgroundSpec {
     public String imageName;
 
     public String toString() {
-    	// Used by grinview GUI to select image
-	if (imageName == null) {
-	    return "<blank>";
-	}  else {
-	    return imageName;
-	}
+        // Used by grinview GUI to select image
+        if (imageName == null) {
+            return "<blank>";
+        }  else {
+            return imageName;
+        }
     }
 }

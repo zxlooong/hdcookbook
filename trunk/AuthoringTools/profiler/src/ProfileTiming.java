@@ -67,27 +67,27 @@ import java.io.Reader;
 
 public class ProfileTiming {
 
-    long startTime;	// in ns, 0 for first one
+    long startTime;     // in ns, 0 for first one
     long duration;
     int threadID;
     String message;
 
     public void writeData(Writer w) throws IOException {
-	Object[] obj = new Object[] {
-		new Long(startTime),
-		new Long(duration),
-		new Integer(threadID),
-		message
-	};
-	JsonIO.writeJSON(w, obj);
-	w.write('\n');
+        Object[] obj = new Object[] {
+                new Long(startTime),
+                new Long(duration),
+                new Integer(threadID),
+                message
+        };
+        JsonIO.writeJSON(w, obj);
+        w.write('\n');
     }
 
     public void readData(Reader r) throws IOException {
-	Object[] obj = (Object []) JsonIO.readJSON(r);
-	startTime = ((Number) obj[0]).longValue();
-	duration = ((Number) obj[1]).longValue();
-	threadID = ((Number) obj[2]).intValue();
-	message = ((String) obj[3]);
+        Object[] obj = (Object []) JsonIO.readJSON(r);
+        startTime = ((Number) obj[0]).longValue();
+        duration = ((Number) obj[1]).longValue();
+        threadID = ((Number) obj[2]).intValue();
+        message = ((String) obj[3]);
     }
 }

@@ -77,7 +77,7 @@ public interface AnimationClient {
      *                   Component.prepareImage().
      **/
     public void initialize(Component component)
-	throws InterruptedException;
+        throws InterruptedException;
 
 
     /**
@@ -100,8 +100,8 @@ public interface AnimationClient {
      *
      * @see AnimationEngine#getModelTimeSkipped()
      *
-     * @throws	InterruptedException	if the thread has been interrupted
-     *					(e.g. because the xlet is being killed)
+     * @throws  InterruptedException    if the thread has been interrupted
+     *                                  (e.g. because the xlet is being killed)
      **/
     public void nextFrame() throws InterruptedException;
 
@@ -111,8 +111,8 @@ public interface AnimationClient {
      * Clients shouldn't make any changes to the model in this call; all
      * such changes need to happen in nextFrame()
      *
-     * @throws	InterruptedException	if the thread has been interrupted
-     *					(e.g. because the xlet is being killed)
+     * @throws  InterruptedException    if the thread has been interrupted
+     *                                  (e.g. because the xlet is being killed)
      *
      * @see #nextFrame()
      **/
@@ -170,17 +170,17 @@ public interface AnimationClient {
      * maintained by the animation client to optimize display areas should 
      * be updated in this method, and not in paintFrame().
      *
-     * @param targets		The RenderContext that manages  the set of 
-     *				targets the client can draw to.
+     * @param targets           The RenderContext that manages  the set of 
+     *                          targets the client can draw to.
      *
-     * @throws	InterruptedException	if the thread has been interrupted
-     *					(e.g. because the xlet is being killed)
+     * @throws  InterruptedException    if the thread has been interrupted
+     *                                  (e.g. because the xlet is being killed)
      *
      * @see RenderContext#setTarget(int)
      * @see #mapDrawTargets(Hashtable)
      **/
     public void addDisplayAreas(RenderContext targets)
-	throws InterruptedException;
+        throws InterruptedException;
 
     /**
      * Paint the current frame of the animation.  This is called after
@@ -199,15 +199,15 @@ public interface AnimationClient {
      * can be handled more efficiently (for some drawing styles) via
      * <code>RenderArea.clearAndAddArea()</code>
      *
-     * @param gr	The graphics context to draw to, set to Src drawing mode
+     * @param gr        The graphics context to draw to, set to Src drawing mode
      *
-     * @throws	InterruptedException	if the thread has been interrupted
-     *					(e.g. because the xlet is being killed)
+     * @throws  InterruptedException    if the thread has been interrupted
+     *                                  (e.g. because the xlet is being killed)
      *
      * @see RenderContext#addArea(DrawRecord)
      **/
     public void paintFrame(Graphics2D gr)
-    	throws InterruptedException ;
+        throws InterruptedException ;
 
     /**
      * Called when the animation framework is done painting the current
@@ -241,7 +241,7 @@ public interface AnimationClient {
      * See addDisplayAreas() for a discussion of what a render area target
      * is for.
      *
-     * @param targets	A hashtable mapping String names to Integer values
+     * @param targets   A hashtable mapping String names to Integer values
      *
      * @see RenderContext#setTarget(int)
      * @see #addDisplayAreas(RenderContext)

@@ -78,13 +78,13 @@ public class Main {
         boolean designOnly = false;
         
         while (index < args.length) {
-	    if ("-asset_dir".equals(args[index])) {
-		index++;
+            if ("-asset_dir".equals(args[index])) {
+                index++;
                 if (index == args.length) {
                     usage();
                 }                
                 String path = args[index];
-		assetDirsLL.add(path);
+                assetDirsLL.add(path);
             } else if ("-out".equals(args[index])) {
                 index++;
                 if (index == args.length) {
@@ -124,14 +124,14 @@ public class Main {
         }
        
         File[] assetDirs = null;
-	if (assetDirsLL.size() > 0) {
-	    assetDirs = new File[assetDirsLL.size()];
-	    int i = 0;
-	    for (Iterator it = assetDirsLL.iterator(); it.hasNext(); ) {
-		File f = new File((String) it.next());
-		assetDirs[i++] = f;
-	    }
-	}
+        if (assetDirsLL.size() > 0) {
+            assetDirs = new File[assetDirsLL.size()];
+            int i = 0;
+            for (Iterator it = assetDirsLL.iterator(); it.hasNext(); ) {
+                File f = new File((String) it.next());
+                assetDirs[i++] = f;
+            }
+        }
         if (assetDirs == null || assetDirs.length == 0) {
             assetDirs = new File[]{ new File(".") }; // current dir
         } 
@@ -140,7 +140,7 @@ public class Main {
         
         FontStripImageGenerator generator 
                 = new FontStripImageGenerator(configFile, scaleX, scaleY,
-					      assetDirs, outputDir);
+                                              assetDirs, outputDir);
         
         try {
             generator.generateImages(designOnly);
@@ -153,13 +153,13 @@ public class Main {
    }
 
     private static double argToDouble(String arg) {
-	try {
-	    return Double.parseDouble(arg);
-	} catch (NumberFormatException ex) {
-	    ex.printStackTrace();
-	    usage();
-	    return -1;	// not reached
-	}
+        try {
+            return Double.parseDouble(arg);
+        } catch (NumberFormatException ex) {
+            ex.printStackTrace();
+            usage();
+            return -1;  // not reached
+        }
     }
     
    

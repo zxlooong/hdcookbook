@@ -66,7 +66,7 @@ public class SESegmentDoneCommand extends SEGrinXHelper {
 
     public SESegmentDoneCommand(SEShow show) {
         super(show);
-	setCommandNumber(SEGMENT_DONE);
+        setCommandNumber(SEGMENT_DONE);
     }
     
     public void accept(SEShowVisitor visitor) {
@@ -89,6 +89,6 @@ public class SESegmentDoneCommand extends SEGrinXHelper {
      * {@inheritDoc}
      **/
     public String toString() {
-	return "segment_done";
+        return "segment_done";
     }
 }

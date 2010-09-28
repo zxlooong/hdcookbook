@@ -97,11 +97,11 @@ public class DebugDirectDrawEngine extends DirectDrawEngine {
      * {@inheritDoc}
      **/
     public void initContainer(Container container, Rectangle bounds) {
-	super.initContainer(container, bounds);
-	containerG = (Graphics2D) container.getGraphics();
-	if (Debug.ASSERT && containerG == null) {
-	    Debug.assertFail();  // Maybe container is invisible?
-	}
+        super.initContainer(container, bounds);
+        containerG = (Graphics2D) container.getGraphics();
+        if (Debug.ASSERT && containerG == null) {
+            Debug.assertFail();  // Maybe container is invisible?
+        }
     }
 
     /**
@@ -109,49 +109,49 @@ public class DebugDirectDrawEngine extends DirectDrawEngine {
      * erase, paint areas, then painted result
      **/
     public void setDebugDraw(boolean debugDraw) {
-	this.debugDraw = debugDraw;
+        this.debugDraw = debugDraw;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void callPaintTargets() throws InterruptedException {
-	if (debugDraw) {
-		// Paint the area to be erased red, and wait
-	    containerG.setColor(red);
-	    containerG.setComposite(AlphaComposite.SrcOver);
-	    for (int i = 0; i < getNumEraseTargets(); i++) {
-		Rectangle a = getEraseTargets()[i];
-		if (!a.isEmpty()) {
-		    containerG.fillRect(a.x, a.y, a.width, a.height);
-		}
-	    }
-	    Toolkit.getDefaultToolkit().sync();
-	    sleepQuarterFrame();
+        if (debugDraw) {
+                // Paint the area to be erased red, and wait
+            containerG.setColor(red);
+            containerG.setComposite(AlphaComposite.SrcOver);
+            for (int i = 0; i < getNumEraseTargets(); i++) {
+                Rectangle a = getEraseTargets()[i];
+                if (!a.isEmpty()) {
+                    containerG.fillRect(a.x, a.y, a.width, a.height);
+                }
+            }
+            Toolkit.getDefaultToolkit().sync();
+            sleepQuarterFrame();
 
-		// Paint the area to be drawn green, and wait
-	    containerG.setColor(green);
-	    for (int i = 0; i < getNumDrawTargets(); i++) {
-		Rectangle a = getDrawTargets()[i];
-		containerG.fillRect(a.x, a.y, a.width, a.height);
-	    }
-	    Toolkit.getDefaultToolkit().sync();
-	    sleepQuarterFrame();
-	    containerG.setComposite(AlphaComposite.Src);
-	}
-	super.callPaintTargets();	// This covers the red and green
+                // Paint the area to be drawn green, and wait
+            containerG.setColor(green);
+            for (int i = 0; i < getNumDrawTargets(); i++) {
+                Rectangle a = getDrawTargets()[i];
+                containerG.fillRect(a.x, a.y, a.width, a.height);
+            }
+            Toolkit.getDefaultToolkit().sync();
+            sleepQuarterFrame();
+            containerG.setComposite(AlphaComposite.Src);
+        }
+        super.callPaintTargets();       // This covers the red and green
     }
 
     /**
      * {@inheritDoc}
      **/
     public void setFps(int fps) {
-	this.fps = fps;
-	super.setFps(fps);
+        this.fps = fps;
+        super.setFps(fps);
     }
 
     private void sleepQuarterFrame() throws InterruptedException {
-	long ms = (1000000 / fps) / 4;
-	Thread.sleep(ms);
+        long ms = (1000000 / fps) / 4;
+        Thread.sleep(ms);
     }
 }

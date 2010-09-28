@@ -76,44 +76,44 @@ public class Queue {
      * entries than this, it will start allocating objects.
      **/
     public Queue(int capacity) {
-	buffer = new Object[capacity];
+        buffer = new Object[capacity];
     }
 
     public synchronized void add(Object el) {
-	int n = (addPos + 1) % buffer.length;
-	if (n != removePos) {
-	    buffer[addPos] = el;
-	    addPos = n;
-	} else {	// overflow
-	    if (overflow == null) {
-		overflow = new Queue(buffer.length);
-	    }
-	    overflow.add(el);
-	}
+        int n = (addPos + 1) % buffer.length;
+        if (n != removePos) {
+            buffer[addPos] = el;
+            addPos = n;
+        } else {        // overflow
+            if (overflow == null) {
+                overflow = new Queue(buffer.length);
+            }
+            overflow.add(el);
+        }
     }
 
     public synchronized boolean isEmpty() {
-	return addPos == removePos;
+        return addPos == removePos;
     }
 
     /**
      * @throws NoSuchElementException if isEmpty() is true
      **/
     public synchronized Object remove() {
-	if (isEmpty()) {
-	    throw new NoSuchElementException();
-	}
-	Object result = buffer[removePos];
-	buffer[removePos] = null;
-	removePos = (removePos + 1) % buffer.length;
-	if (overflow != null) {
-	    buffer[addPos] = overflow.remove();
-	    addPos = (addPos + 1) % buffer.length;
-	    if (overflow.isEmpty()) {
-		overflow = null;
-	    }
-	}
-	return result;
+        if (isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        Object result = buffer[removePos];
+        buffer[removePos] = null;
+        removePos = (removePos + 1) % buffer.length;
+        if (overflow != null) {
+            buffer[addPos] = overflow.remove();
+            addPos = (addPos + 1) % buffer.length;
+            if (overflow.isEmpty()) {
+                overflow = null;
+            }
+        }
+        return result;
     }
     
 }

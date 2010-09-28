@@ -89,7 +89,7 @@ public class BDCredentialSigner {
             
             if (jarFileName != null) {
                 extractFile(jarFileName, permReqFileName);
-	    }
+            }
 
             // 2. Generate credentials
             if (debug) {
@@ -109,7 +109,7 @@ public class BDCredentialSigner {
             printUsageAndExit("Please specify the jarfile tobe updated and signed");
         } else {
             System.err.println("jarfilename:" + jarFileName);
-	}
+        }
         updateJar(jarFileName, permReqFileName);
         // 4. sign the updated jar file
         if (debug) {
@@ -126,7 +126,7 @@ public class BDCredentialSigner {
         
         if (debug) {
             CredentialVerifier.verify(jarFileName, permReqFileName, 
-	    				"app.discroot.crt", isBudaCredential);
+                                        "app.discroot.crt", isBudaCredential);
         }
     }
     
@@ -173,9 +173,9 @@ public class BDCredentialSigner {
                 updateCerts = false;
             } else if (opt.equals("-updatecerts")) {
                 generateCred = false;
-	    } else if (opt.equals("-buda")) {
-		isBudaCredential = true;
-		cBuilder = cBuilder.budaCredential();
+            } else if (opt.equals("-buda")) {
+                isBudaCredential = true;
+                cBuilder = cBuilder.budaCredential();
             } else if (opt.equals("-gastore")) {
                 if (++i == args.length) errorNeedArgument(opt);
                 cBuilder = cBuilder.grantorKeyStore(args[i]);
@@ -244,11 +244,11 @@ public class BDCredentialSigner {
                            "The grantee keystore is used for signing the final jar after it's updated with\n" +
                            "credentials");  
         System.err.println("-----------------------------------------------------------------------\n");
-	
-	System.err.println("usage: BDCredentialSigner [options] permission-request-file jarfile\n");
+        
+        System.err.println("usage: BDCredentialSigner [options] permission-request-file jarfile\n");
         System.err.println("Valid Options:");
         System.err.println(" -gencred             \t:Generate credentials;Output:PRF with credentials");
-        System.err.println(" -buda		  \t:Generate BUDA credentials (default: Persistence storage credentials)");
+        System.err.println(" -buda                \t:Generate BUDA credentials (default: Persistence storage credentials)");
         System.err.println(" -gastore filename    \t:Grantor's keystore;default used:\"grantor.store\"");
         System.err.println("                      \t from the current working directory");
         System.err.println(" -gastorepass password\t:Grantor's keystore password");

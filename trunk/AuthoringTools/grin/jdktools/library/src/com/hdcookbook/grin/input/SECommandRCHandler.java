@@ -64,18 +64,18 @@ import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
 import java.io.IOException;
 
 public class SECommandRCHandler 
-		extends CommandRCHandler 
-		implements SENode, SEScalableNode, SERCHandler 
+                extends CommandRCHandler 
+                implements SENode, SEScalableNode, SERCHandler 
 {
     
     public SECommandRCHandler(String name, int mask, boolean wantKeypress,
-    			     Command[] commands) 
+                             Command[] commands) 
     {
         super();
         this.name = name;
-	this.mask = mask;
-	this.wantKeypress = wantKeypress;
-	this.commands = commands;
+        this.mask = mask;
+        this.wantKeypress = wantKeypress;
+        this.commands = commands;
     }
     
     public SECommandRCHandler(SEShow show) {
@@ -92,7 +92,7 @@ public class SECommandRCHandler
     }
 
     public boolean getWantKeypress() {
-	return wantKeypress;
+        return wantKeypress;
     }
     
     public void setMask(int mask) {
@@ -107,38 +107,38 @@ public class SECommandRCHandler
      * {@inheritDoc}
      **/
     public int getKeyPressedInterestMask() {
-	if (wantKeypress) {
-	    return mask;
-	} else {
-	    return 0;
-	}
+        if (wantKeypress) {
+            return mask;
+        } else {
+            return 0;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getKeyReleasedInterestMask() {
-	if (wantKeypress) {
-	    return 0;
-	} else {
-	    return mask;
-	}
+        if (wantKeypress) {
+            return 0;
+        } else {
+            return mask;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getKeyTypedInterestMask() {
-	return 0;
+        return 0;
     }
 
     
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException {
-	
+        
         out.writeSuperClassData(this);
         out.writeInt(getMask());
-	out.writeBoolean(wantKeypress);
+        out.writeBoolean(wantKeypress);
         out.writeCommands(getCommands());           
     }
 
@@ -168,18 +168,18 @@ public class SECommandRCHandler
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	// Do nothing
+        // Do nothing
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	String type = wantKeypress ? "key_pressed" : "key_released";
-	if (name == null) {
-	    return "rc_handler " + type + " @"+Integer.toHexString(hashCode());
-	} else {
-	    return "rc_handler " + type + " " + name;
-	}
+        String type = wantKeypress ? "key_pressed" : "key_released";
+        if (name == null) {
+            return "rc_handler " + type + " @"+Integer.toHexString(hashCode());
+        } else {
+            return "rc_handler " + type + " " + name;
+        }
     }
 }

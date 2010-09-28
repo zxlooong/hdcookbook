@@ -57,12 +57,12 @@
  * class with UI code in it.
  * The UI plots duration of method execution times for each method
  * It uses:
- *      1. Prefuse display for plotting the execution times.	
- *	1. Swing ComboBox: Selection of time unit for viewing the data
- *	2. Prefuse SearchQuery: Selection of method/s of interest 
- *	3. Prefuse JRangeSlider: Selection of the time view window
- *	4. Swing Spinner: Selection of standard deviation factor for detecting
- *		execution time anamolies.
+ *      1. Prefuse display for plotting the execution times.    
+ *      1. Swing ComboBox: Selection of time unit for viewing the data
+ *      2. Prefuse SearchQuery: Selection of method/s of interest 
+ *      3. Prefuse JRangeSlider: Selection of the time view window
+ *      4. Swing Spinner: Selection of standard deviation factor for detecting
+ *              execution time anamolies.
  */
 
 import com.hdcookbook.grin.util.JsonIO;
@@ -165,7 +165,7 @@ import prefuse.visual.expression.VisiblePredicate;
 import prefuse.visual.sort.ItemSorter;
 
 public class ProfileBrowser extends JPanel implements
-	 ActionListener, ChangeListener {
+         ActionListener, ChangeListener {
 
     // the range: start and end execution time of gathered data in nano seconds.
     static double startTimeNano;
@@ -197,9 +197,9 @@ public class ProfileBrowser extends JPanel implements
     static String filename = "profile.dat";
 
     public static void main(String[] args) {
-	if (args.length > 0) {
-	    filename = args[0];
-	}
+        if (args.length > 0) {
+            filename = args[0];
+        }
         UILib.setPlatformLookAndFeel();
         createFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -210,10 +210,10 @@ public class ProfileBrowser extends JPanel implements
         // load the data
         Table table = null;
         try {
-	    //table = new DelimitedTextTableReader().readTable("/profile.txt");
-	    table = initFromFile(filename);
-    	    table = condenseMethodNames(table);
-	    initData(table);
+            //table = new DelimitedTextTableReader().readTable("/profile.txt");
+            table = initFromFile(filename);
+            table = condenseMethodNames(table);
+            initData(table);
         } catch ( Exception e ) {
             e.printStackTrace();
             System.exit(1);
@@ -225,8 +225,8 @@ public class ProfileBrowser extends JPanel implements
     }
 
     public static Table initFromFile(String fileName) throws IOException {
-	String timeField = TimeUnit.NANO.startTimeField();
-	String durationField = TimeUnit.NANO.durationField();
+        String timeField = TimeUnit.NANO.startTimeField();
+        String durationField = TimeUnit.NANO.durationField();
 
         FileInputStream fis = new FileInputStream(fileName);
         Reader rdr = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
@@ -234,24 +234,24 @@ public class ProfileBrowser extends JPanel implements
         o = JsonIO.readJSON(rdr);
         int num = ((Number) o).intValue();
 
-	Table table = new Table(num, 4);
-	table.addColumn(timeField, double.class);
-	table.addColumn(durationField, double.class);
-	table.addColumn(THREAD_FIELD, int.class);
-	table.addColumn(METHOD_FIELD, String.class);
-	TableTuple tt;
+        Table table = new Table(num, 4);
+        table.addColumn(timeField, double.class);
+        table.addColumn(durationField, double.class);
+        table.addColumn(THREAD_FIELD, int.class);
+        table.addColumn(METHOD_FIELD, String.class);
+        TableTuple tt;
         for (int i = 0; i < num; i++) {
             ProfileTiming t = new ProfileTiming();
             t.readData(rdr);
-	    table.setDouble(i, timeField, t.startTime);
-	    table.setDouble(i, timeField, t.startTime);
-	    table.setDouble(i, durationField, t.duration);
-	    table.setInt(i, THREAD_FIELD, t.threadID);
-	    table.setString(i, METHOD_FIELD, t.message);
+            table.setDouble(i, timeField, t.startTime);
+            table.setDouble(i, timeField, t.startTime);
+            table.setDouble(i, durationField, t.duration);
+            table.setInt(i, THREAD_FIELD, t.threadID);
+            table.setString(i, METHOD_FIELD, t.message);
         }
-	System.out.println(table.getTupleCount() + 
-		" data entries added to the table ...");
-	return table;
+        System.out.println(table.getTupleCount() + 
+                " data entries added to the table ...");
+        return table;
     }
 
     /**
@@ -263,60 +263,60 @@ public class ProfileBrowser extends JPanel implements
      * current time unit.
      */
     public static void initData(Table t) {
-	ColumnMetadata clmd = t.getMetadata(METHOD_FIELD);
-	totalMethods = clmd.getUniqueCount();
-    	startTimeNano = Double.MAX_VALUE;    // start/end time of data
-    	endTimeNano = Double.MIN_VALUE;
-	
-	HashMap<String, Double> sumOfSquares = new HashMap<String, Double>();
-	HashMap<String, Double> sums = new HashMap<String, Double>();
-	HashMap<String, Integer> instances = new HashMap<String, Integer>();
+        ColumnMetadata clmd = t.getMetadata(METHOD_FIELD);
+        totalMethods = clmd.getUniqueCount();
+        startTimeNano = Double.MAX_VALUE;    // start/end time of data
+        endTimeNano = Double.MIN_VALUE;
+        
+        HashMap<String, Double> sumOfSquares = new HashMap<String, Double>();
+        HashMap<String, Double> sums = new HashMap<String, Double>();
+        HashMap<String, Integer> instances = new HashMap<String, Integer>();
 
         for (int i = 0; i < t.getTupleCount(); i++) {
-	    double tStart = t.getDouble(i, currTimeUnit.NANO.startTimeField());	
+            double tStart = t.getDouble(i, currTimeUnit.NANO.startTimeField()); 
             if (tStart < startTimeNano) {
                 startTimeNano = tStart;
             }
-	    double duration = t.getDouble(i, currTimeUnit.NANO.durationField());	
+            double duration = t.getDouble(i, currTimeUnit.NANO.durationField());        
             double tEnd = tStart + duration;
             if (tEnd > endTimeNano) {
                 endTimeNano = tEnd;
             }
-	    
-	    String method = t.getString(i, METHOD_FIELD);
-	    Double d = sumOfSquares.get(method);
-	    double sum = (d == null) ? 0 : d.doubleValue();
-	    sum += Math.pow(duration, 2);
-	    sumOfSquares.put(method, sum);
+            
+            String method = t.getString(i, METHOD_FIELD);
+            Double d = sumOfSquares.get(method);
+            double sum = (d == null) ? 0 : d.doubleValue();
+            sum += Math.pow(duration, 2);
+            sumOfSquares.put(method, sum);
 
-	    d = sums.get(method);
-	    sum = (d == null) ? 0 : d.doubleValue();
-	    sum += duration;
-	    sums.put(method, sum);
+            d = sums.get(method);
+            sum = (d == null) ? 0 : d.doubleValue();
+            sum += duration;
+            sums.put(method, sum);
 
-	    Integer s = instances.get(method);
-	    int size = (s == null) ? 0 : s.intValue();
-	    size++;
-	    instances.put(method, size);
+            Integer s = instances.get(method);
+            int size = (s == null) ? 0 : s.intValue();
+            size++;
+            instances.put(method, size);
         }
-	UIstartTime = toCurrentUnit(startTimeNano);
-	UIendTime = toCurrentUnit(endTimeNano);
+        UIstartTime = toCurrentUnit(startTimeNano);
+        UIendTime = toCurrentUnit(endTimeNano);
 
-	Set<Map.Entry<String, Double>> set = sumOfSquares.entrySet();
-	for (Iterator<Map.Entry<String, Double>> iter = set.iterator(); 
-		iter.hasNext();) {	
-	   Map.Entry<String, Double> e = iter.next();
-	   String method = e.getKey();
-	   Double sumOfSq = e.getValue();
-	   Double avgOfSumOfSq =  sumOfSq / instances.get(method);
-	   Double mean = sums.get(method) / instances.get(method);
-	   Double sqOfAvg = Math.pow(mean, 2);
-	   Double stdDev = Math.sqrt((avgOfSumOfSq - sqOfAvg)); 
-	   stdDeviations.put(method, stdDev);
-	   means.put(method, mean);
-	}
-	System.out.println("The viewable data range is: " + startTimeNano + "-" +
-			endTimeNano + " " + currTimeUnit.NANO.dname());
+        Set<Map.Entry<String, Double>> set = sumOfSquares.entrySet();
+        for (Iterator<Map.Entry<String, Double>> iter = set.iterator(); 
+                iter.hasNext();) {      
+           Map.Entry<String, Double> e = iter.next();
+           String method = e.getKey();
+           Double sumOfSq = e.getValue();
+           Double avgOfSumOfSq =  sumOfSq / instances.get(method);
+           Double mean = sums.get(method) / instances.get(method);
+           Double sqOfAvg = Math.pow(mean, 2);
+           Double stdDev = Math.sqrt((avgOfSumOfSq - sqOfAvg)); 
+           stdDeviations.put(method, stdDev);
+           means.put(method, mean);
+        }
+        System.out.println("The viewable data range is: " + startTimeNano + "-" +
+                        endTimeNano + " " + currTimeUnit.NANO.dname());
     }
 
     /*
@@ -324,16 +324,16 @@ public class ProfileBrowser extends JPanel implements
      * stardard deviation from the mean execution time for the given method
      */
     static boolean withinStdDev(String method, Double duration) {
-	Double sd = toCurrentUnit(stdDeviations.get(method));     
-	Double mean = toCurrentUnit(means.get(method));     
+        Double sd = toCurrentUnit(stdDeviations.get(method));     
+        Double mean = toCurrentUnit(means.get(method));     
 
-	// Lets only indicate longer execution times.
-	return (duration > ((sd * sdf) + mean + 0.5)); 
-		//|| (duration < (mean - (sd * sdf)));	
+        // Lets only indicate longer execution times.
+        return (duration > ((sd * sdf) + mean + 0.5)); 
+                //|| (duration < (mean - (sd * sdf)));  
     }
 
     static double toCurrentUnit(double value) {
-	return currTimeUnit.convert(value);
+        return currTimeUnit.convert(value);
     }
 
     /**
@@ -342,45 +342,45 @@ public class ProfileBrowser extends JPanel implements
      * selected time unit if one does not already exists.
      */
     static Table addCurrTimeUnit(Table t) {
-	String sField = TimeUnit.NANO.startTimeField();
-	String newSField = currTimeUnit.startTimeField();
-	String dField = TimeUnit.NANO.durationField();
-	String newDField = currTimeUnit.durationField();
-	
-	if (t.getColumn(newSField) != null) {
-	    return t;
+        String sField = TimeUnit.NANO.startTimeField();
+        String newSField = currTimeUnit.startTimeField();
+        String dField = TimeUnit.NANO.durationField();
+        String newDField = currTimeUnit.durationField();
+        
+        if (t.getColumn(newSField) != null) {
+            return t;
         }
-	t.addColumn(newSField, double.class);
-	t.addColumn(newDField, double.class);
+        t.addColumn(newSField, double.class);
+        t.addColumn(newDField, double.class);
 
-	for (int rowIndex= 0; rowIndex < t.getTupleCount(); rowIndex++) {
-	    double value = t.getDouble(rowIndex, sField);	
-	    value = currTimeUnit.convert(value);
-	    t.set(rowIndex, newSField, Double.valueOf(value));
-	    value = t.getLong(rowIndex, dField);	
-	    value = currTimeUnit.convert(value);
-	    t.set(rowIndex, newDField, Double.valueOf(value));
-	}
-	return t;
+        for (int rowIndex= 0; rowIndex < t.getTupleCount(); rowIndex++) {
+            double value = t.getDouble(rowIndex, sField);       
+            value = currTimeUnit.convert(value);
+            t.set(rowIndex, newSField, Double.valueOf(value));
+            value = t.getLong(rowIndex, dField);        
+            value = currTimeUnit.convert(value);
+            t.set(rowIndex, newDField, Double.valueOf(value));
+        }
+        return t;
     }
 
     // strips off the characters starting from '(' from the method names.
     // we need a better solution to visualize longer method names.
     public static Table condenseMethodNames(Table t) {
-	for (int rowIndex= 0; rowIndex < t.getTupleCount(); rowIndex++) {
-	    String value = t.getString(rowIndex, METHOD_FIELD);	
-	    if (value == null) {
-		System.out.println("Processing input file. Row no:" + rowIndex +
-			"  is missing the method name");
-		System.exit(1);
-	    }
-	    int idx = value.indexOf('(');
-	    if (idx > -1) {
-		value = value.substring(0, idx);
-	    }
-	    t.setString(rowIndex, METHOD_FIELD, value);
-	}
-	return t;
+        for (int rowIndex= 0; rowIndex < t.getTupleCount(); rowIndex++) {
+            String value = t.getString(rowIndex, METHOD_FIELD); 
+            if (value == null) {
+                System.out.println("Processing input file. Row no:" + rowIndex +
+                        "  is missing the method name");
+                System.exit(1);
+            }
+            int idx = value.indexOf('(');
+            if (idx > -1) {
+                value = value.substring(0, idx);
+            }
+            t.setString(rowIndex, METHOD_FIELD, value);
+        }
+        return t;
     }
     
 
@@ -404,7 +404,7 @@ public class ProfileBrowser extends JPanel implements
 
     public ProfileBrowser(Table t) {
         super(new BorderLayout());
-	this.t = t;
+        this.t = t;
         
         // --------------------------------------------------------------------
         // STEP 1: setup the visualized data
@@ -412,7 +412,7 @@ public class ProfileBrowser extends JPanel implements
         final Visualization vis = new Visualization();
         m_vis = vis;
 
-	t = addCurrTimeUnit(t);
+        t = addCurrTimeUnit(t);
         m_vt = vis.addTable(group, t);
         vis.setRendererFactory(new RendererFactory() {
             AbstractShapeRenderer sr = new RectRenderer();
@@ -429,7 +429,7 @@ public class ProfileBrowser extends JPanel implements
 
         // set up dynamic queries, search set
         RangeQueryBinding  timelineQ = new RangeQueryBinding(m_vt,
-					 currTimeUnit.startTimeField());
+                                         currTimeUnit.startTimeField());
         SearchQueryBinding searchQ   = new SearchQueryBinding(m_vt, METHOD_FIELD);
         
         // construct the filtering predicate
@@ -443,7 +443,7 @@ public class ProfileBrowser extends JPanel implements
                 Constants.Y_AXIS, VisiblePredicate.TRUE);
         yaxis.setRangeModel(timelineQ.getNumberModel());
         timelineQ.getNumberModel().setValueRange(UIstartTime, UIendTime,
-					 UIstartTime, UIendTime); 
+                                         UIstartTime, UIendTime); 
         xaxis.setLayoutBounds(m_dataB);
         yaxis.setLayoutBounds(m_dataB);
         
@@ -467,7 +467,7 @@ public class ProfileBrowser extends JPanel implements
         draw.add(yaxis);
         draw.add(ylabels);
         draw.add(xlabels);
-	// If the DataColor action is set to strokecolor only then uncomment the line below 
+        // If the DataColor action is set to strokecolor only then uncomment the line below 
         //draw.add(new ColorAction(group, VisualItem.FILLCOLOR, 0));
         draw.add(new RepaintAction());
         m_vis.putAction("draw", draw);
@@ -490,7 +490,7 @@ public class ProfileBrowser extends JPanel implements
         
         // --------------------------------------------------------------------
         // STEP 4: set up a display and ui components to show the visualization
-	m_display = new Display(vis);
+        m_display = new Display(vis);
         m_display.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         m_display.setSize(800,550);
         m_display.setHighQuality(true);
@@ -506,13 +506,13 @@ public class ProfileBrowser extends JPanel implements
         m_details.setVerticalAlignment(SwingConstants.BOTTOM);
         
         StringBuilder sb = new StringBuilder();
-   	// Send all output to the Appendable object sb
-   	Formatter formatter = new Formatter(sb, Locale.US);
+        // Send all output to the Appendable object sb
+        Formatter formatter = new Formatter(sb, Locale.US);
 
-   	// Explicit argument indices may be used to re-order output.
-   	formatter.format("%.0f", UIendTime);
+        // Explicit argument indices may be used to re-order output.
+        formatter.format("%.0f", UIendTime);
         m_total = new JFastLabel(totalMethods +" Methods over " + sb.toString() + 
-					" " + currTimeUnit.dname());
+                                        " " + currTimeUnit.dname());
         m_total.setPreferredSize(new Dimension(500,20));
         m_total.setHorizontalAlignment(SwingConstants.RIGHT);
         m_total.setVerticalAlignment(SwingConstants.BOTTOM);
@@ -554,9 +554,9 @@ public class ProfileBrowser extends JPanel implements
         searcher.setLabelText("Method: ");
         searcher.setBorder(BorderFactory.createEmptyBorder(5,5,5,0));
 
-	// set up spinner
+        // set up spinner
         JSpinner jsp = createSDFSpinner();
- 	JLabel l = new JLabel("Deviation Factor");
+        JLabel l = new JLabel("Deviation Factor");
         l.setLabelFor(jsp);
         
         // create dynamic queries
@@ -578,20 +578,20 @@ public class ProfileBrowser extends JPanel implements
             }
             public void mouseReleased(MouseEvent e) {
                 m_display.setHighQuality(true);
-		Object o = e.getSource();
-		if (o instanceof JRangeSlider) {
-	    	    JRangeSlider rs = (JRangeSlider) o;
-	    	    NumberRangeModel nm = (NumberRangeModel) rs.getModel(); 
-	            Double low = (Double) nm.getLowValue();
-	            Double high  = (Double) nm.getHighValue();
-		    UIstartTime = low.doubleValue();
-		    UIendTime = high.doubleValue();
-		}
+                Object o = e.getSource();
+                if (o instanceof JRangeSlider) {
+                    JRangeSlider rs = (JRangeSlider) o;
+                    NumberRangeModel nm = (NumberRangeModel) rs.getModel(); 
+                    Double low = (Double) nm.getLowValue();
+                    Double high  = (Double) nm.getHighValue();
+                    UIstartTime = low.doubleValue();
+                    UIendTime = high.doubleValue();
+                }
                 m_display.repaint();
             }
         });
-	slider.addChangeListener(this);
-	jsp.addChangeListener(this);
+        slider.addChangeListener(this);
+        jsp.addChangeListener(this);
         vis.run("draw");
         vis.run("xlabels");
         
@@ -608,64 +608,64 @@ public class ProfileBrowser extends JPanel implements
 
     // Creates time unit selector box
     public JComponent createUnitSelector() {
-	Vector vec = new Vector();
-	for (TimeUnit tu : TimeUnit.values()) {
-	    vec.add(tu.dname());
+        Vector vec = new Vector();
+        for (TimeUnit tu : TimeUnit.values()) {
+            vec.add(tu.dname());
         }
-	JComboBox box = new JComboBox(vec);
-	box.setSelectedIndex(currTimeUnit.index());
-	box.addActionListener(this);
-	return box;
+        JComboBox box = new JComboBox(vec);
+        box.setSelectedIndex(currTimeUnit.index());
+        box.addActionListener(this);
+        return box;
    }
 
    public JSpinner createSDFSpinner() {
-	SpinnerModel sdfModel = new SpinnerNumberModel(
-					SDF_INIT, //initial value
+        SpinnerModel sdfModel = new SpinnerNumberModel(
+                                        SDF_INIT, //initial value
                                         SDF_MIN,  //min
                                         SDF_MAX,  //max
                                         SDF_STEP);       //step
-	
-	JSpinner jsp = new JSpinner (sdfModel);
-	jsp.setEditor(new JSpinner.NumberEditor(jsp, "#"));	
-	jsp.setValue(Double.valueOf(sdf));
-	return jsp;
+        
+        JSpinner jsp = new JSpinner (sdfModel);
+        jsp.setEditor(new JSpinner.NumberEditor(jsp, "#"));     
+        jsp.setValue(Double.valueOf(sdf));
+        return jsp;
    }
 
     /** Listens to the combo box. */
     public void actionPerformed(ActionEvent e) {
         JComboBox cb = (JComboBox)e.getSource();
         String timeUnitName = (String)cb.getSelectedItem();
-	TimeUnit tu = TimeUnit.match(timeUnitName);
-	if (tu != null) {
-	    currTimeUnit = tu;
-	    UIstartTime = toCurrentUnit(startTimeNano);
-	    UIendTime = toCurrentUnit(endTimeNano);
-	}
+        TimeUnit tu = TimeUnit.match(timeUnitName);
+        if (tu != null) {
+            currTimeUnit = tu;
+            UIstartTime = toCurrentUnit(startTimeNano);
+            UIendTime = toCurrentUnit(endTimeNano);
+        }
         updateDisplay();
     }
 
     public void updateDisplay() {
-	frame.remove(currentView);
-	currentView = new ProfileBrowser(t);
+        frame.remove(currentView);
+        currentView = new ProfileBrowser(t);
         frame.setContentPane(currentView);
         frame.pack();
-	//System.out.println("Display should be new!");
+        //System.out.println("Display should be new!");
     }
 
     public void stateChanged(ChangeEvent e) {
-	Object o = e.getSource();
-	if (o instanceof JRangeSlider) {
-	    JRangeSlider rs = (JRangeSlider) o;
-	    //UIstartTime = rs.getLowValue();
-	    //UIendTime = rs.getHighValue();
-    	} else if (o instanceof JSpinner) {
-	    JSpinner jsp = (JSpinner) o;
-	    SpinnerNumberModel model = (SpinnerNumberModel) jsp.getModel();
-	    sdf = model.getNumber().doubleValue();
-	    jsp.setValue(Double.valueOf(sdf));
-	    //System.out.println("sdf:" + sdf);
-	    updateDisplay();
-	}
+        Object o = e.getSource();
+        if (o instanceof JRangeSlider) {
+            JRangeSlider rs = (JRangeSlider) o;
+            //UIstartTime = rs.getLowValue();
+            //UIendTime = rs.getHighValue();
+        } else if (o instanceof JSpinner) {
+            JSpinner jsp = (JSpinner) o;
+            SpinnerNumberModel model = (SpinnerNumberModel) jsp.getModel();
+            sdf = model.getNumber().doubleValue();
+            jsp.setValue(Double.valueOf(sdf));
+            //System.out.println("sdf:" + sdf);
+            updateDisplay();
+        }
     }
     
     public void displayLayout() {

@@ -91,11 +91,11 @@ public abstract class Command {
      * execute().
      *
      * @param caller The show that is executing this command.  This might
-     *		     not be the same as the show this command was created
-     * 		     under.
+     *               not be the same as the show this command was created
+     *               under.
      **/
     public void execute(Show caller) {
-	execute();
+        execute();
     }
 
     /**
@@ -132,10 +132,10 @@ public abstract class Command {
      * instances.
      *
      * @param featureClones HashMap<Feature, Feature> mapping an original
-     *				feature to its clone.
+     *                          feature to its clone.
      **/
     public Command cloneIfNeeded(HashMap featureClones) {
-	return this;
+        return this;
     }
 
     /**
@@ -154,7 +154,7 @@ public abstract class Command {
      * @see com.hdcookbook.grin.Show#deferNextCommands()
      **/
     final public boolean deferNextCommands() {
-	return false;
+        return false;
     }
 
     /**
@@ -162,12 +162,12 @@ public abstract class Command {
      * purposes.
      **/
     public String toString() {
-	String nm = getClass().getName();
-	int i = nm.lastIndexOf('.');
-	if (i >= 0) {
-	    nm = nm.substring(i+1, nm.length());
-	}
-	return nm;
+        String nm = getClass().getName();
+        int i = nm.lastIndexOf('.');
+        if (i >= 0) {
+            nm = nm.substring(i+1, nm.length());
+        }
+        return nm;
     }
     
 }

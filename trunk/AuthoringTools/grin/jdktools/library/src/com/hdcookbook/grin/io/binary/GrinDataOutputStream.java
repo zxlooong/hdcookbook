@@ -110,8 +110,8 @@ public class GrinDataOutputStream extends DataOutputStream {
            writeByte(Constants.NULL);
        } else {
            writeByte(Constants.NON_NULL);
-	   writeInt(color.getRGB());
-	   	// That method really gets RGBA
+           writeInt(color.getRGB());
+                // That method really gets RGBA
        }    
    }
    
@@ -211,7 +211,7 @@ public class GrinDataOutputStream extends DataOutputStream {
            writeNonNull();
            writeInt(array.length);
            for (int i = 0; i < array.length; i++) {
-	      writeString(array[i]);
+              writeString(array[i]);
            }
        }
    }
@@ -237,7 +237,7 @@ public class GrinDataOutputStream extends DataOutputStream {
        
        int index = binaryWriter.getFeatureIndex(feature);      
        if (index < 0) {
-	    throw new IOException("Invalid feature index, " + feature);
+            throw new IOException("Invalid feature index, " + feature);
        }
        
        writeInt(index);
@@ -264,7 +264,7 @@ public class GrinDataOutputStream extends DataOutputStream {
        
        int index = binaryWriter.getSegmentIndex(segment);      
        if (index < 0) {
-	    throw new IOException("Invalid segment index, " + segment);
+            throw new IOException("Invalid segment index, " + segment);
        }
        
        writeInt(index);
@@ -291,7 +291,7 @@ public class GrinDataOutputStream extends DataOutputStream {
        
        int index = binaryWriter.getRCHandlerIndex(handler);      
        if (index < 0) {
-	    throw new IOException("Invalid RCHandler index");
+            throw new IOException("Invalid RCHandler index");
        }
        
        writeInt(index);

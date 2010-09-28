@@ -56,7 +56,7 @@ package com.hdcookbook.grinxlet;
 
 import com.hdcookbook.grin.GrinXHelper;
 import com.hdcookbook.grin.Show;
-import com.hdcookbook.grin.test.bigjdk.GenericMain;	// that's GrinView
+import com.hdcookbook.grin.test.bigjdk.GenericMain;     // that's GrinView
 import com.hdcookbook.grin.animator.AnimationClient;
 import com.hdcookbook.grin.animator.AnimationEngine;
 import com.hdcookbook.grin.commands.Command;
@@ -87,7 +87,7 @@ import java.awt.event.MouseMotionListener;
  *    public class MyGameXlet extends GameXlet {
  *
  *         public MyGameXlet() {
- *	   }
+ *         }
  *
  *         ...
  *    }

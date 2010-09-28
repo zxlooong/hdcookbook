@@ -95,13 +95,13 @@ import java.io.IOException;
  **/
 public class GuaranteeFill extends Modifier implements Node {
 
-	// Here, we make an inner class of RenderContext.  We
-	// pass this instance to our child; it modifies calls to the
-	// parent RenderContext from our child.
-	//
+        // Here, we make an inner class of RenderContext.  We
+        // pass this instance to our child; it modifies calls to the
+        // parent RenderContext from our child.
+        //
 
-    protected Rectangle guaranteed;	// Guaranteed area
-    protected Rectangle[] fills;		// The areas we need to fill
+    protected Rectangle guaranteed;     // Guaranteed area
+    protected Rectangle[] fills;                // The areas we need to fill
     private DrawRecord drawRecord = new DrawRecord();
 
     
@@ -113,47 +113,47 @@ public class GuaranteeFill extends Modifier implements Node {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup() || activated) {
-	    throw new IllegalStateException();
-	}
+        if (!isSetup() || activated) {
+            throw new IllegalStateException();
+        }
         GuaranteeFill result = new GuaranteeFill(show);
-	result.part = part.makeNewClone(clones);
-	result.guaranteed = guaranteed;
-	result.fills = fills;
-	return result;
-	// No initializeClone() of this feature is needed.
+        result.part = part.makeNewClone(clones);
+        result.guaranteed = guaranteed;
+        result.fills = fills;
+        return result;
+        // No initializeClone() of this feature is needed.
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void setChildChanged() {
-	// When we're deactivated, our child doesn't need to be marked as
-	// modified, because we don't change the drawing at all.
+        // When we're deactivated, our child doesn't need to be marked as
+        // modified, because we don't change the drawing at all.
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(guaranteed.x, guaranteed.y, 
-			   guaranteed.width, guaranteed.height);
-	context.guaranteeAreaFilled(drawRecord);
-	super.addDisplayAreas(context);
+        drawRecord.setArea(guaranteed.x, guaranteed.y, 
+                           guaranteed.width, guaranteed.height);
+        context.guaranteeAreaFilled(drawRecord);
+        super.addDisplayAreas(context);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	if (fills != null) {
-	    gr.setColor(AnimationEngine.transparent);
-	    for (int i = 0; i < fills.length; i++) {
-		Rectangle a = fills[i];
-		gr.fillRect(a.x, a.y, a.width, a.height);
-	    }
-	}
-	part.paintFrame(gr);
+        if (fills != null) {
+            gr.setColor(AnimationEngine.transparent);
+            for (int i = 0; i < fills.length; i++) {
+                Rectangle a = fills[i];
+                gr.fillRect(a.x, a.y, a.width, a.height);
+            }
+        }
+        part.paintFrame(gr);
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

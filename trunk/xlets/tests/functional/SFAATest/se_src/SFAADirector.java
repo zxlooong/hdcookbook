@@ -30,56 +30,56 @@ public class SFAADirector extends Director implements AnimationContext {
     }
 
     public void heartbeat() {
-	count++;
+        count++;
     }
 
     public static void startSFAA() {
-	Debug.println("Pretending to start SFAA");
-	engine = new DirectDrawEngine();
-	engine.setFps(24000);
-	engine.initialize(new SFAADirector());
-	engine.start();
+        Debug.println("Pretending to start SFAA");
+        engine = new DirectDrawEngine();
+        engine.setFps(24000);
+        engine.initialize(new SFAADirector());
+        engine.start();
     }
 
     public static String stopSFAA() {
-	DirectDrawEngine e;
-	synchronized(LOCK) {
-	    if (engine == null) {
-		return "No pretend SFAA to stop.";
-	    }
-	    e = engine;
-	    engine = null;
-	}
-	Debug.println("Stopping the pretend SFAA");
-	e.destroy();
-	return "Pretend SFAA stopped.";
+        DirectDrawEngine e;
+        synchronized(LOCK) {
+            if (engine == null) {
+                return "No pretend SFAA to stop.";
+            }
+            e = engine;
+            engine = null;
+        }
+        Debug.println("Stopping the pretend SFAA");
+        e.destroy();
+        return "Pretend SFAA stopped.";
     }
 
     public void animationInitialize() throws InterruptedException {
-	Director director = this;
-	try {
-	    GrinBinaryReader reader = new GrinBinaryReader(AssetFinder.getURL
-				    ("../build/sfaa_show.grin").openStream());
-	    subShow = new Show(director);
-	    reader.readShow(subShow);
-	} catch (IOException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-		Debug.println("Error reading sfaa_show.grin");
-	    }
-	    throw new InterruptedException();
-	}
+        Director director = this;
+        try {
+            GrinBinaryReader reader = new GrinBinaryReader(AssetFinder.getURL
+                                    ("../build/sfaa_show.grin").openStream());
+            subShow = new Show(director);
+            reader.readShow(subShow);
+        } catch (IOException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+                Debug.println("Error reading sfaa_show.grin");
+            }
+            throw new InterruptedException();
+        }
 
-	engine.checkDestroy();
-	engine.initClients(new AnimationClient[] { subShow });
-	initialize();
-	Container c = GrinXlet.getInstance().getAnimationEngine()
-				.getComponent().getParent();
-	engine.initContainer(c, new Rectangle(0, 0, 960, 540));
+        engine.checkDestroy();
+        engine.initClients(new AnimationClient[] { subShow });
+        initialize();
+        Container c = GrinXlet.getInstance().getAnimationEngine()
+                                .getComponent().getParent();
+        engine.initContainer(c, new Rectangle(0, 0, 960, 540));
     }
 
     public void animationFinishInitialization() {
-	subShow.activateSegment(subShow.getSegment("S:Initialize"));
+        subShow.activateSegment(subShow.getSegment("S:Initialize"));
     }
 
     public static void printTimeOffset() {

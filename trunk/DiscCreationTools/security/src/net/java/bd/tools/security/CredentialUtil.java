@@ -342,7 +342,7 @@ class CredentialUtil {
         String fileId = genCertChainFileId();
         byte credentialUsage = 0;
         if (isBudaCredential) {
-            credentialUsage = 0x01;	// 3-2 s. 12.1.10 table 12-4
+            credentialUsage = 0x01;     // 3-2 s. 12.1.10 table 12-4
         }
         String signature = genCredSignature(credentialUsage, orgId, appId,
                 gaOrgId, expDate, fileList);

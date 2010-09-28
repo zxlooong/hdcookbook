@@ -95,8 +95,8 @@ import org.bluray.media.InvalidPlayListException;
 public class MenuDiscNavigator extends AbstractDiscNavigator {
 
     private MenuXlet xlet;
-    private int currentSubtitleStream = 0;	// For the feature video
-    private int currentAudioStream = 1;		// For the feature video
+    private int currentSubtitleStream = 0;      // For the feature video
+    private int currentAudioStream = 1;         // For the feature video
     private boolean showIsLoaded = false;
 
     /**
@@ -129,11 +129,11 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
      * PL for the scenes
      **/
     public BDLocator[] sceneVideoStartPL = new BDLocator[] {
-	    makeBDLocator("bd://1.PLAYLIST:00001.MARK:00002"),
-	    makeBDLocator("bd://1.PLAYLIST:00001.MARK:00003"),
-	    makeBDLocator("bd://1.PLAYLIST:00001.MARK:00004"),
-	    makeBDLocator("bd://1.PLAYLIST:00001.MARK:00005"),
-	    makeBDLocator("bd://1.PLAYLIST:00001.MARK:00006")
+            makeBDLocator("bd://1.PLAYLIST:00001.MARK:00002"),
+            makeBDLocator("bd://1.PLAYLIST:00001.MARK:00003"),
+            makeBDLocator("bd://1.PLAYLIST:00001.MARK:00004"),
+            makeBDLocator("bd://1.PLAYLIST:00001.MARK:00005"),
+            makeBDLocator("bd://1.PLAYLIST:00001.MARK:00006")
     };
 
     /**
@@ -147,8 +147,8 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
     public HSound activateSound = makeSound("bd://SOUND:02");
 
     public MenuDiscNavigator(MenuXlet xlet) {
-	super(xlet.context);
-	this.xlet = xlet;
+        super(xlet.context);
+        this.xlet = xlet;
     }
 
     /**
@@ -161,11 +161,11 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
      * Start playing a playlist, or a playlist mark
      **/
     public void startVideoAt(BDLocator playlist) {
-	if (playlist == null) {
-	    gotoPlaylistInCurrentTitle(blankVideo);  // this clip is very short
-	} else {
-	    gotoPlaylistInCurrentTitle(playlist);
-	}
+        if (playlist == null) {
+            gotoPlaylistInCurrentTitle(blankVideo);  // this clip is very short
+        } else {
+            gotoPlaylistInCurrentTitle(playlist);
+        }
     }
 
     /**
@@ -181,31 +181,31 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
      * to an objectionable pause on some players.
      **/
     public void notifyStop() {
-	synchronized(this) {
-	    if (!showIsLoaded) {
-		return;		// Show will bring us to video soon
-	    }
-	}
-	if (Debug.LEVEL > 0) { 
-	    Debug.println("notifyStop, currentPlaylistID is " 
-			    + currentPlaylistID);
-	}
-	if (currentPlaylistID == menuVideoPL_ID) {
-	    gotoPlaylistInCurrentTitle(menuVideoStartPL);
-	} else if (currentPlaylistID == blankVideoPL_ID) {
-	    // Do nothing - let it stay stopped
-	} else {
-	    // In all other cases, we go back to the main menu state.  Note
-	    // that show.getSegment and show.activateSegment
-	    // were written such that they don't take out any
-	    // global locks, so it's OK for us to call them, even
-	    // though we know the navigator lock is held.
-	    //
-	    // We don't need to select any video, because the transition
-	    // from S:Loading to S:MenuRollout contains a "BOOK:PlayVideo menu"
-	    // command.
-	    xlet.show.activateSegment(xlet.show.getSegment("S:Loading"));
-	}
+        synchronized(this) {
+            if (!showIsLoaded) {
+                return;         // Show will bring us to video soon
+            }
+        }
+        if (Debug.LEVEL > 0) { 
+            Debug.println("notifyStop, currentPlaylistID is " 
+                            + currentPlaylistID);
+        }
+        if (currentPlaylistID == menuVideoPL_ID) {
+            gotoPlaylistInCurrentTitle(menuVideoStartPL);
+        } else if (currentPlaylistID == blankVideoPL_ID) {
+            // Do nothing - let it stay stopped
+        } else {
+            // In all other cases, we go back to the main menu state.  Note
+            // that show.getSegment and show.activateSegment
+            // were written such that they don't take out any
+            // global locks, so it's OK for us to call them, even
+            // though we know the navigator lock is held.
+            //
+            // We don't need to select any video, because the transition
+            // from S:Loading to S:MenuRollout contains a "BOOK:PlayVideo menu"
+            // command.
+            xlet.show.activateSegment(xlet.show.getSegment("S:Loading"));
+        }
     }
 
     /**
@@ -218,70 +218,70 @@ public class MenuDiscNavigator extends AbstractDiscNavigator {
      * should not do anything in this method that might cause deadlock.
      **/
     protected void notifyAVStarted() {
-	synchronized(this) {
-	    if (!showIsLoaded) {
-		return;		// Show will change everything soon
-	    }
-	}
-	if (currentPlaylistID == movieVideoPL_ID) {
-	    selectSubtitleStream(currentSubtitleStream);
-	    selectAudio(currentAudioStream);
-	} else if (currentPlaylistID == menuVideoPL_ID) {
-		// Mute audio for the menu
-	    selectAudio(0);
-	}
+        synchronized(this) {
+            if (!showIsLoaded) {
+                return;         // Show will change everything soon
+            }
+        }
+        if (currentPlaylistID == movieVideoPL_ID) {
+            selectSubtitleStream(currentSubtitleStream);
+            selectAudio(currentAudioStream);
+        } else if (currentPlaylistID == menuVideoPL_ID) {
+                // Mute audio for the menu
+            selectAudio(0);
+        }
     }
 
     /** 
      * Called by the show to tell us that it's up and running
      **/
     public void notifyShowLoaded() {
-	synchronized(this) {
-	    showIsLoaded = true;
-	    // Nothing waits on this, so no need to notifyAll()
-	}
+        synchronized(this) {
+            showIsLoaded = true;
+            // Nothing waits on this, so no need to notifyAll()
+        }
     }
 
     /**
      * Select an audio stream in the main video.
      **/
     public void selectAudioStream(int streamNumber) {
-	currentAudioStream = streamNumber;
-	selectAudio(streamNumber);
+        currentAudioStream = streamNumber;
+        selectAudio(streamNumber);
     }
 
 
     /** 
      * Select a subtitle stream in the main video.
      *
-     * @param	streamNumber   The stream number, or 0 for no subtitles
+     * @param   streamNumber   The stream number, or 0 for no subtitles
      **/
     public void selectSubtitleStream(int streamNumber) {
-	currentSubtitleStream = streamNumber;
-	boolean on = streamNumber > 0;
-	selectSubtitles(on, streamNumber);
+        currentSubtitleStream = streamNumber;
+        boolean on = streamNumber > 0;
+        selectSubtitles(on, streamNumber);
     }
 
     /**
      * Play a sound-effects sound
      **/
     public void playSound(HSound sound) {
-	if (sound == null) {
-	    if (Debug.LEVEL > 0) {
-		Debug.println("Attempt to play null sound.");
-	    }
-	    return;
-	}
-	sound.play();
+        if (sound == null) {
+            if (Debug.LEVEL > 0) {
+                Debug.println("Attempt to play null sound.");
+            }
+            return;
+        }
+        sound.play();
     }
 
     /**
      * Destroy this navigator.  Called on xlet termination.
      **/
     public synchronized void destroy() {
-	super.destroy();
-	selectSound.dispose();
-	activateSound.dispose();
+        super.destroy();
+        selectSound.dispose();
+        activateSound.dispose();
     }
 
 }

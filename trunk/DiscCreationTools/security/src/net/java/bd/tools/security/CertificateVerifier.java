@@ -186,7 +186,7 @@ public class CertificateVerifier {
         checkForUTF8String(in.toByteArray());
         tmp = in.getDerValue(); // advance to the next element
         //CertificateIssuerName issuer = new CertificateIssuerName(in);
-	//X500Name issuerDN = (X500Name)issuer.get(CertificateIssuerName.DN_NAME);
+        //X500Name issuerDN = (X500Name)issuer.get(CertificateIssuerName.DN_NAME);
 
         // validity:  SEQUENCE { start date, end date }
         checkForGeneralizedTime(in.toByteArray());
@@ -197,7 +197,7 @@ public class CertificateVerifier {
         // subject name
         checkForUTF8String(in.toByteArray());
         //CertificateSubjectName subject = new CertificateSubjectName(in);
-	//X500Name subjectDN = (X500Name)subject.get(CertificateSubjectName.DN_NAME);
+        //X500Name subjectDN = (X500Name)subject.get(CertificateSubjectName.DN_NAME);
  
     }
     

@@ -60,24 +60,24 @@ package com.hdcookbook.grin.io.binary;
 
 class Constants {
  
-	static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
-	static final int GRINSCRIPT_VERSION = 28;
-	
+        static final int GRINSCRIPT_IDENTIFIER = 0xc00cb00c;
+        static final int GRINSCRIPT_VERSION = 28;
+        
         /**
          * Make sure to change BinaryWriter.recordBuiltInClasses()
          * when the constants are updated.
          */
-	static final int ASSEMBLY_IDENTIFIER                = 0;
-	static final int BOX_IDENTIFIER                     = 1;
-	static final int FIXEDIMAGE_IDENTIFIER              = 2; 
-	static final int GROUP_IDENTIFIER                   = 3;
-	static final int IMAGESEQUENCE_IDENTIFIER           = 4;
-	static final int TEXT_IDENTIFIER                    = 5;
-	static final int INTERPOLATED_MODEL_IDENTIFIER      = 6;
-	static final int TRANSLATOR_IDENTIFIER              = 7;
-	static final int CLIPPED_IDENTIFIER                 = 8;
-	static final int FADE_IDENTIFIER                    = 9;
-	static final int SRCOVER_IDENTIFIER                 = 10;        
+        static final int ASSEMBLY_IDENTIFIER                = 0;
+        static final int BOX_IDENTIFIER                     = 1;
+        static final int FIXEDIMAGE_IDENTIFIER              = 2; 
+        static final int GROUP_IDENTIFIER                   = 3;
+        static final int IMAGESEQUENCE_IDENTIFIER           = 4;
+        static final int TEXT_IDENTIFIER                    = 5;
+        static final int INTERPOLATED_MODEL_IDENTIFIER      = 6;
+        static final int TRANSLATOR_IDENTIFIER              = 7;
+        static final int CLIPPED_IDENTIFIER                 = 8;
+        static final int FADE_IDENTIFIER                    = 9;
+        static final int SRCOVER_IDENTIFIER                 = 10;        
         static final int ACTIVATEPART_CMD_IDENTIFIER        = 11;
         static final int ACTIVATESEGMENT_CMD_IDENTIFIER     = 12;
         static final int RESETFEATURE_CMD_IDENTIFIER        = 13;
@@ -86,8 +86,8 @@ class Constants {
         static final int COMMAND_RCHANDLER_IDENTIFIER       = 16;
         static final int VISUAL_RCHANDLER_IDENTIFIER        = 17;
         static final int GUARANTEE_FILL_IDENTIFIER          = 18;
-	static final int SET_TARGET_IDENTIFIER              = 19;
-	static final int SEGMENT_IDENTIFIER                 = 20;
+        static final int SET_TARGET_IDENTIFIER              = 19;
+        static final int SEGMENT_IDENTIFIER                 = 20;
         
         static final byte STRING_CONSTANTS_IDENTIFIER      = (byte) 0xe0;
         static final byte INT_ARRAY_CONSTANTS_IDENTIFIER   = (byte) 0xe1;
@@ -98,4 +98,4 @@ class Constants {
 
         static final byte NULL = (byte) 0xff;
         static final byte NON_NULL = (byte) 0xee;
-}	
+}       

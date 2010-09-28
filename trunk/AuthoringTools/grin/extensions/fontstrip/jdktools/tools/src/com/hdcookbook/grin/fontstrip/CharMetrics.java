@@ -64,7 +64,7 @@ import java.awt.Rectangle;
 class CharMetrics {
 
     private char ch;
-    private int baseline;	// Position of baseline in design image
+    private int baseline;       // Position of baseline in design image
     private Rectangle pixRect;
     private Rectangle boundingRect;
     private int leading;

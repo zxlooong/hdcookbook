@@ -84,7 +84,7 @@ public abstract class SEGenericFeature extends Feature implements SENode {
     }
 
     protected int setSetupMode(boolean mode) {
-	return 0;
+        return 0;
     }
 
     protected void setActivateMode(boolean mode) {

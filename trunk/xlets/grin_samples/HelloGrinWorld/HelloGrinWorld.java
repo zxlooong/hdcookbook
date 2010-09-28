@@ -83,87 +83,87 @@ import org.dvb.ui.DVBBufferedImage;
  */
 
 public class HelloGrinWorld implements Xlet, AnimationContext, UserEventListener {
-	
-	public Show show;
-	Container rootContainer;
-	DirectDrawEngine animationEngine;
-	XletContext context;
-	String grinScriptName = "tumblingduke.grin";
-	
-	public void initXlet(XletContext context) {
-		
-	   this.context = context;
-	   
-	   rootContainer = TVContainer.getRootContainer(context);			
-	   rootContainer.setSize(1920, 1080);
-	   
-	   animationEngine = new DirectDrawEngine();
-	   animationEngine.setFps(24000);
-	   animationEngine.initialize(this);
-	   
-	}
-	
-	public void startXlet() {
-	   rootContainer.setVisible(true);
-	   animationEngine.start(); 	   
-	}
-	
-	public void pauseXlet() {
-	   rootContainer.setVisible(false);
-	   animationEngine.pause();
-	}
-	
-	public void destroyXlet(boolean unconditional) {
-	   rootContainer = null;
-	   animationEngine.destroy();
-	}
-	
-	public void animationInitialize() throws InterruptedException {
+        
+        public Show show;
+        Container rootContainer;
+        DirectDrawEngine animationEngine;
+        XletContext context;
+        String grinScriptName = "tumblingduke.grin";
+        
+        public void initXlet(XletContext context) {
+                
+           this.context = context;
+           
+           rootContainer = TVContainer.getRootContainer(context);                       
+           rootContainer.setSize(1920, 1080);
+           
+           animationEngine = new DirectDrawEngine();
+           animationEngine.setFps(24000);
+           animationEngine.initialize(this);
+           
+        }
+        
+        public void startXlet() {
+           rootContainer.setVisible(true);
+           animationEngine.start();        
+        }
+        
+        public void pauseXlet() {
+           rootContainer.setVisible(false);
+           animationEngine.pause();
+        }
+        
+        public void destroyXlet(boolean unconditional) {
+           rootContainer = null;
+           animationEngine.destroy();
+        }
+        
+        public void animationInitialize() throws InterruptedException {
 
-	   Director director = new Director();
+           Director director = new Director();
            
            try {
-		// Set up AssetFinder so we use DVBBufferedImage.
-		// See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
-		AssetFinder.setHelper(new AssetFinder() {
-		    protected Image createCompatibleImageBufferHelper
-		    			(Component c, int width, int height) 
-		    {
-			return new DVBBufferedImage(width, height);
-		    }
-		    protected Graphics2D createGraphicsFromImageBufferHelper
-		    			(Image buffer) 
-		    {
-			Object g = ((DVBBufferedImage) buffer).createGraphics();
-			return (Graphics2D) g;
-		    }
-		    protected void destroyImageBufferHelper(Image buffer) {
-			((DVBBufferedImage) buffer).dispose();
-		    }
-		});
+                // Set up AssetFinder so we use DVBBufferedImage.
+                // See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
+                AssetFinder.setHelper(new AssetFinder() {
+                    protected Image createCompatibleImageBufferHelper
+                                        (Component c, int width, int height) 
+                    {
+                        return new DVBBufferedImage(width, height);
+                    }
+                    protected Graphics2D createGraphicsFromImageBufferHelper
+                                        (Image buffer) 
+                    {
+                        Object g = ((DVBBufferedImage) buffer).createGraphics();
+                        return (Graphics2D) g;
+                    }
+                    protected void destroyImageBufferHelper(Image buffer) {
+                        ((DVBBufferedImage) buffer).dispose();
+                    }
+                });
 
                AssetFinder.setSearchPath(new String[]{""}, null);      
-	       GrinBinaryReader reader = 
+               GrinBinaryReader reader = 
                        new GrinBinaryReader(AssetFinder.getURL(grinScriptName).openStream());
-	       show = new Show(director);
+               show = new Show(director);
                reader.readShow(show);
                
            } catch (IOException e) {
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(e);
-		}
+                if (Debug.LEVEL > 0) {
+                    Debug.printStackTrace(e);
+                }
                Debug.println("Error in reading the show file");
                throw new InterruptedException();
            }
            
-	   animationEngine.checkDestroy();
-	   animationEngine.initClients(new AnimationClient[]{show});
-	   animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
-	   
-	} 
-	
-	public void animationFinishInitialization() {
-	   show.activateSegment(show.getSegment("S:Initialize"));	
+           animationEngine.checkDestroy();
+           animationEngine.initClients(new AnimationClient[]{show});
+           animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
+           
+        } 
+        
+        public void animationFinishInitialization() {
+           show.activateSegment(show.getSegment("S:Initialize"));       
            
             UserEventRepository userEventRepo = new UserEventRepository("x");
             userEventRepo.addAllArrowKeys();
@@ -177,7 +177,7 @@ public class HelloGrinWorld implements Xlet, AnimationContext, UserEventListener
   
             EventManager.getInstance().addUserEventListener(this, userEventRepo);          
             rootContainer.requestFocus();          
-	}
+        }
 
     /**
      * A remote control event that is coming in via
@@ -187,5 +187,5 @@ public class HelloGrinWorld implements Xlet, AnimationContext, UserEventListener
         if (e.getType() == HRcEvent.KEY_PRESSED) {
             show.handleKeyPressed(e.getCode());
         }
-    }	
+    }   
 }

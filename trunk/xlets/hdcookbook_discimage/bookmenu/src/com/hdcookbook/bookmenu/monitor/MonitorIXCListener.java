@@ -76,7 +76,7 @@ import com.hdcookbook.grin.util.Debug;
  *   @author     Bill Foote (http://jovial.com)
  **/
 public class MonitorIXCListener 
-	implements MonitorIXCInterface, AppStateChangeEventListener {
+        implements MonitorIXCInterface, AppStateChangeEventListener {
 
     /**
      * The org ID for all of our xlets
@@ -96,15 +96,15 @@ public class MonitorIXCListener
     public final static int GAME_APP_ID = 0x0003;
 
     private MonitorXlet xlet;
-    private AppProxy gameXlet;	// Set while we're playing game
+    private AppProxy gameXlet;  // Set while we're playing game
 
     public MonitorIXCListener(MonitorXlet xlet) {
-	this.xlet = xlet;
+        this.xlet = xlet;
     }
 
     private AppProxy getAppProxy(int orgID, int appID) {
-	AppsDatabase db = AppsDatabase.getAppsDatabase();
-	return db.getAppProxy(new AppID(orgID, appID));
+        AppsDatabase db = AppsDatabase.getAppsDatabase();
+        return db.getAppProxy(new AppID(orgID, appID));
     }
 
     public void init() {
@@ -114,23 +114,23 @@ public class MonitorIXCListener
      * Called by the menu xlet to start the game.
      **/
     public void startGame(String s) throws RemoteException {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("****  Monitor xlet to start game ***");
-	}
-	gameXlet = getAppProxy(ORG_ID, GAME_APP_ID);
-	gameXlet.addAppStateChangeEventListener(this);
-	try {
-	    getAppProxy(ORG_ID, MENU_APP_ID).stop(false);
-	    gameXlet.start();
-	} catch (Throwable ignored) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ignored);
-		Debug.println();
-		Debug.println("***  Failed to start game.  For this to work, the monitor xlet must");
-		Debug.println("***  be signed.  Perhaps it wasn't signed correctly?");
-		Debug.println();
-	    }
-	}
+        if (Debug.LEVEL > 0) {
+            Debug.println("****  Monitor xlet to start game ***");
+        }
+        gameXlet = getAppProxy(ORG_ID, GAME_APP_ID);
+        gameXlet.addAppStateChangeEventListener(this);
+        try {
+            getAppProxy(ORG_ID, MENU_APP_ID).stop(false);
+            gameXlet.start();
+        } catch (Throwable ignored) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ignored);
+                Debug.println();
+                Debug.println("***  Failed to start game.  For this to work, the monitor xlet must");
+                Debug.println("***  be signed.  Perhaps it wasn't signed correctly?");
+                Debug.println();
+            }
+        }
     }
 
     /**
@@ -140,60 +140,60 @@ public class MonitorIXCListener
      * automatically launches the menu xlet.
      **/
     public void startMenu(String s) throws RemoteException {
-	doStartMenu();
+        doStartMenu();
     }
 
     private void doStartMenu() {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("****  Monitor xlet to start menu  ***");
-	}
-	try {
-	    gameXlet.removeAppStateChangeEventListener(this);
-	    gameXlet.stop(false);
-	} catch (Throwable ignored) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ignored);
-		Debug.println();
-		Debug.println("***  Failed to start menu.  For this to work, the monitor xlet must");
-		Debug.println("***  be signed.  Perhaps it wasn't signed correctly?");
-		Debug.println();
-	    }
-	}
-	try {
-	    gameXlet = null;
-	    getAppProxy(ORG_ID, MENU_APP_ID).start();
-	} catch (Throwable ignored) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ignored);
-		Debug.println();
-	    }
-	}
+        if (Debug.LEVEL > 0) {
+            Debug.println("****  Monitor xlet to start menu  ***");
+        }
+        try {
+            gameXlet.removeAppStateChangeEventListener(this);
+            gameXlet.stop(false);
+        } catch (Throwable ignored) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ignored);
+                Debug.println();
+                Debug.println("***  Failed to start menu.  For this to work, the monitor xlet must");
+                Debug.println("***  be signed.  Perhaps it wasn't signed correctly?");
+                Debug.println();
+            }
+        }
+        try {
+            gameXlet = null;
+            getAppProxy(ORG_ID, MENU_APP_ID).start();
+        } catch (Throwable ignored) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ignored);
+                Debug.println();
+            }
+        }
     }
 
     /**
      * Callback from system via AppStateChangeEventListener
      **/
     public void stateChange(AppStateChangeEvent event) {
-	// Automatically re-launch the menu when the game puts itself
-	// in the destroyed state
-	if (Debug.LEVEL > 0) {
-	    Debug.println();
-	    Debug.println("*** Monitor gets AppStateChangeEvent");
-	    Debug.println("    " + event);
-	    Debug.println("    App ID:  " + event.getAppID().getAID());
-	    Debug.println();
-	}
-	if (!event.hasFailed() && event.getAppID().getAID() == GAME_APP_ID) {
-	    if (event.getToState() == AppProxy.DESTROYED) {
-		doStartMenu();
-	    }
-	}
+        // Automatically re-launch the menu when the game puts itself
+        // in the destroyed state
+        if (Debug.LEVEL > 0) {
+            Debug.println();
+            Debug.println("*** Monitor gets AppStateChangeEvent");
+            Debug.println("    " + event);
+            Debug.println("    App ID:  " + event.getAppID().getAID());
+            Debug.println();
+        }
+        if (!event.hasFailed() && event.getAppID().getAID() == GAME_APP_ID) {
+            if (event.getToState() == AppProxy.DESTROYED) {
+                doStartMenu();
+            }
+        }
     }
 
     public void destroy() {
-	AppProxy g = gameXlet;
-	if (g != null) {
-	    g.removeAppStateChangeEventListener(this);
-	}
+        AppProxy g = gameXlet;
+        if (g != null) {
+            g.removeAppStateChangeEventListener(this);
+        }
     }
 }

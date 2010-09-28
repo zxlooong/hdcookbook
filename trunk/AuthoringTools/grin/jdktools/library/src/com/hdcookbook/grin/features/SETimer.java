@@ -79,17 +79,17 @@ public class SETimer extends SEInterpolatedModel implements SEScalableNode {
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	// Do nothing
+        // Do nothing
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "timer @" + Integer.toHexString(hashCode());
-	} else {
-	    return "timer " + name;
-	}
+        if (name == null) {
+            return "timer @" + Integer.toHexString(hashCode());
+        } else {
+            return "timer " + name;
+        }
     }
 }

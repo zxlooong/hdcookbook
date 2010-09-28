@@ -117,8 +117,8 @@ public class TranslatorHelper implements DeferredBuilder {
 
 
     public TranslatorHelper(SETranslator translator, int line) {
-	this.translator = translator;
-	this.line = line;
+        this.translator = translator;
+        this.line = line;
     }
 
     /** 
@@ -135,52 +135,52 @@ public class TranslatorHelper implements DeferredBuilder {
      * supported.
      **/
     public void finishBuilding(SEShow show) throws IOException {
-	if (translator.getModelIsRelative()) {
-	    return;
-	}
+        if (translator.getModelIsRelative()) {
+            return;
+        }
 
-	//
-	// This code is a little non-obvious.  What we're doing is
-	// starting at the translator, and doing a depth-first traversal
-	// of its children, looking for the minimum x and y coordinates.
-	// That lets us calculate the x,y offset needed to make our children
-	// land at the absolute xx,y coordinates of the TranslationModel.
-	// This applies even if we have a child that's a translation.  We
-	// always assume a child translation starts out at a 0,0 offset for the
-	// purposes of this calculation, which is about the only reasonable
-	// thing for us to do.
-	//
-	SEShowVisitor visitor = new SEShowVisitor() {
-	    public void visitAssembly(SEAssembly feature) { 
-		SEShow.acceptFeatures(this, feature.getParts());
-	    }
-	    public void visitMenuAssembly(SEMenuAssembly feature) {
-		visitAssembly(feature);
-	    }
-	    public void visitBox(SEBox feature) { 
-		check(feature.getX(), feature.getY());
-	    }
-	    public void visitClipped(SEClipped feature) { 
-		SEShow.acceptFeature(this, feature.getPart());
-	    }
-	    public void visitFade(SEFade feature) { 
-		SEShow.acceptFeature(this, feature.getPart());
-	    }
-	    public void visitFixedImage(SEFixedImage feature) { 
-		check(feature.getX(), feature.getY());
-	    }
-	    public void visitGroup(SEGroup feature) {
-		SEShow.acceptFeatures(this, feature.getParts());
-	    }
-	    public void visitGuaranteeFill(SEGuaranteeFill feature) { 
-		SEShow.acceptFeature(this, feature.getPart());
-	    }
-	    public void visitImageSequence(SEImageSequence feature) {
-		check(feature.getX(), feature.getY());
-	    }
-	    public void visitUserDefinedFeature(Feature feature) {
+        //
+        // This code is a little non-obvious.  What we're doing is
+        // starting at the translator, and doing a depth-first traversal
+        // of its children, looking for the minimum x and y coordinates.
+        // That lets us calculate the x,y offset needed to make our children
+        // land at the absolute xx,y coordinates of the TranslationModel.
+        // This applies even if we have a child that's a translation.  We
+        // always assume a child translation starts out at a 0,0 offset for the
+        // purposes of this calculation, which is about the only reasonable
+        // thing for us to do.
+        //
+        SEShowVisitor visitor = new SEShowVisitor() {
+            public void visitAssembly(SEAssembly feature) { 
+                SEShow.acceptFeatures(this, feature.getParts());
+            }
+            public void visitMenuAssembly(SEMenuAssembly feature) {
+                visitAssembly(feature);
+            }
+            public void visitBox(SEBox feature) { 
+                check(feature.getX(), feature.getY());
+            }
+            public void visitClipped(SEClipped feature) { 
+                SEShow.acceptFeature(this, feature.getPart());
+            }
+            public void visitFade(SEFade feature) { 
+                SEShow.acceptFeature(this, feature.getPart());
+            }
+            public void visitFixedImage(SEFixedImage feature) { 
+                check(feature.getX(), feature.getY());
+            }
+            public void visitGroup(SEGroup feature) {
+                SEShow.acceptFeatures(this, feature.getParts());
+            }
+            public void visitGuaranteeFill(SEGuaranteeFill feature) { 
+                SEShow.acceptFeature(this, feature.getPart());
+            }
+            public void visitImageSequence(SEImageSequence feature) {
+                check(feature.getX(), feature.getY());
+            }
+            public void visitUserDefinedFeature(Feature feature) {
                 if (feature instanceof Modifier) {
-		    visitUserDefinedModifier((Modifier) feature);
+                    visitUserDefinedModifier((Modifier) feature);
                 } else {
                     int x = feature.getX();
                     int y = feature.getY();
@@ -188,71 +188,71 @@ public class TranslatorHelper implements DeferredBuilder {
                         check(x, y);
                     }
                 }
-	    }
-	    public void visitUserDefinedModifier(Modifier modifier) {
-		SEShow.acceptFeature(this, modifier.getPart());
-	    }
+            }
+            public void visitUserDefinedModifier(Modifier modifier) {
+                SEShow.acceptFeature(this, modifier.getPart());
+            }
 
-	    public void visitSetTarget(SESetTarget feature) {
-		SEShow.acceptFeature(this, feature.getPart());
-	    }
-	    public void visitSrcOver(SESrcOver feature) {
-		SEShow.acceptFeature(this, feature.getPart());
-	    }
-	    public void visitText(SEText feature) {
-		// Do nothing, because a text feature doesn't know its
-		// upper-left hand corner without font metrics; we'd really
-		// need the font metrics on the client device, too.  It's
-		// better to just fail, so that people won't be mislead into
-		// using the deprecated "linear" translator style, and will
-		// use "linear-relative" instead.
-	    }
-	    public void visitTranslator(SETranslator feature) {
-		SEShow.acceptFeature(this, feature.getPart());
-	    }
-	    public void visitInterpolatedModel(SEInterpolatedModel feature) {}
-	    public void visitScalingModel(SEScalingModel feature) { }
-	    public void visitTranslatorModel(SETranslatorModel feature) { }
-	    public void visitTimer(SETimer feature) { }
+            public void visitSetTarget(SESetTarget feature) {
+                SEShow.acceptFeature(this, feature.getPart());
+            }
+            public void visitSrcOver(SESrcOver feature) {
+                SEShow.acceptFeature(this, feature.getPart());
+            }
+            public void visitText(SEText feature) {
+                // Do nothing, because a text feature doesn't know its
+                // upper-left hand corner without font metrics; we'd really
+                // need the font metrics on the client device, too.  It's
+                // better to just fail, so that people won't be mislead into
+                // using the deprecated "linear" translator style, and will
+                // use "linear-relative" instead.
+            }
+            public void visitTranslator(SETranslator feature) {
+                SEShow.acceptFeature(this, feature.getPart());
+            }
+            public void visitInterpolatedModel(SEInterpolatedModel feature) {}
+            public void visitScalingModel(SEScalingModel feature) { }
+            public void visitTranslatorModel(SETranslatorModel feature) { }
+            public void visitTimer(SETimer feature) { }
 
-	    public void visitSegment(SESegment segment) { }
-	    public void visitShow(SEShow show) { }
+            public void visitSegment(SESegment segment) { }
+            public void visitShow(SEShow show) { }
 
-	    public void visitCommandRCHandler(SECommandRCHandler handler) {}
-	    public void visitVisualRCHandler(SEVisualRCHandler handler) {}
+            public void visitCommandRCHandler(SECommandRCHandler handler) {}
+            public void visitVisualRCHandler(SEVisualRCHandler handler) {}
 
-	    public void visitActivatePartCommand(SEActivatePartCommand command) {}
-	    public void visitActivateSegmentCommand(SEActivateSegmentCommand command) {}
-	    public void visitSegmentDoneCommand(SESegmentDoneCommand command) {}
-	    public void visitSyncDisplayCommand(SESyncDisplayCommand command) {}
-	    public void visitRunNamedCommand(SERunNamedCommand command) {}
-	    public void visitSetVisualRCStateCommand(SESetVisualRCStateCommand cmd) {}
-	    public void visitResetFeatureCommand(SEResetFeatureCommand cmd) {}
-	    public void visitShowCommand(SEShowCommand command) {}
-	    public void visitUserDefinedCommand(Command command) {}
-	};
+            public void visitActivatePartCommand(SEActivatePartCommand command) {}
+            public void visitActivateSegmentCommand(SEActivateSegmentCommand command) {}
+            public void visitSegmentDoneCommand(SESegmentDoneCommand command) {}
+            public void visitSyncDisplayCommand(SESyncDisplayCommand command) {}
+            public void visitRunNamedCommand(SERunNamedCommand command) {}
+            public void visitSetVisualRCStateCommand(SESetVisualRCStateCommand cmd) {}
+            public void visitResetFeatureCommand(SEResetFeatureCommand cmd) {}
+            public void visitShowCommand(SEShowCommand command) {}
+            public void visitUserDefinedCommand(Command command) {}
+        };
 
-	    // This does the actual depth-first traversal...
-	xCoord = Integer.MAX_VALUE;
-	yCoord = Integer.MAX_VALUE;
-	SEShow.acceptFeature(visitor, translator.getPart());
+            // This does the actual depth-first traversal...
+        xCoord = Integer.MAX_VALUE;
+        yCoord = Integer.MAX_VALUE;
+        SEShow.acceptFeature(visitor, translator.getPart());
 
-	    // Now, xCoord and yCoord contain the upper-left corner of the
-	    // bounding rectangle of our children.
-	if (xCoord == Integer.MAX_VALUE || yCoord == Integer.MAX_VALUE) {
-	    throw new IOException("Can't determine upper-left hand coordinates "
-	    		          + "of tranlator's child at line " + line);
-	}
-	translator.setupAbsoluteXOffset(xCoord);
-	translator.setupAbsoluteYOffset(yCoord);
+            // Now, xCoord and yCoord contain the upper-left corner of the
+            // bounding rectangle of our children.
+        if (xCoord == Integer.MAX_VALUE || yCoord == Integer.MAX_VALUE) {
+            throw new IOException("Can't determine upper-left hand coordinates "
+                                  + "of tranlator's child at line " + line);
+        }
+        translator.setupAbsoluteXOffset(xCoord);
+        translator.setupAbsoluteYOffset(yCoord);
     }
 
     private void check(int x, int y) {
-	if (x < xCoord) {
-	    xCoord = x;
-	}
-	if (y < yCoord) {
-	    yCoord = y;
-	}
+        if (x < xCoord) {
+            xCoord = x;
+        }
+        if (y < yCoord) {
+            yCoord = y;
+        }
     }
 }

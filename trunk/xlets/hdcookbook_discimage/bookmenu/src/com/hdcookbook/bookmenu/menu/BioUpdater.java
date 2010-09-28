@@ -100,7 +100,7 @@ public class BioUpdater implements Runnable {
      * Create the BioUpdater
      **/
     public BioUpdater(MenuXlet xlet) {
-	this.xlet = xlet;
+        this.xlet = xlet;
     }
 
     /** 
@@ -109,18 +109,18 @@ public class BioUpdater implements Runnable {
      * Internet.
      **/
     public void start() {
-	bioAvailableSegment = xlet.show.getSegment("S:Bio.Available");
-	bioNotAvailableSegment = xlet.show.getSegment("S:Bio.NotAvailable");
-	bioImageFeature = (BioImageFeature) xlet.show.getFeature("F:Bio.Bunny");
-	if (Debug.ASSERT) {
-	    if (bioAvailableSegment == null || bioNotAvailableSegment == null
-	        || bioImageFeature == null) 
-	    {
-		Debug.assertFail();
-	    }
-	}
-	checkVersion = true;
-	startThread();
+        bioAvailableSegment = xlet.show.getSegment("S:Bio.Available");
+        bioNotAvailableSegment = xlet.show.getSegment("S:Bio.NotAvailable");
+        bioImageFeature = (BioImageFeature) xlet.show.getFeature("F:Bio.Bunny");
+        if (Debug.ASSERT) {
+            if (bioAvailableSegment == null || bioNotAvailableSegment == null
+                || bioImageFeature == null) 
+            {
+                Debug.assertFail();
+            }
+        }
+        checkVersion = true;
+        startThread();
     }
 
     //
@@ -128,14 +128,14 @@ public class BioUpdater implements Runnable {
     // condition variable
     //
     private synchronized void startThread() {
-	if (destroyed || running) {
-	    notifyAll();	// Starts thread if it was waiting
-	    return;
-	}
-	running = true;
-	Thread t = new Thread(this, "BioUpdater");
-	t.setPriority(4);
-	t.start();
+        if (destroyed || running) {
+            notifyAll();        // Starts thread if it was waiting
+            return;
+        }
+        running = true;
+        Thread t = new Thread(this, "BioUpdater");
+        t.setPriority(4);
+        t.start();
     }
 
     /**
@@ -144,14 +144,14 @@ public class BioUpdater implements Runnable {
      * even if it's in the middle of trying to read from the Internet.
      **/
     public synchronized void destroy() {
-	if (currentInputStream != null) {
-	    try {
-		currentInputStream.close();  // So that it fails
-	    } catch (IOException ex) {
-	    }
-	}
-	destroyed = true;
-	notifyAll();
+        if (currentInputStream != null) {
+            try {
+                currentInputStream.close();  // So that it fails
+            } catch (IOException ex) {
+            }
+        }
+        destroyed = true;
+        notifyAll();
     }
 
     /**
@@ -159,196 +159,196 @@ public class BioUpdater implements Runnable {
      * bio is available for download, or one isn't.
      **/
     public synchronized void activateRightSegment() {
-	if (currentBioVersion < availableBioVersion) {
-	    xlet.show.activateSegment(bioAvailableSegment);
-	} else {
-	    xlet.show.activateSegment(bioNotAvailableSegment);
-	}
+        if (currentBioVersion < availableBioVersion) {
+            xlet.show.activateSegment(bioAvailableSegment);
+        } else {
+            xlet.show.activateSegment(bioNotAvailableSegment);
+        }
     }
 
     /** 
      * Start the process of asynchronously downloading a new biography.
      **/
     public void downloadBio() {
-	synchronized(this) {
-	    downloadImage = true;
-	    startThread();
-	}
+        synchronized(this) {
+            downloadImage = true;
+            startThread();
+        }
     }
 
     /**
      * This is the bio updating thread man loop.
      **/
     public void run() {
-	    // This thread should probably terminate and re-start,
-	    // rather than waiting until the user elects to download.
-	    // This would be an optimization you'd want to do in a
-	    // commercial title.
-	for (;;) {
-	    boolean doCheck;
-	    boolean doDownload;
-	    synchronized(this) {
-		for (;;) {
-		    if (destroyed) {
-			running = false;
-			return;
-		    }
-		    doCheck = checkVersion;
-		    doDownload = downloadImage;
-		    checkVersion =  false;
-		    downloadImage = false;
-		    if (doCheck || doDownload) {
-			break;
-		    }
-		    try {
-			wait();
-		    } catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-			running = false;
-			return;
-		    }
-		}
-	    }
-	    if (doCheck) {
-		readStream(false);
-	    }
-	    if (doDownload) {
-		readStream(true);
-	    }
-	}
+            // This thread should probably terminate and re-start,
+            // rather than waiting until the user elects to download.
+            // This would be an optimization you'd want to do in a
+            // commercial title.
+        for (;;) {
+            boolean doCheck;
+            boolean doDownload;
+            synchronized(this) {
+                for (;;) {
+                    if (destroyed) {
+                        running = false;
+                        return;
+                    }
+                    doCheck = checkVersion;
+                    doDownload = downloadImage;
+                    checkVersion =  false;
+                    downloadImage = false;
+                    if (doCheck || doDownload) {
+                        break;
+                    }
+                    try {
+                        wait();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        running = false;
+                        return;
+                    }
+                }
+            }
+            if (doCheck) {
+                readStream(false);
+            }
+            if (doDownload) {
+                readStream(true);
+            }
+        }
     }
 
     private InputStream getInputStream(String name)  throws IOException {
-	URL u = new URL("http://hdcookbook.com/" + name);
-	try {
-	    return u.openStream();
-	} catch (SecurityException ex) {
-	    //  This means we're not signed.  Rather than just fail to have
-	    //  the bio feature, we fake it out by reading from the mounted
-	    //  JAR filesystem.
-	    u = AssetFinder.getURL("FakeNetwork/" + name);
-	    try {
-	    	// Simulate a visible network delay of 2 seconds
-		Thread.sleep(2000);
-	    } catch (InterruptedException ex2) {
-		Thread.currentThread().interrupt();
-		return null;
-	    }
-	    return u.openStream();
-	}
+        URL u = new URL("http://hdcookbook.com/" + name);
+        try {
+            return u.openStream();
+        } catch (SecurityException ex) {
+            //  This means we're not signed.  Rather than just fail to have
+            //  the bio feature, we fake it out by reading from the mounted
+            //  JAR filesystem.
+            u = AssetFinder.getURL("FakeNetwork/" + name);
+            try {
+                // Simulate a visible network delay of 2 seconds
+                Thread.sleep(2000);
+            } catch (InterruptedException ex2) {
+                Thread.currentThread().interrupt();
+                return null;
+            }
+            return u.openStream();
+        }
     }
 
     private void readStream(boolean forDownload) {
-	InputStream is = null;
-	String name = (forDownload) ? "disc000001/bio00001_img.png"
-	 			    : "disc000001/bio00001_ver.txt";
-	try {
-	    is = getInputStream(name);
-	    synchronized(this) {
-		if (destroyed) {
-		    is.close();
-		    return;
-		}
-		currentInputStream = is;
-	    }
-	    if (forDownload) {
-		doDownloadImage(is);
-	    } else {
-		doCheckVersion(is);
-	    }
-	} catch (IOException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-	    }
-	} finally {
-	    synchronized(this) {
-		currentInputStream = null;
-	    }
-	    if (is != null) {
-		try {
-		    is.close();
-		} catch (Exception ex) {
-		}
-	    }
-	}
+        InputStream is = null;
+        String name = (forDownload) ? "disc000001/bio00001_img.png"
+                                    : "disc000001/bio00001_ver.txt";
+        try {
+            is = getInputStream(name);
+            synchronized(this) {
+                if (destroyed) {
+                    is.close();
+                    return;
+                }
+                currentInputStream = is;
+            }
+            if (forDownload) {
+                doDownloadImage(is);
+            } else {
+                doCheckVersion(is);
+            }
+        } catch (IOException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+            }
+        } finally {
+            synchronized(this) {
+                currentInputStream = null;
+            }
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (Exception ex) {
+                }
+            }
+        }
     }
 
     private void doCheckVersion(InputStream is) throws IOException {
-	BufferedReader rdr = new BufferedReader(new InputStreamReader(is));
-	String line = rdr.readLine();
-	int version = 0;
-	try {
-	    version = Integer.parseInt(line);
-	} catch (NumberFormatException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-	    }
-	    return;
-	}
-	boolean changeUI = false;
-	synchronized(this) {
-	    availableBioVersion = version;
-	    if (availableBioVersion > currentBioVersion) {
-		changeUI = true;
-	    }
-	}
-	if (changeUI) {
-	    synchronized(xlet.show) {
-	    	// Always acquire show lock first
-		Segment s = xlet.show.getCurrentSegment();
-		if (s == bioAvailableSegment || s == bioNotAvailableSegment) {
-		    activateRightSegment();
-		}
-	    }
-	}
+        BufferedReader rdr = new BufferedReader(new InputStreamReader(is));
+        String line = rdr.readLine();
+        int version = 0;
+        try {
+            version = Integer.parseInt(line);
+        } catch (NumberFormatException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+            }
+            return;
+        }
+        boolean changeUI = false;
+        synchronized(this) {
+            availableBioVersion = version;
+            if (availableBioVersion > currentBioVersion) {
+                changeUI = true;
+            }
+        }
+        if (changeUI) {
+            synchronized(xlet.show) {
+                // Always acquire show lock first
+                Segment s = xlet.show.getCurrentSegment();
+                if (s == bioAvailableSegment || s == bioNotAvailableSegment) {
+                    activateRightSegment();
+                }
+            }
+        }
     }
 
     private void doDownloadImage(InputStream is) throws IOException {
-	ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	byte[] imageData = null;
-	try {
-	    byte[] buf = new byte[4096];
-	    for (;;) {
-		int num = is.read(buf);
-		if (num == -1) {
-		    break;
-		}
-		bos.write(buf, 0, num);
-		imageData = bos.toByteArray();
-	    }
-	} catch (IOException ex) {
-		// Oh well, the network failed.  A download is still
-		// available, so no reason to change the UI.  It would
-		// be nice to tell the user that it failed, and we don't
-		// do that here.
-	} finally {
-	    try {
-		bos.close();	// never fails
-		is.close();
-	    } catch (IOException ex) {
-	    }
-	}
-	if (imageData != null) {
-	    Image newImage = Toolkit.getDefaultToolkit().createImage(imageData);
-	    MediaTracker tracker = new MediaTracker(xlet.scene);
-	    tracker.addImage(newImage, 0);
-	    try {
-		tracker.waitForAll();
-	    } catch (InterruptedException ex) {
-		Thread.currentThread().interrupt();
-	    }
-	    synchronized(xlet.show) {
-		bioImageFeature.setImage(newImage);
-		Segment s = xlet.show.getCurrentSegment();
-		synchronized(this) {
-		    currentBioVersion = availableBioVersion;
-		    if (s == bioAvailableSegment || s == bioNotAvailableSegment)
-		    {
-			activateRightSegment();
-		    }
-		    notifyAll();
-		}
-	    }
-	}
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] imageData = null;
+        try {
+            byte[] buf = new byte[4096];
+            for (;;) {
+                int num = is.read(buf);
+                if (num == -1) {
+                    break;
+                }
+                bos.write(buf, 0, num);
+                imageData = bos.toByteArray();
+            }
+        } catch (IOException ex) {
+                // Oh well, the network failed.  A download is still
+                // available, so no reason to change the UI.  It would
+                // be nice to tell the user that it failed, and we don't
+                // do that here.
+        } finally {
+            try {
+                bos.close();    // never fails
+                is.close();
+            } catch (IOException ex) {
+            }
+        }
+        if (imageData != null) {
+            Image newImage = Toolkit.getDefaultToolkit().createImage(imageData);
+            MediaTracker tracker = new MediaTracker(xlet.scene);
+            tracker.addImage(newImage, 0);
+            try {
+                tracker.waitForAll();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+            synchronized(xlet.show) {
+                bioImageFeature.setImage(newImage);
+                Segment s = xlet.show.getCurrentSegment();
+                synchronized(this) {
+                    currentBioVersion = availableBioVersion;
+                    if (s == bioAvailableSegment || s == bioNotAvailableSegment)
+                    {
+                        activateRightSegment();
+                    }
+                    notifyAll();
+                }
+            }
+        }
     }
 }

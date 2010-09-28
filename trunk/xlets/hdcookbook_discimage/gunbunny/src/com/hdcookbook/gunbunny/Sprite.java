@@ -83,12 +83,12 @@ public abstract class Sprite {
     /**
      * Called to paint this sprite.
      *
-     * @param g		The place to paint the sprite
-     * @param paintAll	true if we should paint everything, even if it's
-     *			identical to what was painted in the last frame
+     * @param g         The place to paint the sprite
+     * @param paintAll  true if we should paint everything, even if it's
+     *                  identical to what was painted in the last frame
      * @param animator  The animator that's animating us, or null if
-     *			this is just a call from repaint.
+     *                  this is just a call from repaint.
      **/
     abstract public void paintFrame(Graphics2D g, boolean paintAll, 
-    				    Animator animator);
+                                    Animator animator);
 }

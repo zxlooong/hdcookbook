@@ -80,35 +80,35 @@ public class Clipped extends Modifier implements Node {
 
     protected Rectangle clipRegion;
     private Rectangle lastClipRegion = new Rectangle();
-    	// Last clip region during paint
+        // Last clip region during paint
     private Rectangle tmpI = null;
-	//
-	// Here, we make an inner class of RenderContext.  We
-	// pass this instance to our child; it modifies calls to the
-	// parent RenderContext from our child.
-	//
+        //
+        // Here, we make an inner class of RenderContext.  We
+        // pass this instance to our child; it modifies calls to the
+        // parent RenderContext from our child.
+        //
     private ChildContext childContext = new ChildContext();
     
     class ChildContext extends RenderContext {
-	RenderContext	parent;
+        RenderContext   parent;
 
-	public void addArea(DrawRecord r) {
-	    r.addClip(clipRegion.x, clipRegion.y, 
-	    	      clipRegion.width, clipRegion.height);
-	    parent.addArea(r);
-	}
+        public void addArea(DrawRecord r) {
+            r.addClip(clipRegion.x, clipRegion.y, 
+                      clipRegion.width, clipRegion.height);
+            parent.addArea(r);
+        }
 
-	public void guaranteeAreaFilled(DrawRecord r) {
-	    r.addClip(clipRegion.x, clipRegion.y, 
-	    	      clipRegion.width, clipRegion.height);
-	    parent.guaranteeAreaFilled(r);
-	}
+        public void guaranteeAreaFilled(DrawRecord r) {
+            r.addClip(clipRegion.x, clipRegion.y, 
+                      clipRegion.width, clipRegion.height);
+            parent.guaranteeAreaFilled(r);
+        }
 
-	public int setTarget(int target) {
-	    return parent.setTarget(target);
-	}
+        public int setTarget(int target) {
+            return parent.setTarget(target);
+        }
 
-    };	// End of RenderContext anonymous inner class
+    };  // End of RenderContext anonymous inner class
 
 
     
@@ -120,15 +120,15 @@ public class Clipped extends Modifier implements Node {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup()) {
-	    throw new IllegalStateException();
-	}
-	Clipped result = new Clipped(show);
-	if (clipRegion != null) {
-	    result.clipRegion = new Rectangle(clipRegion);
-	}
-	result.part = part.makeNewClone(clones);
-	return result;
+        if (!isSetup()) {
+            throw new IllegalStateException();
+        }
+        Clipped result = new Clipped(show);
+        if (clipRegion != null) {
+            result.clipRegion = new Rectangle(clipRegion);
+        }
+        result.part = part.makeNewClone(clones);
+        return result;
     }
 
     /**
@@ -136,25 +136,25 @@ public class Clipped extends Modifier implements Node {
      * the animation thread, when it is safe to update the model (e.g.
      * from a show command).
      *
-     * @param newRegion	The new clip region.  
+     * @param newRegion The new clip region.  
      **/
     public void changeClipRegion(Rectangle newRegion) {
-	clipRegion.x = newRegion.x;
-	clipRegion.y = newRegion.y;
-	clipRegion.width = newRegion.width;
-	clipRegion.height = newRegion.height;
-	// The drawing framework takes care of the new clip region
-	// automatically - if we're drawing more or less of our child
-	// as the result of the clip, it notices and does the right
-	// thing.
+        clipRegion.x = newRegion.x;
+        clipRegion.y = newRegion.y;
+        clipRegion.width = newRegion.width;
+        clipRegion.height = newRegion.height;
+        // The drawing framework takes care of the new clip region
+        // automatically - if we're drawing more or less of our child
+        // as the result of the clip, it notices and does the right
+        // thing.
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	childContext.parent = context;
-	super.addDisplayAreas(childContext);
+        childContext.parent = context;
+        super.addDisplayAreas(childContext);
     }
 
 
@@ -162,39 +162,39 @@ public class Clipped extends Modifier implements Node {
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	// This is synchronized by Show.paintFrame, so we don't
-	// have to worry about concurrent calls.
-	lastClipRegion.x = Integer.MIN_VALUE;
-	gr.getClipBounds(lastClipRegion);
-	if (lastClipRegion.x == Integer.MIN_VALUE) {
-	    gr.setClip(clipRegion);
-	    part.paintFrame(gr);
-	    gr.setClip(null);
-	} else {
-	    if (tmpI == null) {
-		tmpI = new Rectangle();		// Holds intersection
-	    }
-	    tmpI.setBounds(lastClipRegion);
-	    if (tmpI.x < clipRegion.x) {
-		tmpI.width -= clipRegion.x - tmpI.x;
-		tmpI.x = clipRegion.x;
-	    }
-	    if (tmpI.y < clipRegion.y) {
-		tmpI.height -= clipRegion.y - tmpI.y;
-		tmpI.y = clipRegion.y;
-	    }
-	    if (tmpI.x + tmpI.width > clipRegion.x + clipRegion.width) {
-		tmpI.width = clipRegion.x + clipRegion.width - tmpI.x;
-	    }
-	    if (tmpI.y + tmpI.height > clipRegion.y + clipRegion.height) {
-		tmpI.height = clipRegion.y + clipRegion.height - tmpI.y;
-	    }
-	    if (tmpI.width > 0 && tmpI.height > 0) {
-		gr.setClip(tmpI);
-		part.paintFrame(gr);
-		gr.setClip(lastClipRegion);
-	    }
-	}
+        // This is synchronized by Show.paintFrame, so we don't
+        // have to worry about concurrent calls.
+        lastClipRegion.x = Integer.MIN_VALUE;
+        gr.getClipBounds(lastClipRegion);
+        if (lastClipRegion.x == Integer.MIN_VALUE) {
+            gr.setClip(clipRegion);
+            part.paintFrame(gr);
+            gr.setClip(null);
+        } else {
+            if (tmpI == null) {
+                tmpI = new Rectangle();         // Holds intersection
+            }
+            tmpI.setBounds(lastClipRegion);
+            if (tmpI.x < clipRegion.x) {
+                tmpI.width -= clipRegion.x - tmpI.x;
+                tmpI.x = clipRegion.x;
+            }
+            if (tmpI.y < clipRegion.y) {
+                tmpI.height -= clipRegion.y - tmpI.y;
+                tmpI.y = clipRegion.y;
+            }
+            if (tmpI.x + tmpI.width > clipRegion.x + clipRegion.width) {
+                tmpI.width = clipRegion.x + clipRegion.width - tmpI.x;
+            }
+            if (tmpI.y + tmpI.height > clipRegion.y + clipRegion.height) {
+                tmpI.height = clipRegion.y + clipRegion.height - tmpI.y;
+            }
+            if (tmpI.width > 0 && tmpI.height > 0) {
+                gr.setClip(tmpI);
+                part.paintFrame(gr);
+                gr.setClip(lastClipRegion);
+            }
+        }
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

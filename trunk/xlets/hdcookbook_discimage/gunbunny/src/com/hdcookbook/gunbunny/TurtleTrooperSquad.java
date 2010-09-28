@@ -74,7 +74,7 @@ public class TurtleTrooperSquad {
     TurtleTrooper[] squad = new TurtleTrooper[xLoc.length];
     
     public TurtleTrooperSquad(Image turtleTrooperImg, 
-    			      Image turtleTrooperBlamImg)
+                              Image turtleTrooperBlamImg)
     {
         this.turtleTrooperImg = turtleTrooperImg; 
         this.turtleTrooperBlamImg = turtleTrooperBlamImg;
@@ -86,7 +86,7 @@ public class TurtleTrooperSquad {
     public void assemble() {
         for(int i=0; i < squad.length; i++) {
             squad[i] = new TurtleTrooper(xLoc[i], turtleTrooperImg, 
-	    				 turtleTrooperBlamImg);
+                                         turtleTrooperBlamImg);
         }
     }
 
@@ -94,25 +94,25 @@ public class TurtleTrooperSquad {
      * Advance the state of the squad to the given frame.
      ***/
     public void nextFrame(int numFrames) {
-	boolean allGone = true;
-	for (int i = 0; i < squad.length; i++) {
-	    squad[i].nextFrame(numFrames);
-	    allGone = allGone && !squad[i].isVisible();
-	}
-	if (allGone) {
-	    for (int i = 0; i < squad.length; i++) {
-		squad[i].awakenWithNextFrame();
-	    }
-	}
+        boolean allGone = true;
+        for (int i = 0; i < squad.length; i++) {
+            squad[i].nextFrame(numFrames);
+            allGone = allGone && !squad[i].isVisible();
+        }
+        if (allGone) {
+            for (int i = 0; i < squad.length; i++) {
+                squad[i].awakenWithNextFrame();
+            }
+        }
     }
 
     /**
      * Paint the current state of the troopers.
      **/
     public void paintFrame(Graphics2D g, boolean paintAll, Animator animator) {
-	for (int i = 0; i < squad.length; i++) {
-	    squad[i].paintFrame(g, paintAll, animator);
-	}
+        for (int i = 0; i < squad.length; i++) {
+            squad[i].paintFrame(g, paintAll, animator);
+        }
     }
 
     /**
@@ -121,13 +121,13 @@ public class TurtleTrooperSquad {
      * is no longer shooting.
      **/
     public boolean hitBy(Rectangle hitRect) {
-	for (int i = 0; i < squad.length; i++) {
-	    if (squad[i].hitBy(hitRect)) {
-		squad[i].startBlamWithNextFrame();
-		return true;
-	    }
-	}
-	return false;
+        for (int i = 0; i < squad.length; i++) {
+            if (squad[i].hitBy(hitRect)) {
+                squad[i].startBlamWithNextFrame();
+                return true;
+            }
+        }
+        return false;
     }
     
 }

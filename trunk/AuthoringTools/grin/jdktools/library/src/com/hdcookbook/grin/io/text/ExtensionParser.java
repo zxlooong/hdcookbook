@@ -90,18 +90,18 @@ public interface ExtensionParser {
      * @param typeName  The name of the feature's type.  This will always
      *                  contain a ":".
      * @param name      The name of this instance of feature
-     *			a list of commands if needed.
-     * @param lexer	The lexer to parse arguments for this feature.
+     *                  a list of commands if needed.
+     * @param lexer     The lexer to parse arguments for this feature.
      *                  The implementation of this method should parse up to ";"
      *                  which indicates the end of the feature declaration.
      *
      * @throws      IOException if there's an error.
      *
-     * @return	    A feature if one of the given type is known, null otherwise
+     * @return      A feature if one of the given type is known, null otherwise
      */
     public Feature getFeature(Show show, String typeName, 
-    			      String name, Lexer lexer)
-		       throws IOException;    
+                              String name, Lexer lexer)
+                       throws IOException;    
 
     /**
      * Get a modifier feature of the given type.  The type name will have a
@@ -125,18 +125,18 @@ public interface ExtensionParser {
      * @param typeName  The name of the feature's type.  This will always
      *                  contain a ":".
      * @param name      The name of this instance of feature
-     *			a list of commands if needed.
-     * @param lexer	The lexer to parse arguments for this feature.
+     *                  a list of commands if needed.
+     * @param lexer     The lexer to parse arguments for this feature.
      *                  The implementation of this method should parse up to ";"
      *                  which indicates the end of the feature declaration.
      *
      * @throws      IOException if there's an error.
      *
-     * @return	    A feature if one of the given type is known, null otherwise
+     * @return      A feature if one of the given type is known, null otherwise
      */
     public Modifier getModifier(Show show, String typeName, 
-    			        String name, Lexer lexer)
-		       throws IOException;
+                                String name, Lexer lexer)
+                       throws IOException;
 
      /**
      * Get a modifier command of the given type. 
@@ -148,14 +148,14 @@ public interface ExtensionParser {
      * @param show      The show being parsed
      * @param typeName  The name of the commands's type.  This will always
      *                  contain a ":".
-     * @param lexer	The lexer to parse arguments for this feature.
+     * @param lexer     The lexer to parse arguments for this feature.
      *                  The implementation of this method should parse up to ";"
      *                  which indicates the end of the feature declaration.
      *
      * @throws      IOException if there's an error.
      *
-     * @return	    A command if one of the given type is known, null otherwise
+     * @return      A command if one of the given type is known, null otherwise
      */
     public Command getCommand(Show show, String typeName, Lexer lexer)
-		       throws IOException;
+                       throws IOException;
 }

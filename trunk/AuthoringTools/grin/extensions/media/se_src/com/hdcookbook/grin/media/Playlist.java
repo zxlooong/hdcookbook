@@ -95,10 +95,10 @@ public class Playlist extends Feature implements Node {
     protected boolean autoStart;
     protected boolean autoStop;
 
-	// If the show uses mark times to send commands when we enter
-	// into a segment of video, markTimes and onEntryCommands will
-	// both be non-null.  Otherwise, they will both be null.
-	// See also the assertions about these data members in initialize().
+        // If the show uses mark times to send commands when we enter
+        // into a segment of video, markTimes and onEntryCommands will
+        // both be non-null.  Otherwise, they will both be null.
+        // See also the assertions about these data members in initialize().
     protected int[] markTimes;
     protected Command[][] onEntryCommands = null;
 
@@ -107,7 +107,7 @@ public class Playlist extends Feature implements Node {
     private int stopCountdown = 0;
     
     public Playlist(Show show) {
-	super(show);
+        super(show);
     }
 
     protected void setLocator(String locator) {
@@ -123,9 +123,9 @@ public class Playlist extends Feature implements Node {
      * for more complete documentation.
      **/
     public void start() {
-	Debug.println("Pretending to start video:  " + locator);
-	startCountdown = 10;
-	stopCountdown = 0;
+        Debug.println("Pretending to start video:  " + locator);
+        startCountdown = 10;
+        stopCountdown = 0;
     }
 
     /**
@@ -133,9 +133,9 @@ public class Playlist extends Feature implements Node {
      * for more complete documentation.
      **/
     public void stop() {
-	Debug.println("Pretending to stop video:  " + locator);
-	startCountdown = 0;
-	stopCountdown = 0;
+        Debug.println("Pretending to stop video:  " + locator);
+        startCountdown = 0;
+        stopCountdown = 0;
     }
 
     /**
@@ -143,54 +143,54 @@ public class Playlist extends Feature implements Node {
      * for more complete documentation.
      **/
     public void resetLocator(String locator) {
-	this.locator = locator;
+        this.locator = locator;
     }
 
     /** 
      * {@inheritDoc}
      **/
     public int getX() {
-	return 0;
+        return 0;
     }
 
     /** 
      * {@inheritDoc}
      **/
     public int getY() {
-	return 0;
+        return 0;
     }
 
     /** 
      * {@inheritDoc}
      **/
     public void initialize() {
-	    // Assert the invariant for our mark times:  The list must
-	    // be sorted, it must start with Integer.MIN_VALUE, and it
-	    // must end with Integer.MAX_VALUE.  Ensuring this invariant
-	    // makes writing the binary search through mark times easier.
-	if (Debug.ASSERT) {
-	    if (markTimes == null) {
-		if (onEntryCommands != null) {
-		    Debug.assertFail();
-		}
-	    } else {
-		if (onEntryCommands == null) {
-		    Debug.assertFail();
-		}
-		if (markTimes[0] != Integer.MIN_VALUE) {
-		    Debug.assertFail();
-		} else if (markTimes[markTimes.length-1] != Integer.MAX_VALUE) {
-		    Debug.assertFail();
-		} 
-		int last = markTimes[0];
-		for (int i = 1; i < markTimes.length; i++) {
-		    if (last >= markTimes[i]) {
-			Debug.assertFail();
-		    }
-		    last = markTimes[i];
-		}
-	    }
-	}
+            // Assert the invariant for our mark times:  The list must
+            // be sorted, it must start with Integer.MIN_VALUE, and it
+            // must end with Integer.MAX_VALUE.  Ensuring this invariant
+            // makes writing the binary search through mark times easier.
+        if (Debug.ASSERT) {
+            if (markTimes == null) {
+                if (onEntryCommands != null) {
+                    Debug.assertFail();
+                }
+            } else {
+                if (onEntryCommands == null) {
+                    Debug.assertFail();
+                }
+                if (markTimes[0] != Integer.MIN_VALUE) {
+                    Debug.assertFail();
+                } else if (markTimes[markTimes.length-1] != Integer.MAX_VALUE) {
+                    Debug.assertFail();
+                } 
+                int last = markTimes[0];
+                for (int i = 1; i < markTimes.length; i++) {
+                    if (last >= markTimes[i]) {
+                        Debug.assertFail();
+                    }
+                    last = markTimes[i];
+                }
+            }
+        }
     }
 
     /** 
@@ -203,32 +203,32 @@ public class Playlist extends Feature implements Node {
      * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
-	return 0;
+        return 0;
     }
 
     /** 
      * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
-	activated = mode;
-	if (mode) {
-	    show.runCommands(onActivate);
-	    if (autoStart) {
-		start();
-	    }
-	} else {
-	    show.runCommands(onDeactivate);
-	    if (autoStop) {
-		stop();
-	    }
-	}
+        activated = mode;
+        if (mode) {
+            show.runCommands(onActivate);
+            if (autoStart) {
+                start();
+            }
+        } else {
+            show.runCommands(onDeactivate);
+            if (autoStop) {
+                stop();
+            }
+        }
     }
 
     /** 
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	return false;
+        return false;
     }
 
     /** 
@@ -253,41 +253,41 @@ public class Playlist extends Feature implements Node {
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	if (startCountdown > 0) {
-	    startCountdown--;
-	    if (startCountdown == 0) {
-		Debug.println("Pretending video started:  " + locator);
-		show.runCommands(onMediaStart);
-		stopCountdown = 10 * 24;
-	    }
-	} else if (stopCountdown > 0) {
-	    stopCountdown--;
-	    if (stopCountdown == 0) {
-		Debug.println("Pretending end of media reached:  " + locator);
-		show.runCommands(onMediaEnd);
-	    }
-	}
+        if (startCountdown > 0) {
+            startCountdown--;
+            if (startCountdown == 0) {
+                Debug.println("Pretending video started:  " + locator);
+                show.runCommands(onMediaStart);
+                stopCountdown = 10 * 24;
+            }
+        } else if (stopCountdown > 0) {
+            stopCountdown--;
+            if (stopCountdown == 0) {
+                Debug.println("Pretending end of media reached:  " + locator);
+                show.runCommands(onMediaEnd);
+            }
+        }
     }
 
     public void readInstanceData(GrinDataInputStream in, int length)
                 throws IOException
     {
-	in.readSuperClassData(this);
+        in.readSuperClassData(this);
 
-	locator = in.readString();
-	onActivate = in.readCommands();
-	onMediaStart = in.readCommands();
-	onMediaEnd = in.readCommands();
-	onDeactivate = in.readCommands();
-	autoStart = in.readBoolean();
-	autoStop = in.readBoolean();
-	markTimes = in.readSharedIntArray();
-	if (in.readByte() != 0)  {
-	    int len = in.readInt();
-	    onEntryCommands = new Command[len][];
-	    for (int i = 0; i < len; i++) {
-		onEntryCommands[i] = in.readCommands();
-	    }
-	}
+        locator = in.readString();
+        onActivate = in.readCommands();
+        onMediaStart = in.readCommands();
+        onMediaEnd = in.readCommands();
+        onDeactivate = in.readCommands();
+        autoStart = in.readBoolean();
+        autoStop = in.readBoolean();
+        markTimes = in.readSharedIntArray();
+        if (in.readByte() != 0)  {
+            int len = in.readInt();
+            onEntryCommands = new Command[len][];
+            for (int i = 0; i < len; i++) {
+                onEntryCommands[i] = in.readCommands();
+            }
+        }
     }
 }

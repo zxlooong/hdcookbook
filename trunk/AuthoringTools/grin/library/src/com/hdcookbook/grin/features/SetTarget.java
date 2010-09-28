@@ -80,8 +80,8 @@ import java.util.HashMap;
 public class SetTarget extends Modifier implements Node {
 
     protected int target;
-    protected String targetName;	
-    	// Only used when re-mapping target names to numbers
+    protected String targetName;        
+        // Only used when re-mapping target names to numbers
     
     public SetTarget(Show show) {
         super(show);
@@ -91,22 +91,22 @@ public class SetTarget extends Modifier implements Node {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup()) {
-	    throw new IllegalStateException();
-	}
-	SetTarget result = new SetTarget(show);
-	result.part = part.makeNewClone(clones);
-	result.target = target;
-	result.targetName = targetName;
-	return result;
-	    // initializeClone() not needed
+        if (!isSetup()) {
+            throw new IllegalStateException();
+        }
+        SetTarget result = new SetTarget(show);
+        result.part = part.makeNewClone(clones);
+        result.target = target;
+        result.targetName = targetName;
+        return result;
+            // initializeClone() not needed
     }
     
     /**
      * Internal use only.  
      **/
     public void mapDrawTarget(Hashtable targetMap) {
-	target = ((Integer) targetMap.get(targetName)).intValue();
+        target = ((Integer) targetMap.get(targetName)).intValue();
     }
 
 
@@ -114,8 +114,8 @@ public class SetTarget extends Modifier implements Node {
      * {@inheritDoc}
      **/
     protected void setChildChanged() {
-	// When we're deactivated, our child doesn't need to be marked as
-	// modified, because we don't change the drawing at all.
+        // When we're deactivated, our child doesn't need to be marked as
+        // modified, because we don't change the drawing at all.
     }
 
 
@@ -123,9 +123,9 @@ public class SetTarget extends Modifier implements Node {
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	int old = context.setTarget(target);
-	super.addDisplayAreas(context);
-	context.setTarget(old);
+        int old = context.setTarget(target);
+        super.addDisplayAreas(context);
+        context.setTarget(old);
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

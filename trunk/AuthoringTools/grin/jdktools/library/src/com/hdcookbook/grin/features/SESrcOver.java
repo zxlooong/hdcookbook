@@ -71,7 +71,7 @@ public class SESrcOver extends SrcOver implements SENode, SEScalableNode {
     }
     
     public SESrcOver(SEShow show, String name) {
-	super(show);
+        super(show);
         setName(name);
     }
     public void writeInstanceData(GrinDataOutputStream out) 
@@ -99,26 +99,26 @@ public class SESrcOver extends SrcOver implements SENode, SEScalableNode {
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
-	if (part == from) {
-	    part = to;
-	}
+        if (part == from) {
+            part = to;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	// Do nothing
+        // Do nothing
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "src_over @" + Integer.toHexString(hashCode());
-	} else {
-	    return "src_over " + name;
-	}
+        if (name == null) {
+            return "src_over @" + Integer.toHexString(hashCode());
+        } else {
+            return "src_over " + name;
+        }
     }
 }

@@ -94,76 +94,76 @@ public abstract class RyanDirector extends Director {
     }
 
     protected void init() {
-	String[] nm = {
-		"F_commentary_menu_count_up",
-		"F_commentary_menu_active",
-		"F_commentary_menu_count_down"
-	};
+        String[] nm = {
+                "F_commentary_menu_count_up",
+                "F_commentary_menu_active",
+                "F_commentary_menu_count_down"
+        };
 
-	commentaryIndicators = new Assembly[nm.length];
-	commentaryOnIndicators = new Feature[nm.length];
-	commentaryOffIndicators = new Feature[nm.length];
+        commentaryIndicators = new Assembly[nm.length];
+        commentaryOnIndicators = new Feature[nm.length];
+        commentaryOffIndicators = new Feature[nm.length];
 
-	for (int i = 0; i < nm.length; i++) {
-	    commentaryIndicators[i] = (Assembly) getShow().getFeature(nm[i]);
-	    commentaryOnIndicators[i] = commentaryIndicators[i].findPart("on");
-	    commentaryOffIndicators[i] =commentaryIndicators[i].findPart("off");
-	    if (Debug.ASSERT &&
-		(commentaryIndicators[i] == null
-		 || commentaryOnIndicators[i] == null
-		 || commentaryOffIndicators[i] == null)) 
-	    {
-		Debug.assertFail();
-	    }
-	}
+        for (int i = 0; i < nm.length; i++) {
+            commentaryIndicators[i] = (Assembly) getShow().getFeature(nm[i]);
+            commentaryOnIndicators[i] = commentaryIndicators[i].findPart("on");
+            commentaryOffIndicators[i] =commentaryIndicators[i].findPart("off");
+            if (Debug.ASSERT &&
+                (commentaryIndicators[i] == null
+                 || commentaryOnIndicators[i] == null
+                 || commentaryOffIndicators[i] == null)) 
+            {
+                Debug.assertFail();
+            }
+        }
 
-	commentaryDirector = 
-		(Assembly) getShow().getFeature("F_commentary_director");
-	if (Debug.ASSERT && commentaryDirector == null) {
-	    Debug.assertFail();
-	}
-	commentaryDirectors = new Feature[7];
-	for (int i = 0; i < commentaryDirectors.length; i++) {
-	    commentaryDirectors[i] = commentaryDirector.findPart("director_"+i);
-	    if (Debug.ASSERT && commentaryDirectors[i] == null) {
-		Debug.assertFail();
-	    }
-	}
+        commentaryDirector = 
+                (Assembly) getShow().getFeature("F_commentary_director");
+        if (Debug.ASSERT && commentaryDirector == null) {
+            Debug.assertFail();
+        }
+        commentaryDirectors = new Feature[7];
+        for (int i = 0; i < commentaryDirectors.length; i++) {
+            commentaryDirectors[i] = commentaryDirector.findPart("director_"+i);
+            if (Debug.ASSERT && commentaryDirectors[i] == null) {
+                Debug.assertFail();
+            }
+        }
     }
 
     public Show createShow() {
         String showName = "ryan_show.txt";
-	SEShow show = new SEShow(this);
-	URL source = null;
-	BufferedReader rdr = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-	    rdr = new BufferedReader(
-			new InputStreamReader(source.openStream(), "UTF-8"));
+        SEShow show = new SEShow(this);
+        URL source = null;
+        BufferedReader rdr = null;
+        try {
+            source = AssetFinder.getURL(showName);
+            if (source == null) {
+                throw new IOException("Can't find resource " + showName);
+            }
+            rdr = new BufferedReader(
+                        new InputStreamReader(source.openStream(), "UTF-8"));
             ShowBuilder builder = new ShowBuilder();
             builder.setExtensionParser(new RyanExtensionParser(this));
-	    ShowParser p = new ShowParser(rdr, showName, show, builder);
-	    p.parse();
-	    rdr.close();
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
+            ShowParser p = new ShowParser(rdr, showName, show, builder);
+            p.parse();
+            rdr.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.out.println();
+            System.out.println(ex.getMessage());
+            System.out.println();
+            System.out.println("Error trying to parse " + showName);
             System.out.println("    URL:  " + source);
-	    Debug.assertFail();
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }
-	}
+            Debug.assertFail();
+        } finally {
+            if (rdr != null) {
+                try {
+                    rdr.close();
+                } catch (IOException ex) {
+                }
+            }
+        }
         return show;
     }
 
@@ -185,13 +185,13 @@ public abstract class RyanDirector extends Director {
      * be done within a command.
      **/
     void toggleCommentary() {
-	commentaryOn = !commentaryOn;
-	setCommentaryUI();
+        commentaryOn = !commentaryOn;
+        setCommentaryUI();
     }
 
     protected void setDirectorNumber(int num) {
-	directorNumber = num;
-	setCommentaryUI();
+        directorNumber = num;
+        setCommentaryUI();
     }
 
     abstract protected void startCommentary();
@@ -202,20 +202,20 @@ public abstract class RyanDirector extends Director {
      * depending on whether commentary is on or off.
      **/
     void setCommentaryUI() {
-	for (int i = 0; i < commentaryIndicators.length; i++) {
-	    Feature f;
-	    if (commentaryOn) {
-		f = commentaryOnIndicators[i];
-	    } else {
-		f = commentaryOffIndicators[i];
-	    }
-	    commentaryIndicators[i].setCurrentFeature(f);
-	}
-	if (commentaryOn) {
-	    commentaryDirector
-		.setCurrentFeature(commentaryDirectors[directorNumber]);
-	} else {
-	    commentaryDirector.setCurrentFeature(commentaryDirectors[0]);
-	}
+        for (int i = 0; i < commentaryIndicators.length; i++) {
+            Feature f;
+            if (commentaryOn) {
+                f = commentaryOnIndicators[i];
+            } else {
+                f = commentaryOffIndicators[i];
+            }
+            commentaryIndicators[i].setCurrentFeature(f);
+        }
+        if (commentaryOn) {
+            commentaryDirector
+                .setCurrentFeature(commentaryDirectors[directorNumber]);
+        } else {
+            commentaryDirector.setCurrentFeature(commentaryDirectors[0]);
+        }
     }
 }

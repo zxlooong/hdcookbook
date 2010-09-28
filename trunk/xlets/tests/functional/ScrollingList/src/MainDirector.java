@@ -42,7 +42,7 @@ public class MainDirector extends Director {
        "The African Queen",
        "Psych",
        "Chinatown",
-       "One Flew Over the Cuckoo's Nest	",
+       "One Flew Over the Cuckoo's Nest ",
        "The Grapes of Wrath",
        "2001: A Space Odyssey",
        "The Maltese Falcon",

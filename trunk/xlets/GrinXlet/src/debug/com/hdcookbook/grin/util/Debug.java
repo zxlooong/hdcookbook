@@ -110,8 +110,8 @@ public class Debug {
      *      <...>
      *      public void myMethod() {
      *          int token;
-     *     	if (Debug.PROFILE) {
-     *     	    Profile.initProfiler(2000, "127.0.0.1");
+     *          if (Debug.PROFILE) {
+     *              Profile.initProfiler(2000, "127.0.0.1");
      *              token = Profile.startTimer(PROFILE_TIMER_1);
      *          }
      *          doTheThingIWantMeasured();
@@ -155,9 +155,9 @@ public class Debug {
                 DebugLog.println(o.toString());
             }
         }
-	// The following can be useful on a software player, but can
-	// cause serious performance degredation on a hardware player:
-	// System.out.println(o);
+        // The following can be useful on a software player, but can
+        // cause serious performance degredation on a hardware player:
+        // System.out.println(o);
     }
 
     /**
@@ -199,7 +199,7 @@ public class Debug {
      *      try {
      *          throw new RuntimeException("STACK BACKTRACE");
      *      } catch (RuntimeException ex) {
-     *		Debug.printStackTrace(ex);
+     *          Debug.printStackTrace(ex);
      *      }
      * </pre>
      **/

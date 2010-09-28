@@ -72,10 +72,10 @@ public interface SEScalableNode {
      * show at compile time, so no special scaling action is required at 
      * runtime.
      *
-     * @param 	xScale	x scale factor in mills
-     * @param 	yScale	y scale factor in mills
-     * @param	xOffset	x offset in pixels
-     * @param	yOffset	y offset in pixels
+     * @param   xScale  x scale factor in mills
+     * @param   yScale  y scale factor in mills
+     * @param   xOffset x offset in pixels
+     * @param   yOffset y offset in pixels
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset);
 }

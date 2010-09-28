@@ -99,7 +99,7 @@ public class WeatherMan extends Command implements Runnable {
     }
 
     public static void setZip(String zipcode) {
-	zip = zipcode;
+        zip = zipcode;
     }
 
     public void run() {
@@ -109,7 +109,7 @@ public class WeatherMan extends Command implements Runnable {
         int images = 0;
         try {
             HttpURLConnection conn = (HttpURLConnection) weatherURL.
-		    			openConnection();
+                                        openConnection();
             int resp = conn.getResponseCode();
             if (resp != 200) {
                 Debug.println("Got an error HTTP response code:" + resp);
@@ -117,24 +117,24 @@ public class WeatherMan extends Command implements Runnable {
             this.fd = XMLParser.parse(conn.getInputStream());
 
             URL url;
-	    if (fd != null) {
+            if (fd != null) {
 
                // select the image based on whether it's a day or night
-            	if (fd.isDayTime) {
+                if (fd.isDayTime) {
                     url = new URL(imageRsc + fd.imageCode + "d.png");
-            	} else {
+                } else {
                     url = new URL(imageRsc + fd.imageCode + "n.png");
-            	}
-            	this.icons[images++] = ImageManager.getImage(url);
+                }
+                this.icons[images++] = ImageManager.getImage(url);
 
-            	// forecast day1's image
-            	url = new URL(imageRsc + fd.day1Code + "d.png");
-            	this.icons[images++] = ImageManager.getImage(url);
+                // forecast day1's image
+                url = new URL(imageRsc + fd.day1Code + "d.png");
+                this.icons[images++] = ImageManager.getImage(url);
 
-            	// forecast day2's image
-            	url = new URL(imageRsc + fd.day2Code + "d.png");
-            	this.icons[images++] = ImageManager.getImage(url);
-	    }
+                // forecast day2's image
+                url = new URL(imageRsc + fd.day2Code + "d.png");
+                this.icons[images++] = ImageManager.getImage(url);
+            }
         } catch (MalformedURLException ignored) {
             Debug.printStackTrace(ignored);
             icons[images] = null;

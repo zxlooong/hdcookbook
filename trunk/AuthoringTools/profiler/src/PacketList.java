@@ -65,8 +65,8 @@ import com.hdcookbook.grin.util.Profile;
 public class PacketList {
 
     private HashMap<MessageKey, MessageKey> messages = new HashMap<MessageKey, MessageKey>();
-    	// We use messages to canonicalize MessageKey instances, so we can avoid allocating
-	// them.
+        // We use messages to canonicalize MessageKey instances, so we can avoid allocating
+        // them.
 
     private Packet[] packets;
     private int length;
@@ -74,93 +74,93 @@ public class PacketList {
     MessageKey tmpKey = new MessageKey();
 
     public PacketList(int capacity) {
-	//
-	// Pre-allocate everything we can to minimize GC pauses during
-	// profile data capture
-	//
-	packets = new Packet[capacity];
-	for (int i = 0; i < capacity; i++) {
-	    packets[i] = new Packet();
-	}
+        //
+        // Pre-allocate everything we can to minimize GC pauses during
+        // profile data capture
+        //
+        packets = new Packet[capacity];
+        for (int i = 0; i < capacity; i++) {
+            packets[i] = new Packet();
+        }
     }
 
     public int getCapacity() {
-	return packets.length;
+        return packets.length;
     }
 
     public int getLength() {
-	return length;
+        return length;
     }
 
     /**
      * Mark this list as closed for new additions.
      **/
     public synchronized void setDone() {
-	done = true;
-	notifyAll();
+        done = true;
+        notifyAll();
     }
 
     public synchronized boolean getDone() {
-	return done;
+        return done;
     }
 
     public synchronized void add(DatagramPacket packet, long timestamp) {
-	if (done || length >= packets.length) {
-	    return;
-	}
-	byte[] buf = packet.getData();
-	int i = packet.getOffset();
-	int len = packet.getLength();
-	if (len < 1) {
-	    return;
-	}
-	byte type = buf[i++];
-	if (type == Profile.MESSAGE) {
-	    Packet p = packets[length++];
-	    p.type = type;
-	    p.timestamp = timestamp;
-	    p.debugMessage = new byte[len-1];
-	    	// We're forced to allocate this here, since the message,
-		// by definition, can change each time
-	    System.arraycopy(buf, i, p.debugMessage, 0, len-1);
-	    notifyAll();	// In case a follower is waiting on get()
-	    return;
-	}
-	if (len < 5) {
-	    return;
-	}
-	int id = 0xff & (int) buf[i++];
-	id <<= 8;
-	id += 0xff & (int) buf[i++];
-	id <<= 8;
-	id += 0xff & (int) buf[i++];
-	id <<= 8;
-	id += 0xff & (int) buf[i++];
-	byte threadID = (byte) 0;
-	MessageKey message = null;
-	if (type == Profile.TIMER_START) {
-	    if (len < 6) {
-		return;
-	    }
-	    threadID = buf[i++];
-	    tmpKey.set(buf, i, len - i);
-	    message = messages.get(tmpKey);
-	    if (message == null) {
-		message = tmpKey.makeCopy();
-		messages.put(message, message);
-	    }
-	} else if (type == Profile.TIMER_STOP) {
-	    // do nothing
-	} else {
-	    return;
-	}
-	Packet p = packets[length++];
-	p.type = type;
-	p.id = id;
-	p.threadID = threadID;
-	p.message = message;
-	p.timestamp = timestamp;
-	notifyAll();	// In case a follower is waiting on get()
+        if (done || length >= packets.length) {
+            return;
+        }
+        byte[] buf = packet.getData();
+        int i = packet.getOffset();
+        int len = packet.getLength();
+        if (len < 1) {
+            return;
+        }
+        byte type = buf[i++];
+        if (type == Profile.MESSAGE) {
+            Packet p = packets[length++];
+            p.type = type;
+            p.timestamp = timestamp;
+            p.debugMessage = new byte[len-1];
+                // We're forced to allocate this here, since the message,
+                // by definition, can change each time
+            System.arraycopy(buf, i, p.debugMessage, 0, len-1);
+            notifyAll();        // In case a follower is waiting on get()
+            return;
+        }
+        if (len < 5) {
+            return;
+        }
+        int id = 0xff & (int) buf[i++];
+        id <<= 8;
+        id += 0xff & (int) buf[i++];
+        id <<= 8;
+        id += 0xff & (int) buf[i++];
+        id <<= 8;
+        id += 0xff & (int) buf[i++];
+        byte threadID = (byte) 0;
+        MessageKey message = null;
+        if (type == Profile.TIMER_START) {
+            if (len < 6) {
+                return;
+            }
+            threadID = buf[i++];
+            tmpKey.set(buf, i, len - i);
+            message = messages.get(tmpKey);
+            if (message == null) {
+                message = tmpKey.makeCopy();
+                messages.put(message, message);
+            }
+        } else if (type == Profile.TIMER_STOP) {
+            // do nothing
+        } else {
+            return;
+        }
+        Packet p = packets[length++];
+        p.type = type;
+        p.id = id;
+        p.threadID = threadID;
+        p.message = message;
+        p.timestamp = timestamp;
+        notifyAll();    // In case a follower is waiting on get()
     }
 
     /**
@@ -170,20 +170,20 @@ public class PacketList {
      * we're interrupted.
      **/
     public synchronized Packet get(int i) {
-	for (;;) {
-	    if (i < length) {
-		break;
-	    }
-	    if (done) {
-		return null;
-	    }
-	    try {
-		wait();
-	    } catch (InterruptedException ex) {
-		Thread.currentThread().interrupt();
-		return null;
-	    }
-	}
-	return packets[i];
+        for (;;) {
+            if (i < length) {
+                break;
+            }
+            if (done) {
+                return null;
+            }
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return null;
+            }
+        }
+        return packets[i];
     }
 }

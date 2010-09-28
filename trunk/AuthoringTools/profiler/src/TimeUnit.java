@@ -72,49 +72,49 @@ public enum TimeUnit {
     private final int index;
 
     TimeUnit(double conv, String name, String sField, String dField, int index) {
-    	this.conversionFactor = conv;
-    	this.displayName = name;
-    	this.startTimeField = sField;
-    	this.durationField = dField;
-	this.index = index;
+        this.conversionFactor = conv;
+        this.displayName = name;
+        this.startTimeField = sField;
+        this.durationField = dField;
+        this.index = index;
     }
 
     public double convertionFact() {
-	return conversionFactor;
+        return conversionFactor;
     }
 
     public String dname() {
-	return displayName;
+        return displayName;
     }
 
     public String startTimeField() {
-	return startTimeField;
+        return startTimeField;
     }
 
     public String durationField() {
-	return durationField;
+        return durationField;
     }
 
     public int index() {
-	return index;
+        return index;
     }
 
     public double convert(double value) {
-	return (value / conversionFactor);
+        return (value / conversionFactor);
     }
 
     public static TimeUnit match(String name) {
-	if (name.equals(NANO.dname())) {
-	    return NANO;
-	} else if (name.equals(MICRO.dname())) {
-	    return MICRO;
-	} else if (name.equals(MILLIS.dname())) {
-	    return MILLIS;
-	} else if (name.equals(SEC.dname())) {
-	    return SEC;
-	} else {
-	    System.out.println("Invalid TimeUnit name:" + name);
-	    return null;
+        if (name.equals(NANO.dname())) {
+            return NANO;
+        } else if (name.equals(MICRO.dname())) {
+            return MICRO;
+        } else if (name.equals(MILLIS.dname())) {
+            return MILLIS;
+        } else if (name.equals(SEC.dname())) {
+            return SEC;
+        } else {
+            System.out.println("Invalid TimeUnit name:" + name);
+            return null;
         }
     }
 }

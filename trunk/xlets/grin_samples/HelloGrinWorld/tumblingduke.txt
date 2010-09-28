@@ -18,7 +18,7 @@ show
 
 segment S:Initialize  
    setup  {
-	F:Everything
+        F:Everything
    } setup_done {
       # triggerred when F:Everything is done loading
       activate_segment S:1 ;  
@@ -27,56 +27,56 @@ segment S:Initialize
 
 segment S:1
    active {
-	F:Background
-	F:TumblingDuke1
+        F:Background
+        F:TumblingDuke1
    } setup  {
-	F:Everything
+        F:Everything
    } next {
-	activate_segment S:2 ;
+        activate_segment S:2 ;
    }
 ; 
 
 segment S:2
    active {
-	F:Background
-	F:TumblingDuke2
+        F:Background
+        F:TumblingDuke2
    } setup  {
-	F:Everything
+        F:Everything
    } next {
-	activate_segment S:3 ;
+        activate_segment S:3 ;
    } 
 ;       
 
 segment S:3
    active {
-	F:Background
-	F:TumblingDuke3
+        F:Background
+        F:TumblingDuke3
    } setup  {
-	F:Everything
+        F:Everything
    } next {
-	activate_segment S:4 ;
+        activate_segment S:4 ;
    } 
 ; 
 
 segment S:4
    active {
-	F:Background
-	F:TumblingDuke4
+        F:Background
+        F:TumblingDuke4
    } setup  {
-	F:Everything
+        F:Everything
    } next {
-	activate_segment S:5 ;
+        activate_segment S:5 ;
    } 
 ; 
 
 segment S:5
    active {
-	F:Background
-	F:TumblingDuke5
+        F:Background
+        F:TumblingDuke5
    } setup  {
-	F:Everything
+        F:Everything
    } next {
-	activate_segment S:6 ;
+        activate_segment S:6 ;
    } 
 ; 
 
@@ -85,9 +85,9 @@ segment S:6
       F:Background
       F:TumblingDuke6
    } setup  {
-	F:Everything
+        F:Everything
    } next {
-	activate_segment S:1 ;
+        activate_segment S:1 ;
    } 
 ; 
 
@@ -97,53 +97,53 @@ segment S:6
 # of every segment, I can assure that all of the features stay loaded 
 # and ready to be activated at any moment.
 feature group F:Everything {
-	F:TumblingDuke1
-	F:TumblingDuke2
-	F:TumblingDuke3
-	F:TumblingDuke4
-	F:TumblingDuke5
-	F:TumblingDuke6
-	F:Background
+        F:TumblingDuke1
+        F:TumblingDuke2
+        F:TumblingDuke3
+        F:TumblingDuke4
+        F:TumblingDuke5
+        F:TumblingDuke6
+        F:Background
 } ;
 
 # White background strip behind the tumbling duke.
 feature box F:Background ( 200 50 1650 300 ) 
-	fill { 255 255 255 255 }
+        fill { 255 255 255 255 }
 ;
 
 feature image_sequence F:TumblingDuke1 1200 60
-	"images/T" {
-		1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
-	} ".gif" end_commands { segment_done ; }
+        "images/T" {
+                1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
+        } ".gif" end_commands { segment_done ; }
 ;
 
 feature image_sequence F:TumblingDuke2 1020 60
-	"images/T" {
-		1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
-	} ".gif" end_commands { segment_done ; }
+        "images/T" {
+                1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
+        } ".gif" end_commands { segment_done ; }
 ;
 
 feature image_sequence F:TumblingDuke3 840 60
-	"images/T" {
-		1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
-	} ".gif" end_commands { segment_done ; }
-;		
+        "images/T" {
+                1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
+        } ".gif" end_commands { segment_done ; }
+;               
 
 feature image_sequence F:TumblingDuke4 660 60
-	"images/T" {
-		1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
-	} ".gif" end_commands { segment_done ; }
-;	
+        "images/T" {
+                1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
+        } ".gif" end_commands { segment_done ; }
+;       
 
 feature image_sequence F:TumblingDuke5 480 60
-	"images/T" {
-		1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
-	} ".gif" end_commands { segment_done ; }
-;	
+        "images/T" {
+                1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
+        } ".gif" end_commands { segment_done ; }
+;       
 
 feature image_sequence F:TumblingDuke6 300 60
-	"images/T" {
-		1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
-	} ".gif" end_commands { segment_done ; }
-;	
+        "images/T" {
+                1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8 8 9 9 9 10 10 10 11 11 11 12 12 12 13 13 13 14 14 14 15 15 15 16 16 16 17 17 17 17
+        } ".gif" end_commands { segment_done ; }
+;       
 end_show

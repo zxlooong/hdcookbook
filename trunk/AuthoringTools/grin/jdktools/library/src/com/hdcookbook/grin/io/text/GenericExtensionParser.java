@@ -84,8 +84,8 @@ public class GenericExtensionParser implements ExtensionParser {
                 return null;
             }
 
-	    public void markDisplayAreasChanged() {
-	    }
+            public void markDisplayAreasChanged() {
+            }
         };
         
         feature.setName(name);

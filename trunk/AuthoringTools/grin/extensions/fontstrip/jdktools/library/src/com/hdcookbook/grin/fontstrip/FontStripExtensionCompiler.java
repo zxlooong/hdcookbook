@@ -170,22 +170,22 @@ public class FontStripExtensionCompiler implements ExtensionParser {
     }
     
     private String[] parseStringsWithOpenBraceRead(Lexer lexer) throws IOException {
-	Vector v = new Vector();
-	for (;;) {
-	    String tok = lexer.getString();
-	    if (tok == null) {
-		lexer.reportError("EOF unexpected in string list");
-	    } else if ("}".equals(tok)) {
-		break;
-	    } else {
-		v.addElement(tok);
-	    }
-	}
-	int num = v.size();
-	String[] result = new String[num];
-	for (int i = 0; i < num; i++) {
-	    result[i] = (String) v.elementAt(i);
-	}
-	return result;
+        Vector v = new Vector();
+        for (;;) {
+            String tok = lexer.getString();
+            if (tok == null) {
+                lexer.reportError("EOF unexpected in string list");
+            } else if ("}".equals(tok)) {
+                break;
+            } else {
+                v.addElement(tok);
+            }
+        }
+        int num = v.size();
+        String[] result = new String[num];
+        for (int i = 0; i < num; i++) {
+            result[i] = (String) v.elementAt(i);
+        }
+        return result;
     }
 }

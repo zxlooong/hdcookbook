@@ -26,9 +26,9 @@ public class CubeDirector extends Director {
      * variable.  That's faster than looking them up every time.
      **/
     public void initialize() {
-	cubePosition = (InterpolatedModel) getFeature("F:Cube.Position");
-	cubeX = cubePosition.getField(Translator.X_FIELD);
-	cubeY = cubePosition.getField(Translator.Y_FIELD);
+        cubePosition = (InterpolatedModel) getFeature("F:Cube.Position");
+        cubeX = cubePosition.getField(Translator.X_FIELD);
+        cubeY = cubePosition.getField(Translator.Y_FIELD);
     }
 
     /**
@@ -38,24 +38,24 @@ public class CubeDirector extends Director {
      * to be in a safe state for modification.
      **/
     public void heartbeat() {
-	cubeX += cubeDX;
-	cubeY += cubeDY;
-	if (cubeX < 0) {
-	    cubeX = 0;
-	    cubeDX = 0;
-	} else if (cubeX > 1920) {
-	    cubeX = 1920;
-	    cubeDX = 0;
-	}
-	if (cubeY < 0) {
-	    cubeY = 0;
-	    cubeDY = 0;
-	} else if (cubeY > 1080) {
-	    cubeY = 1080;
-	    cubeDY = 0;
-	}
-	cubePosition.setField(Translator.X_FIELD, cubeX);
-	cubePosition.setField(Translator.Y_FIELD, cubeY);
+        cubeX += cubeDX;
+        cubeY += cubeDY;
+        if (cubeX < 0) {
+            cubeX = 0;
+            cubeDX = 0;
+        } else if (cubeX > 1920) {
+            cubeX = 1920;
+            cubeDX = 0;
+        }
+        if (cubeY < 0) {
+            cubeY = 0;
+            cubeDY = 0;
+        } else if (cubeY > 1080) {
+            cubeY = 1080;
+            cubeDY = 0;
+        }
+        cubePosition.setField(Translator.X_FIELD, cubeX);
+        cubePosition.setField(Translator.Y_FIELD, cubeY);
     }
   
 }

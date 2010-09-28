@@ -253,7 +253,7 @@ public class GrinBinaryWriter {
         featureList = new IndexedSet();
         rcHandlerList = new IndexedSet();
         segmentList = new IndexedSet();
-	allCommandsList = new IndexedSet();
+        allCommandsList = new IndexedSet();
         
         Feature[] features = show.getFeatures();
         for (Feature feature: features) {
@@ -274,17 +274,17 @@ public class GrinBinaryWriter {
 
         sharedStrings = new IndexedSet();
         sharedIntArrays = new IndexedSet();
-	sharedRectangles = new IndexedSet();
-	sharedRectangleArrays = new IndexedSet();
-	sharedCommandArrays = new IndexedSet();
+        sharedRectangles = new IndexedSet();
+        sharedRectangleArrays = new IndexedSet();
+        sharedCommandArrays = new IndexedSet();
 
-	    // For the constant data types, we make entry 0 be null.
-	    // This saves having an "is null" flag on every other element.
-	sharedStrings.getIndex(null);
-	sharedIntArrays.getIndex(new IntArray(null));
-	sharedRectangles.getIndex(null);
-	sharedRectangleArrays.getIndex(new ObjectArray<Rectangle>(null));
-	sharedCommandArrays.getIndex(new ObjectArray<Command>(null));
+            // For the constant data types, we make entry 0 be null.
+            // This saves having an "is null" flag on every other element.
+        sharedStrings.getIndex(null);
+        sharedIntArrays.getIndex(new IntArray(null));
+        sharedRectangles.getIndex(null);
+        sharedRectangleArrays.getIndex(new ObjectArray<Rectangle>(null));
+        sharedCommandArrays.getIndex(new ObjectArray<Command>(null));
     }
     
     /**
@@ -311,24 +311,24 @@ public class GrinBinaryWriter {
      * @see GrinBinaryReader.getCommandFromIndex(int)
      * @param command The named command to get the index number of
      * @return the index number for the named command, or -1 if no such
-     *		named command exists.
+     *          named command exists.
      **/
     int getCommandIndex(Command command) throws IOException {
-	if (command == null) {
-	    return -1;
-	} else {
-	    while (command instanceof SERunNamedCommand) {
-		command = ((SERunNamedCommand) command).getTarget();
-		if (command == null) {
-		    if (Debug.ASSERT) {
-			Debug.assertFail();
-		    }
-		    throw new IOException("Internal error: "
-					    + " empty RunNamedCommand");
-		}
-	    }
-	    return allCommandsList.getIndex((SENode) command);
-	}
+        if (command == null) {
+            return -1;
+        } else {
+            while (command instanceof SERunNamedCommand) {
+                command = ((SERunNamedCommand) command).getTarget();
+                if (command == null) {
+                    if (Debug.ASSERT) {
+                        Debug.assertFail();
+                    }
+                    throw new IOException("Internal error: "
+                                            + " empty RunNamedCommand");
+                }
+            }
+            return allCommandsList.getIndex((SENode) command);
+        }
     }
     
     /**
@@ -374,32 +374,32 @@ public class GrinBinaryWriter {
     }
 
     int getRectangleIndex(Rectangle r) {
-	return sharedRectangles.getIndex(r);
+        return sharedRectangles.getIndex(r);
     }
 
     int getRectangleArrayIndex(Rectangle[] array) {
-	if (array != null) {
-	    for (int i = 0; i < array.length; i++) {
-		getRectangleIndex(array[i]);
-	    }
-	}
-	return sharedRectangleArrays.getIndex(
-			new ObjectArray<Rectangle>(array));
+        if (array != null) {
+            for (int i = 0; i < array.length; i++) {
+                getRectangleIndex(array[i]);
+            }
+        }
+        return sharedRectangleArrays.getIndex(
+                        new ObjectArray<Rectangle>(array));
     }
 
     int getCommandArrayIndex(Command[] array) throws IOException {
-	Command[] copy = null;
-	if (array != null) {
-	    copy = new Command[array.length];
-	    for (int i = 0; i < array.length; i++) {
-		copy[i] = array[i];
-		while (copy[i] instanceof SERunNamedCommand) {
-		    copy[i] = ((SERunNamedCommand) copy[i]).getTarget();
-		}
-		getCommandIndex(copy[i]);
-	    }
-	}
-	return sharedCommandArrays.getIndex(new ObjectArray<Command>(copy));
+        Command[] copy = null;
+        if (array != null) {
+            copy = new Command[array.length];
+            for (int i = 0; i < array.length; i++) {
+                copy[i] = array[i];
+                while (copy[i] instanceof SERunNamedCommand) {
+                    copy[i] = ((SERunNamedCommand) copy[i]).getTarget();
+                }
+                getCommandIndex(copy[i]);
+            }
+        }
+        return sharedCommandArrays.getIndex(new ObjectArray<Command>(copy));
     }
 
     /**
@@ -436,8 +436,8 @@ public class GrinBinaryWriter {
         // Write out information about the show itself.
         dos.writeInt(show.getSegmentStackDepth());
         dos.writeStringArray(show.getDrawTargets());
-	dos.writeStringArray(show.getStickyImages());
-	writePublicNamedCommands(dos, show.getPublicNamedCommands());
+        dos.writeStringArray(show.getStickyImages());
+        writePublicNamedCommands(dos, show.getPublicNamedCommands());
         dos.writeBoolean(isDebugging);
         
         // We can create one large SENode array including all elements and write
@@ -458,43 +458,43 @@ public class GrinBinaryWriter {
         writeContents(dos, handlers); 
         writeContents(dos, segments);
 
-	// Now we write out the commands.  We had to write out the body of
-	// the show, including the commands themselves in order to 
-	// discover all of the commands.
-	//
-	// The command declarations are written out a couple of lines
-	// down, but because of baos, they occur earlier in the file.
-	SENode[] allCommands = null;
-	if (allCommandsList.size() == 0) {
-	    allCommands = new SENode[0];
-	} else {
-	    int i = 0;
-	    while (i < allCommandsList.size()) {
-		allCommands = (SENode[]) allCommandsList.toArray(SENode.class);
-		while (i < allCommands.length) {
-		    writeNodeContents(dos, allCommands[i]);
-		    	// writeNodeContents() might grow allCommandsList.
-			// That's because a command can have a list of
-			// sub-commands.  Both java_command and
-			// named_command (which can become 
-			// GrinXHelper.COMMAND_LIST) have sub-commands, and thus
-			// can grow allCommandsList when we call 
-			// writeNodeContents().
-		    i++;
-		}
-	    }
-	}
+        // Now we write out the commands.  We had to write out the body of
+        // the show, including the commands themselves in order to 
+        // discover all of the commands.
+        //
+        // The command declarations are written out a couple of lines
+        // down, but because of baos, they occur earlier in the file.
+        SENode[] allCommands = null;
+        if (allCommandsList.size() == 0) {
+            allCommands = new SENode[0];
+        } else {
+            int i = 0;
+            while (i < allCommandsList.size()) {
+                allCommands = (SENode[]) allCommandsList.toArray(SENode.class);
+                while (i < allCommands.length) {
+                    writeNodeContents(dos, allCommands[i]);
+                        // writeNodeContents() might grow allCommandsList.
+                        // That's because a command can have a list of
+                        // sub-commands.  Both java_command and
+                        // named_command (which can become 
+                        // GrinXHelper.COMMAND_LIST) have sub-commands, and thus
+                        // can grow allCommandsList when we call 
+                        // writeNodeContents().
+                    i++;
+                }
+            }
+        }
 
         dos.writeSegmentReference((Segment) show.getShowTopSegment());
         dos.writeFeatureReference((Feature) show.getShowTopGroup());
 
-	dos.writeStringArray(show.getFontName());
-	dos.writeSharedIntArray(show.getFontStyleSize());
+        dos.writeStringArray(show.getFontName());
+        dos.writeSharedIntArray(show.getFontStyleSize());
 
-	dos.writeInt(show.getXScale());
-	dos.writeInt(show.getYScale());
-	dos.writeInt(show.getXOffset());
-	dos.writeInt(show.getYOffset());
+        dos.writeInt(show.getXScale());
+        dos.writeInt(show.getYScale());
+        dos.writeInt(show.getXOffset());
+        dos.writeInt(show.getYOffset());
         
         dos.close();  // We're through writing to baos
 
@@ -503,42 +503,42 @@ public class GrinBinaryWriter {
         // at the beginning of the binary file.
         dos = new GrinDataOutputStream(out, this);
 
-	getStringIndex(seShowCommands.getClassName());
-		// This makes the writeString(that string) work, below.
+        getStringIndex(seShowCommands.getClassName());
+                // This makes the writeString(that string) work, below.
 
         writeStringConstants(dos, 
-			     (String[]) sharedStrings.toArray(String.class));
+                             (String[]) sharedStrings.toArray(String.class));
         writeIntArrayConstants(dos, (IntArray[]) 
-			  	    sharedIntArrays.toArray(IntArray.class));
+                                    sharedIntArrays.toArray(IntArray.class));
         writeRectangleConstants(dos, (Rectangle[]) 
-			  	    sharedRectangles.toArray(Rectangle.class));
+                                    sharedRectangles.toArray(Rectangle.class));
         writeRectangleArrayConstants(dos, (ObjectArray<Rectangle>[]) 
-				    sharedRectangleArrays.toArray(
-					ObjectArray.class));
-	writeExtensionClassNames(dos);
+                                    sharedRectangleArrays.toArray(
+                                        ObjectArray.class));
+        writeExtensionClassNames(dos);
 
         dos.writeString(seShowCommands.getClassName());
-	    //
-	    // This needs to occur after writeStringConstants, above, so
-	    // that the reader finds the string constant.  However, it can't
-	    // go in the baos, because this one string constant is needed
-	    // by the reader to read the command declarations.  That's
-	    // because the command declarations can include extension
-	    // commands that are instantiated through the seShowCommands
-	    // object.
-	    //
+            //
+            // This needs to occur after writeStringConstants, above, so
+            // that the reader finds the string constant.  However, it can't
+            // go in the baos, because this one string constant is needed
+            // by the reader to read the command declarations.  That's
+            // because the command declarations can include extension
+            // commands that are instantiated through the seShowCommands
+            // object.
+            //
 
         writeDeclarations(dos, allCommands);
-	writeCommandArrayConstants(dos, 
-			(ObjectArray<Command>[]) sharedCommandArrays.toArray(
-				ObjectArray.class));
-	if (allCommands.length != allCommandsList.size()) {
-	    throw new IOException("Internal error:  command list size");
-	}
+        writeCommandArrayConstants(dos, 
+                        (ObjectArray<Command>[]) sharedCommandArrays.toArray(
+                                ObjectArray.class));
+        if (allCommands.length != allCommandsList.size()) {
+            throw new IOException("Internal error:  command list size");
+        }
 
-	// Finally, we write out the body of the show.
+        // Finally, we write out the body of the show.
         baos.writeTo(dos);
-	dos.close();
+        dos.close();
     }
 
     /**
@@ -554,12 +554,12 @@ public class GrinBinaryWriter {
         registerBuiltInClass(FIXEDIMAGE_IDENTIFIER, FixedImage.class.getName());
         registerBuiltInClass(GROUP_IDENTIFIER, Group.class.getName());
         registerBuiltInClass(IMAGESEQUENCE_IDENTIFIER, ImageSequence.class.getName());
-	registerBuiltInClass(TEXT_IDENTIFIER, Text.class.getName());
-	registerBuiltInClass(INTERPOLATED_MODEL_IDENTIFIER, InterpolatedModel.class.getName());
-	registerBuiltInClass(TRANSLATOR_IDENTIFIER, Translator.class.getName());
-	registerBuiltInClass(CLIPPED_IDENTIFIER, Clipped.class.getName());
-	registerBuiltInClass(FADE_IDENTIFIER, Fade.class.getName());
-	registerBuiltInClass(SRCOVER_IDENTIFIER, SrcOver.class.getName());        
+        registerBuiltInClass(TEXT_IDENTIFIER, Text.class.getName());
+        registerBuiltInClass(INTERPOLATED_MODEL_IDENTIFIER, InterpolatedModel.class.getName());
+        registerBuiltInClass(TRANSLATOR_IDENTIFIER, Translator.class.getName());
+        registerBuiltInClass(CLIPPED_IDENTIFIER, Clipped.class.getName());
+        registerBuiltInClass(FADE_IDENTIFIER, Fade.class.getName());
+        registerBuiltInClass(SRCOVER_IDENTIFIER, SrcOver.class.getName());        
         registerBuiltInClass(ACTIVATEPART_CMD_IDENTIFIER, ActivatePartCommand.class.getName());
         registerBuiltInClass(ACTIVATESEGMENT_CMD_IDENTIFIER, ActivateSegmentCommand.class.getName());
         registerBuiltInClass(RESETFEATURE_CMD_IDENTIFIER, ResetFeatureCommand.class.getName());
@@ -567,19 +567,19 @@ public class GrinBinaryWriter {
         registerBuiltInClass(SETVISUALRCSTATE_CMD_IDENTIFIER, SetVisualRCStateCommand.class.getName());
         registerBuiltInClass(COMMAND_RCHANDLER_IDENTIFIER, CommandRCHandler.class.getName());
         registerBuiltInClass(VISUAL_RCHANDLER_IDENTIFIER, VisualRCHandler.class.getName());
-        registerBuiltInClass(GUARANTEE_FILL_IDENTIFIER, GuaranteeFill.class.getName());	
+        registerBuiltInClass(GUARANTEE_FILL_IDENTIFIER, GuaranteeFill.class.getName()); 
         registerBuiltInClass(SET_TARGET_IDENTIFIER, SetTarget.class.getName());
-	registerBuiltInClass(SEGMENT_IDENTIFIER, Segment.class.getName());
+        registerBuiltInClass(SEGMENT_IDENTIFIER, Segment.class.getName());
     }
 
     private void registerBuiltInClass(int identifier, String className) 
-	    throws IOException 
+            throws IOException 
     {
         if (runtimeClassNames.getIndex(className) != identifier) {
-		// getIndex() also registers it
+                // getIndex() also registers it
             throw new IOException("Built-in class ID mismatch for " + 
-	    			   className);
-	}
+                                   className);
+        }
     }
 
     //
@@ -590,93 +590,93 @@ public class GrinBinaryWriter {
             throws IOException 
     {
         out.writeByte(EXTENSION_CLASSES_IDENTIFIER);     
-	String[] list = (String[]) runtimeClassNames.toArray(String.class);
-	assert (extensionIndex <= list.length);
-	if (list.length == extensionIndex) {
-	    out.writeInt(-1);
-	    return;
-	}
-	SEShowCommands cmds = show.getShowCommands();
-	if (cmds.getClassName() != null) {
-	    out.writeInt(-1);
-	    return;
-	}
-	out.writeInt(extensionIndex);
-	out.writeInt(list.length - extensionIndex);
-	System.err.println();
-	System.err.println("Warning:  Extension featues or commands are present, but no java generated");
-	System.err.println("          class was specified in the show.  This means that the following");
-	System.err.println("          class name(s) will be recorded in the binary grin show file:");
-	for (int i = extensionIndex; i < list.length; i++) {
-	    System.err.println("              " + list[i]);
-	}
-	System.err.println("          Be sure your obfuscator is set to preserve these class names.");
-	System.err.println();
+        String[] list = (String[]) runtimeClassNames.toArray(String.class);
+        assert (extensionIndex <= list.length);
+        if (list.length == extensionIndex) {
+            out.writeInt(-1);
+            return;
+        }
+        SEShowCommands cmds = show.getShowCommands();
+        if (cmds.getClassName() != null) {
+            out.writeInt(-1);
+            return;
+        }
+        out.writeInt(extensionIndex);
+        out.writeInt(list.length - extensionIndex);
+        System.err.println();
+        System.err.println("Warning:  Extension featues or commands are present, but no java generated");
+        System.err.println("          class was specified in the show.  This means that the following");
+        System.err.println("          class name(s) will be recorded in the binary grin show file:");
+        for (int i = extensionIndex; i < list.length; i++) {
+            System.err.println("              " + list[i]);
+        }
+        System.err.println("          Be sure your obfuscator is set to preserve these class names.");
+        System.err.println();
 
-	for (int i = extensionIndex; i < list.length; i++) {
-	    out.writeUTF(list[i]);
-	}
+        for (int i = extensionIndex; i < list.length; i++) {
+            out.writeUTF(list[i]);
+        }
     }
 
     private void writePublicNamedCommands(
-    			GrinDataOutputStream out, Hashtable table) 
-		throws IOException
+                        GrinDataOutputStream out, Hashtable table) 
+                throws IOException
     {
-	out.writeInt(table.size());
-	for (Iterator it = table.entrySet().iterator(); it.hasNext(); ) {
-	    Map.Entry entry = (Map.Entry) it.next();
-	    String key = (String) entry.getKey();
-	    Command value = (Command) entry.getValue();
-	    out.writeString(key);
-	    out.writeInt(getCommandIndex(value));
-	}
+        out.writeInt(table.size());
+        for (Iterator it = table.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String key = (String) entry.getKey();
+            Command value = (Command) entry.getValue();
+            out.writeString(key);
+            out.writeInt(getCommandIndex(value));
+        }
     }
 
     private void writeDeclarations(GrinDataOutputStream out, SENode[] nodes) 
             throws IOException 
     {
-	assert nodes != null;
-	int i = 0;
-	out.writeInt(nodes.length);
-	for (SENode node : nodes) {
-	    if (node == null) {
-		out.writeInt(NULL);
-	    } else {
-		String runtimeName = node.getRuntimeClassName();
-		out.writeInt(runtimeClassNames.getIndex(runtimeName));
-	    }
+        assert nodes != null;
+        int i = 0;
+        out.writeInt(nodes.length);
+        for (SENode node : nodes) {
+            if (node == null) {
+                out.writeInt(NULL);
+            } else {
+                String runtimeName = node.getRuntimeClassName();
+                out.writeInt(runtimeClassNames.getIndex(runtimeName));
+            }
         }
     }
     
     private void writeContents(GrinDataOutputStream out, SENode[] nodes) 
-	   throws IOException 
+           throws IOException 
     {
-	
+        
         if (nodes == null) {
             return;
-	}
+        }
 
-	for (SENode node : nodes) {
-	    writeNodeContents(out, node);
-	}
+        for (SENode node : nodes) {
+            writeNodeContents(out, node);
+        }
     }
 
     private void writeNodeContents(GrinDataOutputStream out, SENode node)
-	    throws IOException
+            throws IOException
     {
-	if (node != null) {
-	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
-	    node.writeInstanceData(dos);
-	    out.writeInt(baos.size());
-	    dos.close();
-	    baos.writeTo(out);      
+        if (node != null) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            GrinDataOutputStream dos = new GrinDataOutputStream(baos, this);
+            node.writeInstanceData(dos);
+            out.writeInt(baos.size());
+            dos.close();
+            baos.writeTo(out);      
 
-	    // Make sure the runtime class is registered.  This is
-	    // necessary for commands, and a harmless double-check
-	    // for other node types.
-	    runtimeClassNames.getIndex(node.getRuntimeClassName());
-	}
+            // Make sure the runtime class is registered.  This is
+            // necessary for commands, and a harmless double-check
+            // for other node types.
+            runtimeClassNames.getIndex(node.getRuntimeClassName());
+        }
     }
 
     private void writeStringConstants(DataOutputStream out, String[] list) 
@@ -684,10 +684,10 @@ public class GrinBinaryWriter {
     {
         out.writeByte(STRING_CONSTANTS_IDENTIFIER);     
         out.writeInt(list.length);
-	assert list[0] == null;
-	for (int i = 1; i < list.length; i++) {
-	    String str = list[i];
-	    assert str != null;
+        assert list[0] == null;
+        for (int i = 1; i < list.length; i++) {
+            String str = list[i];
+            assert str != null;
             out.writeUTF(str);
         }
     }
@@ -697,14 +697,14 @@ public class GrinBinaryWriter {
     {
         out.writeByte(INT_ARRAY_CONSTANTS_IDENTIFIER);     
         out.writeInt(list.length);
-	assert list[0].array == null;
-	for (int i = 1; i < list.length; i++) {
+        assert list[0].array == null;
+        for (int i = 1; i < list.length; i++) {
             int[] array = list[i].array;
-	    assert array != null;
-	    out.writeInt(array.length);
-	    for (int j = 0; j < array.length; j++) {
-		out.writeInt(array[j]);
-	    }
+            assert array != null;
+            out.writeInt(array.length);
+            for (int j = 0; j < array.length; j++) {
+                out.writeInt(array[j]);
+            }
         }
     }
 
@@ -713,52 +713,52 @@ public class GrinBinaryWriter {
     {
         out.writeByte(RECTANGLE_CONSTANTS_IDENTIFIER);     
         out.writeInt(list.length);
-	assert list[0] == null;
-	for (int i = 1; i < list.length; i++) {
+        assert list[0] == null;
+        for (int i = 1; i < list.length; i++) {
             Rectangle r = list[i];
-	    assert r != null;
-	    out.writeInt(r.x);
-	    out.writeInt(r.y);
-	    out.writeInt(r.width);
-	    out.writeInt(r.height);
+            assert r != null;
+            out.writeInt(r.x);
+            out.writeInt(r.y);
+            out.writeInt(r.width);
+            out.writeInt(r.height);
         }       
     }
     
     private void writeRectangleArrayConstants
-    		(DataOutputStream out, ObjectArray<Rectangle>[] list) 
+                (DataOutputStream out, ObjectArray<Rectangle>[] list) 
         throws IOException 
     {
         out.writeByte(RECTANGLE_ARRAY_CONSTANTS_IDENTIFIER);     
         out.writeInt(list.length);
-	assert list[0].array == null;
-	for (int i = 1; i < list.length; i++) {
-	    ObjectArray<Rectangle> ra = list[i];
-	    assert ra != null;
+        assert list[0].array == null;
+        for (int i = 1; i < list.length; i++) {
+            ObjectArray<Rectangle> ra = list[i];
+            assert ra != null;
             Rectangle[] array = list[i].array;
-	    assert array != null;
-	    out.writeInt(array.length);
-	    for (int j = 0; j < array.length; j++) {
-		out.writeInt(getRectangleIndex(array[j]));
-	    }
+            assert array != null;
+            out.writeInt(array.length);
+            for (int j = 0; j < array.length; j++) {
+                out.writeInt(getRectangleIndex(array[j]));
+            }
         }       
     }
 
     private void writeCommandArrayConstants
-    		(DataOutputStream out, ObjectArray<Command>[] list) 
+                (DataOutputStream out, ObjectArray<Command>[] list) 
         throws IOException 
     {
         out.writeByte(COMMAND_ARRAY_CONSTANTS_IDENTIFIER);     
         out.writeInt(list.length);
-	assert list[0].array == null;
-	for (int i = 1; i < list.length; i++) {
-	    ObjectArray<Command> ra = list[i];
-	    assert ra != null;
+        assert list[0].array == null;
+        for (int i = 1; i < list.length; i++) {
+            ObjectArray<Command> ra = list[i];
+            assert ra != null;
             Command[] array = list[i].array;
-	    assert array != null;
-	    out.writeInt(array.length);
-	    for (int j = 0; j < array.length; j++) {
-		out.writeInt(getCommandIndex(array[j]));
-	    }
+            assert array != null;
+            out.writeInt(array.length);
+            for (int j = 0; j < array.length; j++) {
+                out.writeInt(getCommandIndex(array[j]));
+            }
         }       
     }
    
@@ -776,7 +776,7 @@ public class GrinBinaryWriter {
        }
        FileWriter w = new FileWriter(file);
        String extensionCode = show.getCommandClassCode()
-       			      + generateExtensionCode();
+                              + generateExtensionCode();
        w.write(cmds.getJavaSource(forXlet, extensionCode));
        w.close();
    }

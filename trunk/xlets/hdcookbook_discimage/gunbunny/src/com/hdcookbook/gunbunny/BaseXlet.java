@@ -106,9 +106,9 @@ import com.hdcookbook.gunbunny.util.ImageUtil;
  *
  */
 public abstract class BaseXlet 
-	extends Component  
-	implements Xlet, Runnable, UserEventListener, ServiceContextListener,
-	 	   ControllerListener
+        extends Component  
+        implements Xlet, Runnable, UserEventListener, ServiceContextListener,
+                   ControllerListener
 {
 
     private Thread mainThread;
@@ -136,70 +136,70 @@ public abstract class BaseXlet
      * it becomes true.
      **/
     public synchronized boolean getDestroyed() {
-	return destroyed;
+        return destroyed;
     }
 
     public void initXlet(XletContext ctx) throws XletStateChangeException {
-	Debug.setXlet(this);
+        Debug.setXlet(this);
         this.xletContext = ctx;
     }
 
     public void pauseXlet() {
-	// ignored
+        // ignored
     }
 
 
     public void startXlet() throws XletStateChangeException {
-	ServiceContextFactory scf = ServiceContextFactory.getInstance();
-	try {
-	    serviceContext = scf.getServiceContext(xletContext); 
-	} catch (ServiceContextException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-		Debug.assertFail();
-	    }
-	}
-	serviceContext.addListener(this);
+        ServiceContextFactory scf = ServiceContextFactory.getInstance();
+        try {
+            serviceContext = scf.getServiceContext(xletContext); 
+        } catch (ServiceContextException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+                Debug.assertFail();
+            }
+        }
+        serviceContext.addListener(this);
 
         mainThread = new Thread(this, getClass().getName() + " thread");
-	mainThreadRunning = true;
+        mainThreadRunning = true;
         mainThread.start();
     }
     
     public void destroyXlet(boolean unconditional) 
-    		throws XletStateChangeException 
+                throws XletStateChangeException 
     {
-	synchronized(this) {
-	    if (destroyed) {
-		return;
-	    }
-	    destroyed = true;
-	    notifyAll();
-	}
-	mainThread.interrupt();
-	synchronized(this) {
-	    while (mainThreadRunning) {
-		try {
-		    wait();
-		} catch (InterruptedException ex) {
-		    Thread.currentThread().interrupt();
-		    break;
-		}
-	    }
-	}
-	serviceContext.removeListener(this);
-	ImageUtil.discardImages();
+        synchronized(this) {
+            if (destroyed) {
+                return;
+            }
+            destroyed = true;
+            notifyAll();
+        }
+        mainThread.interrupt();
+        synchronized(this) {
+            while (mainThreadRunning) {
+                try {
+                    wait();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+        serviceContext.removeListener(this);
+        ImageUtil.discardImages();
         EventManager.getInstance().removeUserEventListener(this);
-	if (scene != null) {
-	    scene.remove(this);
-	    Graphics2D g = (Graphics2D) scene.getGraphics();
-	    g.setColor(new Color(0, 0, 0, 0));
-	    g.setComposite(AlphaComposite.Src);
-	    g.fillRect(0,0 ,1920, 1080);
-	}
-	if (player != null) {
-	    player.removeControllerListener(this);
-	}
+        if (scene != null) {
+            scene.remove(this);
+            Graphics2D g = (Graphics2D) scene.getGraphics();
+            g.setColor(new Color(0, 0, 0, 0));
+            g.setComposite(AlphaComposite.Src);
+            g.fillRect(0,0 ,1920, 1080);
+        }
+        if (player != null) {
+            player.removeControllerListener(this);
+        }
     }
 
     /**
@@ -207,34 +207,34 @@ public abstract class BaseXlet
      * and it's ready for video to start playing
      **/
     protected void startVideo(String playlist) {
-	try {
-	    MediaLocator stars = new MediaLocator(new BDLocator(playlist));
-	    player = Manager.createPlayer(stars);
-	} catch (Exception ex) {
-	    if (Debug.ASSERT) {
-		Debug.printStackTrace(ex);
-		Debug.assertFail(ex.toString());
-	    }
-	}
-	player.addControllerListener(this);
-	player.prefetch();
-	player.start();
-	waitForStarted(5000);
+        try {
+            MediaLocator stars = new MediaLocator(new BDLocator(playlist));
+            player = Manager.createPlayer(stars);
+        } catch (Exception ex) {
+            if (Debug.ASSERT) {
+                Debug.printStackTrace(ex);
+                Debug.assertFail(ex.toString());
+            }
+        }
+        player.addControllerListener(this);
+        player.prefetch();
+        player.start();
+        waitForStarted(5000);
     }
 
     /**
      * This is where the main xlet thread executes.  It's our frame pump.
      **/
     public final void run() {
-	waitForPresenting();
+        waitForPresenting();
 
-	scene = HSceneFactory.getInstance().getDefaultHScene();        
-	scene.setLayout(null);
-	scene.setBounds(0, 0, width, height);
-	setBounds(0, 0, width, height);
-	scene.add(this);
-	scene.setVisible(true);
-	setVisible(true);
+        scene = HSceneFactory.getInstance().getDefaultHScene();        
+        scene.setLayout(null);
+        scene.setBounds(0, 0, width, height);
+        setBounds(0, 0, width, height);
+        scene.add(this);
+        scene.setVisible(true);
+        setVisible(true);
 
         UserEventRepository userEventRepo = new UserEventRepository("evt");
         userEventRepo.addAllArrowKeys();
@@ -243,20 +243,20 @@ public abstract class BaseXlet
         userEventRepo.addKey(HRcEvent.VK_ENTER);
         userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
         EventManager.getInstance().addUserEventListener(this, userEventRepo);
-	requestFocus();
+        requestFocus();
 
-	try {
-	    doXletLoop();
-	} catch (InterruptedException ex) {
-	    // This is OK
-	}
-	synchronized (this) {
-	    mainThreadRunning = false;
-	    notifyAll();
-	}
-	if (player != null) {
-	    player.stop();
-	}
+        try {
+            doXletLoop();
+        } catch (InterruptedException ex) {
+            // This is OK
+        }
+        synchronized (this) {
+            mainThreadRunning = false;
+            notifyAll();
+        }
+        if (player != null) {
+            player.stop();
+        }
     }
 
     /** 
@@ -268,22 +268,22 @@ public abstract class BaseXlet
     abstract protected void doXletLoop() throws InterruptedException;
 
     private void waitForPresenting() {
-	if (serviceContext.getService() != null) {
-	    synchronized(this) {
-		isPresenting = true;
-	    }
-	}
-	synchronized (this) {
-	    while (!isPresenting && !destroyed) {
-		// isPresenting set by NormalContentEvent
-		try {
-		    wait();
-		} catch (InterruptedException ex) {
-		    Thread.currentThread().interrupt();
-		    break;
-		}
-	    }
-	}
+        if (serviceContext.getService() != null) {
+            synchronized(this) {
+                isPresenting = true;
+            }
+        }
+        synchronized (this) {
+            while (!isPresenting && !destroyed) {
+                // isPresenting set by NormalContentEvent
+                try {
+                    wait();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
     }
 
     /** 
@@ -302,18 +302,18 @@ public abstract class BaseXlet
      * From ControllerListener
      **/
     public synchronized void controllerUpdate(ControllerEvent event) {
-	if (event instanceof EndOfMediaEvent && !destroyed) {
-	    player.start();
-	    // On PC players, this causes a noticable pause in
-	    // the xlet.  To get around this, we just made the
-	    // playlist we're playing repeat the same video clip
-	    // of a starfield over and over again, for a total length
-	    // of an hour or two.  As a result, it's very unlikely
-	    // a viewer will see anything other than seamless video.
-	}
+        if (event instanceof EndOfMediaEvent && !destroyed) {
+            player.start();
+            // On PC players, this causes a noticable pause in
+            // the xlet.  To get around this, we just made the
+            // playlist we're playing repeat the same video clip
+            // of a starfield over and over again, for a total length
+            // of an hour or two.  As a result, it's very unlikely
+            // a viewer will see anything other than seamless video.
+        }
         notifyAll();
         // When waiting for starting, we just poll the player status,
-	// so no matter the event we notifyAll().
+        // so no matter the event we notifyAll().
     }
 
     //
@@ -326,9 +326,9 @@ public abstract class BaseXlet
         }
         for (;;) {
             if (player.getState() == Player.Started) {
-		if (Debug.LEVEL > 0) {
-		    Debug.println("Player is in started state");
-		}
+                if (Debug.LEVEL > 0) {
+                    Debug.println("Player is in started state");
+                }
                 return true;
             }
             if (!waitWithTimeout(tm, timeout)) {

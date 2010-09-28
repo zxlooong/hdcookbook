@@ -65,7 +65,7 @@ import java.awt.Rectangle;
 import java.io.IOException;
 
 public class SEGuaranteeFill extends GuaranteeFill 
-			     implements SENode, SEScalableNode
+                             implements SENode, SEScalableNode
 {
     public SEGuaranteeFill(SEShow show) {
         super(show);
@@ -73,26 +73,26 @@ public class SEGuaranteeFill extends GuaranteeFill
     /**
      * Create a new node.
      *
-     * @param	show	The show we're a part of
-     * @param	name	The name of this node (can be null)
-     * @param	guaranteed	The area guaranteed to be filled by this node
-     * @param	fills	The rectangles this node will fill with transparent
-     *			pixels.  Can be empty or null.
+     * @param   show    The show we're a part of
+     * @param   name    The name of this node (can be null)
+     * @param   guaranteed      The area guaranteed to be filled by this node
+     * @param   fills   The rectangles this node will fill with transparent
+     *                  pixels.  Can be empty or null.
      **/
     public SEGuaranteeFill(SEShow show, String name, Rectangle guaranteed,
-    			 Rectangle[] fills) 
+                         Rectangle[] fills) 
     {
-	super(show);
+        super(show);
         this.name = name;
-	this.guaranteed = guaranteed;
-	this.fills = fills;
+        this.guaranteed = guaranteed;
+        this.fills = fills;
     }
     
     /**
      * Internal use only.  
      **/
     public Rectangle getGuaranteed() {
-	return guaranteed;
+        return guaranteed;
     }
 
     /**
@@ -106,7 +106,7 @@ public class SEGuaranteeFill extends GuaranteeFill
      * Internal use only.  
      **/
     public void setGuaranteed(Rectangle guaranteed) {
-	this.guaranteed = guaranteed;
+        this.guaranteed = guaranteed;
     }
 
     /**
@@ -120,8 +120,8 @@ public class SEGuaranteeFill extends GuaranteeFill
             throws IOException {
         
         out.writeSuperClassData(this);
-	out.writeRectangle(getGuaranteed());
-	out.writeRectangleArray(getFills());
+        out.writeRectangle(getGuaranteed());
+        out.writeRectangleArray(getFills());
       
     }
 
@@ -143,40 +143,40 @@ public class SEGuaranteeFill extends GuaranteeFill
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
-	if (part == from) {
-	    part = to;
-	}
+        if (part == from) {
+            part = to;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	doScale(guaranteed, xScale, yScale, xOffset, yOffset);
-	if (fills != null) {
-	    for (int i = 0; i < fills.length; i++) {
-		doScale(fills[i], xScale, yScale, xOffset, yOffset);
-	    }
-	}
+        doScale(guaranteed, xScale, yScale, xOffset, yOffset);
+        if (fills != null) {
+            for (int i = 0; i < fills.length; i++) {
+                doScale(fills[i], xScale, yScale, xOffset, yOffset);
+            }
+        }
     }
 
     private void doScale(Rectangle r, int xScale, int yScale, 
-    			 int xOffset, int yOffset)
+                         int xOffset, int yOffset)
     {
-	r.x = xOffset + Show.scale(r.x, xScale);
-	r.y = yOffset + Show.scale(r.y, yScale);
-	r.width = Show.scale(r.width, xScale);
-	r.height = Show.scale(r.height, yScale);
+        r.x = xOffset + Show.scale(r.x, xScale);
+        r.y = yOffset + Show.scale(r.y, yScale);
+        r.width = Show.scale(r.width, xScale);
+        r.height = Show.scale(r.height, yScale);
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "guarantee_fill @" + Integer.toHexString(hashCode());
-	} else {
-	    return "guarantee_fill " + name;
-	}
+        if (name == null) {
+            return "guarantee_fill @" + Integer.toHexString(hashCode());
+        } else {
+            return "guarantee_fill " + name;
+        }
     }
 }

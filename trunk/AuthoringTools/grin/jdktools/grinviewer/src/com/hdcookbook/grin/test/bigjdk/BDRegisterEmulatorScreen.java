@@ -90,7 +90,7 @@ public class BDRegisterEmulatorScreen extends javax.swing.JFrame {
     private BDRegisterEmulator registers;
     
     public BDRegisterEmulatorScreen() {
-	registers = BDRegisterEmulator.getInstance();
+        registers = BDRegisterEmulator.getInstance();
         initComponents();
     }
     
@@ -99,7 +99,7 @@ public class BDRegisterEmulatorScreen extends javax.swing.JFrame {
         MainMenu = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         closeMenuItem = new javax.swing.JMenuItem();
-	registersArea = new javax.swing.JScrollPane();
+        registersArea = new javax.swing.JScrollPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
 
@@ -118,118 +118,118 @@ public class BDRegisterEmulatorScreen extends javax.swing.JFrame {
         setJMenuBar(MainMenu);
 
         registersArea.setPreferredSize(new Dimension(400, 384));
-	getContentPane().add(registersArea);
+        getContentPane().add(registersArea);
 
-	Container regContainer = new Container();
-	registersArea.setViewportView(regContainer);
-	SpringLayout layout = new SpringLayout();
-	regContainer.setLayout(layout);
-	String n = SpringLayout.NORTH;
-	String s = SpringLayout.SOUTH;
-	String e = SpringLayout.EAST;
-	String w = SpringLayout.WEST;
-	int[] vals = registers.getPSRs();
-	psrFields = new JTextField[vals.length];
-	int rowHeight = (new JTextField()).getPreferredSize().height + 2;
-	int currY = 4;
-	for (int i = 0; i < vals.length; i++) {
-	    Component c = new JLabel("PSR  " + i);
-	    regContainer.add(c);
-	    layout.putConstraint(n, c, currY+5, n, regContainer);
-	    layout.putConstraint(w, c, 10, w, regContainer);
-	    psrFields[i] = new JTextField();
-	    psrFields[i].setColumns(10);
-	    regContainer.add(psrFields[i]);
-	    layout.putConstraint(n, psrFields[i], currY, n, regContainer);
-	    currY += rowHeight;
-	    final int num = i;
-	    psrFields[i].addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-		    String txt = psrFields[num].getText().trim();
-		    if (txt.indexOf('(') > -1) {
-			txt = txt.substring(0, txt.indexOf('(')).trim();
-		    }
-		    try {
-			int val = Integer.parseInt(txt);
-			updatePSR(num, val);
-			registers.getPSRs()[num] = val;
-		    } catch (NumberFormatException ex) {
-			updatePSR(num, registers.getPSRs()[num]);
-		    }
-		}
-	    });
-	}
-	{
-	    Component c = new JLabel("--------------------------------------");
-	    regContainer.add(c);
-	    layout.putConstraint(n, c, currY, n, regContainer);
-	    layout.putConstraint(w, c, 10, w, regContainer);
-	    currY += rowHeight;
-	}
-	vals = registers.getGPRs();
-	gprFields = new JTextField[vals.length];
-	Component lbl = null;
-	for (int i = 0; i < vals.length; i++) {
-	    lbl = new JLabel("GPR  " + i);
-	    regContainer.add(lbl);
-	    layout.putConstraint(n, lbl, currY+5, n, regContainer);
-	    layout.putConstraint(w, lbl, 10, w, regContainer);
-	    gprFields[i] = new JTextField();
-	    gprFields[i].setColumns(10);
-	    regContainer.add(gprFields[i]);
-	    layout.putConstraint(n, gprFields[i], currY, n, regContainer);
-	    currY += rowHeight;
-	    final int num = i;
-	    gprFields[i].addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-		    String txt = gprFields[num].getText().trim();
-		    if (txt.indexOf('(') > -1) {
-			txt = txt.substring(0, txt.indexOf('(')).trim();
-		    }
-		    try {
-			int val = Integer.parseInt(txt);
-			updateGPR(num, val);
-			registers.getGPRs()[num] = val;
-		    } catch (NumberFormatException ex) {
-			updateGPR(num, registers.getGPRs()[num]);
-		    }
-		}
-	    });
-	}
-	int textX = lbl.getPreferredSize().width + 24;
-	for (int i = 0; i < psrFields.length; i++) {
-	    layout.putConstraint(w, psrFields[i], textX, w, regContainer);
-	}
-	for (int i = 0; i < gprFields.length; i++) {
-	    layout.putConstraint(w, gprFields[i], textX, w, regContainer);
-	}
-	layout.putConstraint(s, regContainer, 10, s, 
-				gprFields[gprFields.length-1]);
+        Container regContainer = new Container();
+        registersArea.setViewportView(regContainer);
+        SpringLayout layout = new SpringLayout();
+        regContainer.setLayout(layout);
+        String n = SpringLayout.NORTH;
+        String s = SpringLayout.SOUTH;
+        String e = SpringLayout.EAST;
+        String w = SpringLayout.WEST;
+        int[] vals = registers.getPSRs();
+        psrFields = new JTextField[vals.length];
+        int rowHeight = (new JTextField()).getPreferredSize().height + 2;
+        int currY = 4;
+        for (int i = 0; i < vals.length; i++) {
+            Component c = new JLabel("PSR  " + i);
+            regContainer.add(c);
+            layout.putConstraint(n, c, currY+5, n, regContainer);
+            layout.putConstraint(w, c, 10, w, regContainer);
+            psrFields[i] = new JTextField();
+            psrFields[i].setColumns(10);
+            regContainer.add(psrFields[i]);
+            layout.putConstraint(n, psrFields[i], currY, n, regContainer);
+            currY += rowHeight;
+            final int num = i;
+            psrFields[i].addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    String txt = psrFields[num].getText().trim();
+                    if (txt.indexOf('(') > -1) {
+                        txt = txt.substring(0, txt.indexOf('(')).trim();
+                    }
+                    try {
+                        int val = Integer.parseInt(txt);
+                        updatePSR(num, val);
+                        registers.getPSRs()[num] = val;
+                    } catch (NumberFormatException ex) {
+                        updatePSR(num, registers.getPSRs()[num]);
+                    }
+                }
+            });
+        }
+        {
+            Component c = new JLabel("--------------------------------------");
+            regContainer.add(c);
+            layout.putConstraint(n, c, currY, n, regContainer);
+            layout.putConstraint(w, c, 10, w, regContainer);
+            currY += rowHeight;
+        }
+        vals = registers.getGPRs();
+        gprFields = new JTextField[vals.length];
+        Component lbl = null;
+        for (int i = 0; i < vals.length; i++) {
+            lbl = new JLabel("GPR  " + i);
+            regContainer.add(lbl);
+            layout.putConstraint(n, lbl, currY+5, n, regContainer);
+            layout.putConstraint(w, lbl, 10, w, regContainer);
+            gprFields[i] = new JTextField();
+            gprFields[i].setColumns(10);
+            regContainer.add(gprFields[i]);
+            layout.putConstraint(n, gprFields[i], currY, n, regContainer);
+            currY += rowHeight;
+            final int num = i;
+            gprFields[i].addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    String txt = gprFields[num].getText().trim();
+                    if (txt.indexOf('(') > -1) {
+                        txt = txt.substring(0, txt.indexOf('(')).trim();
+                    }
+                    try {
+                        int val = Integer.parseInt(txt);
+                        updateGPR(num, val);
+                        registers.getGPRs()[num] = val;
+                    } catch (NumberFormatException ex) {
+                        updateGPR(num, registers.getGPRs()[num]);
+                    }
+                }
+            });
+        }
+        int textX = lbl.getPreferredSize().width + 24;
+        for (int i = 0; i < psrFields.length; i++) {
+            layout.putConstraint(w, psrFields[i], textX, w, regContainer);
+        }
+        for (int i = 0; i < gprFields.length; i++) {
+            layout.putConstraint(w, gprFields[i], textX, w, regContainer);
+        }
+        layout.putConstraint(s, regContainer, 10, s, 
+                                gprFields[gprFields.length-1]);
         pack();
 
-	registers.addScreen(this);
+        registers.addScreen(this);
 
-	for (int i = 0; i < psrFields.length; i++) {
-	    setTextValue(psrFields[i], registers.getPSRs()[i]);
-	}
-	for (int i = 0; i < gprFields.length; i++) {
-	    setTextValue(gprFields[i], registers.getGPRs()[i]);
-	}
+        for (int i = 0; i < psrFields.length; i++) {
+            setTextValue(psrFields[i], registers.getPSRs()[i]);
+        }
+        for (int i = 0; i < gprFields.length; i++) {
+            setTextValue(gprFields[i], registers.getGPRs()[i]);
+        }
     }
 
     private void setTextValue(JTextField field, int val) {
-	field.setText("" + val + " (0x" + Integer.toHexString(val) + ")");
+        field.setText("" + val + " (0x" + Integer.toHexString(val) + ")");
     }
 
     void updateGPR(int reg, int value) {
-	 setTextValue(gprFields[reg], value);
+         setTextValue(gprFields[reg], value);
     }
 
     private void updatePSR(int reg, int value) {
-	 setTextValue(psrFields[reg], value);
+         setTextValue(psrFields[reg], value);
     }
 
     private void closeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
-	setVisible(false);
+        setVisible(false);
     }
 }

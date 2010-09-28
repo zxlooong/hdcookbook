@@ -78,67 +78,67 @@ import org.dvb.ui.DVBBufferedImage;
  */
 
 public class GrinDriverXlet implements Xlet, AnimationContext {
-	
-	public Show show;
-	Container rootContainer;
-	DirectDrawEngine animationEngine;
-	XletContext context;
-	String grinScriptName = null;
-	
-	public void initXlet(XletContext context) {
+        
+        public Show show;
+        Container rootContainer;
+        DirectDrawEngine animationEngine;
+        XletContext context;
+        String grinScriptName = null;
+        
+        public void initXlet(XletContext context) {
             
-	    this.context = context;
+            this.context = context;
             String[] args = (String[])context.getXletProperty(XletContext.ARGS);
             grinScriptName = args[0];
-	   
-	    rootContainer = TVContainer.getRootContainer(context);			
-	    rootContainer.setSize(1920, 1080);
-	   
-	    animationEngine = new DirectDrawEngine();
-	    animationEngine.setFps(24000);
-	    animationEngine.initialize(this);
-	   
-	}
-	
-	public void startXlet() {
-	    rootContainer.setVisible(true);
-	    animationEngine.start(); 	   
-	}
-	
-	public void pauseXlet() {
-	    rootContainer.setVisible(false);
-	    animationEngine.pause();
-	}
-	
-	public void destroyXlet(boolean unconditional) {
-	    rootContainer = null;
-	    animationEngine.destroy();
-	}
-	
-	public void animationInitialize() throws InterruptedException {
+           
+            rootContainer = TVContainer.getRootContainer(context);                      
+            rootContainer.setSize(1920, 1080);
+           
+            animationEngine = new DirectDrawEngine();
+            animationEngine.setFps(24000);
+            animationEngine.initialize(this);
+           
+        }
+        
+        public void startXlet() {
+            rootContainer.setVisible(true);
+            animationEngine.start();       
+        }
+        
+        public void pauseXlet() {
+            rootContainer.setVisible(false);
+            animationEngine.pause();
+        }
+        
+        public void destroyXlet(boolean unconditional) {
+            rootContainer = null;
+            animationEngine.destroy();
+        }
+        
+        public void animationInitialize() throws InterruptedException {
            
             try {
  
                 show = new Show(null);
 
-		// Set up AssetFinder so we use DVBBufferedImage.
-		// See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
-		AssetFinder.setHelper(new AssetFinder() {
-		    protected Image createCompatibleImageBufferHelper
-		    			(Component c, int width, int height) 
-		    {
-			return new DVBBufferedImage(width, height);
-		    }
-		    protected Graphics2D createGraphicsFromImageBufferHelper
-		    			(Image buffer) 
-		    {
-			Object g = ((DVBBufferedImage) buffer).createGraphics();
-			return (Graphics2D) g;
-		    }
-		    protected void destroyImageBufferHelper(Image buffer) {
-			((DVBBufferedImage) buffer).dispose();
-		    }
-		});
+                // Set up AssetFinder so we use DVBBufferedImage.
+                // See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
+                AssetFinder.setHelper(new AssetFinder() {
+                    protected Image createCompatibleImageBufferHelper
+                                        (Component c, int width, int height) 
+                    {
+                        return new DVBBufferedImage(width, height);
+                    }
+                    protected Graphics2D createGraphicsFromImageBufferHelper
+                                        (Image buffer) 
+                    {
+                        Object g = ((DVBBufferedImage) buffer).createGraphics();
+                        return (Graphics2D) g;
+                    }
+                    protected void destroyImageBufferHelper(Image buffer) {
+                        ((DVBBufferedImage) buffer).dispose();
+                    }
+                });
                 
                 AssetFinder.setSearchPath(new String[]{""}, null);  
                 if (AssetFinder.tryURL("images.map") != null) {
@@ -147,27 +147,27 @@ public class GrinDriverXlet implements Xlet, AnimationContext {
                 } else {
                    Debug.println("No images.map, not using mosaic.");
                 }
-	        GrinBinaryReader reader = new GrinBinaryReader(
+                GrinBinaryReader reader = new GrinBinaryReader(
                         AssetFinder.getURL(grinScriptName).openStream());
                 
-	        reader.readShow(show);
+                reader.readShow(show);
                
             } catch (IOException e) {
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(e);
-		}
+                if (Debug.LEVEL > 0) {
+                    Debug.printStackTrace(e);
+                }
                 Debug.println("Error in reading the show file");
                 throw new InterruptedException();
             }
            
-	    animationEngine.checkDestroy();
-	    animationEngine.initClients(new AnimationClient[]{show});
-	    animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
-	   
-	} 
-	
-	public void animationFinishInitialization() {
-	    show.activateSegment(show.getSegment("S:Initialize"));		
+            animationEngine.checkDestroy();
+            animationEngine.initClients(new AnimationClient[]{show});
+            animationEngine.initContainer(rootContainer, new Rectangle(0,0,1920,1080));
+           
+        } 
+        
+        public void animationFinishInitialization() {
+            show.activateSegment(show.getSegment("S:Initialize"));              
         }
         
 }

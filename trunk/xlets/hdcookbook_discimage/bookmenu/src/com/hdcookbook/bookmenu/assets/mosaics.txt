@@ -65,33 +65,33 @@
 mosaics
 
     mosaic m1.png
-	max_width	600
-	max_height	300
-	min_width	600
-	num_widths	  1
-	image_files {
-	    Graphics/Menu/Load_0000.png
-	    Graphics/Menu/Load_0001.png
-	    Graphics/Menu/Load_0002.png
-	    Graphics/Menu/Load_0003.png
-	    Graphics/Menu/Load_0004.png
-	    Graphics/Menu/Load_0005.png
-	    Graphics/Menu/Load_0006.png
-	    Graphics/Menu/Load_0007.png
-	}
+        max_width       600
+        max_height      300
+        min_width       600
+        num_widths        1
+        image_files {
+            Graphics/Menu/Load_0000.png
+            Graphics/Menu/Load_0001.png
+            Graphics/Menu/Load_0002.png
+            Graphics/Menu/Load_0003.png
+            Graphics/Menu/Load_0004.png
+            Graphics/Menu/Load_0005.png
+            Graphics/Menu/Load_0006.png
+            Graphics/Menu/Load_0007.png
+        }
     ;
 
     mosaic m2.png
-	max_height 4096		# See 3-2 sec. G.6
-	max_width  4096		# See 3-2 sec. G.6
-	max_pixels 4963776	# See 3-2 sec. G.6
-	min_width  64
-	num_widths 129		# Number of different widths to try in search
-				# for smallest mosaic
-	take_all_images true    # Makes this the default mosaic for images
-	    			# in show file that aren't in another mosaic
-	add_image_files {	# Can be used to add images to mosaic
-	}			# that aren't part of a show
+        max_height 4096         # See 3-2 sec. G.6
+        max_width  4096         # See 3-2 sec. G.6
+        max_pixels 4963776      # See 3-2 sec. G.6
+        min_width  64
+        num_widths 129          # Number of different widths to try in search
+                                # for smallest mosaic
+        take_all_images true    # Makes this the default mosaic for images
+                                # in show file that aren't in another mosaic
+        add_image_files {       # Can be used to add images to mosaic
+        }                       # that aren't part of a show
     ;
 
 end_mosaics

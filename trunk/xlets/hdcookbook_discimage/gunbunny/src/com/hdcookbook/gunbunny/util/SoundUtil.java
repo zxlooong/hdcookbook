@@ -82,13 +82,13 @@ public class SoundUtil {
             String id = soundId < 10?"0"+soundId:""+soundId;
             String url = "bd://SOUND:" + id;
             Player player = Manager.createPlayer(new MediaLocator(
-	    					new BDLocator(url)));
+                                                new BDLocator(url)));
             player.start();
         }
         catch(Throwable thr) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(thr);
-	    }
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(thr);
+            }
         }
     }    
 }

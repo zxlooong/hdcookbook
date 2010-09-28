@@ -75,32 +75,32 @@ import com.hdcookbook.grin.io.ShowBuilder;
 class SubFeature implements FeatureRef {
 
     private ShowBuilder builder = null;
-    private String name = null;		// null for an inline feature
-    private Feature feature = null;	// initially null for a named feature
-    private Lexer lexer;		// For error reporting
+    private String name = null;         // null for an inline feature
+    private Feature feature = null;     // initially null for a named feature
+    private Lexer lexer;                // For error reporting
 
 
     SubFeature(Feature feature, Lexer lexer) {
-	this.feature = feature;
-	this.lexer = lexer;
+        this.feature = feature;
+        this.lexer = lexer;
     }
 
     SubFeature(ShowBuilder builder, String name, Lexer lexer) {
-	this.builder = builder;
-	this.name = name;
-	this.lexer = lexer;
+        this.builder = builder;
+        this.name = name;
+        this.lexer = lexer;
     }
 
     /**
      * {@inheritDoc}
      **/
     public Feature getFeature() throws IOException {
-	if (feature == null) {
-	    feature = builder.getNamedFeature(name);
-	    if (feature == null) {
-		lexer.reportError("Feature \"" + name + "\" not found");
-	    }
-	}
-	return feature;
+        if (feature == null) {
+            feature = builder.getNamedFeature(name);
+            if (feature == null) {
+                lexer.reportError("Feature \"" + name + "\" not found");
+            }
+        }
+        return feature;
     }
 }

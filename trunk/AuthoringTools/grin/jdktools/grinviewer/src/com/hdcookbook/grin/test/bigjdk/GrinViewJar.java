@@ -72,39 +72,39 @@ import java.util.ArrayList;
 public class GrinViewJar {
 
     public static void usage() {
-	System.out.println();
-	System.out.println("Usage:  GrinViewJar.class.getName()");
-	System.out.println("  The program looks for a file called grinview_args.txt, and reads");
-	System.out.println("   command-line arguments, one per line, from that file.  Lines");
-	System.out.println("   beginning with \"#\" are discarded.");
-	System.out.println();
-	System.exit(1);
+        System.out.println();
+        System.out.println("Usage:  GrinViewJar.class.getName()");
+        System.out.println("  The program looks for a file called grinview_args.txt, and reads");
+        System.out.println("   command-line arguments, one per line, from that file.  Lines");
+        System.out.println("   beginning with \"#\" are discarded.");
+        System.out.println();
+        System.exit(1);
     }
     public static void main(String[] notused) {
-	ArrayList<String> args = new ArrayList();
-	try {
-	    InputStream is = GrinViewJar.class.getResourceAsStream(
-	    				"/grinview_args.txt");
-	    if (is == null) {
-		usage();
-	    }
-	    BufferedReader r = new BufferedReader(new InputStreamReader(is));
-	    for (;;) {
-		String arg = r.readLine();
-		if (arg == null) {
-		    break;
-		} else if (!arg.startsWith("#") && !arg.equals("")) {
-		    args.add(arg);
-		}
-	    }
-	    r.close();
-	} catch (Throwable t) {
-	    t.printStackTrace();
-	    usage();
-	}
-	String[] argsArray = args.toArray(new String[args.size()]);
-	GrinView.doInputLoop = false;
-	GrinView.main(argsArray);
+        ArrayList<String> args = new ArrayList();
+        try {
+            InputStream is = GrinViewJar.class.getResourceAsStream(
+                                        "/grinview_args.txt");
+            if (is == null) {
+                usage();
+            }
+            BufferedReader r = new BufferedReader(new InputStreamReader(is));
+            for (;;) {
+                String arg = r.readLine();
+                if (arg == null) {
+                    break;
+                } else if (!arg.startsWith("#") && !arg.equals("")) {
+                    args.add(arg);
+                }
+            }
+            r.close();
+        } catch (Throwable t) {
+            t.printStackTrace();
+            usage();
+        }
+        String[] argsArray = args.toArray(new String[args.size()]);
+        GrinView.doInputLoop = false;
+        GrinView.main(argsArray);
     }
 
 }

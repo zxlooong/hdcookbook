@@ -80,8 +80,8 @@ public class ActivatePartCommand extends Command implements Node {
      **/
     public ActivatePartCommand(Show show, Assembly assembly, Feature part) {
         this(show);
-	this.assembly = assembly;
-	this.part = part;
+        this.assembly = assembly;
+        this.part = part;
     }
 
     public ActivatePartCommand(Show show) {
@@ -92,15 +92,15 @@ public class ActivatePartCommand extends Command implements Node {
      * {@inheritDoc}
      **/
     public Command cloneIfNeeded(HashMap featureClones) {
-	Assembly assemblyClone = (Assembly) featureClones.get(assembly);
-	if (assemblyClone == null) {
-	    return this;
-	}
-	Feature partClone = (Feature) featureClones.get(part);
-	if (Debug.ASSERT && partClone == null) {
-	    Debug.assertFail();
-	}
-	return new ActivatePartCommand(show, assemblyClone, partClone);
+        Assembly assemblyClone = (Assembly) featureClones.get(assembly);
+        if (assemblyClone == null) {
+            return this;
+        }
+        Feature partClone = (Feature) featureClones.get(part);
+        if (Debug.ASSERT && partClone == null) {
+            Debug.assertFail();
+        }
+        return new ActivatePartCommand(show, assemblyClone, partClone);
     }
     
     public Assembly getAssembly() {
@@ -112,7 +112,7 @@ public class ActivatePartCommand extends Command implements Node {
     }
 
     public void execute() {
-	assembly.setCurrentFeature(part);
+        assembly.setCurrentFeature(part);
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

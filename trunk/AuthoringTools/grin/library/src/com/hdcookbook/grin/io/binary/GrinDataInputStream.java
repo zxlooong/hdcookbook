@@ -167,17 +167,17 @@ public class GrinDataInputStream extends DataInputStream {
     */
     public int[] readSharedIntArray() throws IOException {
         int index = readInt();
-	return binaryReader.getIntArrayFromReference(index);
+        return binaryReader.getIntArrayFromReference(index);
     }     
 
     public Rectangle[] readSharedRectangleArray() throws IOException {
-	int index = readInt();
-	return binaryReader.getRectangleArrayFromReference(index);
+        int index = readInt();
+        return binaryReader.getRectangleArrayFromReference(index);
     }
 
     public Rectangle readSharedRectangle() throws IOException {
-	int index = readInt();
-	return binaryReader.getRectangleFromReference(index);
+        int index = readInt();
+        return binaryReader.getRectangleFromReference(index);
     }
 
    /**
@@ -186,7 +186,7 @@ public class GrinDataInputStream extends DataInputStream {
     * @throws java.io.IOException if IO error occurs.
     */
    public String readString() throws IOException {
-       int index = readInt();		// index 0 is null
+       int index = readInt();           // index 0 is null
        return binaryReader.getStringFromReference(index);
    }
 
@@ -307,7 +307,7 @@ public class GrinDataInputStream extends DataInputStream {
     */
     public Command[] readCommands() throws IOException {
         int index = readInt();
-	return binaryReader.getCommandArrayFromReference(index);
+        return binaryReader.getCommandArrayFromReference(index);
     }
    
    /**

@@ -67,7 +67,7 @@ import java.awt.Color;
 import java.io.IOException;
 
 public class SEFontStripText extends FontStripText 
-			     implements SENode, SEScalableNode {
+                             implements SENode, SEScalableNode {
     
     public SEFontStripText(Show show) {
         super(show);
@@ -137,19 +137,19 @@ public class SEFontStripText extends FontStripText
      * same scale factors.
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	xArg = xOffset + Show.scale(xArg, xScale);
-	yArg = yOffset + Show.scale(yArg, xScale);
-	hspace = Show.scale(hspace, xScale);
-	vspace = Show.scale(vspace, yScale);
+        xArg = xOffset + Show.scale(xArg, xScale);
+        yArg = yOffset + Show.scale(yArg, xScale);
+        hspace = Show.scale(hspace, xScale);
+        vspace = Show.scale(vspace, yScale);
     }
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "fontstrip:text @" + Integer.toHexString(hashCode());
-	} else {
-	    return "fontstrip:text " + name;
-	}
+        if (name == null) {
+            return "fontstrip:text @" + Integer.toHexString(hashCode());
+        } else {
+            return "fontstrip:text " + name;
+        }
     }
 }

@@ -79,34 +79,34 @@ import java.util.HashMap;
  **/
 public class SrcOver extends Modifier implements Node {
 
-	// Here, we make an inner class of RenderContext.  We
-	// pass this instance to our child; it modifies calls to the
-	// parent RenderContext from our child.
-	//
+        // Here, we make an inner class of RenderContext.  We
+        // pass this instance to our child; it modifies calls to the
+        // parent RenderContext from our child.
+        //
     private ChildContext childContext = new ChildContext();
     
     class ChildContext extends RenderContext {
-	RenderContext	parent;
-	private int x;
-	private int y;
-	private int width;
-	private int height;
+        RenderContext   parent;
+        private int x;
+        private int y;
+        private int width;
+        private int height;
 
-	public void addArea(DrawRecord r) {
-	    r.setSemiTransparent();
-	    parent.addArea(r);
-	}
+        public void addArea(DrawRecord r) {
+            r.setSemiTransparent();
+            parent.addArea(r);
+        }
 
-	public void guaranteeAreaFilled(DrawRecord r) {
-	    // Nothing - our semi-transparent children can't guarantee
-	    // that anything gets filled.
-	}
+        public void guaranteeAreaFilled(DrawRecord r) {
+            // Nothing - our semi-transparent children can't guarantee
+            // that anything gets filled.
+        }
 
-	public int setTarget(int target) {
-	    return parent.setTarget(target);
-	}
+        public int setTarget(int target) {
+            return parent.setTarget(target);
+        }
 
-    };	// End of RenderContext anonymous inner class
+    };  // End of RenderContext anonymous inner class
 
     
     public SrcOver(Show show) {
@@ -117,31 +117,31 @@ public class SrcOver extends Modifier implements Node {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup() || activated) {
-	    throw new IllegalStateException();
-	}
-	SrcOver result = new SrcOver(show);
-	result.part = part.makeNewClone(clones);
-	return result;
-	    // initializeClone() not needed
+        if (!isSetup() || activated) {
+            throw new IllegalStateException();
+        }
+        SrcOver result = new SrcOver(show);
+        result.part = part.makeNewClone(clones);
+        return result;
+            // initializeClone() not needed
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	childContext.parent = context;
-	super.addDisplayAreas(childContext);
+        childContext.parent = context;
+        super.addDisplayAreas(childContext);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	Composite old = gr.getComposite();
-	gr.setComposite(AlphaComposite.SrcOver);
-	part.paintFrame(gr);
-	gr.setComposite(old);
+        Composite old = gr.getComposite();
+        gr.setComposite(AlphaComposite.SrcOver);
+        part.paintFrame(gr);
+        gr.setComposite(old);
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

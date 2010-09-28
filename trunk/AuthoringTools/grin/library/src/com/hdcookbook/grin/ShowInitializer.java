@@ -90,16 +90,16 @@ public class ShowInitializer {
      * value.
      **/
     public synchronized AlphaComposite getAlpha(boolean srcOver, int alpha) {
-	Hashtable ht = (srcOver) ? srcOverAlphas : srcAlphas;
-	Integer key = new Integer(alpha);
-	AlphaComposite result = (AlphaComposite) ht.get(key);
-	if (result == null) {
-	    float af = alpha / 255f;
-	    int mode = srcOver ? AlphaComposite.SRC_OVER : AlphaComposite.SRC;
-	    result = AlphaComposite.getInstance(mode, af);
-	    ht.put(key, result);
-	}
-	return result;
+        Hashtable ht = (srcOver) ? srcOverAlphas : srcAlphas;
+        Integer key = new Integer(alpha);
+        AlphaComposite result = (AlphaComposite) ht.get(key);
+        if (result == null) {
+            float af = alpha / 255f;
+            int mode = srcOver ? AlphaComposite.SRC_OVER : AlphaComposite.SRC;
+            result = AlphaComposite.getInstance(mode, af);
+            ht.put(key, result);
+        }
+        return result;
     }
 
     // We could choose to do the same thing with fonts and colors,

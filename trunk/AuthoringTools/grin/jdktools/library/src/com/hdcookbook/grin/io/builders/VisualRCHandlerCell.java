@@ -89,13 +89,13 @@ public abstract class VisualRCHandlerCell {
     }
 
     void setHelper(VisualRCHandlerHelper helper, int alternate) {
-	this.helper = helper;
-	this.alternate = alternate;
+        this.helper = helper;
+        this.alternate = alternate;
     }
 
     void setXY(int x, int y) {
-	this.xCoord = x;
-	this.yCoord = y;
+        this.xCoord = x;
+        this.yCoord = y;
     }
 
     /**
@@ -112,8 +112,8 @@ public abstract class VisualRCHandlerCell {
      * @return null if OK, or an error message if not
      **/
     abstract public String addState(Map<String, Integer> stateMap,
-    				    Set<String> dupCheck,
-    			            Map<String, VisualRCHandlerCell> cellMap);
+                                    Set<String> dupCheck,
+                                    Map<String, VisualRCHandlerCell> cellMap);
 
     /**
      * Get the name of the state of this cell, or that this cell refers
@@ -129,7 +129,7 @@ public abstract class VisualRCHandlerCell {
      **/
     abstract public int 
     getStateNumber(Map<String, Integer> states, String stateFrom)
-    		throws IOException;
+                throws IOException;
     /** 
      * Check that this cell is OK.  This is called after the cell is
      * completely initialized.
@@ -146,10 +146,10 @@ public abstract class VisualRCHandlerCell {
      * @throws IOException if there's an inconsistency in the handler
      **/
     public int getUpDown() throws IOException {
-	String state = getState();
-	int up = getStateFor("up:" + state, xCoord, yCoord-1, state);
-	int down = getStateFor("down:" + state, xCoord, yCoord+1, state);
-	return (up << 16) | down;
+        String state = getState();
+        int up = getStateFor("up:" + state, xCoord, yCoord-1, state);
+        int down = getStateFor("down:" + state, xCoord, yCoord+1, state);
+        return (up << 16) | down;
     }
 
     /**
@@ -161,44 +161,44 @@ public abstract class VisualRCHandlerCell {
      * @throws IOException if there's an inconsistency in the handler
      **/
     public int getRightLeft() throws IOException {
-	String state = getState();
-	int right = getStateFor("right:" + state, xCoord+1, yCoord, state);
-	int left = getStateFor("left:" + state, xCoord-1, yCoord, state);
-	return (right << 16) | left;
+        String state = getState();
+        int right = getStateFor("right:" + state, xCoord+1, yCoord, state);
+        int left = getStateFor("left:" + state, xCoord-1, yCoord, state);
+        return (right << 16) | left;
     }
 
     private int getStateFor(String overrideKey, int x, int y, String stateFrom) 
-    		throws IOException
+                throws IOException
     {
-	Map<String, String> overrides = helper.getRCOverrides(alternate);
-	ArrayList<ArrayList<VisualRCHandlerCell>> grid 
-		= helper.getGrid(alternate);
-	Map<String, Integer> states = helper.getStates();
+        Map<String, String> overrides = helper.getRCOverrides(alternate);
+        ArrayList<ArrayList<VisualRCHandlerCell>> grid 
+                = helper.getGrid(alternate);
+        Map<String, Integer> states = helper.getStates();
 
-	String state = overrides.get(overrideKey);
-	if (state != null) {
-	    if ("<activate>".equals(state)) {
-		return VisualRCHandler.GRID_ACTIVATE;
-	    } else {
-		return states.get(state).intValue();
-	    }
-	}
+        String state = overrides.get(overrideKey);
+        if (state != null) {
+            if ("<activate>".equals(state)) {
+                return VisualRCHandler.GRID_ACTIVATE;
+            } else {
+                return states.get(state).intValue();
+            }
+        }
 
-	int columns = grid.get(0).size();
-	if (x < 0) {
-	    x = 0;
-	}
-	if (x >= columns) {
-	    x = columns - 1;
-	}
-	if (y < 0) {
-	    y = 0;
-	}
-	if (y >= grid.size()) {
-	    y = grid.size() - 1;
-	}
-	VisualRCHandlerCell cell = grid.get(y).get(x);
-	return cell.getStateNumber(states, stateFrom);
+        int columns = grid.get(0).size();
+        if (x < 0) {
+            x = 0;
+        }
+        if (x >= columns) {
+            x = columns - 1;
+        }
+        if (y < 0) {
+            y = 0;
+        }
+        if (y >= grid.size()) {
+            y = grid.size() - 1;
+        }
+        VisualRCHandlerCell cell = grid.get(y).get(x);
+        return cell.getStateNumber(states, stateFrom);
     }
 
     /**
@@ -206,7 +206,7 @@ public abstract class VisualRCHandlerCell {
      * defines a state can be present in the handler's grid.
      **/
     public static VisualRCHandlerCell newState(String state) {
-	return new StateCell(state);
+        return new StateCell(state);
     }
 
     /**
@@ -215,7 +215,7 @@ public abstract class VisualRCHandlerCell {
      * grid will shift to wherever the referred-to state is.
      **/
     public static VisualRCHandlerCell newStateRef(String state) {
-	return new StateRefCell(state);
+        return new StateRefCell(state);
     }
 
     /**
@@ -228,7 +228,7 @@ public abstract class VisualRCHandlerCell {
      **/
     public static VisualRCHandlerCell newLocationRef(int x, int y) 
     {
-	return new LocationRefCell(x, y);
+        return new LocationRefCell(x, y);
     }
 
     /** 
@@ -239,7 +239,7 @@ public abstract class VisualRCHandlerCell {
      * pressing the ENTER/OK button.
      **/
     public static VisualRCHandlerCell newActivate() {
-	return new ActivateCell();
+        return new ActivateCell();
     }
 
     /**
@@ -248,7 +248,7 @@ public abstract class VisualRCHandlerCell {
      * in whatever state you were in before.
      **/
     public static VisualRCHandlerCell newWall() {
-	return new WallCell();
+        return new WallCell();
     }
 
     /**
@@ -256,107 +256,107 @@ public abstract class VisualRCHandlerCell {
      * it's an error, and compilation fails.
      **/
     public static VisualRCHandlerCell newNull() {
-	return new NullCell();
+        return new NullCell();
     }
 
     public static class StateCell extends VisualRCHandlerCell {
-	private String name;
-	private boolean added = false;
-	StateCell(String name) {
-	    this.name = name;
-	}
-
-	public VisualRCHandlerCell getRefersTo() {
-	    return null;
-	}
-
-	public String addState(Map<String, Integer> stateMap,
-			       Set<String> dupCheck,
-			       Map<String, VisualRCHandlerCell> cellMap) 
-	{
-	    if (added) {
-		return null;
-	    }
-	    added = true;
-	    if (dupCheck.contains(name)) {
-		return "Duplicate state \"" + name + "\".";
-	    }
-	    dupCheck.add(name);
-	    if (stateMap.get(name) == null) {
-		stateMap.put(name, new Integer(stateMap.size()));
-	    }
-	    cellMap.put(name, this);
-	    return null;
+        private String name;
+        private boolean added = false;
+        StateCell(String name) {
+            this.name = name;
         }
 
-	public String getState() {
-	    return name;
-	}
-    
-	public int getStateNumber(Map<String, Integer> states, String stateFrom)
-    		throws IOException
-	{
-	    return states.get(name).intValue();
-	}
+        public VisualRCHandlerCell getRefersTo() {
+            return null;
+        }
 
-	public String check() {
-	    return null;
-	}
+        public String addState(Map<String, Integer> stateMap,
+                               Set<String> dupCheck,
+                               Map<String, VisualRCHandlerCell> cellMap) 
+        {
+            if (added) {
+                return null;
+            }
+            added = true;
+            if (dupCheck.contains(name)) {
+                return "Duplicate state \"" + name + "\".";
+            }
+            dupCheck.add(name);
+            if (stateMap.get(name) == null) {
+                stateMap.put(name, new Integer(stateMap.size()));
+            }
+            cellMap.put(name, this);
+            return null;
+        }
+
+        public String getState() {
+            return name;
+        }
+    
+        public int getStateNumber(Map<String, Integer> states, String stateFrom)
+                throws IOException
+        {
+            return states.get(name).intValue();
+        }
+
+        public String check() {
+            return null;
+        }
     }
 
     public static class StateRefCell extends VisualRCHandlerCell {
-	private String name;
-	StateRefCell(String name) {
-	    this.name = name;
-	}
+        private String name;
+        StateRefCell(String name) {
+            this.name = name;
+        }
 
-	public VisualRCHandlerCell getRefersTo() {
-	    VisualRCHandlerCell result 
-	    	= helper.getStateToCell(alternate).get(name);
-	    assert result != null;
-	    return result;
-	}
+        public VisualRCHandlerCell getRefersTo() {
+            VisualRCHandlerCell result 
+                = helper.getStateToCell(alternate).get(name);
+            assert result != null;
+            return result;
+        }
 
-	public String addState(Map<String, Integer> stateMap,
-    			       Set<String> dupCheck,
-			       Map<String, VisualRCHandlerCell> cellMap) 
-	{
-	    // do nothing
-	    return null;
+        public String addState(Map<String, Integer> stateMap,
+                               Set<String> dupCheck,
+                               Map<String, VisualRCHandlerCell> cellMap) 
+        {
+            // do nothing
+            return null;
         }
 
         public String getName() {
             return name;
         }
 
-	public String getState() {
-	    return getRefersTo().getState();
-	}
+        public String getState() {
+            return getRefersTo().getState();
+        }
     
-	public int getStateNumber(Map<String, Integer> states, String stateFrom)
-    		throws IOException
-	{
-	    return getRefersTo().getStateNumber(states, stateFrom);
-	}
+        public int getStateNumber(Map<String, Integer> states, String stateFrom)
+                throws IOException
+        {
+            return getRefersTo().getStateNumber(states, stateFrom);
+        }
 
-	public String check() {
-	    VisualRCHandlerCell result 
-	    	= helper.getStateToCell(alternate).get(name);
-	    if (result == null) {
-		return "State \"" + name + "\" not found";
-	    } else {
-		return null;
-	    }
-	}
+        public String check() {
+            VisualRCHandlerCell result 
+                = helper.getStateToCell(alternate).get(name);
+            if (result == null) {
+                return "State \"" + name + "\" not found";
+            } else {
+                return null;
+            }
+        }
     }
 
     public static class LocationRefCell extends VisualRCHandlerCell {
-	private int x;
-	private int y;
-	LocationRefCell(int x, int y) {
-	    this.x = x;
-	    this.y = y;
-	}
+        private int x;
+        private int y;
+        LocationRefCell(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
 
         public int getX() {
             return x;
@@ -366,130 +366,130 @@ public abstract class VisualRCHandlerCell {
             return y;
         }
 
-	public VisualRCHandlerCell getRefersTo() {
-	    VisualRCHandlerCell result 
-	    	= helper.getGrid(alternate).get(y).get(x);
-	    assert result != null;
-	    return result;
-	}
-
-	public String addState(Map<String, Integer> stateMap,
-			       Set<String> dupCheck,
-			       Map<String, VisualRCHandlerCell> cellMap) 
-	{
-	    // do nothing
-	    return null;
+        public VisualRCHandlerCell getRefersTo() {
+            VisualRCHandlerCell result 
+                = helper.getGrid(alternate).get(y).get(x);
+            assert result != null;
+            return result;
         }
 
-	public String getState() {
-	    return getRefersTo().getState();
-	}
-    
-	public int getStateNumber(Map<String, Integer> states, String stateFrom)
-    		throws IOException
-	{
-	    return getRefersTo().getStateNumber(states, stateFrom);
-	}
+        public String addState(Map<String, Integer> stateMap,
+                               Set<String> dupCheck,
+                               Map<String, VisualRCHandlerCell> cellMap) 
+        {
+            // do nothing
+            return null;
+        }
 
-	public String check() {
-	    ArrayList<ArrayList<VisualRCHandlerCell>> grid 
-	    	= helper.getGrid(alternate);
-	    if (x < 0 || x >= grid.get(0).size() || y < 0 || y >= grid.size()) {
-		return "" + x + ", " + y + " is an illegal cell.  "
-		       + "Cell numbers count from zero.";
-	    }
-	    return null;
-	}
+        public String getState() {
+            return getRefersTo().getState();
+        }
+    
+        public int getStateNumber(Map<String, Integer> states, String stateFrom)
+                throws IOException
+        {
+            return getRefersTo().getStateNumber(states, stateFrom);
+        }
+
+        public String check() {
+            ArrayList<ArrayList<VisualRCHandlerCell>> grid 
+                = helper.getGrid(alternate);
+            if (x < 0 || x >= grid.get(0).size() || y < 0 || y >= grid.size()) {
+                return "" + x + ", " + y + " is an illegal cell.  "
+                       + "Cell numbers count from zero.";
+            }
+            return null;
+        }
     }
 
     public static class ActivateCell extends VisualRCHandlerCell {
-	ActivateCell() {
-	}
-
-	public VisualRCHandlerCell getRefersTo() {
-	    return null;
-	}
-
-	public String addState(Map<String, Integer> stateMap,
-			       Set<String> dupCheck,
-			       Map<String, VisualRCHandlerCell> cellMap) {
-	    // do nothing
-	    return null;
+        ActivateCell() {
         }
 
-	public String getState() {
-	    return "<activate>";
-	}
-    
-	public int getStateNumber(Map<String, Integer> states, String stateFrom)
-    		throws IOException
-	{
-	    return VisualRCHandler.GRID_ACTIVATE;
-	}
+        public VisualRCHandlerCell getRefersTo() {
+            return null;
+        }
 
-	public String check() {
-	    return null;
-	}
+        public String addState(Map<String, Integer> stateMap,
+                               Set<String> dupCheck,
+                               Map<String, VisualRCHandlerCell> cellMap) {
+            // do nothing
+            return null;
+        }
+
+        public String getState() {
+            return "<activate>";
+        }
+    
+        public int getStateNumber(Map<String, Integer> states, String stateFrom)
+                throws IOException
+        {
+            return VisualRCHandler.GRID_ACTIVATE;
+        }
+
+        public String check() {
+            return null;
+        }
     }
 
     public static class WallCell extends VisualRCHandlerCell {
-	WallCell() {
-	}
-
-	public VisualRCHandlerCell getRefersTo() {
-	    return null;
-	}
-
-	public String addState(Map<String, Integer> stateMap,
-			       Set<String> dupCheck,
-			       Map<String, VisualRCHandlerCell> cellMap) {
-	    // do nothing
-	    return null;
+        WallCell() {
         }
 
-	public String getState() {
-	    return "<wall>";
-	}
-    
-	public int getStateNumber(Map<String, Integer> states, String stateFrom)
-    		throws IOException
-	{
-	    return states.get(stateFrom).intValue();
-	}
+        public VisualRCHandlerCell getRefersTo() {
+            return null;
+        }
 
-	public String check() {
-	    return null;
-	}
+        public String addState(Map<String, Integer> stateMap,
+                               Set<String> dupCheck,
+                               Map<String, VisualRCHandlerCell> cellMap) {
+            // do nothing
+            return null;
+        }
+
+        public String getState() {
+            return "<wall>";
+        }
+    
+        public int getStateNumber(Map<String, Integer> states, String stateFrom)
+                throws IOException
+        {
+            return states.get(stateFrom).intValue();
+        }
+
+        public String check() {
+            return null;
+        }
     }
 
     public static class NullCell extends VisualRCHandlerCell {
-	NullCell() {
-	}
-
-	public VisualRCHandlerCell getRefersTo() {
-	    return null;
-	}
-
-	public String addState(Map<String, Integer> stateMap,
-    			       Set<String> dupCheck,
-			       Map<String, VisualRCHandlerCell> cellMap) {
-	    // do nothing
-	    return null;
+        NullCell() {
         }
 
-	public String getState() {
-	    return "<null>";
-	}
-    
-	public int getStateNumber(Map<String, Integer> states, String stateFrom)
-    		throws IOException
-	{
-	    throw new IOException(
-	    	"Illegal grid:  <null> cell can be navigated to");
-	}
+        public VisualRCHandlerCell getRefersTo() {
+            return null;
+        }
 
-	public String check() {
-	    return null;
-	}
+        public String addState(Map<String, Integer> stateMap,
+                               Set<String> dupCheck,
+                               Map<String, VisualRCHandlerCell> cellMap) {
+            // do nothing
+            return null;
+        }
+
+        public String getState() {
+            return "<null>";
+        }
+    
+        public int getStateNumber(Map<String, Integer> states, String stateFrom)
+                throws IOException
+        {
+            throw new IOException(
+                "Illegal grid:  <null> cell can be navigated to");
+        }
+
+        public String check() {
+            return null;
+        }
     }
 }

@@ -76,19 +76,19 @@ import java.awt.Point;
  * <ul>
  *     <li>There's one instance of MenuShowCommands that's not a 
  *         command at all - it's really a factory object that's used 
- *	   to call the instantiateXXX() method
+ *         to call the instantiateXXX() method
  *
  *    <li>For each java_command in the show, there's an instance 
- *	  of MenuShowCommands that's set up with the correct 
- *	  commandNumber.  MenuShowCommands overrides execute(), 
- *	  so the switch statement in the override determines
- *	  the meaning of commandNumber, which is automatically generated
- *	  by the show compiler.
+ *        of MenuShowCommands that's set up with the correct 
+ *        commandNumber.  MenuShowCommands overrides execute(), 
+ *        so the switch statement in the override determines
+ *        the meaning of commandNumber, which is automatically generated
+ *        by the show compiler.
  *
  *    <li>For each built-in GRIN command that uses GrinXHelper (that is, 
- *	  each sync_display or segment_done command) becomes a direct 
- *	  instance of GrinXHelper.  In this case, execute() isn't 
- *	  overriden, so we get the built-in switch statement.
+ *        each sync_display or segment_done command) becomes a direct 
+ *        instance of GrinXHelper.  In this case, execute() isn't 
+ *        overriden, so we get the built-in switch statement.
  * </ul>
  * <p>
  * For the built-in GRIN commands, the direct instances of GrinXHelper
@@ -298,6 +298,6 @@ public class GrinXHelper extends Command implements Node {
      * {@inheritDoc}
      **/
     public String toString() {
-	return super.toString() + "(" + commandNumber + ")";
+        return super.toString() + "(" + commandNumber + ")";
     }
 }

@@ -66,14 +66,14 @@ public class SECommandList extends SEGrinXHelper {
 
     public SECommandList(SEShow show, Command[] subCommands) {
         super(show);
-	setCommandNumber(COMMAND_LIST);
-	setSubCommands(subCommands);
+        setCommandNumber(COMMAND_LIST);
+        setSubCommands(subCommands);
     }
     
     public void accept(SEShowVisitor visitor) {
-	for (int i = 0; i < subCommands.length; i++) {
-	    ((SENode) subCommands[i]).accept(visitor);
-	}
+        for (int i = 0; i < subCommands.length; i++) {
+            ((SENode) subCommands[i]).accept(visitor);
+        }
     }
 
     /**
@@ -92,6 +92,6 @@ public class SECommandList extends SEGrinXHelper {
      * {@inheritDoc}
      **/
     public String toString() {
-	return "command list @" + Integer.toHexString(hashCode());
+        return "command list @" + Integer.toHexString(hashCode());
     }
 }

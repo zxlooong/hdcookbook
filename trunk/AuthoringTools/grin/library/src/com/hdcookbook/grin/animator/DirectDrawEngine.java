@@ -95,7 +95,7 @@ public class DirectDrawEngine extends ClockBasedEngine {
     private Image buffer;
     private Graphics2D bufferG;
     private Graphics2D componentG;
-    private byte[] profileBlitToFB;	// Profiling model update
+    private byte[] profileBlitToFB;     // Profiling model update
     private int engineNumber = 0;
     private static int nextEngineNumber = 0;
 
@@ -104,85 +104,85 @@ public class DirectDrawEngine extends ClockBasedEngine {
      * the various initXXX methods (including the inherited ones).
      **/
     public DirectDrawEngine() {
-	if (Debug.LEVEL > 0 || (Debug.PROFILE && Debug.PROFILE_ANIMATION)) {
-	    engineNumber = getNextEngineNumber();
-	}
-	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
-	    profileBlitToFB = Profile.makeProfileTimer("blitToFB("+this+")");
-	}
+        if (Debug.LEVEL > 0 || (Debug.PROFILE && Debug.PROFILE_ANIMATION)) {
+            engineNumber = getNextEngineNumber();
+        }
+        if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
+            profileBlitToFB = Profile.makeProfileTimer("blitToFB("+this+")");
+        }
     }
 
     private synchronized static int getNextEngineNumber() {
-	if (Debug.LEVEL > 0 || (Debug.PROFILE && Debug.PROFILE_ANIMATION)) {
-	    nextEngineNumber++;
-	}
-	return nextEngineNumber;
+        if (Debug.LEVEL > 0 || (Debug.PROFILE && Debug.PROFILE_ANIMATION)) {
+            nextEngineNumber++;
+        }
+        return nextEngineNumber;
     }
 
     public String toString() {
-	if (Debug.LEVEL > 0 || (Debug.PROFILE && Debug.PROFILE_ANIMATION)) {
-	    return "DD engine " + engineNumber;
-	} else {
-	    return super.toString();
-	}
+        if (Debug.LEVEL > 0 || (Debug.PROFILE && Debug.PROFILE_ANIMATION)) {
+            return "DD engine " + engineNumber;
+        } else {
+            return super.toString();
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void initContainer(Container container, Rectangle bounds) {
-	this.container = container;
-	ddComponent = new Component() {
-	    public void paint(Graphics g) {
-		if (Debug.LEVEL > 0) {
-		    Debug.println("repainting...");
-		}
-		try {
-		    repaintFrame((Graphics2D) g);
-			// We could paint from the buffer, but this
-			// will be the same frame anyway.
-		} catch (InterruptedException ignored) {
-		    Thread.currentThread().interrupt();
-		}
+        this.container = container;
+        ddComponent = new Component() {
+            public void paint(Graphics g) {
+                if (Debug.LEVEL > 0) {
+                    Debug.println("repainting...");
+                }
+                try {
+                    repaintFrame((Graphics2D) g);
+                        // We could paint from the buffer, but this
+                        // will be the same frame anyway.
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
 
-	    }
-	};
-	ddComponent.setBounds(bounds);
-	container.add(ddComponent);
-	ddComponent.setVisible(true);
-	buffer = AssetFinder.createCompatibleImageBuffer(
-				container, bounds.width, bounds.height);
-	bufferG = AssetFinder.createGraphicsFromImageBuffer(buffer);
-	bufferG.setComposite(AlphaComposite.Src);
-	bufferG.setColor(transparent);
-	bufferG.fillRect(0, 0, bounds.width, bounds.height);
+            }
+        };
+        ddComponent.setBounds(bounds);
+        container.add(ddComponent);
+        ddComponent.setVisible(true);
+        buffer = AssetFinder.createCompatibleImageBuffer(
+                                container, bounds.width, bounds.height);
+        bufferG = AssetFinder.createGraphicsFromImageBuffer(buffer);
+        bufferG.setComposite(AlphaComposite.Src);
+        bufferG.setColor(transparent);
+        bufferG.fillRect(0, 0, bounds.width, bounds.height);
 
-	componentG = (Graphics2D) ddComponent.getGraphics();
-	if (Debug.ASSERT && componentG == null) {
-	    Debug.assertFail();  // Maybe container is invisible?
-	}
-	componentG.setComposite(AlphaComposite.Src);
+        componentG = (Graphics2D) ddComponent.getGraphics();
+        if (Debug.ASSERT && componentG == null) {
+            Debug.assertFail();  // Maybe container is invisible?
+        }
+        componentG.setComposite(AlphaComposite.Src);
     }
 
     /** 
      * {@inheritDoc}
      **/
     public int getWidth() {
-	return ddComponent.getWidth();
+        return ddComponent.getWidth();
     }
 
     /** 
      * {@inheritDoc}
      **/
     public int getHeight() {
-	return ddComponent.getHeight();
+        return ddComponent.getHeight();
     }
 
     /**
      * {@inheritDoc}
      **/
     public Component getComponent() {
-	return ddComponent;
+        return ddComponent;
     }
 
 
@@ -190,8 +190,8 @@ public class DirectDrawEngine extends ClockBasedEngine {
      * {@inheritDoc}
      **/
     protected void clearArea(int x, int y, int width, int height) {
-	bufferG.setColor(transparent);
-	bufferG.fillRect(x, y, width, height);
+        bufferG.setColor(transparent);
+        bufferG.fillRect(x, y, width, height);
     }
 
     /**
@@ -201,54 +201,54 @@ public class DirectDrawEngine extends ClockBasedEngine {
      * own double buffer, nothing external can damage its contents.
      **/
     protected boolean needsFullRedrawInAnimationLoop() {
-	return false;
+        return false;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void callPaintTargets() throws InterruptedException {
-	paintTargets(bufferG);
-	bufferG.setComposite(AlphaComposite.Src);	// Add some robustness
+        paintTargets(bufferG);
+        bufferG.setComposite(AlphaComposite.Src);       // Add some robustness
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void finishedFrame() {
-	int tok;
-	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
-	    tok = Profile.startTimer(profileBlitToFB, Profile.TID_ANIMATION);
-	}
-	int n = renderContext.numDrawTargets;
-	if (n > 0) {
-	    for (int i = 0; i < n; i++) {
-		Rectangle a = renderContext.drawTargets[i];
-		componentG.drawImage(buffer, a.x, a.y, 
-					     a.x+a.width, a.y+a.height,
-					     a.x, a.y,
-					     a.x+a.width, a.y+a.height,
-					     null);
-	    }
-	    Toolkit.getDefaultToolkit().sync();
-	}
-	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
-	    Profile.stopTimer(tok);
-	}
-	Thread.currentThread().yield();
+        int tok;
+        if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
+            tok = Profile.startTimer(profileBlitToFB, Profile.TID_ANIMATION);
+        }
+        int n = renderContext.numDrawTargets;
+        if (n > 0) {
+            for (int i = 0; i < n; i++) {
+                Rectangle a = renderContext.drawTargets[i];
+                componentG.drawImage(buffer, a.x, a.y, 
+                                             a.x+a.width, a.y+a.height,
+                                             a.x, a.y,
+                                             a.x+a.width, a.y+a.height,
+                                             null);
+            }
+            Toolkit.getDefaultToolkit().sync();
+        }
+        if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
+            Profile.stopTimer(tok);
+        }
+        Thread.currentThread().yield();
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void terminatingEraseScreen() {
-	componentG.setColor(transparent);
-	componentG.fillRect(0, 0, getWidth(), getHeight());
-	Toolkit.getDefaultToolkit().sync();
-	container.remove(ddComponent);
-	Image buf = buffer;
-	buffer = null;
-	bufferG = null;
-	AssetFinder.destroyImageBuffer(buf);
+        componentG.setColor(transparent);
+        componentG.fillRect(0, 0, getWidth(), getHeight());
+        Toolkit.getDefaultToolkit().sync();
+        container.remove(ddComponent);
+        Image buf = buffer;
+        buffer = null;
+        bufferG = null;
+        AssetFinder.destroyImageBuffer(buf);
     }
 }

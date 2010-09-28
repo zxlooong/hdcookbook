@@ -77,45 +77,45 @@ public class WeatherExtensionParser implements ExtensionParser {
      * {@inheritDoc}
      **/
     public Feature getFeature(Show show, String typeName,
-    			      String name, Lexer lexer)
-		   throws IOException
+                              String name, Lexer lexer)
+                   throws IOException
     {
-	if ("Weather:arc".equals(typeName)) {
-	    return parseArc(show, name, lexer);
-	} else {
-	    return null;
-	}
+        if ("Weather:arc".equals(typeName)) {
+            return parseArc(show, name, lexer);
+        } else {
+            return null;
+        }
     }
 
     private Feature parseArc(Show show, String name, Lexer lexer)
-    		throws IOException
+                throws IOException
     {
-	Color color = lexer.getParser().parseColor();
-	lexer.parseExpected("x");
-	int x = lexer.getInt();
-	lexer.parseExpected("y");
-	int y = lexer.getInt();
-	lexer.parseExpected("width");
-	int width = lexer.getInt();
-	lexer.parseExpected("height");
-	int height = lexer.getInt();
-	lexer.parseExpected("startAngle");
-	int startAngle = lexer.getInt();
-	lexer.parseExpected("arcAngle");
-	int arcAngle = lexer.getInt();
-	lexer.parseExpected(";");
-	return new SEArc(show, name, x, y, width, height, startAngle, arcAngle,
-			 color);
+        Color color = lexer.getParser().parseColor();
+        lexer.parseExpected("x");
+        int x = lexer.getInt();
+        lexer.parseExpected("y");
+        int y = lexer.getInt();
+        lexer.parseExpected("width");
+        int width = lexer.getInt();
+        lexer.parseExpected("height");
+        int height = lexer.getInt();
+        lexer.parseExpected("startAngle");
+        int startAngle = lexer.getInt();
+        lexer.parseExpected("arcAngle");
+        int arcAngle = lexer.getInt();
+        lexer.parseExpected(";");
+        return new SEArc(show, name, x, y, width, height, startAngle, arcAngle,
+                         color);
     }
 
     /**
      * {@inheritDoc}
      **/
     public Modifier getModifier(Show show, String typeName,
-				String name, Lexer lexer) 
-		throws IOException
+                                String name, Lexer lexer) 
+                throws IOException
     {
-	return null;
+        return null;
     }
 
     /**
@@ -124,7 +124,7 @@ public class WeatherExtensionParser implements ExtensionParser {
     public Command getCommand(Show show, String typeName, Lexer lexer)
                            throws IOException
     {
-	return null;
+        return null;
     }
 
 }

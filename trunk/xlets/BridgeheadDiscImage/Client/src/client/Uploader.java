@@ -82,24 +82,24 @@ public class Uploader {
         Socket socket;
         try {
             socket = new Socket(ip, port);
-	    DataOutputStream out 
-		 = new DataOutputStream(
-		     new BufferedOutputStream(socket.getOutputStream()));
-	    InputStream in = socket.getInputStream();
-	    HdcVFSMaker.sendHdcVFSImage(srcDir, out);
-	    out.flush();
-	    try {
-		while (in.read() != -1) {
-		    // Wait for EOF on the return socket.  On some player/PC
-		    // combos, closing the output socket before the player has
-		    // read all of the bytes causes a "socket reset" error
-		    // in the middle of reading.
-		}
-	    } catch (Exception ex) {
-		// We can get client reset here if the timing is off.
-		// Semantically, it means the same to us as does EOF.
-	    }
-	    in.close();
+            DataOutputStream out 
+                 = new DataOutputStream(
+                     new BufferedOutputStream(socket.getOutputStream()));
+            InputStream in = socket.getInputStream();
+            HdcVFSMaker.sendHdcVFSImage(srcDir, out);
+            out.flush();
+            try {
+                while (in.read() != -1) {
+                    // Wait for EOF on the return socket.  On some player/PC
+                    // combos, closing the output socket before the player has
+                    // read all of the bytes causes a "socket reset" error
+                    // in the middle of reading.
+                }
+            } catch (Exception ex) {
+                // We can get client reset here if the timing is off.
+                // Semantically, it means the same to us as does EOF.
+            }
+            in.close();
             out.close();
             System.out.println("Finished sending data.");
         } catch (Exception e) {
@@ -108,37 +108,37 @@ public class Uploader {
     }
 
     private static void usage() {
-	System.out.println();
-	System.out.println("Usage:  java client.Uploader [<dir> <dest>]");
-	System.out.println();
-	System.out.println("    This program recursively descends a directory, and makes a .hdcvfs stream");
-	System.out.println("    for upload to the bridgehead xlet.  The directory is typically created");
-	System.out.println("    with the cookbook bumfgenerator program.");
-	System.out.println();
-	System.out.println("    (no arguments)               launches upload GUI");
-	System.out.println("    <dir> <player ip address>    uploads without a GUI");
-	System.out.println("    <dir> <file>.hdcvfs          Copies stream to .hdvfs file");
-	System.out.println();
-	System.out.println("   An .hdcvfs file can be put on a web server, for upload with a");
-	System.out.println("   bridgehead xlet that downloads it .hdcvfs file.");
-	System.out.println();
-	System.exit(1);
+        System.out.println();
+        System.out.println("Usage:  java client.Uploader [<dir> <dest>]");
+        System.out.println();
+        System.out.println("    This program recursively descends a directory, and makes a .hdcvfs stream");
+        System.out.println("    for upload to the bridgehead xlet.  The directory is typically created");
+        System.out.println("    with the cookbook bumfgenerator program.");
+        System.out.println();
+        System.out.println("    (no arguments)               launches upload GUI");
+        System.out.println("    <dir> <player ip address>    uploads without a GUI");
+        System.out.println("    <dir> <file>.hdcvfs          Copies stream to .hdvfs file");
+        System.out.println();
+        System.out.println("   An .hdcvfs file can be put on a web server, for upload with a");
+        System.out.println("   bridgehead xlet that downloads it .hdcvfs file.");
+        System.out.println();
+        System.exit(1);
     }
     public static void main(String args[]) {
-	if (args.length == 0) {
-	    System.out.println("Invoke with \"-help\" for more options.");
-	    ClientFrame.launchGUI();
-	} else if (args.length != 2) {
-	    usage();
-	} else {
-	    String dir = args[0];
-	    String dest = args[1];
-	    if (dest.endsWith(".hdcvfs")) {
-		HdcVFSMaker.makeHdcVFSFile(dir, dest);
-	    } else {
-		Uploader.doUpload(dest, DEFAULT_PORT, dir);
-	    }
-	    System.exit(0);
-	}
+        if (args.length == 0) {
+            System.out.println("Invoke with \"-help\" for more options.");
+            ClientFrame.launchGUI();
+        } else if (args.length != 2) {
+            usage();
+        } else {
+            String dir = args[0];
+            String dest = args[1];
+            if (dest.endsWith(".hdcvfs")) {
+                HdcVFSMaker.makeHdcVFSFile(dir, dest);
+            } else {
+                Uploader.doUpload(dest, DEFAULT_PORT, dir);
+            }
+            System.exit(0);
+        }
     }
 }

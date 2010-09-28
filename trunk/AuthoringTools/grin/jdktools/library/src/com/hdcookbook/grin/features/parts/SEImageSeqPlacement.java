@@ -79,8 +79,8 @@ public interface SEImageSeqPlacement {
      * in an image_sequence
      *
      * @throws IOException if reading an image fails, or if there is an
-     *			   incompatible number of placements.
+     *                     incompatible number of placements.
      **/
     public Rectangle[] getImageSeqPlacementRects(String[] images) 
-    	throws IOException;
+        throws IOException;
 }

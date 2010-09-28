@@ -101,15 +101,15 @@ public class ShowBuilder {
     private Map<String, Segment> namedSegments = new HashMap<String, Segment>();
     private Map<String, Feature> namedFeatures = new HashMap<String, Feature>();
     private Map<String, RCHandler> namedRCHandlers 
-    		= new HashMap<String, RCHandler>();
+                = new HashMap<String, RCHandler>();
     private Map<String, Command> namedCommands
-    		= new HashMap<String, Command>();
+                = new HashMap<String, Command>();
 
     private List<Segment> allSegments = new ArrayList<Segment>();
     private List<Feature> allFeatures = new ArrayList<Feature>();
     private List<RCHandler> allRCHandlers = new ArrayList<RCHandler>();
     private ArrayList<SENode> allNodes = new ArrayList<SENode>();
-    	// Contains all segments, features, RC handlers and commands
+        // Contains all segments, features, RC handlers and commands
 
     private List<String> exportedSegments = null;
     private List<String> exportedFeatures = null;
@@ -117,7 +117,7 @@ public class ShowBuilder {
     private List<String> exportedNamedCommands = null;
 
     private List<DeferredBuilder> deferredBuilders
-    	= new ArrayList<DeferredBuilder>();
+        = new ArrayList<DeferredBuilder>();
 
     private String[] stickyImages = null;
     private String binaryGrinFileName = null;
@@ -134,7 +134,7 @@ public class ShowBuilder {
     }
 
     public SEShow getShow() {
-	return show;
+        return show;
     }
 
     public void init(SEShow show) {
@@ -169,28 +169,28 @@ public class ShowBuilder {
      * show tree will be visited, and references to the child will be
      * changed to references to the parent where appropriate.
      *
-     * @param newFeature	The new feature being added
-     * @param child		The existing feature that will be its child
+     * @param newFeature        The new feature being added
+     * @param child             The existing feature that will be its child
      *
-     * @throws IOException	if a problem is encountered
+     * @throws IOException      if a problem is encountered
      **/
     public void injectParent(Feature newFeature, Feature child) 
-	    throws IOException
+            throws IOException
     {
-	for (int i = 0; i < allNodes.size(); i++) {
-	    allNodes.get(i).changeFeatureReference(child, newFeature);
-	}
-	addSyntheticFeature(newFeature);	// adds to allNodes
+        for (int i = 0; i < allNodes.size(); i++) {
+            allNodes.get(i).changeFeatureReference(child, newFeature);
+        }
+        addSyntheticFeature(newFeature);        // adds to allNodes
     }
 
     private void addNode(SENode node) throws IOException {
-	if (noMoreNodes) {
-	    throw new IOException("Can't add new node:  The show's build phase is over.");
-	}
-	if (node == null) {
-	    throw new NullPointerException();
-	}
-	allNodes.add(node);
+        if (noMoreNodes) {
+            throw new IOException("Can't add new node:  The show's build phase is over.");
+        }
+        if (node == null) {
+            throw new NullPointerException();
+        }
+        allNodes.add(node);
     }
 
     /** 
@@ -198,15 +198,15 @@ public class ShowBuilder {
      **/
     public void addFeature(String name, int line, Feature f) throws IOException
     {
-	if (name != null) {
-	    if (namedFeatures.get(name) != null) {
-		throw new IOException("Feature named \"" + name
-				       + "\" already exists.");
-	    }
-	    namedFeatures.put(name, f);
-	}
-	allFeatures.add(f);
-	addNode((SENode) f);
+        if (name != null) {
+            if (namedFeatures.get(name) != null) {
+                throw new IOException("Feature named \"" + name
+                                       + "\" already exists.");
+            }
+            namedFeatures.put(name, f);
+        }
+        allFeatures.add(f);
+        addNode((SENode) f);
     }
 
     /**
@@ -214,52 +214,52 @@ public class ShowBuilder {
      **/
     public void addSegment(String name, int line, Segment s) throws IOException
     {
-	if (name != null) {
-	    if (namedSegments.get(name) != null) {
-		throw new IOException("Segment named \"" + name
-				       + "\" already exists.");
-	    }
-	    namedSegments.put(name, s);
-	}
-	allSegments.add(s);
-	addNode((SENode) s);
+        if (name != null) {
+            if (namedSegments.get(name) != null) {
+                throw new IOException("Segment named \"" + name
+                                       + "\" already exists.");
+            }
+            namedSegments.put(name, s);
+        }
+        allSegments.add(s);
+        addNode((SENode) s);
     }
 
     /**
      * Called when a new named command is encountered
      **/
     public void addNamedCommand(String name, int line, Command c) 
-    		throws IOException
+                throws IOException
     {
-	if (namedCommands.get(name) != null) {
-	    throw new IOException("Named command \"" + name
-				       + "\" already exists.");
-	}
-	namedCommands.put(name, c);
+        if (namedCommands.get(name) != null) {
+            throw new IOException("Named command \"" + name
+                                       + "\" already exists.");
+        }
+        namedCommands.put(name, c);
     }
 
     /**
      * Called when a new command is encountered.
      **/
     public void addCommand(Command command, int line) throws IOException {
-	addNode((SENode) command);
+        addNode((SENode) command);
     }
 
     /**
      * Called when a new remote control handler is encountered.
      **/
     public void addRCHandler(String name, int line, RCHandler hand) 
-			throws IOException
+                        throws IOException
     {
-	if (name != null) {
-	    if (namedRCHandlers.get(name) != null) {
-		throw new IOException("RC Handler named \"" + name
-				       + "\" already exists.");
-	    }
-	    namedRCHandlers.put(name, hand);
-	}
-	allRCHandlers.add(hand);
-	addNode((SENode) hand);
+        if (name != null) {
+            if (namedRCHandlers.get(name) != null) {
+                throw new IOException("RC Handler named \"" + name
+                                       + "\" already exists.");
+            }
+            namedRCHandlers.put(name, hand);
+        }
+        allRCHandlers.add(hand);
+        addNode((SENode) hand);
     }
 
     /**
@@ -270,7 +270,7 @@ public class ShowBuilder {
      * @see #finishBuilding()
      **/
     public void addDeferredBuilder(DeferredBuilder builder) {
-	deferredBuilders.add(builder);
+        deferredBuilders.add(builder);
     }
 
     /**
@@ -281,31 +281,31 @@ public class ShowBuilder {
      * character "*", which cannot be escaped.
      **/
     public void setExported(String[] segments, String[] features, 
-    			    String[] handlers, String[] namedCommands) 
-		throws IOException
+                            String[] handlers, String[] namedCommands) 
+                throws IOException
     {
-	if (exportedSegments != null) {
-	    throw new IOException("Multiple exported clauses");
-	}
+        if (exportedSegments != null) {
+            throw new IOException("Multiple exported clauses");
+        }
 
-	exportedSegments = Arrays.asList(segments);
-	exportedFeatures = Arrays.asList(features);
-	exportedRCHandlers = Arrays.asList(handlers);
-	exportedNamedCommands = Arrays.asList(namedCommands);
+        exportedSegments = Arrays.asList(segments);
+        exportedFeatures = Arrays.asList(features);
+        exportedRCHandlers = Arrays.asList(handlers);
+        exportedNamedCommands = Arrays.asList(namedCommands);
     }
 
     /**
      * Called when a "binary_grin_file_setting" clause is enocuntered.
      **/
     public void setBinaryGrinFileName(String fileName) {
-	this.binaryGrinFileName = fileName;
+        this.binaryGrinFileName = fileName;
     }
 
     /**
      * Called when a "sticky images" clause is enocuntered.
      **/
     public void setStickyImages(String[] stickyImages) {
-	this.stickyImages = stickyImages;
+        this.stickyImages = stickyImages;
     }
     
     /**
@@ -314,7 +314,7 @@ public class ShowBuilder {
     public void setShowTopGroup(SEGroup showTopGroup) 
         throws IOException {
         if (this.showTopGroup != null) {
-	    throw new IOException("Multiple showtop_group clauses");
+            throw new IOException("Multiple showtop_group clauses");
         }
         this.showTopGroup = showTopGroup;
     }
@@ -323,7 +323,7 @@ public class ShowBuilder {
      */   
     public void setShowTop(String showTopName) throws IOException {
         if (this.showTop != null) {
-	    throw new IOException("Multiple show_top clauses");
+            throw new IOException("Multiple show_top clauses");
         } 
         this.showTop = makeShowTopSegment(namedFeatures.get(showTopName));
     }
@@ -332,7 +332,7 @@ public class ShowBuilder {
         SEGroup g = new SEGroup(show);
         g.setParts(new Feature[0]);
         allFeatures.add(g);
-	addNode(g);
+        addNode(g);
         return g;
     }
     
@@ -341,7 +341,7 @@ public class ShowBuilder {
         SESegment segment = new SESegment(" $show_top$ ", features, features,
                 new RCHandler[0], new Command[0], false, new Command[0]);
         allSegments.add(segment);
-	addNode((SENode) segment);
+        addNode((SENode) segment);
         return segment;
     }
 
@@ -349,28 +349,28 @@ public class ShowBuilder {
      * Look up a segment in the list of all named segments.
      **/
     public Segment getNamedSegment(String name) {
-	return namedSegments.get(name);
+        return namedSegments.get(name);
     }
 
     /**
      * Look up a command in the list of all named commands.
      **/
     public Command getNamedCommand(String name) {
-	return namedCommands.get(name);
+        return namedCommands.get(name);
     }
 
     /** 
      * Look up a feature in the list of all named features.
      **/
     public Feature getNamedFeature(String name) {
-	return namedFeatures.get(name);
+        return namedFeatures.get(name);
     }
 
     /** 
      * Look up an RC handler in the list of all named handlers.
      **/
     public RCHandler getNamedRCHandler(String name) {
-	return namedRCHandlers.get(name);
+        return namedRCHandlers.get(name);
     }
 
     /**
@@ -388,199 +388,199 @@ public class ShowBuilder {
             showTop = makeShowTopSegment(showTopGroup);
         }
 
-	// In the following iteration, we specifically use the ArrayList
-	// methods, because they guarantee that elements that are added
-	// to the list during the iteration will be visited.
-	for (int i = 0; i < allNodes.size(); i++) {
-	    allNodes.get(i).postProcess(this);
-	}
-	
-	noMoreNodes = true;
-	    // This prevents any new nodes from being added to the
-	    // show tree.
+        // In the following iteration, we specifically use the ArrayList
+        // methods, because they guarantee that elements that are added
+        // to the list during the iteration will be visited.
+        for (int i = 0; i < allNodes.size(); i++) {
+            allNodes.get(i).postProcess(this);
+        }
+        
+        noMoreNodes = true;
+            // This prevents any new nodes from being added to the
+            // show tree.
 
-	Segment[] segments 
-	    = allSegments.toArray(new Segment[allSegments.size()]);
-	Feature[] features
-	    = allFeatures.toArray(new Feature[allFeatures.size()]);
-	RCHandler[] rcHandlers
-	    = allRCHandlers.toArray(new RCHandler[allRCHandlers.size()]);
-	Hashtable publicSegments 
-		= findPublic(namedSegments, namedSegments.keySet(),
-		             exportedSegments, "Segment");
-	Hashtable publicFeatures 
-		= findPublic(namedFeatures, namedFeatures.keySet(),
-			     exportedFeatures, "Feature");
-	Hashtable publicRCHandlers 
-		= findPublic(namedRCHandlers, namedRCHandlers.keySet(),
-			     exportedRCHandlers, "RC Handler");
-	Hashtable publicNamedCommands 
-		= findPublic(namedCommands, namedCommands.keySet(),
-			     exportedNamedCommands, "Named Command");
-	{
-	    Collection<Command> v = namedCommands.values();
-	    Command[] a = (Command[]) v.toArray(new Command[v.size()]);
-	    show.setNamedCommands(a);
-	}
-	
-	FontSpec[] fontArray = fonts.toArray(FontSpec.class);
-	String[] fontName = new String[fontArray.length];
-	int[] fontStyleSize = new int[fontArray.length];
-	for (int i = 0; i < fontArray.length; i++) {
-	    FontSpec s = fontArray[i];
-	    fontName[i] = s.name;
-	    fontStyleSize[i] = s.style + (s.size << 2);
-	}
+        Segment[] segments 
+            = allSegments.toArray(new Segment[allSegments.size()]);
+        Feature[] features
+            = allFeatures.toArray(new Feature[allFeatures.size()]);
+        RCHandler[] rcHandlers
+            = allRCHandlers.toArray(new RCHandler[allRCHandlers.size()]);
+        Hashtable publicSegments 
+                = findPublic(namedSegments, namedSegments.keySet(),
+                             exportedSegments, "Segment");
+        Hashtable publicFeatures 
+                = findPublic(namedFeatures, namedFeatures.keySet(),
+                             exportedFeatures, "Feature");
+        Hashtable publicRCHandlers 
+                = findPublic(namedRCHandlers, namedRCHandlers.keySet(),
+                             exportedRCHandlers, "RC Handler");
+        Hashtable publicNamedCommands 
+                = findPublic(namedCommands, namedCommands.keySet(),
+                             exportedNamedCommands, "Named Command");
+        {
+            Collection<Command> v = namedCommands.values();
+            Command[] a = (Command[]) v.toArray(new Command[v.size()]);
+            show.setNamedCommands(a);
+        }
+        
+        FontSpec[] fontArray = fonts.toArray(FontSpec.class);
+        String[] fontName = new String[fontArray.length];
+        int[] fontStyleSize = new int[fontArray.length];
+        for (int i = 0; i < fontArray.length; i++) {
+            FontSpec s = fontArray[i];
+            fontName[i] = s.name;
+            fontStyleSize[i] = s.style + (s.size << 2);
+        }
 
-	show.buildShow(segments, features, rcHandlers, stickyImages, 
+        show.buildShow(segments, features, rcHandlers, stickyImages, 
                        showTop, (Group)showTopGroup, 
                        publicSegments,
-		       publicFeatures, publicRCHandlers, publicNamedCommands,
-		       fontName, fontStyleSize);
+                       publicFeatures, publicRCHandlers, publicNamedCommands,
+                       fontName, fontStyleSize);
         
-	if (binaryGrinFileName != null) {
-	    show.setBinaryGrinFileName(binaryGrinFileName);
-	}
-	for (DeferredBuilder builder : deferredBuilders) {
-	    builder.finishBuilding(show);
-	}
+        if (binaryGrinFileName != null) {
+            show.setBinaryGrinFileName(binaryGrinFileName);
+        }
+        for (DeferredBuilder builder : deferredBuilders) {
+            builder.finishBuilding(show);
+        }
     }
 
     private Hashtable findPublic(Map namedThings, Set<String> names,
-    			         List<String> exportedThings, String thingName) 
-		throws IOException 
+                                 List<String> exportedThings, String thingName) 
+                throws IOException 
     {
-	Hashtable result = new Hashtable();
-	if (exportedThings == null) {
-	    result.putAll(namedThings);
-	} else {
-	    List<Pattern> patterns = new ArrayList<Pattern>();
-	    for (String pat : exportedThings) {
-		patterns.add(convertWildcard(pat));
-	    }
-	    for (String key : names) {
-		boolean found = false;
-		for (Pattern pat : patterns) {
-		    if (pat.matcher(key).matches()) {
-			found = true;
-			break;
-		    }
-		}
-		if (found) {
-		    Object value = namedThings.get(key);
-		    assert value != null;
-		    result.put(key, value);
-		}
-	    }
-	}
-	return result;
+        Hashtable result = new Hashtable();
+        if (exportedThings == null) {
+            result.putAll(namedThings);
+        } else {
+            List<Pattern> patterns = new ArrayList<Pattern>();
+            for (String pat : exportedThings) {
+                patterns.add(convertWildcard(pat));
+            }
+            for (String key : names) {
+                boolean found = false;
+                for (Pattern pat : patterns) {
+                    if (pat.matcher(key).matches()) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    Object value = namedThings.get(key);
+                    assert value != null;
+                    result.put(key, value);
+                }
+            }
+        }
+        return result;
     }
 
     private Pattern convertWildcard(String wildcard) {
-	StringBuilder pat = new StringBuilder();
-	for (int i = 0; i < wildcard.length(); i++) {
-	    char ch = wildcard.charAt(i);
-	    if (ch == '*') {
-		pat.append(".*");
-	    } else if (ch == '?') {
-		pat.append(".");
-	    } else if (ch == '[') {
-		int pos = wildcard.indexOf("]", i);
-		String range = null;
-		if (pos > -1) {
-		    range = wildcard.substring(i, pos + 1);
-		}
-		if (range.indexOf("[", 1) != -1) {
-		    // Can't handle '[' inside a '[' ']' pair)
-		    pos = -1;
-		}
-		if (pos == -1)  {
-		    // If we don't have a valid set of characters
-		    pat.append(Pattern.quote("" + ch));
-		} else {
-		    pat.append(range);
-		    i += range.length() - 1;
-		}
-	    } else {
-		pat.append(Pattern.quote("" + ch));
-	    }
-	}
-	return Pattern.compile(pat.toString());
+        StringBuilder pat = new StringBuilder();
+        for (int i = 0; i < wildcard.length(); i++) {
+            char ch = wildcard.charAt(i);
+            if (ch == '*') {
+                pat.append(".*");
+            } else if (ch == '?') {
+                pat.append(".");
+            } else if (ch == '[') {
+                int pos = wildcard.indexOf("]", i);
+                String range = null;
+                if (pos > -1) {
+                    range = wildcard.substring(i, pos + 1);
+                }
+                if (range.indexOf("[", 1) != -1) {
+                    // Can't handle '[' inside a '[' ']' pair)
+                    pos = -1;
+                }
+                if (pos == -1)  {
+                    // If we don't have a valid set of characters
+                    pat.append(Pattern.quote("" + ch));
+                } else {
+                    pat.append(range);
+                    i += range.length() - 1;
+                }
+            } else {
+                pat.append(Pattern.quote("" + ch));
+            }
+        }
+        return Pattern.compile(pat.toString());
     }
 
     public InterpolatedModel makeTimer(String name, int numFrames, 
-    				       boolean repeat, Command[] commands)
+                                       boolean repeat, Command[] commands)
     {
-	int[] frames = new int[] { 0,  numFrames-1 };
-		// That means keyframes from 0 through numFrames-1, which is
-		// a total of numFrames frames.  For example, a timer that's
-		// one frame long runs from frame 0 through frame 0.
-	int[][] values = new int[0][];
-	int repeatFrame;
-	if (repeat) {
-	    repeatFrame = 0;
-	} else {
-	    repeatFrame = Integer.MAX_VALUE;
-	}
-	int loopCount = 1;
-	return makeInterpolatedModel(name, frames, values, repeatFrame,
-				     loopCount, commands, SETimer.class);
-	    // Timer can be implemented as a degenerate case of 
-	    // InterpolatedModel.  It's just a model that interpolates zero
-	    // data values between frame 0 and frame numFrames.
+        int[] frames = new int[] { 0,  numFrames-1 };
+                // That means keyframes from 0 through numFrames-1, which is
+                // a total of numFrames frames.  For example, a timer that's
+                // one frame long runs from frame 0 through frame 0.
+        int[][] values = new int[0][];
+        int repeatFrame;
+        if (repeat) {
+            repeatFrame = 0;
+        } else {
+            repeatFrame = Integer.MAX_VALUE;
+        }
+        int loopCount = 1;
+        return makeInterpolatedModel(name, frames, values, repeatFrame,
+                                     loopCount, commands, SETimer.class);
+            // Timer can be implemented as a degenerate case of 
+            // InterpolatedModel.  It's just a model that interpolates zero
+            // data values between frame 0 and frame numFrames.
     }
 
     public SETranslatorModel
     makeTranslatorModel(String name, int[] frames, int[][] values, 
-    			boolean isRelative, int repeatFrame, int loopCount, 
-			Command[] commands) 
+                        boolean isRelative, int repeatFrame, int loopCount, 
+                        Command[] commands) 
     {
-	SETranslatorModel model = (SETranslatorModel)
-	       makeInterpolatedModel(name, frames, values, repeatFrame, 
-				     loopCount, commands, 
-				     SETranslatorModel.class);
-	model.setIsRelative(isRelative);
-	return model;
+        SETranslatorModel model = (SETranslatorModel)
+               makeInterpolatedModel(name, frames, values, repeatFrame, 
+                                     loopCount, commands, 
+                                     SETranslatorModel.class);
+        model.setIsRelative(isRelative);
+        return model;
     }
 
     public InterpolatedModel 
     makeScalingModel(String name, int[] frames, int[][] values, 
-    		     int repeatFrame, int loopCount, Command[] commands) 
+                     int repeatFrame, int loopCount, Command[] commands) 
     {
-	return makeInterpolatedModel(name, frames, values, repeatFrame, 
-				     loopCount, commands, SEScalingModel.class);
+        return makeInterpolatedModel(name, frames, values, repeatFrame, 
+                                     loopCount, commands, SEScalingModel.class);
     }
 
     public InterpolatedModel 
     makeInterpolatedModel(String name, int[] frames, int[][] values, 
-    			  int repeatFrame, int loopCount, Command[] commands, 
-			  Class clazz)
+                          int repeatFrame, int loopCount, Command[] commands, 
+                          Class clazz)
     {
-	int[] currValues = new int[values.length];
-	for (int i = 0; i < values.length; i++) {
-	    int[] valueList = values[i];
-	    assert valueList.length > 0;
-	    boolean allSame = true;
-	    currValues[i] = valueList[0];
-	    for (int j = 1; j < valueList.length; j++) {
-		allSame = allSame && currValues[i] == valueList[j];
-	    }
-	    if (allSame) {
-		values[i] = null;
-		    // If all of the values are the same, we don't need the
-		    // list of values for this parameter.
-	    }
-	}
-	SEInterpolatedModel result = null;
-	try {
-	    result = (SEInterpolatedModel) clazz.newInstance();
-	} catch (Exception ex) {     // newInstance() throws checked exceptions
-	    ex.printStackTrace();
-	    assert false;
-	}
-	result.setup(show, name, frames, currValues, values, repeatFrame,
-		     loopCount, commands);
-	return result;
+        int[] currValues = new int[values.length];
+        for (int i = 0; i < values.length; i++) {
+            int[] valueList = values[i];
+            assert valueList.length > 0;
+            boolean allSame = true;
+            currValues[i] = valueList[0];
+            for (int j = 1; j < valueList.length; j++) {
+                allSame = allSame && currValues[i] == valueList[j];
+            }
+            if (allSame) {
+                values[i] = null;
+                    // If all of the values are the same, we don't need the
+                    // list of values for this parameter.
+            }
+        }
+        SEInterpolatedModel result = null;
+        try {
+            result = (SEInterpolatedModel) clazz.newInstance();
+        } catch (Exception ex) {     // newInstance() throws checked exceptions
+            ex.printStackTrace();
+            assert false;
+        }
+        result.setup(show, name, frames, currValues, values, repeatFrame,
+                     loopCount, commands);
+        return result;
     }
 
     /**
@@ -588,7 +588,7 @@ public class ShowBuilder {
      * font hasn't been seen before, add it to the pool and return the index.
      **/
     public int getFontIndex(FontSpec spec) {
-	return fonts.getIndex(spec);
+        return fonts.getIndex(spec);
     }
 
 }

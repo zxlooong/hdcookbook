@@ -33,27 +33,27 @@ java_generated_class ReddyCommands [[
 #
 
 feature fixed_image F:Reddy.Scaled ( middle 960 middle 540 ) ReddyKilowatt.jpg 
-	scaling_model F:Reddy.Scaler ;
+        scaling_model F:Reddy.Scaler ;
 
 feature scaling_model F:Reddy.Scaler {
-	0	960 540		   5	   5	start 				mills
-	48	960 540		2000	2000	ease-out-elastic amplitude 8 	mills
-	60	965 540		2000	2000	linear				mills
+        0       960 540            5       5    start                           mills
+        48      960 540         2000    2000    ease-out-elastic amplitude 8    mills
+        60      965 540         2000    2000    linear                          mills
 } ;
 
 feature fade F:Reddy.Fade F:Reddy.Scaled {
-	0	0	start
-	1	255	linear
-	54	255	linear
-	60	0	ease-in-out-quad
+        0       0       start
+        1       255     linear
+        54      255     linear
+        60      0       ease-in-out-quad
     }  end_commands {
-	segment_done ;
+        segment_done ;
     }
 ;
 
 feature group F:Intro {
-	F:Reddy.Fade
-	F:Reddy.Scaler
+        F:Reddy.Fade
+        F:Reddy.Scaler
 } ;
 
 #
@@ -534,39 +534,39 @@ feature fade F:Label.32
       95   0 linear }  end_commands { activate_part F:LabelAssembly label-0 ; segment_done ; } ; 
 
 feature assembly F:LabelAssembly {
-    label-0		F:Label.0
-    label-1		F:Label.1
-    label-2		F:Label.2
-    label-3		F:Label.3
-    label-4		F:Label.4
-    label-5		F:Label.5
-    label-6		F:Label.6
-    label-7		F:Label.7
-    label-8		F:Label.8
-    label-9		F:Label.9
-    label-10		F:Label.10
-    label-11		F:Label.11
-    label-12		F:Label.12
-    label-13		F:Label.13
-    label-14		F:Label.14
-    label-15		F:Label.15
-    label-16		F:Label.16
-    label-17		F:Label.17
-    label-18		F:Label.18
-    label-19		F:Label.19
-    label-20		F:Label.20
-    label-21		F:Label.21
-    label-22		F:Label.22
-    label-23		F:Label.23
-    label-24		F:Label.24
-    label-25		F:Label.25
-    label-26		F:Label.26
-    label-27		F:Label.27
-    label-28		F:Label.28
-    label-29		F:Label.29
-    label-30		F:Label.30
-    label-31		F:Label.31
-    label-32		F:Label.32
+    label-0             F:Label.0
+    label-1             F:Label.1
+    label-2             F:Label.2
+    label-3             F:Label.3
+    label-4             F:Label.4
+    label-5             F:Label.5
+    label-6             F:Label.6
+    label-7             F:Label.7
+    label-8             F:Label.8
+    label-9             F:Label.9
+    label-10            F:Label.10
+    label-11            F:Label.11
+    label-12            F:Label.12
+    label-13            F:Label.13
+    label-14            F:Label.14
+    label-15            F:Label.15
+    label-16            F:Label.16
+    label-17            F:Label.17
+    label-18            F:Label.18
+    label-19            F:Label.19
+    label-20            F:Label.20
+    label-21            F:Label.21
+    label-22            F:Label.22
+    label-23            F:Label.23
+    label-24            F:Label.24
+    label-25            F:Label.25
+    label-26            F:Label.26
+    label-27            F:Label.27
+    label-28            F:Label.28
+    label-29            F:Label.29
+    label-30            F:Label.30
+    label-31            F:Label.31
+    label-32            F:Label.32
 } ;
 
 
@@ -591,11 +591,11 @@ segment S:Initialize
 
 segment S:Intro 
     active {
-	F:Intro
+        F:Intro
     } setup {
-	F:Everything
+        F:Everything
     } next {
-	activate_segment S:Running ;
+        activate_segment S:Running ;
     }
 ;
 
@@ -603,7 +603,7 @@ segment S:Running
     active {
         F:Running
     } setup {
-	F:Everything
+        F:Everything
     } next {
         activate_segment S:Intro ;
     }

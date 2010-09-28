@@ -153,7 +153,7 @@ public class Debug {
      *      try {
      *          throw new RuntimeException("STACK BACKTRACE");
      *      } catch (RuntimeException ex) {
-     *		Debug.printStackTrace(ex);
+     *          Debug.printStackTrace(ex);
      *      }
      * </pre>
      **/

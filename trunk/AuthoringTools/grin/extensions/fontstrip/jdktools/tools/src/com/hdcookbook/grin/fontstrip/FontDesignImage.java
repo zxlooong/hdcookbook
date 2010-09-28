@@ -305,9 +305,9 @@ public class FontDesignImage {
             return (int) layout.getLeading();
         }
 
-	public int getAscent() {
-	    return (int) Math.round(layout.getAscent());
-	}
+        public int getAscent() {
+            return (int) Math.round(layout.getAscent());
+        }
          
         private Font getFont() {
             return font;

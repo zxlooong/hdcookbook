@@ -89,11 +89,11 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
      **/
     public void setup(boolean activated, int state, 
             VisualRCHandler handler, boolean runCommands, int gridNumber)  {
-	this.activated = activated;
-      	this.state = state;
-	this.handler = handler;
-	this.runCommands = runCommands;
-	this.gridNumber = gridNumber;
+        this.activated = activated;
+        this.state = state;
+        this.handler = handler;
+        this.runCommands = runCommands;
+        this.gridNumber = gridNumber;
     }
     
     public void setActivated(boolean activated) {
@@ -116,33 +116,33 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
      * Override of equals and hashCode to make canonicalization work
      **/
     public boolean equals(Object other) {
-	if (this == other) {
-	    return true;
-	} else if (!this.getClass().equals(other.getClass())) {
-	    return false;
-	}
-	SESetVisualRCStateCommand o = (SESetVisualRCStateCommand) other;
-	return this.show == o.show
-	       && this.activated == o.activated
-	       && this.state == o.state
-	       && this.handler == o.handler
-	       && this.runCommands == o.runCommands
-	       && this.gridNumber == o.gridNumber;
+        if (this == other) {
+            return true;
+        } else if (!this.getClass().equals(other.getClass())) {
+            return false;
+        }
+        SESetVisualRCStateCommand o = (SESetVisualRCStateCommand) other;
+        return this.show == o.show
+               && this.activated == o.activated
+               && this.state == o.state
+               && this.handler == o.handler
+               && this.runCommands == o.runCommands
+               && this.gridNumber == o.gridNumber;
     }
 
     /**
      * Override of equals and hashCode to make canonicalization work
      **/
     public int hashCode() {
-	int result = state << 8;
-	if (runCommands) {
-	    result = result + 7;
-	}
-	if (activated) {
-	    result = result + 11;
-	}
-	result += gridNumber << 12;
-	return show.hashCode() ^ handler.hashCode() ^ result;
+        int result = state << 8;
+        if (runCommands) {
+            result = result + 7;
+        }
+        if (activated) {
+            result = result + 11;
+        }
+        result += gridNumber << 12;
+        return show.hashCode() ^ handler.hashCode() ^ result;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) 
@@ -180,9 +180,9 @@ public class SESetVisualRCStateCommand extends SetVisualRCStateCommand
      * {@inheritDoc}
      **/
     public String toString() {
-	return "set_visual_rc " + handler 
-				+ " (" + activated + ", " 
-				+ handler.getStateName(state) + ", "
-				+ runCommands + ", " + gridNumber + " )";
+        return "set_visual_rc " + handler 
+                                + " (" + activated + ", " 
+                                + handler.getStateName(state) + ", "
+                                + runCommands + ", " + gridNumber + " )";
     }
 }

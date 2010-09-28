@@ -94,11 +94,11 @@ public class SEShowCommands  {
     // package-private constructor
     //
     SEShowCommands(SEShow show) {
-	this.show = show;
+        this.show = show;
     }
 
     SEShow getShow() {
-	return show;
+        return show;
     }
     
     /**
@@ -115,19 +115,19 @@ public class SEShowCommands  {
     // null.
     //
     public synchronized Class getCommandClass() {
-	if (!triedShowCommandsClass) {
-	    triedShowCommandsClass = true;
-	    try {
-		showCommandsClass = Class.forName(className);
-	    } catch (ClassNotFoundException ex) {
-		System.out.println(className + " not found; java_command commands won't run.");
-	    } catch (Throwable t) {
-		System.out.println("=======  Problem with " + className 
-					+ "  =====");
-		t.printStackTrace();
-	    }
-	}
-	return showCommandsClass;
+        if (!triedShowCommandsClass) {
+            triedShowCommandsClass = true;
+            try {
+                showCommandsClass = Class.forName(className);
+            } catch (ClassNotFoundException ex) {
+                System.out.println(className + " not found; java_command commands won't run.");
+            } catch (Throwable t) {
+                System.out.println("=======  Problem with " + className 
+                                        + "  =====");
+                t.printStackTrace();
+            }
+        }
+        return showCommandsClass;
     }
 
     /**
@@ -187,11 +187,11 @@ public class SEShowCommands  {
     } 
 
     public void setOriginalSource(String originalSource) {
-	this.originalSource = originalSource;
+        this.originalSource = originalSource;
     }
 
     public String getOriginalSource() {
-	return originalSource;
+        return originalSource;
     }
 
     private void checkForJavaCommandBody(String classBody) throws IOException {

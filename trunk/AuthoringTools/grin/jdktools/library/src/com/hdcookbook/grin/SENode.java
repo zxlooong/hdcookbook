@@ -124,8 +124,8 @@ public interface SENode {
      *    <li>GRIN source file is read and tree is built in memory
      *    <li>Forward references are resolved (in multiple passes)
      *    <li>postProcess() is called on every node.  During the call,
-     *	      child feature nodes can be added, and parent features can
-     *	      be injected.
+     *        child feature nodes can be added, and parent features can
+     *        be injected.
      *    <li>The double-use checker runs to ensure the graph structure
      *        is valid.
      *    <li>Deferred builders (e.g. TranslatorHelper) are called.
@@ -143,9 +143,9 @@ public interface SENode {
      * including nodes that are created during the execution of postProcess()
      * in another node.
      *
-     * @param	builder	    The builder that holds state for the show
+     * @param   builder     The builder that holds state for the show
      *
-     * @throws 	IOException if an error is encountered
+     * @throws  IOException if an error is encountered
      *
      * @see ShowBuilder#addSyntheticFeature(Feature)
      * @see ShowBuilder#injectParent(Feature, Feature)
@@ -162,10 +162,10 @@ public interface SENode {
      * automatically, including nodes that are created during the 
      * execution of postProcess().
      *
-     * @throws IOException	If the operation can't be completed
+     * @throws IOException      If the operation can't be completed
      *
      * @see SENode#changeFeatureReference(Feature, Feature)
      **/
     public void changeFeatureReference(Feature from, Feature to) 
-    	throws IOException ;
+        throws IOException ;
 }

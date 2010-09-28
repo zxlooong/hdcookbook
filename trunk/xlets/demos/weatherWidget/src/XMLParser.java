@@ -177,8 +177,8 @@ class XMLParser {
                     try {
                         st.nextToken();      // ignore day of week
                         st.nextToken();      // ignore day of month
-                        st.nextToken(); 	// ignore month
-                        st.nextToken(); 	// ignore year
+                        st.nextToken();         // ignore month
+                        st.nextToken();         // ignore year
                         time = st.nextToken();
                         am_pm = st.nextToken();
                     } catch (NoSuchElementException e) {

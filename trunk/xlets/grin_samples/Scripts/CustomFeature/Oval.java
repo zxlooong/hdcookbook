@@ -28,17 +28,17 @@ public class Oval extends Feature implements Node {
      * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
-	//
-	// This is synchronized to only occur within model updates.
-	//
-	isActivated = mode;
+        //
+        // This is synchronized to only occur within model updates.
+        //
+        isActivated = mode;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
-	return 0;
+        return 0;
     }
 
     /**
@@ -51,7 +51,7 @@ public class Oval extends Feature implements Node {
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	return false;
+        return false;
     }
 
     /**
@@ -64,25 +64,25 @@ public class Oval extends Feature implements Node {
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
-	drawRecord.setChanged();
+        drawRecord.setChanged();
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(x, y, w, h);
-	drawRecord.setSemiTransparent();
-	context.addArea(drawRecord);
+        drawRecord.setArea(x, y, w, h);
+        drawRecord.setSemiTransparent();
+        context.addArea(drawRecord);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	if (!isActivated) {
-	    return;
-	}
+        if (!isActivated) {
+            return;
+        }
         gr.setColor(color);
         gr.fillOval(x, y, w, h);
     }

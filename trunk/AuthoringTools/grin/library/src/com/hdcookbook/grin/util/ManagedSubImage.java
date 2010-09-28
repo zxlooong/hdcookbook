@@ -73,114 +73,114 @@ public class ManagedSubImage extends ManagedImage {
     private int numReferences = 0;
 
     ManagedSubImage(String name, String mosaicName, Rectangle placement) {
-	this.name = name;
-	this.mosaic = (ManagedFullImage) ImageManager.getImage(mosaicName);
-	this.placement = placement;
+        this.name = name;
+        this.mosaic = (ManagedFullImage) ImageManager.getImage(mosaicName);
+        this.placement = placement;
     }
 
     public String getName() {
-	return name;
+        return name;
     }
 
     public int getWidth() {
-	return placement.width;
+        return placement.width;
     }
     
     public int getHeight() {
-	return placement.height;
+        return placement.height;
     }
 
     void addReference() {
-	numReferences++;
-	mosaic.addReference();
+        numReferences++;
+        mosaic.addReference();
     }
 
     void removeReference() {
-	numReferences--;
-	mosaic.removeReference();
+        numReferences--;
+        mosaic.removeReference();
     }
 
     boolean isReferenced() {
-	return numReferences > 0;
+        return numReferences > 0;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void prepare() {
-	mosaic.prepare();
+        mosaic.prepare();
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean isLoaded() {
-	return mosaic.isLoaded();
+        return mosaic.isLoaded();
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean hadErrorLoading() {
-	return mosaic.hadErrorLoading();
+        return mosaic.hadErrorLoading();
     }
 
     /**
      * {@inheritDoc}
      **/
     public void load(Component comp) {
-	mosaic.load(comp);
+        mosaic.load(comp);
     }
 
     /**
      * {@inheritDoc}
      **/
     public synchronized void startLoading(Component  comp) {
-	mosaic.startLoading(comp);
+        mosaic.startLoading(comp);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void unprepare() {
-	mosaic.unprepare();
+        mosaic.unprepare();
     }
 
     /**
      * {@inheritDoc}
      **/
     public void draw(Graphics2D gr, int x, int y, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, x, y, x+p.width, y+p.height,
-				   p.x, p.y, p.x+p.width, p.y+p.height, comp);
+        Rectangle p = placement;
+        gr.drawImage(mosaic.image, x, y, x+p.width, y+p.height,
+                                   p.x, p.y, p.x+p.width, p.y+p.height, comp);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void drawScaled(Graphics2D gr, Rectangle bounds, Component comp) {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, 
-		     bounds.x, bounds.y, 
-		     bounds.x+bounds.width, bounds.y + bounds.height,
-		     p.x, p.y, p.x+p.width, p.y+p.height, comp);
+        Rectangle p = placement;
+        gr.drawImage(mosaic.image, 
+                     bounds.x, bounds.y, 
+                     bounds.x+bounds.width, bounds.y + bounds.height,
+                     p.x, p.y, p.x+p.width, p.y+p.height, comp);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void drawClipped(Graphics2D gr, int x, int y, 
-			    Rectangle subsection, Component comp) 
+                            Rectangle subsection, Component comp) 
     {
-	Rectangle p = placement;
-	gr.drawImage(mosaic.image, 
+        Rectangle p = placement;
+        gr.drawImage(mosaic.image, 
                      x, y, x+subsection.width, y+subsection.height,
-		     p.x+subsection.x, p.y+subsection.y, 
+                     p.x+subsection.x, p.y+subsection.y, 
                      p.x+subsection.x+subsection.width, 
-		     p.y+subsection.y+subsection.height, comp);
+                     p.y+subsection.y+subsection.height, comp);
     }
 
     void destroy() {
-	ImageManager.ungetImage(mosaic);
+        ImageManager.ungetImage(mosaic);
     }
 }

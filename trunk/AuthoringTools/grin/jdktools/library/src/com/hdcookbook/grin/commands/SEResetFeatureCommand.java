@@ -70,11 +70,11 @@ public class SEResetFeatureCommand extends ResetFeatureCommand implements SENode
     }
    
     public Feature getFeature() {
-	return feature;
+        return feature;
     }
 
     public void setFeature(Feature feature) {
-	this.feature = feature;
+        this.feature = feature;
     }
 
     public String getRuntimeClassName() {
@@ -85,20 +85,20 @@ public class SEResetFeatureCommand extends ResetFeatureCommand implements SENode
      * Override of equals and hashCode to make canonicalization work
      **/
     public boolean equals(Object other) {
-	if (this == other) {
-	    return true;
-	} else if (!this.getClass().equals(other.getClass())) {
-	    return false;
-	}
-	SEResetFeatureCommand o = (SEResetFeatureCommand) other;
-	return this.show == o.show && this.feature == o.feature;
+        if (this == other) {
+            return true;
+        } else if (!this.getClass().equals(other.getClass())) {
+            return false;
+        }
+        SEResetFeatureCommand o = (SEResetFeatureCommand) other;
+        return this.show == o.show && this.feature == o.feature;
     }
 
     /**
      * Override of equals and hashCode to make canonicalization work
      **/
     public int hashCode() {
-	return show.hashCode() ^ feature.hashCode();
+        return show.hashCode() ^ feature.hashCode();
     }
 
     public void writeInstanceData(GrinDataOutputStream out) 
@@ -122,16 +122,16 @@ public class SEResetFeatureCommand extends ResetFeatureCommand implements SENode
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
-	if (feature == from) {
-	    feature = to;
-	}
+        if (feature == from) {
+            feature = to;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	return "reset_feature " + feature;
+        return "reset_feature " + feature;
     }
 
 }

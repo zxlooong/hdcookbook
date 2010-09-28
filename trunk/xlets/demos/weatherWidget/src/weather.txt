@@ -8,7 +8,7 @@ show
 #
 exports 
     segments {
-	S:Initialize 
+        S:Initialize 
     } features { 
        F:Window.Mover
        F:WeatherImage
@@ -28,22 +28,22 @@ exports
 java_generated_class WeatherCommands [[ 
 
         import com.hdcookbook.grin.Show;
-	import com.hdcookbook.grin.GrinXHelper;
+        import com.hdcookbook.grin.GrinXHelper;
         import com.hdcookbook.grin.util.Debug;
         
-	public class WeatherCommands extends GrinXHelper {
-	
-	    public WeatherCommands(Show show) { 
-		super(show); 
-	    }
+        public class WeatherCommands extends GrinXHelper {
+        
+            public WeatherCommands(Show show) { 
+                super(show); 
+            }
 
-	    public WeatherDirector getDirector() {
-		return (WeatherDirector) show.getDirector();
-	    }
-	
-	    JAVA_COMMAND_BODY
-	
-	}
+            public WeatherDirector getDirector() {
+                return (WeatherDirector) show.getDirector();
+            }
+        
+            JAVA_COMMAND_BODY
+        
+        }
 
 ]]
 
@@ -81,32 +81,32 @@ feature group F:Everything {
 #
 
 feature box F:ZipBar ( 0 0 60 30 )
-		outline 1 { 0 0 205 255 }
-		fill { 0 0 0 255 } ;
+                outline 1 { 0 0 205 255 }
+                fill { 0 0 0 255 } ;
 
 feature box F:ZipEditBar ( 0 0 60 30 )
-		outline 2 { 255 255 255 255 }
-		fill { 0 0 0 255 } ;
+                outline 2 { 255 255 255 255 }
+                fill { 0 0 0 255 } ;
 
 feature box F:LocationBar ( 0 35 215 65 )
-		outline 7 { 0 0 139 255 }
-		fill { 0 0 139 255 } ;
+                outline 7 { 0 0 139 255 }
+                fill { 0 0 139 255 } ;
 
 feature box F:DayBar ( 220 35 300 65 )
-		outline 7 { 0 0 205 255 }
-		fill { 0 0 205 255 } ;
+                outline 7 { 0 0 205 255 }
+                fill { 0 0 205 255 } ;
 
 feature box F:DayBarPressed ( 220 35 300 65 )
-		outline 2 { 0 0 0 255 }
-		fill { 0 0 205 255 } ;
+                outline 2 { 0 0 0 255 }
+                fill { 0 0 205 255 } ;
 
 feature box F:StatusBar ( 0 195 300 225 )
-		outline 7 { 0 0 139 255 }
-		fill { 0 0 139 255 } ;
+                outline 7 { 0 0 139 255 }
+                fill { 0 0 139 255 } ;
 
 feature box F:TempBar ( 220 195 300 225 )
-		outline 7 { 0 0 205 255 }
-		fill { 0 0 205 255 } ;
+                outline 7 { 0 0 205 255 }
+                fill { 0 0 205 255 } ;
 
 feature text F:Location left 15 top 40 { "Location Name" }
     Lisa plain 16 { { 255 255 255 255 } } ;
@@ -150,13 +150,13 @@ feature timer F:PollingTimer 1440 repeat { # Every minute
 
 feature assembly F:WindSelector  {
     default             sub_feature group {
-			    F:WeatherImage
-			    F:Circle
-			    F:WindDirection
-			    F:Speed
+                            F:WeatherImage
+                            F:Circle
+                            F:WindDirection
+                            F:Speed
                         } ;
 
-    forecast          	F:WeatherImage
+    forecast            F:WeatherImage
 } ;
 
 # Changes the status of zip editor when a
@@ -164,11 +164,11 @@ feature assembly F:WindSelector  {
 #
 feature assembly F:ZipChooser {
 
-   default	F:ZipBar
+   default      F:ZipBar
 
-   editing	sub_feature group {
-		    F:ZipEditBar
-		} ;
+   editing      sub_feature group {
+                    F:ZipEditBar
+                } ;
 } ;
 
 # Shows that Day is changing 
@@ -177,15 +177,15 @@ feature assembly F:ZipChooser {
 feature assembly F:WeatherUpdater {
 
    normal       sub_feature group {
-		    F:DayBar
-		} ;
+                    F:DayBar
+                } ;
 
    changed       sub_feature group {
-		    F:DayBarPressed
-		    sub_feature timer 5 {
-			activate_part F:WeatherUpdater normal ;
-		    } ;
-		} ; 
+                    F:DayBarPressed
+                    sub_feature timer 5 {
+                        activate_part F:WeatherUpdater normal ;
+                    } ;
+                } ; 
 } ;         
 
 
@@ -194,32 +194,32 @@ feature assembly F:WeatherUpdater {
 rc_handler key_pressed H:DownRight {
        down right 
     } execute {
-	activate_part F:WeatherUpdater changed ;
+        activate_part F:WeatherUpdater changed ;
         java_command [[ getDirector().dayNext(); ]]
     }
 ;
 
 
 rc_handler key_pressed H:Enter {
-	enter
+        enter
      } execute {
-	activate_part F:ZipChooser default ;
-	java_command [[ getDirector().zipDone(); ]]
+        activate_part F:ZipChooser default ;
+        java_command [[ getDirector().zipDone(); ]]
      }
 ;
 
 rc_handler key_pressed H:Left {
-	left
+        left
      } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipErased(); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipErased(); ]]
      }
 ;
 
 rc_handler key_pressed H:Up {
-	up
+        up
     } execute {
-	activate_part F:ZipChooser editing ;
+        activate_part F:ZipChooser editing ;
     }
 ;
 
@@ -229,82 +229,82 @@ rc_handler key_pressed H:Up {
 #
 
 rc_handler key_pressed H:Zero {
-	0
+        0
       } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipEntered('0'); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipEntered('0'); ]]
       }
 ;
 
 rc_handler key_pressed H:One {
-	1
+        1
       } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipEntered('1'); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipEntered('1'); ]]
       }
 ;
 
 rc_handler key_pressed H:Two {
-	2
+        2
       } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipEntered('2'); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipEntered('2'); ]]
       }
 ;
 
 rc_handler key_pressed H:Three {
-	3
+        3
       } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipEntered('3'); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipEntered('3'); ]]
       }
 ;
 
 rc_handler key_pressed H:Four {
-	4
+        4
       } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipEntered('4'); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipEntered('4'); ]]
       }
 ;
 
 rc_handler key_pressed H:Five {
-	5
+        5
       } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipEntered('5'); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipEntered('5'); ]]
       }
 ;
 
 rc_handler key_pressed H:Six {
-	6
+        6
       } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipEntered('6'); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipEntered('6'); ]]
       }
 ;
 
 rc_handler key_pressed H:Seven {
-	7
+        7
       } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipEntered('7'); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipEntered('7'); ]]
       }
 ;
 
 rc_handler key_pressed H:Eight {
-	8
+        8
       } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipEntered('8'); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipEntered('8'); ]]
       }
 ;
 
 rc_handler key_pressed H:Nine {
-	9
+        9
       } execute {
-	activate_part F:ZipChooser editing ;
-	java_command [[ getDirector().zipEntered('9'); ]]
+        activate_part F:ZipChooser editing ;
+        java_command [[ getDirector().zipEntered('9'); ]]
       }
 ;
 
@@ -314,22 +314,22 @@ rc_handler key_pressed H:Nine {
 
 segment S:Initialize 
     setup { 
-	F:Everything
+        F:Everything
     } on_entry {
-	java_command [[ 
-	    Debug.println();
-	    Debug.println("***  Initializing Weather Widget ***"); 
-	    Debug.println();
-	]]
-	java_command [[ 
-	    getDirector().initialize();
-	]]
+        java_command [[ 
+            Debug.println();
+            Debug.println("***  Initializing Weather Widget ***"); 
+            Debug.println();
+        ]]
+        java_command [[ 
+            getDirector().initialize();
+        ]]
     } setup_done {
-	java_command [[
-	    WeatherDirector dir = getDirector();
-	    dir.pollWeather();
- 	]]	
-  	activate_segment S:Showing ;
+        java_command [[
+            WeatherDirector dir = getDirector();
+            dir.pollWeather();
+        ]]      
+        activate_segment S:Showing ;
     }
 ;
 
@@ -339,35 +339,35 @@ segment S:Initialize
 #
 segment S:Showing
     active {
-	F:ZipChooser
-	F:ZipCode
-    	F:LocationBar
+        F:ZipChooser
+        F:ZipCode
+        F:LocationBar
         F:Location
-	F:WindSelector
-    	F:StatusBar
-	F:WeatherUpdater
-	F:TempBar
-   	F:Condition
-	F:Day
-	F:Temp
-	F:PollingTimer
+        F:WindSelector
+        F:StatusBar
+        F:WeatherUpdater
+        F:TempBar
+        F:Condition
+        F:Day
+        F:Temp
+        F:PollingTimer
     } setup {
-	F:Everything
+        F:Everything
     } rc_handlers {
-	H:DownRight
-	H:Left
-	H:Up
-	H:Enter
-	H:Zero
-	H:One
-	H:Two
-	H:Three
-	H:Four
-	H:Five
-	H:Six
-	H:Seven
-	H:Eight
-	H:Nine
+        H:DownRight
+        H:Left
+        H:Up
+        H:Enter
+        H:Zero
+        H:One
+        H:Two
+        H:Three
+        H:Four
+        H:Five
+        H:Six
+        H:Seven
+        H:Eight
+        H:Nine
     }
 ;
 end_show

@@ -93,7 +93,7 @@ public class RepaintDrawAnimator extends Animator {
     }
 
     public Rectangle getPosition() {
-	return position;
+        return position;
     }
 
     /**
@@ -101,12 +101,12 @@ public class RepaintDrawAnimator extends Animator {
      * given frame.
      **/
     public synchronized void initAtFrame(int frame, Container container, 
-    					 Rectangle position) 
+                                         Rectangle position) 
     {
-	this.container = container;
-	this.position = position;
-	this.startFrame = frame;
-	this.startTime = System.currentTimeMillis();
+        this.container = container;
+        this.position = position;
+        this.startFrame = frame;
+        this.startTime = System.currentTimeMillis();
     }
 
     public void destroy() {
@@ -118,7 +118,7 @@ public class RepaintDrawAnimator extends Animator {
      **/
     public synchronized DVBBufferedImage getDoubleBuffer(int width, int height)
     {
-	return null;
+        return null;
     }
 
     /**
@@ -128,41 +128,41 @@ public class RepaintDrawAnimator extends Animator {
      * mode of the graphics will be set to AlphaComposite.Src.
      **/
     public Graphics2D getDoubleBufferGraphics() {
-	return null;
+        return null;
     }
 
     /**
      * Return true if this animator needs the sprites to erase themselves.
      **/
     public boolean needsErase() {
-	return false;
+        return false;
     }
 
     /**
      * Called by the main loop once per frame.
      **/
     public void animateGame(int frame, Game game) throws InterruptedException {
-	if (Debug.LEVEL > 0 && frame % 100 == 0) {
-	    Debug.println("Frame " + (frame - startFrame));
-	}
-	long now = System.currentTimeMillis();
-	long fTime = ((frame - startFrame) * 1000L) / 24L + startTime;
-	if (now < fTime) {	// We're ahead
-	    Thread.sleep(fTime - now);
-	} else {
-	    long nextF = ((frame + 1 - startFrame) * 1000L) / 24L + startTime;
-	    if (now >= nextF) {
-	    	// We're behind.  However, if we drop a frame it's more likely
-		// to happen because we don't get a repaint call.
-		return;
-	    }
-	}
-	synchronized(game) {
-	    game.advanceToFrame(frame);
-	}
-	// We could make this more efficient by giving the game the
-	// means to give us a bounding box
-	container.repaint(position.x, position.y, 
-			  position.width, position.height);
+        if (Debug.LEVEL > 0 && frame % 100 == 0) {
+            Debug.println("Frame " + (frame - startFrame));
+        }
+        long now = System.currentTimeMillis();
+        long fTime = ((frame - startFrame) * 1000L) / 24L + startTime;
+        if (now < fTime) {      // We're ahead
+            Thread.sleep(fTime - now);
+        } else {
+            long nextF = ((frame + 1 - startFrame) * 1000L) / 24L + startTime;
+            if (now >= nextF) {
+                // We're behind.  However, if we drop a frame it's more likely
+                // to happen because we don't get a repaint call.
+                return;
+            }
+        }
+        synchronized(game) {
+            game.advanceToFrame(frame);
+        }
+        // We could make this more efficient by giving the game the
+        // means to give us a bounding box
+        container.repaint(position.x, position.y, 
+                          position.width, position.height);
     }
 }

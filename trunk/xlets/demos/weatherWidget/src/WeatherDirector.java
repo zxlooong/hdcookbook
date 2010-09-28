@@ -111,9 +111,9 @@ public class WeatherDirector extends Director {
     public void initialize() {
         weatherIcon = (FixedImage) getFeature("F:WeatherImage");
         weatherImages[0] = weatherIcon.getImage();
-	blankWeatherImage = ImageManager.getImage("images/blank_weather.png");	
-	blankWeatherImage.prepare();
- 	blankWeatherImage.load(getShow().component);
+        blankWeatherImage = ImageManager.getImage("images/blank_weather.png");  
+        blankWeatherImage.prepare();
+        blankWeatherImage.load(getShow().component);
         location = (Text) getFeature("F:Location");
         condition = (Text) getFeature("F:Condition");
         day = (Text) getFeature("F:Day");
@@ -122,9 +122,9 @@ public class WeatherDirector extends Director {
         Feature[] features = windSelector.getParts();
         displayWind = (Group) features[0];
         noWind = features[1];
-	zipCode = (Text) getFeature("F:ZipCode");
-	String[] zip = zipCode.getText();
-	zipBuf = new StringBuffer(zip[0]);
+        zipCode = (Text) getFeature("F:ZipCode");
+        String[] zip = zipCode.getText();
+        zipBuf = new StringBuffer(zip[0]);
         NetworkManager.start(); // will be ignored if the manager is already started.
         NetworkManager.start();
     }
@@ -176,7 +176,7 @@ public class WeatherDirector extends Director {
         Debug.println("Updating the status");
 
         if ((weatherImages == null) ||
-	    	(weatherUpdate == null)) {
+                (weatherUpdate == null)) {
             weatherIcon.replaceImage(blankWeatherImage);
             location.setText(emptyStringArray);
             day.setText(emptyStringArray);
@@ -249,27 +249,27 @@ public class WeatherDirector extends Director {
     }
 
     void zipEntered(char key) {
-	if (zipBuf.length() < 5) {  // accepts only zip length of 5
-	    zipBuf.append(key);
-	    zipCode.setText(new String[] { zipBuf.toString()});	
-	}
+        if (zipBuf.length() < 5) {  // accepts only zip length of 5
+            zipBuf.append(key);
+            zipCode.setText(new String[] { zipBuf.toString()}); 
+        }
     }
 
     void zipErased() {
-	if (zipBuf.length() > 0) {
-	    zipBuf = zipBuf.deleteCharAt((zipBuf.length() - 1));
-	    zipCode.setText(new String[] { zipBuf.toString()});	
-	}
+        if (zipBuf.length() > 0) {
+            zipBuf = zipBuf.deleteCharAt((zipBuf.length() - 1));
+            zipCode.setText(new String[] { zipBuf.toString()}); 
+        }
     }
 
     void zipDone() {
-	WeatherMan.setZip(zipBuf.toString());
-	//zipBuf.setLength(0); // editing is over;clear the zip code in the UI
-	//zipCode.setText(new String[] { zipBuf.toString()});	
-	pollWeather();
+        WeatherMan.setZip(zipBuf.toString());
+        //zipBuf.setLength(0); // editing is over;clear the zip code in the UI
+        //zipCode.setText(new String[] { zipBuf.toString()});   
+        pollWeather();
     }
-	
-	
+        
+        
     void setPendingCommand(WeatherMan man) {
         synchronized (this) {
             if (pendingCommand == null) {

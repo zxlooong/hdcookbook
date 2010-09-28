@@ -75,7 +75,7 @@ public interface FeatureRef {
     /**
      * Resolve this FeatureRef to an actual feature
      *
-     * @throws IOException	if there's an error resolving it
+     * @throws IOException      if there's an error resolving it
      **/
     public Feature getFeature() throws IOException;
 }

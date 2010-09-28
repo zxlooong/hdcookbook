@@ -90,10 +90,10 @@ public class PlayVideoCommand extends Command implements Node {
         } else {
             Debug.println("Playing back " + tag);
         }
-	 // Playing video takes some time to execute, so we want to
-	 // defer any following commands (like one to move to the next
-	 // segment) until we're caught up.
-	show.deferNextCommands();
+         // Playing video takes some time to execute, so we want to
+         // defer any following commands (like one to move to the next
+         // segment) until we're caught up.
+        show.deferNextCommands();
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

@@ -9,10 +9,10 @@ without re-authoring the assets.
 
 The show file was written for 1920x1080, and versions are built for:
 
-	1920x1080 (full HD)
-	1280x720
-	960x540 (QHD)
-	720x480 (NTSC SD) @ 16x9
+        1920x1080 (full HD)
+        1280x720
+        960x540 (QHD)
+        720x480 (NTSC SD) @ 16x9
 
 Note that scaling to 720x480 means non-square pixels.
 

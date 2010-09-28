@@ -102,34 +102,34 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!setupMode || !imageSetup || isActivated) {
-	    throw new IllegalStateException();
-	}
-	FixedImage result = new FixedImage(show);
-	result.placement = placement;
-	result.fileName = fileName;	// null if image replaced
-	if (scaledBounds != null) {
-	    result.scaledBounds = new Rectangle(scaledBounds);
-	}
-	result.image = image;
-	ImageManager.getImage(image);
-		// This increments the reference count of this ManagedImage,
-		// which is necessary because when the clone is destroyed,
-		// it will decrement that reference count.
-	result.image.prepare();
-		// Balanced by an unprepare in destroy()
-	result.imageSetup = true;
-	result.setupMode = true;
-	return result;
+        if (!setupMode || !imageSetup || isActivated) {
+            throw new IllegalStateException();
+        }
+        FixedImage result = new FixedImage(show);
+        result.placement = placement;
+        result.fileName = fileName;     // null if image replaced
+        if (scaledBounds != null) {
+            result.scaledBounds = new Rectangle(scaledBounds);
+        }
+        result.image = image;
+        ImageManager.getImage(image);
+                // This increments the reference count of this ManagedImage,
+                // which is necessary because when the clone is destroyed,
+                // it will decrement that reference count.
+        result.image.prepare();
+                // Balanced by an unprepare in destroy()
+        result.imageSetup = true;
+        result.setupMode = true;
+        return result;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
-	super.initializeClone(original, clones);
-	FixedImage other = (FixedImage) original;
-	scalingModel = (InterpolatedModel)
+        super.initializeClone(original, clones);
+        FixedImage other = (FixedImage) original;
+        scalingModel = (InterpolatedModel)
                 Feature.clonedReference(other.scalingModel, clones);
     }
 
@@ -139,21 +139,21 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * the segments.
      **/
     public void initialize() {
-	image = ImageManager.getImage(fileName);
+        image = ImageManager.getImage(fileName);
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getX() {
-	return placement.x;
+        return placement.x;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getY() {
-	return placement.y;
+        return placement.y;
     }
 
     /**
@@ -168,11 +168,11 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * @see #setImageSizeChanged()
      **/
     public synchronized Rectangle getMutablePlacement() {
-	if (!placementCopied) {
-	    placement = new Rectangle(placement);	// No longer shared
-	    placementCopied = true;
-	}
-	return placement;
+        if (!placementCopied) {
+            placement = new Rectangle(placement);       // No longer shared
+            placementCopied = true;
+        }
+        return placement;
     }
 
     /**
@@ -184,7 +184,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * @see #getMutablePlacement()
      **/
     public void setImageSizeChanged() {
-	imageChanged = true;
+        imageChanged = true;
     }
 
     
@@ -193,7 +193,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * reference count nor the prepare count are adjusted.
      **/
     public ManagedImage getImage() {
-	return image;
+        return image;
     }
 
     /**
@@ -227,7 +227,7 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * Rectangle r = fi.getMutablePlacement();
      * r.x, r.y = the upper-left hand corner where you want it to be
      * r.width, r.height = the values you want (which can be taken
-     *			from mi.getWidth() and mi.getHeight()
+     *                  from mi.getWidth() and mi.getHeight()
      * fi.setImageSizeChanged();
      *</pre>
      * Code that gets a new image from the ImageManager and swaps it into a 
@@ -239,32 +239,32 @@ public class FixedImage extends Feature implements Node, SetupClient {
      *     URL url = ... the place the image comes from
      *     ManagedImage mi = ImageManager.getImage(url);
      *     fi.replaceImage(mi);
-     *     ImageManager.ungetImage(mi);	    // mi goes out of scope
+     *     ImageManager.ungetImage(mi);     // mi goes out of scope
      * }
      * 
      * @throws  IllegalStateException if this feature is set up, and 
-     *			newImage has not been loaded.  Also thrown if
-     *		        newImage.isReferenced() is false.
+     *                  newImage has not been loaded.  Also thrown if
+     *                  newImage.isReferenced() is false.
      **/
     public void replaceImage(ManagedImage newImage) {
-	if (newImage == image) {
-	    return;
-	}
-	if (setupMode) {
-	    if (!newImage.isLoaded()) {
-		throw new IllegalStateException();
-	    }
-	    ImageManager.getImage(newImage);
-	    newImage.prepare();
-	    image.unprepare();
-	    ImageManager.ungetImage(image);
-	} else {
-	    ImageManager.getImage(newImage);
-	    ImageManager.ungetImage(image);
-	}
-	image = newImage;
-	fileName = null;
-	imageChanged = true;
+        if (newImage == image) {
+            return;
+        }
+        if (setupMode) {
+            if (!newImage.isLoaded()) {
+                throw new IllegalStateException();
+            }
+            ImageManager.getImage(newImage);
+            newImage.prepare();
+            image.unprepare();
+            ImageManager.ungetImage(image);
+        } else {
+            ImageManager.getImage(newImage);
+            ImageManager.ungetImage(image);
+        }
+        image = newImage;
+        fileName = null;
+        imageChanged = true;
     }
 
 
@@ -278,15 +278,15 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * too!).
      **/
     public void destroy() {
-	if (setupMode) {
-	    // That is, if this is a cloned feature
-	    if (Debug.ASSERT && !imageSetup) {
-		Debug.assertFail();
-	    }
-	    image.unprepare();
-		// This balances the image.prepare() in createClone().
-	}
-	ImageManager.ungetImage(image);
+        if (setupMode) {
+            // That is, if this is a cloned feature
+            if (Debug.ASSERT && !imageSetup) {
+                Debug.assertFail();
+            }
+            image.unprepare();
+                // This balances the image.prepare() in createClone().
+        }
+        ImageManager.ungetImage(image);
     }
 
 
@@ -294,114 +294,114 @@ public class FixedImage extends Feature implements Node, SetupClient {
      * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
-	isActivated = mode;
+        isActivated = mode;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
-	synchronized(setupMonitor) {
-	    setupMode = mode;
-	    if (setupMode) {
-		image.prepare();
-		if (image.isLoaded()) {
-		    imageSetup = true;
-		    return 0;
-		} else {
-		    show.setupManager.scheduleSetup(this);
-		    return 1;
-		}
-	    } else {
-		image.unprepare();
-		imageSetup = false;
-		return 0;
-	    }
-	}
+        synchronized(setupMonitor) {
+            setupMode = mode;
+            if (setupMode) {
+                image.prepare();
+                if (image.isLoaded()) {
+                    imageSetup = true;
+                    return 0;
+                } else {
+                    show.setupManager.scheduleSetup(this);
+                    return 1;
+                }
+            } else {
+                image.unprepare();
+                imageSetup = false;
+                return 0;
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void doSomeSetup() {
-	synchronized(setupMonitor) {
-	    if (!setupMode) {
-		return;
-	    }
-	}
-	image.load(show.component);
-	synchronized(setupMonitor) {
-	    if (!setupMode) {
-		return;
-	    }
-	    imageSetup = true;
-	}
-	sendFeatureSetup();
+        synchronized(setupMonitor) {
+            if (!setupMode) {
+                return;
+            }
+        }
+        image.load(show.component);
+        synchronized(setupMonitor) {
+            if (!setupMode) {
+                return;
+            }
+            imageSetup = true;
+        }
+        sendFeatureSetup();
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	synchronized (setupMonitor) {
-	    return setupMode && (!imageSetup);
-	}
+        synchronized (setupMonitor) {
+            return setupMode && (!imageSetup);
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	if (!isActivated) {
-	    return;
-	}
-	if (scalingModel == null) {
-	    image.drawScaled(gr, placement, show.component);
-	} else {
-	    image.drawScaled(gr, scaledBounds, show.component);
-	}
+        if (!isActivated) {
+            return;
+        }
+        if (scalingModel == null) {
+            image.drawScaled(gr, placement, show.component);
+        } else {
+            image.drawScaled(gr, scaledBounds, show.component);
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
-	drawRecord.setChanged();
+        drawRecord.setChanged();
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	if (scalingModel == null) {
-	    drawRecord.setArea(placement.x, placement.y, 
-	    		       placement.width, placement.height);
-	} else {
-	    boolean changed 
-		= scalingModel.scaleBounds(placement.x, placement.y, 
-					   placement.width, placement.height, 
-					   scaledBounds);
-		    // When newly activated, we might get a false positive
-		    // on changed, but that's OK because our draw area is
-		    // changed anyway.
-	    drawRecord.setArea(scaledBounds.x, scaledBounds.y, 
-	    		       scaledBounds.width, scaledBounds.height);
-	    if (changed) {
-		drawRecord.setChanged();
-	    }
-	}
-	if (imageChanged) {
-	    drawRecord.setChanged();
-	    imageChanged = false;
-	}
-	context.addArea(drawRecord);
+        if (scalingModel == null) {
+            drawRecord.setArea(placement.x, placement.y, 
+                               placement.width, placement.height);
+        } else {
+            boolean changed 
+                = scalingModel.scaleBounds(placement.x, placement.y, 
+                                           placement.width, placement.height, 
+                                           scaledBounds);
+                    // When newly activated, we might get a false positive
+                    // on changed, but that's OK because our draw area is
+                    // changed anyway.
+            drawRecord.setArea(scaledBounds.x, scaledBounds.y, 
+                               scaledBounds.width, scaledBounds.height);
+            if (changed) {
+                drawRecord.setChanged();
+            }
+        }
+        if (imageChanged) {
+            drawRecord.setChanged();
+            imageChanged = false;
+        }
+        context.addArea(drawRecord);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	// do nothing
+        // do nothing
     }
     
     public void readInstanceData(GrinDataInputStream in, int length) 

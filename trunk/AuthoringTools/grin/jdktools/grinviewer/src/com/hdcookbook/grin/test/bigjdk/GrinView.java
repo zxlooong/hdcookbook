@@ -97,8 +97,8 @@ public class GrinView extends GenericMain {
     static final DeviceConfig FOURTHREE = new DeviceConfig(1440, 1080);
     static final DeviceConfig FULLHD = new DeviceConfig(1920, 1080);  
 
-    static boolean doInputLoop = false;	
-    	// Can be set false externally, e.g. by GrinViewJar
+    static boolean doInputLoop = false; 
+        // Can be set false externally, e.g. by GrinViewJar
         
     public GrinView() {
     }
@@ -107,94 +107,94 @@ public class GrinView extends GenericMain {
     }
 
     private void buildControlGUI(String showName, boolean isBinary) {
-	screen = new GrinViewScreen(this, new ShowNode(show, showName));
-	screen.setNameText("GRIN show viewer:  " + showName);
-	screen.setResultText("Double-click in the tree to activate a segment.");
+        screen = new GrinViewScreen(this, new ShowNode(show, showName));
+        screen.setNameText("GRIN show viewer:  " + showName);
+        screen.setResultText("Double-click in the tree to activate a segment.");
 
-	try {
+        try {
             String[] lines = readShowFile(showName, isBinary);
-	    screen.setShowText(lines);            
-	} catch (IOException ex) {
-	    System.out.println();
-	    System.out.println("Error reading show:  " + ex);
-	    System.out.println();
-	    System.exit(1);
-	}
+            screen.setShowText(lines);            
+        } catch (IOException ex) {
+            System.out.println();
+            System.out.println("Error reading show:  " + ex);
+            System.out.println();
+            System.exit(1);
+        }
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-		screen.pack();
-		int x = 0;
-		int y = getHeight() + getInsets().top;
-		screen.setLocation(x, y);
+                screen.pack();
+                int x = 0;
+                int y = getHeight() + getInsets().top;
+                screen.setLocation(x, y);
                 screen.setVisible(true);
-		screen.setFpsText("" + getFps());
-        	screen.addWindowListener(new java.awt.event.WindowAdapter() {
-		    public void windowClosing(java.awt.event.WindowEvent e) {
-			exitGrinview();
-		    }
-		});
+                screen.setFpsText("" + getFps());
+                screen.addWindowListener(new java.awt.event.WindowAdapter() {
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        exitGrinview();
+                    }
+                });
             }
         });
     }
     
     private String[] readShowFile(String showName, boolean isBinary) 
-    		throws IOException 
+                throws IOException 
     {
         String[] lines;
         if (isBinary) {
             lines = readShowBinary(showName);
         } else {
-	    lines = readShowText(showName);
+            lines = readShowText(showName);
         }
         
         return lines;
     }
 
     private String[] readShowText(String showName) throws IOException {
-	URL source = AssetFinder.getURL(showName);
-	if (source == null) {
-	    throw new IOException("Can't find resource " + showName);
-	}
-	BufferedReader rdr 
-	    = new BufferedReader(
-		    new InputStreamReader(source.openStream(), "UTF-8"));
-	LinkedList lines = new LinkedList();
-	for (int lineNo = 1; ; lineNo++) {
-	    String line = rdr.readLine();
-	    if (line == null) {
-		break;
-	    }
-	    String num;
-	    if (lineNo < 10) {
-		num = "    ";
-	    } else if (lineNo < 100) {
-		num = "   ";
-	    } else if (lineNo < 1000) {
-		num = "  ";
-	    } else if (lineNo < 10000) {
-		num = " ";
-	    } else {
-		num = "";
-	    }
-	    num = num + lineNo + ":   ";
-	    lines.add(num + line);
-	}
-	rdr.close();
-	return (String[]) lines.toArray(new String[lines.size()]);
+        URL source = AssetFinder.getURL(showName);
+        if (source == null) {
+            throw new IOException("Can't find resource " + showName);
+        }
+        BufferedReader rdr 
+            = new BufferedReader(
+                    new InputStreamReader(source.openStream(), "UTF-8"));
+        LinkedList lines = new LinkedList();
+        for (int lineNo = 1; ; lineNo++) {
+            String line = rdr.readLine();
+            if (line == null) {
+                break;
+            }
+            String num;
+            if (lineNo < 10) {
+                num = "    ";
+            } else if (lineNo < 100) {
+                num = "   ";
+            } else if (lineNo < 1000) {
+                num = "  ";
+            } else if (lineNo < 10000) {
+                num = " ";
+            } else {
+                num = "";
+            }
+            num = num + lineNo + ":   ";
+            lines.add(num + line);
+        }
+        rdr.close();
+        return (String[]) lines.toArray(new String[lines.size()]);
     }
 
     void addLineNumber(Object obj, int line) {
-	lineNumberMap.put(obj, new Integer(line));
+        lineNumberMap.put(obj, new Integer(line));
     }
     
     private String[] readShowBinary(String showName) throws IOException {
-	URL source = AssetFinder.getURL(showName);
-	if (source == null) {
-	    throw new IOException("Can't find resource " + showName);
-	}
+        URL source = AssetFinder.getURL(showName);
+        if (source == null) {
+            throw new IOException("Can't find resource " + showName);
+        }
         BufferedInputStream bis = new BufferedInputStream(source.openStream());
-	LinkedList lines = new LinkedList();
+        LinkedList lines = new LinkedList();
         int ch;
         int count = 0;
         StringBuffer hexInts = new StringBuffer(); // Hex integer for each line
@@ -233,8 +233,8 @@ public class GrinView extends GenericMain {
             count++;
         }
               
-	bis.close();
-	return (String[]) lines.toArray(new String[lines.size()]);
+        bis.close();
+        return (String[]) lines.toArray(new String[lines.size()]);
     }
 
     private static String hexDigits = "0123456789abcdef";
@@ -252,13 +252,13 @@ public class GrinView extends GenericMain {
     }
     
     int getLineNumber(Object o) {
-	ShowNode node = (ShowNode) o;
-	Object v = lineNumberMap.get(node.getContents());
-	if (v == null) {
-	    return -1;
-	} else {
-	    return ((Integer) v).intValue();
-	}
+        ShowNode node = (ShowNode) o;
+        Object v = lineNumberMap.get(node.getContents());
+        if (v == null) {
+            return -1;
+        } else {
+            return ((Integer) v).intValue();
+        }
     }
 
     //
@@ -266,89 +266,89 @@ public class GrinView extends GenericMain {
     // a string describing the action performed.
     //
     String invokeShowNode(Object[] path) {
-	Feature part = null;
-	for (int i = path.length - 1; i >= 0; i--) {
-	    ShowNode node = (ShowNode) path[i];
-	    if (node.getContents() instanceof Segment) {
-		Segment s = (Segment) node.getContents();
-		show.activateSegment(s);
-		return "Activated segment " + s.getName() + ".";
-	    } else if (node.getContents() instanceof Assembly) {
-		if (part != null) {
-		    Assembly a = (Assembly) node.getContents();
-		    a.setCurrentFeature(part);
-		    return "Activated part " + part.getName()
-		    	   + " in assembly " + a.getName() + ".";
-		}
-		part = (Feature) node.getContents();
-	    } else if (node.getContents() instanceof Feature) {
-		part = (Feature) node.getContents();
-	    } else if (node.getContents() instanceof BackgroundSpec) {
-		String name = ((BackgroundSpec) node.getContents()).imageName;
-		if (name == null || "".equals(name)) {
-		    setBackground((URL) null);
-		    return "Selected background image \"\"";
-		} else {
-		    URL url = AssetFinder.tryURL(name);
-		    if (url == null) {
-			return "Can't find " + name;
-		    }
-		    setBackground(url);
-		    return "Selected background image " + name;
-		}
-	    } else {
-		part = null;
-	    }
-	}
-	return null;
+        Feature part = null;
+        for (int i = path.length - 1; i >= 0; i--) {
+            ShowNode node = (ShowNode) path[i];
+            if (node.getContents() instanceof Segment) {
+                Segment s = (Segment) node.getContents();
+                show.activateSegment(s);
+                return "Activated segment " + s.getName() + ".";
+            } else if (node.getContents() instanceof Assembly) {
+                if (part != null) {
+                    Assembly a = (Assembly) node.getContents();
+                    a.setCurrentFeature(part);
+                    return "Activated part " + part.getName()
+                           + " in assembly " + a.getName() + ".";
+                }
+                part = (Feature) node.getContents();
+            } else if (node.getContents() instanceof Feature) {
+                part = (Feature) node.getContents();
+            } else if (node.getContents() instanceof BackgroundSpec) {
+                String name = ((BackgroundSpec) node.getContents()).imageName;
+                if (name == null || "".equals(name)) {
+                    setBackground((URL) null);
+                    return "Selected background image \"\"";
+                } else {
+                    URL url = AssetFinder.tryURL(name);
+                    if (url == null) {
+                        return "Can't find " + name;
+                    }
+                    setBackground(url);
+                    return "Selected background image " + name;
+                }
+            } else {
+                part = null;
+            }
+        }
+        return null;
     }
 
     protected String setFps(float newFps) {
-	String result = super.setFps(newFps);
-	if (screen != null) {
-	    screen.setFpsText("" + newFps);
-	}
-	return result;
+        String result = super.setFps(newFps);
+        if (screen != null) {
+            screen.setFpsText("" + newFps);
+        }
+        return result;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void waitForUser(String msg) {
-	float fps = getFps();
-	if (fps <= 0f) {
-		// Make sure that there's no race condition where a button
-		// press happens after we set the button visible but before
-		// we get down into doWaitForUser
-	    synchronized(debugWaitingMonitor) {
-		screen.forceNextDrawButtonVisible(true);
-		screen.setResultText(msg);
-		doWaitForUser();
-	    }
-	} else {
-	    // If we aren't stopped, we pause 1/4 frame.
-	    long ms = (long) ((0.25 / fps) * 1000 + 0.5);
-	    if (ms > 0) {
-		try {
-		    Thread.sleep(ms);
-		} catch (InterruptedException ex) {
-		    Thread.currentThread().interrupt();
-		}
-	    }
-	}
+        float fps = getFps();
+        if (fps <= 0f) {
+                // Make sure that there's no race condition where a button
+                // press happens after we set the button visible but before
+                // we get down into doWaitForUser
+            synchronized(debugWaitingMonitor) {
+                screen.forceNextDrawButtonVisible(true);
+                screen.setResultText(msg);
+                doWaitForUser();
+            }
+        } else {
+            // If we aren't stopped, we pause 1/4 frame.
+            long ms = (long) ((0.25 / fps) * 1000 + 0.5);
+            if (ms > 0) {
+                try {
+                    Thread.sleep(ms);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void debugDrawFrameDone() {
-	if (getFps() == 0f) {
-	    SwingUtilities.invokeLater(new Runnable() {
-		public void run() {
-		    advanceFrames(1);
-		}
-	    });
-	}
+        if (getFps() == 0f) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    advanceFrames(1);
+                }
+            });
+        }
     }
     
     /**
@@ -392,13 +392,13 @@ public class GrinView extends GenericMain {
     }
     
     private static void usage() {
-	System.out.println();
-	System.out.println("Usage:  java com.hdcookbook.grin.test.bigjdk.GrinView <option> <show file>\\");
-	System.out.println("            <show file> can be a .grin binary file, or a text show file.");
-	System.out.println("                        It is searched for in the asset search path.");
+        System.out.println();
+        System.out.println("Usage:  java com.hdcookbook.grin.test.bigjdk.GrinView <option> <show file>\\");
+        System.out.println("            <show file> can be a .grin binary file, or a text show file.");
+        System.out.println("                        It is searched for in the asset search path.");
 
-	System.out.println("            <options> can be:");
-	System.out.println("                -fps <number>");
+        System.out.println("            <options> can be:");
+        System.out.println("                -fps <number>");
         System.out.println("                -assets <asset path in jar file>");
         System.out.println("                -asset_dir <directory in filesystem>");
         System.out.println("                -imagemap <mapfile>");
@@ -417,140 +417,140 @@ public class GrinView extends GenericMain {
         System.out.println("            -assets and -asset_dir may be repeated to form a search path.");
         System.out.println("            -screensize keyword can be fullhd, pal, ntsc, 720p, vga, or 960x540.");
         System.out.println("                        Default screen size is fullhd (1920x1080), with a scale ");
-	System.out.println("                        factor 2.  Some synonymous names are also allowed.");
+        System.out.println("                        factor 2.  Some synonymous names are also allowed.");
         System.out.println("            -automate option will launch a testing thread which activates");       
         System.out.println("                      show segments in order.");
         System.out.println("            -noui option will suppress the GrinView UI, which is good for profiling");       
         System.out.println("            every named segment in a given show with an 1 second interval.");
         System.out.println("            -extension_parser is needed when the show is a text file and");
         System.out.println("                              uses a custom feature or command subclass.");
-	System.out.println("            -binary tells GrinView to read a binary .grin file.");
-	System.out.println("            -director tells GrinView to instantiate the given class as Direcor.");
-	System.out.println("            -grinxlet tells GrinView to instantiate the given class instead of the default GrinXlet class.");
-	System.out.println();
-	System.exit(1);
+        System.out.println("            -binary tells GrinView to read a binary .grin file.");
+        System.out.println("            -director tells GrinView to instantiate the given class as Direcor.");
+        System.out.println("            -grinxlet tells GrinView to instantiate the given class instead of the default GrinXlet class.");
+        System.out.println();
+        System.exit(1);
     }
 
     public static void main(String[] args) {
         try {
-	    String java_version = System.getProperty("java.version");
-	    String os_name = System.getProperty("os.name");
-	    String os_arch = System.getProperty("os.arch");
-		
-	    System.out.println("Java version: " + java_version);
-	    System.out.println("O/S name: " + os_name);
-	    System.out.println("O/S architecture: " + os_arch);
-		
-	    if (java_version.startsWith("1.5.")
-		&& os_name.startsWith("Mac")
-	        && (os_arch.startsWith("i386") || os_arch.startsWith("x86")))
-	    {
-		System.setProperty("apple.awt.graphics.UseQuartz", "false");
+            String java_version = System.getProperty("java.version");
+            String os_name = System.getProperty("os.name");
+            String os_arch = System.getProperty("os.arch");
+                
+            System.out.println("Java version: " + java_version);
+            System.out.println("O/S name: " + os_name);
+            System.out.println("O/S architecture: " + os_arch);
+                
+            if (java_version.startsWith("1.5.")
+                && os_name.startsWith("Mac")
+                && (os_arch.startsWith("i386") || os_arch.startsWith("x86")))
+            {
+                System.setProperty("apple.awt.graphics.UseQuartz", "false");
 
-		System.out.println();
-		System.out.println("NOTE:  Java 5 on Mac/Intel detected.  Due to known issues, Quartz is being");
-		System.out.println("       disabled.  You may wish to switch to Java 6 to get better performance.");
-		System.out.println("       You can set your default java runtime from Applications -> Utilities");
-		System.out.println("       -> Java Preferences.");
-		System.out.println();
-		System.out.println("       See also https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=183");
-		System.out.println();
-	    }
-	} catch (Throwable t) {
-	    t.printStackTrace();
-	}
+                System.out.println();
+                System.out.println("NOTE:  Java 5 on Mac/Intel detected.  Due to known issues, Quartz is being");
+                System.out.println("       disabled.  You may wish to switch to Java 6 to get better performance.");
+                System.out.println("       You can set your default java runtime from Applications -> Utilities");
+                System.out.println("       -> Java Preferences.");
+                System.out.println();
+                System.out.println("       See also https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=183");
+                System.out.println();
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
         LinkedList assetPathLL = new LinkedList();
         LinkedList assetDirsLL = new LinkedList();
         String imageMap = null;
-	String background = null;
-	int argsUsed = 0;
-	String fps = null;
-	String segment = null;
-	String scaleDivisor = null;
+        String background = null;
+        int argsUsed = 0;
+        String fps = null;
+        String segment = null;
+        String scaleDivisor = null;
         DeviceConfig deviceConfig = null;
         String extensionParserName = null;
-	boolean isBinary = false;
-	boolean noUI = false;
+        boolean isBinary = false;
+        boolean noUI = false;
         String director = null;
         boolean doAutoTest = false;
         String grinxlet = null;
-	while (argsUsed < args.length - 1) {
-	    if ("-fps".equals(args[argsUsed])) {
-		argsUsed++;
+        while (argsUsed < args.length - 1) {
+            if ("-fps".equals(args[argsUsed])) {
+                argsUsed++;
                 if (fps != null) {
                     usage();
                 }
-		fps = args[argsUsed];
-		argsUsed++;
-	    } else if ("-background".equals(args[argsUsed])) {
-		argsUsed++;
+                fps = args[argsUsed];
+                argsUsed++;
+            } else if ("-background".equals(args[argsUsed])) {
+                argsUsed++;
                 if (background != null) {
                     usage();
                 }
-		background = args[argsUsed];
-		argsUsed++;
-	    } else if ("-assets".equals(args[argsUsed])) {
-		argsUsed++;
+                background = args[argsUsed];
+                argsUsed++;
+            } else if ("-assets".equals(args[argsUsed])) {
+                argsUsed++;
                 String path = args[argsUsed];
                 if (!path.endsWith("/")) {
                     path = path + "/";
                 }
-		assetPathLL.add(path);
-		argsUsed++;
-	    } else if ("-asset_dir".equals(args[argsUsed])) {
-		argsUsed++;
+                assetPathLL.add(path);
+                argsUsed++;
+            } else if ("-asset_dir".equals(args[argsUsed])) {
+                argsUsed++;
                 String path = args[argsUsed];
-		assetDirsLL.add(path);
-		argsUsed++;
-	    } else if ("-imagemap".equals(args[argsUsed])) {
+                assetDirsLL.add(path);
+                argsUsed++;
+            } else if ("-imagemap".equals(args[argsUsed])) {
                 if (imageMap != null) {
                     usage();
                 }
-		argsUsed++;
-		imageMap = args[argsUsed];
-		argsUsed++;
-	    } else if ("-segment".equals(args[argsUsed])) {
-		argsUsed++;
-		if (segment != null) {
-			usage();
-		}
-		segment = args[argsUsed];
-		argsUsed++;
-	    } else if ("-scale".equals(args[argsUsed])) {
-		argsUsed++;
+                argsUsed++;
+                imageMap = args[argsUsed];
+                argsUsed++;
+            } else if ("-segment".equals(args[argsUsed])) {
+                argsUsed++;
+                if (segment != null) {
+                        usage();
+                }
+                segment = args[argsUsed];
+                argsUsed++;
+            } else if ("-scale".equals(args[argsUsed])) {
+                argsUsed++;
                 if (scaleDivisor != null) {
                     usage();
                 }
-		scaleDivisor = args[argsUsed];
-		argsUsed++;	
-	    } else if ("-screensize".equals(args[argsUsed])) {
-		argsUsed++;
+                scaleDivisor = args[argsUsed];
+                argsUsed++;     
+            } else if ("-screensize".equals(args[argsUsed])) {
+                argsUsed++;
                 if (deviceConfig != null) {
                     usage();
                 }
-		deviceConfig = getDeviceConfig(args[argsUsed]);
-		argsUsed++;                
-	    } else if ("-extension_parser".equals(args[argsUsed])) {
+                deviceConfig = getDeviceConfig(args[argsUsed]);
+                argsUsed++;                
+            } else if ("-extension_parser".equals(args[argsUsed])) {
                 if (extensionParserName != null) {
                     usage();
                 }
-		argsUsed++;
-		extensionParserName = args[argsUsed];
-		argsUsed++; 
-	    } else if ("-director".equals(args[argsUsed])) {
+                argsUsed++;
+                extensionParserName = args[argsUsed];
+                argsUsed++; 
+            } else if ("-director".equals(args[argsUsed])) {
                 if (director != null) {
                     usage();
                 }
-		argsUsed++;
-		director = args[argsUsed];
-		argsUsed++;
-	    } else if ("-grinxlet".equals(args[argsUsed])) {
+                argsUsed++;
+                director = args[argsUsed];
+                argsUsed++;
+            } else if ("-grinxlet".equals(args[argsUsed])) {
                 if (grinxlet != null) {
                     usage();
                 }
-		argsUsed++;
-		grinxlet = args[argsUsed];
-		argsUsed++;
+                argsUsed++;
+                grinxlet = args[argsUsed];
+                argsUsed++;
             } else if ("-binary".equals(args[argsUsed])) {
                 isBinary = true;
                 argsUsed++;
@@ -564,54 +564,54 @@ public class GrinView extends GenericMain {
                 noUI = true;
                 argsUsed++;
             } else {
-		break;
-	    }
-	}
+                break;
+            }
+        }
         if (argsUsed+1 != args.length) {
             usage();
         }
-	String showFile = args[argsUsed++];
+        String showFile = args[argsUsed++];
         String[] assetPath = null;
         File[] assetDirs = null;
-	if (assetDirsLL.size() > 0) {
-	    assetDirs = new File[assetDirsLL.size()];
-	    int i = 0;
-	    for (Iterator it = assetDirsLL.iterator(); it.hasNext(); ) {
-		File f = new File((String) it.next());
-		assetDirs[i++] = f;
-	    }
-	}
+        if (assetDirsLL.size() > 0) {
+            assetDirs = new File[assetDirsLL.size()];
+            int i = 0;
+            for (Iterator it = assetDirsLL.iterator(); it.hasNext(); ) {
+                File f = new File((String) it.next());
+                assetDirs[i++] = f;
+            }
+        }
         if (assetPathLL.size() == 0) {
-	    if (assetDirs == null) {
-		assetPath = new String[] { "../test/assets/" };
-	    }
+            if (assetDirs == null) {
+                assetPath = new String[] { "../test/assets/" };
+            }
         } else {
             assetPath = (String[]) 
                         assetPathLL.toArray(new String[assetPathLL.size()]);
         }
-	AssetFinder.setHelper(new AssetFinder() {
-	    protected void abortHelper() {
-		System.exit(1);
-	    }
-	});
-       	AssetFinder.setSearchPath(assetPath, assetDirs);
+        AssetFinder.setHelper(new AssetFinder() {
+            protected void abortHelper() {
+                System.exit(1);
+            }
+        });
+        AssetFinder.setSearchPath(assetPath, assetDirs);
         if (imageMap != null) {
             AssetFinder.setImageMap(imageMap);
         }
 
-	GrinView m;
-	if (grinxlet == null) {
-	    m = new GrinView();
-	} else {
-	    m = new GrinView(grinxlet);
-	}
-	if (director != null) {
-	    m.setDirectorClassName(director);
-	}
-	
-	if (scaleDivisor != null || deviceConfig != null) {
-	    m.adjustScreenSize(scaleDivisor, deviceConfig);
-	}
+        GrinView m;
+        if (grinxlet == null) {
+            m = new GrinView();
+        } else {
+            m = new GrinView(grinxlet);
+        }
+        if (director != null) {
+            m.setDirectorClassName(director);
+        }
+        
+        if (scaleDivisor != null || deviceConfig != null) {
+            m.adjustScreenSize(scaleDivisor, deviceConfig);
+        }
         
         ExtensionParser reader = null;
         if (extensionParserName != null && !("".equals(extensionParserName))) {
@@ -624,42 +624,42 @@ public class GrinView extends GenericMain {
             }
         }
         
-	ShowBuilder builder;
-	if (noUI) {
-	    builder = new ShowBuilder();
-	} else {
-	    builder = new GuiShowBuilder(m);
-	}
+        ShowBuilder builder;
+        if (noUI) {
+            builder = new ShowBuilder();
+        } else {
+            builder = new GuiShowBuilder(m);
+        }
         builder.setExtensionParser(reader);
         m.init(showFile, isBinary, builder, segment, doAutoTest);
 
-	if (!noUI) {
-	    m.buildControlGUI(showFile, isBinary);
-	}
-	m.startEngine();
+        if (!noUI) {
+            m.buildControlGUI(showFile, isBinary);
+        }
+        m.startEngine();
 
-	if (background != null) {
-	    try {
-		m.setBackground(new File(background).toURI().toURL());
-	    } catch (Exception ignored) {
-		ignored.printStackTrace();
-	    }
-	}
-	if (fps != null) {
-	    m.doKeyboardCommand("f " + fps); // set fps	 
-	}
+        if (background != null) {
+            try {
+                m.setBackground(new File(background).toURI().toURL());
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
+            }
+        }
+        if (fps != null) {
+            m.doKeyboardCommand("f " + fps); // set fps  
+        }
 
-	if (doInputLoop) {
-	    m.inputLoop();
-	    System.exit(0);
-	}
+        if (doInputLoop) {
+            m.inputLoop();
+            System.exit(0);
+        }
     }
 
     public void setDebugDraw(boolean value) {
-	super.setDebugDraw(value);
-	if (screen != null) {
-	    screen.setDebugDrawToggle(value);
-	}
+        super.setDebugDraw(value);
+        if (screen != null) {
+            screen.setDebugDrawToggle(value);
+        }
     }
     
 }

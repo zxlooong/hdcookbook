@@ -75,10 +75,10 @@ public abstract class EasingEquation {
     /**
      * Evaluate the eqsing equation.
      *
-     * @param t	current time in frames, seconds, or any other unit
-     * @param b	beginning value
-     * @param c	change in value
-     * @param d	duration in frames, seconds, or any other unit
+     * @param t current time in frames, seconds, or any other unit
+     * @param b beginning value
+     * @param c change in value
+     * @param d duration in frames, seconds, or any other unit
      **/
     abstract public double evaluate(double t, double b, double c, double d);
 
@@ -87,7 +87,7 @@ public abstract class EasingEquation {
      * from this equation.  Defaults to zero.
      **/
     public void setMaxError(int maxError) {
-	this.maxError = maxError;
+        this.maxError = maxError;
     }
 
     /**
@@ -95,26 +95,26 @@ public abstract class EasingEquation {
      * making sure that the error doesn't exceed maxError units.  We start
      * the easing from keyFrames[size-1], and add to keyFrames.
      *
-     * @param	keyFrames a list of { frame#, value, ... } int arrays
-     * @param   end 	  Where to ease to, { frame#, value, ... }
+     * @param   keyFrames a list of { frame#, value, ... } int arrays
+     * @param   end       Where to ease to, { frame#, value, ... }
      **/
     public void addKeyFrames(ArrayList<int[]> keyFrames, int[] end) 
-	    throws IOException
+            throws IOException
     {
-	int[] start = keyFrames.get(keyFrames.size() - 1);
-	int startFrame = start[0];
-	int endFrame = end[0];
-	int duration = endFrame - startFrame;
-	int[][] allFrames = new int[duration + 1][];
-	for (int f = 0; f <= duration; f++) {
-	    allFrames[f] = new int[end.length];
-	    allFrames[f][0] = f + startFrame;
-	    for (int i = 1; i < end.length; i++) {
-		double val = evaluate(f, start[i], end[i]-start[i], duration);
-		allFrames[f][i] = (int) Math.round(val);
-	    }
-	}
-	trimUnneededKeyFrames(startFrame, keyFrames, end, allFrames);
+        int[] start = keyFrames.get(keyFrames.size() - 1);
+        int startFrame = start[0];
+        int endFrame = end[0];
+        int duration = endFrame - startFrame;
+        int[][] allFrames = new int[duration + 1][];
+        for (int f = 0; f <= duration; f++) {
+            allFrames[f] = new int[end.length];
+            allFrames[f][0] = f + startFrame;
+            for (int i = 1; i < end.length; i++) {
+                double val = evaluate(f, start[i], end[i]-start[i], duration);
+                allFrames[f][i] = (int) Math.round(val);
+            }
+        }
+        trimUnneededKeyFrames(startFrame, keyFrames, end, allFrames);
     }
 
     /**
@@ -122,57 +122,57 @@ public abstract class EasingEquation {
      * band of this easing equation.  This is called from addKeyFrames().
      **/
     protected void trimUnneededKeyFrames(int startFrame,
-    					 ArrayList<int[]> keyFrames, 
-					 int[] end,
-					 int[][] allFrames)
-	    throws IOException
+                                         ArrayList<int[]> keyFrames, 
+                                         int[] end,
+                                         int[][] allFrames)
+            throws IOException
     {
-	for(;;) {
-	    int[] current = keyFrames.get(keyFrames.size() - 1);
-	    if (current[0] >= end[0]) {
-		return;		// All done!
-	    }
-	    int frame = current[0] + 1;
-	    // Go until at end of function, or error is too big
-	    for (;;) {
-		frame++;
-		if (frame > end[0]) {
-		    break;
-		}
-		int[] candidate = allFrames[frame - startFrame];
-		boolean tooMuchError = false;
-		// Check interpolation algorithm from InterpolatedModel
-		for (int f = current[0] + 1; f < candidate[0]; f++) {
-		    int dist = candidate[0] - current[0];
-		    int distNext = candidate[0] - f;
-		    int distLast = f - current[0];
-		    for (int i = 1; i < current.length; i++) {
-			int v = (candidate[i] * distLast
-				 + current[i] * distNext) / dist;
-			int err = v - allFrames[f - startFrame][i];
-			if (Math.abs(err) > maxError) {
-			    tooMuchError = true;
-			}
-		    }
-		}
-		if (tooMuchError) {
-		    break;
-		}
-	    }
-	    frame--;
-	    keyFrames.add(allFrames[frame - startFrame]);
-	    framesAdded++;
-	}
+        for(;;) {
+            int[] current = keyFrames.get(keyFrames.size() - 1);
+            if (current[0] >= end[0]) {
+                return;         // All done!
+            }
+            int frame = current[0] + 1;
+            // Go until at end of function, or error is too big
+            for (;;) {
+                frame++;
+                if (frame > end[0]) {
+                    break;
+                }
+                int[] candidate = allFrames[frame - startFrame];
+                boolean tooMuchError = false;
+                // Check interpolation algorithm from InterpolatedModel
+                for (int f = current[0] + 1; f < candidate[0]; f++) {
+                    int dist = candidate[0] - current[0];
+                    int distNext = candidate[0] - f;
+                    int distLast = f - current[0];
+                    for (int i = 1; i < current.length; i++) {
+                        int v = (candidate[i] * distLast
+                                 + current[i] * distNext) / dist;
+                        int err = v - allFrames[f - startFrame][i];
+                        if (Math.abs(err) > maxError) {
+                            tooMuchError = true;
+                        }
+                    }
+                }
+                if (tooMuchError) {
+                    break;
+                }
+            }
+            frame--;
+            keyFrames.add(allFrames[frame - startFrame]);
+            framesAdded++;
+        }
     }
 
     //
     // Useful for debugging:
     //
     private String format(int[] arr) {
-	String result = "f " + arr[0] + ":  ";
-	for (int i = 1; i < arr.length; i++) {
-	    result += arr[i] + "  ";
-	}
-	return result;
+        String result = "f " + arr[0] + ":  ";
+        for (int i = 1; i < arr.length; i++) {
+            result += arr[i] + "  ";
+        }
+        return result;
     }
 }

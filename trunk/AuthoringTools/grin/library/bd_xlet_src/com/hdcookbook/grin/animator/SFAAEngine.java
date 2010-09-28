@@ -105,8 +105,8 @@ public class SFAAEngine extends AnimationEngine {
     private Container container;
     private SyncFrameAccurateAnimation sfaa = null;
     private Graphics2D currGraphics = null;
-    	// Set to a non-null value once per frame in runAnimationLoop,
-	// and set back to null in finishedFrame.
+        // Set to a non-null value once per frame in runAnimationLoop,
+        // and set back to null in finishedFrame.
     private long frameNumber;
     private Rectangle bounds;
 
@@ -136,19 +136,19 @@ public class SFAAEngine extends AnimationEngine {
      * more than one draw target in a show that's designed for SFAA.
      * 
      *
-     * @param frameNumber	The frame number to start with.  If the
-     *				SFAA instance was just created, 0 would
-     *				be a reasonable value.
+     * @param frameNumber       The frame number to start with.  If the
+     *                          SFAA instance was just created, 0 would
+     *                          be a reasonable value.
      *
-     * @param skipModel		Set true if this engine should be in
-     *				"skip model" mode; see above.  A value of true
-     *				is recommended.
+     * @param skipModel         Set true if this engine should be in
+     *                          "skip model" mode; see above.  A value of true
+     *                          is recommended.
      * 
      * @see #getAnimationFrameTime()
      **/
     public SFAAEngine(long frameNumber, boolean skipModel) {
-	this.frameNumber = frameNumber;
-	this.skipModel = skipModel;
+        this.frameNumber = frameNumber;
+        this.skipModel = skipModel;
     }
 
     /**
@@ -168,13 +168,13 @@ public class SFAAEngine extends AnimationEngine {
      * first time.
      *
      * @throws IllegalStateException if initContainer has already been called,
-     *		or if the SFAA has already been set.
+     *          or if the SFAA has already been set.
      **/
     public void setSFAA(SyncFrameAccurateAnimation sfaa)  {
-	if (this.sfaa != null) {
-	    throw new IllegalStateException();
-	}
-	this.sfaa = sfaa;
+        if (this.sfaa != null) {
+            throw new IllegalStateException();
+        }
+        this.sfaa = sfaa;
     }
 
     /**
@@ -182,56 +182,56 @@ public class SFAAEngine extends AnimationEngine {
      *
      * @param container  The container that our SFAA instance should be put in.
      *
-     * @param bounds	 The bounds of the SFAA instance we put within the
-     *			 container.
+     * @param bounds     The bounds of the SFAA instance we put within the
+     *                   container.
      *
      * @see #setSFAA(SyncFrameAccurateAnimation)
      **/
     public void initContainer(Container container, Rectangle bounds) {
-	this.container = container;
-	if (sfaa == null) {
-	    AnimationParameters p = new AnimationParameters();
-	    p.threadPriority = Thread.NORM_PRIORITY - 1;
-	    p.scaleFactor = 1;
-	    p.repeatCount = null;
-	    p.lockedToVideo = false;
-	    p.faaTimer = null;
-	    Dimension d = new Dimension(bounds.width, bounds.height);
-	    sfaa = SyncFrameAccurateAnimation.getInstance(d, 1, p);
-	    sfaa.setLocation(bounds.x, bounds.y);
-	    container.add(sfaa);
-	    sfaa.setLocation(bounds.x, bounds.y);
-	    sfaa.start();
-	} else {
-	    Point pos = sfaa.getLocation();
-	    bounds = new Rectangle();
-	    bounds.x = pos.x;
-	    bounds.y = pos.y;
-	    bounds.width = sfaa.getWidth();
-	    bounds.height = sfaa.getHeight();
-	}
-	this.bounds = bounds;
+        this.container = container;
+        if (sfaa == null) {
+            AnimationParameters p = new AnimationParameters();
+            p.threadPriority = Thread.NORM_PRIORITY - 1;
+            p.scaleFactor = 1;
+            p.repeatCount = null;
+            p.lockedToVideo = false;
+            p.faaTimer = null;
+            Dimension d = new Dimension(bounds.width, bounds.height);
+            sfaa = SyncFrameAccurateAnimation.getInstance(d, 1, p);
+            sfaa.setLocation(bounds.x, bounds.y);
+            container.add(sfaa);
+            sfaa.setLocation(bounds.x, bounds.y);
+            sfaa.start();
+        } else {
+            Point pos = sfaa.getLocation();
+            bounds = new Rectangle();
+            bounds.x = pos.x;
+            bounds.y = pos.y;
+            bounds.width = sfaa.getWidth();
+            bounds.height = sfaa.getHeight();
+        }
+        this.bounds = bounds;
     }
 
     /** 
      * {@inheritDoc}
      **/
     public int getWidth() {
-	return bounds.width;
+        return bounds.width;
     }
 
     /** 
      * {@inheritDoc}
      **/
     public int getHeight() {
-	return bounds.height;
+        return bounds.height;
     }
 
     /**
      * {@inheritDoc}
      **/
     public Component getComponent() {
-	return sfaa;
+        return sfaa;
     }
 
     /**
@@ -240,9 +240,9 @@ public class SFAAEngine extends AnimationEngine {
      * This also calls SyncFrameAccurateAnimation.start()
      **/
     public synchronized void start() {
-	paused = false;
-	notifyAll();
-	sfaa.start();
+        paused = false;
+        notifyAll();
+        sfaa.start();
     }
 
     /**
@@ -251,9 +251,9 @@ public class SFAAEngine extends AnimationEngine {
      * This also calls SyncFrameAccurateAnimation.stop()
      **/
     public synchronized void pause() {
-	paused = true;
-	notifyAll();
-	sfaa.stop();
+        paused = true;
+        notifyAll();
+        sfaa.stop();
     }
 
 
@@ -261,8 +261,8 @@ public class SFAAEngine extends AnimationEngine {
      * {@inheritDoc}
      **/
     protected void clearArea(int x, int y, int width, int height) {
-	currGraphics.setColor(transparent);
-	currGraphics.fillRect(x, y, width, height);
+        currGraphics.setColor(transparent);
+        currGraphics.fillRect(x, y, width, height);
     }
 
     /**
@@ -279,77 +279,77 @@ public class SFAAEngine extends AnimationEngine {
      * this class.
      **/
     protected boolean needsFullRedrawInAnimationLoop() {
-	return true;
+        return true;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void callPaintTargets() throws InterruptedException {
-	paintTargets(currGraphics);
+        paintTargets(currGraphics);
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void finishedFrame() {
-	currGraphics = null;
-	sfaa.finishDrawing(frameNumber);
-	Thread.currentThread().yield();
+        currGraphics = null;
+        sfaa.finishDrawing(frameNumber);
+        Thread.currentThread().yield();
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void runAnimationLoop() throws InterruptedException {
-	for (;;) {
-	    checkNewClients();
-	    
-	    synchronized(this) {
-		if (destroyRequested()) {
-		    return;
-		}
-		if (Thread.interrupted()) {
-		    throw new InterruptedException();
-		}
-		if (paused) {
-		    wait();
-		    continue;
-		}
-	    }
+        for (;;) {
+            checkNewClients();
+            
+            synchronized(this) {
+                if (destroyRequested()) {
+                    return;
+                }
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
+                if (paused) {
+                    wait();
+                    continue;
+                }
+            }
 
-	    currGraphics = sfaa.startDrawing(frameNumber);
+            currGraphics = sfaa.startDrawing(frameNumber);
 
-	    if (currGraphics != null) {
-		currGraphics.setComposite(AlphaComposite.Src);
-		advanceModel();
-		showFrame();
-		framesBehind = 0;
-	    } else {
-		if (Debug.LEVEL > 0) {
-		    skippedFrames++;
-		}
-		if (skipModel) {
-		    // do nothing
-		} else {
-		    if (framesBehind < 3) {
-			framesBehind++;
-			advanceModel();
-		    } else {
-			// Skip model update until we catch up.  This should be
-			// very rare, and will never happen if we're in the
-			// (recommended) skip model mode.
-		    }
-		}
-	    }
-	    synchronized(this) {
-		frameNumber++;
-	    }
-	    if (Debug.LEVEL > 0 && (frameNumber % 100) == 0) {
-		Debug.println("Frame " + frameNumber + ", "
-				+ skippedFrames + " skipped.");
-	    }
-	}
+            if (currGraphics != null) {
+                currGraphics.setComposite(AlphaComposite.Src);
+                advanceModel();
+                showFrame();
+                framesBehind = 0;
+            } else {
+                if (Debug.LEVEL > 0) {
+                    skippedFrames++;
+                }
+                if (skipModel) {
+                    // do nothing
+                } else {
+                    if (framesBehind < 3) {
+                        framesBehind++;
+                        advanceModel();
+                    } else {
+                        // Skip model update until we catch up.  This should be
+                        // very rare, and will never happen if we're in the
+                        // (recommended) skip model mode.
+                    }
+                }
+            }
+            synchronized(this) {
+                frameNumber++;
+            }
+            if (Debug.LEVEL > 0 && (frameNumber % 100) == 0) {
+                Debug.println("Frame " + frameNumber + ", "
+                                + skippedFrames + " skipped.");
+            }
+        }
     }
 
     /**
@@ -358,34 +358,34 @@ public class SFAAEngine extends AnimationEngine {
      * stop time.
      *
      * @throws IllegalStateException if the underlying SFAA isn't running
-     *		and presenting video, or if it doesn't have a start/stop time
-     *		set.
+     *          and presenting video, or if it doesn't have a start/stop time
+     *          set.
      *
      * @see #setSFAA(SyncFrameAccurateAnimation)
      **/
     public Time getAnimationFrameTime() {
-	long fn;
-	synchronized(this) {
-	    fn = frameNumber;
-	    // The Java memory model allows longs to be in an inconsistent
-	    // internal state if modified by one thread while being read
-	    // from another.
-	}
-	return sfaa.getAnimationFrameTime(fn);
+        long fn;
+        synchronized(this) {
+            fn = frameNumber;
+            // The Java memory model allows longs to be in an inconsistent
+            // internal state if modified by one thread while being read
+            // from another.
+        }
+        return sfaa.getAnimationFrameTime(fn);
     }
 
     /**
      * Get the number of skipped frames over the lifetime of this animation.
      **/
     public int getSkippedFrames() {
-	return skippedFrames;
+        return skippedFrames;
     }
 
     /**
      * Get the current frame number.
      **/
     public synchronized long getFrameNumber() {
-	return frameNumber;
+        return frameNumber;
     }
 
 
@@ -399,14 +399,14 @@ public class SFAAEngine extends AnimationEngine {
      * See also the class comments for this class.
      **/
     public void destroy() {
-	SyncFrameAccurateAnimation s = sfaa;
-	super.destroy();
-	if (s != null) {
-	    try {
-		s.destroy();
-	    } catch (Throwable ignored) {
-	    }
-	}
+        SyncFrameAccurateAnimation s = sfaa;
+        super.destroy();
+        if (s != null) {
+            try {
+                s.destroy();
+            } catch (Throwable ignored) {
+            }
+        }
     }
 
 
@@ -414,15 +414,15 @@ public class SFAAEngine extends AnimationEngine {
      * {@inheritDoc}
      **/
     protected void terminatingEraseScreen() {
-	container.remove(sfaa);
-	sfaa = null;
-	if (bounds != null) {
-	    Graphics2D g = (Graphics2D) container.getGraphics();
-	    g.setComposite(AlphaComposite.Src);
-	    g.setColor(transparent);
-	    g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-	    g.dispose();
-	    Toolkit.getDefaultToolkit().sync();
-	}
+        container.remove(sfaa);
+        sfaa = null;
+        if (bounds != null) {
+            Graphics2D g = (Graphics2D) container.getGraphics();
+            g.setComposite(AlphaComposite.Src);
+            g.setColor(transparent);
+            g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            g.dispose();
+            Toolkit.getDefaultToolkit().sync();
+        }
     }
 }

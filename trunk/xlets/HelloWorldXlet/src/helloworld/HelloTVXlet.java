@@ -80,22 +80,22 @@ public class HelloTVXlet implements javax.tv.xlet.Xlet {
     public void initXlet(XletContext context) {
         
         // loads a default system font.
-	font = new Font(null, Font.PLAIN, 48);
+        font = new Font(null, Font.PLAIN, 48);
 
         scene = HSceneFactory.getInstance().getDefaultHScene();   
         gui = new Container() {
-		
+                
             public void paint(Graphics g) {
-		g.setFont(font);
-		g.setColor(new Color(10,10,10));
-		g.fillRect(20,20,getWidth()-40,getHeight()-40);
-		g.setColor(new Color(245,245,245));   
-		int message_width = g.getFontMetrics().stringWidth(message);
-		g.drawString(message, (getWidth()-message_width)/2, 500);	
-	    }
-	    
-	 };
-	 
+                g.setFont(font);
+                g.setColor(new Color(10,10,10));
+                g.fillRect(20,20,getWidth()-40,getHeight()-40);
+                g.setColor(new Color(245,245,245));   
+                int message_width = g.getFontMetrics().stringWidth(message);
+                g.drawString(message, (getWidth()-message_width)/2, 500);       
+            }
+            
+         };
+         
         gui.setSize(1920, 1080);  // BD screen size
         scene.add(gui, BorderLayout.CENTER);
         scene.validate();
@@ -109,8 +109,8 @@ public class HelloTVXlet implements javax.tv.xlet.Xlet {
         gui.setVisible(false);
     }
     public void destroyXlet(boolean unconditional) {
-	scene.remove(gui);
-	scene = null;
+        scene.remove(gui);
+        scene = null;
     }
     
 }

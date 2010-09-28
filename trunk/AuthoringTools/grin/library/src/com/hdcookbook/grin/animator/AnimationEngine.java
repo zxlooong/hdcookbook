@@ -95,7 +95,7 @@ public abstract class AnimationEngine implements Runnable {
     protected Rectangle repaintBounds = null;
 
     private AnimationClient[] clients;
-    private AnimationClient[] newClients;	// cf. resetAnimationClients
+    private AnimationClient[] newClients;       // cf. resetAnimationClients
     private Thread worker;
 
     private static final int STATE_NOT_STARTED = 0;
@@ -106,15 +106,15 @@ public abstract class AnimationEngine implements Runnable {
 
     private Object repaintLock = new Object();
 
-    private AnimationContext context;	// see initialize(), start(), run()
+    private AnimationContext context;   // see initialize(), start(), run()
     private Rectangle lastClip = new Rectangle(); // see paintFrame
 
-    private boolean needsFullPaint = true;	// First frame painted fully
+    private boolean needsFullPaint = true;      // First frame painted fully
     protected int modelTimeSkipped = 0;
 
-    private byte[] profileDamageCalc;	// Measure damage calculation algorithm
-    private byte[] profileErase;	// Measure time spend erasing buffer
-    private byte[] profileDraw;		// Time spent drawing to buffer
+    private byte[] profileDamageCalc;   // Measure damage calculation algorithm
+    private byte[] profileErase;        // Measure time spend erasing buffer
+    private byte[] profileDraw;         // Time spent drawing to buffer
 
     private int drawTargetCollapseThreshold = Integer.MIN_VALUE;
     protected boolean targetsCanOverlap = false;
@@ -124,14 +124,14 @@ public abstract class AnimationEngine implements Runnable {
      * Initialize a new AnimationEngine.
      **/
     protected AnimationEngine() {
-	worker = new Thread(this, "Animation " + this);
-	worker.setPriority(Thread.NORM_PRIORITY - 1);
-	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
-	    profileDamageCalc 
-		= Profile.makeProfileTimer("damageCalculation(" + this + ")");
-	    profileErase= Profile.makeProfileTimer("eraseBuffer(" + this + ")");
-	    profileDraw= Profile.makeProfileTimer("drawToBuffer(" + this + ")");
-	}
+        worker = new Thread(this, "Animation " + this);
+        worker.setPriority(Thread.NORM_PRIORITY - 1);
+        if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
+            profileDamageCalc 
+                = Profile.makeProfileTimer("damageCalculation(" + this + ")");
+            profileErase= Profile.makeProfileTimer("eraseBuffer(" + this + ")");
+            profileDraw= Profile.makeProfileTimer("drawToBuffer(" + this + ")");
+        }
     }
 
     /**
@@ -145,39 +145,39 @@ public abstract class AnimationEngine implements Runnable {
      * kept low.  Between one and three would be reasonable, and five
      * is perhaps a workable maximum.
      *
-     * @param clients		The animation clients we'll support
+     * @param clients           The animation clients we'll support
      *
      * @see com.hdcookbook.grin.animator.AnimationContext#animationInitialize()
      **/
     public synchronized void initClients(AnimationClient[] clients) {
-	if (Debug.ASSERT && this.clients != null) {
-	    Debug.assertFail();
-	}
-	doInitClients(clients);
+        if (Debug.ASSERT && this.clients != null) {
+            Debug.assertFail();
+        }
+        doInitClients(clients);
     }
 
     //
     // This is also called from checkNewClients
     //
     private synchronized void doInitClients(AnimationClient[] clients) {
-	this.clients = clients;
-	Hashtable targets = new Hashtable(); // <String, Integer>
-	int num = 0;
-	for (int i = 0; i < clients.length; i++) {
-	    String[] ts = clients[i].getDrawTargets();
-	    for (int j = 0; j < ts.length; j++) {
-		if (targets.get(ts[j]) == null) {
-		    targets.put(ts[j], new Integer(num++));
-		}
-	    }
-	    clients[i].mapDrawTargets(targets);
-	}
-	renderContext = new RenderContextBase(targets.size());
-	if (drawTargetCollapseThreshold != Integer.MIN_VALUE) {  
-	    // If it's been set
-	    renderContext.setCollapseThreshold(drawTargetCollapseThreshold);
-	}
-	renderContext.setTargetsCanOverlap(targetsCanOverlap);
+        this.clients = clients;
+        Hashtable targets = new Hashtable(); // <String, Integer>
+        int num = 0;
+        for (int i = 0; i < clients.length; i++) {
+            String[] ts = clients[i].getDrawTargets();
+            for (int j = 0; j < ts.length; j++) {
+                if (targets.get(ts[j]) == null) {
+                    targets.put(ts[j], new Integer(num++));
+                }
+            }
+            clients[i].mapDrawTargets(targets);
+        }
+        renderContext = new RenderContextBase(targets.size());
+        if (drawTargetCollapseThreshold != Integer.MIN_VALUE) {  
+            // If it's been set
+            renderContext.setCollapseThreshold(drawTargetCollapseThreshold);
+        }
+        renderContext.setTargetsCanOverlap(targetsCanOverlap);
     }
 
     /**
@@ -193,13 +193,13 @@ public abstract class AnimationEngine implements Runnable {
      * predictable and consistent render time.
      **/
     public synchronized void setDrawTargetCollapseThreshold(int t) {
-	if (t == Integer.MIN_VALUE) {
-	    t = Integer.MIN_VALUE + 1;	// MIN_VALUE is reserved
-	}
-	drawTargetCollapseThreshold = t;
-	if (renderContext != null) {
-	    renderContext.setCollapseThreshold(t);
-	}
+        if (t == Integer.MIN_VALUE) {
+            t = Integer.MIN_VALUE + 1;  // MIN_VALUE is reserved
+        }
+        drawTargetCollapseThreshold = t;
+        if (renderContext != null) {
+            renderContext.setCollapseThreshold(t);
+        }
     }
 
     /**
@@ -215,10 +215,10 @@ public abstract class AnimationEngine implements Runnable {
      * The default value of this parameter is false.
      **/
     public synchronized void setAllowOverlappingTargets(boolean v) {
-	targetsCanOverlap = v;
-	if (renderContext != null) {
-	    renderContext.setTargetsCanOverlap(targetsCanOverlap);
-	}
+        targetsCanOverlap = v;
+        if (renderContext != null) {
+            renderContext.setTargetsCanOverlap(targetsCanOverlap);
+        }
     }
 
     /**
@@ -235,7 +235,7 @@ public abstract class AnimationEngine implements Runnable {
      * the caller should not modify that array after calling this method.
      **/
     public synchronized void resetAnimationClients(AnimationClient[] clients) {
-	newClients = clients;
+        newClients = clients;
     }
 
     /**
@@ -250,17 +250,17 @@ public abstract class AnimationEngine implements Runnable {
      * it from the .grin file.
      **/
     public synchronized AnimationClient[] getAnimationClients() {
-	AnimationClient[] src;
-	if (newClients == null) {
-	    src = clients;
-	} else {
-	    src = newClients;
-	}
-	AnimationClient[] result = new AnimationClient[src.length];
-	for (int i = 0; i < src.length; i++) {
-	    result[i] = src[i];
-	}
-	return result;
+        AnimationClient[] src;
+        if (newClients == null) {
+            src = clients;
+        } else {
+            src = newClients;
+        }
+        AnimationClient[] result = new AnimationClient[src.length];
+        for (int i = 0; i < src.length; i++) {
+            result[i] = src[i];
+        }
+        return result;
     }
 
 
@@ -273,7 +273,7 @@ public abstract class AnimationEngine implements Runnable {
      * keypresses, take precidence.
      **/
     public void setThreadPriority(int priority) {
-	worker.setPriority(priority);
+        worker.setPriority(priority);
     }
 
     /**
@@ -313,31 +313,31 @@ public abstract class AnimationEngine implements Runnable {
      * @return The number of erase areas active for this frame
      **/
     protected int getNumEraseTargets() {
-	return renderContext.numDrawTargets;
+        return renderContext.numDrawTargets;
     }
 
     /**
      * @return the total pool of erase areas.  Iterate this from 0..n-1,
-     *	       n=getNumEraseTargets().  Some might be empty, which is indicated
-     *	       by a width <= 0, which makes Rectangle.isEmpty() return true.
+     *         n=getNumEraseTargets().  Some might be empty, which is indicated
+     *         by a width <= 0, which makes Rectangle.isEmpty() return true.
      **/
     protected Rectangle[] getEraseTargets() {
-	return renderContext.eraseTargets;
+        return renderContext.eraseTargets;
     }
 
     /**
      * @return The number of draw areas active for this frame
      **/
     protected int getNumDrawTargets() {
-	return renderContext.numDrawTargets;
+        return renderContext.numDrawTargets;
     }
 
     /**
      * @return the total pool of draw areas.  Iterate this from 0..n-1,
-     *	       n=getNumDrawTargets()
+     *         n=getNumDrawTargets()
      **/
     protected Rectangle[] getDrawTargets() {
-	return renderContext.drawTargets;
+        return renderContext.drawTargets;
     }
 
 
@@ -356,7 +356,7 @@ public abstract class AnimationEngine implements Runnable {
      * bail out if needed.
      **/
     public synchronized boolean destroyRequested() {
-	return state != STATE_RUNNING && state != STATE_NOT_STARTED;
+        return state != STATE_RUNNING && state != STATE_NOT_STARTED;
     }
 
     /**
@@ -366,16 +366,16 @@ public abstract class AnimationEngine implements Runnable {
      * during time-consuming operations in the animatino thread.
      **/
     public void checkDestroy() throws InterruptedException {
-	if (Thread.interrupted() || destroyRequested()) {
-	    throw new InterruptedException();
-	}
+        if (Thread.interrupted() || destroyRequested()) {
+            throw new InterruptedException();
+        }
     }
 
     /**
      * Get the component that this animation engine renders into.  This is
      * added by the engine to the container.
      *
-     * @return	the component, or null if initContainer hasn't been called yet.
+     * @return  the component, or null if initContainer hasn't been called yet.
      *
      * @see #initialize(com.hdcookbook.grin.animator.AnimationContext)
      * @see com.hdcookbook.grin.animator.AnimationContext#animationInitialize()
@@ -388,7 +388,7 @@ public abstract class AnimationEngine implements Runnable {
      * if the contents of the framebuffer was damaged somehow.
      **/
     public synchronized void paintNextFrameFully() {
-	needsFullPaint = true;
+        needsFullPaint = true;
     }
 
     /**
@@ -410,8 +410,8 @@ public abstract class AnimationEngine implements Runnable {
      *                 call addDisplayAreas
      *             for each client
      *                 call paintFrame as many times as needed
-     *		   for each client
-     *			call paintDone
+     *             for each client
+     *                  call paintDone
      *    }
      * </pre>
      * <p>
@@ -426,47 +426,47 @@ public abstract class AnimationEngine implements Runnable {
      * initial segument.
      *
      * @param context   The context that the animation manager is running in.
-     *		        This can be used for initialization that the client
-     *			wants to do in the animation thread.  The context might
-     *			use this to create an HScene, load a GRIN show, 
-     *		        synchronously
-     * 			start video playing, or do other time-consuming 
-     *			operations.
+     *                  This can be used for initialization that the client
+     *                  wants to do in the animation thread.  The context might
+     *                  use this to create an HScene, load a GRIN show, 
+     *                  synchronously
+     *                  start video playing, or do other time-consuming 
+     *                  operations.
      *
      * @see com.hdcookbook.grin.animator.AnimationContext#animationFinishInitialization()
      * @see com.hdcookbook.grin.Show#activateSegment(com.hdcookbook.grin.Segment)
      **/
     public void initialize(AnimationContext context) {
-	if (Debug.ASSERT) {
-	    synchronized(this) {
-		if (state != STATE_NOT_STARTED) {
-		    Debug.assertFail("Illegal state " + state + " in " + this);
-		}
-	    }
-	}
-	this.context = context;
-	worker.start();
-	//
-	// Wait for the thread to start up.  This is good to do, because
-	// it puts us in a known state before returning to the caller,
-	// which is probably ultimately initXlet().  By doing this, we
-	// know that the caller is OK to call destroy() on us after we're done.
-	//
-	// We just wait for the thread to start; we don't wait for that
-	// thread to call the initializations methods.  This is intentional,
-	// because Xlet.initXlet() should return as quickly as it reasonably
-	// can, to ensure that the xlet is considered responsive.
-	//
-	synchronized(this) {
-	    try {
-		while (state == STATE_NOT_STARTED) {
-		    wait();
-		}
-	    } catch (InterruptedException ex) {
-		Thread.currentThread().interrupt();
-		// ignored - player must be trying to shut us down
-	    }
-	}
+        if (Debug.ASSERT) {
+            synchronized(this) {
+                if (state != STATE_NOT_STARTED) {
+                    Debug.assertFail("Illegal state " + state + " in " + this);
+                }
+            }
+        }
+        this.context = context;
+        worker.start();
+        //
+        // Wait for the thread to start up.  This is good to do, because
+        // it puts us in a known state before returning to the caller,
+        // which is probably ultimately initXlet().  By doing this, we
+        // know that the caller is OK to call destroy() on us after we're done.
+        //
+        // We just wait for the thread to start; we don't wait for that
+        // thread to call the initializations methods.  This is intentional,
+        // because Xlet.initXlet() should return as quickly as it reasonably
+        // can, to ensure that the xlet is considered responsive.
+        //
+        synchronized(this) {
+            try {
+                while (state == STATE_NOT_STARTED) {
+                    wait();
+                }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                // ignored - player must be trying to shut us down
+            }
+        }
     }
 
     /**
@@ -509,28 +509,28 @@ public abstract class AnimationEngine implements Runnable {
      * terminated.  
      **/
     public void destroy() {
-	synchronized(this) {
-	    if (state == STATE_STOPPED) {
-		return;
-	    }
-	    if (Debug.ASSERT && state != STATE_RUNNING) {
-		Debug.assertFail();
-	    }
-	    setState(STATE_STOPPING);
-	    try {
-		//
-		// Wait until it's really terminated, so that things are
-		// in a known state when this method returns.
-		//
-		while (state != STATE_STOPPED) {
-		    wait();
-		    // We could use Thread.join() instead.  It's really the
-		    // same thing.
-		}
-	    } catch (InterruptedException ex) {
-		Thread.currentThread().interrupt();
-		// ignored - player must be trying to shut us down
-	    }
+        synchronized(this) {
+            if (state == STATE_STOPPED) {
+                return;
+            }
+            if (Debug.ASSERT && state != STATE_RUNNING) {
+                Debug.assertFail();
+            }
+            setState(STATE_STOPPING);
+            try {
+                //
+                // Wait until it's really terminated, so that things are
+                // in a known state when this method returns.
+                //
+                while (state != STATE_STOPPED) {
+                    wait();
+                    // We could use Thread.join() instead.  It's really the
+                    // same thing.
+                }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                // ignored - player must be trying to shut us down
+            }
         }
     }
 
@@ -558,7 +558,7 @@ public abstract class AnimationEngine implements Runnable {
      * @see #paintFrame(java.awt.Graphics2D)
      **/
     protected abstract void callPaintTargets() 
-    	throws InterruptedException;
+        throws InterruptedException;
 
     /**
      * Called when the engine is finished drawing the current frame.
@@ -584,64 +584,64 @@ public abstract class AnimationEngine implements Runnable {
      * directly.
      **/
     public void run() {
-	setState(STATE_RUNNING);
-	try {
-	    context.animationInitialize();
-	    if (Debug.ASSERT) {
-		synchronized(this) {
-		    if (getComponent() == null) {
-			Debug.assertFail("initContainer() not called");
-		    }
-		    if (clients == null) {
-			Debug.assertFail("initClients() not called");
-		    }
-		}
-	    }
-	    for (int i = 0; i < clients.length; i++) {
-		clients[i].initialize(getComponent());
-	    }
-	    context.animationFinishInitialization();
-	    runAnimationLoop();
+        setState(STATE_RUNNING);
+        try {
+            context.animationInitialize();
+            if (Debug.ASSERT) {
+                synchronized(this) {
+                    if (getComponent() == null) {
+                        Debug.assertFail("initContainer() not called");
+                    }
+                    if (clients == null) {
+                        Debug.assertFail("initClients() not called");
+                    }
+                }
+            }
+            for (int i = 0; i < clients.length; i++) {
+                clients[i].initialize(getComponent());
+            }
+            context.animationFinishInitialization();
+            runAnimationLoop();
 
-	} catch (InterruptedException ex) {
-	    // Player is trying to terminate us 
-	    Thread.currentThread().interrupt();
-	} catch (Throwable t) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(t);
-		Debug.println("****  Exception in animation thread:  " + t);
-	    }
-	} finally {
-	    AnimationClient[] c = clients;
-	    if (c != null) {
-		for (int i = 0; i < c.length; i++) {
-		    try {
-			if (Debug.LEVEL > 0) {
-			    Debug.println("Destroying animation client " + i);
-			}
-			c[i].destroy();
-			if (Debug.LEVEL > 0) {
-			    Debug.println("Destroyed animation client " + i);
-			}
-		    } catch (Throwable t) {
-			if (Debug.LEVEL > 1) {
-			    Debug.println(this);
-			    Debug.printStackTrace(t);
-			    Debug.println("****  Exception in destroy:  " + t);
-			}
-		    }
-		}
-	    }
-	    try {
-		terminatingEraseScreen();
-	    } catch (Throwable t) {
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(t);
-		    Debug.println("****  Exception in destroy:  " + t);
-		}
-	    }
-	    setState(STATE_STOPPED);  // Allows the call to destroy() to return
-	}
+        } catch (InterruptedException ex) {
+            // Player is trying to terminate us 
+            Thread.currentThread().interrupt();
+        } catch (Throwable t) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(t);
+                Debug.println("****  Exception in animation thread:  " + t);
+            }
+        } finally {
+            AnimationClient[] c = clients;
+            if (c != null) {
+                for (int i = 0; i < c.length; i++) {
+                    try {
+                        if (Debug.LEVEL > 0) {
+                            Debug.println("Destroying animation client " + i);
+                        }
+                        c[i].destroy();
+                        if (Debug.LEVEL > 0) {
+                            Debug.println("Destroyed animation client " + i);
+                        }
+                    } catch (Throwable t) {
+                        if (Debug.LEVEL > 1) {
+                            Debug.println(this);
+                            Debug.printStackTrace(t);
+                            Debug.println("****  Exception in destroy:  " + t);
+                        }
+                    }
+                }
+            }
+            try {
+                terminatingEraseScreen();
+            } catch (Throwable t) {
+                if (Debug.LEVEL > 0) {
+                    Debug.printStackTrace(t);
+                    Debug.println("****  Exception in destroy:  " + t);
+                }
+            }
+            setState(STATE_STOPPED);  // Allows the call to destroy() to return
+        }
     }
 
     /**
@@ -681,48 +681,48 @@ public abstract class AnimationEngine implements Runnable {
      * destroy animation clients.
      **/
     protected final void checkNewClients() throws InterruptedException {
-	AnimationClient[] oldClients = null;
-	AnimationClient[] localNew = null;
-	synchronized(this) {
-	    if (newClients == null) {
-		return;
-	    }
-	    oldClients = clients;
-	    localNew = newClients;
-	    newClients = null;
-	}
+        AnimationClient[] oldClients = null;
+        AnimationClient[] localNew = null;
+        synchronized(this) {
+            if (newClients == null) {
+                return;
+            }
+            oldClients = clients;
+            localNew = newClients;
+            newClients = null;
+        }
 
-	// Initialize the ones that are new.  For clients that aren't
-	// new, remove them from oldClients so we don't destroy them
-	// later.
-	for (int i = 0; i < localNew.length; i++) {
-	    boolean found = false;
-	    for (int j = 0; !found && j < oldClients.length; j++) {
-		if (localNew[i] == oldClients[j]) {
-		    found = true;
-		    oldClients[j] = null;
-		}
-	    }
-	    if (!found) {
-		localNew[i].initialize(getComponent());
-	    }
-	}
+        // Initialize the ones that are new.  For clients that aren't
+        // new, remove them from oldClients so we don't destroy them
+        // later.
+        for (int i = 0; i < localNew.length; i++) {
+            boolean found = false;
+            for (int j = 0; !found && j < oldClients.length; j++) {
+                if (localNew[i] == oldClients[j]) {
+                    found = true;
+                    oldClients[j] = null;
+                }
+            }
+            if (!found) {
+                localNew[i].initialize(getComponent());
+            }
+        }
 
-	// Next, destroy the old one's that aren't on the new list
-	for (int i = 0; i < oldClients.length; i++) {
-	    AnimationClient c = oldClients[i];
-	    if (c != null) {
-		c.destroy();
-	    }
-	}
+        // Next, destroy the old one's that aren't on the new list
+        for (int i = 0; i < oldClients.length; i++) {
+            AnimationClient c = oldClients[i];
+            if (c != null) {
+                c.destroy();
+            }
+        }
 
-	//
-	// Finally, set the clients data member, and set up the draw targets
-	// This also creates a new renderContext.
-	//
-	renderContext.resetLastFrameList();
-	doInitClients(localNew);
-	paintNextFrameFully();
+        //
+        // Finally, set the clients data member, and set up the draw targets
+        // This also creates a new renderContext.
+        //
+        renderContext.resetLastFrameList();
+        doInitClients(localNew);
+        paintNextFrameFully();
     }
 
     /**
@@ -749,15 +749,15 @@ public abstract class AnimationEngine implements Runnable {
      * @see AnimationClient#nextFrame()
      **/
     public final int getModelTimeSkipped() {
-	return modelTimeSkipped;
+        return modelTimeSkipped;
     }
     
     protected final void advanceModel() throws InterruptedException {
-	synchronized(repaintLock) {
-	    for (int i = 0; i < clients.length; i++)  {
-		clients[i].nextFrame();
-	    }
-	} 
+        synchronized(repaintLock) {
+            for (int i = 0; i < clients.length; i++)  {
+                clients[i].nextFrame();
+            }
+        } 
     }
 
     /**
@@ -767,20 +767,20 @@ public abstract class AnimationEngine implements Runnable {
      * @see #callPaintTargets()
      **/
     protected final void showFrame() throws InterruptedException {
-	for (int i = 0; i < clients.length; i++) {
-	    clients[i].setCaughtUp();
-	}
-	int tok;
-	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
-	    tok = Profile.startTimer(profileDamageCalc, Profile.TID_ANIMATION);
-	}
-	renderContext.setEmpty();
-	renderContext.setTarget(0);
-	boolean fullPaint;
-	boolean partialPaint;
+        for (int i = 0; i < clients.length; i++) {
+            clients[i].setCaughtUp();
+        }
+        int tok;
+        if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
+            tok = Profile.startTimer(profileDamageCalc, Profile.TID_ANIMATION);
+        }
+        renderContext.setEmpty();
+        renderContext.setTarget(0);
+        boolean fullPaint;
+        boolean partialPaint;
         int x = 0, y = 0, w = 0, h = 0;
-	synchronized(this) {
-	    fullPaint = needsFullPaint || needsFullRedrawInAnimationLoop();
+        synchronized(this) {
+            fullPaint = needsFullPaint || needsFullRedrawInAnimationLoop();
             partialPaint = (repaintBounds != null && !repaintBounds.isEmpty());
             if (fullPaint) { 
                 x = 0; 
@@ -794,59 +794,59 @@ public abstract class AnimationEngine implements Runnable {
                 h = repaintBounds.height;
                 repaintBounds.setSize(0,0);
             }
-	    needsFullPaint = false;
-	}
-	if (fullPaint || partialPaint) {
-	    renderContext.setFullPaint(x,y,w,h);
-	    // We still add the display areas, because that's also where
-	    // the client tracks state
-	    // from frame to frame.  The contract of AnimationClient
-	    // requires that addDisplayAreas be called exactly once per
-	    // frame displayed.
+            needsFullPaint = false;
+        }
+        if (fullPaint || partialPaint) {
+            renderContext.setFullPaint(x,y,w,h);
+            // We still add the display areas, because that's also where
+            // the client tracks state
+            // from frame to frame.  The contract of AnimationClient
+            // requires that addDisplayAreas be called exactly once per
+            // frame displayed.
         }
 
-	for (int i = 0; i < clients.length; i++) {
-	    clients[i].addDisplayAreas(renderContext);	
-	    	// renderContext contains targets
-	}
-	renderContext.processDrawRecordLists();
-	renderContext.collapseTargets();
-	renderContext.calculateEraseTargets();
-	if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
-	    Profile.stopTimer(tok);
-	}
-	if (!targetsCanOverlap) {
-	    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
-		tok = Profile.startTimer(profileErase, Profile.TID_ANIMATION);
-	    }
-	    for (int i = 0; i < renderContext.numDrawTargets; i++) {
-		Rectangle a = renderContext.eraseTargets[i];
-		if (!renderContext.isEmpty(a)) {
-		    clearArea(a.x, a.y, a.width, a.height);
-		}
-	    }
-	    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
-		Profile.stopTimer(tok);
-	    }
-	}
-	try {
-	    int tok2;
-	    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
-		tok2 = Profile.startTimer(profileDraw, Profile.TID_ANIMATION);
-	    }
-	    callPaintTargets();
-	    if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
-		Profile.stopTimer(tok2);
-	    }
-	} finally {
-	    for (int i = 0; i < clients.length; i++) {
-		try {
-		    clients[i].paintDone();
-		} catch (Throwable ignored) {
-		}
-	    }
-	    finishedFrame();
-	}
+        for (int i = 0; i < clients.length; i++) {
+            clients[i].addDisplayAreas(renderContext);  
+                // renderContext contains targets
+        }
+        renderContext.processDrawRecordLists();
+        renderContext.collapseTargets();
+        renderContext.calculateEraseTargets();
+        if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
+            Profile.stopTimer(tok);
+        }
+        if (!targetsCanOverlap) {
+            if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
+                tok = Profile.startTimer(profileErase, Profile.TID_ANIMATION);
+            }
+            for (int i = 0; i < renderContext.numDrawTargets; i++) {
+                Rectangle a = renderContext.eraseTargets[i];
+                if (!renderContext.isEmpty(a)) {
+                    clearArea(a.x, a.y, a.width, a.height);
+                }
+            }
+            if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
+                Profile.stopTimer(tok);
+            }
+        }
+        try {
+            int tok2;
+            if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
+                tok2 = Profile.startTimer(profileDraw, Profile.TID_ANIMATION);
+            }
+            callPaintTargets();
+            if (Debug.PROFILE && Debug.PROFILE_ANIMATION) {
+                Profile.stopTimer(tok2);
+            }
+        } finally {
+            for (int i = 0; i < clients.length; i++) {
+                try {
+                    clients[i].paintDone();
+                } catch (Throwable ignored) {
+                }
+            }
+            finishedFrame();
+        }
     }
 
     /**
@@ -862,35 +862,35 @@ public abstract class AnimationEngine implements Runnable {
      * the Graphics2D instance will be suitable for re-use in a subsequent
      * paintFrame operation.
      *
-     * @param g		A graphics context with a clip area covering
-     *			the full extent of the screen area under the
-     *			control of this animation manager. 
+     * @param g         A graphics context with a clip area covering
+     *                  the full extent of the screen area under the
+     *                  control of this animation manager. 
      *
      * @see #callPaintTargets()
      **/
     protected final void paintTargets(Graphics2D g) 
-	    throws InterruptedException 
+            throws InterruptedException 
     {
-	g.setComposite(AlphaComposite.Src);
-	lastClip.width = 0;
-	g.getClipBounds(lastClip);
-	for (int i = 0; i < renderContext.numDrawTargets; i++) {
-	    g.setClip(renderContext.drawTargets[i]);
-	    if (targetsCanOverlap) {
-		Rectangle a = renderContext.eraseTargets[i];
-		if (!renderContext.isEmpty(a)) {
-		    clearArea(a.x, a.y, a.width, a.height);
-		}
-	    }
-	    for (int j = 0; j < clients.length; j++) {
-		clients[j].paintFrame(g);
-	    }
-	}
-	if (lastClip.width == 0) {
-	    g.setClip(null);
-	} else {
-	    g.setClip(lastClip);
-	}
+        g.setComposite(AlphaComposite.Src);
+        lastClip.width = 0;
+        g.getClipBounds(lastClip);
+        for (int i = 0; i < renderContext.numDrawTargets; i++) {
+            g.setClip(renderContext.drawTargets[i]);
+            if (targetsCanOverlap) {
+                Rectangle a = renderContext.eraseTargets[i];
+                if (!renderContext.isEmpty(a)) {
+                    clearArea(a.x, a.y, a.width, a.height);
+                }
+            }
+            for (int j = 0; j < clients.length; j++) {
+                clients[j].paintFrame(g);
+            }
+        }
+        if (lastClip.width == 0) {
+            g.setClip(null);
+        } else {
+            g.setClip(lastClip);
+        }
     }
 
     /**
@@ -898,16 +898,16 @@ public abstract class AnimationEngine implements Runnable {
      * variant is for use when the full clip area of g should be
      * painted to, rather than the set of render area gargets.
      *
-     * @param g		A graphics context with a clip area covering the 
-     *			area that needs to be painted to
+     * @param g         A graphics context with a clip area covering the 
+     *                  area that needs to be painted to
      *
      * @see #paintTargets(java.awt.Graphics2D)
      **/
     protected final void paintFrame(Graphics2D g) throws InterruptedException {
-	g.setComposite(AlphaComposite.Src);
-	for (int j = 0; j < clients.length; j++) {
-	    clients[j].paintFrame(g);
-	}
+        g.setComposite(AlphaComposite.Src);
+        for (int j = 0; j < clients.length; j++) {
+            clients[j].paintFrame(g);
+        }
     }
 
     /**
@@ -922,15 +922,15 @@ public abstract class AnimationEngine implements Runnable {
      * to a buffered image.
      **/
     public void repaintFrame(Graphics2D g) throws InterruptedException {
-	if (destroyRequested()) {
-	    return;
-	}
-	synchronized(repaintLock) {
-	    // Hold lock so that no model updates happen during repaint.
-	    // We should be safe from deadlock, because the only contention
-	    // for model updates happen from the animation thread, which
-	    // acquires no other locks before acquiring repaintLock.
-	    paintFrame(g);
-	} 
+        if (destroyRequested()) {
+            return;
+        }
+        synchronized(repaintLock) {
+            // Hold lock so that no model updates happen during repaint.
+            // We should be safe from deadlock, because the only contention
+            // for model updates happen from the animation thread, which
+            // acquires no other locks before acquiring repaintLock.
+            paintFrame(g);
+        } 
     }
 }

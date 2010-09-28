@@ -61,11 +61,11 @@ public class SEMenuAssembly extends SEAssembly {
     private MenuAssemblyHelper helper;
     public SEMenuAssembly(SEShow show, MenuAssemblyHelper helper) {
         super(show);
-	this.helper = helper;
+        this.helper = helper;
     }
 
     public MenuAssemblyHelper getHelper() {
-	return helper;
+        return helper;
     }
         
     public void accept(SEShowVisitor visitor) {
@@ -76,10 +76,10 @@ public class SEMenuAssembly extends SEAssembly {
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "menu_assembly @" + Integer.toHexString(hashCode());
-	} else {
-	    return "menu_assembly " + name;
-	}
+        if (name == null) {
+            return "menu_assembly @" + Integer.toHexString(hashCode());
+        } else {
+            return "menu_assembly " + name;
+        }
     }
 }

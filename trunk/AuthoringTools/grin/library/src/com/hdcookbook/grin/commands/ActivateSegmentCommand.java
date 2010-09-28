@@ -81,12 +81,12 @@ public class ActivateSegmentCommand extends Command implements Node {
     public ActivateSegmentCommand(Show show, 
             boolean push, boolean pop) {
         super(show);
-	this.push = push;
-	this.pop = pop;
+        this.push = push;
+        this.pop = pop;
     }
 
     public ActivateSegmentCommand(Show show) {
-	this(show, false, false);
+        this(show, false, false);
     }
     
     public boolean getPush() {
@@ -102,23 +102,23 @@ public class ActivateSegmentCommand extends Command implements Node {
     }
     
     public void setup(Segment segment) {
-	this.segment = segment;
+        this.segment = segment;
     }    
 
     public void execute() {
-	if (push) {
-	    show.pushCurrentSegment();
-	}
-	Segment seg = segment;
-	if (pop) {
-	    seg = show.popSegmentStack();
-	    if (Debug.LEVEL > 0 && seg == null) {
-		Debug.println("****  Error:  Popping segment stack gets null ***");
-	    }
-	}
-	if (seg != null) {
-	    show.doActivateSegment(seg);
-	}
+        if (push) {
+            show.pushCurrentSegment();
+        }
+        Segment seg = segment;
+        if (pop) {
+            seg = show.popSegmentStack();
+            if (Debug.LEVEL > 0 && seg == null) {
+                Debug.println("****  Error:  Popping segment stack gets null ***");
+            }
+        }
+        if (seg != null) {
+            show.doActivateSegment(seg);
+        }
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

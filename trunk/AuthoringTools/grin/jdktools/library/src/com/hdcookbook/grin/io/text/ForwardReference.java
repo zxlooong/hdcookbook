@@ -72,16 +72,16 @@ public abstract class ForwardReference {
     
     public ForwardReference(Lexer lexer) {
         this.lineNumber = lexer.getRealLineNumber();
-	this.fileName = lexer.getRealFileName();
-	this.lexer = lexer;
+        this.fileName = lexer.getRealFileName();
+        this.lexer = lexer;
     }
 
     void resolveAtLine() throws IOException {
-	int n = lexer.getLineNumber();
-	String s = lexer.getFileName();
-	lexer.setLineNumberAndName(lineNumber, fileName);
-	resolve();
-	lexer.setLineNumberAndName(n, s);
+        int n = lexer.getLineNumber();
+        String s = lexer.getFileName();
+        lexer.setLineNumberAndName(lineNumber, fileName);
+        resolve();
+        lexer.setLineNumberAndName(n, s);
     }
    
     /**
@@ -96,7 +96,7 @@ public abstract class ForwardReference {
      **/
     public void reportError(String msg) throws IOException {
         throw new IOException(msg + " on line " + lineNumber 
-			      + " of " + fileName + ".");
+                              + " of " + fileName + ".");
     }
     
 }

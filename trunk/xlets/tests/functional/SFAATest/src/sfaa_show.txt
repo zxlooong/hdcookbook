@@ -63,12 +63,12 @@ show
 
 exports 
     segments {
-	S:Initialize
-	S:Running	# for the debug message
+        S:Initialize
+        S:Running       # for the debug message
     } features {
-	F:Assembly
-	F:Position
-	F:Scale
+        F:Assembly
+        F:Position
+        F:Scale
     } handlers {
     }
 ;
@@ -94,30 +94,30 @@ java_generated_class SFAACommands [[
 ]]
 
 feature timer F:Heartbeat 1 repeat {
-	java_command [[ getDirector().heartbeat(); ]]
+        java_command [[ getDirector().heartbeat(); ]]
 } ;
 
 feature translator_model F:Position { 0 300 300 start } ;
-	# position set by director
+        # position set by director
 
 feature scaling_model F:Scale { 0 0 0 1000 1000 mills } ;
-	# Scale factor set by director
+        # Scale factor set by director
 
 feature assembly F:Assembly {
 
-	New_Bear_01	sub_feature fixed_image ( middle 0 middle 0 ) 
-				"images/New_Bear_01.png" 
-				scaling_model F:Scale ;
+        New_Bear_01     sub_feature fixed_image ( middle 0 middle 0 ) 
+                                "images/New_Bear_01.png" 
+                                scaling_model F:Scale ;
 
-	New_Bear_02	sub_feature fixed_image ( middle 0 middle 0 ) 
-				"images/New_Bear_02.png" 
-				scaling_model F:Scale ;
+        New_Bear_02     sub_feature fixed_image ( middle 0 middle 0 ) 
+                                "images/New_Bear_02.png" 
+                                scaling_model F:Scale ;
 
-	New_Bear_03	sub_feature fixed_image ( middle 0 middle 0 ) 
-				"images/New_Bear_03.png" 
-				scaling_model F:Scale ;
+        New_Bear_03     sub_feature fixed_image ( middle 0 middle 0 ) 
+                                "images/New_Bear_03.png" 
+                                scaling_model F:Scale ;
 
-	Empty		sub_feature group { } ;
+        Empty           sub_feature group { } ;
 
 } ;
 
@@ -131,15 +131,15 @@ feature translator F:All F:Position {
 
 segment S:Initialize 
     setup {
-	F:All
+        F:All
     } setup_done {
-	activate_segment S:Running ;
+        activate_segment S:Running ;
     }
 ;
 
 segment S:Running
     active {
-	F:All
+        F:All
     } setup {
     }
 ;

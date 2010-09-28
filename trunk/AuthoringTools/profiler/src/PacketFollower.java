@@ -69,62 +69,62 @@ public class PacketFollower extends Thread {
     PacketList packets;
     private boolean running = false;
 
-    private Packet[] startPackets;	// Indexed by ID
+    private Packet[] startPackets;      // Indexed by ID
 
     public PacketFollower(PacketList packets) {
-	this.packets = packets;
-	startPackets = new Packet[packets.getCapacity() / 2];
-	    // No more than half of the packets can be start packets
+        this.packets = packets;
+        startPackets = new Packet[packets.getCapacity() / 2];
+            // No more than half of the packets can be start packets
     }
 
     public synchronized void toggleRunning() {
-	running = !running;
-	System.out.println("Follow mode now " + running);
-	notifyAll();
+        running = !running;
+        System.out.println("Follow mode now " + running);
+        notifyAll();
     }
 
     public void run() {
-	for (int i = 0; ; i++) {
-	    Packet p = packets.get(i);
-	    if (p == null) {
-		return;
-	    }
-	    synchronized(this) {
-		while (!running) {
-		    try {
-			wait();
-		    } catch (InterruptedException ex) {
-			return;
-		    }
-		}
-	    }
-	    if (p.id < 0 || p.id >= startPackets.length) {
-		System.out.println("Illegal packet id " + p.id);
-	    } else if (p.type == Profile.TIMER_START) {
-		startPackets[p.id] = p;
-	    } else if (p.type == Profile.TIMER_STOP) {
-		Packet start = startPackets[p.id];
-		if (start == null) {
-		    System.out.println("Missing start packet for " + p.id);
-		} else {
-		    String time = "" + (p.timestamp - start.timestamp) + " ns ";
-		    if (time.length() < 15) {
-			time = "               ".substring(time.length()) + time;
-		    }
+        for (int i = 0; ; i++) {
+            Packet p = packets.get(i);
+            if (p == null) {
+                return;
+            }
+            synchronized(this) {
+                while (!running) {
+                    try {
+                        wait();
+                    } catch (InterruptedException ex) {
+                        return;
+                    }
+                }
+            }
+            if (p.id < 0 || p.id >= startPackets.length) {
+                System.out.println("Illegal packet id " + p.id);
+            } else if (p.type == Profile.TIMER_START) {
+                startPackets[p.id] = p;
+            } else if (p.type == Profile.TIMER_STOP) {
+                Packet start = startPackets[p.id];
+                if (start == null) {
+                    System.out.println("Missing start packet for " + p.id);
+                } else {
+                    String time = "" + (p.timestamp - start.timestamp) + " ns ";
+                    if (time.length() < 15) {
+                        time = "               ".substring(time.length()) + time;
+                    }
                     System.out.println("[Time Profile tid=" 
-		        + (0xff & (int) start.threadID) + "]  " + time
-			+ start.message);
-		}
-	    } else if (p.type == Profile.MESSAGE) {
-		    String time = "" + (p.timestamp) + " ns ";
-		    if (time.length() < 15) {
-			time = "               ".substring(time.length()) + time;
-		    }
+                        + (0xff & (int) start.threadID) + "]  " + time
+                        + start.message);
+                }
+            } else if (p.type == Profile.MESSAGE) {
+                    String time = "" + (p.timestamp) + " ns ";
+                    if (time.length() < 15) {
+                        time = "               ".substring(time.length()) + time;
+                    }
                     System.out.println("[Debug message " + time + ":");
-		    System.out.println(p.getDebugMessage());
-	    } else {
-		System.out.println("Unrecognized packet!");
-	    }
-	}
+                    System.out.println(p.getDebugMessage());
+            } else {
+                System.out.println("Unrecognized packet!");
+            }
+        }
     }
 }

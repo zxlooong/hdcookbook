@@ -66,20 +66,20 @@ public class AppInfoBDMV {
     
     byte[] contentProviderData = new byte[32];
     InitialOutputModePreferenceType initialOutputModePreference
-    	= InitialOutputModePreferenceType.Mode2D;
+        = InitialOutputModePreferenceType.Mode2D;
     boolean ssContentExistFlag = false;
     VideoFormat videoFormat = VideoFormat.IGNORED;
     FrameRate frameRate = FrameRate.IGNORED;
   
     public enum InitialOutputModePreferenceType {
-	Mode2D,		// 0
-	Mode3D;		// 1
+        Mode2D,         // 0
+        Mode3D;         // 1
     }
 
     public enum VideoFormat {
-    		// This is almost the same as the video format defined in
-		// 5.4.4.3.2, but 5.2.2.3 specifies that a value of 0 is
-		// ignored by the player in this context.
+                // This is almost the same as the video format defined in
+                // 5.4.4.3.2, but 5.2.2.3 specifies that a value of 0 is
+                // ignored by the player in this context.
         IGNORED,
         VIDEO_480i,
         VIDEO_576i,
@@ -93,23 +93,23 @@ public class AppInfoBDMV {
             return (byte) ordinal();
         }
 
-	public static VideoFormat getFromEncoding(int encoding) {
+        public static VideoFormat getFromEncoding(int encoding) {
             VideoFormat[] values = VideoFormat.values();
             for (int i = 0; i < values.length; i++) {
                 if (values[i].ordinal() == encoding) {
                     return values[i];
                 }
             }
-	    assert false;
-	    return IGNORED;
-	}
+            assert false;
+            return IGNORED;
+        }
     }     
    
 
     public enum FrameRate {
-    		// This is almost the same as the frame rate defined in
-		// 5.4.4.3.2, but 5.2.2.3 specifies that a value of 0 is
-		// ignored by the player in this context.
+                // This is almost the same as the frame rate defined in
+                // 5.4.4.3.2, but 5.2.2.3 specifies that a value of 0 is
+                // ignored by the player in this context.
         IGNORED,
         Hz_24000_1001,
         Hz_24,
@@ -123,51 +123,51 @@ public class AppInfoBDMV {
             return ordinal();
         }        
 
-	public static FrameRate getFromEncoding(int encoding) {
+        public static FrameRate getFromEncoding(int encoding) {
             FrameRate[] frameRates = FrameRate.values();
             for (int i = 0; i < frameRates.length; i++) {
                 if (frameRates[i].ordinal() == encoding) {
                     return frameRates[i];
                 }
             }
-	    assert false;
-	    return IGNORED;
-	}
+            assert false;
+            return IGNORED;
+        }
     }
 
     public InitialOutputModePreferenceType getInitialOutputModePreference() {
-	return initialOutputModePreference;
+        return initialOutputModePreference;
     }
 
     public void setInitialOutputModePreference(
-    			InitialOutputModePreferenceType v) 
+                        InitialOutputModePreferenceType v) 
     {
-	initialOutputModePreference = v;
+        initialOutputModePreference = v;
     }
 
 
     public boolean getSSContentExistFlag() {
-	return ssContentExistFlag;
+        return ssContentExistFlag;
     }
 
     public void setSSContentExistFlag(boolean v) {
-	this.ssContentExistFlag = v;
+        this.ssContentExistFlag = v;
     }
 
     public VideoFormat getVideoFormat() {
-	return videoFormat;
+        return videoFormat;
     }
 
     public void setVideoFormat(VideoFormat v) {
-	videoFormat = v;
+        videoFormat = v;
     }
 
     public FrameRate getFrameRate() {
-	return frameRate;
+        return frameRate;
     }
 
     public void setFrameRate(FrameRate v) {
-	frameRate = v;
+        frameRate = v;
     }
 
      // Note: Commenting out to stop data represenatation to be in the xml file.
@@ -189,45 +189,45 @@ public class AppInfoBDMV {
     
     public void readObject(DataInputStream din) throws IOException {
        
-	// See 3-1 section 5.2.2.2
+        // See 3-1 section 5.2.2.2
         // 32 bit length (should be constant, 34)
-	// 1 bit reserved
-	// 1 bit initial_output_mode_preference
-	// 1 bit SS content exist flag
-	// 5 bits reserved
-	// 4 bits video_format
-	// 4 bits frame_rate
+        // 1 bit reserved
+        // 1 bit initial_output_mode_preference
+        // 1 bit SS content exist flag
+        // 5 bits reserved
+        // 4 bits video_format
+        // 4 bits frame_rate
         // 16 bit reserved
         // 8*32 user data
         
         din.skipBytes(4); // reserved
-	byte b = din.readByte();
-	if ((b & 0x40) != 0) {
-	    initialOutputModePreference =
-		InitialOutputModePreferenceType.Mode3D;
-	} else {
-	    initialOutputModePreference =
-		InitialOutputModePreferenceType.Mode2D;
-	}
-	ssContentExistFlag = (b & 0x20) != 0;
-	b = din.readByte();
-	videoFormat = VideoFormat.getFromEncoding(b >> 4);
-	frameRate = FrameRate.getFromEncoding(b & 0xf);
+        byte b = din.readByte();
+        if ((b & 0x40) != 0) {
+            initialOutputModePreference =
+                InitialOutputModePreferenceType.Mode3D;
+        } else {
+            initialOutputModePreference =
+                InitialOutputModePreferenceType.Mode2D;
+        }
+        ssContentExistFlag = (b & 0x20) != 0;
+        b = din.readByte();
+        videoFormat = VideoFormat.getFromEncoding(b >> 4);
+        frameRate = FrameRate.getFromEncoding(b & 0xf);
         din.read(contentProviderData);
     }
     
     public void writeObject(DataOutputStream dout) throws IOException {
         dout.writeInt(34);
-	int i = 0;
-	if (initialOutputModePreference == InitialOutputModePreferenceType.Mode3D) {
-	    i |= 0x40;
-	}
-	if (ssContentExistFlag) {
-	    i |= 0x20;
-	}
+        int i = 0;
+        if (initialOutputModePreference == InitialOutputModePreferenceType.Mode3D) {
+            i |= 0x40;
+        }
+        if (ssContentExistFlag) {
+            i |= 0x20;
+        }
         dout.writeByte(i);
-	i = videoFormat.getEncoding() << 4;
-	i |= frameRate.getEncoding();
+        i = videoFormat.getEncoding() << 4;
+        i |= frameRate.getEncoding();
         dout.writeByte(i);
         dout.write(contentProviderData);
     }

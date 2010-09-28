@@ -21,30 +21,30 @@ public class EdSullivan extends Director {
     }
 
     public void initialize() {
-	shoeMover = (InterpolatedModel) getFeature("F:Shoe.Mover");
+        shoeMover = (InterpolatedModel) getFeature("F:Shoe.Mover");
     }
 
     public void heartbeat() {
-	shoeX += shoeDX;
-	if (shoeX < 100) {
-	    shoeX = 100;
-	} else if (shoeX > 1820) {
-	    shoeX = 1820;
-	}
-	shoeMover.setField(Translator.X_FIELD, shoeX);
-	shoeMover.setField(Translator.Y_FIELD, shoeY);
+        shoeX += shoeDX;
+        if (shoeX < 100) {
+            shoeX = 100;
+        } else if (shoeX > 1820) {
+            shoeX = 1820;
+        }
+        shoeMover.setField(Translator.X_FIELD, shoeX);
+        shoeMover.setField(Translator.Y_FIELD, shoeY);
     }
 
     public void shoeLeft() {
-	shoeDX = -30;
+        shoeDX = -30;
     }
 
     public void shoeRight() {
-	shoeDX = 30;
+        shoeDX = 30;
     }
 
     public void shoeStop() {
-	shoeDX = 0;
+        shoeDX = 0;
     }
 
 }

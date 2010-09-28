@@ -90,18 +90,18 @@ public class MenuAssemblyHelper {
      **/
     public static class Features {
 
-	/**
-	 * A label identifyiing the features.  A part can swap out
-	 * features from the default set by specifying assembly features
-	 * with the same id.
-	 **/
-	public String id;
+        /**
+         * A label identifyiing the features.  A part can swap out
+         * features from the default set by specifying assembly features
+         * with the same id.
+         **/
+        public String id;
 
-	/**
-	 * The list of features under the given ID.  This defaults to
-	 * an empty List.
-	 **/
-	public List<FeatureRef> features = new ArrayList<FeatureRef>();
+        /**
+         * The list of features under the given ID.  This defaults to
+         * an empty List.
+         **/
+        public List<FeatureRef> features = new ArrayList<FeatureRef>();
     }
 
     public SEShow show;
@@ -115,42 +115,42 @@ public class MenuAssemblyHelper {
      * Setup the assembly.
      *
      * @return the synthetic features that were created.  These need to be
-     * 	       added to the show by the caller.
+     *         added to the show by the caller.
      **/
     public Iterable<Feature> setupAssembly() throws IOException {
-	String[] nameList = partNames.toArray(new String[partNames.size()]);
-	Feature[] featureList = new Feature[parts.size()];
-	for (int i = 0; i < featureList.length; i++) {
-	    featureList[i] = buildPart(parts.get(i));
-	}
-	assembly.setParts(nameList, featureList);
-	return Arrays.asList(featureList);
+        String[] nameList = partNames.toArray(new String[partNames.size()]);
+        Feature[] featureList = new Feature[parts.size()];
+        for (int i = 0; i < featureList.length; i++) {
+            featureList[i] = buildPart(parts.get(i));
+        }
+        assembly.setParts(nameList, featureList);
+        return Arrays.asList(featureList);
     }
 
     private Feature buildPart(List<Features> replacements) throws IOException {
-	Map<String, List<FeatureRef>> idMap 
-		= new HashMap<String, List<FeatureRef>>();
-	for (Features f : replacements)  {
-	    if (idMap.get(f.id) != null) {
-		throw new IOException("The id \"" + f.id + "\" occurs twice"
-				      + " (near line " + lineNumber + ")");
-	    }
-	    idMap.put(f.id, f.features);
-	}
-	List<Feature> elements = new ArrayList<Feature>();
-	for (int i = 0; i < template.size(); i++) {
-	    List<FeatureRef> fRefs = idMap.get(template.get(i).id);
-	    if (fRefs == null) {
-		fRefs = template.get(i).features;
-	    }
-	    for (int j = 0; j < fRefs.size(); j++)  {
-		elements.add(fRefs.get(j).getFeature());
-	    }
-	}
-	Feature[] members = elements.toArray(new Feature[elements.size()]);
-	SEGroup g = new SEGroup(show, null);
-	g.setup(members);
-	return g;
+        Map<String, List<FeatureRef>> idMap 
+                = new HashMap<String, List<FeatureRef>>();
+        for (Features f : replacements)  {
+            if (idMap.get(f.id) != null) {
+                throw new IOException("The id \"" + f.id + "\" occurs twice"
+                                      + " (near line " + lineNumber + ")");
+            }
+            idMap.put(f.id, f.features);
+        }
+        List<Feature> elements = new ArrayList<Feature>();
+        for (int i = 0; i < template.size(); i++) {
+            List<FeatureRef> fRefs = idMap.get(template.get(i).id);
+            if (fRefs == null) {
+                fRefs = template.get(i).features;
+            }
+            for (int j = 0; j < fRefs.size(); j++)  {
+                elements.add(fRefs.get(j).getFeature());
+            }
+        }
+        Feature[] members = elements.toArray(new Feature[elements.size()]);
+        SEGroup g = new SEGroup(show, null);
+        g.setup(members);
+        return g;
     }
 
 }

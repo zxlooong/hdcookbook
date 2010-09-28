@@ -72,9 +72,9 @@ public class SEClipped extends Clipped implements SENode, SEScalableNode {
     }
     
     public SEClipped(SEShow show, String name, Rectangle clipRegion) {
-	super(show);
+        super(show);
         this.name = name;
-	this.clipRegion = clipRegion;
+        this.clipRegion = clipRegion;
     }    
     
     public Rectangle getClipRegion() {
@@ -110,29 +110,29 @@ public class SEClipped extends Clipped implements SENode, SEScalableNode {
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
-	if (part == from) {
-	    part = to;
-	}
+        if (part == from) {
+            part = to;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	clipRegion = new Rectangle(xOffset + Show.scale(clipRegion.x, xScale),
-				   yOffset + Show.scale(clipRegion.y, yScale),
-				   Show.scale(clipRegion.width, xScale),
-				   Show.scale(clipRegion.height, yScale));
+        clipRegion = new Rectangle(xOffset + Show.scale(clipRegion.x, xScale),
+                                   yOffset + Show.scale(clipRegion.y, yScale),
+                                   Show.scale(clipRegion.width, xScale),
+                                   Show.scale(clipRegion.height, yScale));
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "clipped @" + Integer.toHexString(hashCode());
-	} else {
-	    return "clipped " + name;
-	}
+        if (name == null) {
+            return "clipped @" + Integer.toHexString(hashCode());
+        } else {
+            return "clipped " + name;
+        }
     }
 }

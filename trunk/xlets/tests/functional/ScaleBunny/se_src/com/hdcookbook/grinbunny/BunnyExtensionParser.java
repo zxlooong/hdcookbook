@@ -80,85 +80,85 @@ public class BunnyExtensionParser implements ExtensionParser {
     ExtensionParserList otherParser;
    
     public BunnyExtensionParser() {
-	otherParser = new ExtensionParserList();
-	otherParser.addParser(new FontStripExtensionCompiler());
+        otherParser = new ExtensionParserList();
+        otherParser.addParser(new FontStripExtensionCompiler());
     }
 
     /**
      * {@inheritDoc}
      **/
     public Feature getFeature(Show show, String typeName,
-    			      String name, Lexer lexer)
-		   throws IOException
+                              String name, Lexer lexer)
+                   throws IOException
     {
         if (typeName == null) {
             return null;
         }
         
-	if (typeName.equals("GB:Arc")) {
-	    return parseArc(show, name, lexer); 
-	} else if (typeName.startsWith("GB:")) {
-	    // "GB:" reserved for this parser
-	    return null;
-	} else {
-	    return otherParser.getFeature(show, typeName, name, lexer);
-	} 
+        if (typeName.equals("GB:Arc")) {
+            return parseArc(show, name, lexer); 
+        } else if (typeName.startsWith("GB:")) {
+            // "GB:" reserved for this parser
+            return null;
+        } else {
+            return otherParser.getFeature(show, typeName, name, lexer);
+        } 
     }
 
     private Feature parseArc(Show show, String name, Lexer lexer)
-    		throws IOException
+                throws IOException
     {
-	lexer.parseExpected("{");
-	int r = lexer.getInt();
-	int g = lexer.getInt();
-	int b = lexer.getInt();
-	int a = lexer.getInt();
-	lexer.parseExpected("}");
-	checkColorValue("r", r);
-	checkColorValue("g", r);
-	checkColorValue("b", r);
-	checkColorValue("alpha", r);
-	Color color = new Color(r, g, b, a);
-	lexer.parseExpected("x");
-	int x = lexer.getInt();
-	lexer.parseExpected("y");
-	int y = lexer.getInt();
-	lexer.parseExpected("width");
-	int width = lexer.getInt();
-	lexer.parseExpected("height");
-	int height = lexer.getInt();
-	lexer.parseExpected("startAngle");
-	int startAngle = lexer.getInt();
-	lexer.parseExpected("arcAngle");
-	int arcAngle = lexer.getInt();
-	lexer.parseExpected(";");
-	return new SEArc(show, name, x, y, width, height, startAngle, arcAngle,
-			 color);
+        lexer.parseExpected("{");
+        int r = lexer.getInt();
+        int g = lexer.getInt();
+        int b = lexer.getInt();
+        int a = lexer.getInt();
+        lexer.parseExpected("}");
+        checkColorValue("r", r);
+        checkColorValue("g", r);
+        checkColorValue("b", r);
+        checkColorValue("alpha", r);
+        Color color = new Color(r, g, b, a);
+        lexer.parseExpected("x");
+        int x = lexer.getInt();
+        lexer.parseExpected("y");
+        int y = lexer.getInt();
+        lexer.parseExpected("width");
+        int width = lexer.getInt();
+        lexer.parseExpected("height");
+        int height = lexer.getInt();
+        lexer.parseExpected("startAngle");
+        int startAngle = lexer.getInt();
+        lexer.parseExpected("arcAngle");
+        int arcAngle = lexer.getInt();
+        lexer.parseExpected(";");
+        return new SEArc(show, name, x, y, width, height, startAngle, arcAngle,
+                         color);
     }
 
     private void checkColorValue(String name, int value) throws IOException {
-	if (value < 0 || value > 255) {
-	    throw new IOException("Illegal color value for " + name + ":  "
-	    			  + value);
-	}
+        if (value < 0 || value > 255) {
+            throw new IOException("Illegal color value for " + name + ":  "
+                                  + value);
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public Modifier getModifier(Show show, String typeName,
-				String name, Lexer lexer) 
-		throws IOException
+                                String name, Lexer lexer) 
+                throws IOException
     {   
         if (typeName == null) {
             return null;
         }
         
-	if (typeName.startsWith("GB:")) {
-	    return null; // reserved for this parser
-	} else {
-	    return otherParser.getModifier(show, typeName, name, lexer);
-	} 
+        if (typeName.startsWith("GB:")) {
+            return null; // reserved for this parser
+        } else {
+            return otherParser.getModifier(show, typeName, name, lexer);
+        } 
     }
 
     /**
@@ -170,11 +170,11 @@ public class BunnyExtensionParser implements ExtensionParser {
             return null;
         }
         
-	if (typeName.startsWith("GB:")) {
-	    return null; // reserved for this parser 
-	} else {
-	    return otherParser.getCommand(show, typeName, lexer);
-	} 
+        if (typeName.startsWith("GB:")) {
+            return null; // reserved for this parser 
+        } else {
+            return otherParser.getCommand(show, typeName, lexer);
+        } 
     }
 
 }

@@ -71,8 +71,8 @@ import org.havi.ui.HSceneFactory;
  * has written to. The filename is computed as below:
  * String filename = System.getProperty("dvb.persistent.root")
  *              + "/" + grantorOrgID
- *	        + "/" + grantorAppID
- *	        + "/tmp.txt";
+ *              + "/" + grantorAppID
+ *              + "/tmp.txt";
  * This application is able to access the local file above which is owned by the
  * grantor only if the credentials work. Note that the player maps the root digest
  * value for this application to the grantor's root digest if valid credentials
@@ -85,64 +85,64 @@ public class ReadFromStorageXlet implements Xlet {
     XletContext context;
 
     public void initXlet(XletContext context) {       
-	this.context = context;
+        this.context = context;
         
         // initialize Logger
         XletLogger.setLogFile(System.getProperty("dvb.persistent.root")
-	       + "/" + context.getXletProperty("dvb.org.id")
-	       + "/" + context.getXletProperty("dvb.app.id") 
+               + "/" + context.getXletProperty("dvb.org.id")
+               + "/" + context.getXletProperty("dvb.app.id") 
                + "/" + "log.txt");
     }
     
-    public void startXlet() {	    
-	XletLogger.setVisible(true);
+    public void startXlet() {       
+        XletLogger.setVisible(true);
         accessPersistantStorage();
     }
     
     public void pauseXlet() {
-	XletLogger.setVisible(false);   
+        XletLogger.setVisible(false);   
     }
     public void destroyXlet(boolean unconditional) {
     }
     
     public void accessPersistantStorage() {
-	String filename = System.getProperty("dvb.persistent.root")
+        String filename = System.getProperty("dvb.persistent.root")
               + "/7fff3456/4001/tmp.txt";
         XletLogger.log("File:" + filename);
         // BufferedReader br = null;
         FileInputStream fis = null;
         
-	try {
+        try {
            // The BufferedReader does not work on PS-3;throws an IOException
-	   //BufferedReader br = new BufferedReader(new FileReader(filename));
+           //BufferedReader br = new BufferedReader(new FileReader(filename));
            //Logger.log("READ: " + br.readLine());
            //br.close();
            
            fis = new FileInputStream(filename);
-	   for (int i = 0; i < 10; i++) {
-	  	System.out.println(fis.read());
+           for (int i = 0; i < 10; i++) {
+                System.out.println(fis.read());
            }
            XletLogger.log("READER test passed, accessed filesystem without SecurityException");
-	} catch (AccessControlException ex) {
-		XletLogger.log("Error in reading file", ex);
+        } catch (AccessControlException ex) {
+                XletLogger.log("Error in reading file", ex);
                 Permission perm = ex.getPermission();
                 if (perm != null)
                     XletLogger.log(perm.toString());
-	} catch (IOException ex) {
-		XletLogger.log("Error in reading file", ex);
+        } catch (IOException ex) {
+                XletLogger.log("Error in reading file", ex);
         } catch (Exception ex) {
-		XletLogger.log("Error in reading file", ex);
+                XletLogger.log("Error in reading file", ex);
         } finally {
-	    if (fis != null) {
-		try {
-		    fis.close();
-		} catch (Throwable ignored) {
-		}
-	    }
-	}
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (Throwable ignored) {
+                }
+            }
+        }
     }
     
     public static void main(String[] args) {
-	    // just to fool netbeans...
+            // just to fool netbeans...
     }
 }

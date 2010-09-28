@@ -67,59 +67,59 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(propOrder={"pipMetadataEntry", "paddingY"})
 public class MetadataBlockData {
     
-	private long size = 0;
-	private PIPMetadataEntry[] pipMetadataEntry;
-	private int paddingY = 0;
-	
-	public MetadataBlockData() { }
-	public MetadataBlockData(long size) {
-		this.size = size;
-	}
-	
+        private long size = 0;
+        private PIPMetadataEntry[] pipMetadataEntry;
+        private int paddingY = 0;
+        
+        public MetadataBlockData() { }
+        public MetadataBlockData(long size) {
+                this.size = size;
+        }
+        
     public void readObject(DataInputStream din) throws IOException {
-    	// 16 bit number_of_pip_metadata_entries	2
-    	//        for (0..n-1)
+        // 16 bit number_of_pip_metadata_entries        2
+        //        for (0..n-1)
         //            PIPMetadataEntry[]
-    	// 16 bit padding Y * n						2 * n
-    	int n = din.readUnsignedShort();
-    	PIPMetadataEntry[] pipMetadataEntry = new PIPMetadataEntry[n];
-    	for (int i = 0; i < n; i++) {
-    		pipMetadataEntry[i] = new PIPMetadataEntry();
-    		pipMetadataEntry[i].readObject(din);
-    	}
-    	setPipMetadataEntry(pipMetadataEntry);
-    	// Padding Y
-    	int paddingY = (int) ((this.size - (2 + (8 * n))) / 2);
-    	for (int i = 0; i < paddingY; i++) {
-    		din.readShort();
-    	}
-    	setPaddingY(paddingY);
+        // 16 bit padding Y * n                                         2 * n
+        int n = din.readUnsignedShort();
+        PIPMetadataEntry[] pipMetadataEntry = new PIPMetadataEntry[n];
+        for (int i = 0; i < n; i++) {
+                pipMetadataEntry[i] = new PIPMetadataEntry();
+                pipMetadataEntry[i].readObject(din);
+        }
+        setPipMetadataEntry(pipMetadataEntry);
+        // Padding Y
+        int paddingY = (int) ((this.size - (2 + (8 * n))) / 2);
+        for (int i = 0; i < paddingY; i++) {
+                din.readShort();
+        }
+        setPaddingY(paddingY);
     }
     
     public void writeObject(DataOutputStream dout) throws IOException {
-    	PIPMetadataEntry[] pipMetadataEntry = getPipMetadataEntry();
-    	dout.writeShort(pipMetadataEntry.length);
-    	for (int i = 0; i < pipMetadataEntry.length; i++) {
-    		pipMetadataEntry[i].writeObject(dout);
-    	}
-    	for (int i = 0; i < getPaddingY(); i++) {
-    		dout.writeShort(0);
-    	}
+        PIPMetadataEntry[] pipMetadataEntry = getPipMetadataEntry();
+        dout.writeShort(pipMetadataEntry.length);
+        for (int i = 0; i < pipMetadataEntry.length; i++) {
+                pipMetadataEntry[i].writeObject(dout);
+        }
+        for (int i = 0; i < getPaddingY(); i++) {
+                dout.writeShort(0);
+        }
     }
     
     public PIPMetadataEntry[] getPipMetadataEntry() {
-    	return pipMetadataEntry;
+        return pipMetadataEntry;
     }
     
     public void setPipMetadataEntry(PIPMetadataEntry[] pipMetadataEntry) {
-    	this.pipMetadataEntry = pipMetadataEntry;
+        this.pipMetadataEntry = pipMetadataEntry;
     }
     
     public int getPaddingY() {
-    	return paddingY;
+        return paddingY;
     }
     
     public void setPaddingY(int paddingY) {
-    	this.paddingY = paddingY;
+        this.paddingY = paddingY;
     }
 }

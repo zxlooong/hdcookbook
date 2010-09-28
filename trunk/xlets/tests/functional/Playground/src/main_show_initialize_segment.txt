@@ -5,8 +5,8 @@
 
 segment S:Initialize
     setup {
-	F:Everything
+        F:Everything
     } setup_done {
-	activate_segment S:Main ;
+        activate_segment S:Main ;
     }
 ;

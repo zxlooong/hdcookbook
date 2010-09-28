@@ -81,15 +81,15 @@ public class VisualRCHandlerHelper {
     private boolean startSelected = false;
     private ArrayList<String> gridAlternateNames = new ArrayList<String>();
     private ArrayList<ArrayList<ArrayList<VisualRCHandlerCell>>> grids
-    	= new ArrayList<ArrayList<ArrayList<VisualRCHandlerCell>>>();
+        = new ArrayList<ArrayList<ArrayList<VisualRCHandlerCell>>>();
     private Map<String, Integer> states = new HashMap<String, Integer>();
-    	// Maps state name to number, counting from 0
+        // Maps state name to number, counting from 0
     private ArrayList<Map<String, VisualRCHandlerCell>> stateToCell
-	    = new ArrayList<Map<String, VisualRCHandlerCell>>();
-	// Maps state name to the defining cell for each grid
+            = new ArrayList<Map<String, VisualRCHandlerCell>>();
+        // Maps state name to the defining cell for each grid
     private ArrayList<Map<String, String>> rcOverrides 
-	    = new ArrayList<Map<String, String>>();
-	// See addRCOverrides
+            = new ArrayList<Map<String, String>>();
+        // See addRCOverrides
     private Command[][] selectCommands;
     private Command[][] activateCommands;
     private Rectangle[] mouseRects = null;
@@ -105,100 +105,100 @@ public class VisualRCHandlerHelper {
      * Sets the handler's name
      **/
     public void setHandlerName(String name) {
-	handlerName = name;
+        handlerName = name;
     }
 
     /**
      * Sets the startSelected flag
      **/
     public void setStartSelected(boolean b) {
-	startSelected = b;
+        startSelected = b;
     }
 
     /**
      * Adds an RC grid.
      *
-     * @return null 	if all goes well, or an error message if there's
-     *			a problem.
+     * @return null     if all goes well, or an error message if there's
+     *                  a problem.
      **/
     public String addGrid(ArrayList<ArrayList<VisualRCHandlerCell>> grid) {
-	this.grids.add(grid);
-	if (grid.size() == 0) {
-	    return "Empty grid";
-	}
+        this.grids.add(grid);
+        if (grid.size() == 0) {
+            return "Empty grid";
+        }
 
-	int columns = grid.get(0).size();
-	if (columns == 0) {
-	    return "Empty grid";
-	}
-	for (int y = 1; y < grid.size(); y++) {
-	    if (grid.get(y).size() != columns) {
-		return "Grid row " + y 
-			+ " (counting from 0) has a different length.";
-	    }
-	}
+        int columns = grid.get(0).size();
+        if (columns == 0) {
+            return "Empty grid";
+        }
+        for (int y = 1; y < grid.size(); y++) {
+            if (grid.get(y).size() != columns) {
+                return "Grid row " + y 
+                        + " (counting from 0) has a different length.";
+            }
+        }
 
-	    // Set up the cells with us (the handler) and the x,y pos
-	for (int y = 0; y < grid.size(); y++) {
-	    List<VisualRCHandlerCell> row = grid.get(y);
-	    for (int x = 0; x < row.size(); x++) {
-		VisualRCHandlerCell cell = row.get(x);
-		int alternate = this.grids.size() - 1;
-		cell.setHelper(this, alternate);
-		cell.setXY(x, y);
-	    }
-	}
+            // Set up the cells with us (the handler) and the x,y pos
+        for (int y = 0; y < grid.size(); y++) {
+            List<VisualRCHandlerCell> row = grid.get(y);
+            for (int x = 0; x < row.size(); x++) {
+                VisualRCHandlerCell cell = row.get(x);
+                int alternate = this.grids.size() - 1;
+                cell.setHelper(this, alternate);
+                cell.setXY(x, y);
+            }
+        }
 
-	    // For each cell, populate the states map
+            // For each cell, populate the states map
 
-	Map<String, VisualRCHandlerCell> newStateToCell 
-		= new HashMap<String, VisualRCHandlerCell>();
-	stateToCell.add(newStateToCell);
-	HashSet<String> dupCheck = new HashSet<String>();
-	for (int y = 0; y < grid.size(); y++) {
-	    for (int x = 0; x < columns; x++) {
-		VisualRCHandlerCell cell = grid.get(y).get(x);
-		String msg = cell.addState(states, dupCheck, newStateToCell);
-		if (msg != null) {
-		    return msg;
-		}
-	    }
-	}
+        Map<String, VisualRCHandlerCell> newStateToCell 
+                = new HashMap<String, VisualRCHandlerCell>();
+        stateToCell.add(newStateToCell);
+        HashSet<String> dupCheck = new HashSet<String>();
+        for (int y = 0; y < grid.size(); y++) {
+            for (int x = 0; x < columns; x++) {
+                VisualRCHandlerCell cell = grid.get(y).get(x);
+                String msg = cell.addState(states, dupCheck, newStateToCell);
+                if (msg != null) {
+                    return msg;
+                }
+            }
+        }
 
-	    // Make sure that a cell doesn't
-	    // refer to a cell that itself refers to a cell.
+            // Make sure that a cell doesn't
+            // refer to a cell that itself refers to a cell.
 
-	for (int y = 0; y < grid.size(); y++) {
-	    for (int x = 0; x < columns; x++) {
-		VisualRCHandlerCell cell = grid.get(y).get(x);
-		VisualRCHandlerCell to = cell.getRefersTo();
-		if (to != null && to.getRefersTo() != null) {
-		    return "Grid refers to cell that refers to cell at x,y "
-		    	   + x + ", " + y + " (counting from 0)";
-		}
-	    }
-	}
+        for (int y = 0; y < grid.size(); y++) {
+            for (int x = 0; x < columns; x++) {
+                VisualRCHandlerCell cell = grid.get(y).get(x);
+                VisualRCHandlerCell to = cell.getRefersTo();
+                if (to != null && to.getRefersTo() != null) {
+                    return "Grid refers to cell that refers to cell at x,y "
+                           + x + ", " + y + " (counting from 0)";
+                }
+            }
+        }
 
-	    // Now check all the cells
-	for (int y = 0; y < grid.size(); y++) {
-	    for (int x = 0; x < columns; x++) {
-		VisualRCHandlerCell cell = grid.get(y).get(x);
-		String msg = cell.check();
-		if (msg != null) {
-		    return msg;
-		}
-	    }
-	}
+            // Now check all the cells
+        for (int y = 0; y < grid.size(); y++) {
+            for (int x = 0; x < columns; x++) {
+                VisualRCHandlerCell cell = grid.get(y).get(x);
+                String msg = cell.check();
+                if (msg != null) {
+                    return msg;
+                }
+            }
+        }
 
-	return null;	// null means "no error to report"
+        return null;    // null means "no error to report"
     }
 
     public void addGridAlternateName(String name) {
-	gridAlternateNames.add(name);
+        gridAlternateNames.add(name);
     }
 
     public ArrayList<ArrayList<VisualRCHandlerCell>> getGrid(int i) {
-	return grids.get(i);
+        return grids.get(i);
     }
 
     /**
@@ -212,96 +212,96 @@ public class VisualRCHandlerHelper {
      * "&lt;activate>".
      **/
     public void addRCOverrides(Map<String, String> rcOverrides) {
-	this.rcOverrides.add(rcOverrides);
+        this.rcOverrides.add(rcOverrides);
     }
 
     public Map<String, String> getRCOverrides(int i) {
-	return rcOverrides.get(i);
+        return rcOverrides.get(i);
     }
 
     public void setSelectCommands(Command[][] commands) {
-	selectCommands = commands;
+        selectCommands = commands;
     }
 
     public void setActivateCommands(Command[][] commands) {
-	activateCommands = commands;
+        activateCommands = commands;
     }
 
     public void setMouseRects(Rectangle[] rects) {
-	mouseRects = rects;
+        mouseRects = rects;
     }
 
     public void setMouseRectStates(int[] states) {
-	mouseRectStates = states;
+        mouseRectStates = states;
     }
 
     public void setTimeout(int timeout) {
-	this.timeout = timeout;
+        this.timeout = timeout;
     }
 
     public void setTimeoutCommands(Command[] commands) {
-	timeoutCommands = commands;
+        timeoutCommands = commands;
     }
 
     /**
      * @return The map from state name to index in array of states
      **/
     public Map<String, Integer> getStates() {
-	return states;
+        return states;
     }
 
     Map<String, VisualRCHandlerCell> getStateToCell(int i) {
-	return stateToCell.get(i);
+        return stateToCell.get(i);
     }
 
     /**
      * @return The state number referred to by the given cell, or -1 if 
-     *	       that cell isn't a state or doesn't refer to one.
+     *         that cell isn't a state or doesn't refer to one.
      **/
     public int getState(int alternate, int column, int row) {
-	String name = grids.get(alternate).get(row).get(column).getState();
-	if (name == null) {
-	    return -1;
-	}
-	return states.get(name).intValue();
+        String name = grids.get(alternate).get(row).get(column).getState();
+        if (name == null) {
+            return -1;
+        }
+        return states.get(name).intValue();
     }
 
     /**
      * @throws IOException if there's an inconsistency in the handler
      **/
     public SEVisualRCHandler getFinishedHandler() throws IOException {
-	int[][] upDownAlternates = new int[grids.size()][];
-	int[][] rightLeftAlternates = new int[grids.size()][];
-	String[] gridNames = gridAlternateNames.toArray(
-				new String[gridAlternateNames.size()]);
-	String[] stateNames = new String[states.size()];
-	for (Map.Entry<String, Integer> entry : states.entrySet()) {
-	    int stateNum = entry.getValue().intValue();
-	    stateNames[stateNum] = entry.getKey();
-	}
-	for (int i = 0; i < grids.size(); i++) {
-	    int[] upDown = new int[states.size()];
-	    upDownAlternates[i] = upDown;
-	    int[] rightLeft = new int[states.size()];
-	    rightLeftAlternates[i] = rightLeft;
-	    for (Map.Entry<String, Integer> entry : states.entrySet()) {
-		int stateNum = entry.getValue().intValue();
-		VisualRCHandlerCell cell 
-			= stateToCell.get(i).get(entry.getKey());
-		if (cell != null) {
-		    upDown[stateNum] = cell.getUpDown();
-		    rightLeft[stateNum] = cell.getRightLeft();
-		}
-	    }
-	}
-	SEVisualRCHandler result
-	    = new SEVisualRCHandler(handlerName,  gridNames,
-	    			    stateNames, 
-				    upDownAlternates, rightLeftAlternates,
-	    			    selectCommands, activateCommands,
-				    mouseRects, mouseRectStates,
-				    timeout, timeoutCommands, startSelected, 
-				    this);
-	return result;
+        int[][] upDownAlternates = new int[grids.size()][];
+        int[][] rightLeftAlternates = new int[grids.size()][];
+        String[] gridNames = gridAlternateNames.toArray(
+                                new String[gridAlternateNames.size()]);
+        String[] stateNames = new String[states.size()];
+        for (Map.Entry<String, Integer> entry : states.entrySet()) {
+            int stateNum = entry.getValue().intValue();
+            stateNames[stateNum] = entry.getKey();
+        }
+        for (int i = 0; i < grids.size(); i++) {
+            int[] upDown = new int[states.size()];
+            upDownAlternates[i] = upDown;
+            int[] rightLeft = new int[states.size()];
+            rightLeftAlternates[i] = rightLeft;
+            for (Map.Entry<String, Integer> entry : states.entrySet()) {
+                int stateNum = entry.getValue().intValue();
+                VisualRCHandlerCell cell 
+                        = stateToCell.get(i).get(entry.getKey());
+                if (cell != null) {
+                    upDown[stateNum] = cell.getUpDown();
+                    rightLeft[stateNum] = cell.getRightLeft();
+                }
+            }
+        }
+        SEVisualRCHandler result
+            = new SEVisualRCHandler(handlerName,  gridNames,
+                                    stateNames, 
+                                    upDownAlternates, rightLeftAlternates,
+                                    selectCommands, activateCommands,
+                                    mouseRects, mouseRectStates,
+                                    timeout, timeoutCommands, startSelected, 
+                                    this);
+        return result;
     }
 }

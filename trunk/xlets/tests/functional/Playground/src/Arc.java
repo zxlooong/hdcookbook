@@ -85,7 +85,7 @@ public class Arc extends Feature implements Node {
     private DrawRecord drawRecord = new DrawRecord();
 
     public Arc(Show show) {
-	super(show);
+        super(show);
     }
 
     //
@@ -100,21 +100,21 @@ public class Arc extends Feature implements Node {
      * {@inheritDoc}
      **/
     public int getX() {
-	return x;
+        return x;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getY() {
-	return y;
+        return y;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void initialize() {
-	// no initialization needed
+        // no initialization needed
     }
     
     /**
@@ -133,7 +133,7 @@ public class Arc extends Feature implements Node {
      * {@inheritDoc}
      **/
     public int setSetupMode(boolean mode) {
-	return 0;
+        return 0;
     }
 
     /**
@@ -146,51 +146,51 @@ public class Arc extends Feature implements Node {
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	return false;
+        return false;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	// We don't animate, so there's nothing to update
+        // We don't animate, so there's nothing to update
     }
 
     /**
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
-	drawRecord.setChanged();
+        drawRecord.setChanged();
     }
 
     /**
      * Set the arc angle, and mark that we need to re-draw ourselves.
      **/
     public void setArcAngle(int arcAngle) {
-	this.arcAngle = arcAngle;
-	drawRecord.setChanged();
+        this.arcAngle = arcAngle;
+        drawRecord.setChanged();
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	drawRecord.setArea(x, y, width, height);
-	    // We don't animate, so we don't have to think about setting
-	    // drawRecord.setChanged(), or anything like that.
-	    //
-	    // We might be overstating the draw area, depending on the
-	    // values of startAngle and arcAngle.  It's OK to overstate
-	    // the draw area.
-	context.addArea(drawRecord);
+        drawRecord.setArea(x, y, width, height);
+            // We don't animate, so we don't have to think about setting
+            // drawRecord.setChanged(), or anything like that.
+            //
+            // We might be overstating the draw area, depending on the
+            // values of startAngle and arcAngle.  It's OK to overstate
+            // the draw area.
+        context.addArea(drawRecord);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	gr.setColor(color);
-	gr.fillArc(x, y, width-1, height-1, startAngle, arcAngle);
+        gr.setColor(color);
+        gr.fillArc(x, y, width-1, height-1, startAngle, arcAngle);
     }
 
 
@@ -198,16 +198,16 @@ public class Arc extends Feature implements Node {
      * {@inheritDoc}
      **/
     public void readInstanceData(GrinDataInputStream in, int length)
-	    throws IOException
+            throws IOException
     {
-	in.readSuperClassData(this);
-	color = in.readColor();
-	x = in.readInt();
-	y = in.readInt();
-	width = in.readInt();
-	height = in.readInt();
-	startAngle = in.readInt();
-	arcAngle = in.readInt();
+        in.readSuperClassData(this);
+        color = in.readColor();
+        x = in.readInt();
+        y = in.readInt();
+        width = in.readInt();
+        height = in.readInt();
+        startAngle = in.readInt();
+        arcAngle = in.readInt();
     }
 
 }

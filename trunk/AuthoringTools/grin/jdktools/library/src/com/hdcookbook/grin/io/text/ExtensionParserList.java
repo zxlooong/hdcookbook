@@ -72,7 +72,7 @@ import java.util.ArrayList;
 public class ExtensionParserList implements ExtensionParser {
 
     private ArrayList<ExtensionParser> parsers 
-	= new ArrayList<ExtensionParser>();
+        = new ArrayList<ExtensionParser>();
 
     /**
      * Create a new ExtensionParserList with no parsers in it.
@@ -86,53 +86,53 @@ public class ExtensionParserList implements ExtensionParser {
      * Add the supplied parser to the list of parsers.
      **/
     public void addParser(ExtensionParser parser) {
-	parsers.add(parser);
+        parsers.add(parser);
     }
     
     /**
      * {@inheritDoc}
      **/
     public Feature getFeature(Show show, String typeName, 
-    			      String name, Lexer lexer)
-		       throws IOException
+                              String name, Lexer lexer)
+                       throws IOException
     {
-	for (ExtensionParser p : parsers) {
-	    Feature f = p.getFeature(show, typeName, name, lexer);
-	    if (f != null) {
-		return f;
-	    }
-	}
-	return null;
+        for (ExtensionParser p : parsers) {
+            Feature f = p.getFeature(show, typeName, name, lexer);
+            if (f != null) {
+                return f;
+            }
+        }
+        return null;
     }
 
     /**
      * {@inheritDoc}
      **/
     public Modifier getModifier(Show show, String typeName, 
-    			        String name, Lexer lexer)
-		       throws IOException
+                                String name, Lexer lexer)
+                       throws IOException
     {
-	for (ExtensionParser p : parsers) {
-	    Modifier m = p.getModifier(show, typeName, name, lexer);
-	    if (m != null) {
-		return m;
-	    }
-	}
-	return null;
+        for (ExtensionParser p : parsers) {
+            Modifier m = p.getModifier(show, typeName, name, lexer);
+            if (m != null) {
+                return m;
+            }
+        }
+        return null;
     }
 
     /**
      * {@inheritDoc}
      **/
     public Command getCommand(Show show, String typeName, Lexer lexer)
-		       throws IOException
+                       throws IOException
     {
-	for (ExtensionParser p : parsers) {
-	    Command c = p.getCommand(show, typeName, lexer);
-	    if (c != null) {
-		return c;
-	    }
-	}
-	return null;
+        for (ExtensionParser p : parsers) {
+            Command c = p.getCommand(show, typeName, lexer);
+            if (c != null) {
+                return c;
+            }
+        }
+        return null;
     }
 }

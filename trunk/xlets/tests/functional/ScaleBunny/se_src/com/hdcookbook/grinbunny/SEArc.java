@@ -83,40 +83,40 @@ import java.io.IOException;
 public class SEArc extends Arc implements SENode, SEScalableNode {
 
     public SEArc(Show show, String name, int x, int y, int width, int height,
-		 int startAngle, int arcAngle, Color color)
+                 int startAngle, int arcAngle, Color color)
     {
-	super(show);
-	this.name = name;
-    	this.x = x;
-    	this.y = y;
-    	this.width = width;
-    	this.height = height;
-    	this.startAngle = startAngle;
-    	this.arcAngle = arcAngle;
-    	this.color = color;
+        super(show);
+        this.name = name;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.startAngle = startAngle;
+        this.arcAngle = arcAngle;
+        this.color = color;
     }
 
     public SEArc(SEShow show) {
-	super(show);
+        super(show);
     }
 
     public void writeInstanceData(GrinDataOutputStream out) throws IOException {
-	out.writeSuperClassData(this);
-	out.writeColor(color);
-	out.writeInt(x);
-	out.writeInt(y);
-	out.writeInt(width);
-	out.writeInt(height);
-	out.writeInt(startAngle);
-	out.writeInt(arcAngle);
+        out.writeSuperClassData(this);
+        out.writeColor(color);
+        out.writeInt(x);
+        out.writeInt(y);
+        out.writeInt(width);
+        out.writeInt(height);
+        out.writeInt(startAngle);
+        out.writeInt(arcAngle);
     }
 
     public String getRuntimeClassName() {
-	return Arc.class.getName();
+        return Arc.class.getName();
     }
 
     public void accept(SEShowVisitor visitor) {
-	visitor.visitUserDefinedFeature(this);
+        visitor.visitUserDefinedFeature(this);
     }
 
     /**
@@ -135,20 +135,20 @@ public class SEArc extends Arc implements SENode, SEScalableNode {
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	x = xOffset + Show.scale(x, xScale);
-	y = yOffset + Show.scale(y, yScale);
-	width = Show.scale(width, xScale);
-	height = Show.scale(height, yScale);
+        x = xOffset + Show.scale(x, xScale);
+        y = yOffset + Show.scale(y, yScale);
+        width = Show.scale(width, xScale);
+        height = Show.scale(height, yScale);
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "GB:Arc @" + Integer.toHexString(hashCode());
-	} else {
-	    return "GB:Arc " + name;
-	}
+        if (name == null) {
+            return "GB:Arc @" + Integer.toHexString(hashCode());
+        } else {
+            return "GB:Arc " + name;
+        }
     }
 }

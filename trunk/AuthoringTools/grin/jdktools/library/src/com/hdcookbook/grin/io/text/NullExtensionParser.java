@@ -71,24 +71,24 @@ public class NullExtensionParser implements ExtensionParser {
      * {@inheritDoc}
      */
     public Feature getFeature(Show show, String typeName, String name, Lexer lexer)
-		       throws IOException
+                       throws IOException
     {
-	return null;
+        return null;
     }
 
     /**
      * {@inheritDoc}
      */
     public Modifier getModifier(Show show, String typeName, String name, Lexer lexer)
-		       throws IOException
+                       throws IOException
     {
-	return null;
+        return null;
     }
 
      /**
       * {@inheritDoc}
       **/
     public Command getCommand(Show show, String typeName, Lexer lexer) throws IOException {
-	return null;
+        return null;
     }
 }

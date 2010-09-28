@@ -72,7 +72,7 @@ public class CommandRCHandler extends RCHandler implements Node {
    
     protected int mask;
     protected Command[] commands;
-    protected boolean wantKeypress;	// otherwise wants key release
+    protected boolean wantKeypress;     // otherwise wants key release
     
     public CommandRCHandler() {
         super();
@@ -82,42 +82,42 @@ public class CommandRCHandler extends RCHandler implements Node {
      * {@inheritDoc}
      **/
     public boolean handleKeyPressed(RCKeyEvent ke, Show caller) {
-	if (wantKeypress && (ke.getBitMask() & mask) != 0) {
-	    for (int i = 0; i < commands.length; i++) {
-		commands[i].execute(caller);
-	    }
-	    return true;
-	} else {
-	    return false;
-	}
+        if (wantKeypress && (ke.getBitMask() & mask) != 0) {
+            for (int i = 0; i < commands.length; i++) {
+                commands[i].execute(caller);
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean handleKeyReleased(RCKeyEvent ke, Show caller) {
-	if (!wantKeypress && (ke.getBitMask() & mask) != 0) {
-	    for (int i = 0; i < commands.length; i++) {
-		commands[i].execute(caller);
-	    }
-	    return true;
-	} else {
-	    return false;
-	}
+        if (!wantKeypress && (ke.getBitMask() & mask) != 0) {
+            for (int i = 0; i < commands.length; i++) {
+                commands[i].execute(caller);
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean handleKeyTyped(RCKeyEvent ke, Show caller) {
-	return false;
+        return false;
     }
     
     /**
      * {@inheritDoc}
      **/
     public boolean handleMouse(int x, int y, boolean activate) {
-	return false;
+        return false;
     }
 
     /**
@@ -137,7 +137,7 @@ public class CommandRCHandler extends RCHandler implements Node {
                 
         in.readSuperClassData(this);
         this.mask = in.readInt();     
-	this.wantKeypress = in.readBoolean();
+        this.wantKeypress = in.readBoolean();
         this.commands = in.readCommands();
     }
 }

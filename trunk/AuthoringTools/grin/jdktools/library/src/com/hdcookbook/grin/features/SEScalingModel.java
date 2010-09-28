@@ -68,7 +68,7 @@ import com.hdcookbook.grin.commands.Command;
  * the scaling operation specified by an absolute x,y point.
  **/
 public class SEScalingModel extends SEInterpolatedModel 
-			    implements SEScalableNode 
+                            implements SEScalableNode 
 {
     public SEScalingModel() {
     }
@@ -109,36 +109,36 @@ public class SEScalingModel extends SEInterpolatedModel
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	doScale(currValues, xScale, yScale, xOffset, yOffset);
-	for (int i = 0; i < values.length; i++)  {
-	    doScale(values[i], xScale, yScale, xOffset, yOffset);
-	}
+        doScale(currValues, xScale, yScale, xOffset, yOffset);
+        for (int i = 0; i < values.length; i++)  {
+            doScale(values[i], xScale, yScale, xOffset, yOffset);
+        }
     }
 
     private void doScale(int[] values, int xScale, int yScale, 
-    				       int xOffset, int yOffset) 
+                                       int xOffset, int yOffset) 
     {
-	if (values == null) {
-	    return;
-	}
-	values[SCALE_X_FIELD] 
-	    = xOffset + Show.scale(values[SCALE_X_FIELD], xScale);
-	values[SCALE_Y_FIELD] 
-	    = yOffset + Show.scale(values[SCALE_Y_FIELD], yScale);
-	values[SCALE_X_FACTOR_FIELD]
-	    = Show.scale(values[SCALE_X_FACTOR_FIELD], xScale);
-	values[SCALE_Y_FACTOR_FIELD]
-	    = Show.scale(values[SCALE_Y_FACTOR_FIELD], yScale);
+        if (values == null) {
+            return;
+        }
+        values[SCALE_X_FIELD] 
+            = xOffset + Show.scale(values[SCALE_X_FIELD], xScale);
+        values[SCALE_Y_FIELD] 
+            = yOffset + Show.scale(values[SCALE_Y_FIELD], yScale);
+        values[SCALE_X_FACTOR_FIELD]
+            = Show.scale(values[SCALE_X_FACTOR_FIELD], xScale);
+        values[SCALE_Y_FACTOR_FIELD]
+            = Show.scale(values[SCALE_Y_FACTOR_FIELD], yScale);
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "scaling_model @" + Integer.toHexString(hashCode());
-	} else {
-	    return "scaling_model " + name;
-	}
+        if (name == null) {
+            return "scaling_model @" + Integer.toHexString(hashCode());
+        } else {
+            return "scaling_model " + name;
+        }
     }
 }

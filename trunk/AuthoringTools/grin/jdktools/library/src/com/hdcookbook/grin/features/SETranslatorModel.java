@@ -68,7 +68,7 @@ import com.hdcookbook.grin.io.ShowBuilder;
 import java.io.IOException;
 
 public class SETranslatorModel extends SEInterpolatedModel
-			       implements SEScalableNode 
+                               implements SEScalableNode 
 {
     private boolean isRelative;
 
@@ -76,11 +76,11 @@ public class SETranslatorModel extends SEInterpolatedModel
     }
 
     public void setIsRelative(boolean isRelative) {
-	this.isRelative = isRelative;
+        this.isRelative = isRelative;
     }
 
     public boolean getIsRelative() {
-	return isRelative;
+        return isRelative;
     }
     
     public int[] getXs() {
@@ -123,29 +123,29 @@ public class SETranslatorModel extends SEInterpolatedModel
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	doScale(currValues, xScale, yScale, xOffset, yOffset);
-	for (int i = 0; i < values.length; i++) {
-	    doScale(values[i], xScale, yScale, xOffset, yOffset);
-	}
+        doScale(currValues, xScale, yScale, xOffset, yOffset);
+        for (int i = 0; i < values.length; i++) {
+            doScale(values[i], xScale, yScale, xOffset, yOffset);
+        }
     }
 
     private void doScale(int[] values, int xScale, int yScale, 
-    				       int xOffset, int yOffset) 
+                                       int xOffset, int yOffset) 
     {
-	if (values == null) {
-	    return;
-	}
-	if (isRelative) {
-	    values[Translator.X_FIELD] 
-		= Show.scale(values[Translator.X_FIELD], xScale);
-	    values[Translator.Y_FIELD] 
-		= Show.scale(values[Translator.Y_FIELD], yScale);
-	} else {
-	    values[Translator.X_FIELD] 
-		= xOffset + Show.scale(values[Translator.X_FIELD], xScale);
-	    values[Translator.Y_FIELD] 
-		= yOffset + Show.scale(values[Translator.Y_FIELD], yScale);
-	}
+        if (values == null) {
+            return;
+        }
+        if (isRelative) {
+            values[Translator.X_FIELD] 
+                = Show.scale(values[Translator.X_FIELD], xScale);
+            values[Translator.Y_FIELD] 
+                = Show.scale(values[Translator.Y_FIELD], yScale);
+        } else {
+            values[Translator.X_FIELD] 
+                = xOffset + Show.scale(values[Translator.X_FIELD], xScale);
+            values[Translator.Y_FIELD] 
+                = yOffset + Show.scale(values[Translator.Y_FIELD], yScale);
+        }
     }
 
 
@@ -153,10 +153,10 @@ public class SETranslatorModel extends SEInterpolatedModel
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "translator_model @" + Integer.toHexString(hashCode());
-	} else {
-	    return "translator_model " + name;
-	}
+        if (name == null) {
+            return "translator_model @" + Integer.toHexString(hashCode());
+        } else {
+            return "translator_model " + name;
+        }
     }
 }

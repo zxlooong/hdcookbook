@@ -29,13 +29,13 @@ import com.substanceofcode.utils.StringUtil;
  */
 public class Status {
 
-	private long id;
+        private long id;
     private String screenName;
     private String statusText;
     private Date date;
-	private String source;
-	private boolean favorited;
-	private String profileImageURL;
+        private String source;
+        private boolean favorited;
+        private String profileImageURL;
     
     /** Creates a new instance of StatusEntry 
      * @param screenName 
@@ -43,18 +43,18 @@ public class Status {
      * @param date 
      */
     public Status(long id, String screenName, String statusText, Date date, String source, boolean favorited, String profileImageURL) {
-		this.id = id;
+                this.id = id;
         this.screenName = screenName;
         this.statusText = statusText;
         this.date = date;
         this.source = source;
         this.favorited = favorited;
-		this.profileImageURL = profileImageURL;
+                this.profileImageURL = profileImageURL;
     }
 
-	public long getId() {
-		return id;
-	}
+        public long getId() {
+                return id;
+        }
     
     public String getText() {
         return statusText;
@@ -72,70 +72,70 @@ public class Status {
         return source;
     }
 
-	public boolean getFavorited() {
-		return favorited;
-	}
+        public boolean getFavorited() {
+                return favorited;
+        }
 
-	public String getProfileImageURL() {
-		return profileImageURL;
-	}
+        public String getProfileImageURL() {
+                return profileImageURL;
+        }
 
-	public String getRetweet(int maxLen) {
-		int len = (maxLen-6)-screenName.length(); // 6 is from "rt @" + ": "
+        public String getRetweet(int maxLen) {
+                int len = (maxLen-6)-screenName.length(); // 6 is from "rt @" + ": "
 
-		String text = statusText;
-		if (text.length() > len) {
-			String[] chunks = StringUtil.split(text, " ");
-			int chunksLen = chunks.length;
-			int urlLen    = 0;
-			int nonUrlLen = 0;
+                String text = statusText;
+                if (text.length() > len) {
+                        String[] chunks = StringUtil.split(text, " ");
+                        int chunksLen = chunks.length;
+                        int urlLen    = 0;
+                        int nonUrlLen = 0;
 
-			// find urls and calculate space needed for urls
-			for (int i=0; i < chunksLen; i++) {
-				if (chunks[i].startsWith("http://") ||
-					chunks[i].startsWith("https://") ||
-					chunks[i].startsWith("www.")) {
-					urlLen = urlLen + chunks[i].length();
-				}
-			}
-			nonUrlLen = len-urlLen-1; // available space for non-url chars
+                        // find urls and calculate space needed for urls
+                        for (int i=0; i < chunksLen; i++) {
+                                if (chunks[i].startsWith("http://") ||
+                                        chunks[i].startsWith("https://") ||
+                                        chunks[i].startsWith("www.")) {
+                                        urlLen = urlLen + chunks[i].length();
+                                }
+                        }
+                        nonUrlLen = len-urlLen-1; // available space for non-url chars
 
-			StringBuffer buf = new StringBuffer(153);
-			int i = 0;
-			while ((buf.length() < len) && (i < chunksLen)) {
-				String chunk = chunks[i];
-				if (chunks[i].startsWith("http://") ||
-					chunks[i].startsWith("https://") ||
-					chunks[i].startsWith("www.")) {
-					if (buf.length() > 0) {
-						buf.append(' ');
-						nonUrlLen = nonUrlLen - 1;
-					}
-					buf.append(chunk);
-					urlLen = urlLen - chunk.length();
-				} else {
-					if (nonUrlLen > 3) {
-						if (buf.length() > 0) {
-							buf.append(' ');
-							nonUrlLen = nonUrlLen - 1;
-						}
-						if (nonUrlLen <= chunk.length()) {
-							chunk = chunk.substring(0, nonUrlLen-3)+"..";
-						}
-						buf.append(chunk);
-						nonUrlLen = nonUrlLen - chunk.length();
-					}
-				}
-				i++;
-			}
-			
-			// if it still exceed the possible max, signal it by ".."
-			if (buf.length() > len) {
-				text = buf.toString().substring(0, len-2) + "..";
-			} else {
-				text = buf.toString();
-			}
-		}
-		return "rt @"+screenName+": "+text;
-	}
+                        StringBuffer buf = new StringBuffer(153);
+                        int i = 0;
+                        while ((buf.length() < len) && (i < chunksLen)) {
+                                String chunk = chunks[i];
+                                if (chunks[i].startsWith("http://") ||
+                                        chunks[i].startsWith("https://") ||
+                                        chunks[i].startsWith("www.")) {
+                                        if (buf.length() > 0) {
+                                                buf.append(' ');
+                                                nonUrlLen = nonUrlLen - 1;
+                                        }
+                                        buf.append(chunk);
+                                        urlLen = urlLen - chunk.length();
+                                } else {
+                                        if (nonUrlLen > 3) {
+                                                if (buf.length() > 0) {
+                                                        buf.append(' ');
+                                                        nonUrlLen = nonUrlLen - 1;
+                                                }
+                                                if (nonUrlLen <= chunk.length()) {
+                                                        chunk = chunk.substring(0, nonUrlLen-3)+"..";
+                                                }
+                                                buf.append(chunk);
+                                                nonUrlLen = nonUrlLen - chunk.length();
+                                        }
+                                }
+                                i++;
+                        }
+                        
+                        // if it still exceed the possible max, signal it by ".."
+                        if (buf.length() > len) {
+                                text = buf.toString().substring(0, len-2) + "..";
+                        } else {
+                                text = buf.toString();
+                        }
+                }
+                return "rt @"+screenName+": "+text;
+        }
 }

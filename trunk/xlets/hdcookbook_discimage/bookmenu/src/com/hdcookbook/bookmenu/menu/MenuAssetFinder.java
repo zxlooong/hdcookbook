@@ -80,66 +80,66 @@ public class MenuAssetFinder extends AssetFinder {
     private MenuXlet xlet;
 
     public MenuAssetFinder(MenuXlet xlet) {
-	this.xlet = xlet;
+        this.xlet = xlet;
     }
 
     protected void abortHelper() {
-	if (Debug.LEVEL > 0) {
-	    Debug.println();
-	    Debug.println("******************************");
-	    Debug.println("*     ABORTING DISC PLAY     *");
-	    Debug.println("******************************");
-	    Debug.println();
-	}
-	try {
-	    xlet.destroyXlet(true);
-	} catch (Throwable ignored) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ignored);
-	    }
-	}
-	xlet.navigator.startVideoAt(null);
+        if (Debug.LEVEL > 0) {
+            Debug.println();
+            Debug.println("******************************");
+            Debug.println("*     ABORTING DISC PLAY     *");
+            Debug.println("******************************");
+            Debug.println();
+        }
+        try {
+            xlet.destroyXlet(true);
+        } catch (Throwable ignored) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ignored);
+            }
+        }
+        xlet.navigator.startVideoAt(null);
     }
 
     protected Font getFontHelper(String fontName, int style, int size) {
-	try {
-	    synchronized(this) {
-		if (factory == null) {
-		    factory = new FontFactory();
-		}
-	    }
-	    return factory.createFont(fontName, style, size);
-	} catch (Exception ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-		Debug.println("***  Font " + fontName + " not found.  ***");
-	    }
-	}
-	return null;
+        try {
+            synchronized(this) {
+                if (factory == null) {
+                    factory = new FontFactory();
+                }
+            }
+            return factory.createFont(fontName, style, size);
+        } catch (Exception ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+                Debug.println("***  Font " + fontName + " not found.  ***");
+            }
+        }
+        return null;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected Image createCompatibleImageBufferHelper(Component c,
-						      int width, int height) 
+                                                      int width, int height) 
     {
-	return new DVBBufferedImage(width, height);
+        return new DVBBufferedImage(width, height);
     }
 
     /**
      * {@inheritDoc}
      **/
     protected Graphics2D createGraphicsFromImageBufferHelper(Image buffer) {
-	Object g = ((DVBBufferedImage) buffer).createGraphics();
-	return (Graphics2D) g;
+        Object g = ((DVBBufferedImage) buffer).createGraphics();
+        return (Graphics2D) g;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void destroyImageBufferHelper(Image buffer) {
-	    ((DVBBufferedImage) buffer).dispose();
+            ((DVBBufferedImage) buffer).dispose();
     }
 
 }

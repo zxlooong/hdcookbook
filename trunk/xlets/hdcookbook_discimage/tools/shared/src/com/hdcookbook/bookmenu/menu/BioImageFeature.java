@@ -95,25 +95,25 @@ public class BioImageFeature extends Modifier implements Node {
      * our xlet's extension parser.
      **/
     public BioImageFeature(Show show) {
-	super(show);
+        super(show);
     }
 
     // called with the Show lock held, by the xlet's BioUpdate
     void setImage(Image newImage) {
-	if (replacementImage != null) {
-	    replacementImage.flush();
-	}
-	replacementImage = newImage;
-	width = newImage.getWidth(null);
-	height = newImage.getHeight(null);
-	changed = true;
+        if (replacementImage != null) {
+            replacementImage.flush();
+        }
+        replacementImage = newImage;
+        width = newImage.getWidth(null);
+        height = newImage.getHeight(null);
+        changed = true;
     }
 
     protected void setActivateMode(boolean mode) {
-	super.setActivateMode(mode);
-	if (mode) {
-	    changed = true;
-	}
+        super.setActivateMode(mode);
+        if (mode) {
+            changed = true;
+        }
     }
 
 
@@ -121,23 +121,23 @@ public class BioImageFeature extends Modifier implements Node {
      * Called by the GRIN framework with the show lock held to
      * paint our representation
      *
-     * @param g		The place we paint to
+     * @param g         The place we paint to
      **/
     public void paintFrame(Graphics2D g) {
-	// called with the Show lock held
-	if (replacementImage == null) {
-	    super.paintFrame(g);
-	} else {
-	    g.drawImage(replacementImage, getX(), getY(), null);
-	}
+        // called with the Show lock held
+        if (replacementImage == null) {
+            super.paintFrame(g);
+        } else {
+            g.drawImage(replacementImage, getX(), getY(), null);
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
-	super.markDisplayAreasChanged();
-	drawRecord.setChanged();
+        super.markDisplayAreasChanged();
+        drawRecord.setChanged();
     }
 
 
@@ -146,18 +146,18 @@ public class BioImageFeature extends Modifier implements Node {
      * area we paint to.  This is called with the show lock held.
      **/
     public void  addDisplayAreas(RenderContext context) {
-	if (replacementImage == null) {
-	    super.addDisplayAreas(context);
-	} else {
-	    int x = getX();
-	    int y = getY();
-	    drawRecord.setArea(x, y, width, height);
-	    if (changed) {
-		drawRecord.setChanged();
-		changed = false;
-	    }
-	    context.addArea(drawRecord);
-	}
+        if (replacementImage == null) {
+            super.addDisplayAreas(context);
+        } else {
+            int x = getX();
+            int y = getY();
+            drawRecord.setArea(x, y, width, height);
+            if (changed) {
+                drawRecord.setChanged();
+                changed = false;
+            }
+            context.addArea(drawRecord);
+        }
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

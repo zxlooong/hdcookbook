@@ -63,7 +63,7 @@ mosaics
 
 mosaic m1.png 
     image_files {
-	"images/text_title.png"
+        "images/text_title.png"
     }
 ;
 

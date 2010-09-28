@@ -3,7 +3,7 @@ show
 
 exports 
     segments {
-	S:Initialize
+        S:Initialize
     } features {
     } handlers {
     }
@@ -30,27 +30,27 @@ java_generated_class MyCommands [[
 ]]
 
 feature text F:Text left 150 top 150 {
-	"Socket test xlet"
-	"See the debug log for results."
-	""
-	"Press the popup menu key to access the debug log."
+        "Socket test xlet"
+        "See the debug log for results."
+        ""
+        "Press the popup menu key to access the debug log."
     } SansSerif plain 64 { { 255 255 0 255 } } ;
 
 
 segment S:Initialize
     setup {
-	F:Text
+        F:Text
     } next {
-	activate_segment S:Main ;
+        activate_segment S:Main ;
     }
 ;
 
 
 segment S:Main
     active {
-	F:Text
+        F:Text
     } on_entry {
-	java_command [[ getDirector().startSocketTest(); ]]
+        java_command [[ getDirector().startSocketTest(); ]]
     }
 ;
 

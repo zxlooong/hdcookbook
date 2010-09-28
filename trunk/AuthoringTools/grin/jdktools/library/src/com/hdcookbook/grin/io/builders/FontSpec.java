@@ -71,19 +71,19 @@ public class FontSpec {
     public int size;
 
     public boolean equals(Object other) {
-	if (other instanceof FontSpec) {
-	    FontSpec fs = (FontSpec) other;
-	    return name.equals(fs.name) && style==fs.style && size == fs.size;
-	} else {
-	    return false;
-	}
+        if (other instanceof FontSpec) {
+            FontSpec fs = (FontSpec) other;
+            return name.equals(fs.name) && style==fs.style && size == fs.size;
+        } else {
+            return false;
+        }
     }
 
     public int hashCode() {
-	int h = name.hashCode();
-	h ^= style * 5;
-	h ^= size * 31;
-	return h;
+        int h = name.hashCode();
+        h ^= style * 5;
+        h ^= size * 31;
+        return h;
     }
 
 }

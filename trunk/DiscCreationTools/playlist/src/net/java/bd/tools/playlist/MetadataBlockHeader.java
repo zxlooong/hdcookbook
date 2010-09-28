@@ -67,35 +67,35 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(propOrder={"refToPlayItemID", "refToSecondaryVideoStreamID", "pipTimelineType", "isLumaKey", "isTrickPlaying", "upperLimitLumaKey"})
 public class MetadataBlockHeader {
     
-	private int refToPlayItemID;
-	private int refToSecondaryVideoStreamID;
-	private PIPTimelineType pipTimelineType;
-	private boolean isLumaKey;
-	private boolean isTrickPlaying;
-	private Integer upperLimitLumaKey;
-	//private long metadataBlockDataStartAddress;
-	
+        private int refToPlayItemID;
+        private int refToSecondaryVideoStreamID;
+        private PIPTimelineType pipTimelineType;
+        private boolean isLumaKey;
+        private boolean isTrickPlaying;
+        private Integer upperLimitLumaKey;
+        //private long metadataBlockDataStartAddress;
+        
     public void readObject(DataInputStream din) throws IOException {
-        // 16 bit ref_to_PlayItem_id				2
-    	//  8 bit ref_to_secondary_video_stream_id	1
-    	//  8 bit reserved							1
-    	//  4 bit pip_timeline_type					.
-    	//        flags()
-    	//  1 bit     is_luma_key					.
-    	//  1 bit     trick_playing_flag			.
-    	// 10 bit reserved_for_word_align			.
-    	//        if (is_luma_key)
-    	//  8 bit reserved							1
-    	//  8 bit upper_limit_luma_key				1
-    	//        else
-    	// 16 bit reserved							2
-    	//        endif
-    	// 16 bit reserved							2
-    	// 32 bit metadata_block_data_start_addr	4
-    	setRefToPlayItemID(din.readUnsignedShort());
-    	setRefToSecondaryVideoStreamID(din.readUnsignedByte());
-    	din.skipBytes(1);
-    	int value = din.readUnsignedShort();
+        // 16 bit ref_to_PlayItem_id                            2
+        //  8 bit ref_to_secondary_video_stream_id      1
+        //  8 bit reserved                                                      1
+        //  4 bit pip_timeline_type                                     .
+        //        flags()
+        //  1 bit     is_luma_key                                       .
+        //  1 bit     trick_playing_flag                        .
+        // 10 bit reserved_for_word_align                       .
+        //        if (is_luma_key)
+        //  8 bit reserved                                                      1
+        //  8 bit upper_limit_luma_key                          1
+        //        else
+        // 16 bit reserved                                                      2
+        //        endif
+        // 16 bit reserved                                                      2
+        // 32 bit metadata_block_data_start_addr        4
+        setRefToPlayItemID(din.readUnsignedShort());
+        setRefToSecondaryVideoStreamID(din.readUnsignedByte());
+        din.skipBytes(1);
+        int value = din.readUnsignedShort();
         int type = (value & 0xf000) >> 12;
         Enum[] pipTimelineTypes = PIPTimelineType.values();
         for (int i = 0; i < pipTimelineTypes.length; i++) {
@@ -108,7 +108,7 @@ public class MetadataBlockHeader {
         setIsTrickPlaying((value & 0x0400) != 0);
         value = din.readUnsignedShort();
         if (getIsLumaKey()) {
-        	setUpperLimitLumaKey(value & 0xff);
+                setUpperLimitLumaKey(value & 0xff);
         }
         din.skipBytes(2);
         
@@ -119,91 +119,91 @@ public class MetadataBlockHeader {
     }
     
     public void writeObject(DataOutputStream dout) throws IOException {
-    	dout.writeShort(getRefToPlayItemID());
-    	dout.writeByte(getRefToSecondaryVideoStreamID());
-    	dout.writeByte(0);
-    	int value = getPipTimelineType().ordinal() << 12;
-    	if (getIsLumaKey()) {
-    		value |= 0x0800;
-    	}
-    	if (getIsTrickPlaying()) {
-    		value |= 0x0400;
-    	}
-    	dout.writeShort(value);
-    	value = 0;
-    	if (getIsLumaKey()) {
-    		value = getUpperLimitLumaKey();
-    	}
-    	dout.writeShort(value);
-    	dout.writeShort(0);
-    	
+        dout.writeShort(getRefToPlayItemID());
+        dout.writeByte(getRefToSecondaryVideoStreamID());
+        dout.writeByte(0);
+        int value = getPipTimelineType().ordinal() << 12;
+        if (getIsLumaKey()) {
+                value |= 0x0800;
+        }
+        if (getIsTrickPlaying()) {
+                value |= 0x0400;
+        }
+        dout.writeShort(value);
+        value = 0;
+        if (getIsLumaKey()) {
+                value = getUpperLimitLumaKey();
+        }
+        dout.writeShort(value);
+        dout.writeShort(0);
+        
         // Note - metadata_block_data_start_addr is written by ExtDataBlock.writeObject(..) method.
-    	// dout.write(UnsignedIntHelper.convertToBytes(getMetadataBlockDataStartAddress()));
+        // dout.write(UnsignedIntHelper.convertToBytes(getMetadataBlockDataStartAddress()));
     }
     
     public int getRefToPlayItemID() {
-    	return refToPlayItemID;
+        return refToPlayItemID;
     }
     
     public void setRefToPlayItemID(int refToPlayItemID) {
-    	this.refToPlayItemID = refToPlayItemID;
+        this.refToPlayItemID = refToPlayItemID;
     }
     
     public int getRefToSecondaryVideoStreamID() {
-    	return refToSecondaryVideoStreamID;
+        return refToSecondaryVideoStreamID;
     }
     
     public void setRefToSecondaryVideoStreamID(int refToSecondaryVideoStreamID) {
-    	this.refToSecondaryVideoStreamID = refToSecondaryVideoStreamID;
+        this.refToSecondaryVideoStreamID = refToSecondaryVideoStreamID;
     }
     
     public PIPTimelineType getPipTimelineType() {
-    	return pipTimelineType;
+        return pipTimelineType;
     }
     
     public void setPipTimelineType(PIPTimelineType pipTimelineType) {
-    	this.pipTimelineType = pipTimelineType;
+        this.pipTimelineType = pipTimelineType;
     }
     
     public boolean getIsLumaKey() {
-    	return isLumaKey;
+        return isLumaKey;
     }
     
     public void setIsLumaKey(boolean isLumaKey) {
-    	this.isLumaKey = isLumaKey;
+        this.isLumaKey = isLumaKey;
     }
     
     public boolean getIsTrickPlaying() {
-    	return isTrickPlaying;
+        return isTrickPlaying;
     }
     
     public void setIsTrickPlaying(boolean isTrickPlaying) {
-    	this.isTrickPlaying = isTrickPlaying;
+        this.isTrickPlaying = isTrickPlaying;
     }
     
     public Integer getUpperLimitLumaKey() {
-    	return upperLimitLumaKey;
+        return upperLimitLumaKey;
     }
     
     public void setUpperLimitLumaKey(Integer upperLimitLumaKey) {
-    	this.upperLimitLumaKey = upperLimitLumaKey;
+        this.upperLimitLumaKey = upperLimitLumaKey;
     }
     
     //public long getMetadataBlockDataStartAddress() {
-    //	return metadataBlockDataStartAddress;
+    //  return metadataBlockDataStartAddress;
     //}
     
     //public void setMetadataBlockDataStartAddress(long metadataBlockDataStartAddress) {
-    //	this.metadataBlockDataStartAddress = metadataBlockDataStartAddress;
+    //  this.metadataBlockDataStartAddress = metadataBlockDataStartAddress;
     //}
 
     
     // PIP Timeline Type
     enum PIPTimelineType {
-    	reserved,
-    	SYNCHRONOUS,
-    	ASYNC_SUBPATH,
-    	ASYNC_PLAYITEM;
+        reserved,
+        SYNCHRONOUS,
+        ASYNC_SUBPATH,
+        ASYNC_PLAYITEM;
 
         public byte getEncoding() {
             return (byte) ordinal();

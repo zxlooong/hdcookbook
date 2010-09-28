@@ -80,36 +80,36 @@ import java.io.IOException;
 public class SEImageFrame extends ImageFrame implements SENode {
 
     public SEImageFrame(Show show, String name, int outlineWidth, Color color) {
-	super(show);
-	this.name = name;
-    	this.outlineWidthX = outlineWidth;
-    	this.outlineWidthY = outlineWidth;
-    	this.outlineColor = color;
+        super(show);
+        this.name = name;
+        this.outlineWidthX = outlineWidth;
+        this.outlineWidthY = outlineWidth;
+        this.outlineColor = color;
     }
 
     public SEImageFrame(SEShow show) {
-	super(show);
+        super(show);
     }
 
     void setFixedImage(SEFixedImage fixedImage) {
-	this.fixedImage = fixedImage;
+        this.fixedImage = fixedImage;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) throws IOException {
-	out.writeSuperClassData(this);
-	out.writeInt(outlineWidthX);
-	out.writeInt(outlineWidthY);
-	out.writeColor(outlineColor);
-	out.writeFeatureReference(fixedImage);
+        out.writeSuperClassData(this);
+        out.writeInt(outlineWidthX);
+        out.writeInt(outlineWidthY);
+        out.writeColor(outlineColor);
+        out.writeFeatureReference(fixedImage);
     }
 
     public String getRuntimeClassName() {
-	return ImageFrame.class.getName();
+        return ImageFrame.class.getName();
     }
 
     public void accept(SEShowVisitor visitor) {
-	visitor.visitUserDefinedFeature(this);
-	// fixedImage isn't a child, so we shouldn't visit it here.
+        visitor.visitUserDefinedFeature(this);
+        // fixedImage isn't a child, so we shouldn't visit it here.
     }
 
     /**
@@ -122,21 +122,21 @@ public class SEImageFrame extends ImageFrame implements SENode {
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) 
-    		throws IOException 
+                throws IOException 
     {
-	// fixedImage isn't a child of ours, and if it adds a parent,
-	// that parent wouldn't be a FixedImage anyway, so the most sensible
-	// thing to do is to keep our reference to the FixedImage we know.
+        // fixedImage isn't a child of ours, and if it adds a parent,
+        // that parent wouldn't be a FixedImage anyway, so the most sensible
+        // thing to do is to keep our reference to the FixedImage we know.
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "Playground:image_frame @" + Integer.toHexString(hashCode());
-	} else {
-	    return "Playground:image_frame " + name;
-	}
+        if (name == null) {
+            return "Playground:image_frame @" + Integer.toHexString(hashCode());
+        } else {
+            return "Playground:image_frame " + name;
+        }
     }
 }

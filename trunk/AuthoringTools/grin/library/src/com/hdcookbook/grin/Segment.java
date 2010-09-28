@@ -112,24 +112,24 @@ public class Segment implements Node {
 
     private int outstandingSetups;
 
-    private int setupCheckedInSetup; 	
+    private int setupCheckedInSetup;    
     private int setupCheckedInActive;
-	// # of features in setup clause and activate clause that have
-	// been checked so far for setup
+        // # of features in setup clause and activate clause that have
+        // been checked so far for setup
 
     public Segment() {
     }
     
     public String toString() {
-	if (Debug.LEVEL > 0) {
-	    if (name == null) {
-		return "segment @" + Integer.toHexString(hashCode());
-	    } else {
-		return "segment " + name;
-	    }
-	} else {
-	    return super.toString();
-	}
+        if (Debug.LEVEL > 0) {
+            if (name == null) {
+                return "segment @" + Integer.toHexString(hashCode());
+            } else {
+                return "segment " + name;
+            }
+        } else {
+            return super.toString();
+        }
     }
 
     /**
@@ -140,7 +140,7 @@ public class Segment implements Node {
      * valid to have a null name.
      **/
     public String getName() {
-	return name;
+        return name;
     }
     
     /**
@@ -155,12 +155,12 @@ public class Segment implements Node {
     }
 
     public Show getShow() {
-	return show;
+        return show;
     }
 
     // package-private
     void setShow(Show show) {
-	this.show = show;
+        this.show = show;
     }
 
     /**
@@ -170,9 +170,9 @@ public class Segment implements Node {
      **/
     public void initialize() {
         featureWasActivated = new boolean[activeFeatures.length];
-	for (int i = 0; i < featureWasActivated.length; i++) {
-	    featureWasActivated[i] = false;
-	}
+        for (int i = 0; i < featureWasActivated.length; i++) {
+            featureWasActivated[i] = false;
+        }
     }
 
     //
@@ -187,20 +187,20 @@ public class Segment implements Node {
     // show.
     //
     synchronized Command getCommandToActivate(boolean push) {
-	if (push) {
-	    if (cmdToActivatePush == null) {
-		cmdToActivatePush 
-			= new ActivateSegmentCommand(show, true, false);
-		cmdToActivatePush.setup(this);
-	    }
-	    return cmdToActivatePush;
-	} else {
-	    if (cmdToActivate == null) {
-		cmdToActivate = new ActivateSegmentCommand(show);
-		cmdToActivate.setup(this);
-	    }
-	    return cmdToActivate;
-	}
+        if (push) {
+            if (cmdToActivatePush == null) {
+                cmdToActivatePush 
+                        = new ActivateSegmentCommand(show, true, false);
+                cmdToActivatePush.setup(this);
+            }
+            return cmdToActivatePush;
+        } else {
+            if (cmdToActivate == null) {
+                cmdToActivate = new ActivateSegmentCommand(show);
+                cmdToActivate.setup(this);
+            }
+            return cmdToActivate;
+        }
     }
 
 
@@ -212,20 +212,20 @@ public class Segment implements Node {
      * <p>
      * This call is synchronized by the Show.
      *
-     * @param	lastSegment	The last segment we're coming from.
+     * @param   lastSegment     The last segment we're coming from.
      **/
     void activate(Segment lastSegment) {
-	if (Debug.LEVEL > 1) {
-	    Debug.println("Going from segment " + lastSegment + " to " + this);
-	}
-	if (lastSegment == this) {
-	    return;
-	}
-	active = true;
-	segmentSetupComplete = false;
-	outstandingSetups = 0;
-	setupCheckedInSetup = 0;
-	setupCheckedInActive = 0;
+        if (Debug.LEVEL > 1) {
+            Debug.println("Going from segment " + lastSegment + " to " + this);
+        }
+        if (lastSegment == this) {
+            return;
+        }
+        active = true;
+        segmentSetupComplete = false;
+        outstandingSetups = 0;
+        setupCheckedInSetup = 0;
+        setupCheckedInActive = 0;
         /* 
          * Reset showTopGroup's parts to a default 0-length array.
          * When all of this Segment's active features finish their
@@ -233,45 +233,45 @@ public class Segment implements Node {
          * to reflect this Segment's active feature array.
          **/
         show.showTopGroup.resetVisiblePartsNoAssert(null);
-	for (int i = 0; i < activeFeatures.length; i++) {
-	    int needed = activeFeatures[i].setup();
-	    outstandingSetups += needed;
-	    if (Debug.LEVEL > 0 
-	        && (needed > 0 || activeFeatures[i].needsMoreSetup())) 
-	    {
-	        Debug.println();
-		Debug.println("WARNING:  Feature " + activeFeatures[i]
-			      + " in segment " + name 
-			      + " wasn't set up on time.");
-	        Debug.println();
-	    }
-	    if (!activeFeatures[i].needsMoreSetup()) {
-		activeFeatures[i].activate();
-		featureWasActivated[i] = true;
-	    }
-	}
-	for (int i = 0; i < settingUpFeatures.length; i++) {
-	    outstandingSetups += settingUpFeatures[i].setup();
-	    	// Our count of outstanding setups might be low, if some
-		// features had already started setting up in a previous
-		// segment, but it will never be high.  If it's low, the
-		// result will be some wasted CPU time, but correct behavior.
-	}
-	if (lastSegment != null) {
-	    lastSegment.deactivate();
-	}
-	if (rcHandlers != null) {
-	    for (int i = 0; i < rcHandlers.length; i++) {
-		rcHandlers[i].activate(this);
-	    }
-	}
-	if (onEntryCommands != null) {
-	    for (int i = 0; i < onEntryCommands.length; i++) {
-		show.runCommand(onEntryCommands[i]);
-	    }
-	}
-	outstandingSetups++;	// The one we set up on the next line...
-	runFeatureSetup();
+        for (int i = 0; i < activeFeatures.length; i++) {
+            int needed = activeFeatures[i].setup();
+            outstandingSetups += needed;
+            if (Debug.LEVEL > 0 
+                && (needed > 0 || activeFeatures[i].needsMoreSetup())) 
+            {
+                Debug.println();
+                Debug.println("WARNING:  Feature " + activeFeatures[i]
+                              + " in segment " + name 
+                              + " wasn't set up on time.");
+                Debug.println();
+            }
+            if (!activeFeatures[i].needsMoreSetup()) {
+                activeFeatures[i].activate();
+                featureWasActivated[i] = true;
+            }
+        }
+        for (int i = 0; i < settingUpFeatures.length; i++) {
+            outstandingSetups += settingUpFeatures[i].setup();
+                // Our count of outstanding setups might be low, if some
+                // features had already started setting up in a previous
+                // segment, but it will never be high.  If it's low, the
+                // result will be some wasted CPU time, but correct behavior.
+        }
+        if (lastSegment != null) {
+            lastSegment.deactivate();
+        }
+        if (rcHandlers != null) {
+            for (int i = 0; i < rcHandlers.length; i++) {
+                rcHandlers[i].activate(this);
+            }
+        }
+        if (onEntryCommands != null) {
+            for (int i = 0; i < onEntryCommands.length; i++) {
+                show.runCommand(onEntryCommands[i]);
+            }
+        }
+        outstandingSetups++;    // The one we set up on the next line...
+        runFeatureSetup();
     }
 
     //
@@ -279,17 +279,17 @@ public class Segment implements Node {
     // segment when the show is destroyed.
     //
     void deactivate() {
-	active = false;
-	for (int i = 0; i < activeFeatures.length; i++) {
-	    if (featureWasActivated[i]) {
-		activeFeatures[i].deactivate();
-		featureWasActivated[i] = false;
-	    }
-	    activeFeatures[i].unsetup();
-	}
-	for (int i = 0; i < settingUpFeatures.length; i++) {
-	    settingUpFeatures[i].unsetup();
-	}
+        active = false;
+        for (int i = 0; i < activeFeatures.length; i++) {
+            if (featureWasActivated[i]) {
+                activeFeatures[i].deactivate();
+                featureWasActivated[i] = false;
+            }
+            activeFeatures[i].unsetup();
+        }
+        for (int i = 0; i < settingUpFeatures.length; i++) {
+            settingUpFeatures[i].unsetup();
+        }
         
         show.showTopGroup.resetVisiblePartsNoAssert(null);
     }
@@ -305,92 +305,92 @@ public class Segment implements Node {
     // This is externally synchronized by show, and must be.
     //
     void runFeatureSetup() {
-	// Check to see if all features in active clause are set up
-	if (setupCheckedInActive < activeFeatures.length) {
-	    while (setupCheckedInActive < activeFeatures.length) {
-		if (!featureWasActivated[setupCheckedInActive] 
-		    && activeFeatures[setupCheckedInActive].needsMoreSetup()) 
-		{
-		    return;
-		}
-		setupCheckedInActive++;
-	    }
-	    for (int i = 0; i < activeFeatures.length; i++) {
-		if (!featureWasActivated[i]) {
-		    activeFeatures[i].activate();
-		    featureWasActivated[i] = true;
-		}
-	    }
+        // Check to see if all features in active clause are set up
+        if (setupCheckedInActive < activeFeatures.length) {
+            while (setupCheckedInActive < activeFeatures.length) {
+                if (!featureWasActivated[setupCheckedInActive] 
+                    && activeFeatures[setupCheckedInActive].needsMoreSetup()) 
+                {
+                    return;
+                }
+                setupCheckedInActive++;
+            }
+            for (int i = 0; i < activeFeatures.length; i++) {
+                if (!featureWasActivated[i]) {
+                    activeFeatures[i].activate();
+                    featureWasActivated[i] = true;
+                }
+            }
 
-	    // Set the showTopGroup to this Segment's 
-	    // activeFeature list, unless this segment is the ShowTop segment, 
-	    // in which its activeFeature node tree already contains 
-	    // showTopGroup.
-	    //
-	    // Note that if this segment has no active features, it's OK
-	    // that this statement is never executed, because the 
-	    // showTopGroup's default is to have no active features.
-	    if (this != show.showTop) {
-	       show.showTopGroup.resetVisiblePartsNoAssert(activeFeatures);
-	    }
-	}
+            // Set the showTopGroup to this Segment's 
+            // activeFeature list, unless this segment is the ShowTop segment, 
+            // in which its activeFeature node tree already contains 
+            // showTopGroup.
+            //
+            // Note that if this segment has no active features, it's OK
+            // that this statement is never executed, because the 
+            // showTopGroup's default is to have no active features.
+            if (this != show.showTop) {
+               show.showTopGroup.resetVisiblePartsNoAssert(activeFeatures);
+            }
+        }
 
-	outstandingSetups--;	
-		// This can actually go negative -- see the comment where
-		// it's incremented to see why.
-	if (!active || outstandingSetups > 0 || segmentSetupComplete) {
-	    return;
-	}
+        outstandingSetups--;    
+                // This can actually go negative -- see the comment where
+                // it's incremented to see why.
+        if (!active || outstandingSetups > 0 || segmentSetupComplete) {
+            return;
+        }
 
-	// Check if the setup clause is really finished.
-	while (setupCheckedInSetup < settingUpFeatures.length) {
-	    if (settingUpFeatures[setupCheckedInSetup].needsMoreSetup()) {
-		return;
-	    }
-	    setupCheckedInSetup++;
-	}
+        // Check if the setup clause is really finished.
+        while (setupCheckedInSetup < settingUpFeatures.length) {
+            if (settingUpFeatures[setupCheckedInSetup].needsMoreSetup()) {
+                return;
+            }
+            setupCheckedInSetup++;
+        }
 
-	segmentSetupComplete = true;
+        segmentSetupComplete = true;
         
-	// Now check to see if we should send the next command(s).
-	// At this point in the code, all of our features are set up,
-	// so we send the next command if we have no active features,
-	// or if nextOnSetupDone is true.  nextOnSetupDone will be true
-	// if our "next" clause was called "setup_done".
-	//
-	// A "next" clause gets the "setup_done" behavior because originally,
-	// there were only "next" clauses, the idea being that a segment
-	// with no active features could only reasonably be used for
-	// setup.  Later, "setup_done" was added, e.g. to allow a "loading"
-	// animation, but the old behavior was kept for backwards
-	// compatibility.
+        // Now check to see if we should send the next command(s).
+        // At this point in the code, all of our features are set up,
+        // so we send the next command if we have no active features,
+        // or if nextOnSetupDone is true.  nextOnSetupDone will be true
+        // if our "next" clause was called "setup_done".
+        //
+        // A "next" clause gets the "setup_done" behavior because originally,
+        // there were only "next" clauses, the idea being that a segment
+        // with no active features could only reasonably be used for
+        // setup.  Later, "setup_done" was added, e.g. to allow a "loading"
+        // animation, but the old behavior was kept for backwards
+        // compatibility.
 
-	if (nextOnSetupDone || activeFeatures.length == 0) {
-	    doSegmentDone();
-	}
+        if (nextOnSetupDone || activeFeatures.length == 0) {
+            doSegmentDone();
+        }
     }
 
     void doSegmentDone() {
-	// The "segment done" command is sent from a feature within
-	// the model update loop; if the next command moves us to
-	// a new segment, that will prevent us from getting a second
-	// one due to finishing setup.  If it *doesn't* move us to a 
-	// new segment, then maybe the show author means to send the 
-	// next command more than once.
-	if (nextCommands != null) {
-	    for (int i = 0; i < nextCommands.length; i++) {
-		show.runCommand(nextCommands[i]);
-	    }
-	}
+        // The "segment done" command is sent from a feature within
+        // the model update loop; if the next command moves us to
+        // a new segment, that will prevent us from getting a second
+        // one due to finishing setup.  If it *doesn't* move us to a 
+        // new segment, then maybe the show author means to send the 
+        // next command more than once.
+        if (nextCommands != null) {
+            for (int i = 0; i < nextCommands.length; i++) {
+                show.runCommand(nextCommands[i]);
+            }
+        }
     }
 
     //
     // Called from Show with the Show lock held
     //
     void paintFrame(Graphics2D gr) {
-	for (int i = 0; i < activeFeatures.length; i++) {
-	   activeFeatures[i].paintFrame(gr);
-	}
+        for (int i = 0; i < activeFeatures.length; i++) {
+           activeFeatures[i].paintFrame(gr);
+        }
     }
 
     //
@@ -398,73 +398,73 @@ public class Segment implements Node {
     // areas that will be drawn this frame.
     //
     void addDisplayAreas(RenderContext context) {
-	for (int i = 0; i < activeFeatures.length; i++) {
-	   activeFeatures[i].addDisplayAreas(context);
-	}
+        for (int i = 0; i < activeFeatures.length; i++) {
+           activeFeatures[i].addDisplayAreas(context);
+        }
     }
 
     //
     // Called from Show with the Show lock held
     //
     void nextFrameForActiveFeatures() {
-	for (int i = 0; i < activeFeatures.length; i++) {
+        for (int i = 0; i < activeFeatures.length; i++) {
            activeFeatures[i].nextFrame();
-	}
+        }
     }
     //
     // Called from Show with the Show lock held
     //    
     void nextFrameForRCHandlers() {
-	if (rcHandlers != null) {
-	    for (int i = 0; i < rcHandlers.length; i++) {
-		rcHandlers[i].nextFrame();
-	    }
-	}         
+        if (rcHandlers != null) {
+            for (int i = 0; i < rcHandlers.length; i++) {
+                rcHandlers[i].nextFrame();
+            }
+        }         
     }
 
     //
     // Called from Show with the Show lock held
     //
     boolean handleKeyPressed(RCKeyEvent re, Show caller) {
-	if (rcHandlers == null) {
-	    return false;
-	}
-	for (int i = 0; i < rcHandlers.length; i++) {
-	    if (rcHandlers[i].handleKeyPressed(re, caller)) {
-		return true;
-	    }
-	}
-	return false;
+        if (rcHandlers == null) {
+            return false;
+        }
+        for (int i = 0; i < rcHandlers.length; i++) {
+            if (rcHandlers[i].handleKeyPressed(re, caller)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //
     // Called from Show with the Show lock held
     //
     boolean handleKeyReleased(RCKeyEvent re, Show caller) {
-	if (rcHandlers == null) {
-	    return false;
-	}
-	for (int i = 0; i < rcHandlers.length; i++) {
-	    if (rcHandlers[i].handleKeyReleased(re, caller)) {
-		return true;
-	    }
-	}
-	return false;
+        if (rcHandlers == null) {
+            return false;
+        }
+        for (int i = 0; i < rcHandlers.length; i++) {
+            if (rcHandlers[i].handleKeyReleased(re, caller)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     //
     // Called from Show with the Show lock held
     //
     boolean handleKeyTyped(RCKeyEvent re, Show caller) {
-	if (rcHandlers == null) {
-	    return false;
-	}
-	for (int i = 0; i < rcHandlers.length; i++) {
-	    if (rcHandlers[i].handleKeyTyped(re, caller)) {
-		return true;
-	    }
-	}
-	return false;
+        if (rcHandlers == null) {
+            return false;
+        }
+        for (int i = 0; i < rcHandlers.length; i++) {
+            if (rcHandlers[i].handleKeyTyped(re, caller)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     // Called from show with show lock held
@@ -472,13 +472,13 @@ public class Segment implements Node {
         if (rcHandlers == null) {
             return false;
         }
-	boolean handled = false;
+        boolean handled = false;
         for (int i = 0; i < rcHandlers.length; i++) {
-	    if (rcHandlers[i].handleMouse(x, y, activate)) {
-		handled = true;
-	    }
-	}
-	return handled;
+            if (rcHandlers[i].handleMouse(x, y, activate)) {
+                handled = true;
+            }
+        }
+        return handled;
     }
     
     public void readInstanceData(GrinDataInputStream in, int length) 
@@ -488,12 +488,12 @@ public class Segment implements Node {
         this.activeFeatures = in.readFeaturesArrayReference();
         this.settingUpFeatures = in.readFeaturesArrayReference();
         this.rcHandlers = in.readRCHandlersArrayReference();
-	this.onEntryCommands = in.readCommands();
+        this.onEntryCommands = in.readCommands();
         this.nextOnSetupDone = in.readBoolean();
         this.nextCommands = in.readCommands();
-	this.rcPressedInterest = in.readInt();
-	this.rcReleasedInterest = in.readInt();
-	this.keyTypedInterest = in.readInt();
+        this.rcPressedInterest = in.readInt();
+        this.rcReleasedInterest = in.readInt();
+        this.keyTypedInterest = in.readInt();
     }
 
     /**
@@ -502,7 +502,7 @@ public class Segment implements Node {
      * tools, like grinview.
      **/
     public Feature[] getActiveFeatures() {
-	return activeFeatures;
+        return activeFeatures;
     }
 
     /**
@@ -511,7 +511,7 @@ public class Segment implements Node {
      * building debugging tools, like grinview.
      **/
     public Feature[] getSetupFeatures() {
-	return settingUpFeatures;
+        return settingUpFeatures;
     }
 
     /**
@@ -520,7 +520,7 @@ public class Segment implements Node {
      * building debugging tools, like grinview.
      **/
     public Command[] getOnEntryCommands() {
-	return onEntryCommands;
+        return onEntryCommands;
     }
 
     /**
@@ -530,7 +530,7 @@ public class Segment implements Node {
      * @return the answer to that question.
      **/
     public boolean getNextOnSetupDone() {
-	return nextOnSetupDone;
+        return nextOnSetupDone;
     }
 
     /**
@@ -543,7 +543,7 @@ public class Segment implements Node {
      * @see com.hdcookbook.grin.Show#segmentDone()
      **/
     public Command[] getNextCommands() {
-	return nextCommands;
+        return nextCommands;
     }
 
     /**
@@ -552,7 +552,7 @@ public class Segment implements Node {
      * building debugging tools, like grinview.
      **/
     public RCHandler[] getRCHandlers() {
-	return rcHandlers;
+        return rcHandlers;
     }
 
 }

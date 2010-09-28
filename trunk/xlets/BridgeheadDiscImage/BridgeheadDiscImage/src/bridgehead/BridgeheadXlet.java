@@ -125,14 +125,14 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         bindingUnitDir = root + "/" + orgID + "/" + discID;
         
         String ada = System.getProperty("dvb.persistent.root")
-	       + "/" + orgID + "/" + appID;
+               + "/" + orgID + "/" + appID;
       
         // Set the logging output file, if desired.
         // This can be useful on software players, where you can
-	// read it off your PC's hard disc, but on real hardware
-	// players it's hard to read the file, and persistent storage
-	// isn't really intended for big files.
-	//   XletLogger.setLogFile(ada + "/" + "log.txt");
+        // read it off your PC's hard disc, but on real hardware
+        // players it's hard to read the file, and persistent storage
+        // isn't really intended for big files.
+        //   XletLogger.setLogFile(ada + "/" + "log.txt");
         XletLogger.log("BindingRoot: " + bindingUnitDir);
         
         UserEventRepository uer = new UserEventRepository("BridgeheadXlet");
@@ -143,42 +143,42 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         EventManager em = EventManager.getInstance();
         em.addUserEventListener(this, uer);        
 
-	//
-	// Check for xlet args, so we can autolaunch accordingly.
-	//
+        //
+        // Check for xlet args, so we can autolaunch accordingly.
+        //
         String[] args =
             (String[]) context.getXletProperty(context.ARGS);
         if (args == null || args.length == 0) {
             args = (String[])
                 context.getXletProperty("dvb.caller.parameters");
-			// These are passed via the app launching and
-			// listing API.
+                        // These are passed via the app launching and
+                        // listing API.
         }
-	if (args != null && args.length > 0) {
-	    XletLogger.log("Xlet arguments:");
-	    for (int i = 0; i < args.length; i++) {
-		XletLogger.log("    " + i + ":  " + args[i]);
-	    }
-	    if ("undo_vfs".equals(args[0])) {
-		option = UNDO_VFS_OPTION;
-	    } else if ("connect_url".equals(args[0]) && args.length > 1) {
-		option = UPLOAD_URL_OPTION;
-		uploadURL = args[1];
-	    } else if ("connect_server_socket".equals(args[0])) {
-		option = UPLOAD_PC_OPTION;
-	    } else if ("erase_vfs".equals(args[0])) {
-		option = ERASE_OPTION;
-	    } else {
-		XletLogger.log("Unrecognized xlet arguments.  Valid options");
-		XletLogger.log("    undo_vfs		   undo VFS update");
-		XletLogger.log("    connect_url <url>      uploads from <url>");
-		XletLogger.log("    connect_server_socket  uplaods from PC");
-		XletLogger.log("    erase_vfs		   Erasese VFS contents");
-	    }
-	}
-	synchronized(this) {
-	    initialized = true;
-	}
+        if (args != null && args.length > 0) {
+            XletLogger.log("Xlet arguments:");
+            for (int i = 0; i < args.length; i++) {
+                XletLogger.log("    " + i + ":  " + args[i]);
+            }
+            if ("undo_vfs".equals(args[0])) {
+                option = UNDO_VFS_OPTION;
+            } else if ("connect_url".equals(args[0]) && args.length > 1) {
+                option = UPLOAD_URL_OPTION;
+                uploadURL = args[1];
+            } else if ("connect_server_socket".equals(args[0])) {
+                option = UPLOAD_PC_OPTION;
+            } else if ("erase_vfs".equals(args[0])) {
+                option = ERASE_OPTION;
+            } else {
+                XletLogger.log("Unrecognized xlet arguments.  Valid options");
+                XletLogger.log("    undo_vfs               undo VFS update");
+                XletLogger.log("    connect_url <url>      uploads from <url>");
+                XletLogger.log("    connect_server_socket  uplaods from PC");
+                XletLogger.log("    erase_vfs              Erasese VFS contents");
+            }
+        }
+        synchronized(this) {
+            initialized = true;
+        }
     }
     
     public void startXlet() {
@@ -187,17 +187,17 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
   
         // If the player doesn't support VFS, stop.
         if (!isPlayerCompatible()) {
-	    XletLogger.log("*******************************************");
-	    XletLogger.log("This player doen't support VFS.");
-	    XletLogger.log("Sorry, but I can't do anything for you.");
+            XletLogger.log("*******************************************");
+            XletLogger.log("This player doen't support VFS.");
+            XletLogger.log("Sorry, but I can't do anything for you.");
             return;
         }
     
-	if (option == NO_OPTION) {
-	    showIntroMessage();
-	} else {
-	    processOption();
-	}
+        if (option == NO_OPTION) {
+            showIntroMessage();
+        } else {
+            processOption();
+        }
     }
     
     public void showIntroMessage() {
@@ -217,23 +217,23 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
     }
 
     public synchronized void waitForKey() throws InterruptedException {
-	enterKeyPressed = false;
+        enterKeyPressed = false;
         XletLogger.log("Press enter/OK to continue...");
-	while (!enterKeyPressed) {
-	    wait();
-	}
+        while (!enterKeyPressed) {
+            wait();
+        }
     }
      
     public synchronized void userEventReceived(UserEvent ue) {   
         if (ue.getType()==HRcEvent.KEY_PRESSED 
-	     && ue.getCode() == KeyEvent.VK_ENTER) 
-	{
-	    enterKeyPressed = true;
-	    notifyAll();
-	}
-	if (!initialized || option != NO_OPTION) {
-	    return;
-	}
+             && ue.getCode() == KeyEvent.VK_ENTER) 
+        {
+            enterKeyPressed = true;
+            notifyAll();
+        }
+        if (!initialized || option != NO_OPTION) {
+            return;
+        }
         
         if (ue.getType()==HRcEvent.KEY_PRESSED) {
             switch (ue.getCode()) {
@@ -254,16 +254,16 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
                     return; // don't do anything if the keyevent is none of the above.
             }
 
-	    processOption();
+            processOption();
         }
     }
 
     public synchronized void processOption() {
-	if (thread != null) {
-	    return;
-	}
-	thread = new Thread(this);
-	thread.start();
+        if (thread != null) {
+            return;
+        }
+        thread = new Thread(this);
+        thread.start();
     }
     
     public void run() {  
@@ -273,46 +273,46 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         try {
             switch (option) {
                 case UPLOAD_PC_OPTION:
-		    XletLogger.log("Erasing VFS.");
-		    eraseContents("", new File(bindingUnitDir));
-		    XletLogger.log("Uploading from PC.");
+                    XletLogger.log("Erasing VFS.");
+                    eraseContents("", new File(bindingUnitDir));
+                    XletLogger.log("Uploading from PC.");
                     doDownload(bindingUnitDir);
                     doVFSUpdate(bumfxml, bumfsf);
-		    waitForKey();
-		    doTitleSelection();
-		    break;
-		case UPLOAD_URL_OPTION:
-		    XletLogger.log("Erasing VFS.");
-		    eraseContents("", new File(bindingUnitDir));
-		    XletLogger.log("Uploading from " + uploadURL);
-		    downloadFromURL(bindingUnitDir, uploadURL);
+                    waitForKey();
+                    doTitleSelection();
+                    break;
+                case UPLOAD_URL_OPTION:
+                    XletLogger.log("Erasing VFS.");
+                    eraseContents("", new File(bindingUnitDir));
+                    XletLogger.log("Uploading from " + uploadURL);
+                    downloadFromURL(bindingUnitDir, uploadURL);
                     bumfxml = bindingUnitDir + "/" + "manifest.xml";
                     bumfsf = bindingUnitDir + "/" + "manifest.sf";
                     doVFSUpdate(bumfxml, bumfsf);
-		    waitForKey();
-		    doTitleSelection();
-		    break;
-		case UNDO_VFS_OPTION:
-                    doVFSUpdate(null, null);
-		    waitForKey();
-		    doTitleSelection();
-		    break;
-		case ERASE_OPTION:
-		    eraseContents("", new File(bindingUnitDir));
-		    break;
-		case TITLE_SELECT_OPTION:
-		    XletLogger.log("Selecting title.");
+                    waitForKey();
                     doTitleSelection();
                     break;
-		default:
-		    XletLogger.log("Internal error - unrecognized option "
-		    		   + option);
+                case UNDO_VFS_OPTION:
+                    doVFSUpdate(null, null);
+                    waitForKey();
+                    doTitleSelection();
+                    break;
+                case ERASE_OPTION:
+                    eraseContents("", new File(bindingUnitDir));
+                    break;
+                case TITLE_SELECT_OPTION:
+                    XletLogger.log("Selecting title.");
+                    doTitleSelection();
+                    break;
+                default:
+                    XletLogger.log("Internal error - unrecognized option "
+                                   + option);
             }
         } catch (Exception e) {
             XletLogger.log("", e);
         }
-	showIntroMessage();
-	cleanup();
+        showIntroMessage();
+        cleanup();
     }
     
     public void pauseXlet() {
@@ -334,7 +334,7 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
             } catch (Exception ex) {             
             }
         }
-	option = NO_OPTION;
+        option = NO_OPTION;
     }
 
     // Check that this player is supporting VFS.
@@ -366,7 +366,7 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
     }
     
     public void doDownload(String downloadDir) 
-    	   throws IOException, DiscImageContentException 
+           throws IOException, DiscImageContentException 
     {
         XletLogger.log("Waiting for the client connect.");
         ssocket = new ServerSocket(PORT);
@@ -376,58 +376,58 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         
         XletLogger.log("Accepted connection, start downloading");
 
-	try {
-	    OutputStream out = clientSocket.getOutputStream();
-	    downloadFromSocket(downloadDir, clientSocket.getInputStream());
-	    out.close();
-	} finally {
-	    ssocket.close();
-	}
+        try {
+            OutputStream out = clientSocket.getOutputStream();
+            downloadFromSocket(downloadDir, clientSocket.getInputStream());
+            out.close();
+        } finally {
+            ssocket.close();
+        }
     }
 
     public void downloadFromURL(String downloadDir, String urlString)
-	    throws IOException, DiscImageContentException 
+            throws IOException, DiscImageContentException 
     {
-	URL url = new URL(urlString);
-	downloadFromSocket(downloadDir, url.openStream());
+        URL url = new URL(urlString);
+        downloadFromSocket(downloadDir, url.openStream());
     }
 
 
     public void downloadFromSocket(String downloadDir, InputStream stream) 
-    		throws IOException, DiscImageContentException 
+                throws IOException, DiscImageContentException 
     {
         DataInputStream din = new DataInputStream(
-				new BufferedInputStream(stream));
+                                new BufferedInputStream(stream));
 
-	try {
-	    int numFiles = din.readInt();
-	    int totalLength = din.readInt();
-	    int totalRead = 0;
-	    XletLogger.log("Download directory:  " + downloadDir);
-	    XletLogger.log("Downloading " + numFiles + " files, total length = "
-			   + totalLength + ".");
+        try {
+            int numFiles = din.readInt();
+            int totalLength = din.readInt();
+            int totalRead = 0;
+            XletLogger.log("Download directory:  " + downloadDir);
+            XletLogger.log("Downloading " + numFiles + " files, total length = "
+                           + totalLength + ".");
 
-	    buffer = new byte[4096];
-	    for (int i = 0; i < numFiles; i++) {
-		String name = din.readUTF();
-		int len = din.readInt();
-		XletLogger.log("    Reading " + name + " (" + len + " bytes)");
-		readFile(din, name, len, downloadDir);
-		ContentChecker.checkFile(new File(downloadDir, name));
-		totalRead += len;
-		float percent = totalRead;
-		percent /= totalLength;
-		percent *= 100;
-		XletLogger.log("        File read, "+ percent + "% downloaded");
-	    }
-	    buffer = null;
-	} finally {
-	    din.close();
-	}
+            buffer = new byte[4096];
+            for (int i = 0; i < numFiles; i++) {
+                String name = din.readUTF();
+                int len = din.readInt();
+                XletLogger.log("    Reading " + name + " (" + len + " bytes)");
+                readFile(din, name, len, downloadDir);
+                ContentChecker.checkFile(new File(downloadDir, name));
+                totalRead += len;
+                float percent = totalRead;
+                percent /= totalLength;
+                percent *= 100;
+                XletLogger.log("        File read, "+ percent + "% downloaded");
+            }
+            buffer = null;
+        } finally {
+            din.close();
+        }
     }
 
     private void readFile(DataInputStream din, String name, 
-    			  int remaining, String dir)
+                          int remaining, String dir)
             throws IOException 
     {
         File file = new File(dir, name);
@@ -437,13 +437,13 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
   
         FileOutputStream out = new FileOutputStream(file);
        
-	while (remaining > 0) {
-	    int len = remaining;
-	    if (len > buffer.length) {
-		len = buffer.length;
-	    }
-	    din.readFully(buffer, 0, len);
-	    out.write(buffer, 0, len);
+        while (remaining > 0) {
+            int len = remaining;
+            if (len > buffer.length) {
+                len = buffer.length;
+            }
+            din.readFully(buffer, 0, len);
+            out.write(buffer, 0, len);
             remaining -= len;
         }
         
@@ -480,25 +480,25 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
     // Remove the contents of the given directory.
     //
     private static void eraseContents(String indent, File dir) {
-	try {
-	    if (!dir.isDirectory()) {
-		XletLogger.log(dir + " is not a directory.");
-		return;
-	    }
-	    indent = indent + "    ";
-	    File[] files = dir.listFiles();
-	    for (int i = 0; i < files.length; i++) {
-		if (files[i].isDirectory()) {
-		    eraseContents(indent, files[i]);
-		}
-		XletLogger.log(indent + "Erasing " + files[i]);
-		files[i].delete();
-		if (files[i].exists()) {
-		    XletLogger.log(indent + "    Error!  It still exists!");
-		}
-	    }
-	} catch (Exception ex) {
-	    XletLogger.log("Erasing failed:  " + ex);
-	}
+        try {
+            if (!dir.isDirectory()) {
+                XletLogger.log(dir + " is not a directory.");
+                return;
+            }
+            indent = indent + "    ";
+            File[] files = dir.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    eraseContents(indent, files[i]);
+                }
+                XletLogger.log(indent + "Erasing " + files[i]);
+                files[i].delete();
+                if (files[i].exists()) {
+                    XletLogger.log(indent + "    Error!  It still exists!");
+                }
+            }
+        } catch (Exception ex) {
+            XletLogger.log("Erasing failed:  " + ex);
+        }
     }
 }

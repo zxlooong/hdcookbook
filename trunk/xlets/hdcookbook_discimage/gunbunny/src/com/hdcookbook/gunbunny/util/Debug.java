@@ -94,19 +94,19 @@ public class Debug {
     }
 
     public static void setXlet(Xlet x) {
-	theXlet = x;
+        theXlet = x;
     }
     
     public static void println() {
-	if (LEVEL > 0) {
-	    println("");
-	}
+        if (LEVEL > 0) {
+            println("");
+        }
     }
     
     public static void println(Object o) {
-	if (LEVEL > 0) {
-	    System.err.println(o);
-	}
+        if (LEVEL > 0) {
+            System.err.println(o);
+        }
     }
 
     /**
@@ -117,7 +117,7 @@ public class Debug {
      *      try {
      *          throw new RuntimeException("STACK BACKTRACE");
      *      } catch (RuntimeException ex) {
-     *		Debug.printStackTrace(ex);
+     *          Debug.printStackTrace(ex);
      *      }
      * </pre>
      **/
@@ -126,28 +126,28 @@ public class Debug {
     }
 
     public static void assertFail(String msg) {
-	if (ASSERT) {
-	    Thread.dumpStack();
-	    System.err.println("\n***  Assertion failure:  " + msg + "  ***\n");
-	    Debug.println();
-	    Debug.println("******************************");
-	    Debug.println("*     ABORTING DISC PLAY     *");
-	    Debug.println("******************************");
-	    Debug.println();
-	    Xlet x = theXlet;
-	    if (x != null) {
-		try {
-		    x.destroyXlet(true);
-		} catch (Throwable ignored) {
-		    Debug.printStackTrace(ignored);
-		}
-	    }
-	}
+        if (ASSERT) {
+            Thread.dumpStack();
+            System.err.println("\n***  Assertion failure:  " + msg + "  ***\n");
+            Debug.println();
+            Debug.println("******************************");
+            Debug.println("*     ABORTING DISC PLAY     *");
+            Debug.println("******************************");
+            Debug.println();
+            Xlet x = theXlet;
+            if (x != null) {
+                try {
+                    x.destroyXlet(true);
+                } catch (Throwable ignored) {
+                    Debug.printStackTrace(ignored);
+                }
+            }
+        }
     }
 
     public static void assertFail() {
-	if (ASSERT) {
-	    assertFail("");
-	}
+        if (ASSERT) {
+            assertFail("");
+        }
     }
 }

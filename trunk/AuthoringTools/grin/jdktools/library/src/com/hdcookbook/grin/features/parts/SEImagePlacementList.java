@@ -68,7 +68,7 @@ public class SEImagePlacementList implements SEImageSeqPlacement {
     private ArrayList<SEImagePlacement> placements;
 
     public SEImagePlacementList(ArrayList<SEImagePlacement> placements) {
-	this.placements = placements;
+        this.placements = placements;
     }
 
     /*
@@ -82,21 +82,21 @@ public class SEImagePlacementList implements SEImageSeqPlacement {
      * {@inheritDoc}
      **/
     public Rectangle[] getImageSeqPlacementRects(String[] images) 
-    	throws IOException
+        throws IOException
     {
-	if (images.length != placements.size()) {
-	    throw new IOException("Error:  " + placements.size() + 
-	    			  " placements for " + images.length + 
-				  " images");
-	}
-	Rectangle[] result = new Rectangle[images.length];
-	for (int i = 0; i < images.length; i++) {
-	    if (images[i] == null) {
-		result[i] = null;
-	    } else {
-		result[i] = placements.get(i).getImagePlacementRect(images[i]);
-	    }
-	}
-	return result;
+        if (images.length != placements.size()) {
+            throw new IOException("Error:  " + placements.size() + 
+                                  " placements for " + images.length + 
+                                  " images");
+        }
+        Rectangle[] result = new Rectangle[images.length];
+        for (int i = 0; i < images.length; i++) {
+            if (images[i] == null) {
+                result[i] = null;
+            } else {
+                result[i] = placements.get(i).getImagePlacementRect(images[i]);
+            }
+        }
+        return result;
     }
 }

@@ -74,44 +74,44 @@ class DebugInputStream extends InputStream {
     private InputStream src;
 
     DebugInputStream(InputStream src) {
-	this.src = src;
-	if (Debug.ASSERT) {
-	    positionStack = new Stack();
-	} else {
-	    positionStack = null;
-	}
+        this.src = src;
+        if (Debug.ASSERT) {
+            positionStack = new Stack();
+        } else {
+            positionStack = null;
+        }
     }
 
     public int read() throws IOException {
-	int result = src.read();
-	if (Debug.ASSERT && result >= 0) {
-	    pos++;
-	}
-	return result;
+        int result = src.read();
+        if (Debug.ASSERT && result >= 0) {
+            pos++;
+        }
+        return result;
     }
 
     public void close() throws IOException {
-	if (Debug.ASSERT && !positionStack.empty()) {
-	    Debug.assertFail("positionStack has extra " + positionStack.size()
-	    		     + " elements.");
-	}
+        if (Debug.ASSERT && !positionStack.empty()) {
+            Debug.assertFail("positionStack has extra " + positionStack.size()
+                             + " elements.");
+        }
         src.close();
     }
 
     // Record data block length
     public void pushExpectedLength(int len) {
-	if (Debug.ASSERT) {
-	    positionStack.push(new Integer(len + pos));
-	}
+        if (Debug.ASSERT) {
+            positionStack.push(new Integer(len + pos));
+        }
     }
 
     // Verify the length of the data block
     public void popExpectedLength() {
-	if (Debug.ASSERT) {
-	    Integer popped = (Integer) positionStack.pop();
-	    if (popped.intValue() != pos) {
-		Debug.assertFail("Expected " + popped + " got " + pos);
-	    }
-	}
+        if (Debug.ASSERT) {
+            Integer popped = (Integer) positionStack.pop();
+            if (popped.intValue() != pos) {
+                Debug.assertFail("Expected " + popped + " got " + pos);
+            }
+        }
     }
 }

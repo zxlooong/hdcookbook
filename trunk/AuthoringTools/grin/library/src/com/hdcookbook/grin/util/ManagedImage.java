@@ -151,7 +151,7 @@ abstract public class ManagedImage {
     abstract public String getName();
 
     public String toString() {
-	return super.toString() + " : " + getName();
+        return super.toString() + " : " + getName();
     }
 
     /**
@@ -234,8 +234,8 @@ abstract public class ManagedImage {
      * See ManagedImage's main class documentation under
      * "ManagedImage contract - image loading and unloading".
      *
-     * @param  comp	A component to use for loading the image.  Clients
-     *			using ManagedImage should never pass in null.
+     * @param  comp     A component to use for loading the image.  Clients
+     *                  using ManagedImage should never pass in null.
      *
      * @see #prepare()
      * @see #unprepare()
@@ -307,7 +307,7 @@ abstract public class ManagedImage {
      * @see #prepare()
      **/
     final public void makeSticky() {
-	prepare();
+        prepare();
     }
 
     /**
@@ -322,12 +322,12 @@ abstract public class ManagedImage {
      * @see #prepare()
      **/
     final public void unmakeSticky() {
-	unprepare();
+        unprepare();
     }
 
     public boolean equals(Object other) {
-	return this == other;
-	// ImageManager canonicalizes ManagedImage instances
+        return this == other;
+        // ImageManager canonicalizes ManagedImage instances
     }
     
     /**
@@ -340,13 +340,13 @@ abstract public class ManagedImage {
      * the given bounds.
      **/
     abstract public void drawScaled(Graphics2D gr, Rectangle bounds,
-    				    Component comp);
+                                    Component comp);
     /**
      * Draw the the given subsection of the image into a graphics context,
      * without scaling.  
      **/
     abstract public void drawClipped(Graphics2D gr, int x, int y,
                                     Rectangle subsection,
-    				    Component comp);
+                                    Component comp);
     abstract void destroy();
 }

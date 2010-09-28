@@ -58,28 +58,28 @@
  * from the yahoo rss feed.
  */
 class FeedData {
-	String imageCode;
-	String location;
-	String condition;
-	String day = "Now";
-	String direction;
-	String temp;
-	String speed;
+        String imageCode;
+        String location;
+        String condition;
+        String day = "Now";
+        String direction;
+        String temp;
+        String speed;
 
-	boolean isDayTime = true;
-	
-	// forecast the next day
-	String day1;
-	String day1Code;
-	String day1High;
-	String day1Low;
-	String day1Condition;
-	//
-	// forecast for 2nd next day
-	String day2;
-	String day2Code;
-	String day2High;
-	String day2Low;
-	String day2Condition;
+        boolean isDayTime = true;
+        
+        // forecast the next day
+        String day1;
+        String day1Code;
+        String day1High;
+        String day1Low;
+        String day1Condition;
+        //
+        // forecast for 2nd next day
+        String day2;
+        String day2Code;
+        String day2High;
+        String day2Low;
+        String day2Condition;
 }
 

@@ -141,34 +141,34 @@ public class StringUtil {
     /** URL encode given string */
     public static String urlEncode(String s) {
         if (s != null) {
-			try {
-				return URLEncoder.encode(s, "UTF-8");
-			} catch (UnsupportedEncodingException ue) {
-				try {
-					s = new String(s.getBytes("UTF-8"), "ISO-8859-1");
-				} catch (UnsupportedEncodingException e) {
-				}
-				StringBuffer tmp = new StringBuffer();
-				try {
-					for (int i=0; i<s.length(); i++) {
-						int b = (int) s.charAt(i);
-						if ((b >= 0x30 && b <= 0x39) || (b >= 0x41 && b <= 0x5A) || (b >= 0x61 && b <= 0x7A)) {
-							tmp.append((char) b);
-						} else if (b == 0x20) {
-							tmp.append("+");
-						} else {
-							tmp.append("%");
-							if (b <= 0xf) {
-								tmp.append("0");
-							}
-							tmp.append(Integer.toHexString(b));
-						}
-					}
-				} catch (Exception e) {
-				}
-				return tmp.toString();
-			}
-		}
+                        try {
+                                return URLEncoder.encode(s, "UTF-8");
+                        } catch (UnsupportedEncodingException ue) {
+                                try {
+                                        s = new String(s.getBytes("UTF-8"), "ISO-8859-1");
+                                } catch (UnsupportedEncodingException e) {
+                                }
+                                StringBuffer tmp = new StringBuffer();
+                                try {
+                                        for (int i=0; i<s.length(); i++) {
+                                                int b = (int) s.charAt(i);
+                                                if ((b >= 0x30 && b <= 0x39) || (b >= 0x41 && b <= 0x5A) || (b >= 0x61 && b <= 0x7A)) {
+                                                        tmp.append((char) b);
+                                                } else if (b == 0x20) {
+                                                        tmp.append("+");
+                                                } else {
+                                                        tmp.append("%");
+                                                        if (b <= 0xf) {
+                                                                tmp.append("0");
+                                                        }
+                                                        tmp.append(Integer.toHexString(b));
+                                                }
+                                        }
+                                } catch (Exception e) {
+                                }
+                                return tmp.toString();
+                        }
+                }
         return null;
     }
 }

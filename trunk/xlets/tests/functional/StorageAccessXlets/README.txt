@@ -9,13 +9,13 @@ The Writer xlet writes to a local storage using FileOutputStream
 in a file-named:
 
 String filename = System.getProperty("dvb.persistent.root")
-	       + "/" + context.getXletProperty("dvb.org.id")
-	       + "/" + context.getXletProperty("dvb.app.id")
-	       + "/tmp.txt";
+               + "/" + context.getXletProperty("dvb.org.id")
+               + "/" + context.getXletProperty("dvb.app.id")
+               + "/tmp.txt";
 
 Which actually computes to:
 ${disk-root-writer}/4000/01/tmp.txt
-	where 0x4000 is the org id and 0x01 is the application id. 
+        where 0x4000 is the org id and 0x01 is the application id. 
 
 Reader:
 The reader aquires file credentials and tries to read back the data
@@ -27,8 +27,8 @@ of the Writer's:
 
 String filename = System.getProperty("dvb.persistent.root")
                + "/" + context.getXletProperty("dvb.org.id")
-	       + "/" + context.getXletProperty("dvb.app.id")
-	       + "/tmp.txt";
+               + "/" + context.getXletProperty("dvb.app.id")
+               + "/tmp.txt";
 
 Which computes to: ${disk-root-reader}/4001/02/tmp.txt
 
@@ -39,11 +39,11 @@ ${disk-root-reader}/4001/02/tmp.txt ====> ${disk-root-writer}/4000/01/tmp.txt
 If the credentials work correctly, the read should succeed and the
 Reader xlet should display:
 
-	"READER test passed, accessed filesystem without SecurityException"
+        "READER test passed, accessed filesystem without SecurityException"
 
 If the credentials do not work, then the test will fail displaying:
 
-	"Test Failed with IOException";
+        "Test Failed with IOException";
 
 See the notes in the ${HDCOOKBOOK}/DiscCreationTools/security/README-CREDENTIALS.txt for
 the status of the credential signer tool.

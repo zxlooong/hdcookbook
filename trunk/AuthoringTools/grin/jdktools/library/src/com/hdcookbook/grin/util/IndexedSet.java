@@ -71,19 +71,19 @@ public class IndexedSet<T> {
     private HashMap<T, Integer> mapTToInt;
 
     public IndexedSet() {
-	mapTToInt = new HashMap<T, Integer>();
+        mapTToInt = new HashMap<T, Integer>();
     }
    
     /**
      * Get the index of element in the set, adding it if necessary.
      **/
     public synchronized int getIndex(T element) {
-	Integer i = mapTToInt.get(element);
-	if (i == null) {
-	    i = new Integer(mapTToInt.size());
-	    mapTToInt.put(element, i);
-	}
-	return i;    // autoboxing converts to int
+        Integer i = mapTToInt.get(element);
+        if (i == null) {
+            i = new Integer(mapTToInt.size());
+            mapTToInt.put(element, i);
+        }
+        return i;    // autoboxing converts to int
     }
 
     /**
@@ -91,19 +91,19 @@ public class IndexedSet<T> {
      * element.
      **/
     public synchronized T[] toArray(Class type) {
-	
-	T[] result = (T[]) Array.newInstance(type, size());
-	
-	for (Map.Entry<T, Integer> entry : mapTToInt.entrySet()) {
-	   assert result[entry.getValue()] == null;
-	   result[entry.getValue()] = entry.getKey();
-	}
-	
-	return result;
+        
+        T[] result = (T[]) Array.newInstance(type, size());
+        
+        for (Map.Entry<T, Integer> entry : mapTToInt.entrySet()) {
+           assert result[entry.getValue()] == null;
+           result[entry.getValue()] = entry.getKey();
+        }
+        
+        return result;
     }
 
     public synchronized int size() {
-	return mapTToInt.size();
+        return mapTToInt.size();
     }
 }
 

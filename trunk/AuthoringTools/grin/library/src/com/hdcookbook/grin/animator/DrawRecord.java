@@ -117,7 +117,7 @@ public class DrawRecord {
      * Create a new, empty DrawRecord
      **/
     public DrawRecord() {
-	resetPreviousFrame();
+        resetPreviousFrame();
     }
 
     /**
@@ -127,7 +127,7 @@ public class DrawRecord {
      * should be discarded.
      **/
     void resetPreviousFrame() {
-	lastWidth = Integer.MIN_VALUE;
+        lastWidth = Integer.MIN_VALUE;
     }
 
     /**
@@ -147,18 +147,18 @@ public class DrawRecord {
      * @param   height height of drawing, may be negative
      **/
     public void setArea(int x, int y, int width, int height) {
-	if (width < 0) {
-	    width = -width;
-	    x -= width;
-	}
-	if (height < 0) {
-	    height = -height;
-	    y -= height;
-	}
-	this.x = x;
-	this.y = y;
-	this.width = width;
-	this.height = height;
+        if (width < 0) {
+            width = -width;
+            x -= width;
+        }
+        if (height < 0) {
+            height = -height;
+            y -= height;
+        }
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
     }
 
     //
@@ -175,36 +175,36 @@ public class DrawRecord {
     // The returned value is always >= the value passed in.
     //
     int finishedFrame(int newDrawSequence, int lastDrawSequence,
-		      Rectangle drawTarget)
+                      Rectangle drawTarget)
     {
-	if (drawSequence == 0) {
-	    // Do nothing.  This draw area wasn't visible in the last frame,
-	    // so its area has already been added to the damage list.
-	    // The lastDrawSequence in our loop remains unchanged.
-	} else if (drawSequence < lastDrawSequence) {
-	    // We have changed Z order
-	    addToRect(drawTarget, lastX, lastY, lastWidth, lastHeight);
-	    // We return the current value of lastDrawSequence
+        if (drawSequence == 0) {
+            // Do nothing.  This draw area wasn't visible in the last frame,
+            // so its area has already been added to the damage list.
+            // The lastDrawSequence in our loop remains unchanged.
+        } else if (drawSequence < lastDrawSequence) {
+            // We have changed Z order
+            addToRect(drawTarget, lastX, lastY, lastWidth, lastHeight);
+            // We return the current value of lastDrawSequence
 
-	    if (Debug.LEVEL >= 2 && !drawSequenceWarningGiven) {
-		Debug.println("");
-		Debug.println("NOTE:  An area of the screen is being re-drawn due to a change in z-order.");
-		Debug.println("       If this is unexpected, then you may get more efficient drawing if you");
-		Debug.println("       re-structure your show to have a consistent ordering of the features.");
-		Debug.println("       See also https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=215 .");
-		Debug.println("       This warning will not repeat.");
-		Debug.println();
-		drawSequenceWarningGiven = true;
-	    }
-	} else {
-	    // drawSequence > lastDrawSequence.  It can't be ==, because
-	    // non-zero values are unique.
-	    lastDrawSequence = drawSequence;
-	}
-	drawSequence = newDrawSequence;
-	changed = false;
-	opaque = true;
-	return lastDrawSequence;
+            if (Debug.LEVEL >= 2 && !drawSequenceWarningGiven) {
+                Debug.println("");
+                Debug.println("NOTE:  An area of the screen is being re-drawn due to a change in z-order.");
+                Debug.println("       If this is unexpected, then you may get more efficient drawing if you");
+                Debug.println("       re-structure your show to have a consistent ordering of the features.");
+                Debug.println("       See also https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=215 .");
+                Debug.println("       This warning will not repeat.");
+                Debug.println();
+                drawSequenceWarningGiven = true;
+            }
+        } else {
+            // drawSequence > lastDrawSequence.  It can't be ==, because
+            // non-zero values are unique.
+            lastDrawSequence = drawSequence;
+        }
+        drawSequence = newDrawSequence;
+        changed = false;
+        opaque = true;
+        return lastDrawSequence;
     }
 
     /**
@@ -217,7 +217,7 @@ public class DrawRecord {
      * be filled with source mode drawing.
      **/
     public void setSemiTransparent() {
-	opaque = false;
+        opaque = false;
     }
 
     /**
@@ -227,46 +227,46 @@ public class DrawRecord {
      * required by a different DrawRecord.
      **/
     public void setChanged() {
-	changed = true;
+        changed = true;
     }
 
     /**
      * Indicates that the area is subject to the given translation.
      *
-     * @param	dx	Change in x coordinate
-     * @param	dy	Change in y coordinate
+     * @param   dx      Change in x coordinate
+     * @param   dy      Change in y coordinate
      **/
     public void applyTranslation(int dx, int dy) {
-	this.x += dx;
-	this.y += dy;
+        this.x += dx;
+        this.y += dy;
     }
 
     /**
      * Applies a clip to the area to be drawn.  This can reduce the area
      * set by setArea().  
      * 
-     * @param	x	x coordinate of the clip
-     * @param	y	y coordinate of the clip
-     * @param	width	width coordinate of the clip
-     * @param	height	height coordinate of the clip
+     * @param   x       x coordinate of the clip
+     * @param   y       y coordinate of the clip
+     * @param   width   width coordinate of the clip
+     * @param   height  height coordinate of the clip
      **/
     public void addClip(int x, int y, int width, int height) {
-	if (this.x < x) {
-	    this.width -= x - this.x;
-	    this.x = x;
-	}
-	if (this.y < y) {
-	    this.height -= y - this.y;
-	    this.y = y;
-	}
-	if (this.x + this.width > x + width) {
-	    this.width = x + width - this.x;
-	}
-	if (this.y + this.height > y + height) {
-	    this.height = y + height - this.y;
-	}
+        if (this.x < x) {
+            this.width -= x - this.x;
+            this.x = x;
+        }
+        if (this.y < y) {
+            this.height -= y - this.y;
+            this.y = y;
+        }
+        if (this.x + this.width > x + width) {
+            this.width = x + width - this.x;
+        }
+        if (this.y + this.height > y + height) {
+            this.height = y + height - this.y;
+        }
 
-	// This could easily leave width and height negative!
+        // This could easily leave width and height negative!
     }
 
 
@@ -277,69 +277,69 @@ public class DrawRecord {
     // with our guarantee area.
     //
     void applyGuarantee(Rectangle area) {
-	int x1 = x;
-	int y1 = y;
-	int x2 = x1 + width;
-	int y2 = y1 + height;
-	int ax1 = area.x;
-	int ay1 = area.y;
-	int ax2 = ax1 + area.width;
-	int ay2 = ay1 + area.height;
+        int x1 = x;
+        int y1 = y;
+        int x2 = x1 + width;
+        int y2 = y1 + height;
+        int ax1 = area.x;
+        int ay1 = area.y;
+        int ax2 = ax1 + area.width;
+        int ay2 = ay1 + area.height;
 
-	// First, try moving sides in.  We can only do this if
-	// the guaranteed area completely covers the erase area vertically.
-	//
-	if (y1 <= ay1 && y2 >= ay2) {
+        // First, try moving sides in.  We can only do this if
+        // the guaranteed area completely covers the erase area vertically.
+        //
+        if (y1 <= ay1 && y2 >= ay2) {
 
-	    // Try moving left side to the right
-	    if (x1 <= ax1 && x2 > ax1) {
-		int d = x2 - ax1;
-		area.x += d;
-		area.width -= d;
-		if (area.width <= 0) {
-		    RenderContextBase.setEmpty(area);
-		    return;
-		}
-	    }
+            // Try moving left side to the right
+            if (x1 <= ax1 && x2 > ax1) {
+                int d = x2 - ax1;
+                area.x += d;
+                area.width -= d;
+                if (area.width <= 0) {
+                    RenderContextBase.setEmpty(area);
+                    return;
+                }
+            }
 
-	    // Try moving right side to the left
-	    if (x2 >= ax2 && x1 < ax2) {
-		int d = ax2 - x1;
-		area.width -= d;
-		if (area.width <= 0) {
-		    RenderContextBase.setEmpty(area);
-		    return;
-		}
-	    }
-	}
+            // Try moving right side to the left
+            if (x2 >= ax2 && x1 < ax2) {
+                int d = ax2 - x1;
+                area.width -= d;
+                if (area.width <= 0) {
+                    RenderContextBase.setEmpty(area);
+                    return;
+                }
+            }
+        }
 
-	// Next, try squeezing the top and bottom.  WE can ondly do this
-	// if the guaranteed area completely covers the erase area
-	// horizontally.
-	//
-	if (x1 <= ax1 && x2 >= ax2) {
+        // Next, try squeezing the top and bottom.  WE can ondly do this
+        // if the guaranteed area completely covers the erase area
+        // horizontally.
+        //
+        if (x1 <= ax1 && x2 >= ax2) {
 
-	    // Try moving the top down
-	    if (y1 <= ay1 && y2 > ay1) {
-		int d = y2 - ay1;
-		area.y += d;
-		area.height -= d;
-		if (area.height <= 0) {
-		    RenderContextBase.setEmpty(area);
-		    return;
-		}
-	    }
+            // Try moving the top down
+            if (y1 <= ay1 && y2 > ay1) {
+                int d = y2 - ay1;
+                area.y += d;
+                area.height -= d;
+                if (area.height <= 0) {
+                    RenderContextBase.setEmpty(area);
+                    return;
+                }
+            }
 
-	    // Try moving the bottom up
-	    if (y2 >= ay2 && y1 < ay2) {
-		int d = ay2 - y1;
-		area.height -= d;
-		if (area.height <= 0) {
-		    RenderContextBase.setEmpty(area);
-		    return;
-		}
-	    }
-	}
+            // Try moving the bottom up
+            if (y2 >= ay2 && y1 < ay2) {
+                int d = ay2 - y1;
+                area.height -= d;
+                if (area.height <= 0) {
+                    RenderContextBase.setEmpty(area);
+                    return;
+                }
+            }
+        }
     }
     
     //
@@ -349,33 +349,33 @@ public class DrawRecord {
     //
     void addAreaTo(Rectangle drawTarget) {
 
-	boolean newCoords = x != lastX || y != lastY
-	                    || width != lastWidth || height != lastHeight;
+        boolean newCoords = x != lastX || y != lastY
+                            || width != lastWidth || height != lastHeight;
 
-	// If we were visible in the last frame, we need to check
-	// for areas to erase.
-	//
-	if (lastWidth > 0 && lastHeight > 0) {
-	    if (newCoords || (changed && !opaque)) {
-		// erase the whole last frame
-		addToRect(drawTarget, lastX, lastY, lastWidth, lastHeight);
-	    } 
-	}
+        // If we were visible in the last frame, we need to check
+        // for areas to erase.
+        //
+        if (lastWidth > 0 && lastHeight > 0) {
+            if (newCoords || (changed && !opaque)) {
+                // erase the whole last frame
+                addToRect(drawTarget, lastX, lastY, lastWidth, lastHeight);
+            } 
+        }
 
-	// Now, if we're visible in this frame, check for areas to
-	// draw.
-	if (width > 0 && height > 0) {
-	    if (lastWidth == Integer.MIN_VALUE   // We were just activated
-	        || changed || newCoords)
-	    {
-		addToRect(drawTarget, x, y, width, height);
-	    }
-	}
+        // Now, if we're visible in this frame, check for areas to
+        // draw.
+        if (width > 0 && height > 0) {
+            if (lastWidth == Integer.MIN_VALUE   // We were just activated
+                || changed || newCoords)
+            {
+                addToRect(drawTarget, x, y, width, height);
+            }
+        }
 
-	lastX = x;
-	lastY = y;
-	lastWidth = width;
-	lastHeight = height;
+        lastX = x;
+        lastY = y;
+        lastWidth = width;
+        lastHeight = height;
     }
 
     //
@@ -383,52 +383,52 @@ public class DrawRecord {
     // last frame of animation, but isn't used in this frame.
     //
     void eraseLastFrame(Rectangle drawTarget) {
-	if (lastWidth > 0 && lastHeight > 0) {
-	    addToRect(drawTarget, lastX, lastY, lastWidth, lastHeight);
-	}
-	drawSequence = 0;
+        if (lastWidth > 0 && lastHeight > 0) {
+            addToRect(drawTarget, lastX, lastY, lastWidth, lastHeight);
+        }
+        drawSequence = 0;
     }
 
     //
     // Add the given area to the given rectangle.
     //
     private void addToRect(Rectangle r, int x, int y, int width, int height) {
-	if (width <= 0 || height <= 0) {
-	    return;
-	}
-	if (RenderContextBase.isEmpty(r)) {
-	    r.setBounds(x, y, width, height);
-	} else {
-	    r.add(x, y);
-	    r.add(x+width, y+height);
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+        if (RenderContextBase.isEmpty(r)) {
+            r.setBounds(x, y, width, height);
+        } else {
+            r.add(x, y);
+            r.add(x+width, y+height);
                 // This is correct.  Rectangle.add() (and AWT in general)
-		// believes that the lower-right hand coordinate 
-		// at x+width, y+height is "outside" of a rectangle, and that
-		// adding a coordinate that pushes the lower-right boundary
-		// adds the point in question just _outside_ of the rectangle.
-		// In other words, this:
-		//
-		//         Rectangle r = new Rectangle(2, 2, 0, 0);
-		//         System.out.println(r.contains(2,2));
-		//         System.out.println(r.width + " x " + r.height);
-		//         r.add(2, 2);
-		//         System.out.println(r.width + " x " + r.height);
-		//         r.add(4, 4);
-		//         System.out.println(r.width + " x " + r.height);
-		//         System.out.println(r.contains(1,1) + ", " 
-		//                            + r.contains(2,2) + ", "
-		//                            + r.contains(3,3) + ", " 
-		//			      + r.contains(4,4));
-		// yields:
-		//
-		//     false
-		//     0 x 0
-		//     0 x 0
-		//     2 x 2
-		//     false, true, true, false
-		//
-		// Node that after the call to r.add(4, 4), 
-		// r.contains(4,4) is false.
-	}
+                // believes that the lower-right hand coordinate 
+                // at x+width, y+height is "outside" of a rectangle, and that
+                // adding a coordinate that pushes the lower-right boundary
+                // adds the point in question just _outside_ of the rectangle.
+                // In other words, this:
+                //
+                //         Rectangle r = new Rectangle(2, 2, 0, 0);
+                //         System.out.println(r.contains(2,2));
+                //         System.out.println(r.width + " x " + r.height);
+                //         r.add(2, 2);
+                //         System.out.println(r.width + " x " + r.height);
+                //         r.add(4, 4);
+                //         System.out.println(r.width + " x " + r.height);
+                //         System.out.println(r.contains(1,1) + ", " 
+                //                            + r.contains(2,2) + ", "
+                //                            + r.contains(3,3) + ", " 
+                //                            + r.contains(4,4));
+                // yields:
+                //
+                //     false
+                //     0 x 0
+                //     0 x 0
+                //     2 x 2
+                //     false, true, true, false
+                //
+                // Node that after the call to r.add(4, 4), 
+                // r.contains(4,4) is false.
+        }
     }
 }

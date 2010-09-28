@@ -76,155 +76,155 @@ import java.util.ArrayList;
 public class MediaExtensionParser implements ExtensionParser {
 
     private static class Mark {
-	public int startTime;	// ms
-	public String javaConstantName = null;		// can be null
-	public Command[] onEntryCommands = null;	// can be null
+        public int startTime;   // ms
+        public String javaConstantName = null;          // can be null
+        public Command[] onEntryCommands = null;        // can be null
     }
     
     /**
      * {@inheritDoc}
      **/
     public Feature getFeature(Show show, String typeName,
-    			      String name, Lexer lexer)
-		   throws IOException
+                              String name, Lexer lexer)
+                   throws IOException
     {
         if (typeName == null) {
             return null;
         }
         
-	if (typeName.equals("media:playlist")) {
-	    return parsePlaylist(show, name, lexer); // reserved for this parser
-	} else {
-	    return null;
-	} 
+        if (typeName.equals("media:playlist")) {
+            return parsePlaylist(show, name, lexer); // reserved for this parser
+        } else {
+            return null;
+        } 
     }
 
     private Feature parsePlaylist(Show show, String name, Lexer lexer)
-    		throws IOException
+                throws IOException
     {
-	String locator = lexer.getString();
-	String tok = lexer.getString();
-	boolean autoStart = true;
-	boolean autoStop = true;
-	Command[] onActivate = ShowParser.emptyCommandArray;
-	Command[] onMediaStart = ShowParser.emptyCommandArray;
-	Command[] onMediaEnd = ShowParser.emptyCommandArray;
-	Command[] onDeactivate = ShowParser.emptyCommandArray;
-	ArrayList<Mark> marks = new ArrayList<Mark>();
-	if ("autostart:".equals(tok)) {
-	    autoStart = lexer.getBoolean();
-	    tok = lexer.getString();
-	}
-	if ("autostop:".equals(tok)) {
-	    autoStop = lexer.getBoolean();
-	    tok = lexer.getString();
-	}
-	if ("marks".equals(tok)) {
-	    parsePlaylistMarks(marks, lexer);
-	    tok = lexer.getString();
-	}
-	if ("on_activate".equals(tok)) {
-	    onActivate = lexer.getParser().parseCommands();
-	    tok = lexer.getString();
-	}
-	if ("on_media_start".equals(tok)) {
-	    onMediaStart = lexer.getParser().parseCommands();
-	    tok = lexer.getString();
-	}
-	if ("on_media_end".equals(tok)) {
-	    onMediaEnd = lexer.getParser().parseCommands();
-	    tok = lexer.getString();
-	}
-	if ("on_deactivate".equals(tok)) {
-	    onDeactivate = lexer.getParser().parseCommands();
-	    tok = lexer.getString();
-	}
-	lexer.expectString(";", tok);
+        String locator = lexer.getString();
+        String tok = lexer.getString();
+        boolean autoStart = true;
+        boolean autoStop = true;
+        Command[] onActivate = ShowParser.emptyCommandArray;
+        Command[] onMediaStart = ShowParser.emptyCommandArray;
+        Command[] onMediaEnd = ShowParser.emptyCommandArray;
+        Command[] onDeactivate = ShowParser.emptyCommandArray;
+        ArrayList<Mark> marks = new ArrayList<Mark>();
+        if ("autostart:".equals(tok)) {
+            autoStart = lexer.getBoolean();
+            tok = lexer.getString();
+        }
+        if ("autostop:".equals(tok)) {
+            autoStop = lexer.getBoolean();
+            tok = lexer.getString();
+        }
+        if ("marks".equals(tok)) {
+            parsePlaylistMarks(marks, lexer);
+            tok = lexer.getString();
+        }
+        if ("on_activate".equals(tok)) {
+            onActivate = lexer.getParser().parseCommands();
+            tok = lexer.getString();
+        }
+        if ("on_media_start".equals(tok)) {
+            onMediaStart = lexer.getParser().parseCommands();
+            tok = lexer.getString();
+        }
+        if ("on_media_end".equals(tok)) {
+            onMediaEnd = lexer.getParser().parseCommands();
+            tok = lexer.getString();
+        }
+        if ("on_deactivate".equals(tok)) {
+            onDeactivate = lexer.getParser().parseCommands();
+            tok = lexer.getString();
+        }
+        lexer.expectString(";", tok);
 
-	boolean hasMarkCommands = false;
-	boolean hasJavaConstants = false;
-	for (Mark m : marks) {
-	    if (m.javaConstantName != null) {
-		if (!hasJavaConstants) {
-		    String s;
-		    s = "        // Constants for the beginning of playlist segments.\n";
-		    ((SEShow) show).appendCommandClassCode(s);
-		    s = "        // These can be used with PlayerWranger.setMediaTimeMS().\n";
-		    ((SEShow) show).appendCommandClassCode(s);
-		    hasJavaConstants= true;
+        boolean hasMarkCommands = false;
+        boolean hasJavaConstants = false;
+        for (Mark m : marks) {
+            if (m.javaConstantName != null) {
+                if (!hasJavaConstants) {
+                    String s;
+                    s = "        // Constants for the beginning of playlist segments.\n";
+                    ((SEShow) show).appendCommandClassCode(s);
+                    s = "        // These can be used with PlayerWranger.setMediaTimeMS().\n";
+                    ((SEShow) show).appendCommandClassCode(s);
+                    hasJavaConstants= true;
 
-		}
-		String s = "    public final static int " + m.javaConstantName
-			   + " = " + m.startTime + ";\n";
-		((SEShow) show).appendCommandClassCode(s);
-		    // Yes, downcasts are evil.  The type of show really
-		    // should be changed to SEShow throughout the parser, but
-		    // that would mean breaking existing extension parsers.
-	    }
-	    hasMarkCommands = hasMarkCommands || m.onEntryCommands != null;
-	}
-	if (hasJavaConstants) {
-	    ((SEShow) show).appendCommandClassCode("\n");
-	}
-	int[] markTimes = null;
-	Command[][] onEntryCommands = null;
-	if (hasMarkCommands) {
-	    markTimes = new int[marks.size() + 2];
-	    onEntryCommands = new Command[markTimes.length][];
-	    markTimes[0] = Integer.MIN_VALUE;
-	    markTimes[markTimes.length-1] = Integer.MAX_VALUE;
-	    for (int i = 0; i < marks.size(); i++) {
-		Mark m = marks.get(i);
-		markTimes[i+1] = m.startTime;
-		onEntryCommands[i+1] = m.onEntryCommands;
-	    }
-	}
-	return new SEPlaylist(show, name, locator, onActivate, onMediaStart,
-			      onMediaEnd, onDeactivate, autoStart, autoStop,
-			      markTimes, onEntryCommands);
+                }
+                String s = "    public final static int " + m.javaConstantName
+                           + " = " + m.startTime + ";\n";
+                ((SEShow) show).appendCommandClassCode(s);
+                    // Yes, downcasts are evil.  The type of show really
+                    // should be changed to SEShow throughout the parser, but
+                    // that would mean breaking existing extension parsers.
+            }
+            hasMarkCommands = hasMarkCommands || m.onEntryCommands != null;
+        }
+        if (hasJavaConstants) {
+            ((SEShow) show).appendCommandClassCode("\n");
+        }
+        int[] markTimes = null;
+        Command[][] onEntryCommands = null;
+        if (hasMarkCommands) {
+            markTimes = new int[marks.size() + 2];
+            onEntryCommands = new Command[markTimes.length][];
+            markTimes[0] = Integer.MIN_VALUE;
+            markTimes[markTimes.length-1] = Integer.MAX_VALUE;
+            for (int i = 0; i < marks.size(); i++) {
+                Mark m = marks.get(i);
+                markTimes[i+1] = m.startTime;
+                onEntryCommands[i+1] = m.onEntryCommands;
+            }
+        }
+        return new SEPlaylist(show, name, locator, onActivate, onMediaStart,
+                              onMediaEnd, onDeactivate, autoStart, autoStop,
+                              markTimes, onEntryCommands);
     }
 
     private void parsePlaylistMarks(ArrayList<Mark> marks, Lexer lexer) 
-	    throws IOException 
+            throws IOException 
     {
-	lexer.parseExpected("{");
-	String tok = lexer.getString();
-	int lastTime = Integer.MIN_VALUE;
-	for (;;) {
-	    if ("}".equals(tok)) {
-		break;
-	    }
-	    Mark m = new Mark();
-	    m.startTime = lexer.convertToInt(tok);
-	    if (m.startTime <= lastTime) {
-		lexer.reportError("Mark times are not sorted");
-	    } else if (m.startTime == Integer.MAX_VALUE) {
-		lexer.reportError("Integer.MAX_VALUE is an illegal mark time");
-	    } else {
-		lastTime = m.startTime;
-	    }
-	    lexer.parseExpected("ms");
-	    tok = lexer.getString();
-	    if ("java_constant".equals(tok)) {
-		m.javaConstantName = lexer.getString();
-		tok = lexer.getString();
-	    }
-	    if ("on_entry".equals(tok)) {
-		m.onEntryCommands = lexer.getParser().parseCommands();
-		tok = lexer.getString();
-	    }
-	    marks.add(m);
-	}
+        lexer.parseExpected("{");
+        String tok = lexer.getString();
+        int lastTime = Integer.MIN_VALUE;
+        for (;;) {
+            if ("}".equals(tok)) {
+                break;
+            }
+            Mark m = new Mark();
+            m.startTime = lexer.convertToInt(tok);
+            if (m.startTime <= lastTime) {
+                lexer.reportError("Mark times are not sorted");
+            } else if (m.startTime == Integer.MAX_VALUE) {
+                lexer.reportError("Integer.MAX_VALUE is an illegal mark time");
+            } else {
+                lastTime = m.startTime;
+            }
+            lexer.parseExpected("ms");
+            tok = lexer.getString();
+            if ("java_constant".equals(tok)) {
+                m.javaConstantName = lexer.getString();
+                tok = lexer.getString();
+            }
+            if ("on_entry".equals(tok)) {
+                m.onEntryCommands = lexer.getParser().parseCommands();
+                tok = lexer.getString();
+            }
+            marks.add(m);
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public Modifier getModifier(Show show, String typeName,
-				String name, Lexer lexer) 
-		throws IOException
+                                String name, Lexer lexer) 
+                throws IOException
     {   
-	return null;
+        return null;
     }
 
     /**
@@ -233,7 +233,7 @@ public class MediaExtensionParser implements ExtensionParser {
     public Command getCommand(Show show, String typeName, Lexer lexer)
                            throws IOException
     {   
-	return null;
+        return null;
     }
 
 }

@@ -103,15 +103,15 @@ public class DataAccessXlet implements Xlet {
            ArrayList results = new ArrayList();
            String adaPath = adaRoot + sep + discOrgId + sep + appId;  
            String budaPath = buRoot + sep + discOrgId + sep + discId;
-	   try {
-	       results.add("Xlet context class:  " + context.getClass().getName());
-	       results.add("");
-	       // Try to figure out whose middleware this is, so we know
-	       // whom to contact.
-	   } catch (Throwable t) {
-	   }
+           try {
+               results.add("Xlet context class:  " + context.getClass().getName());
+               results.add("");
+               // Try to figure out whose middleware this is, so we know
+               // whom to contact.
+           } catch (Throwable t) {
+           }
 
-	   String result;
+           String result;
 
            results.add("discOrgId = " + discOrgId + ", xletOrgId = "+xletOrgId);
            
@@ -120,30 +120,30 @@ public class DataAccessXlet implements Xlet {
            result = test.tryWrite(adaPath, "test2.txt");
            results.add("orgId !=, ADA  disc's org write : " + result);
            result = test.tryRead(budaPath);
-	   boolean dodgersBUDA = "Y".equals(result);
+           boolean dodgersBUDA = "Y".equals(result);
            results.add("orgId !=, BUDA disc's org read  : " + result);
            result = test.tryWrite(budaPath, "test2.txt");
-	   dodgersBUDA = dodgersBUDA && "Y".equals(result);
+           dodgersBUDA = dodgersBUDA && "Y".equals(result);
            results.add("orgId !=, BUDA disc's org write : " + result);
 
            String adaPath2 = adaRoot + sep + xletOrgId + sep + appId;
            String budaPath2 = buRoot + sep + xletOrgId + sep + discId;
             
            result = test.tryRead(adaPath2);
-	   boolean giantsADA = "Y".equals(result);
+           boolean giantsADA = "Y".equals(result);
            results.add("orgId !=, ADA  xlet's org read  : " + result);
            result = test.tryWrite(adaPath2, "test2.txt");
-	   giantsADA = giantsADA && "Y".equals(result);
+           giantsADA = giantsADA && "Y".equals(result);
            results.add("orgId !=, ADA  xlet's org write : " + result);
            result = test.tryRead(budaPath2);
            results.add("orgId !=, BUDA xlet's org read  : " + result);
            result = test.tryWrite(budaPath2, "test2.txt");
            results.add("orgId !=, BUDA xlet's org write : " + result);
-	   results.add("");
-	   results.add(" ADA Giants  test:  " + (giantsADA ? "PASS" : "FAIL"));
-	   result = dodgersBUDA ? "PASS" 
-	   		: "FAIL - see 3-2 s. 11.5.3, Disc_Organization_ID" ;
-	   results.add("BUDA Dodgers test:  " + result);
+           results.add("");
+           results.add(" ADA Giants  test:  " + (giantsADA ? "PASS" : "FAIL"));
+           result = dodgersBUDA ? "PASS" 
+                        : "FAIL - see 3-2 s. 11.5.3, Disc_Organization_ID" ;
+           results.add("BUDA Dodgers test:  " + result);
 
            String[] lines = (String[]) results.toArray(new String[results.size()]);
            textComponent.setText(lines);        

@@ -92,24 +92,24 @@ public class ImageSprite extends Sprite {
      * must be initialized using one of the initXXX calls.
      **/
     public ImageSprite(Image image) {
-	this.image = image;
-	imageW = image.getWidth(null);
-	imageH = image.getHeight(null);
+        this.image = image;
+        imageW = image.getWidth(null);
+        imageH = image.getHeight(null);
     }
 
     public int getWidth() {
-	return imageW;
+        return imageW;
     }
 
     public int getHeight() {
-	return imageH;
+        return imageH;
     }
 
     public void getBounds(Rectangle r) {
-	r.x = x;
-	r.y = y;
-	r.width = imageW;
-	r.height = imageH;
+        r.x = x;
+        r.y = y;
+        r.width = imageW;
+        r.height = imageH;
     }
 
     /**
@@ -117,9 +117,9 @@ public class ImageSprite extends Sprite {
      * rectangle.
      **/
     public void initPositionCentered(int xs, int ys, int width, int height) {
-	x = xs + (width - imageW) / 2;
-	y = ys + (height - imageH) / 2;
-	this.imageOn = true;
+        x = xs + (width - imageW) / 2;
+        y = ys + (height - imageH) / 2;
+        this.imageOn = true;
     }
 
     /**
@@ -127,18 +127,18 @@ public class ImageSprite extends Sprite {
      * upper left hand corner.
      **/
     public void initPosition(int x, int y) {
-	this.x = x;
-	this.y = y;
-	this.imageOn = true;
+        this.x = x;
+        this.y = y;
+        this.imageOn = true;
     }
 
     /**
      * Initialize our "position" as invisible.
      **/
     public void initImageOff() {
-	this.imageOn = false;
-	this.x = 0;
-	this.y = 0;
+        this.imageOn = false;
+        this.x = 0;
+        this.y = 0;
     }
 
     /**
@@ -147,9 +147,9 @@ public class ImageSprite extends Sprite {
      * methods.
      **/
     public void nextFrame() {
-	lastX = x;
-	lastY = y;
-	lastImageOn = imageOn;
+        lastX = x;
+        lastY = y;
+        lastImageOn = imageOn;
     }
 
     /**
@@ -158,12 +158,12 @@ public class ImageSprite extends Sprite {
      * methods.
      **/
     public void nextFrame(int newX, int newY) {
-	lastX = x;
-	lastY = y;
-	x = newX;
-	y = newY;
-	lastImageOn = imageOn;
-	imageOn = true;
+        lastX = x;
+        lastY = y;
+        x = newX;
+        y = newY;
+        lastImageOn = imageOn;
+        imageOn = true;
     }
 
     /**
@@ -172,24 +172,24 @@ public class ImageSprite extends Sprite {
      * methods.
      **/
     public void nextFrame(int newX, int newY, Image newImage) {
-	lastX = x;
-	lastY = y;
-	x = newX;
-	y = newY;
-	lastImageOn = imageOn;
-	imageOn = true;
-	if (newImage == image) {
-	    return;
-	}
-	if (Debug.ASSERT) {
-	    if (newImage.getWidth(null) != imageW
-	        || newImage.getHeight(null) != imageH)
-	    {
-		Debug.assertFail();
-	    }
-	}
-	image = newImage;
-	imageReplaced = true;
+        lastX = x;
+        lastY = y;
+        x = newX;
+        y = newY;
+        lastImageOn = imageOn;
+        imageOn = true;
+        if (newImage == image) {
+            return;
+        }
+        if (Debug.ASSERT) {
+            if (newImage.getWidth(null) != imageW
+                || newImage.getHeight(null) != imageH)
+            {
+                Debug.assertFail();
+            }
+        }
+        image = newImage;
+        imageReplaced = true;
     }
 
     /**
@@ -198,10 +198,10 @@ public class ImageSprite extends Sprite {
      * will be erased if needed.
      **/
     public void nextFrameOff() {
-	lastX = x;
-	lastY = y;
-	lastImageOn = imageOn;
-	imageOn = false;
+        lastX = x;
+        lastY = y;
+        lastImageOn = imageOn;
+        imageOn = false;
     }
 
     /**
@@ -209,83 +209,83 @@ public class ImageSprite extends Sprite {
      * image.
      **/
     public void nextFrame(Image newImage) {
-	lastX = x;
-	lastY = y;
-	lastImageOn = imageOn;
-	imageOn = true;
-	if (newImage == image) {
-	    return;
-	}
-	if (Debug.ASSERT) {
-	    if (newImage.getWidth(null) != imageW
-	        || newImage.getHeight(null) != imageH)
-	    {
-		Debug.assertFail();
-	    }
-	}
-	image = newImage;
-	imageReplaced = true;
+        lastX = x;
+        lastY = y;
+        lastImageOn = imageOn;
+        imageOn = true;
+        if (newImage == image) {
+            return;
+        }
+        if (Debug.ASSERT) {
+            if (newImage.getWidth(null) != imageW
+                || newImage.getHeight(null) != imageH)
+            {
+                Debug.assertFail();
+            }
+        }
+        image = newImage;
+        imageReplaced = true;
     }
 
 
     /**
      * Called to paint this sprite
      *
-     * @param g		The place to paint the sprite
-     * @param paintAll	true if we should paint everything, even if it's
-     *			identical to what was painted in the last frame
+     * @param g         The place to paint the sprite
+     * @param paintAll  true if we should paint everything, even if it's
+     *                  identical to what was painted in the last frame
      * @param animator  The animator that's animating us, or null if
-     *			this is just a call from repaint.
+     *                  this is just a call from repaint.
      **/
     public void paintFrame(Graphics2D g, boolean paintAll, Animator animator) {
-	boolean moved = lastX != x || lastY != y || imageOn != lastImageOn;
-	if (imageReplaced) {
-	    moved = true;
-	    imageReplaced = false;
-	}
-	if ((!imageOn) && (!lastImageOn)) {
-	    return;
-	} else if (moved && animator != null && animator.needsErase()) {
-	    Rectangle r = animator.getScratchRectangle();
-	    r.width = imageW;
-	    r.height = imageH;
-	    if (imageOn) {
-		r.x = x;
-		r.y = y;
-		if (lastImageOn) {
-		    r.add(lastX, lastY);
-		    r.add(lastX + imageW, lastY + imageH);
-		}
-	    } else {
-		r.x = lastX;
-		r.y = lastY;
-	    }
-	    DVBBufferedImage buf = animator.getDoubleBuffer(r.width, r.height);
-	    Graphics2D bufG;
-	    if (buf == null) {
-		g.setColor(ImageUtil.colorTransparent);
-		g.fillRect(r.x, r.y, r.width, r.height);
-		if (!imageOn) {
-		    g.drawImage(image, x, y, null);
-		}
-	    } else {
-		bufG = animator.getDoubleBufferGraphics();
-		bufG.setColor(ImageUtil.colorTransparent);
-		bufG.fillRect(0, 0, r.width, r.height);
-		    // That fillRect is somewhat inefficient:  Instead,
-		    // we could do two fillRect calls of just the part the
-		    // image won't be on.
-		if (imageOn) {
-		    bufG.drawImage(image, (x <= lastX ? 0 : x - lastX),
-					  (y <= lastY ? 0 : y - lastY), null);
-		}
-		g.drawImage(buf, r.x, r.y, r.x+r.width, r.y+r.height,
-				  0,  0, r.width,    r.height, null);
-	    }
-	} else if (moved || paintAll) {
-	    if (imageOn) {
-		g.drawImage(image, x, y, null);
-	    }
-	}
+        boolean moved = lastX != x || lastY != y || imageOn != lastImageOn;
+        if (imageReplaced) {
+            moved = true;
+            imageReplaced = false;
+        }
+        if ((!imageOn) && (!lastImageOn)) {
+            return;
+        } else if (moved && animator != null && animator.needsErase()) {
+            Rectangle r = animator.getScratchRectangle();
+            r.width = imageW;
+            r.height = imageH;
+            if (imageOn) {
+                r.x = x;
+                r.y = y;
+                if (lastImageOn) {
+                    r.add(lastX, lastY);
+                    r.add(lastX + imageW, lastY + imageH);
+                }
+            } else {
+                r.x = lastX;
+                r.y = lastY;
+            }
+            DVBBufferedImage buf = animator.getDoubleBuffer(r.width, r.height);
+            Graphics2D bufG;
+            if (buf == null) {
+                g.setColor(ImageUtil.colorTransparent);
+                g.fillRect(r.x, r.y, r.width, r.height);
+                if (!imageOn) {
+                    g.drawImage(image, x, y, null);
+                }
+            } else {
+                bufG = animator.getDoubleBufferGraphics();
+                bufG.setColor(ImageUtil.colorTransparent);
+                bufG.fillRect(0, 0, r.width, r.height);
+                    // That fillRect is somewhat inefficient:  Instead,
+                    // we could do two fillRect calls of just the part the
+                    // image won't be on.
+                if (imageOn) {
+                    bufG.drawImage(image, (x <= lastX ? 0 : x - lastX),
+                                          (y <= lastY ? 0 : y - lastY), null);
+                }
+                g.drawImage(buf, r.x, r.y, r.x+r.width, r.y+r.height,
+                                  0,  0, r.width,    r.height, null);
+            }
+        } else if (moved || paintAll) {
+            if (imageOn) {
+                g.drawImage(image, x, y, null);
+            }
+        }
     }
 }

@@ -89,7 +89,7 @@ public class DirectDrawAnimator extends Animator {
     }
 
     public Rectangle getPosition() {
-	return position;
+        return position;
     }
 
     /**
@@ -97,39 +97,39 @@ public class DirectDrawAnimator extends Animator {
      * given frame.
      **/
     public synchronized void initAtFrame(int frame, Container component, 
-    					 Rectangle position) 
+                                         Rectangle position) 
     {
-	this.component = component;
-	this.position = position;
-	this.firstFrame = true;
-	createNewBuffer(256, 256);
-		// Pick a big enough default size so that growth
-		// is unlikley
-	componentG = (Graphics2D) component.getGraphics();
-	componentG.translate(position.x, position.y);
-	componentG.setClip(0, 0, position.width, position.height);
-	componentG.setComposite(AlphaComposite.Src);
-	this.startFrame = frame;
-	this.startTime = System.currentTimeMillis();
+        this.component = component;
+        this.position = position;
+        this.firstFrame = true;
+        createNewBuffer(256, 256);
+                // Pick a big enough default size so that growth
+                // is unlikley
+        componentG = (Graphics2D) component.getGraphics();
+        componentG.translate(position.x, position.y);
+        componentG.setClip(0, 0, position.width, position.height);
+        componentG.setComposite(AlphaComposite.Src);
+        this.startFrame = frame;
+        this.startTime = System.currentTimeMillis();
     }
 
     private synchronized void createNewBuffer(int width, int height) {
-	if (buffer != null) {
-	    buffer.dispose();
-	}
-	buffer = new DVBBufferedImage(width, height);
-	Object g = buffer.createGraphics();
-	bufferG = (Graphics2D) g;
-	bufferG.setComposite(AlphaComposite.Src);
+        if (buffer != null) {
+            buffer.dispose();
+        }
+        buffer = new DVBBufferedImage(width, height);
+        Object g = buffer.createGraphics();
+        bufferG = (Graphics2D) g;
+        bufferG.setComposite(AlphaComposite.Src);
     }
 
     /**
      * See superclass definition.
      **/
     public void destroy() {
-	if (buffer != null) {
-	    buffer.dispose();
-	}
+        if (buffer != null) {
+            buffer.dispose();
+        }
     }
 
     /**
@@ -137,16 +137,16 @@ public class DirectDrawAnimator extends Animator {
      * for this style of animation, return null.
      **/
     public synchronized DVBBufferedImage getDoubleBuffer(int width, int height) {
-	if (width > buffer.getWidth() || height > buffer.getHeight()) {
-	    if (buffer.getWidth() > width) {
-		width = buffer.getWidth();
-	    }
-	    if (buffer.getHeight() > height) {
-		height = buffer.getHeight();
-	    }
-	    createNewBuffer(width, height);
-	}
-	return buffer;
+        if (width > buffer.getWidth() || height > buffer.getHeight()) {
+            if (buffer.getWidth() > width) {
+                width = buffer.getWidth();
+            }
+            if (buffer.getHeight() > height) {
+                height = buffer.getHeight();
+            }
+            createNewBuffer(width, height);
+        }
+        return buffer;
     }
 
     /**
@@ -156,44 +156,44 @@ public class DirectDrawAnimator extends Animator {
      * mode of the graphics will be set to AlphaComposite.Src.
      **/
     public Graphics2D getDoubleBufferGraphics() {
-	return bufferG;
+        return bufferG;
     }
 
     /**
      * Return true if this animator needs the sprites to erase themselves.
      **/
     public boolean needsErase() {
-	return true;
+        return true;
     }
 
     /**
      * Called by the main loop once per frame.
      **/
     public void animateGame(int frame, Game game) throws InterruptedException {
-	if (Debug.LEVEL > 0 && frame % 100 == 0) {
-	    Debug.println("Frame " + (frame - startFrame) + ", " 
-	    		    + framesDropped + " frames dropped.");
-	}
-	long now = System.currentTimeMillis();
-	long fTime = ((frame - startFrame) * 1000L) / 24L + startTime;
-	if (now < fTime) {	// We're ahead
-	    Thread.sleep(fTime - now);
-	} else {
-	    long nextF = ((frame + 1 - startFrame) * 1000L) / 24L + startTime;
-	    if (now >= nextF) {
-		framesDropped++;
-		return;
-	    }
-	}
-	if (firstFrame) {
-	    componentG.setColor(ImageUtil.colorTransparent);
-	    componentG.fillRect(0, 0, position.width, position.height);
-	}
-	synchronized(game) {
-	    game.advanceToFrame(frame);
-	    game.paintFrame(componentG, firstFrame, this);
-	}
-	Toolkit.getDefaultToolkit().sync();
-	firstFrame = false;
+        if (Debug.LEVEL > 0 && frame % 100 == 0) {
+            Debug.println("Frame " + (frame - startFrame) + ", " 
+                            + framesDropped + " frames dropped.");
+        }
+        long now = System.currentTimeMillis();
+        long fTime = ((frame - startFrame) * 1000L) / 24L + startTime;
+        if (now < fTime) {      // We're ahead
+            Thread.sleep(fTime - now);
+        } else {
+            long nextF = ((frame + 1 - startFrame) * 1000L) / 24L + startTime;
+            if (now >= nextF) {
+                framesDropped++;
+                return;
+            }
+        }
+        if (firstFrame) {
+            componentG.setColor(ImageUtil.colorTransparent);
+            componentG.fillRect(0, 0, position.width, position.height);
+        }
+        synchronized(game) {
+            game.advanceToFrame(frame);
+            game.paintFrame(componentG, firstFrame, this);
+        }
+        Toolkit.getDefaultToolkit().sync();
+        firstFrame = false;
     }
 }

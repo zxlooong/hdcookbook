@@ -76,7 +76,7 @@ public class TurtleTrooper {
     private ImageSprite sprite;
     private Rectangle ourBounds = new Rectangle();
     private boolean startBlam = false;
-    private int blamFramesLeft = -1;	// -1 means not blamming
+    private int blamFramesLeft = -1;    // -1 means not blamming
     
     private int xloc;
     private int yloc = 240;
@@ -84,37 +84,37 @@ public class TurtleTrooper {
     private boolean active = true;
     
     public TurtleTrooper(int x, Image turtleTrooperImg, 
-    			 Image turtleTrooperBlamImg)
+                         Image turtleTrooperBlamImg)
     {
         this.turtleTrooperImg = turtleTrooperImg; 
         this.turtleTrooperBlamImg = turtleTrooperBlamImg;
         this.xloc = x;
-	this.sprite = new ImageSprite(turtleTrooperImg);
-	this.sprite.initPosition(this.xloc, this.yloc);
-	this.sprite.getBounds(ourBounds);
+        this.sprite = new ImageSprite(turtleTrooperImg);
+        this.sprite.initPosition(this.xloc, this.yloc);
+        this.sprite.getBounds(ourBounds);
     }
 
     /**
      * Figures out the state of this trooper for the given frame.
      **/
     public void nextFrame(int numFrames) {
-	if (startBlam) {
-	    startBlam = false;
-	    blamFramesLeft = 10;
-	    sprite.nextFrame(turtleTrooperBlamImg);
-	} else if (blamFramesLeft >= 0) {
-	    blamFramesLeft -= numFrames;
-	    if (blamFramesLeft <= 0) {
-		blamFramesLeft = -1;
-		sprite.nextFrameOff();
-	    } else {
-		sprite.nextFrame(turtleTrooperBlamImg);
-	    }
-	} else if (active) {
-	    sprite.nextFrame(turtleTrooperImg);
-	} else {
-	    sprite.nextFrameOff();
-	}
+        if (startBlam) {
+            startBlam = false;
+            blamFramesLeft = 10;
+            sprite.nextFrame(turtleTrooperBlamImg);
+        } else if (blamFramesLeft >= 0) {
+            blamFramesLeft -= numFrames;
+            if (blamFramesLeft <= 0) {
+                blamFramesLeft = -1;
+                sprite.nextFrameOff();
+            } else {
+                sprite.nextFrame(turtleTrooperBlamImg);
+            }
+        } else if (active) {
+            sprite.nextFrame(turtleTrooperImg);
+        } else {
+            sprite.nextFrameOff();
+        }
     }
 
     /**
@@ -122,14 +122,14 @@ public class TurtleTrooper {
      * exploding trooper is visible.
      **/
     public boolean isVisible() {
-	return active || blamFramesLeft >= 0;
+        return active || blamFramesLeft >= 0;
     }
 
     /** 
      * Paint the trooper's current state.
      **/
     public void paintFrame(Graphics2D g, boolean paintAll, Animator animator) {
-	sprite.paintFrame(g, paintAll, animator);
+        sprite.paintFrame(g, paintAll, animator);
     }
 
     /** 
@@ -137,13 +137,13 @@ public class TurtleTrooper {
      * passed in as hitRect.
      **/
     public boolean hitBy(Rectangle hitRect) {
-	if (active && ourBounds.intersects(hitRect)) {
-	    if (Debug.LEVEL > 0) {
-		Debug.println("Trooper hit!");
-	    }
-	    return true;
-	}
-	return false;
+        if (active && ourBounds.intersects(hitRect)) {
+            if (Debug.LEVEL > 0) {
+                Debug.println("Trooper hit!");
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -151,16 +151,16 @@ public class TurtleTrooper {
      * frame.
      **/
     public void startBlamWithNextFrame() {
-	active = false;
-	startBlam = true;
+        active = false;
+        startBlam = true;
     }
 
     /**
      * Tells a dead trooper that he should wake up with the next frame.
      **/
     public void awakenWithNextFrame() {
-	active = true;
-	startBlam = false;
-	blamFramesLeft = -1;
+        active = true;
+        startBlam = false;
+        blamFramesLeft = -1;
     }
 }

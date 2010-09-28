@@ -75,7 +75,7 @@ public class DriverXlet implements Xlet, Runnable, AppStateChangeEventListener {
     public final static int NUM_TESTS = 9;
     public final static int NUM_ITERATIONS = 99;    // Make it odd, please
     private Thread mainThread = new Thread(this);
-    	// Set null on destroy; synchronized on this
+        // Set null on destroy; synchronized on this
     private boolean started = false;
     private HScene scene;
     private LwText textC;
@@ -86,146 +86,146 @@ public class DriverXlet implements Xlet, Runnable, AppStateChangeEventListener {
     private Graphics sceneGraphics;
 
     public void initXlet(XletContext xc) throws XletStateChangeException {
-	scene = HSceneFactory.getInstance().getDefaultHScene();
-	results[nextLine++] = "   ***  Classloading Performance  ***";
-	for (int i = nextLine; i < results.length; i++) {
-	    results[i] = "";
-	}
-	textC = new LwText(results, Color.white, Color.black);
-	scene.add(textC);
-	scene.setBounds(100, 100, 1720, 880);
-	textC.setSize(1720, 880);
-	scene.setVisible(true);
-	scene.validate();
-	scene.repaint();
-	sceneGraphics = scene.getGraphics();
-	sceneGraphics.setFont(new Font("SansSerif", Font.PLAIN, 48));
+        scene = HSceneFactory.getInstance().getDefaultHScene();
+        results[nextLine++] = "   ***  Classloading Performance  ***";
+        for (int i = nextLine; i < results.length; i++) {
+            results[i] = "";
+        }
+        textC = new LwText(results, Color.white, Color.black);
+        scene.add(textC);
+        scene.setBounds(100, 100, 1720, 880);
+        textC.setSize(1720, 880);
+        scene.setVisible(true);
+        scene.validate();
+        scene.repaint();
+        sceneGraphics = scene.getGraphics();
+        sceneGraphics.setFont(new Font("SansSerif", Font.PLAIN, 48));
     }
 
     public void pauseXlet() {
     }
 
     public void startXlet() throws XletStateChangeException {
-	if (!started) {
-	    started = true;
-	    mainThread.start();
-	}
+        if (!started) {
+            started = true;
+            mainThread.start();
+        }
     }
 
     public void destroyXlet(boolean arg0) throws XletStateChangeException {
-	try {
-	    synchronized(this) {
-		while (mainThread != null) {
-		    mainThread.interrupt();
-		    try {
-			wait();
-		    } catch (InterruptedException ex) {
-			return;
-		    }
-		}
-	    }
-	} finally {
-	    scene.remove(textC);
-	}
+        try {
+            synchronized(this) {
+                while (mainThread != null) {
+                    mainThread.interrupt();
+                    try {
+                        wait();
+                    } catch (InterruptedException ex) {
+                        return;
+                    }
+                }
+            }
+        } finally {
+            scene.remove(textC);
+        }
     }
 
     public void run() {
-	try {
-	    results[nextLine++] = "Normal GC.  Mean, median, standard deviation, in ms:";
-	    //
-	    // First, run through the xlets so that we initialize the
-	    // xlet launching subsystem.  Not doing this caused a
-	    // very high standard deviation for the first test only,
-	    // so this is an important step for good results.
-	    //
-	    for (int i = 0; i < NUM_TESTS; i++) {
-		runTest(i, -1, false);
-	    }
-	    runTests(false);
-	    results[nextLine++] = "GC time suppressed by running GC before each test:";
-	    runTests(true);
-	    textC.repaint();
-	} catch (InterruptedException ex) {
-	    //  discarded
-	} finally {
-	    synchronized(this) {
-		mainThread = null;
-		notifyAll();
-	    }
-	}
+        try {
+            results[nextLine++] = "Normal GC.  Mean, median, standard deviation, in ms:";
+            //
+            // First, run through the xlets so that we initialize the
+            // xlet launching subsystem.  Not doing this caused a
+            // very high standard deviation for the first test only,
+            // so this is an important step for good results.
+            //
+            for (int i = 0; i < NUM_TESTS; i++) {
+                runTest(i, -1, false);
+            }
+            runTests(false);
+            results[nextLine++] = "GC time suppressed by running GC before each test:";
+            runTests(true);
+            textC.repaint();
+        } catch (InterruptedException ex) {
+            //  discarded
+        } finally {
+            synchronized(this) {
+                mainThread = null;
+                notifyAll();
+            }
+        }
     }
 
     private void runTests(boolean gcBeforeTest) throws InterruptedException {
-	for (int i = 0; i < NUM_TESTS; i++) {
-	    for (int j = 0; j < NUM_ITERATIONS; j++) {
-		runTest(i, j, gcBeforeTest);
-		times[j] = runTest(i, j, gcBeforeTest);
-	    }
+        for (int i = 0; i < NUM_TESTS; i++) {
+            for (int j = 0; j < NUM_ITERATIONS; j++) {
+                runTest(i, j, gcBeforeTest);
+                times[j] = runTest(i, j, gcBeforeTest);
+            }
 
-	    double mean = 0.0;
-	    for (int j = 0; j < NUM_ITERATIONS; j++) {
-		mean += times[j];
-	    }
-	    mean /= NUM_ITERATIONS;
-	    Arrays.sort(times);
-	    int median = times[NUM_ITERATIONS / 2];  // NUM_ITERATIONS is odd
-	    double deviation = 0;
-	    for (int j = 0; j < NUM_ITERATIONS; j++) {
-		double d = mean - times[j];
-		deviation += d * d;
-	    }
-	    deviation = Math.sqrt(deviation / NUM_ITERATIONS);
-	    results[nextLine++] = "    " + (i+1) + ":  " + mean + "   " + median
-	    			  + "    " + deviation;
-	}
+            double mean = 0.0;
+            for (int j = 0; j < NUM_ITERATIONS; j++) {
+                mean += times[j];
+            }
+            mean /= NUM_ITERATIONS;
+            Arrays.sort(times);
+            int median = times[NUM_ITERATIONS / 2];  // NUM_ITERATIONS is odd
+            double deviation = 0;
+            for (int j = 0; j < NUM_ITERATIONS; j++) {
+                double d = mean - times[j];
+                deviation += d * d;
+            }
+            deviation = Math.sqrt(deviation / NUM_ITERATIONS);
+            results[nextLine++] = "    " + (i+1) + ":  " + mean + "   " + median
+                                  + "    " + deviation;
+        }
     }
    
     //
     // Returns the number of milliseconds the test takes
     //
     private int runTest(int testNum, int iter, boolean gcBeforeTest) 
-    		throws InterruptedException
+                throws InterruptedException
     {
-	AppProxy app = getAppProxy(0x7fff0001, 0x4001 + testNum);
-	app.addAppStateChangeEventListener(this);
-	testRunning = true;
-	if (gcBeforeTest) {
-	    System.gc();
-	}
-	long startTime = System.currentTimeMillis();
-	app.start();
-	synchronized(this) {
-	    while (testRunning) {
-		wait();
-	    }
-	}
-	int result = (int) (System.currentTimeMillis() - startTime);
-	sceneGraphics.setColor(Color.black);
-	sceneGraphics.fillRect(300, 200, 400, 100);
-	sceneGraphics.setColor(Color.green);
-	sceneGraphics.drawString("" + (testNum + 1) + ", " + (iter+1) + ":  " 
-				    + result,
-				 310, 280);
-	Toolkit.getDefaultToolkit().sync();
-	app.removeAppStateChangeEventListener(this);
-	return result;
+        AppProxy app = getAppProxy(0x7fff0001, 0x4001 + testNum);
+        app.addAppStateChangeEventListener(this);
+        testRunning = true;
+        if (gcBeforeTest) {
+            System.gc();
+        }
+        long startTime = System.currentTimeMillis();
+        app.start();
+        synchronized(this) {
+            while (testRunning) {
+                wait();
+            }
+        }
+        int result = (int) (System.currentTimeMillis() - startTime);
+        sceneGraphics.setColor(Color.black);
+        sceneGraphics.fillRect(300, 200, 400, 100);
+        sceneGraphics.setColor(Color.green);
+        sceneGraphics.drawString("" + (testNum + 1) + ", " + (iter+1) + ":  " 
+                                    + result,
+                                 310, 280);
+        Toolkit.getDefaultToolkit().sync();
+        app.removeAppStateChangeEventListener(this);
+        return result;
     }
 
     //
     // Defined by AppStateChangeEventListener
     //
     public void stateChange(AppStateChangeEvent evt) {
-	if (evt.getToState() == AppProxy.DESTROYED) {
-	    synchronized(this) {
-		testRunning = false;
-		notifyAll();
-	    }
-	}
+        if (evt.getToState() == AppProxy.DESTROYED) {
+            synchronized(this) {
+                testRunning = false;
+                notifyAll();
+            }
+        }
     }
     
     private AppProxy getAppProxy(int orgID, int appID) {
-	AppsDatabase db = AppsDatabase.getAppsDatabase();
-	return db.getAppProxy(new AppID(orgID, appID));
+        AppsDatabase db = AppsDatabase.getAppsDatabase();
+        return db.getAppProxy(new AppID(orgID, appID));
     }    
 }
 

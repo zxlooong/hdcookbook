@@ -142,13 +142,13 @@ public class Profile {
      * @param host The hostname or the IP address of the remote computer
      */
     public static void initProfiler(int port, String host) {
-	if (!Debug.PROFILE) {
-	    return;
-	}
-	if (Debug.LEVEL > 0) {
-	    Debug.println("***  Profiling data being sent to host " + host
-	    	 	  + " port " + port);
-	}
+        if (!Debug.PROFILE) {
+            return;
+        }
+        if (Debug.LEVEL > 0) {
+            Debug.println("***  Profiling data being sent to host " + host
+                          + " port " + port);
+        }
         InetAddress addr = null;
         try {
             // get the inet address from the string
@@ -157,10 +157,10 @@ public class Profile {
             packet = new DatagramPacket(stopBuf, stopBuf.length,
                                         addr, port);
         } catch (IOException e) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(e);
-		socket = null;
-	    }
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(e);
+                socket = null;
+            }
         }
     }
 
@@ -171,14 +171,14 @@ public class Profile {
      * profiler to do things like time xlet startup time.
      **/
     public static void initTokenStart(int tokenStart) {
-	if (!Debug.PROFILE) {
-	    return;
-	}
-	if (Debug.ASSERT && tokenStart < token) {
-	    Debug.assertFail("Illegal token start value " + tokenStart
-	    		     + " < " + token);
-	}
-	token = tokenStart;
+        if (!Debug.PROFILE) {
+            return;
+        }
+        if (Debug.ASSERT && tokenStart < token) {
+            Debug.assertFail("Illegal token start value " + tokenStart
+                             + " < " + token);
+        }
+        token = tokenStart;
     }
 
     /**
@@ -199,9 +199,9 @@ public class Profile {
      * @return A UTF-8 encoded byte array representing the description.
      */
     public static byte[] makeProfileTimer(String description) {
-	if (!Debug.PROFILE) {
-	    return null;
-	}
+        if (!Debug.PROFILE) {
+            return null;
+        }
         byte[] utf8Buf = null;
         try {
             utf8Buf = description.getBytes("UTF-8");
@@ -232,7 +232,7 @@ public class Profile {
      *     }
      *
      *     <...>
-     *	   
+     *     
      *        if (Debug.PROFILE) {
      *             PROFILE_MESSAGE_1[PROFILE_MESSAGE_1.length - 1]
      *                 = (byte) count;
@@ -243,9 +243,9 @@ public class Profile {
      * @return A UTF-8 encoded byte array for the message
      */
     public static byte[] makeMessage(String message) {
-	if (!Debug.PROFILE) {
-	    return null;
-	}
+        if (!Debug.PROFILE) {
+            return null;
+        }
         byte[] utf8Buf = null;
         try {
             utf8Buf = message.getBytes("UTF-8");
@@ -263,50 +263,50 @@ public class Profile {
      * Indicates profiling is over, releases the network resources.
      */
     public static synchronized void doneProfiling() {
-	if (!Debug.PROFILE) {
-	    return;
-	}
-	if (socket != null) {
-	    socket.close();
-	}
-	socket = null;
+        if (!Debug.PROFILE) {
+            return;
+        }
+        if (socket != null) {
+            socket.close();
+        }
+        socket = null;
     }
 
     /**
      * Signals starting the timer on the remote computer.
      *
      * @param startBuf  Buffer holding the description of the 
-     *			block of code that is time.  This byte array
-     *			should be obtained from makeProfileTimer().
+     *                  block of code that is time.  This byte array
+     *                  should be obtained from makeProfileTimer().
      *
-     * @param threadID	Identifier of the "thread" this execution occurs on.
-     *			See the class comments about "thread," and why it's a
-     *			byte.
-     *			
+     * @param threadID  Identifier of the "thread" this execution occurs on.
+     *                  See the class comments about "thread," and why it's a
+     *                  byte.
+     *                  
      * @return Returns the token for the task that is timed
      *
      * @see #makeProfileTimer(String)
      * @see Profile
      */
     public static synchronized int startTimer(byte[] startBuf, byte threadID) {
-	if (!Debug.PROFILE) {
-	    return 0;
-	}
+        if (!Debug.PROFILE) {
+            return 0;
+        }
         token++;
-	DatagramSocket sock = socket;
-	if (sock != null) {
-	    startBuf[0] = (byte) TIMER_START;
-	    startBuf[1] = (byte) ((token >> 24) & 0xff);
-	    startBuf[2] = (byte) ((token >> 16) & 0xff);
-	    startBuf[3] = (byte) ((token >> 8) & 0xff);
-	    startBuf[4] = (byte) (token & 0xff);
-	    startBuf[5] = threadID;
-	    try {
-		packet.setData(startBuf);
-		sock.send(packet);
-	    } catch (IOException e) {
-		Debug.printStackTrace(e);
-	    }
+        DatagramSocket sock = socket;
+        if (sock != null) {
+            startBuf[0] = (byte) TIMER_START;
+            startBuf[1] = (byte) ((token >> 24) & 0xff);
+            startBuf[2] = (byte) ((token >> 16) & 0xff);
+            startBuf[3] = (byte) ((token >> 8) & 0xff);
+            startBuf[4] = (byte) (token & 0xff);
+            startBuf[5] = threadID;
+            try {
+                packet.setData(startBuf);
+                sock.send(packet);
+            } catch (IOException e) {
+                Debug.printStackTrace(e);
+            }
         }
         return token;
     }
@@ -317,22 +317,22 @@ public class Profile {
      * @param tk Token for the task that is done.
      */
     public synchronized static void stopTimer(int tk) {
-	if (!Debug.PROFILE) {
-	    return;
-	}
-	DatagramSocket sock = socket;
-	if (sock != null) {
-	    stopBuf[0] = (byte) TIMER_STOP;
-	    stopBuf[1] = (byte) ((tk >> 24) & 0xff);
-	    stopBuf[2] = (byte) ((tk >> 16) & 0xff);
-	    stopBuf[3] = (byte) ((tk >> 8) & 0xff);
-	    stopBuf[4] = (byte) (tk & 0xff);
-	    try{
-		packet.setData(stopBuf);
-		sock.send(packet);
-	    } catch (IOException e) {
-		Debug.printStackTrace(e);
-	    }
+        if (!Debug.PROFILE) {
+            return;
+        }
+        DatagramSocket sock = socket;
+        if (sock != null) {
+            stopBuf[0] = (byte) TIMER_STOP;
+            stopBuf[1] = (byte) ((tk >> 24) & 0xff);
+            stopBuf[2] = (byte) ((tk >> 16) & 0xff);
+            stopBuf[3] = (byte) ((tk >> 8) & 0xff);
+            stopBuf[4] = (byte) (tk & 0xff);
+            try{
+                packet.setData(stopBuf);
+                sock.send(packet);
+            } catch (IOException e) {
+                Debug.printStackTrace(e);
+            }
         }
     }
 
@@ -340,25 +340,25 @@ public class Profile {
      * Send a message packet
      *
      * @param buf       Buffer holding the message.
-     *			This byte array
-     *			should be obtained from makeMessage().
+     *                  This byte array
+     *                  should be obtained from makeMessage().
      *
      * @see #makeMessage(String)
      * @see Profile
      */
     public static synchronized void sendMessage(byte[] buf) {
-	if (!Debug.PROFILE) {
-	    return;
-	}
-	DatagramSocket sock = socket;
-	if (sock != null) {
-	    buf[0] = (byte) MESSAGE;
-	    try {
-		packet.setData(buf);
-		sock.send(packet);
-	    } catch (IOException e) {
-		Debug.printStackTrace(e);
-	    }
+        if (!Debug.PROFILE) {
+            return;
+        }
+        DatagramSocket sock = socket;
+        if (sock != null) {
+            buf[0] = (byte) MESSAGE;
+            try {
+                packet.setData(buf);
+                sock.send(packet);
+            } catch (IOException e) {
+                Debug.printStackTrace(e);
+            }
         }
     }
 }

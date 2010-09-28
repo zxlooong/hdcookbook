@@ -197,7 +197,7 @@ public class Debug {
      *      try {
      *          throw new RuntimeException("STACK BACKTRACE");
      *      } catch (RuntimeException ex) {
-     *		Debug.printStackTrace(ex);
+     *          Debug.printStackTrace(ex);
      *      }
      * </pre>
      **/
@@ -206,15 +206,15 @@ public class Debug {
     }
 
     static {
-	// Print an obnoxious message to stderr, to try to make sure that
-	// nobody mistakenly uses this version of Debug.java in a production
-	// disc.
-	if (LEVEL > 0) {
-	    Debug.println("== NOTE ==");
-	    Debug.println("    GRIN debug is enabled, and being sent to stderr.");
-	    Debug.println("    If this is a production disc, please disable debug messages and assertions.");
-	    Debug.println("    See the class comments of com.hdcookbook.grin.util.Debug for details.");
-	    Debug.println();
-	}
+        // Print an obnoxious message to stderr, to try to make sure that
+        // nobody mistakenly uses this version of Debug.java in a production
+        // disc.
+        if (LEVEL > 0) {
+            Debug.println("== NOTE ==");
+            Debug.println("    GRIN debug is enabled, and being sent to stderr.");
+            Debug.println("    If this is a production disc, please disable debug messages and assertions.");
+            Debug.println("    See the class comments of com.hdcookbook.grin.util.Debug for details.");
+            Debug.println();
+        }
     }
 }

@@ -67,7 +67,7 @@ import net.java.bd.tools.logger.XletLogger;
  * Need to be signed to work.
  */
 public class WriteToStorageXlet implements Xlet {
-	
+        
     //List multiLineStatus = new ArrayList();
     XletContext context;
     Font font;
@@ -76,23 +76,23 @@ public class WriteToStorageXlet implements Xlet {
     static final int WINDOW_HEIGHT = 1080;
 
     public void initXlet(XletContext context) {       
-	this.context = context;
-	   
+        this.context = context;
+           
         // initialize Logger
         XletLogger.setLogFile(System.getProperty("dvb.persistent.root")
-	       + "/" + context.getXletProperty("dvb.org.id")
-	       + "/" + context.getXletProperty("dvb.app.id") 
+               + "/" + context.getXletProperty("dvb.org.id")
+               + "/" + context.getXletProperty("dvb.app.id") 
                + "/" + "log.txt");
         
     }
     
-    public void startXlet() {	
+    public void startXlet() {   
         XletLogger.setVisible(true);
         accessPersistantStorage();
     }
     
     public void pauseXlet() {
-	XletLogger.setVisible(false);   
+        XletLogger.setVisible(false);   
     }
     
     public void destroyXlet(boolean unconditional) {
@@ -100,43 +100,43 @@ public class WriteToStorageXlet implements Xlet {
     
     public void accessPersistantStorage() {
         String root = System.getProperty("dvb.persistent.root");
-	String filename = System.getProperty("dvb.persistent.root")
-	       + "/" + context.getXletProperty("dvb.org.id")
-	       + "/" + context.getXletProperty("dvb.app.id")
-	       + "/tmp.txt";
-	
-	XletLogger.log("FileName = " + filename);
-	FileOutputStream os = null;
-	try {
+        String filename = System.getProperty("dvb.persistent.root")
+               + "/" + context.getXletProperty("dvb.org.id")
+               + "/" + context.getXletProperty("dvb.app.id")
+               + "/tmp.txt";
+        
+        XletLogger.log("FileName = " + filename);
+        FileOutputStream os = null;
+        try {
           /* BufferedWriter bw = new BufferedWriter(new FileWriter(filename));
            String writable = "Hello BD-J!";
            bw.write(writable, 0, writable.length());
            bw.close(); */
            os = new FileOutputStream(filename);
-	   for (int i = 0; i < 10; i++) {
-		os.write(i);
+           for (int i = 0; i < 10; i++) {
+                os.write(i);
            }
-	   os.close();
+           os.close();
            XletLogger.log("WRITER Test passed");
            XletLogger.log("wrote to a file:" + filename);
            File f = new File(filename);
            XletLogger.log((f.canRead() ? "true" : "false"));
-	   XletLogger.log("Test passed, accessed filesystem without SecurityException");
-	} catch (SecurityException ex) {
-		XletLogger.log("Error in writing", ex);
-	} catch (IOException ex) {
-		XletLogger.log("Error in writing", ex);
+           XletLogger.log("Test passed, accessed filesystem without SecurityException");
+        } catch (SecurityException ex) {
+                XletLogger.log("Error in writing", ex);
+        } catch (IOException ex) {
+                XletLogger.log("Error in writing", ex);
         } finally {
-	    if (os != null) {
-		try {
-		    os.close();
-		} catch (Throwable ignored) {
-		}
-	    }
-	}
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (Throwable ignored) {
+                }
+            }
+        }
     }
     
     public static void main(String[] args) {
-	    // just to fool netbeans...
+            // just to fool netbeans...
     }
 }

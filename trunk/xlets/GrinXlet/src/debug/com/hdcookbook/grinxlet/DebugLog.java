@@ -86,19 +86,19 @@ import java.util.ListIterator;
 public class DebugLog implements Runnable {
 
     private final static int LISTEN_PORT = 6000;
-    static Object LOCK = new Object();		// Also needed by XletDirector
+    static Object LOCK = new Object();          // Also needed by XletDirector
     private static int numActivations = 0;
     private static boolean destroyed = false;
 
-	// The data of the debug log.  It's package-private, because
-	// XletDirector looks directly at the data.
-    static LinkedList log = new LinkedList();	// <string>
-    static boolean atEOLN = true;		// handle \n
+        // The data of the debug log.  It's package-private, because
+        // XletDirector looks directly at the data.
+    static LinkedList log = new LinkedList();   // <string>
+    static boolean atEOLN = true;               // handle \n
     static boolean changed = false;
     static int linesRemoved = 0;  // Count of lines removed off top
     static final int MAX_DEBUG_LINES = 3000;
-    	// Assuming average 50 characters/line, that's 300K.  Remember, Java is
-	// two bytes/character.
+        // Assuming average 50 characters/line, that's 300K.  Remember, Java is
+        // two bytes/character.
 
     //
     // No public constructor
@@ -114,223 +114,223 @@ public class DebugLog implements Runnable {
      * shutdown call, telnet  connections are rendered inoperative, even
      * if startDebugListener is subsequently called.
      *
-     * @throws IllegalStateException	if the DebugLog has been shut down
+     * @throws IllegalStateException    if the DebugLog has been shut down
      **/
     public static void startDebugListener() {
-	synchronized(LOCK) {
-	    if (destroyed) {
-		throw new IllegalStateException();
-	    }
-	    numActivations++;
-	    if (numActivations > 1) {
-		return;
-	    }
-	}
-	Runnable r = new DebugLog();
-	Thread t = new Thread(r, "Debug Log Listener");
-	t.setPriority(4);
-	t.setDaemon(true);
-	t.start();
+        synchronized(LOCK) {
+            if (destroyed) {
+                throw new IllegalStateException();
+            }
+            numActivations++;
+            if (numActivations > 1) {
+                return;
+            }
+        }
+        Runnable r = new DebugLog();
+        Thread t = new Thread(r, "Debug Log Listener");
+        t.setPriority(4);
+        t.setDaemon(true);
+        t.start();
     }
 
     public void run() {
-	try {
-	    listenForDebugConnect();
-	} catch (InterruptedException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.println("Debug log listener interrupted.");
-	    }
-	} catch (IOException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-		Debug.println("Debug log listener failed.");
-	    }
-	}
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Debug log listener thread terminated.");
-	}
+        try {
+            listenForDebugConnect();
+        } catch (InterruptedException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.println("Debug log listener interrupted.");
+            }
+        } catch (IOException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+                Debug.println("Debug log listener failed.");
+            }
+        }
+        if (Debug.LEVEL > 0) {
+            Debug.println("Debug log listener thread terminated.");
+        }
     }
 
     /**
      * @see #startDebugListener()
      **/
     public static void shutdownDebugListener() {
-	synchronized(LOCK) {
-	    numActivations--;
-	    if (numActivations < 1) {
-		destroyed = true;
-		LOCK.notifyAll();
-	    }
-	}
+        synchronized(LOCK) {
+            numActivations--;
+            if (numActivations < 1) {
+                destroyed = true;
+                LOCK.notifyAll();
+            }
+        }
     }
 
     private static void listenForDebugConnect() 
-    		throws InterruptedException, IOException
+                throws InterruptedException, IOException
     {
-	ServerSocket ss = null;
-	int tries = 0;
-	while (ss == null) {
-	    synchronized(LOCK) {
-		if (destroyed) {
-		    return;
-		}
-	    }
-	    try {
-		ss = new ServerSocket(LISTEN_PORT);
-	    } catch (BindException ex) {
-		// Maybe the xlet that launched us is
-		// on port 6000.  If so, it should terminate
-		// soon and release the port, so we give it 2
-		// seconds, checking every 200ms up to 10 times.
-		if (tries > 10) {
-		    throw ex;
-		}
-		tries++;
-		synchronized (LOCK) {
-		    if (destroyed) {
-			return;
-		    }
-		    LOCK.wait(200);
-		}
-	    }
-	}
-	ss.setSoTimeout(1000);	// Check for destroy each second
-	Socket sock = null;
-	try {
-	    Debug.println("    InetAddress.getLocalHost gives " +
-					InetAddress.getLocalHost());
-	} catch (Throwable t) {
-	    Debug.println("    INetAddress.getLocalHost fails with " + t);
-	}
-	boolean messaged = false;
-	for (;;) {
-	    synchronized(LOCK) {
-		if (destroyed) {
-		    try {
-			ss.close();
-		    } catch (Throwable ignored) {
-		    }
-		    return;
-		}
-	    }
-	    try {
-		if (!messaged) {
-		    Debug.println("Debug log available, listening on port "
-		    		  + LISTEN_PORT);
-		    messaged = true;
-		}
-		sock = ss.accept();
-	    } catch (InterruptedIOException ex) {
-		// We get this when the 1 second timeout passes.
-		continue;
-	    }
-	    messaged = false;
+        ServerSocket ss = null;
+        int tries = 0;
+        while (ss == null) {
+            synchronized(LOCK) {
+                if (destroyed) {
+                    return;
+                }
+            }
+            try {
+                ss = new ServerSocket(LISTEN_PORT);
+            } catch (BindException ex) {
+                // Maybe the xlet that launched us is
+                // on port 6000.  If so, it should terminate
+                // soon and release the port, so we give it 2
+                // seconds, checking every 200ms up to 10 times.
+                if (tries > 10) {
+                    throw ex;
+                }
+                tries++;
+                synchronized (LOCK) {
+                    if (destroyed) {
+                        return;
+                    }
+                    LOCK.wait(200);
+                }
+            }
+        }
+        ss.setSoTimeout(1000);  // Check for destroy each second
+        Socket sock = null;
+        try {
+            Debug.println("    InetAddress.getLocalHost gives " +
+                                        InetAddress.getLocalHost());
+        } catch (Throwable t) {
+            Debug.println("    INetAddress.getLocalHost fails with " + t);
+        }
+        boolean messaged = false;
+        for (;;) {
+            synchronized(LOCK) {
+                if (destroyed) {
+                    try {
+                        ss.close();
+                    } catch (Throwable ignored) {
+                    }
+                    return;
+                }
+            }
+            try {
+                if (!messaged) {
+                    Debug.println("Debug log available, listening on port "
+                                  + LISTEN_PORT);
+                    messaged = true;
+                }
+                sock = ss.accept();
+            } catch (InterruptedIOException ex) {
+                // We get this when the 1 second timeout passes.
+                continue;
+            }
+            messaged = false;
 
-	    // Now sock is a socket that has requested to get the log.  We
-	    // assume that it's over a LAN, and thus fast enough so we don't
-	    // have to worry about time spent writing.
+            // Now sock is a socket that has requested to get the log.  We
+            // assume that it's over a LAN, and thus fast enough so we don't
+            // have to worry about time spent writing.
 
-	    InetAddress address = sock.getInetAddress();
-	    Debug.println("Sending debug log to " + address);
-	    sock.setSoTimeout(1000);	
-	    	// We expect a LAN connection, so 1 second is plenty
-	    PrintWriter out = new PrintWriter(new BufferedOutputStream(
-	    				sock.getOutputStream()));
-	    int linesSent = 0;
-	    try {
-		for (;;) {
-		    synchronized(LOCK) {
-			if (destroyed) {
-			    return;
-			}
-			int available = log.size() + linesRemoved;
-			if (!atEOLN) {
-			    available--;
-			}
-			if (linesSent < linesRemoved) {
-			    linesSent = linesRemoved;
-			}
-			int i = linesSent - linesRemoved;
-			ListIterator iter = log.listIterator(i);
-			if (linesSent >= available) {
-			    LOCK.wait();
-			    	// Wakes up on destroyed or when more
-				// debug log becomes available
-			} else {
-			    while (linesSent < available) {
-				linesSent++;
-				out.print(iter.next());
-				out.println('\r');  // I ! <3 Windows 
-			    }
-			}
-		    }
-		    if (out.checkError()) {
-			Debug.println("Telnet connection to " + address 
-			    		  + " broken.");
-			break;	// goes back to listening
-		    }
-		}
-	    } finally {
-		try {
-		    out.close();
-		} catch (Throwable t) {
-		}
-		try {
-		    sock.close();
-		} catch (Throwable t) {
-		}
-	    }
-	}
+            InetAddress address = sock.getInetAddress();
+            Debug.println("Sending debug log to " + address);
+            sock.setSoTimeout(1000);    
+                // We expect a LAN connection, so 1 second is plenty
+            PrintWriter out = new PrintWriter(new BufferedOutputStream(
+                                        sock.getOutputStream()));
+            int linesSent = 0;
+            try {
+                for (;;) {
+                    synchronized(LOCK) {
+                        if (destroyed) {
+                            return;
+                        }
+                        int available = log.size() + linesRemoved;
+                        if (!atEOLN) {
+                            available--;
+                        }
+                        if (linesSent < linesRemoved) {
+                            linesSent = linesRemoved;
+                        }
+                        int i = linesSent - linesRemoved;
+                        ListIterator iter = log.listIterator(i);
+                        if (linesSent >= available) {
+                            LOCK.wait();
+                                // Wakes up on destroyed or when more
+                                // debug log becomes available
+                        } else {
+                            while (linesSent < available) {
+                                linesSent++;
+                                out.print(iter.next());
+                                out.println('\r');  // I ! <3 Windows 
+                            }
+                        }
+                    }
+                    if (out.checkError()) {
+                        Debug.println("Telnet connection to " + address 
+                                          + " broken.");
+                        break;  // goes back to listening
+                    }
+                }
+            } finally {
+                try {
+                    out.close();
+                } catch (Throwable t) {
+                }
+                try {
+                    sock.close();
+                } catch (Throwable t) {
+                }
+            }
+        }
     }
 
     /**
      * Add s to the debug log, without a line break at the end.
      **/
     public static void print(String s) {
-	synchronized(LOCK) {
-	    for (;;) {
-		int pos = s.indexOf('\n');
-		if (pos == -1) {
-		    break;
-		}
-		println(s.substring(0, pos));
-		s = s.substring(pos+1, s.length());
-	    }
-	    if (s.length() > 0) {
-		changed = true;
-		if (atEOLN) {
-		    log.add(s);
-		    atEOLN = false;
-		} else {
-		    String start = (String) log.removeLast();
-		    log.add(start + s);
-		}
-		LOCK.notifyAll();
-	    }
-	    while (log.size() > MAX_DEBUG_LINES) {
-		log.removeFirst();
-		linesRemoved++;
-	    }
-	}
+        synchronized(LOCK) {
+            for (;;) {
+                int pos = s.indexOf('\n');
+                if (pos == -1) {
+                    break;
+                }
+                println(s.substring(0, pos));
+                s = s.substring(pos+1, s.length());
+            }
+            if (s.length() > 0) {
+                changed = true;
+                if (atEOLN) {
+                    log.add(s);
+                    atEOLN = false;
+                } else {
+                    String start = (String) log.removeLast();
+                    log.add(start + s);
+                }
+                LOCK.notifyAll();
+            }
+            while (log.size() > MAX_DEBUG_LINES) {
+                log.removeFirst();
+                linesRemoved++;
+            }
+        }
     }
 
     /**
      * Add s to the debug log, with a line break at the end.
      **/
     public static void println(String s) {
-	synchronized(LOCK) {
-	    print(s);
-	    if (atEOLN) {
-		changed = true;
-		log.add("");
-		while (log.size() > MAX_DEBUG_LINES) {
-		    log.removeFirst();
-		    linesRemoved++;
-		}
-	    } else {
-		atEOLN = true;
-	    } 
-	    LOCK.notifyAll();
-	}
+        synchronized(LOCK) {
+            print(s);
+            if (atEOLN) {
+                changed = true;
+                log.add("");
+                while (log.size() > MAX_DEBUG_LINES) {
+                    log.removeFirst();
+                    linesRemoved++;
+                }
+            } else {
+                atEOLN = true;
+            } 
+            LOCK.notifyAll();
+        }
     }
 }

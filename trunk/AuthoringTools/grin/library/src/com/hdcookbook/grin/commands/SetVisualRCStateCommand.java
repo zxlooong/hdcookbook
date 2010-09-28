@@ -88,25 +88,25 @@ public class SetVisualRCStateCommand extends Command implements Node {
      * Constructor for use by xlets that want to set a handler state
      **/
     public SetVisualRCStateCommand(Show show, boolean activated, int state, 
-    				   VisualRCHandler handler,
-				   boolean runCommands)  
+                                   VisualRCHandler handler,
+                                   boolean runCommands)  
     {
-	this(show, activated, state, handler, runCommands, -1);
+        this(show, activated, state, handler, runCommands, -1);
     }
 
     /**
      * Constructor for use by xlets that want to set a handler state
      **/
     public SetVisualRCStateCommand(Show show, boolean activated, int state, 
-    				   VisualRCHandler handler,
-				   boolean runCommands, int gridNumber)
+                                   VisualRCHandler handler,
+                                   boolean runCommands, int gridNumber)
     {
         this(show);
-	this.activated = activated;
-	this.state = state;
-	this.handler = handler;
-	this.runCommands = runCommands;
-	this.gridNumber = gridNumber;
+        this.activated = activated;
+        this.state = state;
+        this.handler = handler;
+        this.runCommands = runCommands;
+        this.gridNumber = gridNumber;
     }
     
     public boolean getActivated() {
@@ -126,13 +126,13 @@ public class SetVisualRCStateCommand extends Command implements Node {
     }
     
     public void execute(Show caller) {
-	handler.setState(state, activated, runCommands, gridNumber);
+        handler.setState(state, activated, runCommands, gridNumber);
     }
 
     public void execute() {
-	if (Debug.ASSERT) {
-	    Debug.assertFail();
-	}
+        if (Debug.ASSERT) {
+            Debug.assertFail();
+        }
     }
     
     public void readInstanceData(GrinDataInputStream in, int length) 
@@ -144,7 +144,7 @@ public class SetVisualRCStateCommand extends Command implements Node {
         this.state = in.readInt();
         this.handler = (VisualRCHandler) in.readRCHandlerReference();
         this.runCommands = in.readBoolean();
-	this.gridNumber = in.readInt();
+        this.gridNumber = in.readInt();
     }
     
 }

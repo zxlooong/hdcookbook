@@ -64,18 +64,18 @@ import java.io.IOException;
 public class SESegment extends Segment implements SENode {
 
     public SESegment(String name, Feature[] active, Feature[] setup,
-    		 RCHandler[] rcHandlers, Command[] onEntryCommands,
-		 boolean nextOnSetupDone, Command[] nextCommands) 
-	    throws IOException 
+                 RCHandler[] rcHandlers, Command[] onEntryCommands,
+                 boolean nextOnSetupDone, Command[] nextCommands) 
+            throws IOException 
     {
         super();
-	this.name = name;	// for debugging
-	this.activeFeatures = active;
-	this.settingUpFeatures = setup;
-	this.onEntryCommands = onEntryCommands;
-	this.nextOnSetupDone = nextOnSetupDone;
-	this.nextCommands = nextCommands;
-	this.setRCHandlers(rcHandlers);
+        this.name = name;       // for debugging
+        this.activeFeatures = active;
+        this.settingUpFeatures = setup;
+        this.onEntryCommands = onEntryCommands;
+        this.nextOnSetupDone = nextOnSetupDone;
+        this.nextCommands = nextCommands;
+        this.setRCHandlers(rcHandlers);
     }
     
    public void setName(String name) {
@@ -100,18 +100,18 @@ public class SESegment extends Segment implements SENode {
     
     public void setRCHandlers(RCHandler[] rcHandlers) {
         this.rcHandlers = rcHandlers;
-	int pressedMask = 0;
-	int releasedMask = 0;
-	int typedMask = 0;
-	for (int i = 0; i < rcHandlers.length; i++) {
-	    SERCHandler h = (SERCHandler) rcHandlers[i];
-	    pressedMask = pressedMask | h.getKeyPressedInterestMask();
-	    releasedMask = releasedMask | h.getKeyReleasedInterestMask();
-	    typedMask = typedMask | h.getKeyTypedInterestMask();
-	}
-	this.rcPressedInterest = pressedMask;
-	this.rcReleasedInterest = releasedMask;
-	this.keyTypedInterest = typedMask;
+        int pressedMask = 0;
+        int releasedMask = 0;
+        int typedMask = 0;
+        for (int i = 0; i < rcHandlers.length; i++) {
+            SERCHandler h = (SERCHandler) rcHandlers[i];
+            pressedMask = pressedMask | h.getKeyPressedInterestMask();
+            releasedMask = releasedMask | h.getKeyReleasedInterestMask();
+            typedMask = typedMask | h.getKeyTypedInterestMask();
+        }
+        this.rcPressedInterest = pressedMask;
+        this.rcReleasedInterest = releasedMask;
+        this.keyTypedInterest = typedMask;
     }
 
     
@@ -125,9 +125,9 @@ public class SESegment extends Segment implements SENode {
         out.writeCommands(getOnEntryCommands());
         out.writeBoolean(getNextOnSetupDone());
         out.writeCommands(getNextCommands());
-	out.writeInt(rcPressedInterest);
-	out.writeInt(rcReleasedInterest);
-	out.writeInt(keyTypedInterest);
+        out.writeInt(rcPressedInterest);
+        out.writeInt(rcReleasedInterest);
+        out.writeInt(keyTypedInterest);
     }
 
     public String getRuntimeClassName() {
@@ -150,16 +150,16 @@ public class SESegment extends Segment implements SENode {
     public void changeFeatureReference(Feature from, Feature to) 
             throws IOException
     {
-	for (int i = 0; i < activeFeatures.length; i++) {
-	    if (activeFeatures[i] == from) {
-		activeFeatures[i] = to;
-	    }
-	}
-	for (int i = 0; i < settingUpFeatures.length; i++) {
-	    if (settingUpFeatures[i] == from) {
-		settingUpFeatures[i] = to;
-	    }
-	}
+        for (int i = 0; i < activeFeatures.length; i++) {
+            if (activeFeatures[i] == from) {
+                activeFeatures[i] = to;
+            }
+        }
+        for (int i = 0; i < settingUpFeatures.length; i++) {
+            if (settingUpFeatures[i] == from) {
+                settingUpFeatures[i] = to;
+            }
+        }
     }
 
 }

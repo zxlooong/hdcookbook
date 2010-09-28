@@ -69,8 +69,8 @@ import java.awt.Rectangle;
 import java.io.IOException;
 
 public class SEVisualRCHandler 
-		extends VisualRCHandler 
-		implements SENode, SEScalableNode, SERCHandler
+                extends VisualRCHandler 
+                implements SENode, SEScalableNode, SERCHandler
 {
 
     private VisualRCHandlerHelper helper;
@@ -82,31 +82,31 @@ public class SEVisualRCHandler
     }
 
     public SEVisualRCHandler(String name, String[] gridAlternateNames,
-    			     String[] stateNames,
-			     int[][] upDownAlternates, 
-			     int[][] rightLeftAlternates,
-			     Command[][] selectCommands, 
-			     Command[][] activateCommands, 
-			     Rectangle[] mouseRects, int[] mouseRectStates,
-			     int timeout, Command[] timeoutCommands,
-			     boolean startSelected,
-			     VisualRCHandlerHelper helper) 
+                             String[] stateNames,
+                             int[][] upDownAlternates, 
+                             int[][] rightLeftAlternates,
+                             Command[][] selectCommands, 
+                             Command[][] activateCommands, 
+                             Rectangle[] mouseRects, int[] mouseRectStates,
+                             int timeout, Command[] timeoutCommands,
+                             boolean startSelected,
+                             VisualRCHandlerHelper helper) 
     {
         super();
-	this.name = name;
-	this.gridAlternateNames = gridAlternateNames;
-	this.stateNames = stateNames;
-	this.upDownAlternates = upDownAlternates;
-	this.rightLeftAlternates = rightLeftAlternates;
-	this.upDown = upDownAlternates[0];
-	this.rightLeft = rightLeftAlternates[0];
-	this.selectCommands = selectCommands;
-	this.activateCommands = activateCommands;
-	this.mouseRects = mouseRects;
-	this.mouseRectStates = mouseRectStates;
-	this.timeout = timeout;
-	this.timeoutCommands = timeoutCommands;
-	this.startSelected = startSelected;
+        this.name = name;
+        this.gridAlternateNames = gridAlternateNames;
+        this.stateNames = stateNames;
+        this.upDownAlternates = upDownAlternates;
+        this.rightLeftAlternates = rightLeftAlternates;
+        this.upDown = upDownAlternates[0];
+        this.rightLeft = rightLeftAlternates[0];
+        this.selectCommands = selectCommands;
+        this.activateCommands = activateCommands;
+        this.mouseRects = mouseRects;
+        this.mouseRectStates = mouseRectStates;
+        this.timeout = timeout;
+        this.timeoutCommands = timeoutCommands;
+        this.startSelected = startSelected;
         this.helper = helper;
     }
 
@@ -114,33 +114,33 @@ public class SEVisualRCHandler
      * Called from the parser
      **/
     public void setup(Assembly assembly, Feature[] selectFeatures, 
-    		      Feature[] activateFeatures)
+                      Feature[] activateFeatures)
     {
-	this.assembly = assembly;
-	this.selectFeatures = selectFeatures;
-	this.activateFeatures = activateFeatures;
-	// activating this handler can change its state
+        this.assembly = assembly;
+        this.selectFeatures = selectFeatures;
+        this.activateFeatures = activateFeatures;
+        // activating this handler can change its state
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getKeyPressedInterestMask() {
-	return VisualRCHandler.MASK;
+        return VisualRCHandler.MASK;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getKeyReleasedInterestMask() {
-	return 0;
+        return 0;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getKeyTypedInterestMask() {
-	return 0;
+        return 0;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) 
@@ -148,12 +148,12 @@ public class SEVisualRCHandler
         
         out.writeSuperClassData(this);
         
-	out.writeStringArray(gridAlternateNames);
-	out.writeInt(upDownAlternates.length);
-	for (int i = 0; i < upDownAlternates.length; i++) {
-	    out.writeSharedIntArray(upDownAlternates[i]);
-	    out.writeSharedIntArray(rightLeftAlternates[i]);
-	}
+        out.writeStringArray(gridAlternateNames);
+        out.writeInt(upDownAlternates.length);
+        for (int i = 0; i < upDownAlternates.length; i++) {
+            out.writeSharedIntArray(upDownAlternates[i]);
+            out.writeSharedIntArray(rightLeftAlternates[i]);
+        }
         out.writeStringArray(stateNames);
         if (selectCommands == null) {
             out.writeNull();
@@ -180,13 +180,13 @@ public class SEVisualRCHandler
         out.writeCommands(timeoutCommands);
        
         out.writeBoolean(assembly != null);
-	if (assembly != null) {
-	    out.writeFeatureReference(assembly);
-	}
+        if (assembly != null) {
+            out.writeFeatureReference(assembly);
+        }
         
         out.writeFeaturesArrayReference(selectFeatures);
         out.writeFeaturesArrayReference(activateFeatures);
-	out.writeBoolean(startSelected);
+        out.writeBoolean(startSelected);
     }
 
     public String getRuntimeClassName() {
@@ -209,41 +209,41 @@ public class SEVisualRCHandler
     public void changeFeatureReference(Feature from, Feature to) 
             throws IOException
     {
-	for (int i = 0; i < selectFeatures.length; i++) {
-	    if (selectFeatures[i] == from) {
-		selectFeatures[i] = to;
-	    }
-	}
-	for (int i = 0; i < activateFeatures.length; i++) {
-	    if (activateFeatures[i] == from) {
-		activateFeatures[i] = to;
-	    }
-	}
+        for (int i = 0; i < selectFeatures.length; i++) {
+            if (selectFeatures[i] == from) {
+                selectFeatures[i] = to;
+            }
+        }
+        for (int i = 0; i < activateFeatures.length; i++) {
+            if (activateFeatures[i] == from) {
+                activateFeatures[i] = to;
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	if (mouseRects != null) {
-	    for (int i = 0; i < mouseRects.length; i++) {
-		Rectangle r = mouseRects[i];
-		r.x = xOffset + Show.scale(r.x, xScale);
-		r.y = yOffset + Show.scale(r.y, yScale);
-		r.width = Show.scale(r.width, xScale);
-		r.height = Show.scale(r.height, yScale);
-	    }
-	}
+        if (mouseRects != null) {
+            for (int i = 0; i < mouseRects.length; i++) {
+                Rectangle r = mouseRects[i];
+                r.x = xOffset + Show.scale(r.x, xScale);
+                r.y = yOffset + Show.scale(r.y, yScale);
+                r.width = Show.scale(r.width, xScale);
+                r.height = Show.scale(r.height, yScale);
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (getName() == null) {
-	    return "rc_handler visual @" + Integer.toHexString(hashCode());
-	} else {
-	    return "rc_handler visual " + getName();
-	}
+        if (getName() == null) {
+            return "rc_handler visual @" + Integer.toHexString(hashCode());
+        } else {
+            return "rc_handler visual " + getName();
+        }
     }
 }

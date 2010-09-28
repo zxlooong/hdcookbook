@@ -83,8 +83,8 @@ public class Box extends Feature implements Node {
     protected int y;
     protected int width;
     protected int height;
-    protected int outlineWidthX;	// in x dimension
-    protected int outlineWidthY;	// in y dimension
+    protected int outlineWidthX;        // in x dimension
+    protected int outlineWidthY;        // in y dimension
     protected Color outlineColor;
     protected Color fillColor;
     protected InterpolatedModel scalingModel = null;
@@ -102,31 +102,31 @@ public class Box extends Feature implements Node {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup() || isActivated) {
-	    throw new IllegalStateException();
-	}
-	Box result = new Box(show);
-	result.x = x;
-	result.y = y;
-	result.width = width;
-	result.height = height;
-	result.outlineWidthX = outlineWidthX;
-	result.outlineWidthY = outlineWidthY;
-	result.outlineColor = outlineColor;
-	result.fillColor = fillColor;
-	if (scaledBounds != null) {
-	    result.scaledBounds = new Rectangle(scaledBounds);
-	}
-	return result;
+        if (!isSetup() || isActivated) {
+            throw new IllegalStateException();
+        }
+        Box result = new Box(show);
+        result.x = x;
+        result.y = y;
+        result.width = width;
+        result.height = height;
+        result.outlineWidthX = outlineWidthX;
+        result.outlineWidthY = outlineWidthY;
+        result.outlineColor = outlineColor;
+        result.fillColor = fillColor;
+        if (scaledBounds != null) {
+            result.scaledBounds = new Rectangle(scaledBounds);
+        }
+        return result;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
-	super.initializeClone(original, clones);
-	Box other = (Box) original;
-	scalingModel = (InterpolatedModel)
+        super.initializeClone(original, clones);
+        Box other = (Box) original;
+        scalingModel = (InterpolatedModel)
                 Feature.clonedReference(other.scalingModel, clones);
     }
 
@@ -134,14 +134,14 @@ public class Box extends Feature implements Node {
      * {@inheritDoc}
      **/
     public int getX() {
-	return x;
+        return x;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getY() {
-	return y;
+        return y;
     }
 
     /**
@@ -171,9 +171,9 @@ public class Box extends Feature implements Node {
      * model updates, with the show lock held.
      **/
     public void resizeOutline(int outlineWidthX, int outlineWidthY) {
-	this.outlineWidthX = outlineWidthX;
-	this.outlineWidthY = outlineWidthY;
-	boxPropertiesChanged = true;
+        this.outlineWidthX = outlineWidthX;
+        this.outlineWidthY = outlineWidthY;
+        boxPropertiesChanged = true;
     }
 
     /**
@@ -186,8 +186,8 @@ public class Box extends Feature implements Node {
      * model updates, with the show lock held.
      **/
     public void changeBoxColor(Color c) {
-	this.fillColor = c;
-	boxPropertiesChanged = true;
+        this.fillColor = c;
+        boxPropertiesChanged = true;
     }
 
     /**
@@ -200,8 +200,8 @@ public class Box extends Feature implements Node {
      * model updates, with the show lock held.
      **/
     public void changeBoxOutlineColor(Color c) {
-	this.outlineColor = c;
-	boxPropertiesChanged = true;
+        this.outlineColor = c;
+        boxPropertiesChanged = true;
     }
 
     /**
@@ -223,24 +223,24 @@ public class Box extends Feature implements Node {
      * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
-	//
-	// This is synchronized to only occur within model updates.
-	//
-	isActivated = mode;
+        //
+        // This is synchronized to only occur within model updates.
+        //
+        isActivated = mode;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
-	return 0;
+        return 0;
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	return false;
+        return false;
     }
 
     /**
@@ -253,93 +253,93 @@ public class Box extends Feature implements Node {
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
-	drawRecord.setChanged();
+        drawRecord.setChanged();
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	if (scalingModel == null) {
-	    drawRecord.setArea(x, y, width, height);
-	} else {
-	    boolean changed 
-		= scalingModel.scaleBounds(x, y, width, height, scaledBounds);
-		    // When newly activated, we might get a false positive
-		    // on changed, but that's OK because our draw area is
-		    // changed anyway.
-	    drawRecord.setArea(scaledBounds.x, scaledBounds.y, 
-	    		       scaledBounds.width, scaledBounds.height);
-	    if (changed) {
-		drawRecord.setChanged();
-	    }
-	}
-	if (boxPropertiesChanged) {
-	    drawRecord.setChanged();
-	    boxPropertiesChanged = false;
-	}
-	drawRecord.setSemiTransparent();
-	context.addArea(drawRecord);
+        if (scalingModel == null) {
+            drawRecord.setArea(x, y, width, height);
+        } else {
+            boolean changed 
+                = scalingModel.scaleBounds(x, y, width, height, scaledBounds);
+                    // When newly activated, we might get a false positive
+                    // on changed, but that's OK because our draw area is
+                    // changed anyway.
+            drawRecord.setArea(scaledBounds.x, scaledBounds.y, 
+                               scaledBounds.width, scaledBounds.height);
+            if (changed) {
+                drawRecord.setChanged();
+            }
+        }
+        if (boxPropertiesChanged) {
+            drawRecord.setChanged();
+            boxPropertiesChanged = false;
+        }
+        drawRecord.setSemiTransparent();
+        context.addArea(drawRecord);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	if (!isActivated) {
-	    return;
-	}
-	int x1;
-	int y1;
-	int w;
-	int h;
-	if (scalingModel == null) {
-	    x1 = x;
-	    y1 = y;
-	    w = width;
-	    h = height;
-	} else {
-	    x1 = scaledBounds.x;
-	    y1 = scaledBounds.y;
-	    w = scaledBounds.width;
-	    if (w < 0) {
-		w = -w;
-		x1 -= w;
-	    }
-	    h = scaledBounds.height;
-	    if (h < 0) {
-		h = -h;
-		y1 -= h;
-	    }
-	    // We don't scale outlineWidth.  This would be complicated
-	    // to do, and it's not likely to be what's meant anyway.
-	}
-	int x2 = x1 + w - 1;
-	int y2 = y1 + h - 1;
-	if ((outlineWidthX > 0 || outlineWidthY > 0) && outlineColor != null) {
-	    gr.setColor(outlineColor);
-	    int tx = outlineWidthX;
-	    int t2x = 2*tx;
-	    int ty = outlineWidthY;
-	    int t2y = 2*ty;
-	    gr.fillArc(x1, y1, t2x, t2y, 90, 90);	// upper-left
-	    gr.fillArc(x1, y2-t2y, t2x, t2y, 180, 90); 	// lower-left
-	    gr.fillArc(x2-t2x, y2-t2y, t2x, t2y, 270, 90); // lower-right
-	    gr.fillArc(x2-t2x, y1, t2x, t2y, 0, 90);	// upper-right
-	    // Issue #4 - subtract the right and bottom most pixels by one
-	    gr.fillRect(x1, y1+ty, tx, h-t2y-1);	// left
-	    gr.fillRect(x1+tx, y2-ty+1, w-t2x-1, ty);   // bottom
-	    gr.fillRect(x2-tx+1, y1+ty, tx, h-t2y-1);   // right
-	    gr.fillRect(x1+tx, y1, w-t2x-1, ty);        // top
-	    x1 += tx;
-	    y1 += ty;
-	    w -= t2x;
-	    h -= t2y;
-	}
-	if (fillColor != null) {
-	    gr.setColor(fillColor);
-	    gr.fillRect(x1, y1, w, h); 
-	}
+        if (!isActivated) {
+            return;
+        }
+        int x1;
+        int y1;
+        int w;
+        int h;
+        if (scalingModel == null) {
+            x1 = x;
+            y1 = y;
+            w = width;
+            h = height;
+        } else {
+            x1 = scaledBounds.x;
+            y1 = scaledBounds.y;
+            w = scaledBounds.width;
+            if (w < 0) {
+                w = -w;
+                x1 -= w;
+            }
+            h = scaledBounds.height;
+            if (h < 0) {
+                h = -h;
+                y1 -= h;
+            }
+            // We don't scale outlineWidth.  This would be complicated
+            // to do, and it's not likely to be what's meant anyway.
+        }
+        int x2 = x1 + w - 1;
+        int y2 = y1 + h - 1;
+        if ((outlineWidthX > 0 || outlineWidthY > 0) && outlineColor != null) {
+            gr.setColor(outlineColor);
+            int tx = outlineWidthX;
+            int t2x = 2*tx;
+            int ty = outlineWidthY;
+            int t2y = 2*ty;
+            gr.fillArc(x1, y1, t2x, t2y, 90, 90);       // upper-left
+            gr.fillArc(x1, y2-t2y, t2x, t2y, 180, 90);  // lower-left
+            gr.fillArc(x2-t2x, y2-t2y, t2x, t2y, 270, 90); // lower-right
+            gr.fillArc(x2-t2x, y1, t2x, t2y, 0, 90);    // upper-right
+            // Issue #4 - subtract the right and bottom most pixels by one
+            gr.fillRect(x1, y1+ty, tx, h-t2y-1);        // left
+            gr.fillRect(x1+tx, y2-ty+1, w-t2x-1, ty);   // bottom
+            gr.fillRect(x2-tx+1, y1+ty, tx, h-t2y-1);   // right
+            gr.fillRect(x1+tx, y1, w-t2x-1, ty);        // top
+            x1 += tx;
+            y1 += ty;
+            w -= t2x;
+            h -= t2y;
+        }
+        if (fillColor != null) {
+            gr.setColor(fillColor);
+            gr.fillRect(x1, y1, w, h); 
+        }
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 
@@ -347,10 +347,10 @@ public class Box extends Feature implements Node {
                 
         in.readSuperClassData(this);
         
-	this.x = in.readInt();
-	this.y = in.readInt();
-	this.width = in.readInt();
-	this.height = in.readInt();
+        this.x = in.readInt();
+        this.y = in.readInt();
+        this.width = in.readInt();
+        this.height = in.readInt();
         this.outlineWidthX = in.readInt();
         this.outlineWidthY = in.readInt();
         this.outlineColor = in.readColor();

@@ -78,102 +78,102 @@ public class PlaygroundExtensionParser implements ExtensionParser {
      * {@inheritDoc}
      **/
     public Feature getFeature(Show show, String typeName,
-    			      String name, Lexer lexer)
-		   throws IOException
+                              String name, Lexer lexer)
+                   throws IOException
     {
-	if ("Playground:arc".equals(typeName)) {
-	    return parseArc(show, name, lexer);
-	} else if ("Playground:bouncing_arc".equals(typeName)) {
-	    return parseBouncingArc(show, name, lexer);
-	} else if ("Playground:image_frame".equals(typeName)) {
-	    return parseFrame(show, name, lexer);
-	} else {
-	    return null;
-	}
+        if ("Playground:arc".equals(typeName)) {
+            return parseArc(show, name, lexer);
+        } else if ("Playground:bouncing_arc".equals(typeName)) {
+            return parseBouncingArc(show, name, lexer);
+        } else if ("Playground:image_frame".equals(typeName)) {
+            return parseFrame(show, name, lexer);
+        } else {
+            return null;
+        }
     }
 
     private Feature parseArc(Show show, String name, Lexer lexer)
-    		throws IOException
+                throws IOException
     {
-	Color color = lexer.getParser().parseColor();
-	lexer.parseExpected("x");
-	int x = lexer.getInt();
-	lexer.parseExpected("y");
-	int y = lexer.getInt();
-	lexer.parseExpected("width");
-	int width = lexer.getInt();
-	lexer.parseExpected("height");
-	int height = lexer.getInt();
-	lexer.parseExpected("startAngle");
-	int startAngle = lexer.getInt();
-	lexer.parseExpected("arcAngle");
-	int arcAngle = lexer.getInt();
-	lexer.parseExpected(";");
-	return new SEArc(show, name, x, y, width, height, startAngle, arcAngle,
-			 color);
+        Color color = lexer.getParser().parseColor();
+        lexer.parseExpected("x");
+        int x = lexer.getInt();
+        lexer.parseExpected("y");
+        int y = lexer.getInt();
+        lexer.parseExpected("width");
+        int width = lexer.getInt();
+        lexer.parseExpected("height");
+        int height = lexer.getInt();
+        lexer.parseExpected("startAngle");
+        int startAngle = lexer.getInt();
+        lexer.parseExpected("arcAngle");
+        int arcAngle = lexer.getInt();
+        lexer.parseExpected(";");
+        return new SEArc(show, name, x, y, width, height, startAngle, arcAngle,
+                         color);
     }
 
     private Feature parseBouncingArc(Show show, String name, Lexer lexer)
-    		throws IOException
+                throws IOException
     {
-	Color color = lexer.getParser().parseColor();
-	lexer.parseExpected("x");
-	int x = lexer.getInt();
-	lexer.parseExpected("y");
-	int y = lexer.getInt();
-	lexer.parseExpected("width");
-	int width = lexer.getInt();
-	lexer.parseExpected("height");
-	int height = lexer.getInt();
-	lexer.parseExpected("startAngle");
-	int startAngle = lexer.getInt();
-	lexer.parseExpected("arcAngle");
-	int arcAngle = lexer.getInt();
-	lexer.parseExpected("bounceHeight");
-	int bounceHeight = lexer.getInt();
-	lexer.parseExpected("bouncePeriod");
-	int bouncePeriod = lexer.getInt();
-	if (bouncePeriod < 2) {
-	    lexer.reportError("bouncePeriod must be at least 2");
-	}
-	lexer.parseExpected(";");
-	return new SEBouncingArc(show, name, x, y, width, height, 
-				 startAngle, arcAngle, color, 
-				 bounceHeight, bouncePeriod);
+        Color color = lexer.getParser().parseColor();
+        lexer.parseExpected("x");
+        int x = lexer.getInt();
+        lexer.parseExpected("y");
+        int y = lexer.getInt();
+        lexer.parseExpected("width");
+        int width = lexer.getInt();
+        lexer.parseExpected("height");
+        int height = lexer.getInt();
+        lexer.parseExpected("startAngle");
+        int startAngle = lexer.getInt();
+        lexer.parseExpected("arcAngle");
+        int arcAngle = lexer.getInt();
+        lexer.parseExpected("bounceHeight");
+        int bounceHeight = lexer.getInt();
+        lexer.parseExpected("bouncePeriod");
+        int bouncePeriod = lexer.getInt();
+        if (bouncePeriod < 2) {
+            lexer.reportError("bouncePeriod must be at least 2");
+        }
+        lexer.parseExpected(";");
+        return new SEBouncingArc(show, name, x, y, width, height, 
+                                 startAngle, arcAngle, color, 
+                                 bounceHeight, bouncePeriod);
     }
 
     private Feature parseFrame(Show show, String name, Lexer lexer)
-    		throws IOException
+                throws IOException
     {
-	final ShowParser parser = lexer.getParser();
-	final String fixedImageName = lexer.getString();
-	lexer.parseExpected("outline");
-	int outlineWidth = lexer.getInt();
-	Color color = parser.parseColor();
-	lexer.parseExpected(";");
-	final SEImageFrame frame 
-		= new SEImageFrame(show, name, outlineWidth, color);
-	ForwardReference fw = new ForwardReference(lexer) {
-	    public void resolve() throws IOException {
-		Feature f = parser.lookupFeatureOrFail(fixedImageName);
-		if (!(f instanceof SEFixedImage)) {
-		    reportError(fixedImageName + " is not a fixed_image");
-		}
-		frame.setFixedImage((SEFixedImage) f);
-	    }
-	};
-	parser.addForwardReference(fw, 0);
-	return frame;
+        final ShowParser parser = lexer.getParser();
+        final String fixedImageName = lexer.getString();
+        lexer.parseExpected("outline");
+        int outlineWidth = lexer.getInt();
+        Color color = parser.parseColor();
+        lexer.parseExpected(";");
+        final SEImageFrame frame 
+                = new SEImageFrame(show, name, outlineWidth, color);
+        ForwardReference fw = new ForwardReference(lexer) {
+            public void resolve() throws IOException {
+                Feature f = parser.lookupFeatureOrFail(fixedImageName);
+                if (!(f instanceof SEFixedImage)) {
+                    reportError(fixedImageName + " is not a fixed_image");
+                }
+                frame.setFixedImage((SEFixedImage) f);
+            }
+        };
+        parser.addForwardReference(fw, 0);
+        return frame;
     }
 
     /**
      * {@inheritDoc}
      **/
     public Modifier getModifier(Show show, String typeName,
-				String name, Lexer lexer) 
-		throws IOException
+                                String name, Lexer lexer) 
+                throws IOException
     {
-	return null;
+        return null;
     }
 
     /**
@@ -182,7 +182,7 @@ public class PlaygroundExtensionParser implements ExtensionParser {
     public Command getCommand(Show show, String typeName, Lexer lexer)
                            throws IOException
     {
-	return null;
+        return null;
     }
 
 }

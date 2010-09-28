@@ -68,16 +68,16 @@ public class SESetTarget extends SetTarget implements SENode, SEScalableNode {
     /**
      * Create a new SetTarget node.
      *
-     * @param	show	The show we're a part of
-     * @param	name	The name of this node
-     * @param	target	The target of the RenderContext for our children
-     *			to use.
+     * @param   show    The show we're a part of
+     * @param   name    The name of this node
+     * @param   target  The target of the RenderContext for our children
+     *                  to use.
      **/
     public SESetTarget(SEShow show, String name, int target) {
-	super(show);
+        super(show);
         this.name = name;
-	this.target = target;
-	this.targetName = show.getDrawTargets()[target];
+        this.target = target;
+        this.targetName = show.getDrawTargets()[target];
     }
         
     public SESetTarget(SEShow show) {
@@ -102,7 +102,7 @@ public class SESetTarget extends SetTarget implements SENode, SEScalableNode {
             throws IOException {    
         
         out.writeSuperClassData(this);
-	out.writeString(targetName);
+        out.writeString(targetName);
     }
 
     public String getRuntimeClassName() {
@@ -123,26 +123,26 @@ public class SESetTarget extends SetTarget implements SENode, SEScalableNode {
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
-	if (part == from) {
-	    part = to;
-	}
+        if (part == from) {
+            part = to;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	// Do nothing
+        // Do nothing
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "set_target @" + Integer.toHexString(hashCode());
-	} else {
-	    return "set_target " + name;
-	}
+        if (name == null) {
+            return "set_target @" + Integer.toHexString(hashCode());
+        } else {
+            return "set_target " + name;
+        }
     }
 }

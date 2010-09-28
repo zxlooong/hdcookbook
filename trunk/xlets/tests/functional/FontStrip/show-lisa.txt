@@ -75,7 +75,7 @@ rc_handler key_pressed H:Switch2
 
 segment S:Initialize  
    setup  {
-	F:FontStrips
+        F:FontStrips
         F:Texts
    } setup_done {
         activate_segment S:FontStrips ;  
@@ -84,7 +84,7 @@ segment S:Initialize
 
 segment S:FontStrips
    active {
-	F:FontStrips
+        F:FontStrips
    } rc_handlers {
         H:Switch1
    }
@@ -92,7 +92,7 @@ segment S:FontStrips
 
 segment S:Texts
    active {
-	F:Texts
+        F:Texts
    } rc_handlers {
         H:Switch2
    }

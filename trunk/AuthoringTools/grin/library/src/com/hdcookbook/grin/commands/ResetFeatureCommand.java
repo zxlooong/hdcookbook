@@ -82,17 +82,17 @@ public class ResetFeatureCommand extends Command implements Node {
      * {@inheritDoc}
      **/
     public Command cloneIfNeeded(HashMap featureClones) {
-	Feature featureClone = (Feature) featureClones.get(feature);
-	if (featureClone == null) {
-	    return this;
-	}
-	ResetFeatureCommand result = new ResetFeatureCommand(show);
-	result.feature = featureClone;
-	return result;
+        Feature featureClone = (Feature) featureClones.get(feature);
+        if (featureClone == null) {
+            return this;
+        }
+        ResetFeatureCommand result = new ResetFeatureCommand(show);
+        result.feature = featureClone;
+        return result;
     }
     
     public void execute() {
-	feature.resetFeature();
+        feature.resetFeature();
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

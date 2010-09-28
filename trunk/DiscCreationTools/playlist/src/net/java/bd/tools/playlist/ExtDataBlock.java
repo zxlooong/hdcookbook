@@ -68,86 +68,86 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(propOrder={"metadataBlockHeader", "paddingX", "metadataBlockData", "data"})
 public class ExtDataBlock {
-	
-	private BlockType type;
+        
+        private BlockType type;
     private long size;  // need the size info when ExtDataBlock is an unknown type
-	// Type: pip_metadata
-	private MetadataBlockHeader[] metadataBlockHeader;
-	private int paddingX;
-	private MetadataBlockData[] metadataBlockData;
-	// Type: unknown
-	private byte[] data;
-	
-	public ExtDataBlock() {}
-	public ExtDataBlock(BlockType type, long size) {
-		setType(type);
-		this.size = size;
-	}
+        // Type: pip_metadata
+        private MetadataBlockHeader[] metadataBlockHeader;
+        private int paddingX;
+        private MetadataBlockData[] metadataBlockData;
+        // Type: unknown
+        private byte[] data;
+        
+        public ExtDataBlock() {}
+        public ExtDataBlock(BlockType type, long size) {
+                setType(type);
+                this.size = size;
+        }
     
     public void readObject(DataInputStream din) throws IOException {
-    	if (type == BlockType.pip_metadata) {
-    		readPIPMetadata(din);
-    	} else {
-    		readUnknownExtData(din);
-    	}
+        if (type == BlockType.pip_metadata) {
+                readPIPMetadata(din);
+        } else {
+                readUnknownExtData(din);
+        }
     }
     
     public void writeObject(DataOutputStream dout) throws IOException {
-    	if (type == BlockType.pip_metadata) {
-    		writePIPMetadata(dout);
-    	} else {
-    		writeUnknownExtData(dout);
-    	}
+        if (type == BlockType.pip_metadata) {
+                writePIPMetadata(dout);
+        } else {
+                writeUnknownExtData(dout);
+        }
     }
     
     @XmlAttribute
     public BlockType getType() {
-    	return type;
+        return type;
     }
     
     public void setType(BlockType type) {
-    	this.type = type;
+        this.type = type;
     }
     
     
     // Type: pip_metadata
     
     private void readPIPMetadata(DataInputStream din) throws IOException {
-        // 32 bit length							4 unsigned
-    	// 16 bit number_of_metadata_block_entries	2
-    	// MetadataBlockHeader()[n]					14
-    	// Padding X								?
-    	// MetadataBlockData()[n]					?
-    	din.skipBytes(4);							// length
-        int n = din.readUnsignedShort();			// number_of_metadata_block_entries
-    	MetadataBlockHeader[] headers = new MetadataBlockHeader[n];
-    	int blockDataStartAddress[] = new int[n];
-    	for (int i = 0; i < n; i++) {
-    		headers[i] = new MetadataBlockHeader();
-    		headers[i].readObject(din);
-    		blockDataStartAddress[i] = din.readInt(); // 20
-    	}
-    	setMetadataBlockHeader(headers);       
-    	long firstStartAddress = blockDataStartAddress[0];
-    	int paddingX = 0;
-    	if (firstStartAddress > 0) {
-    		paddingX = (int) ((firstStartAddress - (6 + n * 14)) / 2);
-    		for (int i = 0; i < paddingX; i++) {
-    			din.readShort();
-    		}
-    	}
-    	setPaddingX(paddingX);
-    	MetadataBlockData[] blockdata = new MetadataBlockData[n];
-    	for (int i = 0; i < n; i++) {
-    		long size = 0L;
-    		if (i < n - 1) {
-    			size = blockDataStartAddress[i + 1] - 
-    			          blockDataStartAddress[i];
-    		}
-    		blockdata[i] = new MetadataBlockData(size);
-    		blockdata[i].readObject(din);
-    	}
-    	setMetadataBlockData(blockdata);
+        // 32 bit length                                                        4 unsigned
+        // 16 bit number_of_metadata_block_entries      2
+        // MetadataBlockHeader()[n]                                     14
+        // Padding X                                                            ?
+        // MetadataBlockData()[n]                                       ?
+        din.skipBytes(4);                                                       // length
+        int n = din.readUnsignedShort();                        // number_of_metadata_block_entries
+        MetadataBlockHeader[] headers = new MetadataBlockHeader[n];
+        int blockDataStartAddress[] = new int[n];
+        for (int i = 0; i < n; i++) {
+                headers[i] = new MetadataBlockHeader();
+                headers[i].readObject(din);
+                blockDataStartAddress[i] = din.readInt(); // 20
+        }
+        setMetadataBlockHeader(headers);       
+        long firstStartAddress = blockDataStartAddress[0];
+        int paddingX = 0;
+        if (firstStartAddress > 0) {
+                paddingX = (int) ((firstStartAddress - (6 + n * 14)) / 2);
+                for (int i = 0; i < paddingX; i++) {
+                        din.readShort();
+                }
+        }
+        setPaddingX(paddingX);
+        MetadataBlockData[] blockdata = new MetadataBlockData[n];
+        for (int i = 0; i < n; i++) {
+                long size = 0L;
+                if (i < n - 1) {
+                        size = blockDataStartAddress[i + 1] - 
+                                  blockDataStartAddress[i];
+                }
+                blockdata[i] = new MetadataBlockData(size);
+                blockdata[i].readObject(din);
+        }
+        setMetadataBlockData(blockdata);
     }
     
     private void writePIPMetadata(DataOutputStream dout) throws IOException {
@@ -161,9 +161,9 @@ public class ExtDataBlock {
         int dataBlockSize = 0;
         for (int i = 0; i < blockdata.length; i++) {
             metadataBlockStartAddress[i] = dataBlockSize + startAddress;
-        	blockdata[i].writeObject(pipMetadataStream);
-        	pipMetadataStream.flush();
-        	dataBlockSize = baos.size();
+                blockdata[i].writeObject(pipMetadataStream);
+                pipMetadataStream.flush();
+                dataBlockSize = baos.size();
         }
         
         pipMetadataStream.flush();
@@ -194,39 +194,39 @@ public class ExtDataBlock {
     }
     
     public MetadataBlockHeader[] getMetadataBlockHeader() {
-    	return metadataBlockHeader;
+        return metadataBlockHeader;
     }
     
     public void setMetadataBlockHeader(MetadataBlockHeader[] metadataBlockHeader) {
-    	this.metadataBlockHeader = metadataBlockHeader;
+        this.metadataBlockHeader = metadataBlockHeader;
     }
     
     public int getPaddingX() {
-    	return paddingX;
+        return paddingX;
     }
     
     public void setPaddingX(int paddingX) {
-    	this.paddingX = paddingX;
+        this.paddingX = paddingX;
     }
     
     public MetadataBlockData[] getMetadataBlockData() {
-    	return metadataBlockData;
+        return metadataBlockData;
     }
     
     public void setMetadataBlockData(MetadataBlockData[] metadataBlockData) {
-    	this.metadataBlockData = metadataBlockData;
+        this.metadataBlockData = metadataBlockData;
     }
     
     
     // Type: unknown   
     private void readUnknownExtData(DataInputStream din) throws IOException {
-		byte[] data = new byte[(int) size];
-		din.readFully(data);
-		setData(data);
+                byte[] data = new byte[(int) size];
+                din.readFully(data);
+                setData(data);
     }
     
     private void writeUnknownExtData(DataOutputStream dout) throws IOException {
-    	dout.write(getData());
+        dout.write(getData());
     }
     
     public byte[] getData() {

@@ -89,35 +89,35 @@ public class Mosaic {
     private int maxHeight;
     private int minWidth;
     private int numWidths;
-    private int maxPixels;	
+    private int maxPixels;      
     private String outputName;
 
     private int position;
-    private int currPixels = Integer.MAX_VALUE;	// # pixels occupied
+    private int currPixels = Integer.MAX_VALUE; // # pixels occupied
     private int currWidth = 0;
     private int currHeight = 0;
 
     private BufferedImage buffer;
-    private Graphics2D graphics;	// into buffer
+    private Graphics2D graphics;        // into buffer
 
     /** 
      * Create a new mosaic, with the given parameters
      **/
     public Mosaic(MosaicSpec spec) {
-	maxWidth = spec.maxWidth;
-	maxHeight = spec.maxHeight;
-	minWidth = spec.minWidth;
-	numWidths = spec.numWidths;
-	maxPixels = spec.maxPixels;
-	outputName = spec.name;
+        maxWidth = spec.maxWidth;
+        maxHeight = spec.maxHeight;
+        minWidth = spec.minWidth;
+        numWidths = spec.numWidths;
+        maxPixels = spec.maxPixels;
+        outputName = spec.name;
     }
 
     public int getHeightUsed() {
-	return currHeight;
+        return currHeight;
     }
 
     public int getWidthUsed() {
-	return currWidth;
+        return currWidth;
     }
 
     /**
@@ -125,9 +125,9 @@ public class Mosaic {
      * This always works, and returns a MosaicPart.
      **/
     public MosaicPart putImage(ManagedImage mi, int maxWidth, int maxHeight) {
-	MosaicPart part = new MosaicPart(mi, this, maxWidth, maxHeight);
-	partsList.add(part);
-	return part;
+        MosaicPart part = new MosaicPart(mi, this, maxWidth, maxHeight);
+        partsList.add(part);
+        return part;
     }
 
     /**
@@ -136,32 +136,32 @@ public class Mosaic {
      * @return true if this mosaic is used for images, false if it's empty
      **/
     public boolean compile(Component progressComponent) {
-	this.progressComponent = progressComponent;
-	parts = partsList.toArray(new MosaicPart[partsList.size()]);
-	Arrangement arrangement = new Arrangement(maxHeight, parts);
-	int lastWidth = -1;
-	double widthFactor = Math.log(((double) maxWidth) / minWidth);
-	for (int i = 0; i < numWidths; i++) {
-	    int width;
-	    if (numWidths > 1) {
-		// Increase width geometrically from minWidth to maxWidth
-		double f = widthFactor * ((double) i) / (numWidths - 1);
-		f = Math.exp(f) * minWidth;
-		width = (int) (f + 0.5);
-	    } else {
-		width = maxWidth;
-	    }
-	    if (width == lastWidth) {
-		continue;	// Don't try same width twice
-	    }
-	    lastWidth = width;
-	    arrangement.arrangeWithin(width);
-	    int pixels = arrangement.getPixelsUsed();
-	    if (pixels < currPixels) {
-		setBestArrangement(arrangement);
-	    }
-	}
-	return currPixels > 0;
+        this.progressComponent = progressComponent;
+        parts = partsList.toArray(new MosaicPart[partsList.size()]);
+        Arrangement arrangement = new Arrangement(maxHeight, parts);
+        int lastWidth = -1;
+        double widthFactor = Math.log(((double) maxWidth) / minWidth);
+        for (int i = 0; i < numWidths; i++) {
+            int width;
+            if (numWidths > 1) {
+                // Increase width geometrically from minWidth to maxWidth
+                double f = widthFactor * ((double) i) / (numWidths - 1);
+                f = Math.exp(f) * minWidth;
+                width = (int) (f + 0.5);
+            } else {
+                width = maxWidth;
+            }
+            if (width == lastWidth) {
+                continue;       // Don't try same width twice
+            }
+            lastWidth = width;
+            arrangement.arrangeWithin(width);
+            int pixels = arrangement.getPixelsUsed();
+            if (pixels < currPixels) {
+                setBestArrangement(arrangement);
+            }
+        }
+        return currPixels > 0;
     }
 
     //
@@ -170,51 +170,51 @@ public class Mosaic {
     // can be subsequently modified.
     //
     void setBestArrangement(Arrangement arrangement) {
-	currPixels = arrangement.getPixelsUsed();
-	synchronized(parts) {
-	    arrangement.positionParts(parts);
-	    currWidth = arrangement.getWidthUsed();
-	    currHeight = arrangement.getHeightUsed();
-	}
-	Component c = progressComponent;
-	if (c != null) {
-	    c.repaint(100L);
-	}
+        currPixels = arrangement.getPixelsUsed();
+        synchronized(parts) {
+            arrangement.positionParts(parts);
+            currWidth = arrangement.getWidthUsed();
+            currHeight = arrangement.getHeightUsed();
+        }
+        Component c = progressComponent;
+        if (c != null) {
+            c.repaint(100L);
+        }
     }
 
     int getCurrPixels() {
-	return currPixels;
+        return currPixels;
     }
 
     void paintStatus(Graphics2D g) {
-	if (parts == null) {
-	    return;
-	}
-	g.setComposite(AlphaComposite.Src);
-	synchronized(parts) {
-	    if (currWidth == 0 || currHeight == 0 || progressComponent==null) {
-		return;
-	    }
-	    float scaleX = ((float) progressComponent.getWidth()) / currWidth;
-	    float scaleY = ((float) progressComponent.getHeight()) / currHeight;
-	    if (scaleX < scaleY) {
-		scaleY = scaleX;
-	    } else {
-		scaleX = scaleY;
-	    }
-	    g.setColor(Color.yellow);
-	    g.fillRect(0, 0, (int) (currWidth * scaleX), 
-	    		     (int) (currHeight * scaleY));
-	    Rectangle p = new Rectangle();
-	    for (MosaicPart part : parts) {
-		Rectangle r = part.getPlacement();
-		p.x = (int) (r.x * scaleX);
-		p.y = (int) (r.y * scaleY);
-		p.width = (int) (r.width * scaleX);
-		p.height = (int) (r.height * scaleY);
-		part.getImage().drawScaled(g, p, progressComponent);
-	    }
-	}
+        if (parts == null) {
+            return;
+        }
+        g.setComposite(AlphaComposite.Src);
+        synchronized(parts) {
+            if (currWidth == 0 || currHeight == 0 || progressComponent==null) {
+                return;
+            }
+            float scaleX = ((float) progressComponent.getWidth()) / currWidth;
+            float scaleY = ((float) progressComponent.getHeight()) / currHeight;
+            if (scaleX < scaleY) {
+                scaleY = scaleX;
+            } else {
+                scaleX = scaleY;
+            }
+            g.setColor(Color.yellow);
+            g.fillRect(0, 0, (int) (currWidth * scaleX), 
+                             (int) (currHeight * scaleY));
+            Rectangle p = new Rectangle();
+            for (MosaicPart part : parts) {
+                Rectangle r = part.getPlacement();
+                p.x = (int) (r.x * scaleX);
+                p.y = (int) (r.y * scaleY);
+                p.width = (int) (r.width * scaleX);
+                p.height = (int) (r.height * scaleY);
+                part.getImage().drawScaled(g, p, progressComponent);
+            }
+        }
     }
 
 
@@ -222,7 +222,7 @@ public class Mosaic {
      * Get the name of the file we'll be written to.
      **/
     public String getOutputName() {
-	return outputName;
+        return outputName;
     }
 
     /**
@@ -230,7 +230,7 @@ public class Mosaic {
      * written out for GRIN to consult at runtime.
      **/
     public void setPosition(int position) {
-	this.position = position;
+        this.position = position;
     }
 
     /**
@@ -238,35 +238,35 @@ public class Mosaic {
      * written out for GRIN to consult at runtime.
      **/
     public int getPosition() {
-	return position;
+        return position;
     }
 
     /**
      * Write out our image buffer as a PNG image.
      **/
     public void writeMosaicImage(File out) throws IOException {
-	if (currPixels == Integer.MAX_VALUE) {
-	    throw new IOException("Unable to create arrange images in mosaic " 
-	    			   + out);
-	}
-	if (currPixels > maxPixels) {
-	    throw new IOException("Image too big (" + currPixels + " > "
-	    			  + maxPixels + ") -- see part 3.2 section G.5 "
-				  + "table G-4 \"Image size\".\n");
-	}
-	BufferedImage buffer = new BufferedImage(currWidth, currHeight, 
-					BufferedImage.TYPE_INT_ARGB);
-	Graphics2D graphics  = (Graphics2D)  buffer.getGraphics();
-	graphics.setComposite(AlphaComposite.Src);
-	graphics.setColor(Color.yellow);
-	graphics.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
-	for (MosaicPart part : parts) {
-	    Rectangle r = part.getPlacement();
-	    part.getImage().drawScaled(graphics, r, null);
-	}
-	boolean ok = ImageIO.write(buffer, "PNG", out);
-	if (!ok) {
-	    throw new IOException("No writer found");
-	}
+        if (currPixels == Integer.MAX_VALUE) {
+            throw new IOException("Unable to create arrange images in mosaic " 
+                                   + out);
+        }
+        if (currPixels > maxPixels) {
+            throw new IOException("Image too big (" + currPixels + " > "
+                                  + maxPixels + ") -- see part 3.2 section G.5 "
+                                  + "table G-4 \"Image size\".\n");
+        }
+        BufferedImage buffer = new BufferedImage(currWidth, currHeight, 
+                                        BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics  = (Graphics2D)  buffer.getGraphics();
+        graphics.setComposite(AlphaComposite.Src);
+        graphics.setColor(Color.yellow);
+        graphics.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
+        for (MosaicPart part : parts) {
+            Rectangle r = part.getPlacement();
+            part.getImage().drawScaled(graphics, r, null);
+        }
+        boolean ok = ImageIO.write(buffer, "PNG", out);
+        if (!ok) {
+            throw new IOException("No writer found");
+        }
     }
 }

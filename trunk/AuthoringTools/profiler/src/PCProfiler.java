@@ -83,7 +83,7 @@ public class PCProfiler extends Thread {
 
     private int myPort;
     private DatagramSocket socket;
-    PacketList packets = new PacketList(2000000);	// 1M measurements
+    PacketList packets = new PacketList(2000000);       // 1M measurements
     private boolean started;
     private PacketFollower follower = null;
 
@@ -113,47 +113,47 @@ public class PCProfiler extends Thread {
     public void run() {
 
         byte[] buffer = new byte[512];
-	DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-	System.gc();
-	System.out.println("Ready to receive...");
-	synchronized(this) {
-	    started = true;
-	    notifyAll();
-	}
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+        System.gc();
+        System.out.println("Ready to receive...");
+        synchronized(this) {
+            started = true;
+            notifyAll();
+        }
         while (true) {
-	    PacketList list = null;
+            PacketList list = null;
             try {
                 socket.receive(packet);
-		list = packets;
-		if (list == null) {
-		    return;
-		}
-		list.add(packet, System.nanoTime());
+                list = packets;
+                if (list == null) {
+                    return;
+                }
+                list.add(packet, System.nanoTime());
             } catch (IOException e) {
                 e.printStackTrace();
                 socket.close();
                 break;
             }
-	    if (list.getDone()) {
-		return;
-	    }
+            if (list.getDone()) {
+                return;
+            }
         }
     }
 
     private void waitUntilStarted() {
-	synchronized(this) {
-	    for (;;) {
-		if (started) {
-		    return;
-		}
-		try {
-		    wait();
-		} catch (InterruptedException ex) {
-		    Thread.currentThread().interrupt();
-		    return;
-		}
-	    }
-	}
+        synchronized(this) {
+            for (;;) {
+                if (started) {
+                    return;
+                }
+                try {
+                    wait();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+        }
     }
 
     /**
@@ -167,118 +167,118 @@ public class PCProfiler extends Thread {
     }
 
     public void printHelp() {
-	System.out.println();
-	System.out.println("Commands:");
-	System.out.println("    d    Dump data collected so far and run GUI");
-	System.out.println("    q    Quit");
-	System.out.println("    f    Toggle follow mode, which shows what's received on stdout");
-	System.out.println("  <eof>  Same as q (thus, nothing happens when you double-click the JAR");
-	System.out.println();
-	System.out.println("You can also launch the program with a data file as an argument.");
-	System.out.println("This will bring up the GUI on that dataset.");
-	System.out.println();
+        System.out.println();
+        System.out.println("Commands:");
+        System.out.println("    d    Dump data collected so far and run GUI");
+        System.out.println("    q    Quit");
+        System.out.println("    f    Toggle follow mode, which shows what's received on stdout");
+        System.out.println("  <eof>  Same as q (thus, nothing happens when you double-click the JAR");
+        System.out.println();
+        System.out.println("You can also launch the program with a data file as an argument.");
+        System.out.println("This will bring up the GUI on that dataset.");
+        System.out.println();
     }
 
     public void readCommands() throws IOException {
-	BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-	waitUntilStarted();
-	System.out.println();
-	System.out.println("Now capturing packets.");
-	printHelp();
-	for (;;) {
-	    String s = in.readLine();
-	    if (s == null) {
-		System.exit(0);
-	    }
-	    s=s.trim().toLowerCase();
-	    if ("d".equals(s)) {
-		dumpData(in);
-	    } else if ("q".equals(s)) {
-		System.exit(0);
-	    } else if ("f".equals(s)) {
-		toggleFollow();
-	    } else {
-		System.out.println("??" + ((char) 7));
-		printHelp();
-	    }
-	}
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        waitUntilStarted();
+        System.out.println();
+        System.out.println("Now capturing packets.");
+        printHelp();
+        for (;;) {
+            String s = in.readLine();
+            if (s == null) {
+                System.exit(0);
+            }
+            s=s.trim().toLowerCase();
+            if ("d".equals(s)) {
+                dumpData(in);
+            } else if ("q".equals(s)) {
+                System.exit(0);
+            } else if ("f".equals(s)) {
+                toggleFollow();
+            } else {
+                System.out.println("??" + ((char) 7));
+                printHelp();
+            }
+        }
     }
 
    
     // The toggle follow command from the keyboard
     private void toggleFollow() {
-	if (follower == null) {
-	    follower = new PacketFollower(packets);
-	    follower.setPriority(3);
-	    follower.start();
-	}
-	follower.toggleRunning();
+        if (follower == null) {
+            follower = new PacketFollower(packets);
+            follower.setPriority(3);
+            follower.start();
+        }
+        follower.toggleRunning();
     }
    
     // The dump data command from the keyboard
     private void dumpData(BufferedReader in) {
-	packets.setDone();
-	System.out.println();
-	System.out.println("Dumping information derived from " 
-			   + packets.getLength() + " packets.");
+        packets.setDone();
+        System.out.println();
+        System.out.println("Dumping information derived from " 
+                           + packets.getLength() + " packets.");
 
-	ProfilingRun run = new ProfilingRun();
-	run.init(packets);
-	packets = null;		// Allows GC, unless there's a follower
-	run.writeData("profile.dat");
-	System.out.println("    Wrote data to profile.dat");
-	ResultsGui gui = new ResultsGui();
-	gui.init(run);
-	run = null;	// Allows GC
-	gui.readCommands(in);
-	System.exit(0);
+        ProfilingRun run = new ProfilingRun();
+        run.init(packets);
+        packets = null;         // Allows GC, unless there's a follower
+        run.writeData("profile.dat");
+        System.out.println("    Wrote data to profile.dat");
+        ResultsGui gui = new ResultsGui();
+        gui.init(run);
+        run = null;     // Allows GC
+        gui.readCommands(in);
+        System.exit(0);
     }
 
     //
     // Launching the GUI from the command line
     //
     private static void launchGUIFromFile(String fileName) throws IOException {
-	ProfilingRun run = new ProfilingRun();
-	run.initFromFile(fileName);
-	BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-	ResultsGui gui = new ResultsGui();
-	gui.init(run);
-	run = null;	// Allows GC
-	gui.readCommands(in);
-	System.exit(0);
+        ProfilingRun run = new ProfilingRun();
+        run.initFromFile(fileName);
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        ResultsGui gui = new ResultsGui();
+        gui.init(run);
+        run = null;     // Allows GC
+        gui.readCommands(in);
+        System.exit(0);
     }
 
     public static void main(String args[]) {
-	if (args.length > 0) {
-	    System.out.println("Reading data file from " + args[0]);
-	    try {
-		launchGUIFromFile(args[0]);
-	    } catch (IOException ex) {
-		ex.printStackTrace();
-	    }
-	    return;
-	}
+        if (args.length > 0) {
+            System.out.println("Reading data file from " + args[0]);
+            try {
+                launchGUIFromFile(args[0]);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            return;
+        }
         PCProfiler prof = new PCProfiler(2008);
-	try {
-	} catch (OutOfMemoryError err) {
-	    err.printStackTrace();
-	    System.out.println();
-	    System.out.println("Try setting maximum heap size, like this:");
-	    System.out.println("    java -Xmx200m -jar build/profiler.jar");
-	    System.out.println();
-	    System.exit(1);
+        try {
+        } catch (OutOfMemoryError err) {
+            err.printStackTrace();
+            System.out.println();
+            System.out.println("Try setting maximum heap size, like this:");
+            System.out.println("    java -Xmx200m -jar build/profiler.jar");
+            System.out.println();
+            System.exit(1);
 
-	    // If you're as annoyed by this as I am, see why this can't be set
-	    // in the JAR file at 
-	    // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6202113
-	}
-	prof.setPriority(5);
+            // If you're as annoyed by this as I am, see why this can't be set
+            // in the JAR file at 
+            // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6202113
+        }
+        prof.setPriority(5);
         prof.start();
-	try {
-	    prof.readCommands();
-	} catch (IOException e) {
-	    Debug.printStackTrace(e);
-	    System.exit(0);
-	}
+        try {
+            prof.readCommands();
+        } catch (IOException e) {
+            Debug.printStackTrace(e);
+            System.exit(0);
+        }
     }
 }

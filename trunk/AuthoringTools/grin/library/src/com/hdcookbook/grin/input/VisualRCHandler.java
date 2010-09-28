@@ -116,23 +116,23 @@ public class VisualRCHandler extends RCHandler implements Node {
     public final static int GRID_ACTIVATE = 0xffff;
 
     protected static int MASK = RCKeyEvent.KEY_UP.getBitMask()
-    				| RCKeyEvent.KEY_DOWN.getBitMask()
-    				| RCKeyEvent.KEY_RIGHT.getBitMask()
-    				| RCKeyEvent.KEY_LEFT.getBitMask()
-    				| RCKeyEvent.KEY_ENTER.getBitMask();
+                                | RCKeyEvent.KEY_DOWN.getBitMask()
+                                | RCKeyEvent.KEY_RIGHT.getBitMask()
+                                | RCKeyEvent.KEY_LEFT.getBitMask()
+                                | RCKeyEvent.KEY_ENTER.getBitMask();
     protected int[] upDown;    // For each state, the most significant 16 bits
-    			     // contains the state to go to on "up", and the
-			     // least significant 16 bits the "down" value.
-			     // If this has the special value GRID_ACTIVATE, 
-			     // then there's no movement, but the feature is
-			     // activated.
+                             // contains the state to go to on "up", and the
+                             // least significant 16 bits the "down" value.
+                             // If this has the special value GRID_ACTIVATE, 
+                             // then there's no movement, but the feature is
+                             // activated.
 
     protected int[] rightLeft; // For each state, the most significant 16 bits
-    			     // contains the state to go to on "right", and the
-			     // least significant 16 bits the "left" value.
-			     // If this has the special value GRID_ACTIVATE, 
-			     // then there's no movement, but the feature is
-			     // activated.
+                             // contains the state to go to on "right", and the
+                             // least significant 16 bits the "left" value.
+                             // If this has the special value GRID_ACTIVATE, 
+                             // then there's no movement, but the feature is
+                             // activated.
 
     protected int[][] upDownAlternates;     // alternate grid, 
     protected int[][] rightLeftAlternates;  // cf. visual_grid_alternate
@@ -141,14 +141,14 @@ public class VisualRCHandler extends RCHandler implements Node {
     protected String[] stateNames;   // The names corresponding to state numbers.
     protected Assembly assembly;     // can be null
     protected Feature[] selectFeatures; // By state #, array can be null, and
-    				      // any element can be null.
+                                      // any element can be null.
     protected Command[][] selectCommands; // By state #, array can be null, and
-           			      // any element can be null.
+                                      // any element can be null.
     protected Feature[] activateFeatures;  // by state #, etc.
     protected Command[][] activateCommands;  // by state #
     protected Rectangle[] mouseRects;   // hit zones on screen for the mouse
     protected int[] mouseRectStates;    // The state # corresponding to each rect
-    protected int timeout;	// -1 means "no timeout"
+    protected int timeout;      // -1 means "no timeout"
     protected Command[] timeoutCommands;
 
     /**
@@ -173,11 +173,11 @@ public class VisualRCHandler extends RCHandler implements Node {
      * Useful for development.
      **/
     public String toString() {
-	return super.toString() + "(" + getName() + ")";
+        return super.toString() + "(" + getName() + ")";
     }
 
     private boolean handlesActivation() {
-	return activateFeatures != null || activateCommands != null;
+        return activateFeatures != null || activateCommands != null;
     }
 
     /**
@@ -186,7 +186,7 @@ public class VisualRCHandler extends RCHandler implements Node {
      * is held on our show.
      **/
     public boolean getActivated() {
-	return activated;
+        return activated;
     }
 
     /**
@@ -195,14 +195,14 @@ public class VisualRCHandler extends RCHandler implements Node {
      * is held on our show.
      **/
     public int getState() {
-	return currState;
+        return currState;
     }
 
     /**
      * Get the name of a numbered state.
      **/
     public String getStateName(int stateNum) {
-	return stateNames[stateNum];
+        return stateNames[stateNum];
     }
 
     /**
@@ -211,12 +211,12 @@ public class VisualRCHandler extends RCHandler implements Node {
      * @return -1 if not found
      **/
     public int lookupState(String name) {
-	for (int i = 0; i < stateNames.length; i++) {
-	    if (stateNames[i].equals(name)) {
-		return i;
-	    }
-	}
-	return -1;
+        for (int i = 0; i < stateNames.length; i++) {
+            if (stateNames[i].equals(name)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -225,62 +225,62 @@ public class VisualRCHandler extends RCHandler implements Node {
      * @return -1 if not found
      **/
     public int lookupGrid(String gridAlternateName) {
-	for (int i = 0; i < gridAlternateNames.length; i++) {
-	    if (gridAlternateNames[i].equals(gridAlternateName)) {
-		return i;
-	    }
-	}
-	return -1;
+        for (int i = 0; i < gridAlternateNames.length; i++) {
+            if (gridAlternateNames[i].equals(gridAlternateName)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean handleKeyPressed(RCKeyEvent ke, Show caller) {
-	if ((ke.getBitMask() & MASK) == 0) {
-	    return false;
-	}
-	synchronized(show) {
-	    int newState = 0;
-	    if (ke == ke.KEY_ENTER) {
-		newState = GRID_ACTIVATE;
-	    } else if (ke == ke.KEY_UP) {
-		newState = (upDown[currState] >> 16) & 0xffff;
+        if ((ke.getBitMask() & MASK) == 0) {
+            return false;
+        }
+        synchronized(show) {
+            int newState = 0;
+            if (ke == ke.KEY_ENTER) {
+                newState = GRID_ACTIVATE;
+            } else if (ke == ke.KEY_UP) {
+                newState = (upDown[currState] >> 16) & 0xffff;
             } else if (ke == ke.KEY_DOWN) {
-		newState = upDown[currState] & 0xffff;
+                newState = upDown[currState] & 0xffff;
             } else if (ke == ke.KEY_RIGHT) {
-		newState = (rightLeft[currState] >> 16) & 0xffff;
+                newState = (rightLeft[currState] >> 16) & 0xffff;
             } else if (ke == ke.KEY_LEFT) {
-		newState = rightLeft[currState] & 0xffff;
+                newState = rightLeft[currState] & 0xffff;
             } else if (Debug.ASSERT) {
-		Debug.assertFail();
-	    }
-	    if (newState == GRID_ACTIVATE) {
-		if (!handlesActivation()) {
-		    return false;
-		}
-		setState(-1, true, true);
-		return true;
-	    } else {
-		setState(newState, false, true);
-		return true;
-	    }
-	}
+                Debug.assertFail();
+            }
+            if (newState == GRID_ACTIVATE) {
+                if (!handlesActivation()) {
+                    return false;
+                }
+                setState(-1, true, true);
+                return true;
+            } else {
+                setState(newState, false, true);
+                return true;
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean handleKeyReleased(RCKeyEvent ke, Show caller) {
-	// ignored
-	return false;
+        // ignored
+        return false;
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean handleKeyTyped(RCKeyEvent ke, Show caller) {
-	return false;
+        return false;
     }
     
     /**
@@ -296,10 +296,10 @@ public class VisualRCHandler extends RCHandler implements Node {
         for (int i = 0; i < mouseRects.length; i++) {
             if (mouseRects[i].contains(x, y)) {
                 setState(mouseRectStates[i], activate, true);
-		return true;
+                return true;
             }
         }
-	return false;
+        return false;
     }
     
     /**
@@ -308,15 +308,15 @@ public class VisualRCHandler extends RCHandler implements Node {
      * updates.  This method may also be called from a java_command or
      * from the director, within the animation thread.
      *
-     * @param newState	     New state, -1 means "current"
+     * @param newState       New state, -1 means "current"
      * @param newActivated   New value for activated
      * @param runCommands    If true, run the commands normally associated
-     *			     with entering this state due to a keypress.
+     *                       with entering this state due to a keypress.
      **/
     public void setState(int newState, boolean newActivated,
-		         boolean runCommands) 
+                         boolean runCommands) 
     {
-	setState(newState, newActivated, runCommands, -1);
+        setState(newState, newActivated, runCommands, -1);
     }
 
     /**
@@ -325,117 +325,117 @@ public class VisualRCHandler extends RCHandler implements Node {
      * updates.  This method may also be called from a java_command or
      * from the director, within the animation thread.
      *
-     * @param newState	     New state, -1 means "current"
+     * @param newState       New state, -1 means "current"
      * @param newActivated   New value for activated
      * @param runCommands    If true, run the commands normally associated
-     *			     with entering this state due to a keypress.
+     *                       with entering this state due to a keypress.
      * @param gridAlternate  Alternate grid # to select, 0..max, or -1 to
-     *			     leave grid unchanged.
+     *                       leave grid unchanged.
      **/
     public void setState(int newState, boolean newActivated,
-		         boolean runCommands, int gridAlternate) 
+                         boolean runCommands, int gridAlternate) 
     {
-	synchronized(show) {
-	    if (gridAlternate != -1)  {
-		upDown = upDownAlternates[gridAlternate];
-		rightLeft = rightLeftAlternates[gridAlternate];
-	    }
-	    if (newState == GRID_ACTIVATE) {
-		newState = currState;
-		newActivated = true;
-	    } else if (newState == -1) {
-		newState = currState;
-	    }
-	    if (newState == currState && newActivated == activated) {
-		if (activated) {
-		    // If activated, re-run any animations by
-		    // briefly setting the assembly to the selected
-		    // state.
-		    setState(newState, false, false);
-		} else {
-		    return;
-		}
-	    }
-	    if (Debug.LEVEL > 1) {
-		Debug.println("RC handler state becomes " 
-			      + stateNames[newState]);
-	    }
-	    Feature[] fs = newActivated ? activateFeatures : selectFeatures;
-	    Command[][] cs = newActivated ? activateCommands : selectCommands;
-	    if (fs != null && fs[newState] != null) {
-		assembly.setCurrentFeature(fs[newState]);
-		if (Debug.LEVEL > 1) {
-		    Debug.println("    Setting assembly to " + fs[newState]);
-		}
-	    }
-	    if (runCommands && cs != null) {
-		Command[] arr = cs[newState];
-		if (arr != null) {
-		    for (int i = 0; i < arr.length; i++) {
-			show.runCommand(arr[i]);
-		    }
-		}
-	    }
-	    currState = newState;
-	    activated = newActivated;
-	} // end synchronized
+        synchronized(show) {
+            if (gridAlternate != -1)  {
+                upDown = upDownAlternates[gridAlternate];
+                rightLeft = rightLeftAlternates[gridAlternate];
+            }
+            if (newState == GRID_ACTIVATE) {
+                newState = currState;
+                newActivated = true;
+            } else if (newState == -1) {
+                newState = currState;
+            }
+            if (newState == currState && newActivated == activated) {
+                if (activated) {
+                    // If activated, re-run any animations by
+                    // briefly setting the assembly to the selected
+                    // state.
+                    setState(newState, false, false);
+                } else {
+                    return;
+                }
+            }
+            if (Debug.LEVEL > 1) {
+                Debug.println("RC handler state becomes " 
+                              + stateNames[newState]);
+            }
+            Feature[] fs = newActivated ? activateFeatures : selectFeatures;
+            Command[][] cs = newActivated ? activateCommands : selectCommands;
+            if (fs != null && fs[newState] != null) {
+                assembly.setCurrentFeature(fs[newState]);
+                if (Debug.LEVEL > 1) {
+                    Debug.println("    Setting assembly to " + fs[newState]);
+                }
+            }
+            if (runCommands && cs != null) {
+                Command[] arr = cs[newState];
+                if (arr != null) {
+                    for (int i = 0; i < arr.length; i++) {
+                        show.runCommand(arr[i]);
+                    }
+                }
+            }
+            currState = newState;
+            activated = newActivated;
+        } // end synchronized
     }
 
     /**
      * {@inheritDoc}
      **/
     public void activate(Segment s) {
-	timedOut = timeout <= -1;
-	currFrame = 0;
-	if (assembly != null) {
-		// If we have an assembly, make our state mirror
-		// that of the assembly.
-	    Feature curr = assembly.getCurrentPart();
-	    int i = lookForFeature(curr, selectFeatures);
-	    if (i != -1) {
-		currState = i;
-		activated = false;
-	    } else  {
-		i = lookForFeature(curr, activateFeatures);
-		if (i != -1) {
-		    currState = i;
-		    if (startSelected) {
-			assembly.setCurrentFeature(selectFeatures[i]);
-			activated = false;
-		    } else {
-			activated = true;
-		    }
-		} else if (Debug.LEVEL > 0) {
-		    Debug.println("Handler " + getName()
-		                  + " can't find current assembly state");
-		}
-	    }
-	}
+        timedOut = timeout <= -1;
+        currFrame = 0;
+        if (assembly != null) {
+                // If we have an assembly, make our state mirror
+                // that of the assembly.
+            Feature curr = assembly.getCurrentPart();
+            int i = lookForFeature(curr, selectFeatures);
+            if (i != -1) {
+                currState = i;
+                activated = false;
+            } else  {
+                i = lookForFeature(curr, activateFeatures);
+                if (i != -1) {
+                    currState = i;
+                    if (startSelected) {
+                        assembly.setCurrentFeature(selectFeatures[i]);
+                        activated = false;
+                    } else {
+                        activated = true;
+                    }
+                } else if (Debug.LEVEL > 0) {
+                    Debug.println("Handler " + getName()
+                                  + " can't find current assembly state");
+                }
+            }
+        }
     }
 
     private int lookForFeature(Feature f, Feature[] fs) {
-	if (fs == null) {
-	    return -1;
-	}
-	for (int i = 0; i < fs.length; i++) {
-	    if (fs[i] == f) {
-		return i;
-	    }
-	}
-	return -1;
+        if (fs == null) {
+            return -1;
+        }
+        for (int i = 0; i < fs.length; i++) {
+            if (fs[i] == f) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	currFrame++;
-    	if (!timedOut && currFrame > timeout) {
-	    timedOut = true;
-	    for (int i = 0; i < timeoutCommands.length; i++) {
-		show.runCommand(timeoutCommands[i]);
-	    }
-	}
+        currFrame++;
+        if (!timedOut && currFrame > timeout) {
+            timedOut = true;
+            for (int i = 0; i < timeoutCommands.length; i++) {
+                show.runCommand(timeoutCommands[i]);
+            }
+        }
     }
     
     public void readInstanceData(GrinDataInputStream in, int length) 
@@ -443,13 +443,13 @@ public class VisualRCHandler extends RCHandler implements Node {
         
         in.readSuperClassData(this);
         
-	gridAlternateNames = in.readStringArray();
-	upDownAlternates = new int[in.readInt()][];
-	rightLeftAlternates = new int[upDownAlternates.length][];
-	for (int i = 0; i < upDownAlternates.length; i++) {
-	    upDownAlternates[i] = in.readSharedIntArray();
-	    rightLeftAlternates[i] = in.readSharedIntArray();
-	}
+        gridAlternateNames = in.readStringArray();
+        upDownAlternates = new int[in.readInt()][];
+        rightLeftAlternates = new int[upDownAlternates.length][];
+        for (int i = 0; i < upDownAlternates.length; i++) {
+            upDownAlternates[i] = in.readSharedIntArray();
+            rightLeftAlternates[i] = in.readSharedIntArray();
+        }
         upDown = upDownAlternates[0];
         rightLeft = rightLeftAlternates[0];
         stateNames = in.readStringArray();
@@ -475,11 +475,11 @@ public class VisualRCHandler extends RCHandler implements Node {
         this.timeout = in.readInt();
         this.timeoutCommands = in.readCommands();
         
-	if (in.readBoolean()) {
+        if (in.readBoolean()) {
             this.assembly = (Assembly)in.readFeatureReference();
         }    
         this.selectFeatures = in.readFeaturesArrayReference();
         this.activateFeatures = in.readFeaturesArrayReference();      
-	this.startSelected = in.readBoolean();
+        this.startSelected = in.readBoolean();
     }
 }

@@ -90,80 +90,80 @@ public class Assembly extends Feature implements Node {
     private int numSetupChecked;
 
     public Assembly(Show show) {
-	super(show);
+        super(show);
     }
 
     public void setParts(String[] partNames, Feature[] parts) { 
-	this.partNames = partNames;
-	this.parts = parts;
-	currentFeature = parts[0];
+        this.partNames = partNames;
+        this.parts = parts;
+        currentFeature = parts[0];
     }
 
     /**
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup() || activated) {
-	    throw new IllegalStateException();
-	}
-	Assembly result = new Assembly(show);
-	int found = -1;
-	result.partNames = partNames;
-	result.parts = new Feature[parts.length];
-	for (int i = 0; i < parts.length; i++) {
-	    if (currentFeature == parts[i]) {
-		found = i;
-	    }
-	    result.parts[i] = parts[i].makeNewClone(clones);
-	}
-	if (found != -1) {
-	    result.currentFeature = result.parts[found];
-	}
-	result.numSetupChecked = numSetupChecked;
-	    // result.activated remains false
-	return result;
-	    // No initializeClone() of this feature is needed.
+        if (!isSetup() || activated) {
+            throw new IllegalStateException();
+        }
+        Assembly result = new Assembly(show);
+        int found = -1;
+        result.partNames = partNames;
+        result.parts = new Feature[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            if (currentFeature == parts[i]) {
+                found = i;
+            }
+            result.parts[i] = parts[i].makeNewClone(clones);
+        }
+        if (found != -1) {
+            result.currentFeature = result.parts[found];
+        }
+        result.numSetupChecked = numSetupChecked;
+            // result.activated remains false
+        return result;
+            // No initializeClone() of this feature is needed.
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addSubgraph(HashSet set) {
-	if (set.contains(this)) {
-	    return;		// Avoid O(n^2) with assemblies 
-	}
-	super.addSubgraph(set);
-	for (int i = 0; i < parts.length; i++) {
-	    parts[i].addSubgraph(set);
-	}
+        if (set.contains(this)) {
+            return;             // Avoid O(n^2) with assemblies 
+        }
+        super.addSubgraph(set);
+        for (int i = 0; i < parts.length; i++) {
+            parts[i].addSubgraph(set);
+        }
     }
     
     /**
      * {@inheritDoc}
      **/
     public int getX() {
-	return currentFeature.getX();
+        return currentFeature.getX();
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getY() {
-	return currentFeature.getY();
+        return currentFeature.getY();
     }
 
     /**
      * Get the names of our parts.
      **/
     public String[] getPartNames() {
-	return partNames;
+        return partNames;
     }
 
     /**
      * Get our parts, that is, our child features.
      **/
     public Feature[] getParts() {
-	return parts;
+        return parts;
     }
 
     /**
@@ -172,8 +172,8 @@ public class Assembly extends Feature implements Node {
      * the segments.
      **/
     public void initialize() {
-	// The show will initialize our sub-features, so we don't
-	// need to do anything here.
+        // The show will initialize our sub-features, so we don't
+        // need to do anything here.
     }
 
 
@@ -188,20 +188,20 @@ public class Assembly extends Feature implements Node {
      * too!).
      **/
     public void destroy() {
-	// The show will destroy our sub-features, so we don't
-	// need to do anything here.
+        // The show will destroy our sub-features, so we don't
+        // need to do anything here.
     }
 
     //
     // This is synchronized to only occur within model updates.
     //
     protected void setActivateMode(boolean mode) {
-	activated = mode;
-	if (mode) {
-	    currentFeature.activate();
-	} else {
-	    currentFeature.deactivate();
-	}
+        activated = mode;
+        if (mode) {
+            currentFeature.activate();
+        } else {
+            currentFeature.deactivate();
+        }
     }
 
     /**
@@ -220,65 +220,65 @@ public class Assembly extends Feature implements Node {
      * @see #getCurrentPart()
      **/
     public void setCurrentFeature(Feature feature) {
-	synchronized(show) {	// It's already held, but this is harmless
-	    if (currentFeature == feature) {
-		return;
-	    }
-	    if (activated) {
-		feature.activate();
-		currentFeature.deactivate();
-		show.getDirector().notifyAssemblyPartSelected
-				    (this, feature,  currentFeature, activated);
-	    }
-	    currentFeature = feature;
-	}
+        synchronized(show) {    // It's already held, but this is harmless
+            if (currentFeature == feature) {
+                return;
+            }
+            if (activated) {
+                feature.activate();
+                currentFeature.deactivate();
+                show.getDirector().notifyAssemblyPartSelected
+                                    (this, feature,  currentFeature, activated);
+            }
+            currentFeature = feature;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
-	if (mode) {
-	    numSetupChecked = 0;
-	    int num = 0;
-	    for (int i = 0; i < parts.length; i++) {
-		num += parts[i].setup();
-	    }
-	    return num;
-	} else {
-	    for (int i = 0; i < parts.length; i++) {
-		parts[i].unsetup();
-	    }
-	    return 0;
-	}
+        if (mode) {
+            numSetupChecked = 0;
+            int num = 0;
+            for (int i = 0; i < parts.length; i++) {
+                num += parts[i].setup();
+            }
+            return num;
+        } else {
+            for (int i = 0; i < parts.length; i++) {
+                parts[i].unsetup();
+            }
+            return 0;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	//
-	// See note about cloned features in setSetupMode()
-	//
-	while (numSetupChecked < parts.length) {
-	    if (parts[numSetupChecked].needsMoreSetup()) {
-		return true;
-	    }
-	    numSetupChecked++;
-	    	// Once a part doesn't need more setup, it will never go
-		// back to needing setup until we call unsetup() then
-		// setup().  numSetupChecked is re-set to 0 just before
-		// callin setup() on our part, so this is safe.  Note
-		// that the contract of Feature requires that setup()
-		// be called before needsMoreSetup() is consulted.
-		//
-		// This optimization helps speed the calculation of
-		// needsMoreSetup() in the case where a group or an
-		// assembly is the child of multiple parts of an assembly.
-		// With this optimization, a potential O(n^2) is turned
-		// into O(n) (albeit typically with a small n).
-	}
-	return false;
+        //
+        // See note about cloned features in setSetupMode()
+        //
+        while (numSetupChecked < parts.length) {
+            if (parts[numSetupChecked].needsMoreSetup()) {
+                return true;
+            }
+            numSetupChecked++;
+                // Once a part doesn't need more setup, it will never go
+                // back to needing setup until we call unsetup() then
+                // setup().  numSetupChecked is re-set to 0 just before
+                // callin setup() on our part, so this is safe.  Note
+                // that the contract of Feature requires that setup()
+                // be called before needsMoreSetup() is consulted.
+                //
+                // This optimization helps speed the calculation of
+                // needsMoreSetup() in the case where a group or an
+                // assembly is the child of multiple parts of an assembly.
+                // With this optimization, a potential O(n^2) is turned
+                // into O(n) (albeit typically with a small n).
+        }
+        return false;
     }
 
     /**
@@ -286,11 +286,11 @@ public class Assembly extends Feature implements Node {
      * null if it can't be found.
      **/
     public Feature findPart(String name) {
-	for (int i = 0; i < parts.length; i++) {
-	    if (partNames[i].equals(name)) {
-		return parts[i];
-	    }
-	}
+        for (int i = 0; i < parts.length; i++) {
+            if (partNames[i].equals(name)) {
+                return parts[i];
+            }
+        }
         return null;
     }
 
@@ -300,18 +300,18 @@ public class Assembly extends Feature implements Node {
      * @see #setCurrentFeature(com.hdcookbook.grin.Feature)
      **/
     public Feature getCurrentPart() {
-	return currentFeature;
+        return currentFeature;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
-	currentFeature.markDisplayAreasChanged();
-	    // At this point, we're not sure if currentFeature refers to
-	    // the previous frame or the next frame, but either way will
-	    // generate correct results, because a feature could only fail
-	    // to be marked as modified if it was active in both.
+        currentFeature.markDisplayAreasChanged();
+            // At this point, we're not sure if currentFeature refers to
+            // the previous frame or the next frame, but either way will
+            // generate correct results, because a feature could only fail
+            // to be marked as modified if it was active in both.
     }
 
 
@@ -319,21 +319,21 @@ public class Assembly extends Feature implements Node {
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	currentFeature.addDisplayAreas(context);
+        currentFeature.addDisplayAreas(context);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	currentFeature.paintFrame(gr);
+        currentFeature.paintFrame(gr);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	currentFeature.nextFrame();
+        currentFeature.nextFrame();
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 

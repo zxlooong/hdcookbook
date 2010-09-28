@@ -29,11 +29,11 @@ import com.hdcookbook.grin.util.Debug;
 import com.substanceofcode.utils.StringUtil;
 
 public class DateUtil {
-	private static final String[] DAY_OF_WEEK = {
-		"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-	private static final String[] MONTH = {
-		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+        private static final String[] DAY_OF_WEEK = {
+                "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+        private static final String[] MONTH = {
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
     /**
      * Parse RSS date format to Date object.
@@ -136,18 +136,18 @@ public class DateUtil {
             return cal.getTime();
     }
 
-	public static String formatHTTPDate(Date date) {
-		Calendar cal = Calendar.getInstance();
+        public static String formatHTTPDate(Date date) {
+                Calendar cal = Calendar.getInstance();
         cal.setTimeZone( TimeZone.getTimeZone("GMT+0") );
-		cal.setTime(date);
-		return 
-			DAY_OF_WEEK[cal.get(Calendar.DAY_OF_WEEK)-1]+", "+
-			cal.get(Calendar.DAY_OF_MONTH)+" "+
-			MONTH[cal.get(Calendar.MONTH)]+" "+
-			cal.get(Calendar.YEAR)+" "+
-			cal.get(Calendar.HOUR_OF_DAY)+":"+
-			cal.get(Calendar.MINUTE)+":"+
-			cal.get(Calendar.SECOND)+" GMT";
-		//Tue%2C+27+Mar+2007+22%3A55%3A48+GMT
-	}
+                cal.setTime(date);
+                return 
+                        DAY_OF_WEEK[cal.get(Calendar.DAY_OF_WEEK)-1]+", "+
+                        cal.get(Calendar.DAY_OF_MONTH)+" "+
+                        MONTH[cal.get(Calendar.MONTH)]+" "+
+                        cal.get(Calendar.YEAR)+" "+
+                        cal.get(Calendar.HOUR_OF_DAY)+":"+
+                        cal.get(Calendar.MINUTE)+":"+
+                        cal.get(Calendar.SECOND)+" GMT";
+                //Tue%2C+27+Mar+2007+22%3A55%3A48+GMT
+        }
 }

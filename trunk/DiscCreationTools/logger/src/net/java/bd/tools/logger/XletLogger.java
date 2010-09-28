@@ -71,8 +71,8 @@ import org.havi.ui.HSceneFactory;
  *       
  *       java.awt.Container gui = new MyXletContainer(); // xlet root container for displaying gui
  *       String ada = System.getProperty("dvb.persistent.root")
- *	       + "/" + context.getXletProperty("dvb.org.id")
- *	       + "/" + context.getXletProperty("dvb.app.id");
+ *             + "/" + context.getXletProperty("dvb.org.id")
+ *             + "/" + context.getXletProperty("dvb.app.id");
  *       
  *       XletLogger.setXletContainer(gui);  // Adds the xlet gui to the default HScene.
  *       XletLogger.setLogFile(ada + "/" + "log.txt");  // logfile goes to ADA
@@ -203,9 +203,9 @@ public class XletLogger {
         HScene scene = HSceneFactory.getInstance().getDefaultHScene(); 
         scene.setBackgroundMode(HScene.BACKGROUND_FILL);
  
-    	// initiate LogDialog component to display log on the screen
+        // initiate LogDialog component to display log on the screen
         Screen.setRootContainer(scene);  
-	XletLogDialog logDialog = new XletLogDialog();
+        XletLogDialog logDialog = new XletLogDialog();
         logDialog.compose();
         Logger.addObserver(logDialog);
         Logger.addObserver(new SystemOutLogObserver());

@@ -21,17 +21,17 @@ middle's hash), then this disc.
 
 Possible outcomes:
 
-	The credential wins, that is, output_1 gets written under middle's 
-	hash
+        The credential wins, that is, output_1 gets written under middle's 
+        hash
 
-	The credential loses, that is, output_1 gets written under root's
-	hash
+        The credential loses, that is, output_1 gets written under root's
+        hash
 
-	Partial credential loss:  output_1 gets written under root's hash if
-	it wasn't there, but if it was there under middle's hash, that mapped
-	name applies
+        Partial credential loss:  output_1 gets written under root's hash if
+        it wasn't there, but if it was there under middle's hash, that mapped
+        name applies
 
-	Disc doesn't launch because player fails to cope with this totally
-	unanticipated scenario
+        Disc doesn't launch because player fails to cope with this totally
+        unanticipated scenario
 
-	Something else
+        Something else

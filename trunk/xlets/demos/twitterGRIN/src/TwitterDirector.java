@@ -78,10 +78,10 @@ import java.util.StringTokenizer;
 public class TwitterDirector extends Director {
 
     private static class TweetView {
-	FixedImage	icon;
-	Text		screenName;
-	Text		createdTime;
-	Text		tweet;
+        FixedImage      icon;
+        Text            screenName;
+        Text            createdTime;
+        Text            tweet;
     }
 
     private ManagedImage blankProfilePicture;
@@ -101,102 +101,102 @@ public class TwitterDirector extends Director {
 
     public  InterpolatedModel windowMover;
 
-    TwitterApi twitter = new TwitterApi(null);	// Used by TwitterPoll
+    TwitterApi twitter = new TwitterApi(null);  // Used by TwitterPoll
     Component component;
 
     public TwitterDirector() {
     }
 
     public void initialize() {
-	{
-	    FixedImage fi = (FixedImage) getFeature("F:ProfileImage.Blank");
-	    blankProfilePicture = fi.getImage();
-	    ImageManager.getImage(blankProfilePicture);
-	    blankProfilePicture.prepare();
-	    fi = (FixedImage) getFeature("F:ProfileImage.Default");
-	    defaultProfilePicture = fi.getImage();
-	    ImageManager.getImage(defaultProfilePicture);
-	    defaultProfilePicture.prepare();
+        {
+            FixedImage fi = (FixedImage) getFeature("F:ProfileImage.Blank");
+            blankProfilePicture = fi.getImage();
+            ImageManager.getImage(blankProfilePicture);
+            blankProfilePicture.prepare();
+            fi = (FixedImage) getFeature("F:ProfileImage.Default");
+            defaultProfilePicture = fi.getImage();
+            ImageManager.getImage(defaultProfilePicture);
+            defaultProfilePicture.prepare();
         windowMover = (InterpolatedModel) getFeature("F:Window.Mover");
-	}
-	tweets = new TweetView[4];
-	for (int i = 0; i < tweets.length; i++) {
-	    TweetView v = new TweetView();
-	    tweets[i] = v;
-	    v.icon = (FixedImage) getFeature("F:ProfileImage." + (i+1));
-	    v.screenName = (Text) getFeature("F:ScreenName." + (i+1));
-	    v.createdTime = (Text) getFeature("F:CreatedTime." + (i+1));
-	    v.tweet = (Text) getFeature("F:Tweet." + (i+1));
+        }
+        tweets = new TweetView[4];
+        for (int i = 0; i < tweets.length; i++) {
+            TweetView v = new TweetView();
+            tweets[i] = v;
+            v.icon = (FixedImage) getFeature("F:ProfileImage." + (i+1));
+            v.screenName = (Text) getFeature("F:ScreenName." + (i+1));
+            v.createdTime = (Text) getFeature("F:CreatedTime." + (i+1));
+            v.tweet = (Text) getFeature("F:Tweet." + (i+1));
 
-	    v.screenName.setText(emptyStringArray);
-	    v.createdTime.setText(emptyStringArray);
-	    v.tweet.setText(emptyStringArray);
-	}
+            v.screenName.setText(emptyStringArray);
+            v.createdTime.setText(emptyStringArray);
+            v.tweet.setText(emptyStringArray);
+        }
 
-	footer = (Text) getFeature("F:Footer");
-	fontMetrics = getShow().component.getFontMetrics(tweets[0].tweet.getFont());
-	NetworkManager.start();
+        footer = (Text) getFeature("F:Footer");
+        fontMetrics = getShow().component.getFontMetrics(tweets[0].tweet.getFont());
+        NetworkManager.start();
     }
 
     public void initializeProfileImages() {
-	for (int i = 0; i < tweets.length; i++) {
-	    tweets[i].icon.replaceImage(blankProfilePicture);
-	}
+        for (int i = 0; i < tweets.length; i++) {
+            tweets[i].icon.replaceImage(blankProfilePicture);
+        }
     }
 
     public void notifyDestroyed() {
-	super.notifyDestroyed();
-	if (blankProfilePicture != null) {
-	    blankProfilePicture.unprepare();
-	    ImageManager.ungetImage(blankProfilePicture);
-	}
-	if (defaultProfilePicture != null) {
-	    defaultProfilePicture.unprepare();
-	    ImageManager.ungetImage(defaultProfilePicture);
-	}
-	NetworkManager.shutdown();
-	TwitterPoll poll = null;
-	synchronized(this) {
-	    poll = pendingCommand;
-	}
-	if (poll != null) {
-	    poll.destroy();
-	}
-	if (tweetIcon != null) {
-	    for (int i = 0; i < tweetIcon.length; i++) {
-		if (tweetIcon[i] != null) {
-		    tweetIcon[i].unprepare();
-		    ImageManager.ungetImage(tweetIcon[i]);
-		}
-	    }
-	}
+        super.notifyDestroyed();
+        if (blankProfilePicture != null) {
+            blankProfilePicture.unprepare();
+            ImageManager.ungetImage(blankProfilePicture);
+        }
+        if (defaultProfilePicture != null) {
+            defaultProfilePicture.unprepare();
+            ImageManager.ungetImage(defaultProfilePicture);
+        }
+        NetworkManager.shutdown();
+        TwitterPoll poll = null;
+        synchronized(this) {
+            poll = pendingCommand;
+        }
+        if (poll != null) {
+            poll.destroy();
+        }
+        if (tweetIcon != null) {
+            for (int i = 0; i < tweetIcon.length; i++) {
+                if (tweetIcon[i] != null) {
+                    tweetIcon[i].unprepare();
+                    ImageManager.ungetImage(tweetIcon[i]);
+                }
+            }
+        }
     }
 
     public void pollTwitter() {
-	NetworkManager.enqueue(new TwitterPoll(this));
+        NetworkManager.enqueue(new TwitterPoll(this));
     }
 
     public void pageNext() {
-	page++;
-	normalizePage();
-	copyDataToUI();
+        page++;
+        normalizePage();
+        copyDataToUI();
     }
 
     public void pageBack() {
-	page--;
-	normalizePage();
-	copyDataToUI();
+        page--;
+        normalizePage();
+        copyDataToUI();
     }
 
     private void normalizePage() {
-	int max = 1 + (tweetStatus.length - 1) / tweets.length;
-	if (page > max) {
-	    page = max;
-	}
-	if (page < 1) {
-	    page = 1;
-	}
-	footer.setText(new String[] { "Page: " + page });
+        int max = 1 + (tweetStatus.length - 1) / tweets.length;
+        if (page > max) {
+            page = max;
+        }
+        if (page < 1) {
+            page = 1;
+        }
+        footer.setText(new String[] { "Page: " + page });
     }
 
     //
@@ -206,84 +206,84 @@ public class TwitterDirector extends Director {
     // icons; it will eventually unprepare and unget them.
     //
     void updateScreen(Status[] messages, ManagedImage[] icons) {
-	if (tweetIcon != null) {
-	    for (int i = 0; i < tweetIcon.length; i++) {
-		if (tweetIcon[i] != null) {
-		    tweetIcon[i].unprepare();
-		    ImageManager.ungetImage(tweetIcon[i]);
-		}
-	    }
-	}
-	tweetIcon = icons;
-	tweetStatus = messages;
-	normalizePage();
-	copyDataToUI();
+        if (tweetIcon != null) {
+            for (int i = 0; i < tweetIcon.length; i++) {
+                if (tweetIcon[i] != null) {
+                    tweetIcon[i].unprepare();
+                    ImageManager.ungetImage(tweetIcon[i]);
+                }
+            }
+        }
+        tweetIcon = icons;
+        tweetStatus = messages;
+        normalizePage();
+        copyDataToUI();
     }
 
     private void copyDataToUI() {
-	int entry = (page - 1) * 4;
-	for (int i = 0; i < tweets.length; i++) {
-	    TweetView tweet = tweets[i];
-	    if (entry >= tweetStatus.length) {
-		tweet.screenName.setText(emptyStringArray);
-		tweet.createdTime.setText(emptyStringArray);
-		tweet.tweet.setText(emptyStringArray);
-		tweet.icon.replaceImage(blankProfilePicture);
-	    } else {
-		Status status = tweetStatus[entry];
-		ManagedImage image = tweetIcon[entry];
-		tweet.screenName.setText(new String[] { status.getScreenName() });
-		String date = dateFormat.format(status.getDate());
-		tweet.createdTime.setText(new String[] { date });
-		String[] lines = new String[] { "", "", "", "" };
-		StringTokenizer tok = new StringTokenizer(status.getText(), " ", true);
-		int line = 0;
-		int width = 0;
-		while (tok.hasMoreTokens() && line < lines.length) {
-		    String t = tok.nextToken();
-		    int w = fontMetrics.stringWidth(t);
-		    if (" ".equals(t) || width == 0 || width+w < 215) {
-			lines[line] = lines[line] + t;
-			width += w;
-		    } else {
-			line++;
-			if (line < lines.length) {
-			    lines[line] = t;
-			    width = w;
-			}
-		    }
-		}
-		tweet.tweet.setText(lines);
-		if (image == null) {
-		    tweet.icon.replaceImage(blankProfilePicture);
-		} else {
-		    tweet.icon.replaceImage(image);
-		}
-	    }
-	    entry++;
-	}
+        int entry = (page - 1) * 4;
+        for (int i = 0; i < tweets.length; i++) {
+            TweetView tweet = tweets[i];
+            if (entry >= tweetStatus.length) {
+                tweet.screenName.setText(emptyStringArray);
+                tweet.createdTime.setText(emptyStringArray);
+                tweet.tweet.setText(emptyStringArray);
+                tweet.icon.replaceImage(blankProfilePicture);
+            } else {
+                Status status = tweetStatus[entry];
+                ManagedImage image = tweetIcon[entry];
+                tweet.screenName.setText(new String[] { status.getScreenName() });
+                String date = dateFormat.format(status.getDate());
+                tweet.createdTime.setText(new String[] { date });
+                String[] lines = new String[] { "", "", "", "" };
+                StringTokenizer tok = new StringTokenizer(status.getText(), " ", true);
+                int line = 0;
+                int width = 0;
+                while (tok.hasMoreTokens() && line < lines.length) {
+                    String t = tok.nextToken();
+                    int w = fontMetrics.stringWidth(t);
+                    if (" ".equals(t) || width == 0 || width+w < 215) {
+                        lines[line] = lines[line] + t;
+                        width += w;
+                    } else {
+                        line++;
+                        if (line < lines.length) {
+                            lines[line] = t;
+                            width = w;
+                        }
+                    }
+                }
+                tweet.tweet.setText(lines);
+                if (image == null) {
+                    tweet.icon.replaceImage(blankProfilePicture);
+                } else {
+                    tweet.icon.replaceImage(image);
+                }
+            }
+            entry++;
+        }
     }
 
     void setPendingCommand(TwitterPoll poll) {
-	synchronized(this) {
-	    if (pendingCommand == null) {
-		pendingCommand = poll;
-		poll = null;
-	    }
-	}
-	if (poll != null) {
-	    // This should never happen in practice, but there's a theoretical
-	    // possibility of this as a race condition.
-	    poll.destroy();
-	}
+        synchronized(this) {
+            if (pendingCommand == null) {
+                pendingCommand = poll;
+                poll = null;
+            }
+        }
+        if (poll != null) {
+            // This should never happen in practice, but there's a theoretical
+            // possibility of this as a race condition.
+            poll.destroy();
+        }
     }
 
     void unsetPendingCommand(TwitterPoll poll) {
-	synchronized(this) {
-	    if (pendingCommand == poll) {
-		pendingCommand = null;
-	    }
-	}
+        synchronized(this) {
+            if (pendingCommand == poll) {
+                pendingCommand = null;
+            }
+        }
     }
 
     public Dimension getPaneModeDimension() {

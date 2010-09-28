@@ -422,9 +422,9 @@ public class SecurityUtil {
             this.onlineDiscRootFile = file;
             initOnline();
             return this;
-	}
+        }
 
-	private void initOnline() {
+        private void initOnline() {
             if (contentSignerAlias == null) {
                 contentSignerAlias = DEF_ONLINE_CERT_ALIAS;
             }
@@ -802,11 +802,11 @@ public class SecurityUtil {
                     " for online authentication");
             return;
         }
-	if (skipOnlineDiscroot) {
-	    rootCert = new byte[1];
-	} else {
+        if (skipOnlineDiscroot) {
+            rootCert = new byte[1];
+        } else {
             rootCert = readIntoBuffer(onlineDiscRootFile);
-	}
+        }
         Signature signer = Signature.getInstance(SIG_ALG);
         signer.initSign(key);
         signer.update(rootCert);
@@ -879,11 +879,11 @@ public class SecurityUtil {
             throws Exception {
         Signature verifier = Signature.getInstance(SIG_ALG);
         verifier.initVerify(cert);
-	if (skipOnlineDiscroot) {
-	    verifier.update(new byte[1]);
-	} else {
+        if (skipOnlineDiscroot) {
+            verifier.update(new byte[1]);
+        } else {
              verifier.update(readIntoBuffer(onlineDiscRootFile));
-	}
+        }
         verifier.update(typeIndicator.getBytes(ISO));
         verifier.update(versionNo.getBytes(ISO));
         verifier.update(new byte[32]);

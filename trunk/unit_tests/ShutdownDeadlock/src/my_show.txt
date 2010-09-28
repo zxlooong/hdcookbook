@@ -4,8 +4,8 @@ show
 
 exports
     segments {
-	S:Initialize
-	S:Run
+        S:Initialize
+        S:Run
     } features {
     } handlers {
     }
@@ -68,15 +68,15 @@ feature group F:Images {
 
 segment S:Initialize
     setup {
-	F:Images
+        F:Images
     } next {
-	activate_segment S:Run ;
+        activate_segment S:Run ;
     }
 ;
 
 segment S:Run
     active {
-	F:Images
+        F:Images
     }
 ;
 

@@ -221,11 +221,11 @@ private void portTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN
 
 
     public static void launchGUI() {
-	EventQueue.invokeLater(new Runnable() {
-	    public void run() {
-	       new ClientFrame().setVisible(true);
-	    }
-	});
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+               new ClientFrame().setVisible(true);
+            }
+        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

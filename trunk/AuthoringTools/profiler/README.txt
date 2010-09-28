@@ -67,7 +67,7 @@ To launch, I use a shell script like this:
     #!/bin/sh
     java -Xmx200m -cp \
         $HOME/java.net/hdcookbook/bin/profiler.jar:$HOME/lib/prefuse.jar \
-	ProfileBrowser $*
+        ProfileBrowser $*
 
 
 Profile Browser's features:

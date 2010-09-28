@@ -76,10 +76,10 @@ import java.util.List;
  **/
 public class Main {
 
-    private static int scaleX = 1000;	// X scale factor in mills
-    private static int scaleY = 1000;	// Y scale factor in mills
-    private static int offsetX = 0;	// X offset in pixels
-    private static int offsetY = 0;	// Y offset in pixels
+    private static int scaleX = 1000;   // X scale factor in mills
+    private static int scaleY = 1000;   // Y scale factor in mills
+    private static int offsetX = 0;     // X offset in pixels
+    private static int offsetY = 0;     // Y offset in pixels
     private static boolean headless = true;
    
    /**
@@ -98,15 +98,15 @@ public class Main {
         LinkedList<String> assetPathLL = new LinkedList<String>();
         LinkedList<String> assetDirsLL = new LinkedList<String>();
        
-	LinkedList<String> showFilesLL = new LinkedList<String>();
+        LinkedList<String> showFilesLL = new LinkedList<String>();
         String extensionParserName = "com.hdcookbook.grin.io.text.NullExtensionParser";
         String outputDir = null;
         boolean debug = false;
         boolean optimize = true;
         
         while (index < args.length) {
-	    if ("-assets".equals(args[index])) {
-		index++;
+            if ("-assets".equals(args[index])) {
+                index++;
                 String path = args[index];
                 if (index == args.length) {
                     usage();
@@ -114,14 +114,14 @@ public class Main {
                 if (!path.endsWith("/")) {
                     path = path + "/";
                 }
-		assetPathLL.add(path);
-	    } else if ("-asset_dir".equals(args[index])) {
-		index++;
+                assetPathLL.add(path);
+            } else if ("-asset_dir".equals(args[index])) {
+                index++;
                 if (index == args.length) {
                     usage();
                 }                
                 String path = args[index];
-		assetDirsLL.add(path);
+                assetDirsLL.add(path);
             } else if ("-debug".equals(args[index])){
                 debug = true;
             } else if ("-show_mosaic".equals(args[index])){
@@ -167,8 +167,8 @@ public class Main {
             } else if ("-optimize".equals(args[index])) {
                 optimize = true;
             } else if ("".equals(args[index])) {
-		// Skip it.  In ant, it's much easier to make a property blank
-		// than it is to pass one argument fewer to a program.
+                // Skip it.  In ant, it's much easier to make a property blank
+                // than it is to pass one argument fewer to a program.
             } else {
                 showFilesLL.add(args[index]);
             }
@@ -178,9 +178,9 @@ public class Main {
         if (showFilesLL.isEmpty()) {
             usage();
         }
-	if (headless) {
-	    System.setProperty("java.awt.headless", "true");
-	}
+        if (headless) {
+            System.setProperty("java.awt.headless", "true");
+        }
         
         ExtensionParser extensionParser = null;
         
@@ -195,38 +195,38 @@ public class Main {
             } catch (ClassNotFoundException ex) {
                  ex.printStackTrace();
             } 
-	    if (extensionParser == null) {
-		System.err.println();
-		System.err.println("Error:  extension parser \"" 
-				   + extensionParserName + "\" not found.");
-		System.err.println();
-		System.exit(1);
-	    }
+            if (extensionParser == null) {
+                System.err.println();
+                System.err.println("Error:  extension parser \"" 
+                                   + extensionParserName + "\" not found.");
+                System.err.println();
+                System.exit(1);
+            }
         }
 
         String[] assetPath = null;
         File[] assetDirs = null;
-	if (assetDirsLL.size() > 0) {
-	    assetDirs = new File[assetDirsLL.size()];
-	    int i = 0;
-	    for (Iterator it = assetDirsLL.iterator(); it.hasNext(); ) {
-		File f = new File((String) it.next());
-		assetDirs[i++] = f;
-	    }
-	} else {
-	    assetDirs = new File[0];
-	}
+        if (assetDirsLL.size() > 0) {
+            assetDirs = new File[assetDirsLL.size()];
+            int i = 0;
+            for (Iterator it = assetDirsLL.iterator(); it.hasNext(); ) {
+                File f = new File((String) it.next());
+                assetDirs[i++] = f;
+            }
+        } else {
+            assetDirs = new File[0];
+        }
         if (assetPathLL.isEmpty() && assetDirs.length == 0) {
             assetPath = new String[]{ "." }; // current dir
         } else {
             assetPath = assetPathLL.toArray(new String[assetPathLL.size()]);
         }
-	String[] showFiles=showFilesLL.toArray(new String[showFilesLL.size()]);
+        String[] showFiles=showFilesLL.toArray(new String[showFilesLL.size()]);
         
-	AssetFinder.setHelper(new AssetFinder() {
-	    protected void abortHelper() {
-		System.exit(1);
-	    }
+        AssetFinder.setHelper(new AssetFinder() {
+            protected void abortHelper() {
+                System.exit(1);
+            }
             
             protected Font getFontHelper(String fontName, int style, int size) {
                 // On JavaSE, one cannot easily load a custom font.
@@ -235,8 +235,8 @@ public class Main {
                 // fontName, style, and size.
                 return new Font(fontName, style, size);
             }
-	});
-       	AssetFinder.setSearchPath(assetPath, assetDirs);
+        });
+        AssetFinder.setSearchPath(assetPath, assetDirs);
         try {
            convert(assetPath, assetDirs, showFiles, 
                    extensionParser, outputDir, debug, optimize);
@@ -248,30 +248,30 @@ public class Main {
    }
 
     private static int argToInt(String s) {
-	try {
-	    return Integer.parseInt(s);
-	} catch (NumberFormatException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(s + " is not an integer");
-	    System.out.println();
-	    usage();
-	    return -1;	// not reached
-	}
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException ex) {
+            ex.printStackTrace();
+            System.out.println();
+            System.out.println(s + " is not an integer");
+            System.out.println();
+            usage();
+            return -1;  // not reached
+        }
     }
 
     private static int argToMills(String s) {
-	try {
-	    Double d = Double.parseDouble(s);
-	    return (int) Math.round(d * 1000);
-	} catch (NumberFormatException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(s + " is not a double");
-	    System.out.println();
-	    usage();
-	    return -1;	// not reached
-	}
+        try {
+            Double d = Double.parseDouble(s);
+            return (int) Math.round(d * 1000);
+        } catch (NumberFormatException ex) {
+            ex.printStackTrace();
+            System.out.println();
+            System.out.println(s + " is not a double");
+            System.out.println();
+            usage();
+            return -1;  // not reached
+        }
     }
 
    /**
@@ -292,74 +292,74 @@ public class Main {
     * such as creating image mosaics.
     */
    public static void convert(String[] assets, File[] assetsDir, 
-   			     String[] showFiles, 
-			     ExtensionParser extensionParser, String outputDir,
-			     boolean debug, boolean optimize) 
-		   throws IOException 
+                             String[] showFiles, 
+                             ExtensionParser extensionParser, String outputDir,
+                             boolean debug, boolean optimize) 
+                   throws IOException 
     {
-	if (outputDir == null) {
-	    outputDir = "."; // current dir
-	}
-	AssetFinder.setSearchPath(assets, assetsDir);
-	List<File> files = new ArrayList<File>();
-	SEShow[] shows = new SEShow[showFiles.length];
-	try {   
-	    for (int i = 0; i < showFiles.length; i++) {
-		ShowBuilder builder = new ShowBuilder();
-		builder.setExtensionParser(extensionParser);         
-		SEShow show = ShowParser.parseShow(showFiles[i], null, builder);
-		shows[i] = show;
-	    }
-	    if (scaleX != 1000 || scaleY != 1000 
-	    	|| offsetX != 0 || offsetY != 0) 
-	    {
-		for (int i = 0; i < shows.length; i++) {
-		    shows[i].scaleBy(scaleX, scaleY, offsetX, offsetY);
-		}
-	    }
-	    if (optimize) {
-		GrinCompiler compiler = new GrinCompiler();
-		compiler.setHeadless(headless);
-		compiler.optimizeShows(shows, outputDir);
-	    }
-	    for (int i = 0; i < showFiles.length; i++) {
-		if (!shows[i].getNoShowFile()) {
-		    String baseName = showFiles[i];
-		    if (baseName.indexOf('.') != -1) {
-			baseName = baseName.substring(0, 
-						baseName.lastIndexOf('.'));
-		    }
-		    String fileName = shows[i].getBinaryGrinFileName();;
-		    if (fileName == null) {
-			fileName = baseName + ".grin";
-		    }
-		    File f = new File(outputDir, fileName);
-		    files.add(f);
-		    DataOutputStream dos 
-			= new DataOutputStream(new FileOutputStream(f));
-		    GrinBinaryWriter out 
-			= new GrinBinaryWriter(shows[i], debug);
-		    out.writeShow(dos);
-		    dos.close();
+        if (outputDir == null) {
+            outputDir = "."; // current dir
+        }
+        AssetFinder.setSearchPath(assets, assetsDir);
+        List<File> files = new ArrayList<File>();
+        SEShow[] shows = new SEShow[showFiles.length];
+        try {   
+            for (int i = 0; i < showFiles.length; i++) {
+                ShowBuilder builder = new ShowBuilder();
+                builder.setExtensionParser(extensionParser);         
+                SEShow show = ShowParser.parseShow(showFiles[i], null, builder);
+                shows[i] = show;
+            }
+            if (scaleX != 1000 || scaleY != 1000 
+                || offsetX != 0 || offsetY != 0) 
+            {
+                for (int i = 0; i < shows.length; i++) {
+                    shows[i].scaleBy(scaleX, scaleY, offsetX, offsetY);
+                }
+            }
+            if (optimize) {
+                GrinCompiler compiler = new GrinCompiler();
+                compiler.setHeadless(headless);
+                compiler.optimizeShows(shows, outputDir);
+            }
+            for (int i = 0; i < showFiles.length; i++) {
+                if (!shows[i].getNoShowFile()) {
+                    String baseName = showFiles[i];
+                    if (baseName.indexOf('.') != -1) {
+                        baseName = baseName.substring(0, 
+                                                baseName.lastIndexOf('.'));
+                    }
+                    String fileName = shows[i].getBinaryGrinFileName();;
+                    if (fileName == null) {
+                        fileName = baseName + ".grin";
+                    }
+                    File f = new File(outputDir, fileName);
+                    files.add(f);
+                    DataOutputStream dos 
+                        = new DataOutputStream(new FileOutputStream(f));
+                    GrinBinaryWriter out 
+                        = new GrinBinaryWriter(shows[i], debug);
+                    out.writeShow(dos);
+                    dos.close();
 
-		    f = new File(outputDir, baseName + ".xlet.java");
-		    files.add(f);
-		    out.writeCommandClass(shows[i], true, f);
+                    f = new File(outputDir, baseName + ".xlet.java");
+                    files.add(f);
+                    out.writeCommandClass(shows[i], true, f);
 
-		    f = new File(outputDir, baseName + ".grinview.java");
-		    files.add(f);
-		    out.writeCommandClass(shows[i], false, f);
-		}
-	    }
-	} catch (IOException e) { 
-	    // failed on writing, delete the output files
-	    for (File file: files) {
-		if (file != null && file.exists()) {
-		   file.delete();
-		}
-	    }
-	    throw e;
-	}
+                    f = new File(outputDir, baseName + ".grinview.java");
+                    files.add(f);
+                    out.writeCommandClass(shows[i], false, f);
+                }
+            }
+        } catch (IOException e) { 
+            // failed on writing, delete the output files
+            for (File file: files) {
+                if (file != null && file.exists()) {
+                   file.delete();
+                }
+            }
+            throw e;
+        }
     }
    
    private static void usage() {
@@ -372,7 +372,7 @@ public class Main {
         System.out.println("Usage: com.hdcookbook.grin.io.binary.Main <options> <show files>");
         System.out.println("");
         System.out.println("\t<show files> should be one or more text based "
-			   + " show files availale in the assets search path.");
+                           + " show files availale in the assets search path.");
         System.out.println("");
         System.out.println("\t<options> can be:");
         System.out.println("\t\t-assets <directory>");

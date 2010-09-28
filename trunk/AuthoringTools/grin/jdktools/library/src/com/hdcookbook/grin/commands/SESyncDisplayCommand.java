@@ -71,7 +71,7 @@ public class SESyncDisplayCommand extends SEGrinXHelper {
 
     public SESyncDisplayCommand(SEShow show) {
         super(show);
-	setCommandNumber(SYNC_DISPLAY);
+        setCommandNumber(SYNC_DISPLAY);
     }
     
     public void accept(SEShowVisitor visitor) {
@@ -94,6 +94,6 @@ public class SESyncDisplayCommand extends SEGrinXHelper {
      * {@inheritDoc}
      **/
     public String toString() {
-	    return "sync_display";
+            return "sync_display";
     }
 }

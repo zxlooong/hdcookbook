@@ -93,13 +93,13 @@ public class Bunny {
     
     
     public Bunny(Image bunnyImg, Image carrotBullet, TurtleTrooperSquad squad, 
-    		 TurtleSaucer saucer)
+                 TurtleSaucer saucer)
     {
         this.bunnySprite = new ImageSprite(bunnyImg);
-	bunnySprite.initPosition(xloc, yloc);
+        bunnySprite.initPosition(xloc, yloc);
         this.carrotSprite = new ImageSprite(carrotBullet);
-	this.carrotSprite.initImageOff();
-	this.shooting = false;
+        this.carrotSprite.initImageOff();
+        this.shooting = false;
         this.squad = squad;
         this.saucer = saucer;
         
@@ -110,73 +110,73 @@ public class Bunny {
      * Called to move us from side to side when an arrow key is pressed.
      **/
     public synchronized void setXSpeed(int speed) {
-	xSpeed = speed;
+        xSpeed = speed;
     }
 
     /**
      * Called to ask us to fire if we can, when the OK button is pressed.
      **/
     public synchronized void fire() {
-	if (shooting) {
-	    return;
-	}
-	startShot = true;
-	carrotY = yloc + 10;
-	carrotX = xloc + (bunnySprite.getWidth() - carrotSprite.getWidth()) / 2;
+        if (shooting) {
+            return;
+        }
+        startShot = true;
+        carrotY = yloc + 10;
+        carrotX = xloc + (bunnySprite.getWidth() - carrotSprite.getWidth()) / 2;
     }
 
     /**
      * Move our state to the next frame of animation.
      **/
     public void nextFrame(int numFrames) {
-	if (xSpeed == 0) {
-	    bunnySprite.nextFrame();
-	} else {
-	    xloc += xSpeed * numFrames;
-	    if (xloc < 10) {
-		xloc = 10;
-	    } else if (xloc > 1650) {
-		xloc = 1650;
-	    }
-	    bunnySprite.nextFrame(xloc, yloc);
-	}
-	if (startShot) {
-	    shooting = true;
-	    startShot = false;
-	} else if (shooting) {
-	    int dy = -22 * numFrames;
-	    carrotSprite.getBounds(hitRect);
-	    hitRect.height -= dy;
-	    hitRect.y += dy;
-	    boolean hit = squad.hitBy(hitRect);
-	    if (hit) {
-		trooperHits++;
-	    } else if (saucer.hitBy(hitRect)) {
-		hit = true;
-		saucerHits++;
-	    }
-	    if (hit) {
-		shooting = false;
-	    } 
-	}
-	if (shooting) {
-	    carrotY -= 22 * numFrames;
-	    if (carrotY < 24) {
-		shooting = false;
-		carrotSprite.nextFrameOff();
-	    } else {
-		carrotSprite.nextFrame(carrotX, carrotY);
-	    }
-	} else {
-	    carrotSprite.nextFrameOff();
-	}
+        if (xSpeed == 0) {
+            bunnySprite.nextFrame();
+        } else {
+            xloc += xSpeed * numFrames;
+            if (xloc < 10) {
+                xloc = 10;
+            } else if (xloc > 1650) {
+                xloc = 1650;
+            }
+            bunnySprite.nextFrame(xloc, yloc);
+        }
+        if (startShot) {
+            shooting = true;
+            startShot = false;
+        } else if (shooting) {
+            int dy = -22 * numFrames;
+            carrotSprite.getBounds(hitRect);
+            hitRect.height -= dy;
+            hitRect.y += dy;
+            boolean hit = squad.hitBy(hitRect);
+            if (hit) {
+                trooperHits++;
+            } else if (saucer.hitBy(hitRect)) {
+                hit = true;
+                saucerHits++;
+            }
+            if (hit) {
+                shooting = false;
+            } 
+        }
+        if (shooting) {
+            carrotY -= 22 * numFrames;
+            if (carrotY < 24) {
+                shooting = false;
+                carrotSprite.nextFrameOff();
+            } else {
+                carrotSprite.nextFrame(carrotX, carrotY);
+            }
+        } else {
+            carrotSprite.nextFrameOff();
+        }
     }
 
     /**
      * Paint the two sprites we own, that is, the bunny and the carrot.
      **/
     public void paintFrame(Graphics2D g, boolean paintAll, Animator animator) {
-	bunnySprite.paintFrame(g, paintAll, animator);
-	carrotSprite.paintFrame(g, paintAll, animator);
+        bunnySprite.paintFrame(g, paintAll, animator);
+        carrotSprite.paintFrame(g, paintAll, animator);
     }
 }

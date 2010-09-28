@@ -12,17 +12,17 @@ java_generated_class MainShowCommands [[
 
     public class MainShowCommands extends GrinXHelper {
 
-	private static Random random = new Random();
+        private static Random random = new Random();
 
-	public MainShowCommands(Show show) {
-	    super(show);
-	}
+        public MainShowCommands(Show show) {
+            super(show);
+        }
 
-	public MainDirector getMainDirector() {
-	    return (MainDirector) show.getDirector();
-	}
+        public MainDirector getMainDirector() {
+            return (MainDirector) show.getDirector();
+        }
 
-	JAVA_COMMAND_BODY 
+        JAVA_COMMAND_BODY 
 
     }
 

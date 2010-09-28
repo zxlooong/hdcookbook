@@ -90,59 +90,59 @@ public class SEBouncingArc extends SEArc {
     private int bouncePeriod;
 
     public SEBouncingArc(
-    		Show show, String name, int x, int y, int width, int height,
-		int startAngle, int arcAngle, Color color, int bounceHeight,
-		int bouncePeriod)
+                Show show, String name, int x, int y, int width, int height,
+                int startAngle, int arcAngle, Color color, int bounceHeight,
+                int bouncePeriod)
     {
-	super(show, name, x, y, width, height, startAngle, arcAngle, color);
-	this.bounceHeight = bounceHeight;
-	this.bouncePeriod = bouncePeriod;
+        super(show, name, x, y, width, height, startAngle, arcAngle, color);
+        this.bounceHeight = bounceHeight;
+        this.bouncePeriod = bouncePeriod;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void postProcess(ShowBuilder builder) throws IOException {
-	super.postProcess(builder);
-	int[] frames = new int[bouncePeriod];
-	int[][] values = new int[2][];
-	int[] yValues = new int[bouncePeriod];
-	int[] xValues = new int[bouncePeriod];
-	values[SETranslator.Y_FIELD] = yValues;
-	values[SETranslator.X_FIELD] = xValues;
-	for (int i = 0; i < bouncePeriod; i++) {
-	    double period = bouncePeriod;
-	    double x = i - (period / 2.0);
-	    x = x * 2.0 / period;	// x between -1 and 1
-	    x = x * x;
-	    frames[i] = i;
-	    xValues[i] = 0;  
-	    	// bulder.makeTranslatorModel optimizes this array away
-	    yValues[i] = (int) (0.5 + x * bounceHeight);
-	    	// We could cut down on the number of frames by using the
-		// runtime linear interpolation built into InterpolatedModel
-	}
-	SETranslatorModel model 
-	    = builder.makeTranslatorModel(null, frames, values, true, 0, 1,
-	    				  new Command[0]);
-	SETranslator translator = new SETranslator(builder.getShow(), null);
-	translator.setupModelIsRelative(false);
-	translator.setup(model, this);
-	SEGroup group = new SEGroup(builder.getShow());
-	group.setup(new Feature[] { model, translator });
-	builder.injectParent(group, this);
-	builder.addSyntheticFeature(model);
-	builder.addSyntheticFeature(translator);
+        super.postProcess(builder);
+        int[] frames = new int[bouncePeriod];
+        int[][] values = new int[2][];
+        int[] yValues = new int[bouncePeriod];
+        int[] xValues = new int[bouncePeriod];
+        values[SETranslator.Y_FIELD] = yValues;
+        values[SETranslator.X_FIELD] = xValues;
+        for (int i = 0; i < bouncePeriod; i++) {
+            double period = bouncePeriod;
+            double x = i - (period / 2.0);
+            x = x * 2.0 / period;       // x between -1 and 1
+            x = x * x;
+            frames[i] = i;
+            xValues[i] = 0;  
+                // bulder.makeTranslatorModel optimizes this array away
+            yValues[i] = (int) (0.5 + x * bounceHeight);
+                // We could cut down on the number of frames by using the
+                // runtime linear interpolation built into InterpolatedModel
+        }
+        SETranslatorModel model 
+            = builder.makeTranslatorModel(null, frames, values, true, 0, 1,
+                                          new Command[0]);
+        SETranslator translator = new SETranslator(builder.getShow(), null);
+        translator.setupModelIsRelative(false);
+        translator.setup(model, this);
+        SEGroup group = new SEGroup(builder.getShow());
+        group.setup(new Feature[] { model, translator });
+        builder.injectParent(group, this);
+        builder.addSyntheticFeature(model);
+        builder.addSyntheticFeature(translator);
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "Playground:bouncing_arc @" + Integer.toHexString(hashCode());
-	} else {
-	    return "Playground:bouncing_arc " + name;
-	}
+        if (name == null) {
+            return "Playground:bouncing_arc @" + Integer.toHexString(hashCode());
+        } else {
+            return "Playground:bouncing_arc " + name;
+        }
     }
 }

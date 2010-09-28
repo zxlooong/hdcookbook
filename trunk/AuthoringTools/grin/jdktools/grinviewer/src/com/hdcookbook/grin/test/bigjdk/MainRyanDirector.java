@@ -83,75 +83,75 @@ public class MainRyanDirector extends RyanDirector {
     }
 
     public void init() {
-	super.init();
-	sCommentaryMenuActivation 
-	    = getShow().getSegment("commentary_menu_activation");
-	sCommentaryMenuCountDown
-	    = getShow().getSegment("commentary_menu_count_down");
+        super.init();
+        sCommentaryMenuActivation 
+            = getShow().getSegment("commentary_menu_activation");
+        sCommentaryMenuCountDown
+            = getShow().getSegment("commentary_menu_count_down");
     }
 
     public synchronized void startVideo() {
-	videoCanBeStarted = true;
-	notifyAll();
+        videoCanBeStarted = true;
+        notifyAll();
     }
 
     public void setInteractiveMode(boolean on) {
-    	System.out.println("Interactive mode set to " + on);
-	if (on) {
-	    synchronized(this) {
-		nextTriggerFrame = frame + 24*5;	// 5s
-		nextTrigger = new Runnable() {
-		    public void run() {
-			getShow().activateSegment(sCommentaryMenuActivation);
-		    }
-		};
-	    }
-	}
+        System.out.println("Interactive mode set to " + on);
+        if (on) {
+            synchronized(this) {
+                nextTriggerFrame = frame + 24*5;        // 5s
+                nextTrigger = new Runnable() {
+                    public void run() {
+                        getShow().activateSegment(sCommentaryMenuActivation);
+                    }
+                };
+            }
+        }
     }
 
     protected void startCommentary() {
-	setDirectorNumber(1);
-	setupNextDirector(2);
+        setDirectorNumber(1);
+        setupNextDirector(2);
     }
 
     private void setupNextDirector(final int num) {
-	synchronized(this) {
-	    nextTriggerFrame = frame + 24*3;
-	    if (num == 1) {
-		nextTriggerFrame += 24*6;
-	    }
-	    nextTrigger = new Runnable() {
-		public void run() {
-		    if (num == 5) {
-			getShow().activateSegment(sCommentaryMenuCountDown);
-		    }
-		    if (num < 6) {
-			setupNextDirector(num + 1);
-		    }
-		    setDirectorNumber(num);
-		}
-	    };
-	}
+        synchronized(this) {
+            nextTriggerFrame = frame + 24*3;
+            if (num == 1) {
+                nextTriggerFrame += 24*6;
+            }
+            nextTrigger = new Runnable() {
+                public void run() {
+                    if (num == 5) {
+                        getShow().activateSegment(sCommentaryMenuCountDown);
+                    }
+                    if (num < 6) {
+                        setupNextDirector(num + 1);
+                    }
+                    setDirectorNumber(num);
+                }
+            };
+        }
     }
 
     public synchronized void waitForVideoStartOK() throws InterruptedException {
-	while (!videoCanBeStarted) {
-	    wait();
-	}
+        while (!videoCanBeStarted) {
+            wait();
+        }
     }
 
     public void setFrame(int f) {
-	Runnable trigger = null;
-	synchronized (this)  {
-	    if (nextTrigger != null && f >= nextTriggerFrame) {
-		trigger = nextTrigger;
-		nextTrigger = null;
-	    }
-	    frame = f;
-	}
-	if (trigger != null) {
-	    trigger.run();
-	}
+        Runnable trigger = null;
+        synchronized (this)  {
+            if (nextTrigger != null && f >= nextTriggerFrame) {
+                trigger = nextTrigger;
+                nextTrigger = null;
+            }
+            frame = f;
+        }
+        if (trigger != null) {
+            trigger.run();
+        }
     }
     
 }

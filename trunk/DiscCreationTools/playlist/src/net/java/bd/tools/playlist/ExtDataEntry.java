@@ -75,30 +75,30 @@ public class ExtDataEntry {
     //private long extDataLength;
     
     public void readObject(DataInputStream din) throws IOException {
-        // 16 bit id1  			 		2
-        // 16 bit id2            		2
+        // 16 bit id1                                   2
+        // 16 bit id2                           2
         
         // 
-        // 32 bit extDataStartAddress	4 unsigned
-        // 32 bit extDataLength       	4 unsigned
+        // 32 bit extDataStartAddress   4 unsigned
+        // 32 bit extDataLength         4 unsigned
         // Note - extentionDataStartAddress and extentionDataLength are
-        // read in and written out by ExtensionData.java   	
-    	setID1((int) din.readShort());
-    	setID2((int) din.readShort());
+        // read in and written out by ExtensionData.java        
+        setID1((int) din.readShort());
+        setID2((int) din.readShort());
         
-    	//byte[] extDataStartAddressBytes = new byte[4];
-        //byte[] extDataLengthBytes  = new byte[4];    	
-    	//din.readFully(extDataStartAddressBytes);
-    	//setExtDataStartAddress(UnsignedIntHelper.convertToLong(extDataStartAddressBytes));
-    	//din.readFully(extDataLengthBytes);
-    	//setExtDataLength(UnsignedIntHelper.convertToLong(extDataLengthBytes));
+        //byte[] extDataStartAddressBytes = new byte[4];
+        //byte[] extDataLengthBytes  = new byte[4];     
+        //din.readFully(extDataStartAddressBytes);
+        //setExtDataStartAddress(UnsignedIntHelper.convertToLong(extDataStartAddressBytes));
+        //din.readFully(extDataLengthBytes);
+        //setExtDataLength(UnsignedIntHelper.convertToLong(extDataLengthBytes));
     }
     
     public void writeObject(DataOutputStream dout) throws IOException {
-    	dout.writeShort(getID1());
-    	dout.writeShort(getID2());
-    	//dout.write(UnsignedIntHelper.convertToBytes(getExtDataStartAddress()));
-    	//dout.write(UnsignedIntHelper.convertToBytes(getExtDataLength()));
+        dout.writeShort(getID1());
+        dout.writeShort(getID2());
+        //dout.write(UnsignedIntHelper.convertToBytes(getExtDataStartAddress()));
+        //dout.write(UnsignedIntHelper.convertToBytes(getExtDataLength()));
     }
 
     @XmlJavaTypeAdapter(HexStringIntegerAdapter.class)    

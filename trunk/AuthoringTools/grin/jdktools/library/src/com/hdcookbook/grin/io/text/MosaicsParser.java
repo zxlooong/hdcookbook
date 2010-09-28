@@ -92,15 +92,15 @@ public class MosaicsParser {
      * Create a mosaic parser to parse a mosaic definition file
      * at the given location.
      *
-     * @param show	The show to populate.  This should be a new, empty
-     *			show.
-     * @param lexer	The lexer to use
-     * @param builder	The builder to use
+     * @param show      The show to populate.  This should be a new, empty
+     *                  show.
+     * @param lexer     The lexer to use
+     * @param builder   The builder to use
      **/
     public MosaicsParser(SEShow show, Lexer lexer, ShowBuilder builder) {
-	this.show = show;
-	this.lexer = lexer;
-	this.builder = builder;
+        this.show = show;
+        this.lexer = lexer;
+        this.builder = builder;
     }
 
     /**
@@ -108,84 +108,84 @@ public class MosaicsParser {
      * was read.
      **/
     public void parse() throws IOException {
-	show.setNoShowFile(true);
-	for (;;) {
-	    String tok = lexer.getString();
-	    if ("mosaic".equals(tok)) {
-		parseMosaic();
-	    } else if ("end_mosaics".equals(tok)) {
-		break;
-	    } else {
-		lexer.reportError("\"mosaic\" or \"end_mosaics\"  expected");
-	    }
-	}
-	builder.finishBuilding();
+        show.setNoShowFile(true);
+        for (;;) {
+            String tok = lexer.getString();
+            if ("mosaic".equals(tok)) {
+                parseMosaic();
+            } else if ("end_mosaics".equals(tok)) {
+                break;
+            } else {
+                lexer.reportError("\"mosaic\" or \"end_mosaics\"  expected");
+            }
+        }
+        builder.finishBuilding();
     }
 
     private void parseMosaic() throws IOException {
-	String fileName = lexer.getString();
-	MosaicSpec spec = null;
-	try {
-	    spec = show.newMosaicSpec(fileName);
-	} catch (IOException ex) {
-	    lexer.reportError(ex.getMessage());
-	}
-	ArrayList<String> files = new ArrayList<String>();
-	ArrayList<String> filesToSkip = new ArrayList<String>();
-	for (;;) {
-	    String tok = lexer.getString();
-	    if (";".equals(tok)) {
-		break;
-	    } else if ("max_width".equals(tok)) {
-		spec.maxWidth = lexer.getInt();
-	    } else if ("max_height".equals(tok)) {
-		spec.maxHeight = lexer.getInt();
-	    } else if ("max_pixels".equals(tok)) {
-		spec.maxPixels = lexer.getInt();
-	    } else if ("min_width".equals(tok)) {
-		spec.minWidth = lexer.getInt();
-	    } else if ("num_widths".equals(tok)) {
-		spec.numWidths = lexer.getInt();
-	    } else if ("take_all_images".equals(tok)) {
-		spec.takeAllImages = lexer.getBoolean();
-	    } else if ("image_files".equals(tok)) {
-		List<String> f = parseStrings();
-		files.addAll(f);
-	    } else if ("add_image_files".equals(tok)) {
-		List<String> f = parseStrings();
-		for (String file : f) {
-		    SEImagePlacement placement = new SEImagePlacement();
-		    placement.setX(0);
-		    placement.setY(0);
-		    String name = null; // anonymous
-		    SEFixedImage im 
-			= new SEFixedImage(show, name, placement, file);
-		    builder.addFeature(name, lexer.getLineNumber(), im);
-		}
-		files.addAll(f);
-	    } else if ("skip_image_files".equals(tok)) {
-		List<String> f = parseStrings();
-		filesToSkip.addAll(f);
-	    } else {
-		lexer.expectString("; or mosaic_part", tok);
-	    }
-	}
-	spec.imagesToConsider = files.toArray(new String[files.size()]);
-	spec.imagesToSkip = filesToSkip.toArray(new String[filesToSkip.size()]);
+        String fileName = lexer.getString();
+        MosaicSpec spec = null;
+        try {
+            spec = show.newMosaicSpec(fileName);
+        } catch (IOException ex) {
+            lexer.reportError(ex.getMessage());
+        }
+        ArrayList<String> files = new ArrayList<String>();
+        ArrayList<String> filesToSkip = new ArrayList<String>();
+        for (;;) {
+            String tok = lexer.getString();
+            if (";".equals(tok)) {
+                break;
+            } else if ("max_width".equals(tok)) {
+                spec.maxWidth = lexer.getInt();
+            } else if ("max_height".equals(tok)) {
+                spec.maxHeight = lexer.getInt();
+            } else if ("max_pixels".equals(tok)) {
+                spec.maxPixels = lexer.getInt();
+            } else if ("min_width".equals(tok)) {
+                spec.minWidth = lexer.getInt();
+            } else if ("num_widths".equals(tok)) {
+                spec.numWidths = lexer.getInt();
+            } else if ("take_all_images".equals(tok)) {
+                spec.takeAllImages = lexer.getBoolean();
+            } else if ("image_files".equals(tok)) {
+                List<String> f = parseStrings();
+                files.addAll(f);
+            } else if ("add_image_files".equals(tok)) {
+                List<String> f = parseStrings();
+                for (String file : f) {
+                    SEImagePlacement placement = new SEImagePlacement();
+                    placement.setX(0);
+                    placement.setY(0);
+                    String name = null; // anonymous
+                    SEFixedImage im 
+                        = new SEFixedImage(show, name, placement, file);
+                    builder.addFeature(name, lexer.getLineNumber(), im);
+                }
+                files.addAll(f);
+            } else if ("skip_image_files".equals(tok)) {
+                List<String> f = parseStrings();
+                filesToSkip.addAll(f);
+            } else {
+                lexer.expectString("; or mosaic_part", tok);
+            }
+        }
+        spec.imagesToConsider = files.toArray(new String[files.size()]);
+        spec.imagesToSkip = filesToSkip.toArray(new String[filesToSkip.size()]);
     }
 
     private List<String> parseStrings() throws IOException {
-	lexer.parseExpected("{");
-	List<String> result = new ArrayList();
-	for (;;) {
-	    String tok = lexer.getString();
-	    if (tok == null) {
-		lexer.reportError("EOF unexpected in string list");
-	    } else if ("}".equals(tok)) {
-		return result;
-	    } else {
-		result.add(tok);
-	    }
-	}
+        lexer.parseExpected("{");
+        List<String> result = new ArrayList();
+        for (;;) {
+            String tok = lexer.getString();
+            if (tok == null) {
+                lexer.reportError("EOF unexpected in string list");
+            } else if ("}".equals(tok)) {
+                return result;
+            } else {
+                result.add(tok);
+            }
+        }
     }
 }

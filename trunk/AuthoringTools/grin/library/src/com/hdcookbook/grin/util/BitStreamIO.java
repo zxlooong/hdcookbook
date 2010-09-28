@@ -68,13 +68,13 @@ import java.io.DataOutputStream;
  * structure (part 3-2 section 5.2.3.2). For example, a structure like
  * this:
  * <pre>
- *      isFirst			 1 uimsbf
- *      isPretty		 1 uimsbf
- * 	randomFlags		 3 uimsbf
- *	reserved_for_word_align	11 bslbf
- *      someNameLength 		 8 uimsbf
+ *      isFirst                  1 uimsbf
+ *      isPretty                 1 uimsbf
+ *      randomFlags              3 uimsbf
+ *      reserved_for_word_align 11 bslbf
+ *      someNameLength           8 uimsbf
  *      for (i = 0; i < someNameLength; i++) {
- *          someNameByte	 8 uimsbf
+ *          someNameByte         8 uimsbf
  *      }
  *
  *  where someName is encoded in UTF8
@@ -86,7 +86,7 @@ import java.io.DataOutputStream;
  *
  *    boolean isFirst = (bio.readBits(dis, 1)) != 0;
  *    boolean isPretty = (bio.readBits(dis, 1)) != 0;
- *    int someBits = bio.readBits(dis, 3);	// 0 <= someBits < 8
+ *    int someBits = bio.readBits(dis, 3);      // 0 <= someBits < 8
  *    bio.readBits(dis, 11);
  *    if (Debug.ASSERT) {
  *        bio.assertByteAligned(1);
@@ -131,9 +131,9 @@ import java.io.DataOutputStream;
 public class BitStreamIO {
 
     private int bitsProcessed = 0;
-    private int buf = 0;	// Only used to hold one byte
+    private int buf = 0;        // Only used to hold one byte
     private final static int[] maskArr = { 0x00, 0x01, 0x03, 0x07, 0x0f,
-    					         0x1f, 0x3f, 0x7f, 0xff };
+                                                 0x1f, 0x3f, 0x7f, 0xff };
 
     /** 
      * Create a new BitStreamIO helper.  A given helper should be used
@@ -148,41 +148,41 @@ public class BitStreamIO {
      * Some bits will be stored in the helper if the read isn't byte-aligned
      * after this call.
      *
-     *  @param	dis	The stream to read from.
-     *  @param	numBits	The number of bits to read, 0 <= numBits <= 32
+     *  @param  dis     The stream to read from.
+     *  @param  numBits The number of bits to read, 0 <= numBits <= 32
      **/
     public int readBits(DataInputStream dis, int numBits) 
-	    throws IOException 
+            throws IOException 
     {
-	if (Debug.ASSERT && (numBits < 0 || numBits > 32)) {
-	    Debug.assertFail();
-	}
-	int result = 0;
-	int bitsInBuf = ( 8 - (bitsProcessed & 7)) & 7;
-	bitsProcessed += numBits;
-	while (numBits > 0) {
-	    if (bitsInBuf == 0) {
-		buf = ((int) dis.readByte()) & 0xff;
-		bitsInBuf = 8;
-	    }
-	    // Now 0 < bitsInBuf <= 8
-	    if (numBits >= bitsInBuf) {
-		    // We take all the bits down to the lsb
-		result <<= bitsInBuf;
-		int mask = maskArr[bitsInBuf];
-		result |= (buf & mask);
-		numBits -= bitsInBuf;
-		bitsInBuf = 0;
-	    } else {	// numBits < bitsInBuf
-		bitsInBuf -= numBits;
-		result <<= numBits;
-		int buf2 = buf >> bitsInBuf;	// That's the updated bitsInBuf
-		int mask = maskArr[numBits];
-		result |= buf2 & mask;
-		numBits = 0;
-	    }
-	}
-	return result;
+        if (Debug.ASSERT && (numBits < 0 || numBits > 32)) {
+            Debug.assertFail();
+        }
+        int result = 0;
+        int bitsInBuf = ( 8 - (bitsProcessed & 7)) & 7;
+        bitsProcessed += numBits;
+        while (numBits > 0) {
+            if (bitsInBuf == 0) {
+                buf = ((int) dis.readByte()) & 0xff;
+                bitsInBuf = 8;
+            }
+            // Now 0 < bitsInBuf <= 8
+            if (numBits >= bitsInBuf) {
+                    // We take all the bits down to the lsb
+                result <<= bitsInBuf;
+                int mask = maskArr[bitsInBuf];
+                result |= (buf & mask);
+                numBits -= bitsInBuf;
+                bitsInBuf = 0;
+            } else {    // numBits < bitsInBuf
+                bitsInBuf -= numBits;
+                result <<= numBits;
+                int buf2 = buf >> bitsInBuf;    // That's the updated bitsInBuf
+                int mask = maskArr[numBits];
+                result |= buf2 & mask;
+                numBits = 0;
+            }
+        }
+        return result;
     }
 
     /**
@@ -191,41 +191,41 @@ public class BitStreamIO {
      * Some bits will be stored in the helper if the read isn't byte-aligned
      * after this call.
      *
-     *  @param	dis	The stream to read from.
-     *  @param	numBits	The number of bits to read, 0 <= numBits <= 64
+     *  @param  dis     The stream to read from.
+     *  @param  numBits The number of bits to read, 0 <= numBits <= 64
      **/
     public long readBitsLong(DataInputStream dis, int numBits) 
-	    throws IOException
+            throws IOException
     {
-	if (Debug.ASSERT && (numBits < 0 || numBits > 64)) {
-	    Debug.assertFail();
-	}
-	long result = 0;
-	int bitsInBuf = ( 8 - (bitsProcessed & 7)) & 7;
-	bitsProcessed += numBits;
-	while (numBits > 0) {
-	    if (bitsInBuf == 0) {
-		buf = ((int) dis.readByte()) & 0xff;
-		bitsInBuf = 8;
-	    }
-	    // Now 0 < bitsInBuf <= 8
-	    if (numBits >= bitsInBuf) {
-		    // We take all the bits down to the lsb
-		result <<= bitsInBuf;
-		int mask = maskArr[bitsInBuf];
-		result |= (buf & mask);
-		numBits -= bitsInBuf;
-		bitsInBuf = 0;
-	    } else {	// numBits < bitsInBuf
-		bitsInBuf -= numBits;
-		result <<= numBits;
-		int buf2 = buf >> bitsInBuf;	// That's the updated bitsInBuf
-		int mask = maskArr[numBits];
-		result |= buf2 & mask;
-		numBits = 0;
-	    }
-	}
-	return result;
+        if (Debug.ASSERT && (numBits < 0 || numBits > 64)) {
+            Debug.assertFail();
+        }
+        long result = 0;
+        int bitsInBuf = ( 8 - (bitsProcessed & 7)) & 7;
+        bitsProcessed += numBits;
+        while (numBits > 0) {
+            if (bitsInBuf == 0) {
+                buf = ((int) dis.readByte()) & 0xff;
+                bitsInBuf = 8;
+            }
+            // Now 0 < bitsInBuf <= 8
+            if (numBits >= bitsInBuf) {
+                    // We take all the bits down to the lsb
+                result <<= bitsInBuf;
+                int mask = maskArr[bitsInBuf];
+                result |= (buf & mask);
+                numBits -= bitsInBuf;
+                bitsInBuf = 0;
+            } else {    // numBits < bitsInBuf
+                bitsInBuf -= numBits;
+                result <<= numBits;
+                int buf2 = buf >> bitsInBuf;    // That's the updated bitsInBuf
+                int mask = maskArr[numBits];
+                result |= buf2 & mask;
+                numBits = 0;
+            }
+        }
+        return result;
     }
 
     /**
@@ -234,102 +234,102 @@ public class BitStreamIO {
      * at a time. Some bits will be stored in the helper
      * if the result isn't byte-aligned at the end of this write.
      *
-     * @param	dos	The stream to write to
-     * @param	numBits	The number of bits, 0 <= numBits <= 32
-     * @param	value	The value to read (in the lower-order bits)
+     * @param   dos     The stream to write to
+     * @param   numBits The number of bits, 0 <= numBits <= 32
+     * @param   value   The value to read (in the lower-order bits)
      **/
     public void writeBits(DataOutputStream dos, int numBits, int value) 
-	    throws IOException
+            throws IOException
     {
-	if (Debug.ASSERT && (numBits < 0 || numBits > 32)) {
-	    Debug.assertFail();
-	}
-	int bitsInBuf = (bitsProcessed & 7);
-	bitsProcessed += numBits;
-	while (numBits > 0) {
-	    if (bitsInBuf > 0) {
-		int available = 8 - bitsInBuf;	// 0 < available < 8
-		if (available <= numBits) {	// Shift available into buf
-		    int mask = maskArr[available];
-		    buf |= (value >> (numBits - available)) & mask;
-		    numBits -= available;
-		    bitsInBuf += available;
-		} else {			// Shift numBits into buf
-		    // 0 < numBits < available < 8
-		    int mask = maskArr[numBits];
-		    int buf2 = value & mask;
-		    buf |= buf2 << (available - numBits);
-		    bitsInBuf += numBits;
-		    numBits = 0;
-		}
-	    } else if (numBits >= 8) {
-		buf = value >> (numBits - 8);
-		    // Don't need "& 0xff" because dos.write() does that for us
-		numBits -= 8;
-		    // Don't need to mask off the higher-order bits we just
-		    // put into buf
-		bitsInBuf = 8;
-	    } else {
-		// numBits < 8, bitsInBuf = 0;
-		int mask = maskArr[numBits];
-		int buf2 = value & mask;
-		buf |= buf2 << (8 - numBits);
-		bitsInBuf = numBits;
-		numBits = 0;
-	    }
-	    if (bitsInBuf == 8) {
-		dos.write(buf);
-		buf = 0;
-		bitsInBuf = 0;
-	    }
-	}
+        if (Debug.ASSERT && (numBits < 0 || numBits > 32)) {
+            Debug.assertFail();
+        }
+        int bitsInBuf = (bitsProcessed & 7);
+        bitsProcessed += numBits;
+        while (numBits > 0) {
+            if (bitsInBuf > 0) {
+                int available = 8 - bitsInBuf;  // 0 < available < 8
+                if (available <= numBits) {     // Shift available into buf
+                    int mask = maskArr[available];
+                    buf |= (value >> (numBits - available)) & mask;
+                    numBits -= available;
+                    bitsInBuf += available;
+                } else {                        // Shift numBits into buf
+                    // 0 < numBits < available < 8
+                    int mask = maskArr[numBits];
+                    int buf2 = value & mask;
+                    buf |= buf2 << (available - numBits);
+                    bitsInBuf += numBits;
+                    numBits = 0;
+                }
+            } else if (numBits >= 8) {
+                buf = value >> (numBits - 8);
+                    // Don't need "& 0xff" because dos.write() does that for us
+                numBits -= 8;
+                    // Don't need to mask off the higher-order bits we just
+                    // put into buf
+                bitsInBuf = 8;
+            } else {
+                // numBits < 8, bitsInBuf = 0;
+                int mask = maskArr[numBits];
+                int buf2 = value & mask;
+                buf |= buf2 << (8 - numBits);
+                bitsInBuf = numBits;
+                numBits = 0;
+            }
+            if (bitsInBuf == 8) {
+                dos.write(buf);
+                buf = 0;
+                bitsInBuf = 0;
+            }
+        }
     }
 
     public void writeBitsLong(DataOutputStream dos, int numBits, long value) 
-	    throws IOException 
+            throws IOException 
     {
-	if (Debug.ASSERT && (numBits < 0 || numBits > 64)) {
-	    Debug.assertFail();
-	}
-	int bitsInBuf = (bitsProcessed & 7);
-	bitsProcessed += numBits;
-	while (numBits > 0) {
-	    if (bitsInBuf > 0) {
-		int available = 8 - bitsInBuf;	// 0 < available < 8
-		if (available <= numBits) {	// Shift available into buf
-		    int mask = maskArr[available];
-		    buf |= (value >> (numBits - available)) & mask;
-		    numBits -= available;
-		    bitsInBuf += available;
-		} else {			// Shift numBits into buf
-		    // 0 < numBits < available < 8
-		    long mask = maskArr[numBits];
-		    int buf2 = (int) (value & mask);
-		    buf |= buf2 << (available - numBits);
-		    bitsInBuf += numBits;
-		    numBits = 0;
-		}
-	    } else if (numBits >= 8) {
-		buf = (int) (value >> (numBits - 8));
-		    // Don't need "& 0xff" because dos.write() does that for us
-		numBits -= 8;
-		    // Don't need to mask off the higher-order bits we just
-		    // put into buf
-		bitsInBuf = 8;
-	    } else {
-		// numBits < 8, bitsInBuf = 0;
-		int mask = maskArr[numBits];
-		int buf2 = (int) (value & mask);
-		buf |= buf2 << (8 - numBits);
-		bitsInBuf = numBits;
-		numBits = 0;
-	    }
-	    if (bitsInBuf == 8) {
-		dos.write(buf);
-		buf = 0;
-		bitsInBuf = 0;
-	    }
-	}
+        if (Debug.ASSERT && (numBits < 0 || numBits > 64)) {
+            Debug.assertFail();
+        }
+        int bitsInBuf = (bitsProcessed & 7);
+        bitsProcessed += numBits;
+        while (numBits > 0) {
+            if (bitsInBuf > 0) {
+                int available = 8 - bitsInBuf;  // 0 < available < 8
+                if (available <= numBits) {     // Shift available into buf
+                    int mask = maskArr[available];
+                    buf |= (value >> (numBits - available)) & mask;
+                    numBits -= available;
+                    bitsInBuf += available;
+                } else {                        // Shift numBits into buf
+                    // 0 < numBits < available < 8
+                    long mask = maskArr[numBits];
+                    int buf2 = (int) (value & mask);
+                    buf |= buf2 << (available - numBits);
+                    bitsInBuf += numBits;
+                    numBits = 0;
+                }
+            } else if (numBits >= 8) {
+                buf = (int) (value >> (numBits - 8));
+                    // Don't need "& 0xff" because dos.write() does that for us
+                numBits -= 8;
+                    // Don't need to mask off the higher-order bits we just
+                    // put into buf
+                bitsInBuf = 8;
+            } else {
+                // numBits < 8, bitsInBuf = 0;
+                int mask = maskArr[numBits];
+                int buf2 = (int) (value & mask);
+                buf |= buf2 << (8 - numBits);
+                bitsInBuf = numBits;
+                numBits = 0;
+            }
+            if (bitsInBuf == 8) {
+                dos.write(buf);
+                buf = 0;
+                bitsInBuf = 0;
+            }
+        }
     }
 
     /** 
@@ -339,13 +339,13 @@ public class BitStreamIO {
      * etc.
      **/
     public void assertByteAligned(int numBytes) {
-	if (Debug.ASSERT) {
-	    int numBits = numBytes * 8;
-	    int bits = bitsProcessed % numBits;
-	    if (bits != 0) {
-		Debug.assertFail(bits + " stray bits.");
-	    }
-	}
+        if (Debug.ASSERT) {
+            int numBits = numBytes * 8;
+            int bits = bitsProcessed % numBits;
+            if (bits != 0) {
+                Debug.assertFail(bits + " stray bits.");
+            }
+        }
     }
 
     /**
@@ -354,6 +354,6 @@ public class BitStreamIO {
      * boundaries.
      **/
     public int getBitsProcessed() {
-	return bitsProcessed;
+        return bitsProcessed;
     }
 }

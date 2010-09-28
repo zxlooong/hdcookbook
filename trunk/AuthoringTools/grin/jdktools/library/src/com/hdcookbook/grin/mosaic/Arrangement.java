@@ -67,69 +67,69 @@ import java.awt.Rectangle;
 class Arrangement {
 
     private int maxHeight;
-    private Rectangle[] pos;	// The positon of each part
+    private Rectangle[] pos;    // The positon of each part
     private int widthUsed = 0;
     private int heightUsed = 0;
     private int pixelsUsed;     // Integer.MAX_VALUE means "impossible"
-    private int placed;		// # of rectangles fixed in place so far
+    private int placed;         // # of rectangles fixed in place so far
 
     Arrangement(int maxHeight, MosaicPart[] parts) {
-	this.maxHeight = maxHeight;
-	pos = new Rectangle[parts.length];
-	for (int i = 0; i < parts.length; i++) {
-	    pos[i] = new Rectangle(parts[i].getPlacement());
-	}
+        this.maxHeight = maxHeight;
+        pos = new Rectangle[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            pos[i] = new Rectangle(parts[i].getPlacement());
+        }
     }
 
     void arrangeWithin(int maxWidth) {
-	for (placed = 0; placed < pos.length; placed++) {
-	    Rectangle curr = pos[placed];
-	    curr.x = 0;
-	    curr.y = 0;
-	    if (curr.width > maxWidth) {	// Can't fit
-		pixelsUsed = Integer.MAX_VALUE;
-		return;
-	    }
-	    int nextY = maxHeight;
-	    boolean found = false;
-	    while (!found && curr.y + curr.height <= maxHeight) {
-		found = true;
-		for (int i = 0; found && i < placed; i++) {
-		    Rectangle other = pos[i];
-		    if (curr.intersects(other)) {
-			found = false;
-			curr.x = other.x + other.width;
-			int y = other.y + other.height;
-			if (y < nextY) {
-			    nextY = y;
-			}
-			if (curr.x + curr.width > maxWidth) {
-			    curr.x = 0;
-			    assert curr.y < nextY;
-			    curr.y = nextY;
-			    nextY = maxHeight;
-			}
-		    }
-		}
-	    }
-	    if (!found) {
-		pixelsUsed = Integer.MAX_VALUE;
-		return;
-	    }
-	}
-	widthUsed = 0;
-	heightUsed = 0;
-	for (Rectangle r : pos) {
-	    int w = r.x + r.width;
-	    if (w > widthUsed) {
-		widthUsed = w;
-	    }
-	    int h = r.y + r.height;
-	    if (h > heightUsed) {
-		heightUsed = h;
-	    }
-	}
-	pixelsUsed = widthUsed * heightUsed;
+        for (placed = 0; placed < pos.length; placed++) {
+            Rectangle curr = pos[placed];
+            curr.x = 0;
+            curr.y = 0;
+            if (curr.width > maxWidth) {        // Can't fit
+                pixelsUsed = Integer.MAX_VALUE;
+                return;
+            }
+            int nextY = maxHeight;
+            boolean found = false;
+            while (!found && curr.y + curr.height <= maxHeight) {
+                found = true;
+                for (int i = 0; found && i < placed; i++) {
+                    Rectangle other = pos[i];
+                    if (curr.intersects(other)) {
+                        found = false;
+                        curr.x = other.x + other.width;
+                        int y = other.y + other.height;
+                        if (y < nextY) {
+                            nextY = y;
+                        }
+                        if (curr.x + curr.width > maxWidth) {
+                            curr.x = 0;
+                            assert curr.y < nextY;
+                            curr.y = nextY;
+                            nextY = maxHeight;
+                        }
+                    }
+                }
+            }
+            if (!found) {
+                pixelsUsed = Integer.MAX_VALUE;
+                return;
+            }
+        }
+        widthUsed = 0;
+        heightUsed = 0;
+        for (Rectangle r : pos) {
+            int w = r.x + r.width;
+            if (w > widthUsed) {
+                widthUsed = w;
+            }
+            int h = r.y + r.height;
+            if (h > heightUsed) {
+                heightUsed = h;
+            }
+        }
+        pixelsUsed = widthUsed * heightUsed;
     }
 
     //
@@ -137,9 +137,9 @@ class Arrangement {
     // arrangement
     //
     void positionParts(MosaicPart[] parts) {
-	for (int i = 0; i < parts.length; i++) {
-	    parts[i].setPosition(pos[i].x, pos[i].y);
-	}
+        for (int i = 0; i < parts.length; i++) {
+            parts[i].setPosition(pos[i].x, pos[i].y);
+        }
     }
 
     //
@@ -147,20 +147,20 @@ class Arrangement {
     // if no viable arrangement exists.
     //
     int getPixelsUsed() {
-	return pixelsUsed;
+        return pixelsUsed;
     }
 
     //
     // Return the width used in the current arrangement
     //
     int getWidthUsed() {
-	return widthUsed;
+        return widthUsed;
     }
 
     //
     // Return the height used in the current arrangement
     //
     int getHeightUsed() {
-	return heightUsed;
+        return heightUsed;
     }
 }

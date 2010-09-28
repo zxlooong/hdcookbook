@@ -69,52 +69,52 @@ public class PointsEasingEquation extends EasingEquation {
     private int[][] points;
 
     public PointsEasingEquation(int[][] points) {
-	this.points = points;
+        this.points = points;
     }
 
     public void addKeyFrames(ArrayList<int[]> keyFrames, int[] end) 
-	    throws IOException
+            throws IOException
     {
-	int[] start = keyFrames.get(keyFrames.size() - 1);
-	int startFrame = start[0];
-	int endFrame = end[0];
-	int duration = endFrame - startFrame;
-	int[][] allFrames = new int[duration + 1][];
-	if (points.length != duration) {
-	    throw new IOException("Expected " + duration +
-	    			  " points, got " + points.length);
-	}
-	if (start.length != end.length) {
-	    throw new IOException("Start and end frames have different number of values");
-	}
-	allFrames[0] = new int[start.length];
-	for (int i = 0; i < start.length; i++) {
-	    allFrames[0][i] = start[i];
-	}
-	for (int f = 1; f <= duration; f++) {
-	    int[] pts = points[f-1];
-	    if (pts.length != end.length - 1) {
-		throw new IOException("In point set " + f + " expected " +
-				      (end.length - 1) + " values but got " +
-				      pts.length);
-	    }
-	    allFrames[f] = new int[end.length];
-	    allFrames[f][0] = f + startFrame;
-	    for (int i = 1; i < end.length; i++) {
-		allFrames[f][i] = pts[i-1];
-	    }
-	}
-	for (int i = 1; i < end.length; i++) {
-	    if (allFrames[duration][i] != end[i]) {
-		throw new IOException("End point value " + i 
-				      + " mismatch:  " + end[i]
-				      + " != " + allFrames[duration][i]);
-	    }
-	}
-	trimUnneededKeyFrames(startFrame, keyFrames, end, allFrames);
+        int[] start = keyFrames.get(keyFrames.size() - 1);
+        int startFrame = start[0];
+        int endFrame = end[0];
+        int duration = endFrame - startFrame;
+        int[][] allFrames = new int[duration + 1][];
+        if (points.length != duration) {
+            throw new IOException("Expected " + duration +
+                                  " points, got " + points.length);
+        }
+        if (start.length != end.length) {
+            throw new IOException("Start and end frames have different number of values");
+        }
+        allFrames[0] = new int[start.length];
+        for (int i = 0; i < start.length; i++) {
+            allFrames[0][i] = start[i];
+        }
+        for (int f = 1; f <= duration; f++) {
+            int[] pts = points[f-1];
+            if (pts.length != end.length - 1) {
+                throw new IOException("In point set " + f + " expected " +
+                                      (end.length - 1) + " values but got " +
+                                      pts.length);
+            }
+            allFrames[f] = new int[end.length];
+            allFrames[f][0] = f + startFrame;
+            for (int i = 1; i < end.length; i++) {
+                allFrames[f][i] = pts[i-1];
+            }
+        }
+        for (int i = 1; i < end.length; i++) {
+            if (allFrames[duration][i] != end[i]) {
+                throw new IOException("End point value " + i 
+                                      + " mismatch:  " + end[i]
+                                      + " != " + allFrames[duration][i]);
+            }
+        }
+        trimUnneededKeyFrames(startFrame, keyFrames, end, allFrames);
     }
 
     public double evaluate(double t, double b, double c, double d) {
-	throw new RuntimeException("not implemented, shouldn't be called");
+        throw new RuntimeException("not implemented, shouldn't be called");
     }
 }

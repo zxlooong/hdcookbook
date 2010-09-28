@@ -64,61 +64,61 @@ package com.hdcookbook.grin.util;
  **/
 public class NetworkManager {
 
-    static Object LOCK = new Object();		// Also needed by XletDirector
+    static Object LOCK = new Object();          // Also needed by XletDirector
     private static int numActivations = 0;
     private static boolean destroyed = false;
     private static Queue queue = new Queue(10);
     private static Thread thread;
 
     public static void start() {
-	synchronized(LOCK) {
-	    if (destroyed) {
-		   throw new IllegalStateException();
-	    }
-	    numActivations++;
-	    if (numActivations > 1) {
-		return;
-	    }
-	}
-	Runnable r = new Runnable() {
-	    public void run() {
-		try {
-		    processQueue();
-		} catch (InterruptedException ex) {
-		    if (Debug.LEVEL > 0) {
-			Debug.println("Network manager interrupted.");
-		    }
-		}
-		if (Debug.LEVEL > 0) {
-		    Debug.println("Network manager thread exits.");
-		}
-	    }
-	};
-	thread = new Thread(r, "Network Manager");
+        synchronized(LOCK) {
+            if (destroyed) {
+                   throw new IllegalStateException();
+            }
+            numActivations++;
+            if (numActivations > 1) {
+                return;
+            }
+        }
+        Runnable r = new Runnable() {
+            public void run() {
+                try {
+                    processQueue();
+                } catch (InterruptedException ex) {
+                    if (Debug.LEVEL > 0) {
+                        Debug.println("Network manager interrupted.");
+                    }
+                }
+                if (Debug.LEVEL > 0) {
+                    Debug.println("Network manager thread exits.");
+                }
+            }
+        };
+        thread = new Thread(r, "Network Manager");
         // Set the priority as the same as SetupManager, and one less than
         // AnimationEngine.
-	thread.setPriority(3); 
-	thread.setDaemon(true);
-	thread.start();
+        thread.setPriority(3); 
+        thread.setDaemon(true);
+        thread.start();
     }
     
     public static void shutdown() {
-	synchronized(LOCK) {
-	    numActivations--;
-	    if (numActivations < 1) {
-		destroyed = true;
-		LOCK.notifyAll();
-	    }
-	    if (thread != null) {
-		thread.interrupt();
-		thread = null;
-		    // This thread.interrupt() is important.  Our network
-		    // taskg (the Runnable instances that get enqueued)
-		    // should poll Thread.interrupted() regularly, and shut
-		    // down if it is true.  This will more quickly terminate
-		    // the NetworkManager thread on xlet shutdown.
-	    }
-	}
+        synchronized(LOCK) {
+            numActivations--;
+            if (numActivations < 1) {
+                destroyed = true;
+                LOCK.notifyAll();
+            }
+            if (thread != null) {
+                thread.interrupt();
+                thread = null;
+                    // This thread.interrupt() is important.  Our network
+                    // taskg (the Runnable instances that get enqueued)
+                    // should poll Thread.interrupted() regularly, and shut
+                    // down if it is true.  This will more quickly terminate
+                    // the NetworkManager thread on xlet shutdown.
+            }
+        }
     }
 
     /**
@@ -129,28 +129,28 @@ public class NetworkManager {
      * @see java.lang.Thread#isInterrupted()
      **/
     public static void enqueue(Runnable r) {
-	synchronized(LOCK) {
-	    queue.add(r);
-	    LOCK.notifyAll();
-	}
+        synchronized(LOCK) {
+            queue.add(r);
+            LOCK.notifyAll();
+        }
     }
 
     private static void processQueue() throws InterruptedException {
-	for (;;) {
-	    Runnable runnable;
-	    for (;;) {
-		synchronized(LOCK) {
-		    if (destroyed) {
-			return;
-		    }
-		    if (!queue.isEmpty()) {
-			runnable = (Runnable) queue.remove();
-			break;
-		    }
-		    LOCK.wait();
-		}
-	    }
-	    try {
+        for (;;) {
+            Runnable runnable;
+            for (;;) {
+                synchronized(LOCK) {
+                    if (destroyed) {
+                        return;
+                    }
+                    if (!queue.isEmpty()) {
+                        runnable = (Runnable) queue.remove();
+                        break;
+                    }
+                    LOCK.wait();
+                }
+            }
+            try {
         // In runnable.run(), most likely the code will be doing some
         // network access, and if it's http, then it'll take time.
         // This seems to slow down the animation engine trying to do
@@ -160,15 +160,15 @@ public class NetworkManager {
         // will be given a chance before  the NetworkManager thread 
         // possibly blocks.
                 Thread.currentThread().yield();
-		runnable.run();
-	    } catch (Throwable t) {
-		if (t instanceof InterruptedException) {
-		    throw (InterruptedException) t;
-		}
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(t);
-		}
-	    }
-	}
+                runnable.run();
+            } catch (Throwable t) {
+                if (t instanceof InterruptedException) {
+                    throw (InterruptedException) t;
+                }
+                if (Debug.LEVEL > 0) {
+                    Debug.printStackTrace(t);
+                }
+            }
+        }
     }
 }

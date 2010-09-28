@@ -81,21 +81,21 @@ public class SERunNamedCommand extends Command implements SENode {
     }
 
     public void setTarget(Command target) {
-	this.target = target;
+        this.target = target;
     }
 
     public Command getTarget() {
-	return target;
+        return target;
     }
 
     public void execute(Show caller) {
-	target.execute(caller);
+        target.execute(caller);
     }
 
     public void execute() {
-	if (Debug.ASSERT) {
-	    Debug.assertFail();
-	}
+        if (Debug.ASSERT) {
+            Debug.assertFail();
+        }
     }
 
     /**
@@ -105,13 +105,13 @@ public class SERunNamedCommand extends Command implements SENode {
      * resolved to their target before any comparision.
      **/
     public boolean equals(Object other) {
-	if (this == other) {
-	    return true;
-	} else if (!this.getClass().equals(other.getClass())) {
-	    return false;
-	}
-	SERunNamedCommand o = (SERunNamedCommand) other;
-	return this.show == o.show && this.target == o.target;
+        if (this == other) {
+            return true;
+        } else if (!this.getClass().equals(other.getClass())) {
+            return false;
+        }
+        SERunNamedCommand o = (SERunNamedCommand) other;
+        return this.show == o.show && this.target == o.target;
     }
 
     /**
@@ -120,25 +120,25 @@ public class SERunNamedCommand extends Command implements SENode {
      * @see #equals(Object)
      **/
     public int hashCode() {
-	return target.hashCode() * 17;
+        return target.hashCode() * 17;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException 
     {
-	if (Debug.ASSERT) {
-	    Debug.assertFail();
-	    	// We're special-cased in GrinDataOutputStream
-	}
-	throw new IOException("Internal error");
+        if (Debug.ASSERT) {
+            Debug.assertFail();
+                // We're special-cased in GrinDataOutputStream
+        }
+        throw new IOException("Internal error");
     }
 
     public String getRuntimeClassName() {
-	if (Debug.ASSERT) {
-	    Debug.assertFail();
-	    	// We're special-cased in GrinDataOutputStream
-	}
-	return null;
+        if (Debug.ASSERT) {
+            Debug.assertFail();
+                // We're special-cased in GrinDataOutputStream
+        }
+        return null;
     }
 
     public void accept(SEShowVisitor visitor) {
@@ -163,6 +163,6 @@ public class SERunNamedCommand extends Command implements SENode {
      * {@inheritDoc}
      **/
     public String toString() {
-	return "run_named_command " + target;
+        return "run_named_command " + target;
     }
 }

@@ -98,22 +98,22 @@ public class SEDoubleUseChecker extends AbstractSEShowVisitor {
      * are reported by throwing an IOException.
      **/
     public void reportAnyProblems() throws IOException {
-	if (errors.size() > 0) {
-	    String message = "Feature(s) simultaneously visible > 1 times:  ";
-	    System.out.println(message);
-	    for (String error : errors) {
-		System.out.println("    " + error);
-		message += error;
-		message += "  ";
-	    }
-	   System.out.println();
-	   throw new IOException(message);
-	}
+        if (errors.size() > 0) {
+            String message = "Feature(s) simultaneously visible > 1 times:  ";
+            System.out.println(message);
+            for (String error : errors) {
+                System.out.println("    " + error);
+                message += error;
+                message += "  ";
+            }
+           System.out.println();
+           throw new IOException(message);
+        }
     }
 
     public void visitShow(SEShow show) {
-	// We only visit the segments, and then recurse down the active features
-	// for each segment.
+        // We only visit the segments, and then recurse down the active features
+        // for each segment.
 
         showTopFeatures = new HashSet<Feature>();        
         SESegment showTopSegment = (SESegment) show.getShowTopSegment();
@@ -124,122 +124,122 @@ public class SEDoubleUseChecker extends AbstractSEShowVisitor {
         activeFeatures = null;    // gets re-set soon
 
         this.showTopSegment  = showTopSegment; // prevent re-visit
-	SEShow.acceptSegments(this, show.getSegments());
+        SEShow.acceptSegments(this, show.getSegments());
     }
 
     public void visitSegment(SESegment segment) {
         if (segment != showTopSegment) {
-	   activeFeatures = new HashSet<Feature>(showTopFeatures);
-	   SEShow.acceptFeatures(this, segment.getActiveFeatures());
+           activeFeatures = new HashSet<Feature>(showTopFeatures);
+           SEShow.acceptFeatures(this, segment.getActiveFeatures());
         }
     }
 
     private void addActive(Feature feature) {
-	if (activeFeatures.contains(feature)) {
-	    errors.add("" + feature.getName());
-	    	// The name shouldn't be null, because it should be impossible
-		// to have an un-named feature appear twice in the show graph,
-		// but with automatically generated show graphs we can't rule
-		// this out.  This makes it prudent to append to "".
-	}
-	activeFeatures.add(feature);
+        if (activeFeatures.contains(feature)) {
+            errors.add("" + feature.getName());
+                // The name shouldn't be null, because it should be impossible
+                // to have an un-named feature appear twice in the show graph,
+                // but with automatically generated show graphs we can't rule
+                // this out.  This makes it prudent to append to "".
+        }
+        activeFeatures.add(feature);
     }
 
 
     public void visitAssembly(SEAssembly feature) {
-	addActive(feature);
-	//
-	// An assembly is the tricky case.  The parts of an assembly can
-	// contain the same features, so we have to construct a new set
-	// for each of our parts.  However,  for the other features in
-	// the segment, we need to assume that any feature in any part
-	// of this assembly might be active, so we need to add the
-	// union of our children to activeFeatures.
-	//
-	Set originalSet = activeFeatures;
-	Set unionSet = new HashSet(originalSet);
-	for (Feature part : Arrays.asList(feature.getParts())) {
-	    activeFeatures = new HashSet(originalSet);
-	    SEShow.acceptFeature(this, part);
-	    unionSet.addAll(activeFeatures);
-	}
-	activeFeatures = unionSet;
+        addActive(feature);
+        //
+        // An assembly is the tricky case.  The parts of an assembly can
+        // contain the same features, so we have to construct a new set
+        // for each of our parts.  However,  for the other features in
+        // the segment, we need to assume that any feature in any part
+        // of this assembly might be active, so we need to add the
+        // union of our children to activeFeatures.
+        //
+        Set originalSet = activeFeatures;
+        Set unionSet = new HashSet(originalSet);
+        for (Feature part : Arrays.asList(feature.getParts())) {
+            activeFeatures = new HashSet(originalSet);
+            SEShow.acceptFeature(this, part);
+            unionSet.addAll(activeFeatures);
+        }
+        activeFeatures = unionSet;
     }
 
     public void visitBox(SEBox feature) {
-	addActive(feature);
+        addActive(feature);
     }
 
     public void visitClipped(SEClipped feature) {
-	addActive(feature);
-	SEShow.acceptFeature(this, feature.getPart());
+        addActive(feature);
+        SEShow.acceptFeature(this, feature.getPart());
     }
 
     public void visitFade(SEFade feature) {
-	addActive(feature);
-	SEShow.acceptFeature(this, feature.getPart());
+        addActive(feature);
+        SEShow.acceptFeature(this, feature.getPart());
     }
 
     public void visitFixedImage(SEFixedImage feature) {
-	addActive(feature);
+        addActive(feature);
     }
 
     public void visitGroup(SEGroup feature) {
-	Feature[] parts = feature.getParts();
-	if (parts.length != 0) {
-	    addActive(feature);
-	    // A group with no children is a special case:  Because it does
-	    // nothing, it's OK for it to be active more than once.  An empty
-	    // group is used as an idiom for "Nothing" or "Null feature", so
-	    // this does happen in practice.
-	}
-	for (Feature part : Arrays.asList(parts)) {
-	    SEShow.acceptFeature(this, part);
-	}
+        Feature[] parts = feature.getParts();
+        if (parts.length != 0) {
+            addActive(feature);
+            // A group with no children is a special case:  Because it does
+            // nothing, it's OK for it to be active more than once.  An empty
+            // group is used as an idiom for "Nothing" or "Null feature", so
+            // this does happen in practice.
+        }
+        for (Feature part : Arrays.asList(parts)) {
+            SEShow.acceptFeature(this, part);
+        }
     }
 
     public void visitGuaranteeFill(SEGuaranteeFill feature) {
-	addActive(feature);
-	SEShow.acceptFeature(this, feature.getPart());
+        addActive(feature);
+        SEShow.acceptFeature(this, feature.getPart());
     }
 
     public void visitImageSequence(SEImageSequence feature) {
-	addActive(feature);
+        addActive(feature);
     }
 
     public void visitUserDefinedFeature(Feature feature) {
         if (feature instanceof Modifier) {
-	    visitUserDefinedModifier((Modifier) feature);
-	} else {
-	    addActive(feature);
+            visitUserDefinedModifier((Modifier) feature);
+        } else {
+            addActive(feature);
         }   
     }
 
     public void visitUserDefinedModifier(Modifier modifier) {
-	addActive(modifier);
+        addActive(modifier);
         SEShow.acceptFeature(this, modifier.getPart());
     }
 
     public void visitSetTarget(SESetTarget feature) {
-	addActive(feature);
-	SEShow.acceptFeature(this, feature.getPart());
+        addActive(feature);
+        SEShow.acceptFeature(this, feature.getPart());
     }
 
     public void visitSrcOver(SESrcOver feature) {
-	addActive(feature);
-	SEShow.acceptFeature(this, feature.getPart());
+        addActive(feature);
+        SEShow.acceptFeature(this, feature.getPart());
     }
 
     public void visitText(SEText feature) {
-	addActive(feature);
+        addActive(feature);
     }
 
     public void visitTranslator(SETranslator feature) {
-	addActive(feature);
-	SEShow.acceptFeature(this, feature.getPart());
+        addActive(feature);
+        SEShow.acceptFeature(this, feature.getPart());
     }
 
     public void visitInterpolatedModel(SEInterpolatedModel feature) {
-	addActive(feature);
+        addActive(feature);
     }
 }

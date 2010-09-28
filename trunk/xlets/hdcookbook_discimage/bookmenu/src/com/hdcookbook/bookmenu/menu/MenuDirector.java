@@ -84,7 +84,7 @@ public class MenuDirector extends Director implements PlayVideoExtension {
     private UserInputManager userInputManager = null;
 
     public MenuDirector(MenuXlet xlet) {
-	this.xlet = xlet;
+        this.xlet = xlet;
     }
 
     /**
@@ -104,33 +104,33 @@ public class MenuDirector extends Director implements PlayVideoExtension {
         try {
             
             String showName = "menu.grin";
-	    URL u = AssetFinder.getURL(showName);
+            URL u = AssetFinder.getURL(showName);
             BufferedInputStream bis = new BufferedInputStream(u.openStream());  
- 	    GrinBinaryReader reader = new GrinBinaryReader(bis);
+            GrinBinaryReader reader = new GrinBinaryReader(bis);
             
-	    reader.readShow(show);
+            reader.readShow(show);
             bis.close();
             
-	} catch (IOException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-		Debug.println();
-		Debug.println("***  Fatal error:  Failed to parse show.");
-		Debug.println("***  " + ex);
-		Debug.println();
-		AssetFinder.abort();
-	    }
-	}        
+        } catch (IOException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+                Debug.println();
+                Debug.println("***  Fatal error:  Failed to parse show.");
+                Debug.println("***  " + ex);
+                Debug.println();
+                AssetFinder.abort();
+            }
+        }        
         
-	return show;
+        return show;
     }
 
     private synchronized BioUpdater getBioUpdater() {
-	if (!destroyed && bioUpdater == null) {
-	    bioUpdater = new BioUpdater(xlet);
-	    bioUpdater.start();
-	}
-	return bioUpdater;
+        if (!destroyed && bioUpdater == null) {
+            bioUpdater = new BioUpdater(xlet);
+            bioUpdater.start();
+        }
+        return bioUpdater;
     }
 
     /**
@@ -138,10 +138,10 @@ public class MenuDirector extends Director implements PlayVideoExtension {
      * in the right state when the bio screen is activated.
      **/
     public void activateBio() {
-	BioUpdater bu = getBioUpdater();
-	if (bu != null) {
-	    bu.activateRightSegment();
-	}
+        BioUpdater bu = getBioUpdater();
+        if (bu != null) {
+            bu.activateRightSegment();
+        }
     }
 
     /**
@@ -149,18 +149,18 @@ public class MenuDirector extends Director implements PlayVideoExtension {
      * process of downloading a new bio image from the Internet.
      **/
     public void downloadBio() {
-	BioUpdater bu = getBioUpdater();
-	if (bu != null) {
-	    bu.downloadBio();
-	}
+        BioUpdater bu = getBioUpdater();
+        if (bu != null) {
+            bu.downloadBio();
+        }
     }
 
     private synchronized BookmarkManager getBookmarkManager() {
-	if (!destroyed && bookmarkManager == null) {
-	    bookmarkManager = new BookmarkManager(xlet);
-	    bookmarkManager.init();
-	}
-	return bookmarkManager;
+        if (!destroyed && bookmarkManager == null) {
+            bookmarkManager = new BookmarkManager(xlet);
+            bookmarkManager.init();
+        }
+        return bookmarkManager;
     }
 
     /** 
@@ -170,12 +170,12 @@ public class MenuDirector extends Director implements PlayVideoExtension {
      * @param bookmarkNum  Number of bookmark, 0 means "none"
      **/
     public long setBookmarkUIForScene(int bookmarkNum) {
-	BookmarkManager mgr = getBookmarkManager();
-	if (mgr != null) {
-	    return mgr.updateUI(bookmarkNum);
-	} else {
-	    return Long.MIN_VALUE;
-	}
+        BookmarkManager mgr = getBookmarkManager();
+        if (mgr != null) {
+            return mgr.updateUI(bookmarkNum);
+        } else {
+            return Long.MIN_VALUE;
+        }
     }
 
     /** 
@@ -183,10 +183,10 @@ public class MenuDirector extends Director implements PlayVideoExtension {
      * bookmark at the current position in the  main video.
      **/
     public void makeBookmark() {
-	BookmarkManager mgr = getBookmarkManager();
-	if (mgr != null) {
-	    mgr.makeBookmark();
-	}
+        BookmarkManager mgr = getBookmarkManager();
+        if (mgr != null) {
+            mgr.makeBookmark();
+        }
     }
 
     /**
@@ -194,47 +194,47 @@ public class MenuDirector extends Director implements PlayVideoExtension {
      * that's currently selected in the UI.
      **/
     public void deleteCurrentBookmark() {
-	BookmarkManager mgr = getBookmarkManager();
-	if (mgr != null) {
-	    mgr.deleteCurrentBookmark();
-	}
+        BookmarkManager mgr = getBookmarkManager();
+        if (mgr != null) {
+            mgr.deleteCurrentBookmark();
+        }
     }
 
     private synchronized UserInputManager getUserInputManager() {
-	if (!destroyed && userInputManager == null) {
-	    userInputManager = new UserInputManager(xlet);
-	    userInputManager.init();
-	}
-	return userInputManager;
+        if (!destroyed && userInputManager == null) {
+            userInputManager = new UserInputManager(xlet);
+            userInputManager.init();
+        }
+        return userInputManager;
     }
 
     /**
      * @param text  The uppercase letter to add, or one of the special 
-     *		    values "-enter-" or "-init-".
+     *              values "-enter-" or "-init-".
      **/
     public void setUserInputText(String text) {
-	UserInputManager m = getUserInputManager();
-	if (m != null) {
-	    m.setText(text);
-	}
+        UserInputManager m = getUserInputManager();
+        if (m != null) {
+            m.setText(text);
+        }
     }
 
     /**
      * Destroy this director.  Called on xlet termination.
      **/
     public void destroy() {
-	synchronized(this) {
-	    destroyed = true;
-	    if (bioUpdater != null) {
-		bioUpdater.destroy();
-	    }
-	    if (bookmarkManager != null) {
-		bookmarkManager.destroy();
-	    }
-	    if (userInputManager != null) {
-		userInputManager.destroy();
-	    }
-	}
+        synchronized(this) {
+            destroyed = true;
+            if (bioUpdater != null) {
+                bioUpdater.destroy();
+            }
+            if (bookmarkManager != null) {
+                bookmarkManager.destroy();
+            }
+            if (userInputManager != null) {
+                userInputManager.destroy();
+            }
+        }
     }
 
     public void playVideo(String arg) {

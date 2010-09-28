@@ -15,18 +15,18 @@ show_top F:ShowTop ;
 feature showtop_group F:ShowTopGroup ;
 
 feature fade F:ShowTop F:ShowTopGroup {
-	 0	255	start 
-	 11	  0	ease-in-out-quad
-	 23	255	ease-in-out-quad
+         0      255     start 
+         11       0     ease-in-out-quad
+         23     255     ease-in-out-quad
     } repeat 0 ;
 
 
 feature text F:MyText left 100 top 250 "My show_top is making me flash!"
-	SansSerif bold 96 { { 255 255 255 255 } } ;
+        SansSerif bold 96 { { 255 255 255 255 } } ;
 
 segment S:TheSegment 
     active {
-    	F:MyText
+        F:MyText
     }
 ;
 

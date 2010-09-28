@@ -77,34 +77,34 @@ public class GuiShowBuilder extends ShowBuilder {
     private GrinView gui;
 
     public GuiShowBuilder(GrinView gui) {
-	this.gui = gui;
+        this.gui = gui;
     }
 
     public void addFeature(String name, int line, Feature f) throws IOException
     {
-	super.addFeature(name, line, f);
-	gui.addLineNumber(f, line);
+        super.addFeature(name, line, f);
+        gui.addLineNumber(f, line);
     }
 
     public void addSegment(String name, int line, Segment s) throws IOException
     {
-	super.addSegment(name, line, s);
-	gui.addLineNumber(s, line);
+        super.addSegment(name, line, s);
+        gui.addLineNumber(s, line);
     }
 
     public void addCommand(Command command, int line) throws IOException {
-	super.addCommand(command, line);
-	gui.addLineNumber(command, line);
+        super.addCommand(command, line);
+        gui.addLineNumber(command, line);
     }
 
     public void addRCHandler(String name, int line, RCHandler hand)
-    			throws IOException
+                        throws IOException
     {
-	super.addRCHandler(name, line, hand);
-	gui.addLineNumber(hand, line);
+        super.addRCHandler(name, line, hand);
+        gui.addLineNumber(hand, line);
     }
 
     public void finishBuilding() throws IOException {
-	super.finishBuilding();
+        super.finishBuilding();
     }
 }

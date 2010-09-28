@@ -110,7 +110,7 @@ public class FontImageMosaic {
     
     HashMap charInfo = new HashMap();
     int     maxLeading   = 0;    
-    int	    maxBoundAscent = 0;
+    int     maxBoundAscent = 0;
     int     maxBoundDescent = 0;
     
     File    outputFile     = null;  // physical image file to output.
@@ -119,8 +119,8 @@ public class FontImageMosaic {
     {
         maxPixelsX = width;
         maxPixelsY = height;
-	this.scaleX = scaleX;
-	this.scaleY = scaleY;
+        this.scaleX = scaleX;
+        this.scaleY = scaleY;
         image = new BufferedImage(maxPixelsX, maxPixelsY,
                     BufferedImage.TYPE_INT_ARGB);
     }
@@ -140,7 +140,7 @@ public class FontImageMosaic {
     }
     
     private void setImageSource(File sourceFile, Color[] colorsToIgnore)
-	      throws IOException 
+              throws IOException 
     {
         BufferedInputStream source = 
                 new BufferedInputStream(new FileInputStream(sourceFile));
@@ -359,16 +359,16 @@ public class FontImageMosaic {
             Rectangle     imageRectInMosaic = writeSubImage(g2, charImage, subImageRect); 
             
             // Now let's figure out the font metrics info in relations to the 
-	    // char image that got written out.
-	    int ascent = metrics.getBaseline() - regionToScan.y-subImageRect.y;
-	    int boundAscent = metrics.getBaseline() + 1 - boundRect.y;
-	    int boundDescent = boundRect.height - boundAscent;
-	    int xOffset = regionToScan.x + subImageRect.x - boundRect.x;
+            // char image that got written out.
+            int ascent = metrics.getBaseline() - regionToScan.y-subImageRect.y;
+            int boundAscent = metrics.getBaseline() + 1 - boundRect.y;
+            int boundDescent = boundRect.height - boundAscent;
+            int xOffset = regionToScan.x + subImageRect.x - boundRect.x;
 
-	    if (subImageRect.height == 0) {
-		ascent = 0;
-	    }
-	    int width = boundRect.width;
+            if (subImageRect.height == 0) {
+                ascent = 0;
+            }
+            int width = boundRect.width;
 
             // Write out the char position in the final font image mosaic,
             // and the asent/boundRect info for this char.
@@ -376,21 +376,21 @@ public class FontImageMosaic {
             info.imageInMosaic = imageRectInMosaic;
             info.ascent = (int) Math.round(scaleY * ascent);
             info.width = (int) Math.round(scaleX * width);
-	    info.xOffset = (int) Math.round(xOffset);
+            info.xOffset = (int) Math.round(xOffset);
             charInfo.put(ch, info);
             
             // Character's bounding rect and ascent info can be used
             // to calculate the char's ascent, descent and advance.
             // Meanwhile character leading, and max ascent and descent is
-	    // recorded per font.  Bound ascent is based on the bound rect
-	    // of rendering the font, and not the actual pixels.
+            // recorded per font.  Bound ascent is based on the bound rect
+            // of rendering the font, and not the actual pixels.
 
-	    boundAscent = (int) Math.round(scaleY * boundAscent);
-	    boundDescent = (int) Math.round(scaleY * boundDescent);
-	    int leading = (int) Math.round(scaleX * metrics.getLeading());
-	    maxLeading = Math.max(maxLeading, leading);
-	    maxBoundAscent = Math.max(maxBoundAscent, boundAscent);
-	    maxBoundDescent = Math.max(maxBoundDescent, boundDescent);
+            boundAscent = (int) Math.round(scaleY * boundAscent);
+            boundDescent = (int) Math.round(scaleY * boundDescent);
+            int leading = (int) Math.round(scaleX * metrics.getLeading());
+            maxLeading = Math.max(maxLeading, leading);
+            maxBoundAscent = Math.max(maxBoundAscent, boundAscent);
+            maxBoundDescent = Math.max(maxBoundDescent, boundDescent);
         }
     }
     
@@ -405,11 +405,11 @@ public class FontImageMosaic {
     }
 
     private Rectangle writeSubImage(Graphics2D g2, BufferedImage charImage, 
-    				    Rectangle subImageRect) 
-	       throws IOException 
+                                    Rectangle subImageRect) 
+               throws IOException 
     {
-	int width = (int) Math.round(subImageRect.width * scaleX);
-	int height = (int) Math.round(subImageRect.height * scaleY);
+        int width = (int) Math.round(subImageRect.width * scaleX);
+        int height = (int) Math.round(subImageRect.height * scaleY);
         if (currPixelsX + width >= maxPixelsX) { 
             // calculating the location of the char image in the mosaic.
             if (maxWidthInColumn < currPixelsX) {
@@ -421,7 +421,7 @@ public class FontImageMosaic {
         }
         
         Rectangle drawRegion 
-	    = new Rectangle(currPixelsX, currPixelsY, width, height);
+            = new Rectangle(currPixelsX, currPixelsY, width, height);
         
         if (!drawRegion.isEmpty()) {
             g2.drawImage(charImage, drawRegion.x, drawRegion.y,
@@ -448,8 +448,8 @@ public class FontImageMosaic {
     class ImageMosaicCharInfo {        
         char ch;
         Rectangle imageInMosaic;
-        int ascent;	// True ascent of this character in image
-	int xOffset;	// Offset of where the font image should be drawn
+        int ascent;     // True ascent of this character in image
+        int xOffset;    // Offset of where the font image should be drawn
         int width;
 
         public ImageMosaicCharInfo(char ch) {

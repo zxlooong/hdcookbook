@@ -76,8 +76,8 @@ public class FontImageFileInfo {
     int maxLeading;
     int maxAscent;
     int maxDescent;
-    	// maxAscent and maxDescent are based on the bound rects of
-	// the characters during font construction.
+        // maxAscent and maxDescent are based on the bound rects of
+        // the characters during font construction.
     HashMap charMap;
     
     public static void initFontImageFileInfo(String infoFile) 
@@ -104,8 +104,8 @@ public class FontImageFileInfo {
             fileNames[i] = dis.readUTF();
             FontImageFileInfo info = new FontImageFileInfo();
             info.maxLeading = dis.readInt();
-	    info.maxAscent = dis.readInt();
-	    info.maxDescent = dis.readInt();
+            info.maxAscent = dis.readInt();
+            info.maxDescent = dis.readInt();
             info.charMap = new HashMap();
             int count = dis.readInt();
             for (int j = 0; j < count; j++) {

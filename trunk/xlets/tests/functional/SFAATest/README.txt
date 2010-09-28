@@ -19,45 +19,45 @@ If you want to test SFAA on a given player, follow these steps:
     
     2.  When it prompts you to enter the number of buffers, press "1"
         or "2".  Do not use the arrow keys to set a trim value before 
-	pressing the number key.  Let the media play through, which 
-	should take about 12 seconds.  You may see a fairly long delay 
-	between when the video starts playing (that's the red bear 
-	outline), and when SFAA starts presenting graphics (that's 
-	the bear images that attempt to cover the red outline).  
-	If there is a long delay, don't worry; this isn't part of 
-	the test.
-	
+        pressing the number key.  Let the media play through, which 
+        should take about 12 seconds.  You may see a fairly long delay 
+        between when the video starts playing (that's the red bear 
+        outline), and when SFAA starts presenting graphics (that's 
+        the bear images that attempt to cover the red outline).  
+        If there is a long delay, don't worry; this isn't part of 
+        the test.
+        
     3.  When it prompts you to press enter to run the test again, press enter.
         Ignore the results on the screen.
-	
+        
     4.  When it prompts you to enter the number of buffers, press "1".
         Do not use the arrow keys to set a trim value before pressing
-	the number key.
+        the number key.
     
     5.  Watch the registration of the video (red outline) and the SFAA
         graphics (bear picture).  It's OK if the graphics is behind the
-	video by up to two frames.  During the initial diagonal movement
-	of the bear, this equates to a registration difference between the
-	two of 20 video pixels horizontally and 12 video pixels vertically
-	(the video is encoded at full HD, 1920x1080).  It's also OK if
-	the bear animation drops half of its frames, resulting in a
-	real animation rate of 12fps - visually, this would be seen as
-	slightly "jerky" bear movement with smoother outline movement.
-	It may also intermittently fall behind by a couple of additional
-	frames, perhaps once or twice during the movement (due to GC or
-	other non-Java system activity).
-	
-	Within the parameters discussed above, the bear The picture shall
-	remain registered with the bear outline throughout the video
-	presentation.
+        video by up to two frames.  During the initial diagonal movement
+        of the bear, this equates to a registration difference between the
+        two of 20 video pixels horizontally and 12 video pixels vertically
+        (the video is encoded at full HD, 1920x1080).  It's also OK if
+        the bear animation drops half of its frames, resulting in a
+        real animation rate of 12fps - visually, this would be seen as
+        slightly "jerky" bear movement with smoother outline movement.
+        It may also intermittently fall behind by a couple of additional
+        frames, perhaps once or twice during the movement (due to GC or
+        other non-Java system activity).
+        
+        Within the parameters discussed above, the bear The picture shall
+        remain registered with the bear outline throughout the video
+        presentation.
 
     6.  When you see the results screen, it should say it skipped
         N frames out of a total of M frames.  M shall be between 260 and 300,
-	and N shall be no greather than 55% of M.  Press enter.
+        and N shall be no greather than 55% of M.  Press enter.
 
     7.  When it prompts you to enter the number of buffers, press "4".
         Do not use the arrow keys to set a trim value before pressing
-	the number key.
+        the number key.
 
     8.  Repeat steps 5 and 6, noting the results.
 

@@ -91,7 +91,7 @@ import java.io.IOException;
 public class Show implements AnimationClient {
 
     private Director director;
-	// Never null
+        // Never null
 
     /**
      * Our helper that calls into us to load images and such.  This is
@@ -163,16 +163,16 @@ public class Show implements AnimationClient {
 
     private Queue pendingCommands = new Queue(32);
     private boolean deferringPendingCommands = false;
-    private int numTargets = 1;	  // number of RenderContext targets needed 
-    				  // by this show
-    private boolean inputOK = true;	
-	// Condition variable on this instance of show
+    private int numTargets = 1;   // number of RenderContext targets needed 
+                                  // by this show
+    private boolean inputOK = true;     
+        // Condition variable on this instance of show
     private int inputOKWaiting = 0;
-    	// # of threads waiting on inputOK
+        // # of threads waiting on inputOK
 
     protected String fontName[];
     protected int fontStyleSize[];  // style in lower two bits, >> 2 for size
-    private Font font[];	    // Populated on demand by getFont(int).
+    private Font font[];            // Populated on demand by getFont(int).
 
     /**
      * Scale factor for use by a director's java code
@@ -206,15 +206,15 @@ public class Show implements AnimationClient {
      * Create a new show.
      *
      * @param director  A Director helper class the xlet can use to control
-     *			the show.  May be null, in which case a default
-     *			direct instance of Director will be assigned.
+     *                  the show.  May be null, in which case a default
+     *                  direct instance of Director will be assigned.
      **/
     public Show(Director director) {
-	if (director == null) {
-	    director = new Director();
-	}
-	this.director = director;
-	director.setShow(this);
+        if (director == null) {
+            director = new Director();
+        }
+        this.director = director;
+        director.setShow(this);
     }
 
     /**
@@ -224,7 +224,7 @@ public class Show implements AnimationClient {
      * @return our Director
      **/
     public Director getDirector() {
-	return director;
+        return director;
     }
 
     /**
@@ -235,57 +235,57 @@ public class Show implements AnimationClient {
      * @throws IOException if anything goes wrong.
      **/
     public void buildShow(Segment[] segments, Feature[] features, 
-    		          RCHandler[] rcHandlers, String[] stickyImages,
+                          RCHandler[] rcHandlers, String[] stickyImages,
                           Segment showTop, Group showTopGroup,
-		          Hashtable publicSegments, Hashtable publicFeatures,
-		          Hashtable publicRCHandlers, 
-			  Hashtable publicNamedCommands,
-			  String[] fontName, int[] fontStyleSize)
-	    throws IOException 
+                          Hashtable publicSegments, Hashtable publicFeatures,
+                          Hashtable publicRCHandlers, 
+                          Hashtable publicNamedCommands,
+                          String[] fontName, int[] fontStyleSize)
+            throws IOException 
     {
-	this.segments = segments;
-	this.features = features;
-	this.rcHandlers = rcHandlers;
-	if (stickyImages != null) {
-	    this.stickyImages = new ManagedImage[stickyImages.length];
-	    for (int i = 0; i < stickyImages.length; i++) {
-		this.stickyImages[i] = ImageManager.getImage(stickyImages[i]);
-		    // This will never be null, even if the path doesn't refer
-		    // to a real image.  The library doesn't try to load images
-		    // until a feature that uses the image is prepared, so the
-		    // framework has no way of knowing if the image exists or
-		    // not at this time.
-	    }
-	}
+        this.segments = segments;
+        this.features = features;
+        this.rcHandlers = rcHandlers;
+        if (stickyImages != null) {
+            this.stickyImages = new ManagedImage[stickyImages.length];
+            for (int i = 0; i < stickyImages.length; i++) {
+                this.stickyImages[i] = ImageManager.getImage(stickyImages[i]);
+                    // This will never be null, even if the path doesn't refer
+                    // to a real image.  The library doesn't try to load images
+                    // until a feature that uses the image is prepared, so the
+                    // framework has no way of knowing if the image exists or
+                    // not at this time.
+            }
+        }
         
         this.showTopGroup = showTopGroup;
         this.showTop = showTop;
         this.showTop.setShow(this); 
         
-	this.publicSegments = publicSegments;
-	this.publicFeatures = publicFeatures;
-	this.publicRCHandlers = publicRCHandlers;
-	this.publicNamedCommands = publicNamedCommands;
-	
-	for (int i = 0; i < rcHandlers.length; i++) {
-	    rcHandlers[i].setShow(this);
-	}
-	for (int i = 0; i < segments.length; i++) {
-	    segments[i].setShow(this);
-	}
-	this.fontName = fontName;
-	this.fontStyleSize = fontStyleSize;
-	font = new Font[fontName.length];
+        this.publicSegments = publicSegments;
+        this.publicFeatures = publicFeatures;
+        this.publicRCHandlers = publicRCHandlers;
+        this.publicNamedCommands = publicNamedCommands;
+        
+        for (int i = 0; i < rcHandlers.length; i++) {
+            rcHandlers[i].setShow(this);
+        }
+        for (int i = 0; i < segments.length; i++) {
+            segments[i].setShow(this);
+        }
+        this.fontName = fontName;
+        this.fontStyleSize = fontStyleSize;
+        font = new Font[fontName.length];
     }
 
     /**
      * Sets the scale and offset values for a show. 
      **/
     public void setScale(int xScale, int yScale, int xOffset, int yOffset) {
-	this.xScale = xScale;
-	this.yScale = yScale;
-	this.xOffset = xOffset;
-	this.yOffset = yOffset;
+        this.xScale = xScale;
+        this.yScale = yScale;
+        this.xOffset = xOffset;
+        this.yOffset = yOffset;
     }
 
     /**
@@ -295,14 +295,14 @@ public class Show implements AnimationClient {
      * or from the animation thread after setup.
      **/
     public Font getFont(int index) {
-	// We're not synchronized, because we're called in well defined
-	// places with no possibility of conflict.
-	if (font[index] == null) {
-	    int style = fontStyleSize[index] & 0x03;
-	    int size = fontStyleSize[index] >> 2;
-	    font[index] = AssetFinder.getFont(fontName[index], style, size);
-	}
-	return font[index];
+        // We're not synchronized, because we're called in well defined
+        // places with no possibility of conflict.
+        if (font[index] == null) {
+            int style = fontStyleSize[index] & 0x03;
+            int size = fontStyleSize[index] >> 2;
+            font[index] = AssetFinder.getFont(fontName[index], style, size);
+        }
+        return font[index];
     }
 
     /**
@@ -317,41 +317,41 @@ public class Show implements AnimationClient {
      *                   Component.prepareImage().
      **/
     public void initialize(Component component) {
-	if (Debug.ASSERT && initialized) {
-	    Debug.assertFail("Initizlize called twice");
-	}
-	initialized = true;
-	this.component = component;
-	if (stickyImages != null) {
-	    for (int i = 0; i < stickyImages.length; i++) {
-		this.stickyImages[i].makeSticky();
-		    // This always succeeds, even if the actual image
-		    // file doesn't exist, because no attempt is made to
-		    // load the image here.
-	    }
-	}
-	popSegmentCommand = new ActivateSegmentCommand(this, false, true);
-	{
-	    int num = 0;
-	    for (int i = 0; i < features.length; i++) {
-		if (features[i] instanceof SetupClient) {
-		    num++;
-		}
-	    }
-	    setupManager = new SetupManager(num);
-	}
-	setupManager.start();
-	for (int i = 0; i < segments.length; i++) {
-	    segments[i].initialize();
-	}
-	for (int i = 0; i < features.length; i++) {
-	    features[i].initialize();
-	}
+        if (Debug.ASSERT && initialized) {
+            Debug.assertFail("Initizlize called twice");
+        }
+        initialized = true;
+        this.component = component;
+        if (stickyImages != null) {
+            for (int i = 0; i < stickyImages.length; i++) {
+                this.stickyImages[i].makeSticky();
+                    // This always succeeds, even if the actual image
+                    // file doesn't exist, because no attempt is made to
+                    // load the image here.
+            }
+        }
+        popSegmentCommand = new ActivateSegmentCommand(this, false, true);
+        {
+            int num = 0;
+            for (int i = 0; i < features.length; i++) {
+                if (features[i] instanceof SetupClient) {
+                    num++;
+                }
+            }
+            setupManager = new SetupManager(num);
+        }
+        setupManager.start();
+        for (int i = 0; i < segments.length; i++) {
+            segments[i].initialize();
+        }
+        for (int i = 0; i < features.length; i++) {
+            features[i].initialize();
+        }
         
         showTop.initialize();
         showTop.activate(null);
         
-	initializer = null;
+        initializer = null;
     }
 
     /**
@@ -362,28 +362,28 @@ public class Show implements AnimationClient {
      * from the engine's list of shows.
      **/
     public synchronized void destroy() {
-	if (Debug.ASSERT && !initialized) {
-	    Debug.assertFail("Destroy of uninitialized show");
-	}
-	if (currentSegment != null) {
-	    currentSegment.deactivate();
-	    currentSegment = null;
-	}
+        if (Debug.ASSERT && !initialized) {
+            Debug.assertFail("Destroy of uninitialized show");
+        }
+        if (currentSegment != null) {
+            currentSegment.deactivate();
+            currentSegment = null;
+        }
         showTop.deactivate();
         showTop = null;
                  
-	for (int i = 0; i < features.length; i++) {
-	    features[i].destroy();
-	}       
-	if (stickyImages != null) {
-	    for (int i = 0; i < stickyImages.length; i++) {
-		this.stickyImages[i].unmakeSticky();
-	    }
-	}
-	destroyed = true;
-	setupManager.stop();
-	director.notifyDestroyed();
-	notifyAll();
+        for (int i = 0; i < features.length; i++) {
+            features[i].destroy();
+        }       
+        if (stickyImages != null) {
+            for (int i = 0; i < stickyImages.length; i++) {
+                this.stickyImages[i].unmakeSticky();
+            }
+        }
+        destroyed = true;
+        setupManager.stop();
+        director.notifyDestroyed();
+        notifyAll();
     }
 
     /** 
@@ -391,14 +391,14 @@ public class Show implements AnimationClient {
      * call this method directly.
      **/
     public void setSegmentStackDepth(int depth) {
-	segmentStack = new Segment[depth];
+        segmentStack = new Segment[depth];
     }
 
     /**
      * Used to build the show, or to reinitialize it.  
      **/
     public void setDrawTargets(String[] drawTargets) {
-	this.drawTargets = drawTargets;
+        this.drawTargets = drawTargets;
     }
     
     
@@ -414,21 +414,21 @@ public class Show implements AnimationClient {
      * @see com.hdcookbook.grin.features.SetTarget
      **/
     public String[] getDrawTargets() {
-	return drawTargets;
+        return drawTargets;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void mapDrawTargets(Hashtable targetMap) {
-	defaultDrawTarget 
-	    = ((Integer) targetMap.get(drawTargets[0])).intValue();
-	for (int i = 0; i < features.length; i++) {
-	    Feature f = features[i];
-	    if (f instanceof SetTarget) {
-		((SetTarget) f).mapDrawTarget(targetMap);
-	    }
-	}
+        defaultDrawTarget 
+            = ((Integer) targetMap.get(drawTargets[0])).intValue();
+        for (int i = 0; i < features.length; i++) {
+            Feature f = features[i];
+            if (f instanceof SetTarget) {
+                ((SetTarget) f).mapDrawTarget(targetMap);
+            }
+        }
     }
 
     /**
@@ -437,7 +437,7 @@ public class Show implements AnimationClient {
      * @return feature, or null if not found
      **/
     public Feature getFeature(String name) {
-	return (Feature) publicFeatures.get(name);
+        return (Feature) publicFeatures.get(name);
     }
 
     /**
@@ -449,7 +449,7 @@ public class Show implements AnimationClient {
      * @return the Command, or null
      **/
     public Command getNamedCommand(String name) {
-	return (Command) publicNamedCommands.get(name);
+        return (Command) publicNamedCommands.get(name);
     }
    
     /**
@@ -458,7 +458,7 @@ public class Show implements AnimationClient {
      * @return rc handler, or null if not found
      **/
     public RCHandler getRCHandler(String name) {
-	return (RCHandler) publicRCHandlers.get(name);
+        return (RCHandler) publicRCHandlers.get(name);
     }
     
     /**
@@ -466,10 +466,10 @@ public class Show implements AnimationClient {
      * It's OK to call this before the show is initialized.
      *
      * @return segment, or null if not found.  
-     * 	
+     *  
      **/
     public Segment getSegment(String name) {
-	return (Segment) publicSegments.get(name);
+        return (Segment) publicSegments.get(name);
     }
 
     /**
@@ -478,7 +478,7 @@ public class Show implements AnimationClient {
      * It's set in the show file.
      **/
     public int getSegmentStackDepth() {
-	return segmentStack.length;
+        return segmentStack.length;
     }
 
 
@@ -498,7 +498,7 @@ public class Show implements AnimationClient {
      *               segment activation stack;
      **/
     public void activateSegment(Segment seg) {
-	activateSegment(seg, false);
+        activateSegment(seg, false);
     }
 
     /**
@@ -515,18 +515,18 @@ public class Show implements AnimationClient {
      *
      * @param   push When true and when the segment is non-null, the 
      *               current segment will be pushed onto the
-     *		     segment activation stack as the show transitions to
-     *		     the new segment.
+     *               segment activation stack as the show transitions to
+     *               the new segment.
      **/
     public void activateSegment(Segment seg, boolean push) {
-	if (Debug.ASSERT && seg != null && seg.show != this) {
-	    Debug.assertFail();
-	}
-	if (seg == null) {
-	    runCommand(popSegmentCommand);
-	} else {
-	    runCommand(seg.getCommandToActivate(push));
-	}
+        if (Debug.ASSERT && seg != null && seg.show != this) {
+            Debug.assertFail();
+        }
+        if (seg == null) {
+            runCommand(popSegmentCommand);
+        } else {
+            runCommand(seg.getCommandToActivate(push));
+        }
     }
 
     /**
@@ -534,8 +534,8 @@ public class Show implements AnimationClient {
      * should never call this method directly.
      **/
     public synchronized void pushCurrentSegment() {
-	segmentStack[segmentStackPos] = currentSegment;
-	segmentStackPos = (segmentStackPos + 1) % segmentStack.length;
+        segmentStack[segmentStackPos] = currentSegment;
+        segmentStackPos = (segmentStackPos + 1) % segmentStack.length;
     }
 
     /**
@@ -543,13 +543,13 @@ public class Show implements AnimationClient {
      * should never call this method directly.
      **/
     public synchronized Segment popSegmentStack() {
-	segmentStackPos--;
-	if (segmentStackPos < 0) {
-	    segmentStackPos = segmentStack.length - 1;
-	}
-	Segment result = segmentStack[segmentStackPos];
-	segmentStack[segmentStackPos] = null;
-	return result;
+        segmentStackPos--;
+        if (segmentStackPos < 0) {
+            segmentStackPos = segmentStack.length - 1;
+        }
+        Segment result = segmentStack[segmentStackPos];
+        segmentStack[segmentStackPos] = null;
+        return result;
     }
 
     /**
@@ -577,12 +577,12 @@ public class Show implements AnimationClient {
      * @see #deferNextCommands()
      **/
     public void syncDisplay() {
-	if (syncDisplayCommand == null) {
-	    GrinXHelper cmd = new GrinXHelper(this);
-	    cmd.setCommandNumber(GrinXHelper.SYNC_DISPLAY);
-	    syncDisplayCommand = cmd;
-	}
-	runCommand(syncDisplayCommand);
+        if (syncDisplayCommand == null) {
+            GrinXHelper cmd = new GrinXHelper(this);
+            cmd.setCommandNumber(GrinXHelper.SYNC_DISPLAY);
+            syncDisplayCommand = cmd;
+        }
+        runCommand(syncDisplayCommand);
     }
 
     /**
@@ -593,12 +593,12 @@ public class Show implements AnimationClient {
      * This is equivalent to the <code>segment_done</code> GRIN command.
      **/
     public void segmentDone() {
-	if (segmentDoneCommand == null) {
-	    GrinXHelper cmd = new GrinXHelper(this);
-	    cmd.setCommandNumber(GrinXHelper.SEGMENT_DONE);
-	    segmentDoneCommand = cmd;
-	}
-	runCommand(segmentDoneCommand);
+        if (segmentDoneCommand == null) {
+            GrinXHelper cmd = new GrinXHelper(this);
+            cmd.setCommandNumber(GrinXHelper.SEGMENT_DONE);
+            segmentDoneCommand = cmd;
+        }
+        runCommand(segmentDoneCommand);
     }
 
     /**
@@ -613,7 +613,7 @@ public class Show implements AnimationClient {
      * @see #runCommands(Command[])
      **/
     public void runCommand(Command cmd) {
-	pendingCommands.add(cmd);
+        pendingCommands.add(cmd);
     }
 
     /**
@@ -628,14 +628,14 @@ public class Show implements AnimationClient {
      * @see #runCommand(Command)
      **/
     public void runCommands(Command[] cmds) {
-	if (cmds == null || cmds.length == 0) {
-	    return;
-	}
-	synchronized(pendingCommands) {
-	    for (int i = 0; i < cmds.length; i++) {
-		pendingCommands.add(cmds[i]);
-	    }
-	}
+        if (cmds == null || cmds.length == 0) {
+            return;
+        }
+        synchronized(pendingCommands) {
+            for (int i = 0; i < cmds.length; i++) {
+                pendingCommands.add(cmds[i]);
+            }
+        }
     }
 
     /**
@@ -652,36 +652,36 @@ public class Show implements AnimationClient {
      * @see #nextFrame()
      **/
     public synchronized void setCaughtUp() {
-	deferringPendingCommands = false;
+        deferringPendingCommands = false;
     }
 
     /**
      * {@inheritDoc}
      *
-     * @throws	InterruptedException	if the show has been destroyed
+     * @throws  InterruptedException    if the show has been destroyed
      *
      * @see #setCaughtUp()
      **/
     public synchronized void nextFrame() throws InterruptedException {
-	if (currentSegment != null) {
-	    showTop.nextFrameForActiveFeatures();
+        if (currentSegment != null) {
+            showTop.nextFrameForActiveFeatures();
             currentSegment.nextFrameForRCHandlers();
-	}
-	director.notifyNextFrame();
-	    // It's in Director's contract that this be called with the
-	    // show lock held.
+        }
+        director.notifyNextFrame();
+            // It's in Director's contract that this be called with the
+            // show lock held.
     }
 
     // 
     // Called from Director.notifyNextFrame()
     //
     synchronized void runPendingCommands() {
-	while (!deferringPendingCommands && !pendingCommands.isEmpty()) {
-	    Command c = (Command) pendingCommands.remove();
-	    if (c != null) {
-		c.execute(this);	// Can call deferNextCommands()
-	    }
-	}
+        while (!deferringPendingCommands && !pendingCommands.isEmpty()) {
+            Command c = (Command) pendingCommands.remove();
+            if (c != null) {
+                c.execute(this);        // Can call deferNextCommands()
+            }
+        }
     }
 
     /**
@@ -699,7 +699,7 @@ public class Show implements AnimationClient {
      * @see #syncDisplay()
      **/
     public synchronized void deferNextCommands() {
-	deferringPendingCommands = true;
+        deferringPendingCommands = true;
     }
 
     /**
@@ -707,15 +707,15 @@ public class Show implements AnimationClient {
      * called from anywhere else.
      **/
     public synchronized void doActivateSegment(Segment newS) {
-	// We know the lock is being held, and a command is being executed
-	Segment old = currentSegment;
-	synchronized(pendingCommands) {
-	    currentSegment = newS;
-	    	// Needed for RC key processing, since we don't want to
-		// take out the show lock when receiving an RC event.
-	}
-	currentSegment.activate(old);
-	director.notifySegmentActivated(newS, old);
+        // We know the lock is being held, and a command is being executed
+        Segment old = currentSegment;
+        synchronized(pendingCommands) {
+            currentSegment = newS;
+                // Needed for RC key processing, since we don't want to
+                // take out the show lock when receiving an RC event.
+        }
+        currentSegment.activate(old);
+        director.notifySegmentActivated(newS, old);
     }
 
     /**
@@ -724,7 +724,7 @@ public class Show implements AnimationClient {
      **/
     // We know the lock is being held, and a command is being executed
     public void doSegmentDone() {
-	currentSegment.doSegmentDone();
+        currentSegment.doSegmentDone();
     }
 
 
@@ -734,7 +734,7 @@ public class Show implements AnimationClient {
      * current segment doesn't change right after the call.
      **/
     public synchronized Segment getCurrentSegment() {
-	return currentSegment;
+        return currentSegment;
     }
     
 
@@ -742,19 +742,19 @@ public class Show implements AnimationClient {
      * {@inheritDoc}
      **/
     public synchronized void addDisplayAreas(RenderContext context) 
-				throws InterruptedException 
+                                throws InterruptedException 
     {
-	while (inputOKWaiting > 0) {
-	    // If input is pending, let it in first
-	    wait();	// can throw InterruptedException
-	}
-	inputOK = false;
-	    // We could call notifyAll() here, but nobody waits for
-	    // inputOK to turn false, so there's no need.
+        while (inputOKWaiting > 0) {
+            // If input is pending, let it in first
+            wait();     // can throw InterruptedException
+        }
+        inputOK = false;
+            // We could call notifyAll() here, but nobody waits for
+            // inputOK to turn false, so there's no need.
         if (currentSegment != null) {
-	    int old = context.setTarget(defaultDrawTarget);
-	    showTop.addDisplayAreas(context);
-	    context.setTarget(old);
+            int old = context.setTarget(defaultDrawTarget);
+            showTop.addDisplayAreas(context);
+            context.setTarget(old);
         }
     }
 
@@ -765,25 +765,25 @@ public class Show implements AnimationClient {
      * called by the xlet, usually via the animation framework.  
      **/
     public synchronized void paintFrame(Graphics2D gr)
-    	throws InterruptedException 
+        throws InterruptedException 
     {
-	if (Thread.interrupted() || destroyed) {
-	    throw new InterruptedException();
-	}
-        if (currentSegment != null) {
-	   showTop.paintFrame(gr);
+        if (Thread.interrupted() || destroyed) {
+            throw new InterruptedException();
         }
-	if (Debug.ASSERT && deferringPendingCommands) {
-	    Debug.assertFail();
-	}
+        if (currentSegment != null) {
+           showTop.paintFrame(gr);
+        }
+        if (Debug.ASSERT && deferringPendingCommands) {
+            Debug.assertFail();
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public synchronized void paintDone() {
-	inputOK = true;
-	notifyAll();	// Remote control input might be waiting on inputOK
+        inputOK = true;
+        notifyAll();    // Remote control input might be waiting on inputOK
     }
 
     //
@@ -803,21 +803,21 @@ public class Show implements AnimationClient {
     // another keypress might come in before that command runs.
     //
     private synchronized boolean waitForInputOK() {
-	if ((!inputOK) && (!destroyed)) {
-	    inputOKWaiting++;
-	    try {
-		while ((!inputOK) && (!destroyed)) {
-		    wait();
-		}
-	    } catch (InterruptedException ex) {
-		Thread.currentThread().interrupt();
-		return false;
-	    } finally {
-		inputOKWaiting--;
-		notifyAll();
-	    }
-	}
-	return !destroyed;
+        if ((!inputOK) && (!destroyed)) {
+            inputOKWaiting++;
+            try {
+                while ((!inputOK) && (!destroyed)) {
+                    wait();
+                }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return false;
+            } finally {
+                inputOKWaiting--;
+                notifyAll();
+            }
+        }
+        return !destroyed;
     }
 
     /**
@@ -832,24 +832,24 @@ public class Show implements AnimationClient {
      * show, you can populate the needed segments with a key_pressed
      * rc_handler with an empty body that captures all keys.
      *
-     * @return true	If the key press is enqueued, and thus is expected to
-     *			be used.
+     * @return true     If the key press is enqueued, and thus is expected to
+     *                  be used.
      **/
     public boolean handleKeyPressed(int vkCode) {
-	synchronized(pendingCommands) {
-	    if (currentSegment == null) {
-		return false;
-	    }
-	    RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
-	    if (re == null) {
-		return false;
-	    }
-	    if ((currentSegment.rcPressedInterest & re.getBitMask()) == 0) {
-		return false;
-	    }
-	    pendingCommands.add(re);
-	}
-	return true;
+        synchronized(pendingCommands) {
+            if (currentSegment == null) {
+                return false;
+            }
+            RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
+            if (re == null) {
+                return false;
+            }
+            if ((currentSegment.rcPressedInterest & re.getBitMask()) == 0) {
+                return false;
+            }
+            pendingCommands.add(re);
+        }
+        return true;
     }
 
     /**
@@ -857,9 +857,9 @@ public class Show implements AnimationClient {
      **/
     public synchronized void 
     internalHandleKeyPressed(RCKeyEvent re, Show caller) {
-	if (currentSegment != null) {
-	    currentSegment.handleKeyPressed(re, caller);
-	}
+        if (currentSegment != null) {
+            currentSegment.handleKeyPressed(re, caller);
+        }
     }
 
     /**
@@ -875,24 +875,24 @@ public class Show implements AnimationClient {
      * show, you can populate the needed segments with a key_released 
      * rc_handler with an empty body that captures all keys.
      *
-     * @return true	If the key release is enqueued, and thus is expected to
-     *			be used.
+     * @return true     If the key release is enqueued, and thus is expected to
+     *                  be used.
      **/
     public boolean handleKeyReleased(int vkCode) {
-	synchronized(pendingCommands) {
-	    if (currentSegment == null) {
-		return false;
-	    }
-	    RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
-	    if (re == null) {
-		return false;
-	    }
-	    if ((currentSegment.rcReleasedInterest & re.getBitMask()) == 0) {
-		return false;
-	    }
-	    pendingCommands.add(re.getKeyReleased());
-	}
-	return true;
+        synchronized(pendingCommands) {
+            if (currentSegment == null) {
+                return false;
+            }
+            RCKeyEvent re = RCKeyEvent.getKeyByEventCode(vkCode);
+            if (re == null) {
+                return false;
+            }
+            if ((currentSegment.rcReleasedInterest & re.getBitMask()) == 0) {
+                return false;
+            }
+            pendingCommands.add(re.getKeyReleased());
+        }
+        return true;
     }
 
     /**
@@ -900,9 +900,9 @@ public class Show implements AnimationClient {
      **/
     public synchronized void 
     internalHandleKeyReleased(RCKeyEvent re, Show caller) {
-	if (currentSegment != null) {
-	    currentSegment.handleKeyReleased(re, caller);
-	}
+        if (currentSegment != null) {
+            currentSegment.handleKeyReleased(re, caller);
+        }
     }
 
     /**
@@ -915,17 +915,17 @@ public class Show implements AnimationClient {
      * A key typed event is queued and true is returned only if the current
      * segment uses that key typed event.
      *
-     * @return true	If the key typed is enqueued, and thus is expected to
-     *			be used.
+     * @return true     If the key typed is enqueued, and thus is expected to
+     *                  be used.
      **/
     public boolean handleKeyTyped(RCKeyEvent typed) {
-	synchronized(pendingCommands) {
-	    if ((currentSegment.keyTypedInterest & typed.getBitMask()) == 0) {
-		return false;
-	    }
-	    pendingCommands.add(typed);
-	}
-	return true;
+        synchronized(pendingCommands) {
+            if ((currentSegment.keyTypedInterest & typed.getBitMask()) == 0) {
+                return false;
+            }
+            pendingCommands.add(typed);
+        }
+        return true;
     }
 
     /**
@@ -934,9 +934,9 @@ public class Show implements AnimationClient {
      **/
     public synchronized void 
     internalHandleKeyTyped(RCKeyEvent re, Show caller) {
-	if (currentSegment != null) {
-	    currentSegment.handleKeyTyped(re, caller);
-	}
+        if (currentSegment != null) {
+            currentSegment.handleKeyTyped(re, caller);
+        }
     }
 
     /**
@@ -948,18 +948,18 @@ public class Show implements AnimationClient {
      * only fast players (like PC players) support mice.
      **/
     public synchronized void handleMouseMoved(int x, int y) {
-	boolean used = false;
+        boolean used = false;
         if (currentSegment != null) {
-	    if (!waitForInputOK()) {
-		return;
-	    }
+            if (!waitForInputOK()) {
+                return;
+            }
             used = currentSegment.handleMouse(x, y, false);
         }
-	Cursor c = used ? Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)
-			: Cursor.getDefaultCursor();
-	if (component != null && c != component.getCursor()) {
-	    component.setCursor(c);
-	}
+        Cursor c = used ? Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)
+                        : Cursor.getDefaultCursor();
+        if (component != null && c != component.getCursor()) {
+            component.setCursor(c);
+        }
     }
    
     /**
@@ -971,15 +971,15 @@ public class Show implements AnimationClient {
      **/
     public synchronized void handleMouseClicked(int x, int y) {
         if (currentSegment != null) {
-	    if (!waitForInputOK()) {
-		return;
-	    }
+            if (!waitForInputOK()) {
+                return;
+            }
             currentSegment.handleMouse(x, y, true);
         }
-	Cursor c = Cursor.getDefaultCursor();
-	if (component != null && c != component.getCursor()) {
-	    component.setCursor(c);
-	}
+        Cursor c = Cursor.getDefaultCursor();
+        if (component != null && c != component.getCursor()) {
+            component.setCursor(c);
+        }
     }
 
     /**
@@ -996,7 +996,7 @@ public class Show implements AnimationClient {
      * @see #getYScale()
      **/
     public static int scale(int value, int mills) {
-	return (value * mills + 500) / 1000;
+        return (value * mills + 500) / 1000;
     }
 
     /**
@@ -1005,7 +1005,7 @@ public class Show implements AnimationClient {
      * @see #scale(int, int)
      **/
     public int getXScale() {
-	return xScale;
+        return xScale;
     }
 
     /**
@@ -1014,7 +1014,7 @@ public class Show implements AnimationClient {
      * @see #scale(int, int)
      **/
     public int getYScale()  {
-	return yScale;
+        return yScale;
     }
 
     /**
@@ -1024,7 +1024,7 @@ public class Show implements AnimationClient {
      * have already been adjusted.
      **/
     public int getXOffset() {
-	return xOffset;
+        return xOffset;
     }
 
     /**
@@ -1034,6 +1034,6 @@ public class Show implements AnimationClient {
      * have already been adjusted.
      **/
     public int getYOffset() {
-	return yOffset;
+        return yOffset;
     }
 }

@@ -160,66 +160,66 @@ public class SEShowCommand extends Command implements SENode {
      * Returns the original source as specified in Show script file.
      */
     public String getOriginalSource() {
-	 return originalSource;
+         return originalSource;
     }
 
     /**
      * Sets the original source as specified in Show file.
      */
     public void setOriginalSource(String originalSource) {
-	 this.originalSource = originalSource;
+         this.originalSource = originalSource;
     }
    
     /**
      * {@inheritDoc}
      **/
     public void execute(Show caller) {
-	if (!triedSeCommand) {
-	    triedSeCommand = true;
-	    Class cl = container.getCommandClass();
-	    if (cl != null) {
+        if (!triedSeCommand) {
+            triedSeCommand = true;
+            Class cl = container.getCommandClass();
+            if (cl != null) {
                 Class[] paramType = { Show.class };
                 Object[] params = { show };
-		try {
-		    seCommand = (GrinXHelper) 
+                try {
+                    seCommand = (GrinXHelper) 
                             cl.getConstructor(paramType).newInstance(params);
-		} catch (Throwable t) {
-		    t.printStackTrace();
-		}
-	    }
-	    if (seCommand != null) {
-		seCommand.setCommandNumber(commandNumber);
-		seCommand.setSubCommands(getSubCommands());
-	    }
-	}
-	if (seCommand != null) {
-	    try {
-		seCommand.execute(caller);
-	    } catch (Throwable t) {
-		System.out.println("***  Error executing command:  ");
-		t.printStackTrace();
-		System.out.println();
-	    }
-	} else {
-	    System.out.println("executing command:  " + xletMethodBody);
-	}
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+            if (seCommand != null) {
+                seCommand.setCommandNumber(commandNumber);
+                seCommand.setSubCommands(getSubCommands());
+            }
+        }
+        if (seCommand != null) {
+            try {
+                seCommand.execute(caller);
+            } catch (Throwable t) {
+                System.out.println("***  Error executing command:  ");
+                t.printStackTrace();
+                System.out.println();
+            }
+        } else {
+            System.out.println("executing command:  " + xletMethodBody);
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void execute() {
-	if (Debug.ASSERT) {
-	    Debug.assertFail();
-	}
+        if (Debug.ASSERT) {
+            Debug.assertFail();
+        }
     }
 
     public void writeInstanceData(GrinDataOutputStream out) 
             throws IOException 
     {
         out.writeSuperClassData(this);
-	out.writeInt(getCommandNumber());
-	out.writeCommands(getSubCommands());
+        out.writeInt(getCommandNumber());
+        out.writeCommands(getSubCommands());
     }
 
     public String getRuntimeClassName() {
@@ -248,6 +248,6 @@ public class SEShowCommand extends Command implements SENode {
      * {@inheritDoc}
      **/
     public String toString() {
-	return "java_command number " + commandNumber;
+        return "java_command number " + commandNumber;
     }
 }

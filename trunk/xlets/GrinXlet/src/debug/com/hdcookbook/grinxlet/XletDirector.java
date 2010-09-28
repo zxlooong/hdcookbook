@@ -73,7 +73,7 @@ import java.util.ListIterator;
  **/
 
 public class XletDirector extends Director {
-	
+        
     public GrinXlet xlet;
 
     Assembly F_KeyUpState;
@@ -93,220 +93,220 @@ public class XletDirector extends Director {
 
     private int currFramerate = 10;    // Default to 23.976 (usually overridden)
     private static int[] framerates = {
-    	31, 62, 125, 250, 500, 1001, 2002, 3003, 6006, 12012, 24000,
-	24024, 30000, 30030, 60000, 60060, 120000, 120120
+        31, 62, 125, 250, 500, 1001, 2002, 3003, 6006, 12012, 24000,
+        24024, 30000, 30030, 60000, 60060, 120000, 120120
     };
     private boolean debugDraw = false;
 
-    private int debugLogTop = 0;	// Top line visible in debug log
+    private int debugLogTop = 0;        // Top line visible in debug log
     private int lastDebugLogTop = Integer.MIN_VALUE;
-    private boolean debugLogFollow = false;	
-    	// If we're in "follow" mode, always showing the last line (like tail -f)
+    private boolean debugLogFollow = false;     
+        // If we're in "follow" mode, always showing the last line (like tail -f)
     private String[] debugLogEntries;
     private String[] debugLogLineNumbers;
     private String[] debugLogLineCount;
     private int logX = 0;
 
     public XletDirector(GrinXlet xlet) {
-	this.xlet = xlet;
-	DebugLog.startDebugListener();
+        this.xlet = xlet;
+        DebugLog.startDebugListener();
     }
 
     /** 
      * {@inheritDoc}
      **/
     public void notifyDestroyed() {
-	DebugLog.shutdownDebugListener();
+        DebugLog.shutdownDebugListener();
     }
 
 
     public void initialize() {
-	xScale = getShow().getXScale();
-	yScale = getShow().getYScale();
-	F_KeyUpState = (Assembly) getFeature("F:KeyUpState");
-	F_KeyUpState_enabled = getPart(F_KeyUpState, "enabled");
-	F_KeyUpState_disabled = getPart(F_KeyUpState, "disabled");
-	F_Framerate = (Text) getFeature("F:Framerate");
-	F_DebugDraw = (Assembly) getFeature("F:DebugDraw");
-	F_DebugDraw_enabled = getPart(F_DebugDraw, "enabled");
-	F_DebugDraw_disabled = getPart(F_DebugDraw, "disabled");
-	F_DebugLog_LineCount = (Text) getFeature("F:DebugLog.LineCount");
-	F_DebugLog_LineNumbers = (Text) getFeature("F:DebugLog.LineNumbers");
-	F_DebugLog_Lines = (Text) getFeature("F:DebugLog.Lines");
-	F_DebugLog_Scroller = (InterpolatedModel) getFeature("F:DebugLog.Scroller");
-	int lines = Show.scale((1080 - 80*2), yScale)
-			/ F_DebugLog_Lines.getLineHeight();
-	debugLogEntries = new String[lines];
-	debugLogLineNumbers = new String[lines];
-	debugLogLineCount = new String[1];
+        xScale = getShow().getXScale();
+        yScale = getShow().getYScale();
+        F_KeyUpState = (Assembly) getFeature("F:KeyUpState");
+        F_KeyUpState_enabled = getPart(F_KeyUpState, "enabled");
+        F_KeyUpState_disabled = getPart(F_KeyUpState, "disabled");
+        F_Framerate = (Text) getFeature("F:Framerate");
+        F_DebugDraw = (Assembly) getFeature("F:DebugDraw");
+        F_DebugDraw_enabled = getPart(F_DebugDraw, "enabled");
+        F_DebugDraw_disabled = getPart(F_DebugDraw, "disabled");
+        F_DebugLog_LineCount = (Text) getFeature("F:DebugLog.LineCount");
+        F_DebugLog_LineNumbers = (Text) getFeature("F:DebugLog.LineNumbers");
+        F_DebugLog_Lines = (Text) getFeature("F:DebugLog.Lines");
+        F_DebugLog_Scroller = (InterpolatedModel) getFeature("F:DebugLog.Scroller");
+        int lines = Show.scale((1080 - 80*2), yScale)
+                        / F_DebugLog_Lines.getLineHeight();
+        debugLogEntries = new String[lines];
+        debugLogLineNumbers = new String[lines];
+        debugLogLineCount = new String[1];
     }
 
     /**
      * Sets the UI state to match the model.
      **/
     public void setUIState() {
-	if (xlet.sendKeyUp) {
-	    F_KeyUpState.setCurrentFeature(F_KeyUpState_enabled);
-	} else {
-	    F_KeyUpState.setCurrentFeature(F_KeyUpState_disabled);
-	}
-	if (debugDraw) {
-	    F_DebugDraw.setCurrentFeature(F_DebugDraw_enabled);
-	} else {
-	    F_DebugDraw.setCurrentFeature(F_DebugDraw_disabled);
-	}
-	int fps = xlet.debugEngine.getFps();
-	if (fps > 0) {
-	    currFramerate = 0;
-	    while (currFramerate+1 < framerates.length
-	    	   && fps > framerates[currFramerate])
-	    {
-		currFramerate++;
-	    }
-	}
-	setFramerate();
+        if (xlet.sendKeyUp) {
+            F_KeyUpState.setCurrentFeature(F_KeyUpState_enabled);
+        } else {
+            F_KeyUpState.setCurrentFeature(F_KeyUpState_disabled);
+        }
+        if (debugDraw) {
+            F_DebugDraw.setCurrentFeature(F_DebugDraw_enabled);
+        } else {
+            F_DebugDraw.setCurrentFeature(F_DebugDraw_disabled);
+        }
+        int fps = xlet.debugEngine.getFps();
+        if (fps > 0) {
+            currFramerate = 0;
+            while (currFramerate+1 < framerates.length
+                   && fps > framerates[currFramerate])
+            {
+                currFramerate++;
+            }
+        }
+        setFramerate();
     }
 
     public void setFramerate() {
-	if (xlet.debugEngine == null) {
-	    String[] arr = new String[] 
-	    		{ "Can't set fps on " + xlet.animationEngine } ;
-	    F_Framerate.setText(arr);
-	} else {
-	    int fpts = framerates[currFramerate];  // frames / 1001ths second
-	    float fps = ((float) fpts) / 1001f;
-	    String[] arr = new String[] { "Frames per second:  " + fps };
-	    F_Framerate.setText(arr);
-	    xlet.debugEngine.setFps(fpts);
-	}
+        if (xlet.debugEngine == null) {
+            String[] arr = new String[] 
+                        { "Can't set fps on " + xlet.animationEngine } ;
+            F_Framerate.setText(arr);
+        } else {
+            int fpts = framerates[currFramerate];  // frames / 1001ths second
+            float fps = ((float) fpts) / 1001f;
+            String[] arr = new String[] { "Frames per second:  " + fps };
+            F_Framerate.setText(arr);
+            xlet.debugEngine.setFps(fpts);
+        }
     }
 
     /**
      * Increases the framerate
      **/
     public void framerateUp() {
-	currFramerate++;
-	if (currFramerate >= framerates.length) {
-	    currFramerate = framerates.length - 1;
-	}
-	setFramerate();
+        currFramerate++;
+        if (currFramerate >= framerates.length) {
+            currFramerate = framerates.length - 1;
+        }
+        setFramerate();
     }
 
     /**
      * Decreases the framerate
      **/
     public void framerateDown() {
-	currFramerate--;
-	if (currFramerate < 0) {
-	    currFramerate = 0;
-	}
-	setFramerate();
+        currFramerate--;
+        if (currFramerate < 0) {
+            currFramerate = 0;
+        }
+        setFramerate();
     }
 
     public boolean getDebugDraw() {
-	return debugDraw;
+        return debugDraw;
     }
 
     public void setDebugDraw(boolean value) {
-	debugDraw = value;
-	if (xlet.debugEngine != null) {
-	    xlet.debugEngine.setDebugDraw(value);
-	}
+        debugDraw = value;
+        if (xlet.debugEngine != null) {
+            xlet.debugEngine.setDebugDraw(value);
+        }
     }
 
     private void displayDebugLog() {
-	synchronized(DebugLog.LOCK) {
-	    DebugLog.changed = false;
-	    int lines = DebugLog.log.size() + DebugLog.linesRemoved;
-	    debugLogLineCount[0] = "" + lines + " lines";
-	    F_DebugLog_LineCount.setText(debugLogLineCount);
-	    int maxTop = lines - debugLogEntries.length;
-	    if (debugLogTop >= maxTop) {
-		debugLogFollow = true;
-	    }
-	    if (debugLogFollow) {
-		debugLogTop = maxTop;
-	    }
-	    if (debugLogTop == lastDebugLogTop && debugLogTop != maxTop) {
-		return;
-	    }
-	    if (debugLogTop < DebugLog.linesRemoved) {
-		debugLogTop = DebugLog.linesRemoved;
-	    }
-	    ListIterator iter = DebugLog.log.listIterator(
-	    				debugLogTop - DebugLog.linesRemoved);
-	    for (int i = 0; i < debugLogEntries.length; i++) {
-		if (!iter.hasNext()) {
-		    debugLogEntries[i] = "";
-		    debugLogLineNumbers[i] = "";
-		} else {
-		    debugLogEntries[i] = (String) iter.next();
-		    int line = debugLogTop + i + 1;
-		    debugLogLineNumbers[i] = "" + line + ":";
-		}
-	    }
-	    F_DebugLog_LineNumbers.setText(debugLogLineNumbers);
-	    F_DebugLog_Lines.setText(debugLogEntries);
-	    lastDebugLogTop = debugLogTop;
-	}
+        synchronized(DebugLog.LOCK) {
+            DebugLog.changed = false;
+            int lines = DebugLog.log.size() + DebugLog.linesRemoved;
+            debugLogLineCount[0] = "" + lines + " lines";
+            F_DebugLog_LineCount.setText(debugLogLineCount);
+            int maxTop = lines - debugLogEntries.length;
+            if (debugLogTop >= maxTop) {
+                debugLogFollow = true;
+            }
+            if (debugLogFollow) {
+                debugLogTop = maxTop;
+            }
+            if (debugLogTop == lastDebugLogTop && debugLogTop != maxTop) {
+                return;
+            }
+            if (debugLogTop < DebugLog.linesRemoved) {
+                debugLogTop = DebugLog.linesRemoved;
+            }
+            ListIterator iter = DebugLog.log.listIterator(
+                                        debugLogTop - DebugLog.linesRemoved);
+            for (int i = 0; i < debugLogEntries.length; i++) {
+                if (!iter.hasNext()) {
+                    debugLogEntries[i] = "";
+                    debugLogLineNumbers[i] = "";
+                } else {
+                    debugLogEntries[i] = (String) iter.next();
+                    int line = debugLogTop + i + 1;
+                    debugLogLineNumbers[i] = "" + line + ":";
+                }
+            }
+            F_DebugLog_LineNumbers.setText(debugLogLineNumbers);
+            F_DebugLog_Lines.setText(debugLogEntries);
+            lastDebugLogTop = debugLogTop;
+        }
     }
 
     public void debugLogHeartbeat() {
-	synchronized(DebugLog.LOCK) {
-	    if (DebugLog.changed) {
-		displayDebugLog();
-	    }
-	}
+        synchronized(DebugLog.LOCK) {
+            if (DebugLog.changed) {
+                displayDebugLog();
+            }
+        }
     }
 
     public void skipDebugLogTo(int pos) {
-	logX = 0;
-	F_DebugLog_Scroller.setField(Translator.X_FIELD, logX);
-	synchronized(DebugLog.LOCK) {
-	    int lines = DebugLog.log.size();   
-		    // not including DebugLog.linesRemoved.
-	    lines -= debugLogEntries.length;
-	    if (lines <= 0) {
-		debugLogFollow = true;
-	    } else {
-		debugLogFollow = false;
-		pos--;
-		if (pos < 0) {
-		    pos = 0;
-		} else if (pos > 8) {
-		    pos = 8;
-		}
-		debugLogTop = (pos * 100 * lines) / 800;
-		debugLogTop += DebugLog.linesRemoved;
-	    }
-	    displayDebugLog();
-	}
+        logX = 0;
+        F_DebugLog_Scroller.setField(Translator.X_FIELD, logX);
+        synchronized(DebugLog.LOCK) {
+            int lines = DebugLog.log.size();   
+                    // not including DebugLog.linesRemoved.
+            lines -= debugLogEntries.length;
+            if (lines <= 0) {
+                debugLogFollow = true;
+            } else {
+                debugLogFollow = false;
+                pos--;
+                if (pos < 0) {
+                    pos = 0;
+                } else if (pos > 8) {
+                    pos = 8;
+                }
+                debugLogTop = (pos * 100 * lines) / 800;
+                debugLogTop += DebugLog.linesRemoved;
+            }
+            displayDebugLog();
+        }
     }
 
     public void moveDebugLogLeft() {
-	logX += 960;
-	if (logX > 0) {
-	    logX = 0;
-	}
-	F_DebugLog_Scroller.setField(Translator.X_FIELD, 
-					Show.scale(logX, xScale));
+        logX += 960;
+        if (logX > 0) {
+            logX = 0;
+        }
+        F_DebugLog_Scroller.setField(Translator.X_FIELD, 
+                                        Show.scale(logX, xScale));
     }
 
     public void moveDebugLogRight() {
-	logX -= 960;
-	F_DebugLog_Scroller.setField(Translator.X_FIELD,
-					Show.scale(logX, xScale));
+        logX -= 960;
+        F_DebugLog_Scroller.setField(Translator.X_FIELD,
+                                        Show.scale(logX, xScale));
     }
 
     public void moveDebugLogUp() {
-	debugLogTop -= 10;
-	debugLogFollow = false;
-	displayDebugLog();
+        debugLogTop -= 10;
+        debugLogFollow = false;
+        displayDebugLog();
     }
 
     public void moveDebugLogDown() {
-	debugLogTop += 10;
-	displayDebugLog();
+        debugLogTop += 10;
+        displayDebugLog();
     }
 
 }

@@ -99,61 +99,61 @@ public class Packet {
      * lines.
      **/
     public String getDebugMessage() {
-	if (debugMessage == null) {
-	    return null;
-	}
-	StringBuffer out = new StringBuffer();
-	int ch;
-	int count = 0;
-	String line = "";
-	for (int i = 0; ; i++) {
-	    if (i < debugMessage.length) {
-		ch = (int) 0xff & debugMessage[i];
-	    } else {
-		ch = -1;
-	    }
-	    int m = count % 16;
-	    if (m == 0) {
-		if (ch == -1) {
-		    break;
-		}
-	        out.append(toHex(count, 8) + ":  ");
-	    }
-	    if (m == 8) {
-		out.append(" ");
-	    }
-	    if (ch == -1) {
-		out.append("  ");
-	    } else {
-		out.append(toHex(ch, 2));
-		if (ch >= 32 && ch < 127) {
-		    line += ((char) ch);
-		} else {
-		    line += ".";
-		}
-	    }
-	    if (m == 15)  {
-	        out.append("   " + line + "\n");
-		line = "";
-	    } else {
-		out.append(" ");
-	    }
-	    count++;
-	}
-	return out.toString();
+        if (debugMessage == null) {
+            return null;
+        }
+        StringBuffer out = new StringBuffer();
+        int ch;
+        int count = 0;
+        String line = "";
+        for (int i = 0; ; i++) {
+            if (i < debugMessage.length) {
+                ch = (int) 0xff & debugMessage[i];
+            } else {
+                ch = -1;
+            }
+            int m = count % 16;
+            if (m == 0) {
+                if (ch == -1) {
+                    break;
+                }
+                out.append(toHex(count, 8) + ":  ");
+            }
+            if (m == 8) {
+                out.append(" ");
+            }
+            if (ch == -1) {
+                out.append("  ");
+            } else {
+                out.append(toHex(ch, 2));
+                if (ch >= 32 && ch < 127) {
+                    line += ((char) ch);
+                } else {
+                    line += ".";
+                }
+            }
+            if (m == 15)  {
+                out.append("   " + line + "\n");
+                line = "";
+            } else {
+                out.append(" ");
+            }
+            count++;
+        }
+        return out.toString();
     }
 
     private static String toHex(int b, int digits) {
-	if (digits <= 0) {
-	    throw new IllegalArgumentException();
-	}
-	String result = "";
-	while (digits > 0 || b > 0) {
-	    result = hexDigits.charAt(b % 16) + result;
-	    b = b / 16;
-	    digits--;
-	}
-	return result;
+        if (digits <= 0) {
+            throw new IllegalArgumentException();
+        }
+        String result = "";
+        while (digits > 0 || b > 0) {
+            result = hexDigits.charAt(b % 16) + result;
+            b = b / 16;
+            digits--;
+        }
+        return result;
     }
 
 

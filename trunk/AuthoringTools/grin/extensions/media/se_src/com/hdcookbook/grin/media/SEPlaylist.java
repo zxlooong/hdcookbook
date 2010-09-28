@@ -79,57 +79,57 @@ public class SEPlaylist extends Playlist implements SENode {
      * Create a new SEPlaylist
      **/
     public SEPlaylist(Show show, String name, String locator, 
-    		      Command[] onActivate, Command[] onMediaStart,
-		      Command[] onMediaEnd, Command[] onDeactivate,
-		      boolean autoStart, boolean autoStop,
-		      int[] markTimes, Command[][] onEntryCommands)
+                      Command[] onActivate, Command[] onMediaStart,
+                      Command[] onMediaEnd, Command[] onDeactivate,
+                      boolean autoStart, boolean autoStop,
+                      int[] markTimes, Command[][] onEntryCommands)
     {
-	super(show);
-	this.name = name;
-	this.onActivate = onActivate;
-	this.onMediaStart = onMediaStart;
-	this.onMediaEnd = onMediaEnd;
-	this.onDeactivate = onDeactivate;
-	this.autoStart = autoStart;
-	this.autoStop = autoStop;
-	this.setLocator(locator);
-	this.markTimes = markTimes;
-	this.onEntryCommands = onEntryCommands;
+        super(show);
+        this.name = name;
+        this.onActivate = onActivate;
+        this.onMediaStart = onMediaStart;
+        this.onMediaEnd = onMediaEnd;
+        this.onDeactivate = onDeactivate;
+        this.autoStart = autoStart;
+        this.autoStop = autoStop;
+        this.setLocator(locator);
+        this.markTimes = markTimes;
+        this.onEntryCommands = onEntryCommands;
     }
 
     public void writeInstanceData(GrinDataOutputStream out) throws IOException {
-	out.writeSuperClassData(this);
-	out.writeString(getLocator());
-	out.writeCommands(onActivate);
-	out.writeCommands(onMediaStart);
-	out.writeCommands(onMediaEnd);
-	out.writeCommands(onDeactivate);
-	out.writeBoolean(autoStart);
-	out.writeBoolean(autoStop);
-	out.writeSharedIntArray(markTimes);
-	if (onEntryCommands == null) {
-	    out.writeByte(0);
-	} else {
-	    out.writeByte(1);
-	    out.writeInt(onEntryCommands.length);
-	    for (int i = 0; i < onEntryCommands.length; i++) {
-		out.writeCommands(onEntryCommands[i]);
-	    }
-	}
+        out.writeSuperClassData(this);
+        out.writeString(getLocator());
+        out.writeCommands(onActivate);
+        out.writeCommands(onMediaStart);
+        out.writeCommands(onMediaEnd);
+        out.writeCommands(onDeactivate);
+        out.writeBoolean(autoStart);
+        out.writeBoolean(autoStop);
+        out.writeSharedIntArray(markTimes);
+        if (onEntryCommands == null) {
+            out.writeByte(0);
+        } else {
+            out.writeByte(1);
+            out.writeInt(onEntryCommands.length);
+            for (int i = 0; i < onEntryCommands.length; i++) {
+                out.writeCommands(onEntryCommands[i]);
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public String getRuntimeClassName() {
-	return Playlist.class.getName();
+        return Playlist.class.getName();
     }
 
     /** 
      * {@inheritDoc}
      **/
     public void accept(SEShowVisitor visitor) {
-	visitor.visitUserDefinedFeature(this);
+        visitor.visitUserDefinedFeature(this);
     }
 
     /**
@@ -150,10 +150,10 @@ public class SEPlaylist extends Playlist implements SENode {
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "media:playlist @" + Integer.toHexString(hashCode());
-	} else {
-	    return "media:playlist " + name;
-	}
+        if (name == null) {
+            return "media:playlist @" + Integer.toHexString(hashCode());
+        } else {
+            return "media:playlist " + name;
+        }
     }
 }

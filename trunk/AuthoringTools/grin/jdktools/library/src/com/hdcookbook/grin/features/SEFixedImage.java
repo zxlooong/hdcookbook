@@ -77,25 +77,25 @@ public class SEFixedImage extends FixedImage implements SENode, SEScalableNode {
     }
     
     public SEFixedImage(SEShow show, String name, SEImagePlacement sePlacement, 
-    			String fileName) 
-    		throws IOException 
+                        String fileName) 
+                throws IOException 
     {
-	super(show);
+        super(show);
         this.name = name;
-	this.sePlacement = sePlacement;
-	this.fileName = fileName;
-	this.placement = sePlacement.getImagePlacementRect(fileName);
+        this.sePlacement = sePlacement;
+        this.fileName = fileName;
+        this.placement = sePlacement.getImagePlacementRect(fileName);
     }
 
     public void setScalingModel(InterpolatedModel model) {
-	this.scalingModel = model;
-	if (model != null) {
-	    scaledBounds = new Rectangle();
-	}
+        this.scalingModel = model;
+        if (model != null) {
+            scaledBounds = new Rectangle();
+        }
     }
 
     public InterpolatedModel getScalingModel() {
-	return scalingModel;
+        return scalingModel;
     }
     
     /**
@@ -109,7 +109,7 @@ public class SEFixedImage extends FixedImage implements SENode, SEScalableNode {
      * Internal use only
      **/
     public Dimension getImageSize() {
-	return new Dimension(placement.width, placement.height);
+        return new Dimension(placement.width, placement.height);
     }
 
     /* 
@@ -130,11 +130,11 @@ public class SEFixedImage extends FixedImage implements SENode, SEScalableNode {
      * Internal use only
      **/
     public void setImage(ManagedImage image) {
-	this.image = image;
+        this.image = image;
     }
 
     public void setPlacement(Rectangle placement) {
-	this.placement = placement;
+        this.placement = placement;
     }
     
     public void writeInstanceData(GrinDataOutputStream out) throws IOException
@@ -172,20 +172,20 @@ public class SEFixedImage extends FixedImage implements SENode, SEScalableNode {
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	placement = new Rectangle(xOffset + Show.scale(placement.x, xScale),
-				  yOffset + Show.scale(placement.y, yScale),
-				  Show.scale(placement.width, xScale),
-				  Show.scale(placement.height, yScale));
+        placement = new Rectangle(xOffset + Show.scale(placement.x, xScale),
+                                  yOffset + Show.scale(placement.y, yScale),
+                                  Show.scale(placement.width, xScale),
+                                  Show.scale(placement.height, yScale));
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "fixed_image @" + Integer.toHexString(hashCode());
-	} else {
-	    return "fixed_image " + name;
-	}
+        if (name == null) {
+            return "fixed_image @" + Integer.toHexString(hashCode());
+        } else {
+            return "fixed_image " + name;
+        }
     }
 }

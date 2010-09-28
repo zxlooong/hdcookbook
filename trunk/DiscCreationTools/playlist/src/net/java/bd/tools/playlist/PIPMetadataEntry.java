@@ -67,90 +67,90 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(propOrder={"pipMetadataTimeStamp", "pipHorizontalPosition", "pipVerticalPosition", "pipScale"})
 public class PIPMetadataEntry {
     
-	private long pipMetadataTimeStamp;
-	private int pipHorizontalPosition;
-	private int pipVerticalPosition;
-	private PIPScaleType pipScale;
-	
+        private long pipMetadataTimeStamp;
+        private int pipHorizontalPosition;
+        private int pipVerticalPosition;
+        private PIPScaleType pipScale;
+        
     public void readObject(DataInputStream din) throws IOException {
-        // 32 bit pip_metadata_time_stamp			4 unsigned
-    	//        pip_composition_metadata()
-    	// 12 bit pip_horizontal_position			.
-    	// 12 bit pip_vertical_position				.
-    	//  4 bit pip_scale							.
-    	//  4 bit reserved							.
-    	
-    	byte[] pipMetadataTimeStampBytes = new byte[4];
-    	byte[] pipCompositionMetadataBytes = new byte[4];
-    	
-    	din.readFully(pipMetadataTimeStampBytes);
-    	setPipMetadataTimeStamp(UnsignedIntHelper.convertToLong(pipMetadataTimeStampBytes));
-    	din.readFully(pipCompositionMetadataBytes);
-    	long pipCompositionMetadata = UnsignedIntHelper.convertToLong(pipCompositionMetadataBytes);
-    	int horizontalPosition = (int) ((pipCompositionMetadata & 0xfff00000) >> 20);
-    	int verticalPosition = (int) ((pipCompositionMetadata & 0x000fff00) >> 8);
-    	int pipScale = (int) ((pipCompositionMetadata & 0x000000f0) >> 4);
-    	setPipHorizontalPosition(horizontalPosition);
-    	setPipVerticalPosition(verticalPosition);
-    	Enum[] pipScaleTypes = PIPScaleType.values();
-    	for (int k = 0; k < pipScaleTypes.length; k++) {
-    		if (pipScaleTypes[k].ordinal() == pipScale) {
-    			setPipScale((PIPScaleType) pipScaleTypes[k]);
-    			break;
-    		}
-    	}
+        // 32 bit pip_metadata_time_stamp                       4 unsigned
+        //        pip_composition_metadata()
+        // 12 bit pip_horizontal_position                       .
+        // 12 bit pip_vertical_position                         .
+        //  4 bit pip_scale                                                     .
+        //  4 bit reserved                                                      .
+        
+        byte[] pipMetadataTimeStampBytes = new byte[4];
+        byte[] pipCompositionMetadataBytes = new byte[4];
+        
+        din.readFully(pipMetadataTimeStampBytes);
+        setPipMetadataTimeStamp(UnsignedIntHelper.convertToLong(pipMetadataTimeStampBytes));
+        din.readFully(pipCompositionMetadataBytes);
+        long pipCompositionMetadata = UnsignedIntHelper.convertToLong(pipCompositionMetadataBytes);
+        int horizontalPosition = (int) ((pipCompositionMetadata & 0xfff00000) >> 20);
+        int verticalPosition = (int) ((pipCompositionMetadata & 0x000fff00) >> 8);
+        int pipScale = (int) ((pipCompositionMetadata & 0x000000f0) >> 4);
+        setPipHorizontalPosition(horizontalPosition);
+        setPipVerticalPosition(verticalPosition);
+        Enum[] pipScaleTypes = PIPScaleType.values();
+        for (int k = 0; k < pipScaleTypes.length; k++) {
+                if (pipScaleTypes[k].ordinal() == pipScale) {
+                        setPipScale((PIPScaleType) pipScaleTypes[k]);
+                        break;
+                }
+        }
     }
     
     public void writeObject(DataOutputStream dout) throws IOException {
-    	dout.write(UnsignedIntHelper.convertToBytes(getPipMetadataTimeStamp()));
-    	long pipCompositionMetadata = 0;
-    	pipCompositionMetadata |= getPipHorizontalPosition() << 20;
-    	pipCompositionMetadata |= getPipVerticalPosition() << 8;
-    	pipCompositionMetadata |= getPipScale().ordinal() << 4;
-    	dout.write(UnsignedIntHelper.convertToBytes(pipCompositionMetadata));
+        dout.write(UnsignedIntHelper.convertToBytes(getPipMetadataTimeStamp()));
+        long pipCompositionMetadata = 0;
+        pipCompositionMetadata |= getPipHorizontalPosition() << 20;
+        pipCompositionMetadata |= getPipVerticalPosition() << 8;
+        pipCompositionMetadata |= getPipScale().ordinal() << 4;
+        dout.write(UnsignedIntHelper.convertToBytes(pipCompositionMetadata));
     }
     
     public long getPipMetadataTimeStamp() {
-    	return pipMetadataTimeStamp;
+        return pipMetadataTimeStamp;
     }
     
     public void setPipMetadataTimeStamp(long pipMetadataTimeStamp) {
-    	this.pipMetadataTimeStamp = pipMetadataTimeStamp;
+        this.pipMetadataTimeStamp = pipMetadataTimeStamp;
     }
     
     public int getPipHorizontalPosition() {
-    	return pipHorizontalPosition;
+        return pipHorizontalPosition;
     }
     
     public void setPipHorizontalPosition(int pipHorizontalPosition) {
-    	this.pipHorizontalPosition = pipHorizontalPosition;
+        this.pipHorizontalPosition = pipHorizontalPosition;
     }
     
     public int getPipVerticalPosition() {
-    	return pipVerticalPosition;
+        return pipVerticalPosition;
     }
     
     public void setPipVerticalPosition(int pipVerticalPosition) {
-    	this.pipVerticalPosition = pipVerticalPosition;
+        this.pipVerticalPosition = pipVerticalPosition;
     }
     
     public PIPScaleType getPipScale() {
-    	return pipScale;
+        return pipScale;
     }
     
     public void setPipScale(PIPScaleType pipScale) {
-    	this.pipScale = pipScale;
+        this.pipScale = pipScale;
     }
 
     
     // PIP Timeline Type
     enum PIPScaleType {
-    	reserved,
-    	NO_SCALING,
-    	HALF_SCALING,
-    	QUARTER_SCALING,
-    	ONE_AND_HALF_SCALING,
-    	FULL_SCREEN_SCALING;
+        reserved,
+        NO_SCALING,
+        HALF_SCALING,
+        QUARTER_SCALING,
+        ONE_AND_HALF_SCALING,
+        FULL_SCREEN_SCALING;
 
         public byte getEncoding() {
             return (byte) ordinal();

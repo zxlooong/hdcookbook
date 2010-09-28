@@ -95,82 +95,82 @@ public class GunBunnyXlet extends BaseXlet {
      * event.
      **/
     public void paint(Graphics gArg) {
-	Graphics2D g = (Graphics2D) gArg;
-	g.setComposite(AlphaComposite.Src);
-	g.setColor(frameColor);
-	g.fillRect(0, 0, width, frameWidth);
-	g.fillRect(0, 0, frameWidth, height);
-	g.fillRect(width - frameWidth, 0, frameWidth, height);
-	g.fillRect(0, height-frameWidth, width, frameWidth);
+        Graphics2D g = (Graphics2D) gArg;
+        g.setComposite(AlphaComposite.Src);
+        g.setColor(frameColor);
+        g.fillRect(0, 0, width, frameWidth);
+        g.fillRect(0, 0, frameWidth, height);
+        g.fillRect(width - frameWidth, 0, frameWidth, height);
+        g.fillRect(0, height-frameWidth, width, frameWidth);
 
-	Game gm;
-	synchronized (this) {
-	    gm = game;
-	}
-	if (gm != null) {
-	    g.translate(animPos.x, animPos.y);
-	    g.setClip(0, 0, animPos.width, animPos.height);
-	    gm.paintFrame(g, true, null);
-	}
+        Game gm;
+        synchronized (this) {
+            gm = game;
+        }
+        if (gm != null) {
+            g.translate(animPos.x, animPos.y);
+            g.setClip(0, 0, animPos.width, animPos.height);
+            gm.paintFrame(g, true, null);
+        }
     }
 
 
     protected void doXletLoop() throws InterruptedException {
-	try {
-	    fontFactory = new FontFactory();
-	} catch (Exception ex) {
-	    if (Debug.ASSERT) {
-		Debug.printStackTrace(ex);
-		Debug.assertFail(ex.toString());
-	    }
-	}
-	Game gm = new Game();
-	gm.initialize(this);
-	frame = 0;
-	animPos = new Rectangle();
-	animPos.x = frameWidth + 10;
-	animPos.y = frameWidth + 10;
-	animPos.width = width - 2*animPos.x;
-	animPos.height = height - 2*animPos.y;
-	setAnimator(new DirectDrawAnimator());
-	synchronized(this) {
-	    game = gm;
-	}
-	startVideo("bd://0.PLAYLIST:00003");
-	try {
-	    for (;;) {
-		if (getDestroyed()) {
-		    return;		// End xlet
-		} else if (Thread.interrupted()) {
-		    throw new InterruptedException();
-		}
-		Animator a;
-		int f;
-		synchronized(this) {
-		    a = animator;
-		}
-		animator.animateGame(frame, game);
-		synchronized(this) {
-		    frame++;
-		}
-	    }
-	} finally {
-	    animator.destroy();
-	}
+        try {
+            fontFactory = new FontFactory();
+        } catch (Exception ex) {
+            if (Debug.ASSERT) {
+                Debug.printStackTrace(ex);
+                Debug.assertFail(ex.toString());
+            }
+        }
+        Game gm = new Game();
+        gm.initialize(this);
+        frame = 0;
+        animPos = new Rectangle();
+        animPos.x = frameWidth + 10;
+        animPos.y = frameWidth + 10;
+        animPos.width = width - 2*animPos.x;
+        animPos.height = height - 2*animPos.y;
+        setAnimator(new DirectDrawAnimator());
+        synchronized(this) {
+            game = gm;
+        }
+        startVideo("bd://0.PLAYLIST:00003");
+        try {
+            for (;;) {
+                if (getDestroyed()) {
+                    return;             // End xlet
+                } else if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
+                Animator a;
+                int f;
+                synchronized(this) {
+                    a = animator;
+                }
+                animator.animateGame(frame, game);
+                synchronized(this) {
+                    frame++;
+                }
+            }
+        } finally {
+            animator.destroy();
+        }
     }
 
     private synchronized void setAnimator(Animator newAnimator) {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Setting animator to " 
-	    		   + newAnimator.getClass().getName());
-	}
-	synchronized(this) {
-	    if (animator != null) {
-		animator.destroy();
-	    }
-	    animator = newAnimator;
-	    animator.initAtFrame(frame, scene, animPos);
-	}
+        if (Debug.LEVEL > 0) {
+            Debug.println("Setting animator to " 
+                           + newAnimator.getClass().getName());
+        }
+        synchronized(this) {
+            if (animator != null) {
+                animator.destroy();
+            }
+            animator = newAnimator;
+            animator.initAtFrame(frame, scene, animPos);
+        }
     }
 
     /**
@@ -179,38 +179,38 @@ public class GunBunnyXlet extends BaseXlet {
      * the menu xlet.
      **/
     public void destroySelf() {
-	if (Debug.LEVEL > 0) {
-	    Debug.println();
-	    Debug.println("*******************************");
-	    Debug.println("*    GUN BUNNY BIDS ADIEU     *");
-	    Debug.println("*******************************");
-	    Debug.println();
-	}
-	try {
-	    destroyXlet(true);
-	} catch (XletStateChangeException ignored) {
-	}
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Calling notifyDestroyed...");
-	}
-	xletContext.notifyDestroyed();
+        if (Debug.LEVEL > 0) {
+            Debug.println();
+            Debug.println("*******************************");
+            Debug.println("*    GUN BUNNY BIDS ADIEU     *");
+            Debug.println("*******************************");
+            Debug.println();
+        }
+        try {
+            destroyXlet(true);
+        } catch (XletStateChangeException ignored) {
+        }
+        if (Debug.LEVEL > 0) {
+            Debug.println("Calling notifyDestroyed...");
+        }
+        xletContext.notifyDestroyed();
     }
     
     /**
      * See superclass definition.
      **/
     protected void numberKeyPressed(int value) {
-	Animator newAnimator = null;
-	if (Debug.LEVEL > 0) {
-	    Debug.println("NUMBER KEY:  " + value);
-	}
-	if (value == 1 && !(animator instanceof DirectDrawAnimator)) {
-	    setAnimator(new DirectDrawAnimator());
-	} else if (value == 2 && !(animator instanceof SFAAAnimator)) {
-	    setAnimator(new SFAAAnimator());
-	} else if (value == 3 && !(animator instanceof RepaintDrawAnimator)) {
-	    setAnimator(new RepaintDrawAnimator());
-	} else if (value == 0) {
+        Animator newAnimator = null;
+        if (Debug.LEVEL > 0) {
+            Debug.println("NUMBER KEY:  " + value);
+        }
+        if (value == 1 && !(animator instanceof DirectDrawAnimator)) {
+            setAnimator(new DirectDrawAnimator());
+        } else if (value == 2 && !(animator instanceof SFAAAnimator)) {
+            setAnimator(new SFAAAnimator());
+        } else if (value == 3 && !(animator instanceof RepaintDrawAnimator)) {
+            setAnimator(new RepaintDrawAnimator());
+        } else if (value == 0) {
             if (game != null) {
                game.handleEnd();
             }
@@ -233,49 +233,49 @@ public class GunBunnyXlet extends BaseXlet {
      * See superclass definition.
      **/
     protected void enterKeyPressed() {
-	Game g = game;
-	if (g != null) {
-	    g.handleEnter();
-	}
+        Game g = game;
+        if (g != null) {
+            g.handleEnter();
+        }
     }
         
     /**
      * See superclass definition.
      **/
     protected void arrowLeftKeyPressed(){
-	Game g = game;
-	if (g != null) {
-	    g.handleLeft();
-	}
+        Game g = game;
+        if (g != null) {
+            g.handleLeft();
+        }
     }
     
     /**
      * See superclass definition.
      **/
     protected void arrowRightPressed(){
-	Game g = game;
-	if (g != null) {
-	    g.handleRight();
-	}
+        Game g = game;
+        if (g != null) {
+            g.handleRight();
+        }
     }
     
     /**
      * See superclass definition.
      **/
     protected void arrowUpPressed(){
-	Game g = game;
-	if (g != null) {
-	    g.handleUp();
-	}
+        Game g = game;
+        if (g != null) {
+            g.handleUp();
+        }
     }
     
     /**
      * See superclass definition.
      **/
     protected void arrowDownPressed(){
-	Game g = game;
-	if (g != null) {
-	    g.handleDown();
-	}
+        Game g = game;
+        if (g != null) {
+            g.handleDown();
+        }
     }    
 }

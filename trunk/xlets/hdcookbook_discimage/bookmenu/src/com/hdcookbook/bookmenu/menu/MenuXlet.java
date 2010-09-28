@@ -103,8 +103,8 @@ import com.hdcookbook.bookmenu.MonitorIXCInterface;
  *   @author     Bill Foote (http://jovial.com)
  **/
 public class MenuXlet implements Xlet, UserEventListener, 
-				 MouseListener, MouseMotionListener,
-				 ServiceContextListener, AnimationContext
+                                 MouseListener, MouseMotionListener,
+                                 ServiceContextListener, AnimationContext
 {
 
     public XletContext context;
@@ -115,131 +115,131 @@ public class MenuXlet implements Xlet, UserEventListener,
     public Show show;
 
     private boolean destroyed = false;
-    private boolean isPresenting = false;	// Set by service context event
+    private boolean isPresenting = false;       // Set by service context event
     private ServiceContext ourServiceContext;
     private MonitorIXCInterface monitorXlet = null;
     private ServiceDomain assetsJar;
 
     public void initXlet(XletContext ctx) throws XletStateChangeException {
-	this.context = ctx;
-	if (Debug.LEVEL > 0) {
-	    Debug.println("MenuXlet in initXlet");
-	}
-	DirectDrawEngine dde = new DirectDrawEngine();
-	dde.setFps(24000);
-	engine = dde;
-	engine.initialize(this);
+        this.context = ctx;
+        if (Debug.LEVEL > 0) {
+            Debug.println("MenuXlet in initXlet");
+        }
+        DirectDrawEngine dde = new DirectDrawEngine();
+        dde.setFps(24000);
+        engine = dde;
+        engine.initialize(this);
     }
 
     public void startXlet() throws XletStateChangeException {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("MenuXlet in startXlet");
-	}
-	engine.start();
+        if (Debug.LEVEL > 0) {
+            Debug.println("MenuXlet in startXlet");
+        }
+        engine.start();
     }
 
     public void pauseXlet() {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("MenuXlet in pauseXlet");
-	}
-	engine.pause();
+        if (Debug.LEVEL > 0) {
+            Debug.println("MenuXlet in pauseXlet");
+        }
+        engine.pause();
     }
 
     public void destroyXlet(boolean unconditional) 
-	    throws XletStateChangeException 
+            throws XletStateChangeException 
     {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("MenuXlet in destroyXlet");
-	}
-	synchronized (this) {
-	    if (destroyed) {
-		return;
-	    }
-	    destroyed = true;
-	    notifyAll();
-	}
-	engine.destroy();
-	director.destroy();
-	if (navigator != null) {
-	    navigator.destroy();
-	}
-	if (assetsJar != null) {
-	    try {
-		assetsJar.detach();
-			// For greater memory efficiency, one can
-			// detach assetsJar as soon as everything has
-			// been read from it.  That could be done by
-			// triggering a command from GRIN once all of
-			// the initialization is done.
-	    } catch (Exception ex) {
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(ex);
-		}
-	    }
-	}
-	if (ourServiceContext != null) {
-	    ourServiceContext.removeListener(this);
-	}
-	EventManager.getInstance().removeUserEventListener(this);
+        if (Debug.LEVEL > 0) {
+            Debug.println("MenuXlet in destroyXlet");
+        }
+        synchronized (this) {
+            if (destroyed) {
+                return;
+            }
+            destroyed = true;
+            notifyAll();
+        }
+        engine.destroy();
+        director.destroy();
+        if (navigator != null) {
+            navigator.destroy();
+        }
+        if (assetsJar != null) {
+            try {
+                assetsJar.detach();
+                        // For greater memory efficiency, one can
+                        // detach assetsJar as soon as everything has
+                        // been read from it.  That could be done by
+                        // triggering a command from GRIN once all of
+                        // the initialization is done.
+            } catch (Exception ex) {
+                if (Debug.LEVEL > 0) {
+                    Debug.printStackTrace(ex);
+                }
+            }
+        }
+        if (ourServiceContext != null) {
+            ourServiceContext.removeListener(this);
+        }
+        EventManager.getInstance().removeUserEventListener(this);
     }
 
     public void animationInitialize() throws InterruptedException {
-	ServiceContextFactory scf = ServiceContextFactory.getInstance();
-	try {
-	    ourServiceContext = scf.getServiceContext(context);
-	} catch (ServiceContextException ex) {
-	    if (Debug.ASSERT) {
-		Debug.printStackTrace(ex);
-		Debug.assertFail();
-	    }
-	}
-	ourServiceContext.addListener(this);
-	waitForServiceContextPresenting();
-	scene = HSceneFactory.getInstance().getDefaultHScene();
-	scene.setLayout(null);
-	scene.setBounds(0, 0, 1920, 1080);
-	scene.setVisible(true);
-	navigator = new MenuDiscNavigator(this);
+        ServiceContextFactory scf = ServiceContextFactory.getInstance();
+        try {
+            ourServiceContext = scf.getServiceContext(context);
+        } catch (ServiceContextException ex) {
+            if (Debug.ASSERT) {
+                Debug.printStackTrace(ex);
+                Debug.assertFail();
+            }
+        }
+        ourServiceContext.addListener(this);
+        waitForServiceContextPresenting();
+        scene = HSceneFactory.getInstance().getDefaultHScene();
+        scene.setLayout(null);
+        scene.setBounds(0, 0, 1920, 1080);
+        scene.setVisible(true);
+        navigator = new MenuDiscNavigator(this);
 
-	assetsJar = new ServiceDomain();
-	try {
-	    BDLocator loc = new BDLocator("bd://JAR:00004");
-	    assetsJar.attach(loc);
-	} catch (Exception ex) {
-	    if (Debug.LEVEL > 0) {
-		// If this happens, it's a bug.
-		Debug.printStackTrace(ex);
-	    }
-	}
-	File[] path = { assetsJar.getMountPoint() } ;
-	AssetFinder.setHelper(new MenuAssetFinder(this));
-	AssetFinder.setSearchPath(null, path);
-	if (AssetFinder.tryURL("images.map") != null) {
-	    if (Debug.LEVEL > 0) {
-		Debug.println("Found images.map, using mosaic.");
-	    }
-	    AssetFinder.setImageMap("images.map");
-	} else if (Debug.LEVEL > 0) {
-	    Debug.println("No images.map, not using mosaic.");
-	}
+        assetsJar = new ServiceDomain();
+        try {
+            BDLocator loc = new BDLocator("bd://JAR:00004");
+            assetsJar.attach(loc);
+        } catch (Exception ex) {
+            if (Debug.LEVEL > 0) {
+                // If this happens, it's a bug.
+                Debug.printStackTrace(ex);
+            }
+        }
+        File[] path = { assetsJar.getMountPoint() } ;
+        AssetFinder.setHelper(new MenuAssetFinder(this));
+        AssetFinder.setSearchPath(null, path);
+        if (AssetFinder.tryURL("images.map") != null) {
+            if (Debug.LEVEL > 0) {
+                Debug.println("Found images.map, using mosaic.");
+            }
+            AssetFinder.setImageMap("images.map");
+        } else if (Debug.LEVEL > 0) {
+            Debug.println("No images.map, not using mosaic.");
+        }
 
-	navigator.init();
+        navigator.init();
 
-	director = new MenuDirector(this);
-	director.init();
-	show = director.createShow();
+        director = new MenuDirector(this);
+        director.init();
+        show = director.createShow();
 
-	engine.checkDestroy();
+        engine.checkDestroy();
 
-	AnimationClient[] clients = { show };
-	engine.initClients(clients);
-	Rectangle bounds = new Rectangle(0, 0, 1920, 1080);
-	engine.initContainer(scene, bounds);
+        AnimationClient[] clients = { show };
+        engine.initClients(clients);
+        Rectangle bounds = new Rectangle(0, 0, 1920, 1080);
+        engine.initContainer(scene, bounds);
     }
 
     public void animationFinishInitialization() throws InterruptedException {
-	System.gc();
-	show.activateSegment(show.getSegment("S:Initialize"));
+        System.gc();
+        show.activateSegment(show.getSegment("S:Initialize"));
 
         UserEventRepository userEventRepo = new UserEventRepository("x");
         userEventRepo.addAllArrowKeys();
@@ -249,48 +249,48 @@ public class MenuXlet implements Xlet, UserEventListener,
         userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
         EventManager.getInstance().addUserEventListener(this, userEventRepo);
 
-	scene.addMouseMotionListener(this);
-	scene.addMouseListener(this);
-	scene.requestFocus();
+        scene.addMouseMotionListener(this);
+        scene.addMouseListener(this);
+        scene.requestFocus();
     }
 
     /**
      * Callback from system via ServiceContextListener.
      **/
     public void receiveServiceContextEvent(ServiceContextEvent e)  {
-	if (e instanceof NormalContentEvent) {
-	    synchronized(this) {
-		isPresenting = true;
-		notifyAll();
-	    }
-	}
+        if (e instanceof NormalContentEvent) {
+            synchronized(this) {
+                isPresenting = true;
+                notifyAll();
+            }
+        }
     }
 
     private void waitForServiceContextPresenting() {
-	synchronized(this) {
-	    if (ourServiceContext.getService() != null) {
-		isPresenting = true;
-	    }
-	    for (;;) {
-		if (isPresenting) {
-		    if (Debug.LEVEL > 0) {
-			Debug.println("Service context is presenting");
-		    }
-		    return;
-		} else if (destroyed) {
-		    return;
-		}
-		try {
-		    if (Debug.LEVEL > 0) {
-			Debug.println("Waiting for service context to present");
-		    }
-		    wait();
-		} catch (InterruptedException ex) {
-		    Thread.currentThread().interrupt();
-		    return;	// Bail out
-		}
-	    }
-	}
+        synchronized(this) {
+            if (ourServiceContext.getService() != null) {
+                isPresenting = true;
+            }
+            for (;;) {
+                if (isPresenting) {
+                    if (Debug.LEVEL > 0) {
+                        Debug.println("Service context is presenting");
+                    }
+                    return;
+                } else if (destroyed) {
+                    return;
+                }
+                try {
+                    if (Debug.LEVEL > 0) {
+                        Debug.println("Waiting for service context to present");
+                    }
+                    wait();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    return;     // Bail out
+                }
+            }
+        }
     }
 
     /**
@@ -298,78 +298,78 @@ public class MenuXlet implements Xlet, UserEventListener,
      * monitor xlet.
      **/
     public synchronized MonitorIXCInterface getMonitorXlet() {
-	int tries = 0;
-	while (monitorXlet == null) {		// See continue in loop body
-	    boolean notBound = false;
-	    String orgID = (String) context.getXletProperty("dvb.org.id");
-	    String appID = (String) context.getXletProperty("dvb.app.id");
-	    int appIDint = -1;
-	    try {
-		appIDint =  Integer.parseInt(appID, 16);
-	    } catch (Exception ignored) {
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(ignored);
-		}
-	    }
-	    String name = "/" + orgID + 
-			  "/" + Integer.toHexString(appIDint - 1) +
-			  "/Monitor";
-	    // The monitor app's app ID is one less than ours.
-	    try {
-		monitorXlet = tryIXCRegistry(name);
-	    } catch (NotBoundException ex) {
-		notBound = true;
-	    }
+        int tries = 0;
+        while (monitorXlet == null) {           // See continue in loop body
+            boolean notBound = false;
+            String orgID = (String) context.getXletProperty("dvb.org.id");
+            String appID = (String) context.getXletProperty("dvb.app.id");
+            int appIDint = -1;
+            try {
+                appIDint =  Integer.parseInt(appID, 16);
+            } catch (Exception ignored) {
+                if (Debug.LEVEL > 0) {
+                    Debug.printStackTrace(ignored);
+                }
+            }
+            String name = "/" + orgID + 
+                          "/" + Integer.toHexString(appIDint - 1) +
+                          "/Monitor";
+            // The monitor app's app ID is one less than ours.
+            try {
+                monitorXlet = tryIXCRegistry(name);
+            } catch (NotBoundException ex) {
+                notBound = true;
+            }
 
-	    if (monitorXlet == null) {
-		int orgIDint = (int) Long.parseLong(orgID, 16);
-		if (orgIDint < 0) {
-		    // There was a spec bug in MHP/GEM that suggested
-		    // a very strange negative hex number as the org ID.
-		    // That bug was fixed after players shipped, so it's
-		    // a good idea to try under the other name, too.
-		    orgIDint = -orgIDint;
-		    name = "/-" + Integer.toHexString(orgIDint) + 
-			   "/" + Integer.toHexString(appIDint - 1) +
-			   "/Monitor";
-		    try {
-			monitorXlet = tryIXCRegistry(name);
-		    } catch (NotBoundException ex) {
-			notBound = true;
-		    }
-		}
-	    }
-	    if (monitorXlet == null) {
-		// Keep trying for two seconds...
-		try {
-		    tries++;
-		    if (tries < 21) {
-			Thread.sleep(100);
-			continue;
-		    }
-		} catch (InterruptedException ex2) {
-		    Thread.currentThread().interrupt();
-		}
-	    	// Give up, but provide a stub so at least we don't
-		// get null pointer exceptions.  If we get here, then
-		// there's  some kind of bug; this just adds a little bit
-		// of robustness in a bad situation.
-		if (Debug.LEVEL > 0) {
-		    Debug.println();
-		    Debug.println("***  Monitor xlet not found!  ***");
-		    Debug.println("This is a serious bug; all monitor app "
-		    	 	  + "functionality won't be available.");
-		    Debug.println();
-		}
-		monitorXlet = new MonitorIXCInterface() {
-		    public void startGame(String s) {
-		    }
-		    public void startMenu(String s) {
-		    }
-		};
-	    }
-	}
-	return monitorXlet;
+            if (monitorXlet == null) {
+                int orgIDint = (int) Long.parseLong(orgID, 16);
+                if (orgIDint < 0) {
+                    // There was a spec bug in MHP/GEM that suggested
+                    // a very strange negative hex number as the org ID.
+                    // That bug was fixed after players shipped, so it's
+                    // a good idea to try under the other name, too.
+                    orgIDint = -orgIDint;
+                    name = "/-" + Integer.toHexString(orgIDint) + 
+                           "/" + Integer.toHexString(appIDint - 1) +
+                           "/Monitor";
+                    try {
+                        monitorXlet = tryIXCRegistry(name);
+                    } catch (NotBoundException ex) {
+                        notBound = true;
+                    }
+                }
+            }
+            if (monitorXlet == null) {
+                // Keep trying for two seconds...
+                try {
+                    tries++;
+                    if (tries < 21) {
+                        Thread.sleep(100);
+                        continue;
+                    }
+                } catch (InterruptedException ex2) {
+                    Thread.currentThread().interrupt();
+                }
+                // Give up, but provide a stub so at least we don't
+                // get null pointer exceptions.  If we get here, then
+                // there's  some kind of bug; this just adds a little bit
+                // of robustness in a bad situation.
+                if (Debug.LEVEL > 0) {
+                    Debug.println();
+                    Debug.println("***  Monitor xlet not found!  ***");
+                    Debug.println("This is a serious bug; all monitor app "
+                                  + "functionality won't be available.");
+                    Debug.println();
+                }
+                monitorXlet = new MonitorIXCInterface() {
+                    public void startGame(String s) {
+                    }
+                    public void startMenu(String s) {
+                    }
+                };
+            }
+        }
+        return monitorXlet;
     }
 
     //
@@ -378,32 +378,32 @@ public class MenuXlet implements Xlet, UserEventListener,
     // find the mnitor xlet.
     //
     private MonitorIXCInterface tryIXCRegistry(String name) 
-    		throws NotBoundException 
+                throws NotBoundException 
     {
-	NotBoundException notBound = null;
-	try {
-	    try {
-		if (Debug.LEVEL > 0) {
-		    Debug.println("Connecting to IXC object at " + name);
-		}
-		return (MonitorIXCInterface) IxcRegistry.lookup(context, name);
-	    } catch (RemoteException ignored) {
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(ignored);
-		    // Must be a bug
-		}
-	    } catch (NotBoundException ex) {
-		// Maybe the monitor xlet hasn't had time to start yet
-		notBound = ex;
-	    }
-	} catch (Throwable ignored) {
-	    // Player bug:  sometimes a player will throw the wrong kind of
-	    // exception.
-	}
-	if (notBound != null) {
-	    throw notBound;
-	}
-	return null;
+        NotBoundException notBound = null;
+        try {
+            try {
+                if (Debug.LEVEL > 0) {
+                    Debug.println("Connecting to IXC object at " + name);
+                }
+                return (MonitorIXCInterface) IxcRegistry.lookup(context, name);
+            } catch (RemoteException ignored) {
+                if (Debug.LEVEL > 0) {
+                    Debug.printStackTrace(ignored);
+                    // Must be a bug
+                }
+            } catch (NotBoundException ex) {
+                // Maybe the monitor xlet hasn't had time to start yet
+                notBound = ex;
+            }
+        } catch (Throwable ignored) {
+            // Player bug:  sometimes a player will throw the wrong kind of
+            // exception.
+        }
+        if (notBound != null) {
+            throw notBound;
+        }
+        return null;
     }
 
     /**
@@ -412,13 +412,13 @@ public class MenuXlet implements Xlet, UserEventListener,
      * monitor xlet.
      **/
     public void startGame() {
-	try {
-	    getMonitorXlet().startGame("");
-	} catch (RemoteException ignored) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ignored);
-	    }
-	}
+        try {
+            getMonitorXlet().startGame("");
+        } catch (RemoteException ignored) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ignored);
+            }
+        }
     }
 
 
@@ -426,21 +426,21 @@ public class MenuXlet implements Xlet, UserEventListener,
      * Mouse motion callback
      **/
     public void mouseMoved(MouseEvent e) {
-	show.handleMouseMoved(e.getX(), e.getY());
+        show.handleMouseMoved(e.getX(), e.getY());
     }
 
     /**
      * Mouse motion callback (when a button is down)
      **/
     public void mouseDragged(MouseEvent e) {
-	show.handleMouseMoved(e.getX(), e.getY());
+        show.handleMouseMoved(e.getX(), e.getY());
     }
 
     /**
      * Mouse clicked callback
      **/
     public void mouseClicked(MouseEvent e) {
-	show.handleMouseClicked(e.getX(), e.getY());
+        show.handleMouseClicked(e.getX(), e.getY());
     }
 
     /**
@@ -468,9 +468,9 @@ public class MenuXlet implements Xlet, UserEventListener,
      * org.dvb.event.UserEventListener
      **/
     public void userEventReceived(UserEvent e) {
-	if (e.getType() == HRcEvent.KEY_PRESSED) {
-	    show.handleKeyPressed(e.getCode());
-	}
+        if (e.getType() == HRcEvent.KEY_PRESSED) {
+            show.handleKeyPressed(e.getCode());
+        }
     }
 
 }

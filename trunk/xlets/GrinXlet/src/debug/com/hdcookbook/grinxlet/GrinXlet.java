@@ -482,7 +482,7 @@ public class GrinXlet
         EventManager.getInstance().addUserEventListener(this, userEventRepo);
         pushKeyInterest(show);
         rootContainer.addMouseMotionListener(this);
-	    rootContainer.addMouseListener(this);
+            rootContainer.addMouseListener(this);
         rootContainer.requestFocus();
     }
 

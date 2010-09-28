@@ -69,7 +69,7 @@ public class GrinCompiler {
     }
 
     public void setHeadless(boolean v) {
-	headless = v;
+        headless = v;
     }
 
     /**
@@ -81,16 +81,16 @@ public class GrinCompiler {
      * will be stored, such as the generated mosaic image files.
      */
     public void optimizeShows(SEShow[] shows, String outputDir) 
-    		throws IOException 
+                throws IOException 
     {
         File f = new File(outputDir);
         if (!f.exists()) {
             throw new IOException("output directory " + outputDir 
-	    			+ " not found.");
+                                + " not found.");
         }
         MosaicMaker mm = new MosaicMaker(shows, f, headless);
-	mm.init();
-	mm.makeMosaics();        
+        mm.init();
+        mm.makeMosaics();        
         mm.destroy();
     }
 }

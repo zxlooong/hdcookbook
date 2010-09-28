@@ -72,40 +72,40 @@ import java.awt.Shape;
  */
 public class RectRenderer extends PolygonRenderer {
 
-	protected Shape getRawShape(VisualItem item) {
-	
-	    double displayStart = ProfileBrowser.UIstartTime;
-	    double displayEnd =  ProfileBrowser.UIendTime;
+        protected Shape getRawShape(VisualItem item) {
+        
+            double displayStart = ProfileBrowser.UIstartTime;
+            double displayEnd =  ProfileBrowser.UIendTime;
 
-	    //read start time
-	    Tuple t = item.getSourceTuple();
-	    double y = t.getLong(ProfileBrowser.currTimeUnit.startTimeField());
-	    double h = t.getDouble(ProfileBrowser.currTimeUnit.durationField()); 
+            //read start time
+            Tuple t = item.getSourceTuple();
+            double y = t.getLong(ProfileBrowser.currTimeUnit.startTimeField());
+            double h = t.getDouble(ProfileBrowser.currTimeUnit.durationField()); 
 
-	    Visualization viz = item.getVisualization();
-	    int height = viz.getDisplay(0).getHeight();
-	
-	    boolean red = ProfileBrowser.withinStdDev(t.getString(ProfileBrowser.METHOD_FIELD), h);
-	    if (red) {
-	        item.setFillColor(ColorLib.rgb(255, 0, 0));
-	    }
+            Visualization viz = item.getVisualization();
+            int height = viz.getDisplay(0).getHeight();
+        
+            boolean red = ProfileBrowser.withinStdDev(t.getString(ProfileBrowser.METHOD_FIELD), h);
+            if (red) {
+                item.setFillColor(ColorLib.rgb(255, 0, 0));
+            }
 
             h *= height;
-	    h /= displayEnd - displayStart;
+            h /= displayEnd - displayStart;
             int ih = (int) (h + 0.5);
 
             if (ih <= 0) {
-		ih = 1;
+                ih = 1;
             } 
-	    double adjustedY = item.getStartY(); 
-	    double presH = item.getEndY() - adjustedY;
-	    //double yDiff = ((ih - presH) / 2) + 0.5;
-	    double yDiff = (ih - presH) + 0.5;
-	    adjustedY -=  yDiff; 
+            double adjustedY = item.getStartY(); 
+            double presH = item.getEndY() - adjustedY;
+            //double yDiff = ((ih - presH) / 2) + 0.5;
+            double yDiff = (ih - presH) + 0.5;
+            adjustedY -=  yDiff; 
 
             if (adjustedY <= 0) {
-		adjustedY = 1;
+                adjustedY = 1;
             } 
-	    return new java.awt.geom.Rectangle2D.Double(item.getStartX(), adjustedY, 20, ih);
-	}
+            return new java.awt.geom.Rectangle2D.Double(item.getStartX(), adjustedY, 20, ih);
+        }
 }

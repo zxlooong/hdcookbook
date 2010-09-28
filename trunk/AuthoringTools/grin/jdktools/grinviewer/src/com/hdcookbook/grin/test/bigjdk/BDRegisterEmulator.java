@@ -77,47 +77,47 @@ public class BDRegisterEmulator {
     private int psr[] = new int[62];
 
     private ArrayList<BDRegisterEmulatorScreen> screens
-    	= new ArrayList<BDRegisterEmulatorScreen>();
-		// There should be zero or one of these because the
-		// GrinView UI only makes one registers screen, but in
-		// principle there could be multiple views.
+        = new ArrayList<BDRegisterEmulatorScreen>();
+                // There should be zero or one of these because the
+                // GrinView UI only makes one registers screen, but in
+                // principle there could be multiple views.
 
     private BDRegisterEmulator() {
     }
 
     public static BDRegisterEmulator getInstance() {
-	synchronized(LOCK) {
-	    if (theInstance == null) {
-		theInstance = new BDRegisterEmulator();
-	    }
-	}
-	return theInstance;
+        synchronized(LOCK) {
+            if (theInstance == null) {
+                theInstance = new BDRegisterEmulator();
+            }
+        }
+        return theInstance;
     }
 
     /**
      *
-     * @throws IllegalArgumentException	  if reg < 0 or >= 4096
+     * @throws IllegalArgumentException   if reg < 0 or >= 4096
      **/
     public int getGPR(int reg) {
-	if (reg < 0 || reg> gpr.length) {
-	    throw new IllegalArgumentException("Illegal GPR register " + reg);
-	}
-	return gpr[reg];
+        if (reg < 0 || reg> gpr.length) {
+            throw new IllegalArgumentException("Illegal GPR register " + reg);
+        }
+        return gpr[reg];
     }
     /**
      *
-     * @throws IllegalArgumentException	  if reg < 0 or >= 4096
+     * @throws IllegalArgumentException   if reg < 0 or >= 4096
      **/
     public void setGPR(int reg, int value) {
-	if (reg < 0 || reg> gpr.length) {
-	    throw new IllegalArgumentException("Illegal GPR register " + reg);
-	}
-	gpr[reg] = value;
-	synchronized(screens) {
-	    for (int i = 0; i < screens.size(); i++) {
-		screens.get(i).updateGPR(reg, value);
-	    }
-	}
+        if (reg < 0 || reg> gpr.length) {
+            throw new IllegalArgumentException("Illegal GPR register " + reg);
+        }
+        gpr[reg] = value;
+        synchronized(screens) {
+            for (int i = 0; i < screens.size(); i++) {
+                screens.get(i).updateGPR(reg, value);
+            }
+        }
     }
 
     /**
@@ -125,28 +125,28 @@ public class BDRegisterEmulator {
      * @throws IllegalArgumentException  if reg is an illegal value
      **/
     public int getPSR(int reg) {
-	if (reg < 0 || reg > psr.length || reg == 0 || reg == 9
-	    || reg == 10 || reg == 11 || (reg >= 21 && reg <= 28)
-	    || (reg >= 32 && reg <= 35) || reg == 41
-	    || (reg >= 45 && reg <= 47)) 
-	{
-	    throw new IllegalArgumentException("Illegal GPR register " + reg);
-	}
-	return psr[reg];
+        if (reg < 0 || reg > psr.length || reg == 0 || reg == 9
+            || reg == 10 || reg == 11 || (reg >= 21 && reg <= 28)
+            || (reg >= 32 && reg <= 35) || reg == 41
+            || (reg >= 45 && reg <= 47)) 
+        {
+            throw new IllegalArgumentException("Illegal GPR register " + reg);
+        }
+        return psr[reg];
     }
 
     int[] getPSRs() {
-	return psr;
+        return psr;
     }
 
     int[] getGPRs() {
-	return gpr;
+        return gpr;
     }
 
     void addScreen(BDRegisterEmulatorScreen screen) {
-	synchronized(screens) {
-	    screens.add(screen);
-	}
+        synchronized(screens) {
+            screens.add(screen);
+        }
     }
 
 }

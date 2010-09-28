@@ -81,63 +81,63 @@ public class MonitorXlet implements Xlet {
     private MonitorIXCListener listener;
 
     public void initXlet(XletContext ctx) throws XletStateChangeException {
-	this.xletContext = ctx;
-	if (Debug.LEVEL > 0) {
-	    Debug.println("MonitorXlet in initXlet");
-	}
+        this.xletContext = ctx;
+        if (Debug.LEVEL > 0) {
+            Debug.println("MonitorXlet in initXlet");
+        }
     }
 
     public void startXlet() throws XletStateChangeException {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("MonitorXlet in startXlet");
-	}
-	if (running) {
-	    return;
-	}
-	running = true;
-	listener = new MonitorIXCListener(this);
-	listener.init();
-	try {
-	    if (Debug.LEVEL > 0) {
-		Debug.println("*** Monitor xlet exporting IXC object.");
-		Debug.println("      Org ID:  " 
-				+ xletContext.getXletProperty("dvb.org.id"));
-		Debug.println("      App ID:  " 
-				+ xletContext.getXletProperty("dvb.app.id"));
-	    }
-	    IxcRegistry.bind(xletContext, "Monitor", listener);
-	    if (Debug.LEVEL > 0) {
-		Debug.println("*** Monitor xlet export succeeded.");
-	    }
-	} catch (AlreadyBoundException ignored) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ignored);
-	    }
-	}
+        if (Debug.LEVEL > 0) {
+            Debug.println("MonitorXlet in startXlet");
+        }
+        if (running) {
+            return;
+        }
+        running = true;
+        listener = new MonitorIXCListener(this);
+        listener.init();
+        try {
+            if (Debug.LEVEL > 0) {
+                Debug.println("*** Monitor xlet exporting IXC object.");
+                Debug.println("      Org ID:  " 
+                                + xletContext.getXletProperty("dvb.org.id"));
+                Debug.println("      App ID:  " 
+                                + xletContext.getXletProperty("dvb.app.id"));
+            }
+            IxcRegistry.bind(xletContext, "Monitor", listener);
+            if (Debug.LEVEL > 0) {
+                Debug.println("*** Monitor xlet export succeeded.");
+            }
+        } catch (AlreadyBoundException ignored) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ignored);
+            }
+        }
     }
 
     public void pauseXlet() {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("MonitorXlet in pauseXlet");
-	}
+        if (Debug.LEVEL > 0) {
+            Debug.println("MonitorXlet in pauseXlet");
+        }
     }
 
     public void destroyXlet(boolean unconditional) 
-	    throws XletStateChangeException 
+            throws XletStateChangeException 
     {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("MonitorXlet in destroyXlet");
-	}
-	if (listener != null) {
-	    listener.destroy();
-	}
-	try {
-	    IxcRegistry.unbind(xletContext, "Monitor");
-	} catch (NotBoundException ignored) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ignored);
-	    }
-	}
+        if (Debug.LEVEL > 0) {
+            Debug.println("MonitorXlet in destroyXlet");
+        }
+        if (listener != null) {
+            listener.destroy();
+        }
+        try {
+            IxcRegistry.unbind(xletContext, "Monitor");
+        } catch (NotBoundException ignored) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ignored);
+            }
+        }
     }
 
 }

@@ -66,22 +66,22 @@ import java.io.IOException;
 public class SEInterpolatedModel extends InterpolatedModel implements SENode {
 
     public SEInterpolatedModel() {
-        super(null);        	// setup sets the value of show
+        super(null);            // setup sets the value of show
     }
     
     public void setup(SEShow show, String name, int[] frames, 
-		      int[] currValues, int[][] values,
-		      int repeatFrame, int loopCount, 
-		      Command[] endCommands) 
+                      int[] currValues, int[][] values,
+                      int repeatFrame, int loopCount, 
+                      Command[] endCommands) 
     {
-	this.show = show;
+        this.show = show;
         this.name = name;
-	this.frames = frames;
-	this.currValues = currValues;
-	this.values = values;
-	this.repeatFrame = repeatFrame;
-	this.loopCount = loopCount;
-	this.endCommands = endCommands;
+        this.frames = frames;
+        this.currValues = currValues;
+        this.values = values;
+        this.repeatFrame = repeatFrame;
+        this.loopCount = loopCount;
+        this.endCommands = endCommands;
     }
  
     public void setFrames(int[] frames) {
@@ -121,7 +121,7 @@ public class SEInterpolatedModel extends InterpolatedModel implements SENode {
     }
 
     public int getLoopCount() {
-	return loopCount;
+        return loopCount;
     }
        
     public void writeInstanceData(GrinDataOutputStream out) 
@@ -130,12 +130,12 @@ public class SEInterpolatedModel extends InterpolatedModel implements SENode {
         out.writeSuperClassData(this);
         out.writeSharedIntArray(getFrames());
         out.writeIntArray(getCurrValues());
-	assert values.length == getCurrValues().length;
-	for (int i = 0; i < values.length; i++) {
-	    out.writeSharedIntArray(values[i]);
-	}
+        assert values.length == getCurrValues().length;
+        for (int i = 0; i < values.length; i++) {
+            out.writeSharedIntArray(values[i]);
+        }
         out.writeInt(getRepeatFrame());
-	out.writeInt(getLoopCount());
+        out.writeInt(getLoopCount());
         out.writeCommands(getEndCommands());       
     }
 
@@ -165,10 +165,10 @@ public class SEInterpolatedModel extends InterpolatedModel implements SENode {
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "interpolated_model @" + Integer.toHexString(hashCode());
-	} else {
-	    return "interpolated_model " + name;
-	}
+        if (name == null) {
+            return "interpolated_model @" + Integer.toHexString(hashCode());
+        } else {
+            return "interpolated_model " + name;
+        }
     }
 }

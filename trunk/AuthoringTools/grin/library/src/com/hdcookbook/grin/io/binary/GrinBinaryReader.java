@@ -186,7 +186,7 @@ public class GrinBinaryReader {
 
     private GrinXHelper showCommands = null;
 
-    private int extensionStartIndex; 	// -1 if no extensions recorded
+    private int extensionStartIndex;    // -1 if no extensions recorded
     private Constructor[] extensionConstructors = null;
     
     /*
@@ -307,40 +307,40 @@ public class GrinBinaryReader {
         if (index < 0 || index > intArrayConstants.length) {
             throw new IOException("non-existing int array reference");
         }  else {
-	    return intArrayConstants[index];
-	}
+            return intArrayConstants[index];
+        }
     }
 
     String getStringFromReference(int index) throws IOException {
         if (index < 0 || index > stringConstants.length) {
-	    throw new IOException("wrong string reference ");
+            throw new IOException("wrong string reference ");
         }  else {
             return stringConstants[index];
         }
     }
 
     Rectangle getRectangleFromReference(int index) throws IOException {
-	if (index < 0 || index > rectangleConstants.length) {
-	    throw new IOException("bad rectangle reference");
-	} else {
-	    return rectangleConstants[index];
-	}
+        if (index < 0 || index > rectangleConstants.length) {
+            throw new IOException("bad rectangle reference");
+        } else {
+            return rectangleConstants[index];
+        }
     }
     
     Rectangle[] getRectangleArrayFromReference(int index) throws IOException {
-	if (index < 0 || index > rectangleArrayConstants.length) {
-	    throw new IOException("bad rectangle array reference");
-	} else {
-	    return rectangleArrayConstants[index];
-	}
+        if (index < 0 || index > rectangleArrayConstants.length) {
+            throw new IOException("bad rectangle array reference");
+        } else {
+            return rectangleArrayConstants[index];
+        }
     }
 
     Command[] getCommandArrayFromReference(int index) throws IOException {
-	if (index < 0 || index > commandArrayConstants.length) {
-	    throw new IOException("bad command array reference");
-	} else {
-	    return commandArrayConstants[index];
-	}
+        if (index < 0 || index > commandArrayConstants.length) {
+            throw new IOException("bad command array reference");
+        } else {
+            return commandArrayConstants[index];
+        }
     }
     
     private void checkValue(int x, int y, String message) throws IOException {
@@ -354,51 +354,51 @@ public class GrinBinaryReader {
        int version = in.readInt();
        checkValue(version, Constants.GRINSCRIPT_VERSION, 
            "Script version mismatch, expects " + Constants.GRINSCRIPT_VERSION 
-	   + ", found " + version);       
+           + ", found " + version);       
     }
     
     /**
      * Reconstructs the Show object passed in as argument.
      *
-     * @param show	An empty Show object to reconstruct.
+     * @param show      An empty Show object to reconstruct.
      * @throws IOException if binary data parsing fails.
      */
     
     public void readShow(Show show) throws IOException {
 
         this.show = show;
-	this.showInArray = new Show[] { show } ;
+        this.showInArray = new Show[] { show } ;
         
         GrinDataInputStream in = new GrinDataInputStream(stream, this);       
         checkScriptHeader(in);
 
         stringConstants = readStringConstants(in);
         intArrayConstants = readIntArrayConstants(in);
-	rectangleConstants = readRectangleConstants(in);
-	rectangleArrayConstants = readRectangleArrayConstants(in);
-	extensionConstructors = readExtensionConstructors(in);
+        rectangleConstants = readRectangleConstants(in);
+        rectangleArrayConstants = readRectangleArrayConstants(in);
+        extensionConstructors = readExtensionConstructors(in);
 
-	readShowCommandsClass(in);
+        readShowCommandsClass(in);
         showCommands = instantiateShowCommandsCmd();
         
-	commandList = new Command[in.readInt()];
-	readDeclarations(in, commandList);
-	commandArrayConstants = readCommandArrayConstants(in);
+        commandList = new Command[in.readInt()];
+        readDeclarations(in, commandList);
+        commandArrayConstants = readCommandArrayConstants(in);
        
         int showSegmentStackDepth = in.readInt();
         show.setSegmentStackDepth(showSegmentStackDepth);
-	String[] showDrawTargets = in.readStringArray();
-	show.setDrawTargets(showDrawTargets);
+        String[] showDrawTargets = in.readStringArray();
+        show.setDrawTargets(showDrawTargets);
         String[] stickyImages = in.readStringArray();
-	Hashtable publicNamedCommands = readPublicNamedCommands(in);
+        Hashtable publicNamedCommands = readPublicNamedCommands(in);
         debuggable = in.readBoolean();
             
         // Read in the show file
-	featureList = new Feature[in.readInt()];
+        featureList = new Feature[in.readInt()];
         readDeclarations(in, featureList);
-	rcHandlerList = new RCHandler[in.readInt()];
+        rcHandlerList = new RCHandler[in.readInt()];
         readDeclarations(in, rcHandlerList);
-	segmentList = new Segment[in.readInt()];
+        segmentList = new Segment[in.readInt()];
         readDeclarations(in, segmentList);  
         readContents(in, featureList);
         readContents(in, rcHandlerList);
@@ -408,32 +408,32 @@ public class GrinBinaryReader {
         Segment showTop = (Segment) in.readSegmentReference();
         Group showTopGroup     = (Group) in.readFeatureReference();
         
-	String[] fontName = in.readStringArray();
-	int[] fontStyleSize = in.readSharedIntArray();
-	
-	int xScale = in.readInt();
-	int yScale = in.readInt();
-	int xOffset = in.readInt();
-	int yOffset = in.readInt();
-	show.setScale(xScale, yScale, xOffset, yOffset);
+        String[] fontName = in.readStringArray();
+        int[] fontStyleSize = in.readSharedIntArray();
         
-	show.buildShow(segmentList, featureList, rcHandlerList, stickyImages,
+        int xScale = in.readInt();
+        int yScale = in.readInt();
+        int xOffset = in.readInt();
+        int yOffset = in.readInt();
+        show.setScale(xScale, yScale, xOffset, yOffset);
+        
+        show.buildShow(segmentList, featureList, rcHandlerList, stickyImages,
                        showTop, showTopGroup,
-		       publicSegments, publicFeatures, publicRCHandlers,
-		       publicNamedCommands, fontName, fontStyleSize);
+                       publicSegments, publicFeatures, publicRCHandlers,
+                       publicNamedCommands, fontName, fontStyleSize);
     }
 
     private Hashtable readPublicNamedCommands(GrinDataInputStream in) 
-    		throws IOException 
+                throws IOException 
     {
-	int num = in.readInt();
-	Hashtable result = new Hashtable(num);
-	for (int i = 0; i < num; i++) {
-	    String key = in.readString();
-	    Command value = getCommandFromIndex(in.readInt());
-	    result.put(key, value);
-	}
-	return result;
+        int num = in.readInt();
+        Hashtable result = new Hashtable(num);
+        for (int i = 0; i < num; i++) {
+            String key = in.readString();
+            Command value = getCommandFromIndex(in.readInt());
+            result.put(key, value);
+        }
+        return result;
     }
 
     private void readDeclarations(GrinDataInputStream in, Object[] list)
@@ -509,7 +509,7 @@ public class GrinBinaryReader {
                 case Constants.NULL: // happens for commands
                     node = null;
                 default:  // extensions  
-		    node = instantiateExtension(identifier);
+                    node = instantiateExtension(identifier);
                     break;
                 }
 
@@ -519,149 +519,149 @@ public class GrinBinaryReader {
     }
 
     private Node instantiateExtension(int typeIdentifier) throws IOException {
-	if (extensionConstructors == null) {
-	    if (showCommands == null) {
-		throw new IOException("Missing GrinXHelper subclass for "
-				      + "instantiating extensions");
-	    }
-	    return showCommands.getInstanceOf(show, typeIdentifier);
-	} else {
-	    int i = typeIdentifier - extensionStartIndex;
-	    try {
-		return (Node) extensionConstructors[i].newInstance(showInArray);
-	    } catch (Exception ex) {
-		throw new IOException("Error instantiating extension:  " + ex);
-	    }
-	}
+        if (extensionConstructors == null) {
+            if (showCommands == null) {
+                throw new IOException("Missing GrinXHelper subclass for "
+                                      + "instantiating extensions");
+            }
+            return showCommands.getInstanceOf(show, typeIdentifier);
+        } else {
+            int i = typeIdentifier - extensionStartIndex;
+            try {
+                return (Node) extensionConstructors[i].newInstance(showInArray);
+            } catch (Exception ex) {
+                throw new IOException("Error instantiating extension:  " + ex);
+            }
+        }
     }
     
     private int[][] readIntArrayConstants(GrinDataInputStream in) 
-	    throws IOException 
+            throws IOException 
     {
         checkValue(in.readByte(),
                 Constants.INT_ARRAY_CONSTANTS_IDENTIFIER,
                 "Integer array constants identifier");        
         int length = in.readInt();
         int[][] array = new int[length][];
-	array[0] = null;
+        array[0] = null;
         for (int i = 1; i < length; i++) {
             array[i] = new int[in.readInt()];
-	    for (int j = 0; j < array[i].length; j++) {
-		array[i][j] = in.readInt();
-	    }
+            for (int j = 0; j < array[i].length; j++) {
+                array[i][j] = in.readInt();
+            }
         }
         return array;
     }
 
     private Rectangle[] readRectangleConstants(GrinDataInputStream in) 
-	    throws IOException 
+            throws IOException 
     {
         checkValue(in.readByte(),
                 Constants.RECTANGLE_CONSTANTS_IDENTIFIER,
                 "Rectangle constants identifier");        
         int length = in.readInt();
         Rectangle[] array = new Rectangle[length];
-	array[0] = null;
+        array[0] = null;
         for (int i = 1; i < length; i++) {
-	    Rectangle r = new Rectangle();
-	    r.x = in.readInt();
-	    r.y = in.readInt();
-	    r.width = in.readInt();
-	    r.height = in.readInt();
+            Rectangle r = new Rectangle();
+            r.x = in.readInt();
+            r.y = in.readInt();
+            r.width = in.readInt();
+            r.height = in.readInt();
             array[i] = r;
         }
         return array;
     }
 
     private Rectangle[][] readRectangleArrayConstants(GrinDataInputStream in) 
-	    throws IOException 
+            throws IOException 
     {
         checkValue(in.readByte(),
                 Constants.RECTANGLE_ARRAY_CONSTANTS_IDENTIFIER,
                 "Rectangle array constants identifier");        
         int length = in.readInt();
         Rectangle[][] array = new Rectangle[length][];
-	array[0] = null;
+        array[0] = null;
         for (int i = 1; i < length; i++) {
-	    Rectangle[] row = new Rectangle[in.readInt()];
-	    array[i] = row;
-	    for (int j = 0; j < row.length; j++) {
-		row[j] = getRectangleFromReference(in.readInt());
-	    }
+            Rectangle[] row = new Rectangle[in.readInt()];
+            array[i] = row;
+            for (int j = 0; j < row.length; j++) {
+                row[j] = getRectangleFromReference(in.readInt());
+            }
         }
         return array;
     }
 
     private Command[][] readCommandArrayConstants(GrinDataInputStream in) 
-	    throws IOException 
+            throws IOException 
     {
         checkValue(in.readByte(),
                 Constants.COMMAND_ARRAY_CONSTANTS_IDENTIFIER,
                 "Command array constants identifier");        
         int length = in.readInt();
         Command[][] array = new Command[length][];
-	array[0] = null;
+        array[0] = null;
         for (int i = 1; i < length; i++) {
-	    Command[] row = new Command[in.readInt()];
-	    array[i] = row;
-	    for (int j = 0; j < row.length; j++) {
-		row[j] = getCommandFromIndex(in.readInt());
-	    }
+            Command[] row = new Command[in.readInt()];
+            array[i] = row;
+            for (int j = 0; j < row.length; j++) {
+                row[j] = getCommandFromIndex(in.readInt());
+            }
         }
         return array;
     }
 
     private Constructor[] readExtensionConstructors(GrinDataInputStream in) 
-    		throws IOException 
+                throws IOException 
     {
         checkValue(in.readByte(),
                 Constants.EXTENSION_CLASSES_IDENTIFIER,
                 "Extension classes identifier");        
-	extensionStartIndex = in.readInt();
-	if (extensionStartIndex == -1) {
-	    return null;
-	}
+        extensionStartIndex = in.readInt();
+        if (extensionStartIndex == -1) {
+            return null;
+        }
         int length = in.readInt();
-	Constructor[] result = new Constructor[length];
-	Class[] paramTypes = { Show.class };
-	for (int i = 0; i <length; i++) {
-	    String name = in.readUTF();
-	    try {
+        Constructor[] result = new Constructor[length];
+        Class[] paramTypes = { Show.class };
+        for (int i = 0; i <length; i++) {
+            String name = in.readUTF();
+            try {
             Class cl = null;
             if (classLoader == null) {
-		        cl = Class.forName(name);
+                        cl = Class.forName(name);
             } else {
                 cl = Class.forName(name, true, classLoader);
             }
-		    result[i] = cl.getDeclaredConstructor(paramTypes);
-	    } catch (ClassNotFoundException ex) {
-		throw new IOException("Extension class " + name 
-				       + " is missing:  " + ex);
-	    } catch (NoSuchMethodException ex) {
-		throw new IOException("Extension class " + name 
-				       + " missing constructor:  " + ex);
-	    }
-	}
-	return result;
+                    result[i] = cl.getDeclaredConstructor(paramTypes);
+            } catch (ClassNotFoundException ex) {
+                throw new IOException("Extension class " + name 
+                                       + " is missing:  " + ex);
+            } catch (NoSuchMethodException ex) {
+                throw new IOException("Extension class " + name 
+                                       + " missing constructor:  " + ex);
+            }
+        }
+        return result;
     }
 
     
     private void readShowCommandsClass(GrinDataInputStream in)
-	   throws IOException 
+           throws IOException 
     {
-	String className = in.readString();
-	if (className == null) {
-	    return;
-	}
-	try {
+        String className = in.readString();
+        if (className == null) {
+            return;
+        }
+        try {
         if (classLoader == null) {
             showCommandsClass = Class.forName(className);
         } else {
             showCommandsClass = Class.forName(className, true, classLoader);
         }
-	} catch (Exception ex) {
-	    throw new IOException(ex.toString());
-	}
+        } catch (Exception ex) {
+            throw new IOException(ex.toString());
+        }
     }
 
     private void readContents(GrinDataInputStream in, Object[] list) 
@@ -689,7 +689,7 @@ public class GrinBinaryReader {
                 "String array identifier");
         
         String[] strings = new String[in.readInt()];
-	// strings[0] is null
+        // strings[0] is null
         for (int i = 1; i < strings.length; i++) {
             strings[i] = in.readUTF();
         }
@@ -700,24 +700,24 @@ public class GrinBinaryReader {
         if (index < 0 || index > commandArrayConstants.length) {
             throw new IOException("non-existing command array reference");
         }  else {
-	    return commandArrayConstants[index];
-	}
+            return commandArrayConstants[index];
+        }
     }
 
     private GrinXHelper instantiateShowCommandsCmd() 
-        throws IOException {	
+        throws IOException {    
         if (showCommandsClass == null) {
             return null;
-	}
-	GrinXHelper result;
+        }
+        GrinXHelper result;
         Class[] paramType = { Show.class };
         Object[] param = { show };
-	try {
-	    result = (GrinXHelper) 
+        try {
+            result = (GrinXHelper) 
                 showCommandsClass.getConstructor(paramType).newInstance(param);
-	} catch (Throwable ex) {
-	    throw new IOException(ex.toString());
-	}
+        } catch (Throwable ex) {
+            throw new IOException(ex.toString());
+        }
         return result;
     }  
 

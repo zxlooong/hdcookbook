@@ -16,7 +16,7 @@ feature extension fontstrip:text
 
 segment S:Initialize  
    setup  {
-	F:Everything
+        F:Everything
    } setup_done {
       # triggerred when F:Everything is done loading
       activate_segment S:1 ;  
@@ -28,13 +28,13 @@ segment S:1
         F:Text
         F:Text2
    } setup  {
-	F:Everything
+        F:Everything
    } 
 ; 
 
 feature group F:Everything {
-	F:Text
-	F:Text2
+        F:Text
+        F:Text2
 } ;
 
 end_show

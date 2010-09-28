@@ -72,8 +72,8 @@ import java.util.Hashtable;
 public class ImageManager {
 
     private static Hashtable images = new Hashtable();
-    private static Hashtable imageMap = null;	
-    	// Map of mosaic tile name to MosaicTile
+    private static Hashtable imageMap = null;   
+        // Map of mosaic tile name to MosaicTile
     private static Object lock = new Object();
 
     private ImageManager() {
@@ -92,26 +92,26 @@ public class ImageManager {
      * @see ManagedImage
      **/
     public static ManagedImage getImage(String name) {
-	synchronized(lock) {
-	    ManagedImage im = (ManagedImage) images.get(name);
-	    if (im == null) {
-		if (imageMap != null) {
-		    MosaicTile t = (MosaicTile) imageMap.get(name);
-		    if (t != null) {
-			im = new ManagedSubImage(name, t.mosaicName, 
-						 t.placement);
-		    } else if (Debug.LEVEL > 0) {
-			Debug.println(name + " not found in image map.");
-		    }
-		}
-		if (im == null) {
-		    im = new ManagedFullImage(name);
-		}
-		images.put(name, im);
-	    }
-	    im.addReference();
-	    return im;
-	}
+        synchronized(lock) {
+            ManagedImage im = (ManagedImage) images.get(name);
+            if (im == null) {
+                if (imageMap != null) {
+                    MosaicTile t = (MosaicTile) imageMap.get(name);
+                    if (t != null) {
+                        im = new ManagedSubImage(name, t.mosaicName, 
+                                                 t.placement);
+                    } else if (Debug.LEVEL > 0) {
+                        Debug.println(name + " not found in image map.");
+                    }
+                }
+                if (im == null) {
+                    im = new ManagedFullImage(name);
+                }
+                images.put(name, im);
+            }
+            im.addReference();
+            return im;
+        }
     }
 
     /**
@@ -129,16 +129,16 @@ public class ImageManager {
      * @see ManagedImage
      **/
     public static ManagedImage getImage(URL url) {
-	String name = url.toExternalForm();
-	synchronized(lock) {
-	    ManagedImage im = (ManagedImage) images.get(name);
-	    if (im == null) {
-		im = new ManagedFullImage(name, url);
-		images.put(name, im);
-	    }
-	    im.addReference();
-	    return im;
-	}
+        String name = url.toExternalForm();
+        synchronized(lock) {
+            ManagedImage im = (ManagedImage) images.get(name);
+            if (im == null) {
+                im = new ManagedFullImage(name, url);
+                images.put(name, im);
+            }
+            im.addReference();
+            return im;
+        }
     }
 
     /**
@@ -147,17 +147,17 @@ public class ImageManager {
      * reference count, without needing to do a hash table lookup.
      * See the ManagedImage contract for more details.
      *
-     * @throws	IllegalStateException if im.isReferenced() is false
+     * @throws  IllegalStateException if im.isReferenced() is false
      *
      * @see ManagedImage
      **/
     public static void getImage(ManagedImage im) {
-	synchronized(lock) {
-	    if (!im.isReferenced()) {
-		throw new IllegalStateException();
-	    }
-	    im.addReference();
-	}
+        synchronized(lock) {
+            if (!im.isReferenced()) {
+                throw new IllegalStateException();
+            }
+            im.addReference();
+        }
     }
 
     /**
@@ -168,71 +168,71 @@ public class ImageManager {
      * @see ManagedImage
      **/
     public static void ungetImage(ManagedImage im) {
-	synchronized(lock) {
-	    im.removeReference();
-	    if (!im.isReferenced()) {
-		images.remove(im.getName());
-		im.destroy();
-	    }
-	}
+        synchronized(lock) {
+            im.removeReference();
+            if (!im.isReferenced()) {
+                images.remove(im.getName());
+                im.destroy();
+            }
+        }
     }
 
     static void readImageMap(String fileName, Hashtable map) throws IOException 
     {
-	// Reads the file written by 
-	// com.hdcookbook.grin.build.mosaic.MosaicMaker.makeMosaics()
-	// This maps the original image file name to the name of a
-	// mosaic image, and the position within that mosaic.
-	DataInputStream dis = null;
-	try {
-	    URL u = AssetFinder.getURL(fileName);
-	    if (u == null) {
-		throw new IOException("No image map " + fileName);
-	    }
-	    dis = new DataInputStream(new BufferedInputStream(u.openStream()));
+        // Reads the file written by 
+        // com.hdcookbook.grin.build.mosaic.MosaicMaker.makeMosaics()
+        // This maps the original image file name to the name of a
+        // mosaic image, and the position within that mosaic.
+        DataInputStream dis = null;
+        try {
+            URL u = AssetFinder.getURL(fileName);
+            if (u == null) {
+                throw new IOException("No image map " + fileName);
+            }
+            dis = new DataInputStream(new BufferedInputStream(u.openStream()));
 
-	    int n = dis.readInt();
-	    String[] mosaics = new String[n];
-	    for (int i = 0; i < n; i++) {
-		mosaics[i] = dis.readUTF();
-	    }
+            int n = dis.readInt();
+            String[] mosaics = new String[n];
+            for (int i = 0; i < n; i++) {
+                mosaics[i] = dis.readUTF();
+            }
 
-	    n = dis.readInt();
-	    for (int i = 0; i < n; i++) {
-		String tileName = dis.readUTF();
-		MosaicTile t = new MosaicTile();
-		t.mosaicName = mosaics[dis.readInt()];
-		t.placement = new Rectangle();
-		t.placement.x = dis.readInt();
-		t.placement.y = dis.readInt();
-		t.placement.width = dis.readInt();
-		t.placement.height = dis.readInt();
-		map.put(tileName, t);
-	    }
-	    if (Debug.ASSERT && dis.read() != -1) {
-		Debug.assertFail();
-	    }
-	    // dis.close is in the finally block
-	} catch (IOException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-	    }
-	    if (Debug.ASSERT) {
-		Debug.assertFail();
-	    }
-	} finally {
-	    if (dis != null) {
-		try {
-		    dis.close();
-		} catch (IOException ignored) {
-		}
-	    }
-	}
+            n = dis.readInt();
+            for (int i = 0; i < n; i++) {
+                String tileName = dis.readUTF();
+                MosaicTile t = new MosaicTile();
+                t.mosaicName = mosaics[dis.readInt()];
+                t.placement = new Rectangle();
+                t.placement.x = dis.readInt();
+                t.placement.y = dis.readInt();
+                t.placement.width = dis.readInt();
+                t.placement.height = dis.readInt();
+                map.put(tileName, t);
+            }
+            if (Debug.ASSERT && dis.read() != -1) {
+                Debug.assertFail();
+            }
+            // dis.close is in the finally block
+        } catch (IOException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+            }
+            if (Debug.ASSERT) {
+                Debug.assertFail();
+            }
+        } finally {
+            if (dis != null) {
+                try {
+                    dis.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
     }
 
     static void setImageMap(Hashtable map) {
-	synchronized(lock) {
-	    imageMap = map;
-	}
+        synchronized(lock) {
+            imageMap = map;
+        }
     }
 }

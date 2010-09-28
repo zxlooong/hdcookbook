@@ -105,17 +105,17 @@ class TimedSocket extends Thread {
      * @param host Remote host name
      * @param port port number of the remote host
      * @param timeout socket time out specified in milliseconds.
-     *		 A timeout value of zero means no timeout. In this
-     * 	         case the getSocket() will wait until the socket is connected
-     * 		 to the remote host or an Exception is thrown.
+     *           A timeout value of zero means no timeout. In this
+     *           case the getSocket() will wait until the socket is connected
+     *           to the remote host or an Exception is thrown.
      * @see #getSocket()
-     */ 		
+     */                 
     TimedSocket (String host, int port, long timeout) {
-	this.host = host;
-	this.port = port;
-	this.timeout = timeout;
-	
-	/**
+        this.host = host;
+        this.port = port;
+        this.timeout = timeout;
+        
+        /**
          * Helps the system to know that it's OK to consider the xlet this
          * thread was created in as destroyed, even if this thread is blocked
          * on waiting for the socket.
@@ -126,93 +126,93 @@ class TimedSocket extends Thread {
    /**
     * Returns a socket connected to the remote host
     * @throws IOException if the socket times out or if any other exception
-    *			is incurred in the process of connecting to the remote host
+    *                   is incurred in the process of connecting to the remote host
     */
    Socket getSocket() throws IOException {
-	long startTime = System.currentTimeMillis();
-	this.start();
-	long elapsedTime = 0;
-	long waitPeriod = timeout;
-	while (true) {
-	    try {
-		synchronized (LOCK) {
-	           if (connState == CONNECTED) {
-	                return socket;
-	           } else if (sockExcep != null) {
-		        throw new IOException(sockExcep.getMessage());
-	           } else if (connState == TIMED_OUT) {
-		        throw new IOException("Socket timed out, waited for: " + elapsedTime + " ms" );
-		   }
-		   LOCK.wait(waitPeriod);
-	    	   elapsedTime = System.currentTimeMillis() - startTime;
-	    	   if (elapsedTime >= timeout) {
-		       connState = TIMED_OUT;
-	    	   } else {
-	    	       waitPeriod = (timeout - elapsedTime);
-		   }
-		}
-	    } catch (InterruptedException e) {
-		throw new IOException("Received:" + e.getMessage());
-	    }
-	}
+        long startTime = System.currentTimeMillis();
+        this.start();
+        long elapsedTime = 0;
+        long waitPeriod = timeout;
+        while (true) {
+            try {
+                synchronized (LOCK) {
+                   if (connState == CONNECTED) {
+                        return socket;
+                   } else if (sockExcep != null) {
+                        throw new IOException(sockExcep.getMessage());
+                   } else if (connState == TIMED_OUT) {
+                        throw new IOException("Socket timed out, waited for: " + elapsedTime + " ms" );
+                   }
+                   LOCK.wait(waitPeriod);
+                   elapsedTime = System.currentTimeMillis() - startTime;
+                   if (elapsedTime >= timeout) {
+                       connState = TIMED_OUT;
+                   } else {
+                       waitPeriod = (timeout - elapsedTime);
+                   }
+                }
+            } catch (InterruptedException e) {
+                throw new IOException("Received:" + e.getMessage());
+            }
+        }
     }
 
     public void run() {
-	try {
-	    // Don't hold any lock for no one should be waiting on a lock
+        try {
+            // Don't hold any lock for no one should be waiting on a lock
             // during connection establishment.
-	    // The purpose of this class is not to wait for socket connection to
-	    // complete either with failure or with success. 
-	    //
-	    socket = new Socket (host, port);
+            // The purpose of this class is not to wait for socket connection to
+            // complete either with failure or with success. 
+            //
+            socket = new Socket (host, port);
 
-	    // Signal that the socket is now connected
-	    synchronized (LOCK) {
-		if (connState != TIMED_OUT) {  // abort() takes precedence
-		    connState = CONNECTED;
-		}
-		LOCK.notifyAll();
-	    }
-	} catch (IOException e) {
-	    synchronized (LOCK) {
-	        sockExcep = e;
-		LOCK.notifyAll();
-	    }
-	    return;
-	} 
-	boolean doClose = false;
-	synchronized(LOCK) {
-	    if (connState == TIMED_OUT) {
-		doClose = true;
-	    }
-	}
-	if (doClose) {
-	    close();
-	}
+            // Signal that the socket is now connected
+            synchronized (LOCK) {
+                if (connState != TIMED_OUT) {  // abort() takes precedence
+                    connState = CONNECTED;
+                }
+                LOCK.notifyAll();
+            }
+        } catch (IOException e) {
+            synchronized (LOCK) {
+                sockExcep = e;
+                LOCK.notifyAll();
+            }
+            return;
+        } 
+        boolean doClose = false;
+        synchronized(LOCK) {
+            if (connState == TIMED_OUT) {
+                doClose = true;
+            }
+        }
+        if (doClose) {
+            close();
+        }
     }
 
     public  void close() {
-	try {
-	    socket.close();
-	} catch (Exception e) {
-	    // ignore
-	}
+        try {
+            socket.close();
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
    /**
     * Abort the socket connection attempt immediately 
     */
    public void abort() {
-	//
-	// Wake up getSocket() that is waiting on LOCK
-	// and reset the timeout
-	//
-	synchronized (LOCK) {
-	    connState = TIMED_OUT;  // force socket timeout 
-	    if (Debug.LEVEL > 1) {
-		Debug.println("Aborting socket connection..");
-	    }
-	    LOCK.notifyAll();
-	}
-     }	
+        //
+        // Wake up getSocket() that is waiting on LOCK
+        // and reset the timeout
+        //
+        synchronized (LOCK) {
+            connState = TIMED_OUT;  // force socket timeout 
+            if (Debug.LEVEL > 1) {
+                Debug.println("Aborting socket connection..");
+            }
+            LOCK.notifyAll();
+        }
+     }  
 }

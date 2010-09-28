@@ -123,7 +123,7 @@ import org.bluray.ti.selection.TitleContext;
 
 
 public abstract class AbstractDiscNavigator 
-		implements PlaybackListener, ControllerListener
+                implements PlaybackListener, ControllerListener
 {
     private XletContext xletContext;
     /**
@@ -131,9 +131,9 @@ public abstract class AbstractDiscNavigator
      * as soon as we navigate to our first  playlist.
      **/
     private Player mainPlayer;
-    private boolean weAreControlling = false;	// true while we control player
-    private boolean playerIsStarted = false;	// Shadows player state
-    private boolean waitingForStarted = false;	// handshake to avoid deadlock
+    private boolean weAreControlling = false;   // true while we control player
+    private boolean playerIsStarted = false;    // Shadows player state
+    private boolean waitingForStarted = false;  // handshake to avoid deadlock
     private PlayListChangeControl playlistControl;
     private MediaTimePositionControl timePositionControl;
     private PlaybackControl playbackControl;
@@ -152,7 +152,7 @@ public abstract class AbstractDiscNavigator
     protected int currentPlaylistID = -1;
 
     protected AbstractDiscNavigator(XletContext xletContext) {
-	this.xletContext = xletContext;
+        this.xletContext = xletContext;
     }
 
     /**
@@ -160,72 +160,72 @@ public abstract class AbstractDiscNavigator
      * null on error.
      **/
     protected static BDLocator makeBDLocator(String ls) {
-	if (Debug.LEVEL > 1) {
-	    Debug.println("Making BD locator " + ls);
-	}
-	try {
-	    return new BDLocator(ls);
-	} catch (Exception ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-	    }
-	    return null;
-	}
+        if (Debug.LEVEL > 1) {
+            Debug.println("Making BD locator " + ls);
+        }
+        try {
+            return new BDLocator(ls);
+        } catch (Exception ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+            }
+            return null;
+        }
     }
 
     /**
      * Convenience method to make a MediaLocator, given a BD locator string
      **/
     protected static MediaLocator makeMediaLocator(String ls) {
-	return new MediaLocator(makeBDLocator(ls));
+        return new MediaLocator(makeBDLocator(ls));
     }
 
     /**
      * Convenience method to make an HSound, given a BD locator string
      **/
     protected static HSound makeSound(String ls) {
-	try {
-	    MediaLocator ml = makeMediaLocator(ls);
-	    HSound hs = new HSound();
-	    hs.load(ml.getURL());
-	    return hs;
-	} catch (Throwable t) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(t);
-		Debug.println();
-		Debug.println("****  Failed to load sound " + ls + "  *****");
-		Debug.println(t);
-		Debug.println();
-	    }
-	    return null;
-	}
+        try {
+            MediaLocator ml = makeMediaLocator(ls);
+            HSound hs = new HSound();
+            hs.load(ml.getURL());
+            return hs;
+        } catch (Throwable t) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(t);
+                Debug.println();
+                Debug.println("****  Failed to load sound " + ls + "  *****");
+                Debug.println(t);
+                Debug.println();
+            }
+            return null;
+        }
     }
 
     /**
      * Convenience method to make Title, given a BD locator string
      **/
     protected static Title makeTitle(String ls) {
-	BDLocator loc = makeBDLocator(ls);
-	try {
-	    if (siManager == null) {
-		siManager = SIManager.createInstance();
-	    }
-	    return (Title) siManager.getService(loc);
-	} catch (InvalidLocatorException ignored) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ignored);
-	    }
-	    return null;
-	} catch (SecurityException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-		Debug.println();
-		Debug.println("*** Permission denied for creating Title "+loc);
-		Debug.println("*** Only signed xlets can do this.");
-		Debug.println();
-	    }
-	    return null;
-	}
+        BDLocator loc = makeBDLocator(ls);
+        try {
+            if (siManager == null) {
+                siManager = SIManager.createInstance();
+            }
+            return (Title) siManager.getService(loc);
+        } catch (InvalidLocatorException ignored) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ignored);
+            }
+            return null;
+        } catch (SecurityException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+                Debug.println();
+                Debug.println("*** Permission denied for creating Title "+loc);
+                Debug.println("*** Only signed xlets can do this.");
+                Debug.println();
+            }
+            return null;
+        }
     }
 
 
@@ -238,23 +238,23 @@ public abstract class AbstractDiscNavigator
      * @see #gotoPlaylistInCurrentTitle(org.bluray.net.BDLocator)
      **/
     public synchronized void selectTitle(Title title) {
-	if (titleContext == null) {
-	    try {
-		ServiceContextFactory scf = ServiceContextFactory.getInstance();
-		titleContext = (TitleContext)scf.getServiceContext(xletContext);
-	    } catch (ServiceContextException ignored) {
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(ignored);
-		}
-		if (Debug.ASSERT) {
-		    Debug.assertFail();
-		}
-	    }
-	}
-	if (Debug.LEVEL > 0) {
-	    Debug.println("*** Changing title to " + title.getLocator()+" ***");
-	}
-	titleContext.start(title, false);
+        if (titleContext == null) {
+            try {
+                ServiceContextFactory scf = ServiceContextFactory.getInstance();
+                titleContext = (TitleContext)scf.getServiceContext(xletContext);
+            } catch (ServiceContextException ignored) {
+                if (Debug.LEVEL > 0) {
+                    Debug.printStackTrace(ignored);
+                }
+                if (Debug.ASSERT) {
+                    Debug.assertFail();
+                }
+            }
+        }
+        if (Debug.LEVEL > 0) {
+            Debug.println("*** Changing title to " + title.getLocator()+" ***");
+        }
+        titleContext.start(title, false);
     }
 
     /**
@@ -266,111 +266,111 @@ public abstract class AbstractDiscNavigator
      **/
     protected synchronized void gotoPlaylistInCurrentTitle(BDLocator loc) {
 
-	    //
-	    // Guard against an attempt to control player from two
-	    // threads simultaneously
-	    //
-	while (weAreControlling) {
-	    if (Debug.LEVEL > 0) {
-		Debug.println("Waiting for other thread to control player");
-	    }
-	    try {
-		wait();
-	    } catch (InterruptedException ex) {
-		Thread.currentThread().interrupt();
-		return;
-	    }
-	}
+            //
+            // Guard against an attempt to control player from two
+            // threads simultaneously
+            //
+        while (weAreControlling) {
+            if (Debug.LEVEL > 0) {
+                Debug.println("Waiting for other thread to control player");
+            }
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
 
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Start controlling player at "
-				+ System.currentTimeMillis());
-	}
-	if (Debug.LEVEL > 0) {
-	    Debug.println("*** Changing playlist to " + loc + " ***");
-	}
-	weAreControlling = true;
-	try {
-	    if (mainPlayer == null) {
-		try {
-		    MediaLocator ml = new MediaLocator(loc);
-		    mainPlayer  = Manager.createPlayer(ml);
-		} catch (Exception ignored) {
-		    if (Debug.LEVEL > 0) {
-			Debug.printStackTrace(ignored);
-		    }
-		    if (Debug.ASSERT) {
-			Debug.assertFail("Error creating player");
-		    }
-		}
-		mainPlayer.addControllerListener(this);
-		mainPlayer.prefetch();
-		Control[] controls = mainPlayer.getControls();
-		for (int i = 0; i < controls.length; i++) {
-		    if (controls[i] instanceof PlayListChangeControl) {
-			playlistControl = (PlayListChangeControl) controls[i];
-		    } else if (controls[i] instanceof PlaybackControl) {
-			playbackControl = (PlaybackControl) controls[i];
-		    } else if (controls[i] instanceof SubtitlingControl) {
-			subtitlingControl = (SubtitlingControl) controls[i];
-		    } else if (controls[i] instanceof PrimaryAudioControl) {
-			audioControl = (PrimaryAudioControl) controls[i];
-		    } else if (controls[i] instanceof PrimaryGainControl) {
-			gainControl = (PrimaryGainControl) controls[i];
-		    } else if (controls[i] instanceof MediaTimePositionControl){
-			timePositionControl = 
-				(MediaTimePositionControl)controls[i];
-		    }
-		}
-		if (Debug.LEVEL > 1) {
-		    Debug.println("Playback control:  " + playbackControl);
-		    Debug.println("Playlist control:  " + playlistControl);
-		    Debug.println("Subtitling control:  " + subtitlingControl);
-		    Debug.println("Audio control:  " + audioControl);
-		    Debug.println("Gain control:  " + gainControl);
-		}
-		if (Debug.ASSERT && 
-		     (playbackControl == null || playlistControl == null
-		      || audioControl == null || gainControl == null
-		      || subtitlingControl == null 
-		      || timePositionControl == null))
-		{
-		    Debug.assertFail("Missing control");
-		}
-		playbackControl.addPlaybackControlListener(this);
-	    } else {
-		// We had already created the player, so we can use
-		// org.bluray.media.PlayListChangeControl
-		mainPlayer.stop();
-		waitForStarted(false, 3000);
-		try {
-		    playlistControl.selectPlayList(loc);
-		} catch (Exception ignored) {
-		    if (Debug.LEVEL > 0) {
-			Debug.printStackTrace(ignored);
-		    }
-		}
-	    }
-	    mainPlayer.start();
-	    currentPlaylistID = loc.getPlayListId();
-		// I'm not sure, but I think that selecting different streams
-		// might not work if the player isn't started...
-		//
-		// Also, it's crucial that we release our lock for long
-		// enough for the player state events to come in.
-	    if (Debug.LEVEL > 1) {
-		Debug.println("Waiting for player to enter started state...");
-	    }
-	    waitForStarted(true, 3000);
-	    notifyAVStarted();
-	} finally {
-	    weAreControlling = false;
-	    notifyAll();
-	    if (Debug.LEVEL > 0) {
-		Debug.println("Done controlling player at " 
-				+ System.currentTimeMillis());
-	    }
-	}
+        if (Debug.LEVEL > 0) {
+            Debug.println("Start controlling player at "
+                                + System.currentTimeMillis());
+        }
+        if (Debug.LEVEL > 0) {
+            Debug.println("*** Changing playlist to " + loc + " ***");
+        }
+        weAreControlling = true;
+        try {
+            if (mainPlayer == null) {
+                try {
+                    MediaLocator ml = new MediaLocator(loc);
+                    mainPlayer  = Manager.createPlayer(ml);
+                } catch (Exception ignored) {
+                    if (Debug.LEVEL > 0) {
+                        Debug.printStackTrace(ignored);
+                    }
+                    if (Debug.ASSERT) {
+                        Debug.assertFail("Error creating player");
+                    }
+                }
+                mainPlayer.addControllerListener(this);
+                mainPlayer.prefetch();
+                Control[] controls = mainPlayer.getControls();
+                for (int i = 0; i < controls.length; i++) {
+                    if (controls[i] instanceof PlayListChangeControl) {
+                        playlistControl = (PlayListChangeControl) controls[i];
+                    } else if (controls[i] instanceof PlaybackControl) {
+                        playbackControl = (PlaybackControl) controls[i];
+                    } else if (controls[i] instanceof SubtitlingControl) {
+                        subtitlingControl = (SubtitlingControl) controls[i];
+                    } else if (controls[i] instanceof PrimaryAudioControl) {
+                        audioControl = (PrimaryAudioControl) controls[i];
+                    } else if (controls[i] instanceof PrimaryGainControl) {
+                        gainControl = (PrimaryGainControl) controls[i];
+                    } else if (controls[i] instanceof MediaTimePositionControl){
+                        timePositionControl = 
+                                (MediaTimePositionControl)controls[i];
+                    }
+                }
+                if (Debug.LEVEL > 1) {
+                    Debug.println("Playback control:  " + playbackControl);
+                    Debug.println("Playlist control:  " + playlistControl);
+                    Debug.println("Subtitling control:  " + subtitlingControl);
+                    Debug.println("Audio control:  " + audioControl);
+                    Debug.println("Gain control:  " + gainControl);
+                }
+                if (Debug.ASSERT && 
+                     (playbackControl == null || playlistControl == null
+                      || audioControl == null || gainControl == null
+                      || subtitlingControl == null 
+                      || timePositionControl == null))
+                {
+                    Debug.assertFail("Missing control");
+                }
+                playbackControl.addPlaybackControlListener(this);
+            } else {
+                // We had already created the player, so we can use
+                // org.bluray.media.PlayListChangeControl
+                mainPlayer.stop();
+                waitForStarted(false, 3000);
+                try {
+                    playlistControl.selectPlayList(loc);
+                } catch (Exception ignored) {
+                    if (Debug.LEVEL > 0) {
+                        Debug.printStackTrace(ignored);
+                    }
+                }
+            }
+            mainPlayer.start();
+            currentPlaylistID = loc.getPlayListId();
+                // I'm not sure, but I think that selecting different streams
+                // might not work if the player isn't started...
+                //
+                // Also, it's crucial that we release our lock for long
+                // enough for the player state events to come in.
+            if (Debug.LEVEL > 1) {
+                Debug.println("Waiting for player to enter started state...");
+            }
+            waitForStarted(true, 3000);
+            notifyAVStarted();
+        } finally {
+            weAreControlling = false;
+            notifyAll();
+            if (Debug.LEVEL > 0) {
+                Debug.println("Done controlling player at " 
+                                + System.currentTimeMillis());
+            }
+        }
     }
 
 
@@ -395,8 +395,8 @@ public abstract class AbstractDiscNavigator
      * @see #gotoPlaylistInCurrentTitle(org.bluray.net.BDLocator)
      **/
     public synchronized void gotoMediaTime(BDLocator playlist, long mediaTime) {
-	gotoPlaylistInCurrentTitle(playlist);
-	timePositionControl.setMediaTimePosition(new Time(mediaTime));
+        gotoPlaylistInCurrentTitle(playlist);
+        timePositionControl.setMediaTimePosition(new Time(mediaTime));
     }
 
     /**
@@ -406,22 +406,22 @@ public abstract class AbstractDiscNavigator
      * @see #gotoPlaylistInCurrentTitle(org.bluray.net.BDLocator)
      **/
     public synchronized void selectSubtitles(boolean on, int streamNum) {
-	if (subtitlingControl != null) {
-	    if (Debug.LEVEL > 0) {
-		Debug.println("Subtitles set " + on + ", " + streamNum);
-	    }
-	    subtitlingControl.setSubtitling(on);
-	    if (on) {
-		try {
-		    subtitlingControl.selectStreamNumber(streamNum);
-		} catch (StreamNotAvailableException ignored) {
-		    if (Debug.LEVEL > 0) {
-			Debug.println("*** Subtitles stream " + streamNum 
-				      + " not available.");
-		    }
-		}
-	    }
-	}
+        if (subtitlingControl != null) {
+            if (Debug.LEVEL > 0) {
+                Debug.println("Subtitles set " + on + ", " + streamNum);
+            }
+            subtitlingControl.setSubtitling(on);
+            if (on) {
+                try {
+                    subtitlingControl.selectStreamNumber(streamNum);
+                } catch (StreamNotAvailableException ignored) {
+                    if (Debug.LEVEL > 0) {
+                        Debug.println("*** Subtitles stream " + streamNum 
+                                      + " not available.");
+                    }
+                }
+            }
+        }
     }
 
     /** 
@@ -429,27 +429,27 @@ public abstract class AbstractDiscNavigator
      * on a disc.  
      **/
     public synchronized void selectAudio(int streamNum) {
-	if (gainControl != null && audioControl != null) {  
-			// They're set at same time
-	    if (Debug.LEVEL > 0) {
-		Debug.println("Audio set to " + streamNum);
-	    }
-	    if (streamNum == 0) {
-		// We could call gainControl.setMute(true);
-		// However, this turns out to not be necessary with our
-		// video, and it seems to trigger a player bug.
-	    } else {
-		// Could undo mute with gainControl.setMute(false);
-		try {
-		    audioControl.selectStreamNumber(streamNum);
-		} catch (StreamNotAvailableException ignored) {
-		    if (Debug.LEVEL > 0) {
-			Debug.println("*** Audio stream " + streamNum 
-				      + " not available.");
-		    }
-		}
-	    } 
-	}
+        if (gainControl != null && audioControl != null) {  
+                        // They're set at same time
+            if (Debug.LEVEL > 0) {
+                Debug.println("Audio set to " + streamNum);
+            }
+            if (streamNum == 0) {
+                // We could call gainControl.setMute(true);
+                // However, this turns out to not be necessary with our
+                // video, and it seems to trigger a player bug.
+            } else {
+                // Could undo mute with gainControl.setMute(false);
+                try {
+                    audioControl.selectStreamNumber(streamNum);
+                } catch (StreamNotAvailableException ignored) {
+                    if (Debug.LEVEL > 0) {
+                        Debug.println("*** Audio stream " + streamNum 
+                                      + " not available.");
+                    }
+                }
+            } 
+        }
     }
 
     /**
@@ -462,15 +462,15 @@ public abstract class AbstractDiscNavigator
      * @see #gotoPlaylistInCurrentTitle(org.bluray.net.BDLocator)
      **/
     public synchronized long getMediaTime() {
-	if (timePositionControl == null) {
-	    // Should never happen
-	    return Long.MIN_VALUE;
-	}
-	Time t = timePositionControl.getMediaTimePosition();
-	if (t == null) {
-	    return Long.MIN_VALUE;
-	}
-	return t.getNanoseconds();
+        if (timePositionControl == null) {
+            // Should never happen
+            return Long.MIN_VALUE;
+        }
+        Time t = timePositionControl.getMediaTimePosition();
+        if (t == null) {
+            return Long.MIN_VALUE;
+        }
+        return t.getNanoseconds();
     }
 
     /**
@@ -478,89 +478,89 @@ public abstract class AbstractDiscNavigator
      * xlet termination.
      **/
     public synchronized void destroy() {
-	if (playbackControl != null) {
-	    playbackControl.removePlaybackControlListener(this);
-	}
-	if (mainPlayer != null) {
-	    mainPlayer.removeControllerListener(this);
-	    mainPlayer.stop();		// MHP 11.7.1.2
-	}
+        if (playbackControl != null) {
+            playbackControl.removePlaybackControlListener(this);
+        }
+        if (mainPlayer != null) {
+            mainPlayer.removeControllerListener(this);
+            mainPlayer.stop();          // MHP 11.7.1.2
+        }
     }
 
     /**
      * Callback from PlaybackListener
      **/
     public void markReached(PlaybackMarkEvent event) {
-	// We're not currently doing anything with these events
+        // We're not currently doing anything with these events
     }
 
     /**
      * Callback from PlaybackListener
      **/
     public void playItemReached(PlaybackPlayItemEvent event) {
-	// We're not currently doing anything with these events
+        // We're not currently doing anything with these events
     }
 
     /**
      * Callback from ControllerListener
      **/
     public void controllerUpdate(ControllerEvent event) {
-	boolean doNotifyStop = false;
-	if (Debug.LEVEL > 1) {
-	    Debug.println("Received controller event " + event);
-	}
-	synchronized(this) {
-	    boolean oldPlayerState = playerIsStarted;
+        boolean doNotifyStop = false;
+        if (Debug.LEVEL > 1) {
+            Debug.println("Received controller event " + event);
+        }
+        synchronized(this) {
+            boolean oldPlayerState = playerIsStarted;
 
-	    if (event instanceof RestartingEvent) {
-		// Restarting event is a subtype of StopEvent, and can
-		// be generated for things like a rate change.  It's not
-		// a StopEvent that we care about, because the player
-		// is just going to Start again automatically, so we ignore
-		// it.
-		if (Debug.LEVEL > 1) {
-		    Debug.println("Ignoring RestartingEvent");
-		}
-	    } else if (event instanceof StartEvent) {
-		if (Debug.LEVEL > 0) {
-		    Debug.println("*** StartEvent at media time "
-			  + ((StartEvent) event).getMediaTime().getSeconds());
-		}
-		playerIsStarted = true;
-	    } else if (event instanceof StopEvent) {
-		if (Debug.LEVEL > 0) {
-		    Debug.println("*** StopEvent at media time "
-			  + ((StopEvent) event).getMediaTime().getSeconds());
-		}
-		playerIsStarted = false;
-	    }
+            if (event instanceof RestartingEvent) {
+                // Restarting event is a subtype of StopEvent, and can
+                // be generated for things like a rate change.  It's not
+                // a StopEvent that we care about, because the player
+                // is just going to Start again automatically, so we ignore
+                // it.
+                if (Debug.LEVEL > 1) {
+                    Debug.println("Ignoring RestartingEvent");
+                }
+            } else if (event instanceof StartEvent) {
+                if (Debug.LEVEL > 0) {
+                    Debug.println("*** StartEvent at media time "
+                          + ((StartEvent) event).getMediaTime().getSeconds());
+                }
+                playerIsStarted = true;
+            } else if (event instanceof StopEvent) {
+                if (Debug.LEVEL > 0) {
+                    Debug.println("*** StopEvent at media time "
+                          + ((StopEvent) event).getMediaTime().getSeconds());
+                }
+                playerIsStarted = false;
+            }
 
-	    if (playerIsStarted != oldPlayerState) {
-		doNotifyStop = !playerIsStarted && !weAreControlling;
-		notifyAll();
+            if (playerIsStarted != oldPlayerState) {
+                doNotifyStop = !playerIsStarted && !weAreControlling;
+                notifyAll();
 
-		if (Debug.LEVEL > 0) {
-		    Debug.println("*** Player is now " 
-		    		   + (playerIsStarted ? "started" : "stopped"));
-		}
+                if (Debug.LEVEL > 0) {
+                    Debug.println("*** Player is now " 
+                                   + (playerIsStarted ? "started" : "stopped"));
+                }
 
-		//
-		// Handshake with waitForStarted(), in case our video
-		// is so short that it could stop almost immediately.
-		//
-		while (playerIsStarted && waitingForStarted) {
-		    try {
-			wait();
-		    } catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-			break;
-		    }
-		}
-	    }
-	}
-	if (doNotifyStop) {
-	    notifyStop();	// With no locks held
-	}
+                //
+                // Handshake with waitForStarted(), in case our video
+                // is so short that it could stop almost immediately.
+                //
+                while (playerIsStarted && waitingForStarted) {
+                    try {
+                        wait();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+        }
+        if (doNotifyStop) {
+            notifyStop();       // With no locks held
+        }
     }
 
     /**
@@ -577,36 +577,36 @@ public abstract class AbstractDiscNavigator
     // Return true if all went well, false if we time out.
     //
     private boolean waitForStarted(boolean wantStarted, long timeout) {
-	long tm = 0;
-	if (timeout > 0) {
-	    tm = System.currentTimeMillis();
-	}
-	for (;;) {
-	    synchronized(this) {
-		waitingForStarted = wantStarted;	// matched in finally
-		try {
-		    if (wantStarted == playerIsStarted) {
-			return true;
-		    }
-		    if (!waitWithTimeout(this, tm, timeout)) {
-			if (Debug.LEVEL > 0) {
-			    Thread.currentThread().dumpStack();
-			    Debug.println();
-			    Debug.println("***  WARNING:  Timed out waiting "
-					  + timeout + " ms "
-					  + "for player started " +wantStarted);
-			    Debug.println();
-			}
-			return false;
-		    }
-		} finally {
-		    if (waitingForStarted) {
-			waitingForStarted = false;
-			notifyAll();
-		    }
-		}
-	    }
-	}
+        long tm = 0;
+        if (timeout > 0) {
+            tm = System.currentTimeMillis();
+        }
+        for (;;) {
+            synchronized(this) {
+                waitingForStarted = wantStarted;        // matched in finally
+                try {
+                    if (wantStarted == playerIsStarted) {
+                        return true;
+                    }
+                    if (!waitWithTimeout(this, tm, timeout)) {
+                        if (Debug.LEVEL > 0) {
+                            Thread.currentThread().dumpStack();
+                            Debug.println();
+                            Debug.println("***  WARNING:  Timed out waiting "
+                                          + timeout + " ms "
+                                          + "for player started " +wantStarted);
+                            Debug.println();
+                        }
+                        return false;
+                    }
+                } finally {
+                    if (waitingForStarted) {
+                        waitingForStarted = false;
+                        notifyAll();
+                    }
+                }
+            }
+        }
     }
 
     //
@@ -616,22 +616,22 @@ public abstract class AbstractDiscNavigator
     //
     private boolean waitWithTimeout(Object monitor,long startTime, long timeout)
     {
-	try {
-	    if (timeout <= 0) {
-		monitor.wait();
-		return true;
-	    } else {
-		long t = timeout - (System.currentTimeMillis() - startTime);
-		if (t <= 0) {
-		    return false;
-		}
-		monitor.wait(t);
-		t = timeout - (System.currentTimeMillis() - startTime);
-		return t > 0;
-	    }
-	} catch (InterruptedException ex) {
-	    Thread.currentThread().interrupt();
-	    return false;
-	}
+        try {
+            if (timeout <= 0) {
+                monitor.wait();
+                return true;
+            } else {
+                long t = timeout - (System.currentTimeMillis() - startTime);
+                if (t <= 0) {
+                    return false;
+                }
+                monitor.wait(t);
+                t = timeout - (System.currentTimeMillis() - startTime);
+                return t > 0;
+            }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
     }
 }

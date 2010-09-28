@@ -78,78 +78,78 @@ class TwitterPoll extends Command implements Runnable {
     private TwitterDirector director;
 
     TwitterPoll(TwitterDirector director) {
-	super(director.getShow());
-	this.director = director;
+        super(director.getShow());
+        this.director = director;
     }
 
     private ManagedImage[] icons;
     private Status[] tweets;
     private boolean destroyed = false;
-	// Access to destroyed doesn't need to be synchronized -- see
-	// the comments in destroy()
+        // Access to destroyed doesn't need to be synchronized -- see
+        // the comments in destroy()
 
     /**
      * Run the networking task.  This happens in the networking thread.
      **/
     public void run() {
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Polling server...");
-	}
-	Vector v;
-	try {
-	    v = director.twitter.requestPublicTimeline(null);
-	} catch (TwitterException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-		Debug.println();
-		Debug.println("*** Twitter message fails to load:  " + ex);
-		Debug.println();
-	    }
-	    return;
-	}
-	icons = new ManagedImage[v.size()];
-	tweets = new Status[v.size()];
-	for (int i = 0; i < v.size(); i++) {
-	    if (Thread.interrupted()) {
-	    	// Note that NetworkManager calls Thread.interrupt() for us
-		// when it wants us to terminate.  
-		//
-		// For added robustness, we could add a synchronized check
-		// of NetworkManager.destroyed here too - that would provide
-		// some robustness against buggy libraries that catch
-		// InterruptedException without re-posting the
-		// Thread.interrupt().  
-		destroy();
-		return;
-	    }
-	    tweets[i] = (Status) v.elementAt(i);
-	    try {
-		URL url = new URL(tweets[i].getProfileImageURL());
-		icons[i] = ImageManager.getImage(url);
-	    } catch (MalformedURLException ignored) {
-		icons[i] = null;
-	    }
-	    if (icons[i] != null) {
-		icons[i].prepare();
-		icons[i].load(director.getShow().component);
-	    }
-	}
-	director.setPendingCommand(this);
-	show.runCommand(this);	// To update the UI in the animation thread
+        if (Debug.LEVEL > 0) {
+            Debug.println("Polling server...");
+        }
+        Vector v;
+        try {
+            v = director.twitter.requestPublicTimeline(null);
+        } catch (TwitterException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+                Debug.println();
+                Debug.println("*** Twitter message fails to load:  " + ex);
+                Debug.println();
+            }
+            return;
+        }
+        icons = new ManagedImage[v.size()];
+        tweets = new Status[v.size()];
+        for (int i = 0; i < v.size(); i++) {
+            if (Thread.interrupted()) {
+                // Note that NetworkManager calls Thread.interrupt() for us
+                // when it wants us to terminate.  
+                //
+                // For added robustness, we could add a synchronized check
+                // of NetworkManager.destroyed here too - that would provide
+                // some robustness against buggy libraries that catch
+                // InterruptedException without re-posting the
+                // Thread.interrupt().  
+                destroy();
+                return;
+            }
+            tweets[i] = (Status) v.elementAt(i);
+            try {
+                URL url = new URL(tweets[i].getProfileImageURL());
+                icons[i] = ImageManager.getImage(url);
+            } catch (MalformedURLException ignored) {
+                icons[i] = null;
+            }
+            if (icons[i] != null) {
+                icons[i].prepare();
+                icons[i].load(director.getShow().component);
+            }
+        }
+        director.setPendingCommand(this);
+        show.runCommand(this);  // To update the UI in the animation thread
     }
 
     /**
      * Update the screen.  This happens in the animation thread.
      **/
     public void execute() {
-	if (destroyed) {
-	    return;
-	}
-	director.unsetPendingCommand(this);
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Updating screen...");
-	}
-	director.updateScreen(tweets, icons);
+        if (destroyed) {
+            return;
+        }
+        director.unsetPendingCommand(this);
+        if (Debug.LEVEL > 0) {
+            Debug.println("Updating screen...");
+        }
+        director.updateScreen(tweets, icons);
     }
 
     /**
@@ -163,17 +163,17 @@ class TwitterPoll extends Command implements Runnable {
      * point (via the enqueue/dequeue).
      **/
     public void destroy() {
-	destroyed = true;
-	if (icons == null) {
-	    return;
-	}
-	for (int i = 0; i < icons.length; i++) {
-	    ManagedImage im = icons[i];
-	    if (im != null) {
-		im.unprepare();
-		ImageManager.ungetImage(im);
-	    }
-	}
+        destroyed = true;
+        if (icons == null) {
+            return;
+        }
+        for (int i = 0; i < icons.length; i++) {
+            ManagedImage im = icons[i];
+            if (im != null) {
+                im.unprepare();
+                ImageManager.ungetImage(im);
+            }
+        }
     }
 
 }

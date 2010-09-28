@@ -100,75 +100,75 @@ public class Main {
 
 
     public static int read(InputStream in, byte[] data) throws IOException {
-	int len = 0;
-	while (len < data.length) {
-	    int i = in.read(data, len, data.length - len);
-	    if (i == -1) {
-		if (len > 0) {
-		    return len;
-		} else {
-		    return -1;
-		}
-	    }
-	    len += i;
-	}
-	return len;
+        int len = 0;
+        while (len < data.length) {
+            int i = in.read(data, len, data.length - len);
+            if (i == -1) {
+                if (len > 0) {
+                    return len;
+                } else {
+                    return -1;
+                }
+            }
+            len += i;
+        }
+        return len;
     }
 
     public static void stripCPIBits(InputStream in, OutputStream out) 
-    	    throws IOException 
+            throws IOException 
     {
-	byte[] packet = new byte[192];	// cf. BD-ROM part 3-1 sec. 6.2.1
-	int[] flagCount = { 0, 0, 0, 0 };
-	int num = 0;
-	for (;;) {
-	    int len = read(in, packet);
-	    if (len == -1) {
-		break;
-	    } else if (len < 192) {
-		System.err.println("Warning:  Final packet only " + len 
-				   + " bytes long.");
-		out.write(packet, 0, len);
-		break;
-	    }
-	    num++;
-	    if (packet[4] != 0x47) {
-		System.err.println("Warning:  packet " + num 
-			+ "'s transport packet doesn't start with 0x47.");
-	    }
-	    int flagVal = (((int) packet[0]) & 0xff) >> 6;
-	    flagCount[flagVal]++;
-	    packet[0] = (byte) (packet[0] & 0x3f);	
-	    	// cf. AACS Blu-ray Disc section 3.10.2
-	    out.write(packet);
-	}
-	System.err.println();
-	System.err.println("Finished modifying transport stream.");
-	System.err.println("    "+flagCount[0] + " CPI flags left as 00");
-	System.err.println("    "+flagCount[1] + " CPI flags changed 01 to 00");
-	System.err.println("    "+flagCount[2] + " CPI flags changed 10 to 00");
-	System.err.println("    "+flagCount[3] + " CPI flags changed 11 to 00");
-	System.err.println(num + " total packets in transport stream.");
-	System.err.println();
+        byte[] packet = new byte[192];  // cf. BD-ROM part 3-1 sec. 6.2.1
+        int[] flagCount = { 0, 0, 0, 0 };
+        int num = 0;
+        for (;;) {
+            int len = read(in, packet);
+            if (len == -1) {
+                break;
+            } else if (len < 192) {
+                System.err.println("Warning:  Final packet only " + len 
+                                   + " bytes long.");
+                out.write(packet, 0, len);
+                break;
+            }
+            num++;
+            if (packet[4] != 0x47) {
+                System.err.println("Warning:  packet " + num 
+                        + "'s transport packet doesn't start with 0x47.");
+            }
+            int flagVal = (((int) packet[0]) & 0xff) >> 6;
+            flagCount[flagVal]++;
+            packet[0] = (byte) (packet[0] & 0x3f);      
+                // cf. AACS Blu-ray Disc section 3.10.2
+            out.write(packet);
+        }
+        System.err.println();
+        System.err.println("Finished modifying transport stream.");
+        System.err.println("    "+flagCount[0] + " CPI flags left as 00");
+        System.err.println("    "+flagCount[1] + " CPI flags changed 01 to 00");
+        System.err.println("    "+flagCount[2] + " CPI flags changed 10 to 00");
+        System.err.println("    "+flagCount[3] + " CPI flags changed 11 to 00");
+        System.err.println(num + " total packets in transport stream.");
+        System.err.println();
     }
 
     public static void usage() {
-	System.err.println();
-	System.err.println("Usage:  java -jar cpistrip.jar < in.m2ts > out.m2ts");
-	System.err.println();
-	System.exit(1);
+        System.err.println();
+        System.err.println("Usage:  java -jar cpistrip.jar < in.m2ts > out.m2ts");
+        System.err.println();
+        System.exit(1);
     }
 
     public static void main(String[] args) {
-	if (args.length != 0) {
-	    usage();
-	}
-	try {
-	    stripCPIBits(System.in, System.out);
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.exit(1);
-	}
-	System.exit(0);
+        if (args.length != 0) {
+            usage();
+        }
+        try {
+            stripCPIBits(System.in, System.out);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+        System.exit(0);
     }
 }

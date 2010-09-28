@@ -86,8 +86,8 @@ import com.hdcookbook.grin.util.BitStreamIO;
  */
 public final class BDJOReader {
     private static boolean TRACE = false;
-    	// Set to true to debug binary reading by tracing all of the
-	// reads from the .bdjo file
+        // Set to true to debug binary reading by tracing all of the
+        // reads from the .bdjo file
     // don't create me!
     private BDJOReader() {}
     
@@ -138,17 +138,17 @@ public final class BDJOReader {
     }
     
     private static String readISO646String(String name, DataInputStream dis, 
-    					   BitStreamIO bio, int len)
+                                           BitStreamIO bio, int len)
             throws IOException 
     {
         byte[] buf = new byte[len];
-	bio.assertByteAligned(1);
+        bio.assertByteAligned(1);
         dis.read(buf);
         String result = iso646String(buf);
-	if (TRACE) {
-	    System.out.println(name + ":  \"" + result + "\"");
-	}
-	return result;
+        if (TRACE) {
+            System.out.println(name + ":  \"" + result + "\"");
+        }
+        return result;
     }
     
     private static String toUTF8String(byte[] buf) {
@@ -160,117 +160,117 @@ public final class BDJOReader {
     }
     
     private static String readUTF8String(String name, DataInputStream dis, 
-    					 BitStreamIO bio, int len)
+                                         BitStreamIO bio, int len)
             throws IOException 
     {
         byte[] buf = new byte[len];
-	bio.assertByteAligned(1);
+        bio.assertByteAligned(1);
         dis.read(buf);
-	String result = toUTF8String(buf);
-	if (TRACE) {
-	    System.out.println(name + ":  \"" + result + "\"");
-	}
-	return result;
+        String result = toUTF8String(buf);
+        if (TRACE) {
+            System.out.println(name + ":  \"" + result + "\"");
+        }
+        return result;
     }
 
     private static byte readByte(String name, DataInputStream dis, 
-    				 BitStreamIO bio) 
-	    throws IOException 
+                                 BitStreamIO bio) 
+            throws IOException 
     {
-	bio.assertByteAligned(1);
-	byte result = dis.readByte();
-	if (TRACE) {
-	    System.out.println(name + ":  " + ((int) result) + " ");
-	}
-	return result;
+        bio.assertByteAligned(1);
+        byte result = dis.readByte();
+        if (TRACE) {
+            System.out.println(name + ":  " + ((int) result) + " ");
+        }
+        return result;
     }
 
     private static int readUnsignedByte(String name, DataInputStream dis, 
-					BitStreamIO bio) 
-	    throws IOException 
+                                        BitStreamIO bio) 
+            throws IOException 
     {
-	bio.assertByteAligned(1);
-	int result = dis.readUnsignedByte();
-	if (TRACE) {
-	    System.out.println(name + ":  " + result + " ");
-	}
-	return result;
+        bio.assertByteAligned(1);
+        int result = dis.readUnsignedByte();
+        if (TRACE) {
+            System.out.println(name + ":  " + result + " ");
+        }
+        return result;
     }
 
     private static short readShort(String name, DataInputStream dis, 
-				   BitStreamIO bio) 
-	    throws IOException 
+                                   BitStreamIO bio) 
+            throws IOException 
     {
-	bio.assertByteAligned(1);
-	short  result = dis.readShort();
-	if (TRACE) {
-	    System.out.println(name + ":  " + result + " ");
-	}
-	return result;
+        bio.assertByteAligned(1);
+        short  result = dis.readShort();
+        if (TRACE) {
+            System.out.println(name + ":  " + result + " ");
+        }
+        return result;
     }
 
     private static int readUnsignedShort(String name, DataInputStream dis, 
-				         BitStreamIO bio) 
-	    throws IOException 
+                                         BitStreamIO bio) 
+            throws IOException 
     {
-	bio.assertByteAligned(1);
-	int result = dis.readUnsignedShort();
-	if (TRACE) {
-	    System.out.println(name + ":  " + result + " ");
-	}
-	return result;
+        bio.assertByteAligned(1);
+        int result = dis.readUnsignedShort();
+        if (TRACE) {
+            System.out.println(name + ":  " + result + " ");
+        }
+        return result;
     }
 
     private static int readInt(String name, DataInputStream dis, 
-				 BitStreamIO bio) 
-	    throws IOException 
+                                 BitStreamIO bio) 
+            throws IOException 
     {
-	bio.assertByteAligned(1);
-	int result = dis.readInt();
-	if (TRACE) {
-	    System.out.println(name + ":  " + result + " ");
-	}
-	return result;
+        bio.assertByteAligned(1);
+        int result = dis.readInt();
+        if (TRACE) {
+            System.out.println(name + ":  " + result + " ");
+        }
+        return result;
     }
 
     private static int readBits(String name, DataInputStream dis, 
-    			  BitStreamIO bio, int bits) 
-	    throws IOException 
+                          BitStreamIO bio, int bits) 
+            throws IOException 
     {
-	int result = bio.readBits(dis, bits);
-	if (TRACE) {
-	    System.out.println(name + ":  \"" + result + "\"");
-	}
-	return result;
+        int result = bio.readBits(dis, bits);
+        if (TRACE) {
+            System.out.println(name + ":  \"" + result + "\"");
+        }
+        return result;
     }
 
     private static long readBitsLong(String name, DataInputStream dis, 
-				     BitStreamIO bio, int bits) 
-	    throws IOException 
+                                     BitStreamIO bio, int bits) 
+            throws IOException 
     {
-	long result = bio.readBitsLong(dis, bits);
-	if (TRACE) {
-	    System.out.println(name + ":  \"" + result + "\"");
-	}
-	return result;
+        long result = bio.readBitsLong(dis, bits);
+        if (TRACE) {
+            System.out.println(name + ":  \"" + result + "\"");
+        }
+        return result;
     }
 
     // section 10.2.2.2 TerminalInfo - Syntax
     private static TerminalInfo readTerminalInfo(DataInputStream dis, 
-    						 BitStreamIO bio)
+                                                 BitStreamIO bio)
             throws IOException 
     {
         TerminalInfo ti = new TerminalInfo();
-	if (TRACE) {
-	    System.out.println("Terminal info:");
-	}
+        if (TRACE) {
+            System.out.println("Terminal info:");
+        }
         // skip "length" field which is 4 bytes
-	readInt("    length (ignored)", dis, bio);
+        readInt("    length (ignored)", dis, bio);
         // followed by length, we have default_font_file_name
         ti.setDefaultFontFile(readISO646String("    default font", dis, bio,5));
         // read initial_HAVi_configuration_id, menu_call_mask and 
-	// title_search_mask - which is 4 bits + 1 bit + 1 bit
-	int id = readBits("    HAVi config", dis, bio, 4);
+        // title_search_mask - which is 4 bits + 1 bit + 1 bit
+        int id = readBits("    HAVi config", dis, bio, 4);
         Enum[] values = HaviDeviceConfig.values();
         for (int i = 0; i < values.length; i++) {
             HaviDeviceConfig hdc = (HaviDeviceConfig)values[i];
@@ -279,38 +279,38 @@ public final class BDJOReader {
                 break;
             }
         }
-	boolean b = readBits("    menu call mask", dis, bio, 1) != 0;
+        boolean b = readBits("    menu call mask", dis, bio, 1) != 0;
         ti.setMenuCallMask(b);
-	b = readBits("    title search mask", dis, bio, 1) != 0;
+        b = readBits("    title search mask", dis, bio, 1) != 0;
         ti.setTitleSearchMask(b);
-	b = readBits("    mouse supported", dis, bio, 1) != 0;
+        b = readBits("    mouse supported", dis, bio, 1) != 0;
         ti.setMouseSupported(b);
-	b = readBits("    mouse interest", dis, bio, 1) != 0;
+        b = readBits("    mouse interest", dis, bio, 1) != 0;
         ti.setMouseInterest(b);
-	ti.setInitialOutputMode(readBits("    initial output mode", dis,bio,2));
-	ti.setInitialFrameRate(readBits("    initial frame rate", dis, bio, 4));
-	readBitsLong("    padding", dis, bio, 26);
+        ti.setInitialOutputMode(readBits("    initial output mode", dis,bio,2));
+        ti.setInitialFrameRate(readBits("    initial frame rate", dis, bio, 4));
+        readBitsLong("    padding", dis, bio, 26);
         
         return ti;
     }
     
     // section 10.2.3.2 AppCacheInfo - Syntax
     private static AppCacheInfo readAppCacheInfo(DataInputStream dis,
-    						 BitStreamIO bio)
+                                                 BitStreamIO bio)
             throws IOException 
     {
-	if (TRACE) {
-	    System.out.println("App cache info:");
-	}
+        if (TRACE) {
+            System.out.println("App cache info:");
+        }
         AppCacheInfo aci = new AppCacheInfo();
         // ignore "length" field which is 4 bytes
-	readInt("    length (ignored)", dis, bio);
+        readInt("    length (ignored)", dis, bio);
         // get "number_of_entries" field
         final int numEntries 
-	    = readUnsignedByte("    number of entries", dis, bio);
+            = readUnsignedByte("    number of entries", dis, bio);
         // followed by that we have "reserved_for_word_align" field
         // which is one byte
-	readByte("    padding", dis, bio);
+        readByte("    padding", dis, bio);
         
         AppCacheEntry[] entries = new AppCacheEntry[numEntries];
         /* each app cache entry is of size is 12 bytes */
@@ -323,10 +323,10 @@ public final class BDJOReader {
             ace.setName(readISO646String("        ref_to_name", dis, bio, 5));
             // language_code field
             ace.setLanguage(
-		readISO646String("        language_code", dis, bio, 3));
+                readISO646String("        language_code", dis, bio, 3));
             entries[e] = ace;
             // skip "reserved_for_future_use" field
-	    readBits("        padding", dis, bio, 8*3);
+            readBits("        padding", dis, bio, 8*3);
         }
         aci.setEntries(entries);
         return aci;
@@ -334,65 +334,65 @@ public final class BDJOReader {
     
     // section 10.2.4.2 TableOfAccessiblePlayLists - Syntax
     private static TableOfAccessiblePlayLists 
-	readTableOfAccessiblePlayLists(DataInputStream dis, BitStreamIO bio) 
-	    throws IOException 
+        readTableOfAccessiblePlayLists(DataInputStream dis, BitStreamIO bio) 
+            throws IOException 
     {
-	if (TRACE) {
-	    System.out.println("Table of accessible playlists:");
-	}
+        if (TRACE) {
+            System.out.println("Table of accessible playlists:");
+        }
         // ignore "length" field which is 4 bytes
-	readInt("    length (ignored)", dis, bio);
+        readInt("    length (ignored)", dis, bio);
         // read "number_of_acc_Playlists", "access_to_all_flag" and
         // "autostart_first_PlayList_flag" fields.
         // -- which are 11 bits + 1 bit + 1 bit respectively
-	final int numPlayLists = readBits("    num playlists", dis, bio, 11);
+        final int numPlayLists = readBits("    num playlists", dis, bio, 11);
         TableOfAccessiblePlayLists tapl = new TableOfAccessiblePlayLists();
-	boolean b = readBits("    access to all flag", dis, bio, 1) != 0;
+        boolean b = readBits("    access to all flag", dis, bio, 1) != 0;
         tapl.setAccessToAllFlag(b);
-	b = readBits("    autostart first playlist", dis, bio, 1) != 0;
+        b = readBits("    autostart first playlist", dis, bio, 1) != 0;
         tapl.setAutostartFirstPlayListFlag(b);
-	readBits("    padding", dis, bio, 19);
+        readBits("    padding", dis, bio, 19);
 
         String[] playLists = new String[numPlayLists];
         for (int p = 0; p < playLists.length; p++) {
             // read PlayList_file_name field
             playLists[p] = readISO646String("        playlist file name", 
-	    				    dis, bio, 5);
+                                            dis, bio, 5);
             // skip reserved_for_word_align field
-	    readByte("        padding", dis, bio);
+            readByte("        padding", dis, bio);
         }
         tapl.setPlayListFileNames(playLists);
         return tapl;
     }
     
     private static ApplicationManagementTable 
-	readApplicationManagementTable(DataInputStream dis, BitStreamIO bio) 
-	    throws IOException 
+        readApplicationManagementTable(DataInputStream dis, BitStreamIO bio) 
+            throws IOException 
     {
-	if (TRACE) {
-	    System.out.println("Application management table:");
-	}
+        if (TRACE) {
+            System.out.println("Application management table:");
+        }
         // ignore "length" field which is 4 bytes
-	readInt("    length (ignored)", dis, bio);
+        readInt("    length (ignored)", dis, bio);
         // get "number_of_applications" field
         int numApps = readUnsignedByte("    number of applications", dis, bio);
         // skip reserved_for_word_align field
-	readByte("    padding", dis, bio);
+        readByte("    padding", dis, bio);
         
         AppInfo[] apps = new AppInfo[numApps];
         for (int a = 0; a < numApps; a++) {
-	    if (TRACE) {
-		System.out.println("    " + a + ":");
-	    }
+            if (TRACE) {
+                System.out.println("    " + a + ":");
+            }
             AppInfo ai = new AppInfo();
             // get application_control_code field
             ai.setControlCode(
-		readByte("        application control code", dis, bio));
+                readByte("        application control code", dis, bio));
             
             // application_type is 4 bits, followed by
             // 4 bit alignment field
-	    ai.setType((byte)readBits("        application type", dis, bio, 4));
-	    readBits("        padding", dis, bio, 4);
+            ai.setType((byte)readBits("        application type", dis, bio, 4));
+            readBits("        padding", dis, bio, 4);
             
             ai.setOrganizationId(readInt("        org id", dis, bio));
             ai.setApplicationId(readShort("        app id", dis, bio));
@@ -403,38 +403,38 @@ public final class BDJOReader {
             // - reserved_word_align (1 byte)
             // - descriptor_length (4 bytes)
             // - reserved_for_future_use (4 bytes)
-	    readByte("        descriptor_tag (ignored)", dis, bio);
-	    readByte("        padding", dis, bio);
-	    readInt("        descriptor_length (ignored)", dis, bio);
-	    readInt("        padding", dis, bio);
+            readByte("        descriptor_tag (ignored)", dis, bio);
+            readByte("        padding", dis, bio);
+            readInt("        descriptor_length (ignored)", dis, bio);
+            readInt("        padding", dis, bio);
                     
             // Application_profiles_count is 4 bit field
             final int appProfileCount
-		= readBits("        application profiles count", dis, bio, 4);
-	    readBits("        padding", dis, bio, 12);
+                = readBits("        application profiles count", dis, bio, 4);
+            readBits("        padding", dis, bio, 12);
             
             AppProfile[] profiles = new AppProfile[appProfileCount];
             for (int p = 0; p < appProfileCount; p++) {
-		if (TRACE) {
-		    System.out.println("        " + p + ":");
-		}
+                if (TRACE) {
+                    System.out.println("        " + p + ":");
+                }
                 AppProfile ap = new AppProfile();
                 ap.setProfile(readShort("            profile", dis, bio));
                 ap.setMajorVersion((short)
-		    readUnsignedByte("            major version", dis, bio));
+                    readUnsignedByte("            major version", dis, bio));
                 ap.setMinorVersion((short)
-		    readUnsignedByte("            minor version", dis, bio));
+                    readUnsignedByte("            minor version", dis, bio));
                 ap.setMicroVersion((short)
-		    readUnsignedByte("            micro version", dis, bio));
+                    readUnsignedByte("            micro version", dis, bio));
                 // skip "reserved_for_word_align" field
-		readUnsignedByte("            padding", dis, bio);
+                readUnsignedByte("            padding", dis, bio);
                 profiles[p] = ap;
             }
             ApplicationDescriptor appDesc = new ApplicationDescriptor();
             appDesc.setProfiles(profiles);
             // get "application_priority" field
             appDesc.setPriority((short)
-	    	readUnsignedByte("        application priority", dis, bio));
+                readUnsignedByte("        application priority", dis, bio));
             
             // get "application_binding", "Visibility" fields
             // each 2 bits in size and also the "reserved_for_word_align"
@@ -456,44 +456,44 @@ public final class BDJOReader {
                     break;
                 }
             }
-	    readBits("        padding", dis, bio, 4);
+            readBits("        padding", dis, bio, 4);
             
             // read "number_of_application_name_bytes" field
             int totalNameBytes 
-		= readUnsignedShort("        application name bytes", dis, bio);
+                = readUnsignedShort("        application name bytes", dis, bio);
             if (totalNameBytes > 0) {
                 int nameBytesRead = 0;
                 List<AppName> appNames = new ArrayList<AppName>();
                 while (nameBytesRead < totalNameBytes) {
                     AppName an = new AppName();
                     an.setLanguage(readISO646String(
-		    	"            language", dis, bio, 3));
+                        "            language", dis, bio, 3));
                     nameBytesRead += 3;
                     int nameLen = readUnsignedByte("            name length",
-		    				   dis, bio);
+                                                   dis, bio);
                     nameBytesRead++;
                     an.setName(readUTF8String("            name", dis, bio,
-		    			      nameLen));
+                                              nameLen));
                     nameBytesRead += nameLen;
                     appNames.add(an);
                 }
                 AppName[] appNamesArr 
-		    = appNames.toArray(new AppName[appNames.size()]);
+                    = appNames.toArray(new AppName[appNames.size()]);
                 appDesc.setNames(appNamesArr);
             }
                 
             // The field next to the alignment for-loop has to start at 16-bit 
-	    // word bounday. The current field (in this case "names" is at 
-	    // 16-bit boundary. So, if the "length" value is odd, then we have 
-	    // 2 bytes length field + odd number of bytes for the name(s) => we 
-	    // need to skip one more byte to make it even again.
+            // word bounday. The current field (in this case "names" is at 
+            // 16-bit boundary. So, if the "length" value is odd, then we have 
+            // 2 bytes length field + odd number of bytes for the name(s) => we 
+            // need to skip one more byte to make it even again.
             if ((totalNameBytes & 0x1) != 0) {
                 readByte("        padding", dis, bio);
             }
             
             int iconLength = readUnsignedByte("        icon length", dis, bio);
             appDesc.setIconLocator(readISO646String("        icon locator",
-	    					    dis, bio, iconLength));
+                                                    dis, bio, iconLength));
             
             // length is 1 byte field. If length value is even, then we
             // have 1 byte for length + even bytes for string => we need
@@ -504,44 +504,44 @@ public final class BDJOReader {
             
             // read "application_icon_flags" field
             appDesc.setIconFlags(readShort("        application icon flags",
-	    				   dis, bio));
+                                           dis, bio));
            
             int baseDirLength = readUnsignedByte("        base dir length",
-	    					 dis, bio);
+                                                 dis, bio);
             appDesc.setBaseDirectory(readISO646String("        base directory",
-	    					      dis, bio, baseDirLength));
+                                                      dis, bio, baseDirLength));
             // there is another for-loop here for word align!!
             if ((baseDirLength & 0x1) == 0) {
                 dis.skipBytes(1);
             }
             int classPathLength = dis.readUnsignedByte();
             appDesc.setClasspathExtension(
-		readISO646String("        classpath extenstion", 
-				 dis, bio, classPathLength));
+                readISO646String("        classpath extenstion", 
+                                 dis, bio, classPathLength));
             // there is another for-loop here for word align!!
             if ((classPathLength & 0x1) == 0) {
                 readByte("        padding", dis, bio);
             }
             int initClassLength 
-		= readUnsignedByte("        initial class length", dis, bio);
+                = readUnsignedByte("        initial class length", dis, bio);
             appDesc.setInitialClassName(
-		readUTF8String("        initial class", dis, bio, 
-			       initClassLength));
+                readUTF8String("        initial class", dis, bio, 
+                               initClassLength));
             // there is another for-loop here for word align!!
             if ((initClassLength & 0x1) == 0) {
                 readByte("        padding", dis, bio);
             }
 
             int totalParamBytes = readUnsignedByte("        param bytes",
-	    					   dis, bio);
+                                                   dis, bio);
             if (totalParamBytes > 0) {
                 int paramBytesRead = 0;
                 List<String> params = new ArrayList<String>();
                 while (paramBytesRead < totalParamBytes) {
                     int paramLen = readUnsignedByte("            len",dis,bio);
                     paramBytesRead++;
-		    params.add(readUTF8String("            param", 
-		    			      dis, bio, paramLen));
+                    params.add(readUTF8String("            param", 
+                                              dis, bio, paramLen));
                     paramBytesRead += paramLen;
                }
                 String[] paramsArr = params.toArray(new String[params.size()]);
@@ -569,7 +569,7 @@ public final class BDJOReader {
         } else {
             dis = new DataInputStream(in);
         }
-	BitStreamIO bio = new BitStreamIO();
+        BitStreamIO bio = new BitStreamIO();
         
         String magic = readISO646String("magic number", dis, bio, 4);
         if (!magic.equals("BDJO")) {
@@ -579,30 +579,30 @@ public final class BDJOReader {
         BDJO bdjo = new BDJO();
         bdjo.setVersion(Version.valueOf("V_" + version));
 
-	readInt("terminal info start address (ignored)", dis, bio);
-	readInt("app cache info start address (ignored)", dis, bio);
-	readInt("table of accessible playlists start address (ignored)", 
-		dis, bio);
-	readInt("application management table start address (ignored)",
-		dis, bio);
-	readInt("key interest table start address (ignored)", dis, bio);
-	readInt("file access info start address (ignored)", dis, bio);
+        readInt("terminal info start address (ignored)", dis, bio);
+        readInt("app cache info start address (ignored)", dis, bio);
+        readInt("table of accessible playlists start address (ignored)", 
+                dis, bio);
+        readInt("application management table start address (ignored)",
+                dis, bio);
+        readInt("key interest table start address (ignored)", dis, bio);
+        readInt("file access info start address (ignored)", dis, bio);
         
         // reserved_for_future_use 128 bits
-	readBitsLong("padding", dis, bio, 64);
-	readBitsLong("padding", dis, bio, 64);
+        readBitsLong("padding", dis, bio, 64);
+        readBitsLong("padding", dis, bio, 64);
         
         bdjo.setTerminalInfo(readTerminalInfo(dis, bio));
         bdjo.setAppCacheInfo(readAppCacheInfo(dis, bio));
         bdjo.setTableOfAccessiblePlayLists(
-		readTableOfAccessiblePlayLists(dis, bio));
+                readTableOfAccessiblePlayLists(dis, bio));
         bdjo.setApplicationManagementTable(
-		readApplicationManagementTable(dis, bio));
+                readApplicationManagementTable(dis, bio));
         bdjo.setKeyInterestTable(readInt("key interest table", dis, bio));
         int dirPathsLength = readUnsignedShort("file access info length",
-					       dis, bio);
+                                               dis, bio);
         bdjo.setFileAccessInfo(readISO646String("file access info", dis, 
-					        bio, dirPathsLength));
+                                                bio, dirPathsLength));
         
         return bdjo;
     }

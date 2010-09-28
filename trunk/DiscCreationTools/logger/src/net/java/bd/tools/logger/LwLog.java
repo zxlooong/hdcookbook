@@ -128,12 +128,12 @@ public class LwLog extends Component {
     }
 
     public synchronized void paint(Graphics g) {
-	if (followEnd) {
-	    firstDisplayedItem = data.size() - numberOfLinesDisplayed;
-	    if (firstDisplayedItem < 0) {
-		firstDisplayedItem = 0;
-	    }
-	}
+        if (followEnd) {
+            firstDisplayedItem = data.size() - numberOfLinesDisplayed;
+            if (firstDisplayedItem < 0) {
+                firstDisplayedItem = 0;
+            }
+        }
         maxRecordLength = 0;
         FontMetrics fm = g.getFontMetrics(Screen.getDefaultFont());
 
@@ -181,7 +181,7 @@ public class LwLog extends Component {
      */
     public synchronized void moveUp() {
         if (firstDisplayedItem > 0) {
-	    followEnd = false;
+            followEnd = false;
             firstDisplayedItem--;
             repaint();
         }
@@ -194,8 +194,8 @@ public class LwLog extends Component {
     public synchronized void moveDown() {
         if (firstDisplayedItem < data.size() - numberOfLinesDisplayed) {
             firstDisplayedItem++;
-	    followEnd = firstDisplayedItem 
-			    >= data.size() - numberOfLinesDisplayed;
+            followEnd = firstDisplayedItem 
+                            >= data.size() - numberOfLinesDisplayed;
             repaint();
         }
     }
@@ -206,7 +206,7 @@ public class LwLog extends Component {
      */
     public synchronized void movePageUp() {
         if (firstDisplayedItem > 0) {
-	    followEnd = false;
+            followEnd = false;
             firstDisplayedItem -= numberOfLinesDisplayed;
             if (firstDisplayedItem < 0) {
                 firstDisplayedItem = 0;
@@ -224,8 +224,8 @@ public class LwLog extends Component {
             firstDisplayedItem = Math.min(
                     data.size() - numberOfLinesDisplayed,
                     firstDisplayedItem + numberOfLinesDisplayed);
-	    followEnd = firstDisplayedItem 
-			    >= data.size() - numberOfLinesDisplayed;
+            followEnd = firstDisplayedItem 
+                            >= data.size() - numberOfLinesDisplayed;
 
             repaint();
         }

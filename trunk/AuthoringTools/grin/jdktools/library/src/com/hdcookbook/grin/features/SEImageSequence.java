@@ -69,7 +69,7 @@ import java.awt.Dimension;
 import java.io.IOException;
 
 public class SEImageSequence extends ImageSequence 
-			     implements SENode, SEScalableNode 
+                             implements SENode, SEScalableNode 
 {
     private SEImageSeqPlacement sePlacement;
 
@@ -78,27 +78,27 @@ public class SEImageSequence extends ImageSequence
     }
     
     public SEImageSequence(SEShow show, String name, 
-    			   SEImageSeqPlacement sePlacement, String fileName,
-    			   String[] middle, String extension, boolean repeat,
-			   int loopCount, Command[] endCommands) 
-    		throws IOException {
-	super(show);
+                           SEImageSeqPlacement sePlacement, String fileName,
+                           String[] middle, String extension, boolean repeat,
+                           int loopCount, Command[] endCommands) 
+                throws IOException {
+        super(show);
         this.name = name;
-	this.sePlacement = sePlacement;
-	this.repeat = repeat;
-	this.model = null;
-	this.loopCount = loopCount;
-	this.endCommands = endCommands;
+        this.sePlacement = sePlacement;
+        this.repeat = repeat;
+        this.model = null;
+        this.loopCount = loopCount;
+        this.endCommands = endCommands;
         
         fileNames = new String[middle.length];
         for (int i = 0; i < middle.length; i++) {
-	    if (middle[i] == null) {
-		fileNames[i] = null;
-	    } else {
-		fileNames[i] = (fileName + middle[i] + extension).intern();
-	    }
-	}
-	this.placements = sePlacement.getImageSeqPlacementRects(fileNames);
+            if (middle[i] == null) {
+                fileNames[i] = null;
+            } else {
+                fileNames[i] = (fileName + middle[i] + extension).intern();
+            }
+        }
+        this.placements = sePlacement.getImageSeqPlacementRects(fileNames);
     }
     
     public SEImageSeqPlacement getPlacement() {
@@ -106,16 +106,16 @@ public class SEImageSequence extends ImageSequence
     }
 
     public Dimension[] getImageSizes() {
-	Dimension[] result = new Dimension[placements.length];
-	for (int i = 0; i < result.length; i++) {
-	    Rectangle r = placements[i];
+        Dimension[] result = new Dimension[placements.length];
+        for (int i = 0; i < result.length; i++) {
+            Rectangle r = placements[i];
         if (r == null) {
            result[i] = null;
         } else {
-	       result[i] = new Dimension(r.width, r.height);
+               result[i] = new Dimension(r.width, r.height);
         }
-	}
-	return result;
+        }
+        return result;
     }
 
     public boolean getRepeat() {
@@ -135,7 +135,7 @@ public class SEImageSequence extends ImageSequence
     }
 
     public int getLoopCount() {
-	return loopCount;
+        return loopCount;
     }
 
     public void setRepeat(boolean repeat) {
@@ -165,7 +165,7 @@ public class SEImageSequence extends ImageSequence
     }
 
     public void setPlacements(Rectangle[] placements) {
-	this.placements = placements;
+        this.placements = placements;
     }
 
     public InterpolatedModel getScalingModel() {
@@ -216,24 +216,24 @@ public class SEImageSequence extends ImageSequence
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	Rectangle[] p = placements;
-	placements = new Rectangle[p.length];
-	for (int i = 0; i < placements.length; i++) {
-	    placements[i] = new Rectangle(xOffset + Show.scale(p[i].x, xScale),
-				          yOffset + Show.scale(p[i].y, yScale),
-				          Show.scale(p[i].width, xScale),
-				          Show.scale(p[i].height, yScale));
-	}
+        Rectangle[] p = placements;
+        placements = new Rectangle[p.length];
+        for (int i = 0; i < placements.length; i++) {
+            placements[i] = new Rectangle(xOffset + Show.scale(p[i].x, xScale),
+                                          yOffset + Show.scale(p[i].y, yScale),
+                                          Show.scale(p[i].width, xScale),
+                                          Show.scale(p[i].height, yScale));
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "image_sequence @" + Integer.toHexString(hashCode());
-	} else {
-	    return "image_sequence " + name;
-	}
+        if (name == null) {
+            return "image_sequence @" + Integer.toHexString(hashCode());
+        } else {
+            return "image_sequence " + name;
+        }
     }
 }

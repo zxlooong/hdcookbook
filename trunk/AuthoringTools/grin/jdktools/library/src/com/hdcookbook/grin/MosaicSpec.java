@@ -92,7 +92,7 @@ public class MosaicSpec {
     public String[] imagesToSkip = null;
 
     /**
-     * @param name	The file name to put the mosaic in
+     * @param name      The file name to put the mosaic in
      **/
     public MosaicSpec(String name) {
         this.name = name;

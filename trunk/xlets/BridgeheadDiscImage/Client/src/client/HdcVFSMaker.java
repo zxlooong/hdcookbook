@@ -78,7 +78,7 @@ import java.util.ArrayList;
 public class HdcVFSMaker {
 
     public static void sendHdcVFSImage(File baseDir, DataOutputStream out) 
-	    throws IOException
+            throws IOException
     {
         
         if (!baseDir.exists()) {
@@ -86,90 +86,90 @@ public class HdcVFSMaker {
             return;
         }
 
-	ArrayList<String> files = new ArrayList<String>();
-	ArrayList<Integer> lengths = new ArrayList<Integer>();
-	addFiles(baseDir, "", files, lengths);
+        ArrayList<String> files = new ArrayList<String>();
+        ArrayList<Integer> lengths = new ArrayList<Integer>();
+        addFiles(baseDir, "", files, lengths);
 
-	int totalLength = 0;
-	for (int len : lengths) {
-	    totalLength += len;
-	}
-	System.out.println("Writing " + files.size() + " files, " 
-			   + totalLength + " bytes.");
-	out.writeInt(files.size());
-	out.writeInt(totalLength);
+        int totalLength = 0;
+        for (int len : lengths) {
+            totalLength += len;
+        }
+        System.out.println("Writing " + files.size() + " files, " 
+                           + totalLength + " bytes.");
+        out.writeInt(files.size());
+        out.writeInt(totalLength);
 
-	byte[] buffer = new byte[4096];
-	System.out.print("    Wrote file");
-	for (int i = 0; i < files.size(); i++) {
-	    out.writeUTF(files.get(i));
-	    int remaining = lengths.get(i);
-	    out.writeInt(remaining);
-	    File f = new File(baseDir, files.get(i));
-	    DataInputStream in = new DataInputStream(new FileInputStream(f));
-	    while (remaining > 0) {
-		int len = remaining;
-		if (len > buffer.length) {
-		    len = buffer.length;
-		}
-		in.readFully(buffer, 0, len);
-		out.write(buffer, 0, len);
-		remaining -= len;
-	    }
-	    in.close();
-	    System.out.print(" " + (i+1));
-	    System.out.flush();
-	}
-	System.out.println();
+        byte[] buffer = new byte[4096];
+        System.out.print("    Wrote file");
+        for (int i = 0; i < files.size(); i++) {
+            out.writeUTF(files.get(i));
+            int remaining = lengths.get(i);
+            out.writeInt(remaining);
+            File f = new File(baseDir, files.get(i));
+            DataInputStream in = new DataInputStream(new FileInputStream(f));
+            while (remaining > 0) {
+                int len = remaining;
+                if (len > buffer.length) {
+                    len = buffer.length;
+                }
+                in.readFully(buffer, 0, len);
+                out.write(buffer, 0, len);
+                remaining -= len;
+            }
+            in.close();
+            System.out.print(" " + (i+1));
+            System.out.flush();
+        }
+        System.out.println();
     }
 
     private static void addFiles(File baseDir, String path, 
-    				 ArrayList<String> files, 
-				 ArrayList<Integer> lengths) 
-	    throws IOException 
+                                 ArrayList<String> files, 
+                                 ArrayList<Integer> lengths) 
+            throws IOException 
     {
-	File dir = new File(baseDir, path);
-	File[] ourFiles = dir.listFiles();
-	String sep = "";
-	if (path.length() > 0) {
-	    sep = "/";
-		// I do mean "/", and not File.separatorChar.  This needs
-		// to be the seperator char on the player, not on the local
-		// PC, and anyway, "/" works on Windows, Linux and Mac.
-	}
-	for (File  f : ourFiles) {
-	    if (f.isDirectory()) {
-		addFiles(baseDir, path + sep + f.getName(), files, lengths);
-	    } else {
-		long len = f.length();
-		if (len > Integer.MAX_VALUE) {
-		    throw new IOException("File " + f.getAbsolutePath() 
-		    		+ "'s length of " + len + " is too long");
-		}
-		String name = path + sep + f.getName();
-		System.out.println("    Adding " + name + ", length " + len);
-		files.add(name);
-		lengths.add((int) len);
-	    }
-	}
+        File dir = new File(baseDir, path);
+        File[] ourFiles = dir.listFiles();
+        String sep = "";
+        if (path.length() > 0) {
+            sep = "/";
+                // I do mean "/", and not File.separatorChar.  This needs
+                // to be the seperator char on the player, not on the local
+                // PC, and anyway, "/" works on Windows, Linux and Mac.
+        }
+        for (File  f : ourFiles) {
+            if (f.isDirectory()) {
+                addFiles(baseDir, path + sep + f.getName(), files, lengths);
+            } else {
+                long len = f.length();
+                if (len > Integer.MAX_VALUE) {
+                    throw new IOException("File " + f.getAbsolutePath() 
+                                + "'s length of " + len + " is too long");
+                }
+                String name = path + sep + f.getName();
+                System.out.println("    Adding " + name + ", length " + len);
+                files.add(name);
+                lengths.add((int) len);
+            }
+        }
     }
 
     public static void makeHdcVFSFile(String baseDirS, String destS) {
-	File baseDir = new File(baseDirS);
-	File dest = new File(destS);
-	System.out.println("Creating " + dest + " from directory " + baseDir);
-	try {
-	    DataOutputStream out 
-		= new DataOutputStream(
-		    new BufferedOutputStream(
-			new FileOutputStream(dest)));
-	    sendHdcVFSImage(baseDir, out);
-	    out.flush();
-	    out.close();
-	    System.out.println("Wrote all files to " + dest);
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.exit(1);
-	}
+        File baseDir = new File(baseDirS);
+        File dest = new File(destS);
+        System.out.println("Creating " + dest + " from directory " + baseDir);
+        try {
+            DataOutputStream out 
+                = new DataOutputStream(
+                    new BufferedOutputStream(
+                        new FileOutputStream(dest)));
+            sendHdcVFSImage(baseDir, out);
+            out.flush();
+            out.close();
+            System.out.println("Wrote all files to " + dest);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
     }
 }

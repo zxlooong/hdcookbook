@@ -76,7 +76,7 @@ public abstract class Modifier extends Feature {
     protected boolean activated = false;
 
     public Modifier(Show show, String name) {
-	super(show);
+        super(show);
         this.name = name;
     }
     
@@ -88,39 +88,39 @@ public abstract class Modifier extends Feature {
      * {@inheritDoc}
      **/
     public void addSubgraph(HashSet set) {
-	if (set.contains(this)) {
-	    return;
-	}
-	super.addSubgraph(set);
-	part.addSubgraph(set);
+        if (set.contains(this)) {
+            return;
+        }
+        super.addSubgraph(set);
+        part.addSubgraph(set);
     }
 
     /**
      * Called from the parser.
      **/
     public void setup(Feature part) { 
-	this.part = part;
+        this.part = part;
     }
 
     /**
      * Get our child feature
      **/
     public Feature getPart() {
-	return part;
+        return part;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getX() {
-	return part.getX();
+        return part.getX();
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getY() {
-	return part.getY();
+        return part.getY();
     }
 
 
@@ -130,8 +130,8 @@ public abstract class Modifier extends Feature {
      * the segments.
      **/
     public void initialize() {
-	// The show will initialize our sub-feature, so we don't
-	// need to do anything here.
+        // The show will initialize our sub-feature, so we don't
+        // need to do anything here.
     }
 
     /**
@@ -145,23 +145,23 @@ public abstract class Modifier extends Feature {
      * too!).
      **/
     public void destroy() {
-	// The show will destroy our sub-feature, so we don't
-	// need to do anything here.
+        // The show will destroy our sub-feature, so we don't
+        // need to do anything here.
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
-	// This is synchronized to only occur within model updates.
-	activated = mode;
-	if (mode) {
-	    part.activate();
-	    setChildChanged();
-	} else {
-	    part.deactivate();
-	    setChildChanged();
-	}
+        // This is synchronized to only occur within model updates.
+        activated = mode;
+        if (mode) {
+            part.activate();
+            setChildChanged();
+        } else {
+            part.deactivate();
+            setChildChanged();
+        }
     }
 
     /**
@@ -172,48 +172,48 @@ public abstract class Modifier extends Feature {
      * @see com.hdcookbook.grin.Feature#markDisplayAreasChanged()
      **/
     protected void setChildChanged() {
-	// When we're deactivated, our child might not be, and we might modify
-	// the child.  Further, when we're activated, our child might already
-	// have been.  See also
-	// https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=121
-	//
-	part.markDisplayAreasChanged();
+        // When we're deactivated, our child might not be, and we might modify
+        // the child.  Further, when we're activated, our child might already
+        // have been.  See also
+        // https://hdcookbook.dev.java.net/issues/show_bug.cgi?id=121
+        //
+        part.markDisplayAreasChanged();
     }
 
     /**
      * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
-	if (mode) {
-	    return part.setup();
-	} else {
-	    part.unsetup();
-	    return 0;
-	}
+        if (mode) {
+            return part.setup();
+        } else {
+            part.unsetup();
+            return 0;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	if (part.needsMoreSetup()) {
-	    return true;
-	}
-	return false;
+        if (part.needsMoreSetup()) {
+            return true;
+        }
+        return false;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D g) {
-	part.paintFrame(g);
+        part.paintFrame(g);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
-	part.markDisplayAreasChanged();
+        part.markDisplayAreasChanged();
     }
 
     /**
@@ -224,13 +224,13 @@ public abstract class Modifier extends Feature {
      * in this class simply calls this method on the modified part.
      **/
     public void addDisplayAreas(RenderContext context) {
-	part.addDisplayAreas(context);
+        part.addDisplayAreas(context);
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	part.nextFrame();
+        part.nextFrame();
     }
 }

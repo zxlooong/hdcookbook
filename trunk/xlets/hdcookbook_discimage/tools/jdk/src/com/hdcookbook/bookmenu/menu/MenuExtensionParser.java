@@ -74,8 +74,8 @@ public class MenuExtensionParser implements ExtensionParser {
 
     public Modifier getModifier(Show show, String typeName, final String name, Lexer lexer) 
             throws IOException {
-	    String arg = lexer.getString();
-	    lexer.parseExpected(";");        
+            String arg = lexer.getString();
+            lexer.parseExpected(";");        
             
         Modifier mod = null;
         if ("BOOK:bio_image".equals(typeName)) {

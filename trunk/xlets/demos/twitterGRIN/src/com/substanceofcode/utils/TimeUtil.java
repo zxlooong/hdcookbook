@@ -72,7 +72,7 @@ public class TimeUtil {
             }
         } else {
             return String.valueOf(seconds) + " secs";
-		}
+                }
     }    
     
 }

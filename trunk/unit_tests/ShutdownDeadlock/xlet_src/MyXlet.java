@@ -57,17 +57,17 @@ public class MyXlet extends GrinXlet {
 
 
     public AnimationClient[] getAnimationClients() {
-	Debug.assertFail();
-	return null;
+        Debug.assertFail();
+        return null;
     }
 
     public void resetAnimationClients(AnimationClient[] clients) {
-	Debug.assertFail();
+        Debug.assertFail();
     }
 
     public void initXlet(XletContext context) {
-	DebugLog.startDebugListener();
-	super.initXlet(context);
+        DebugLog.startDebugListener();
+        super.initXlet(context);
     }
 
     protected void doInitXlet(String[] args)  {
@@ -77,58 +77,58 @@ public class MyXlet extends GrinXlet {
         showFileName = args[0];
         showInitialSegment = args[1];
         showDirectorName = args[2];
-	// args[3] is about definesFonts, which we ignore
+        // args[3] is about definesFonts, which we ignore
         String root = System.getProperty("bluray.vfs.root") + "/";
         resourcesDir = new File(root + args[4]);
-	AssetFinder.setHelper(new AssetFinder() {
-	    // Set up AssetFinder so we use DVBBufferedImage.
-	    // See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
+        AssetFinder.setHelper(new AssetFinder() {
+            // Set up AssetFinder so we use DVBBufferedImage.
+            // See http://wiki.java.net/bin/view/Mobileandembedded/BDJImageMemoryManagement
 
-	    protected Image createCompatibleImageBufferHelper(Component c, int width, int height) {
-		return new DVBBufferedImage(width, height);
-	    }
+            protected Image createCompatibleImageBufferHelper(Component c, int width, int height) {
+                return new DVBBufferedImage(width, height);
+            }
 
-	    protected Graphics2D createGraphicsFromImageBufferHelper(Image buffer) {
-		Object g = ((DVBBufferedImage) buffer).createGraphics();
-		return (Graphics2D) g;
-	    }
+            protected Graphics2D createGraphicsFromImageBufferHelper(Image buffer) {
+                Object g = ((DVBBufferedImage) buffer).createGraphics();
+                return (Graphics2D) g;
+            }
 
-	    protected void destroyImageBufferHelper(Image buffer) {
-		((DVBBufferedImage) buffer).dispose();
-	    }
-	});
+            protected void destroyImageBufferHelper(Image buffer) {
+                ((DVBBufferedImage) buffer).dispose();
+            }
+        });
 
-	AssetFinder.setSearchPath(null, new File[]{resourcesDir});
+        AssetFinder.setSearchPath(null, new File[]{resourcesDir});
 
-	rootContainer = getRootContainer();
-	pilot = new ShutdownDeadlock(this, 
-				     (Graphics2D) rootContainer.getGraphics());
+        rootContainer = getRootContainer();
+        pilot = new ShutdownDeadlock(this, 
+                                     (Graphics2D) rootContainer.getGraphics());
 
     }
 
     public void startXlet() {
-	rootContainer.setVisible(true);
-	if (started) {
-	    return;
-	}
-	started = true;
-	pilot.start();
+        rootContainer.setVisible(true);
+        if (started) {
+            return;
+        }
+        started = true;
+        pilot.start();
     }
 
     public void pauseXlet() {
-	// We don't implement pausing
+        // We don't implement pausing
     }
 
     public void destroyXlet(boolean unconditional) {
-	rootContainer = null;
+        rootContainer = null;
         if (Debug.LEVEL > 0) {
             Debug.println("Destroying animation engine...");
         }
-	try {
-	    pilot.stop();
-	} catch (InterruptedException ex) {
-	    Thread.currentThread().interrupt();
-	}
+        try {
+            pilot.stop();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
         if (Debug.LEVEL > 0) {
             Debug.println("destroyXlet() completes successfully.");
             Debug.println();
@@ -138,16 +138,16 @@ public class MyXlet extends GrinXlet {
         }
         xletContext = null;
 
-	DebugLog.shutdownDebugListener();
+        DebugLog.shutdownDebugListener();
     }
 
     public void startShow() {
-	director = new MyDirector();
-	DirectDrawEngine dde = new DirectDrawEngine();
-	dde.setFps(24000);
-	animationEngine = dde;
-	animationEngine.initialize(this);
-	animationEngine.start();
+        director = new MyDirector();
+        DirectDrawEngine dde = new DirectDrawEngine();
+        dde.setFps(24000);
+        animationEngine = dde;
+        animationEngine.initialize(this);
+        animationEngine.start();
     }
 
     public long getElapsedTime() throws InterruptedException {
@@ -165,13 +165,13 @@ public class MyXlet extends GrinXlet {
 
     public void animationInitialize() throws InterruptedException {
         try {
-	    BufferedInputStream bis = new BufferedInputStream(
-			    AssetFinder.getURL(showFileName).openStream());
+            BufferedInputStream bis = new BufferedInputStream(
+                            AssetFinder.getURL(showFileName).openStream());
             GrinBinaryReader reader = new GrinBinaryReader(bis);
             show = new Show(director);
             reader.readShow(show);
-	    bis.close();
-		// @@@@  Do this for the real GrinXlet!
+            bis.close();
+                // @@@@  Do this for the real GrinXlet!
         } catch (IOException e) {
             if (Debug.LEVEL > 0) {
                 Debug.printStackTrace(e);
@@ -183,16 +183,16 @@ public class MyXlet extends GrinXlet {
         animationEngine.checkDestroy();
         animationEngine.initClients(new AnimationClient[]{show});
         animationEngine.initContainer(rootContainer,
-		    new Rectangle(0, 0, 1080, 1080));
-	     // Note that the width is only 1080, not 1920.  This gives
-	     // us space for progress and debug messages in the rightmost
-	     // 840 pixels of the screen.
+                    new Rectangle(0, 0, 1080, 1080));
+             // Note that the width is only 1080, not 1920.  This gives
+             // us space for progress and debug messages in the rightmost
+             // 840 pixels of the screen.
     }
 
 
 
     public void animationFinishInitialization() {
-	director.initialize();
+        director.initialize();
         show.activateSegment(show.getSegment(showInitialSegment));
     }
 

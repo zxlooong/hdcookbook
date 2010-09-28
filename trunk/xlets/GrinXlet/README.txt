@@ -10,12 +10,12 @@ This directory holds the source code and build for a generic grin xlet.
 There are two versions of the grin xlet:
 
     debug:  The xlet includes a pop-up menu that can be used to access
-    	    various debug features, such as a debug log, a feature
-	    to disable KEY_RELEASE events, etc.
-	    
+            various debug features, such as a debug log, a feature
+            to disable KEY_RELEASE events, etc.
+            
     deploy: The xlet turns off all debug features, including the GRIN
             runtime debug output and assertions that are controlled by
-	    com.hdcookbook.grin.util.Debug.
+            com.hdcookbook.grin.util.Debug.
 
 In addition, GrinView contains a stripped-down version of GrinXlet.
 Because of this, you can call the public GrinXlet APIs from a Director,
@@ -37,12 +37,12 @@ The build system assumes that the grin xlet has three directories:
 
     se_src  Includes source code of anything needed on the desktop at
             compile  time, such as support files for app-specific extensions.
-	    This directory must exist, but it may be empty.
+            This directory must exist, but it may be empty.
 
     xlet_src  Includes the source code of anything needed in the xlet that
-    	    can't be present on SE, such as code that depends on javax.tv
-	    or org.bluray APIs.  This directory must exist, but it may be
-	    empty.
+            can't be present on SE, such as code that depends on javax.tv
+            or org.bluray APIs.  This directory must exist, but it may be
+            empty.
 
 The show file must have an exported segment (usually called "S:Initialize").
 The xlet will navigate to this segment when it is started.  If the

@@ -85,30 +85,30 @@ public class SEActivatePartCommand extends ActivatePartCommand implements SENode
      * Called from parser
      **/
     public void setup(Assembly assembly, Feature part) {
-	this.assembly = assembly;
-	this.part = part;
+        this.assembly = assembly;
+        this.part = part;
     }
 
     /**
      * Override of equals and hashCode to make canonicalization work
      **/
     public boolean equals(Object other) {
-	if (this == other) {
-	    return true;
-	} else if (!this.getClass().equals(other.getClass())) {
-	    return false;
-	}
-	SEActivatePartCommand o = (SEActivatePartCommand) other;
-	return this.show == o.show
-	       && this.assembly == o.assembly
-	       && this.part == o.part;
+        if (this == other) {
+            return true;
+        } else if (!this.getClass().equals(other.getClass())) {
+            return false;
+        }
+        SEActivatePartCommand o = (SEActivatePartCommand) other;
+        return this.show == o.show
+               && this.assembly == o.assembly
+               && this.part == o.part;
     }
 
     /**
      * Override of equals and hashCode to make canonicalization work
      **/
     public int hashCode() {
-	return show.hashCode() ^ assembly.hashCode() & part.hashCode();
+        return show.hashCode() ^ assembly.hashCode() & part.hashCode();
     }
     
     public void writeInstanceData(GrinDataOutputStream out) 
@@ -137,18 +137,18 @@ public class SEActivatePartCommand extends ActivatePartCommand implements SENode
      * {@inheritDoc}
      **/
     public void changeFeatureReference(Feature from, Feature to) {
-	if (assembly == from && to instanceof Assembly) {
-	    assembly = (Assembly) to;
-	}
-	if (part == from) {
-	    part = to;
-	}
+        if (assembly == from && to instanceof Assembly) {
+            assembly = (Assembly) to;
+        }
+        if (part == from) {
+            part = to;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	return "activate_part " + assembly + " " + part;
+        return "activate_part " + assembly + " " + part;
     }
 }

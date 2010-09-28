@@ -96,11 +96,11 @@ import java.util.Random;
 public class GrinBunnyDirector extends Director {
 
     private final static String PROFILE_IP_ADDRESS = null;
-    	// If you want to use the profiler,set this to the
-	// IP address on your LAN of the PC where you'll collect
-	// the profiling data.  You can use "127.0.0.1" to profile
-	// from GrinView on the same PC.
-	// cf. https://hdcookbook.dev.java.net/profiler.html
+        // If you want to use the profiler,set this to the
+        // IP address on your LAN of the PC where you'll collect
+        // the profiling data.  You can use "127.0.0.1" to profile
+        // from GrinView on the same PC.
+        // cf. https://hdcookbook.dev.java.net/profiler.html
 
     private static int GAME_DURATION_FRAMES = 24 * 60;
     private static int CARROT_SPEED = 14;
@@ -109,17 +109,17 @@ public class GrinBunnyDirector extends Director {
     private static int SAUCER_STAGE_LEFT = -202;
     private static int SAUCER_STAGE_RIGHT = 1896;
 
-    private int framesLeft;	// # of frames left in game
-    private int lastTimeLeft;	// Last value of remaining time
-    private int score;		// Current score
-    private int lastScore;	// Last score displayed
+    private int framesLeft;     // # of frames left in game
+    private int lastTimeLeft;   // Last value of remaining time
+    private int score;          // Current score
+    private int lastScore;      // Last score displayed
     private int bunnyXSpeed;
     private int bunnyX;
     private int saucerXSpeed;
     private Random random = new Random();
 
     private Trooper[] troopers;  // Our troopers.  The first is taken from
-    			  	 // the show file, and the rest are cloned.
+                                 // the show file, and the rest are cloned.
     private Group troopersGroup; // The group that holds them
     private FontStripText scoreMessage;
     private FontStripText timeMessage;
@@ -138,20 +138,20 @@ public class GrinBunnyDirector extends Director {
     private InterpolatedModel saucerPos;
     private Segment gameOverSegment;
     Playlist backgroundVideo;
-    boolean gameRunning = false;	// Used by grinbunny_show
+    boolean gameRunning = false;        // Used by grinbunny_show
 
     private byte[] profileMessageTurtle;
     private byte[] profileMessageSaucer;
 
-	// This static class gives us a convenient place to stash references
-	// to the GRIN nodes that make up a trooper.  A trooper is one of
-	// the eight turtles along the top of the screen.
+        // This static class gives us a convenient place to stash references
+        // to the GRIN nodes that make up a trooper.  A trooper is one of
+        // the eight turtles along the top of the screen.
     private static class Trooper {
-	Feature top;		// The top node in the trooper scene graph
-	InterpolatedModel pos;	// What we manipulate to move it
-	Assembly assembly;	// Controls the visual state of the trooper
-	Feature blamState;	// What we set it to to make it go "blam"
-	Feature showingState;
+        Feature top;            // The top node in the trooper scene graph
+        InterpolatedModel pos;  // What we manipulate to move it
+        Assembly assembly;      // Controls the visual state of the trooper
+        Feature blamState;      // What we set it to to make it go "blam"
+        Feature showingState;
     }
 
     public GrinBunnyDirector() {
@@ -162,101 +162,101 @@ public class GrinBunnyDirector extends Director {
      * Called by a java_command in the show to initialize the game
      **/
     public void initializeGame() {
-	if (Debug.PROFILE && PROFILE_IP_ADDRESS != null) {
-	    Profile.initProfiler(2008, PROFILE_IP_ADDRESS);
-	}
-	PlayerWrangler.getInstance().initialize(
-			GrinXlet.getInstance().getAnimationEngine());
-	int[] trooperX = new int[]{ 162, 364, 566, 768, 970, 1172, 1374, 1576 };
-	if (Debug.ASSERT && troopers != null) {
-	    Debug.assertFail();
-	}
-	Trooper firstTrooper = new Trooper();
-	firstTrooper.top = getFeature("F:TurtleTrooper");
-	firstTrooper.pos 
-	    = (InterpolatedModel) getFeature("F:TurtleTrooper.Pos");
-	firstTrooper.assembly 
-	    = (Assembly) getFeature("F:TurtleTrooper.Assembly");
-	firstTrooper.blamState = getPart(firstTrooper.assembly, "blam");
-	firstTrooper.showingState = getPart(firstTrooper.assembly, "showing");
+        if (Debug.PROFILE && PROFILE_IP_ADDRESS != null) {
+            Profile.initProfiler(2008, PROFILE_IP_ADDRESS);
+        }
+        PlayerWrangler.getInstance().initialize(
+                        GrinXlet.getInstance().getAnimationEngine());
+        int[] trooperX = new int[]{ 162, 364, 566, 768, 970, 1172, 1374, 1576 };
+        if (Debug.ASSERT && troopers != null) {
+            Debug.assertFail();
+        }
+        Trooper firstTrooper = new Trooper();
+        firstTrooper.top = getFeature("F:TurtleTrooper");
+        firstTrooper.pos 
+            = (InterpolatedModel) getFeature("F:TurtleTrooper.Pos");
+        firstTrooper.assembly 
+            = (Assembly) getFeature("F:TurtleTrooper.Assembly");
+        firstTrooper.blamState = getPart(firstTrooper.assembly, "blam");
+        firstTrooper.showingState = getPart(firstTrooper.assembly, "showing");
 
-	troopers = new Trooper[trooperX.length];
-	troopers[0] = firstTrooper;
-	for (int i = 1; i < troopers.length; i++) {
-	    HashMap clones = new HashMap();
-	    Trooper t = new Trooper();
-	    t.top = firstTrooper.top.cloneSubgraph(clones);
-	    	// We clone the trooper subgraph, then for all the nodes
-		// within that cloned subgraph, we look up the named features
-		// using the original named feature as key.
-	    t.pos = (InterpolatedModel) clones.get(firstTrooper.pos);
-	    t.assembly = (Assembly) clones.get(firstTrooper.assembly);
-	    t.blamState = (Feature) clones.get(firstTrooper.blamState);
-	    t.showingState = (Feature) clones.get(firstTrooper.showingState);
-	    troopers[i] = t;
-	}
-	Feature[] groupMembers = new Feature[troopers.length];
-	for (int i = 0; i < troopers.length; i++) {
-	    troopers[i].pos.setField(Translator.X_FIELD, trooperX[i]);
-	    groupMembers[i] = troopers[i].top;
-	}
+        troopers = new Trooper[trooperX.length];
+        troopers[0] = firstTrooper;
+        for (int i = 1; i < troopers.length; i++) {
+            HashMap clones = new HashMap();
+            Trooper t = new Trooper();
+            t.top = firstTrooper.top.cloneSubgraph(clones);
+                // We clone the trooper subgraph, then for all the nodes
+                // within that cloned subgraph, we look up the named features
+                // using the original named feature as key.
+            t.pos = (InterpolatedModel) clones.get(firstTrooper.pos);
+            t.assembly = (Assembly) clones.get(firstTrooper.assembly);
+            t.blamState = (Feature) clones.get(firstTrooper.blamState);
+            t.showingState = (Feature) clones.get(firstTrooper.showingState);
+            troopers[i] = t;
+        }
+        Feature[] groupMembers = new Feature[troopers.length];
+        for (int i = 0; i < troopers.length; i++) {
+            troopers[i].pos.setField(Translator.X_FIELD, trooperX[i]);
+            groupMembers[i] = troopers[i].top;
+        }
 
-	troopersGroup = (Group) getFeature("F:TurtleTroopers");
-	troopersGroup.resetVisibleParts(groupMembers);
+        troopersGroup = (Group) getFeature("F:TurtleTroopers");
+        troopersGroup.resetVisibleParts(groupMembers);
 
-	scoreMessage = (FontStripText) getFeature("F:ScoreMessage");
-	timeMessage = (FontStripText) getFeature("F:TimeMessage");
-	timeLeftCircle = (Arc) getFeature("F:TimeLeftCircle");
-	bunnyPos = (InterpolatedModel) getFeature("F:Bunny.Pos");
-	carrotAssembly = (Assembly) getFeature("F:Carrot.Assembly");
-	carrotFiringState = getPart(carrotAssembly, "firing");
-	carrotEmptyState = getPart(carrotAssembly, "empty");
-	carrotPos = (InterpolatedModel) getFeature("F:Carrot.Pos");
-	trooperRestore = (Assembly) getFeature("F:TrooperRestore");
-	trooperRestoreCountdown = getPart(trooperRestore, "countdown");
+        scoreMessage = (FontStripText) getFeature("F:ScoreMessage");
+        timeMessage = (FontStripText) getFeature("F:TimeMessage");
+        timeLeftCircle = (Arc) getFeature("F:TimeLeftCircle");
+        bunnyPos = (InterpolatedModel) getFeature("F:Bunny.Pos");
+        carrotAssembly = (Assembly) getFeature("F:Carrot.Assembly");
+        carrotFiringState = getPart(carrotAssembly, "firing");
+        carrotEmptyState = getPart(carrotAssembly, "empty");
+        carrotPos = (InterpolatedModel) getFeature("F:Carrot.Pos");
+        trooperRestore = (Assembly) getFeature("F:TrooperRestore");
+        trooperRestoreCountdown = getPart(trooperRestore, "countdown");
     
-	saucerAssembly = (Assembly) getFeature("F:TurtleSaucer.Assembly");
-	saucerShowingState = getPart(saucerAssembly, "showing");
-	saucerBlamState = getPart(saucerAssembly, "blam");
-	saucerEmptyState = getPart(saucerAssembly, "empty");
-	saucerPos = (InterpolatedModel) getFeature("F:TurtleSaucer.Pos");
-	backgroundVideo = (Playlist) getFeature("F:BackgroundVideo");
+        saucerAssembly = (Assembly) getFeature("F:TurtleSaucer.Assembly");
+        saucerShowingState = getPart(saucerAssembly, "showing");
+        saucerBlamState = getPart(saucerAssembly, "blam");
+        saucerEmptyState = getPart(saucerAssembly, "empty");
+        saucerPos = (InterpolatedModel) getFeature("F:TurtleSaucer.Pos");
+        backgroundVideo = (Playlist) getFeature("F:BackgroundVideo");
 
-	gameOverSegment = getSegment("S:GameOver");
-	if (Debug.PROFILE) {
-	    profileMessageTurtle = Profile.makeMessage(
-	    				"Turtle hit, score now XXXXX");
-	    profileMessageSaucer = Profile.makeMessage(
-	    				"Saucer hit, score now XXXXX");
-	}
+        gameOverSegment = getSegment("S:GameOver");
+        if (Debug.PROFILE) {
+            profileMessageTurtle = Profile.makeMessage(
+                                        "Turtle hit, score now XXXXX");
+            profileMessageSaucer = Profile.makeMessage(
+                                        "Saucer hit, score now XXXXX");
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void notifyDestroyed() {
-	PlayerWrangler.getInstance().destroy();
-	    //
-	    // PlayerWrangler is a singleton.
-	    // The only reason it's OK to destroy a singleton here,
-	    // in a Show director, is because this particular show is
-	    // the main show for the xlet - this show is only destroyed
-	    // when the xlet is being destroyed.
-	    //
-	if (troopersGroup != null) {
-	    troopersGroup.resetVisibleParts(null);
-	}
-	// trooper[0] wasn't cloned by us, so it shouldn't be destroyed by us
-	if (troopers != null) {
-	    for (int i = 1; i < troopers.length; i++) {
-		if (troopers[i].top != null) {
-		    troopers[i].top.destroyClonedSubgraph();
-		}
-	    }
-	}
-	if (Debug.PROFILE && PROFILE_IP_ADDRESS != null) {
-	    Profile.doneProfiling();
-	}
+        PlayerWrangler.getInstance().destroy();
+            //
+            // PlayerWrangler is a singleton.
+            // The only reason it's OK to destroy a singleton here,
+            // in a Show director, is because this particular show is
+            // the main show for the xlet - this show is only destroyed
+            // when the xlet is being destroyed.
+            //
+        if (troopersGroup != null) {
+            troopersGroup.resetVisibleParts(null);
+        }
+        // trooper[0] wasn't cloned by us, so it shouldn't be destroyed by us
+        if (troopers != null) {
+            for (int i = 1; i < troopers.length; i++) {
+                if (troopers[i].top != null) {
+                    troopers[i].top.destroyClonedSubgraph();
+                }
+            }
+        }
+        if (Debug.PROFILE && PROFILE_IP_ADDRESS != null) {
+            Profile.doneProfiling();
+        }
     }
 
     //
@@ -264,201 +264,201 @@ public class GrinBunnyDirector extends Director {
     // of the world.
     //
     private void updateShow() {
-	if (score != lastScore) {
-	    String[] s = scoreMessage.getText();
-	    s[0] = "Score:  " + score;
-	    scoreMessage.setText(s);
-	    lastScore = score;
-	}
-	int timeLeft = (framesLeft + 23) / 24;
-	if (timeLeft != lastTimeLeft) {
-	    String[] s = timeMessage.getText();
-	    int minutes = timeLeft / 60;
-	    timeLeft -= minutes * 60;
-	    String t = "Time: " + minutes + ":";
-	    if (timeLeft < 10) {
-		t += "0";
-	    }
-	    t += timeLeft;
-	    s[0] = t;
-	    timeMessage.setText(s);
-	    lastTimeLeft = timeLeft;
-	}
-	int arcAngle = (framesLeft * 360) / GAME_DURATION_FRAMES;
-	timeLeftCircle.setArcAngle(arcAngle);
-	bunnyPos.setField(Translator.X_FIELD, bunnyX);
+        if (score != lastScore) {
+            String[] s = scoreMessage.getText();
+            s[0] = "Score:  " + score;
+            scoreMessage.setText(s);
+            lastScore = score;
+        }
+        int timeLeft = (framesLeft + 23) / 24;
+        if (timeLeft != lastTimeLeft) {
+            String[] s = timeMessage.getText();
+            int minutes = timeLeft / 60;
+            timeLeft -= minutes * 60;
+            String t = "Time: " + minutes + ":";
+            if (timeLeft < 10) {
+                t += "0";
+            }
+            t += timeLeft;
+            s[0] = t;
+            timeMessage.setText(s);
+            lastTimeLeft = timeLeft;
+        }
+        int arcAngle = (framesLeft * 360) / GAME_DURATION_FRAMES;
+        timeLeftCircle.setArcAngle(arcAngle);
+        bunnyPos.setField(Translator.X_FIELD, bunnyX);
     }
 
     /**
      * Called by a java_command in the show to start the game
      **/
     public void startGame() {
-	framesLeft = GAME_DURATION_FRAMES;
-	lastTimeLeft = Integer.MIN_VALUE;
-	score = 0;
-	lastScore = Integer.MIN_VALUE;
-	restoreTroopers();
-	carrotAssembly.setCurrentFeature(carrotEmptyState);
-	saucerAssembly.setCurrentFeature(saucerEmptyState);
-	updateShow();
-	bunnyXSpeed = 0;
-	bunnyX = 1000;
+        framesLeft = GAME_DURATION_FRAMES;
+        lastTimeLeft = Integer.MIN_VALUE;
+        score = 0;
+        lastScore = Integer.MIN_VALUE;
+        restoreTroopers();
+        carrotAssembly.setCurrentFeature(carrotEmptyState);
+        saucerAssembly.setCurrentFeature(saucerEmptyState);
+        updateShow();
+        bunnyXSpeed = 0;
+        bunnyX = 1000;
     }
 
     /**
      * Called by a java_command in the show before every frame
      **/
     public void heartbeat() {
-	framesLeft--;
-	if (framesLeft < 0) {
-	    getShow().activateSegment(gameOverSegment);
-	    return;
-	}
+        framesLeft--;
+        if (framesLeft < 0) {
+            getShow().activateSegment(gameOverSegment);
+            return;
+        }
 
-	// 
-	// Move the bunny
-	//
-	bunnyX += bunnyXSpeed;
-	if (bunnyX < 100) {
-	    bunnyX = 100;
-	} else if (bunnyX > 1820) {
-	    bunnyX = 1820;
-	}
+        // 
+        // Move the bunny
+        //
+        bunnyX += bunnyXSpeed;
+        if (bunnyX < 100) {
+            bunnyX = 100;
+        } else if (bunnyX > 1820) {
+            bunnyX = 1820;
+        }
 
-	//
-	// If the saucer isn't showing, roll the dice and maybe start it
-	// off.  If it is showing and hasn't just blown up, move it,
-	// and see if we've hit it.
-	//
-	Feature saucerState = saucerAssembly.getCurrentPart();
-	if (saucerState == saucerEmptyState) {
-	    if (random.nextInt(24 * 5) == 7)  {
-		// Make a saucer every 5 seconds or so
-		int x;
-		if (random.nextInt(2) == 0) {
-		    x = SAUCER_STAGE_LEFT;
-		    saucerXSpeed = SAUCER_SPEED;
-		} else {
-		    x = SAUCER_STAGE_RIGHT;
-		    saucerXSpeed = -SAUCER_SPEED;
-		}
-		saucerPos.setField(Translator.X_FIELD, x);
-		saucerAssembly.setCurrentFeature(saucerShowingState);
-		saucerState = saucerShowingState;
-	    }
-	} else if (saucerState == saucerShowingState
-		    || saucerState == saucerBlamState)
-	{
-	    int x = saucerPos.getField(Translator.X_FIELD) + saucerXSpeed;
-	    saucerPos.setField(Translator.X_FIELD, x);
-	    if (x < SAUCER_STAGE_LEFT || x > SAUCER_STAGE_RIGHT) {
-		saucerAssembly.setCurrentFeature(saucerEmptyState);
-		saucerState = saucerEmptyState;
-	    }
-	}
+        //
+        // If the saucer isn't showing, roll the dice and maybe start it
+        // off.  If it is showing and hasn't just blown up, move it,
+        // and see if we've hit it.
+        //
+        Feature saucerState = saucerAssembly.getCurrentPart();
+        if (saucerState == saucerEmptyState) {
+            if (random.nextInt(24 * 5) == 7)  {
+                // Make a saucer every 5 seconds or so
+                int x;
+                if (random.nextInt(2) == 0) {
+                    x = SAUCER_STAGE_LEFT;
+                    saucerXSpeed = SAUCER_SPEED;
+                } else {
+                    x = SAUCER_STAGE_RIGHT;
+                    saucerXSpeed = -SAUCER_SPEED;
+                }
+                saucerPos.setField(Translator.X_FIELD, x);
+                saucerAssembly.setCurrentFeature(saucerShowingState);
+                saucerState = saucerShowingState;
+            }
+        } else if (saucerState == saucerShowingState
+                    || saucerState == saucerBlamState)
+        {
+            int x = saucerPos.getField(Translator.X_FIELD) + saucerXSpeed;
+            saucerPos.setField(Translator.X_FIELD, x);
+            if (x < SAUCER_STAGE_LEFT || x > SAUCER_STAGE_RIGHT) {
+                saucerAssembly.setCurrentFeature(saucerEmptyState);
+                saucerState = saucerEmptyState;
+            }
+        }
 
-	//
-	// Collision detection.  I got the numbers here by positioning
-	// the carrot on the screen, and visually checking where it runs
-	// into things.  This is pretty easy to do, by overriding the
-	// arrow keys to just move the carrot one pixel at a time, with
-	// the game time set long.
-	//
+        //
+        // Collision detection.  I got the numbers here by positioning
+        // the carrot on the screen, and visually checking where it runs
+        // into things.  This is pretty easy to do, by overriding the
+        // arrow keys to just move the carrot one pixel at a time, with
+        // the game time set long.
+        //
 
-	//
-	// If we're firing...
-	//
-	if (carrotAssembly.getCurrentPart() == carrotFiringState) {
-	    int yC = carrotPos.getField(Translator.Y_FIELD) - CARROT_SPEED;
-	    carrotPos.setField(Translator.Y_FIELD, yC);
-	    int xC = carrotPos.getField(Translator.X_FIELD);
-	    boolean hit = false;
+        //
+        // If we're firing...
+        //
+        if (carrotAssembly.getCurrentPart() == carrotFiringState) {
+            int yC = carrotPos.getField(Translator.Y_FIELD) - CARROT_SPEED;
+            carrotPos.setField(Translator.Y_FIELD, yC);
+            int xC = carrotPos.getField(Translator.X_FIELD);
+            boolean hit = false;
 
-	    //
-	    // Check for trooper hit
-	    //
-	    for (int i = 0; !hit && i < troopers.length; i++) {
-		Trooper t = troopers[i];
-		int xT = troopers[i].pos.getField(Translator.X_FIELD);
-		hit = t.assembly.getCurrentPart() == t.showingState
-		      && -505 <= yC && yC <= -436
-		      && 9 <= (xC - xT) && (xC - xT) <= 61;
-		if (hit) {
-		    score += 50;
-		    t.assembly.setCurrentFeature(t.blamState);
-		    	// The show has a timer that will move it to
-			// empty 10 frames later
-		    if (Debug.PROFILE) {
-			setScore(profileMessageTurtle, score);
-			Profile.sendMessage(profileMessageTurtle);
-		    }
-		}
-	    }
+            //
+            // Check for trooper hit
+            //
+            for (int i = 0; !hit && i < troopers.length; i++) {
+                Trooper t = troopers[i];
+                int xT = troopers[i].pos.getField(Translator.X_FIELD);
+                hit = t.assembly.getCurrentPart() == t.showingState
+                      && -505 <= yC && yC <= -436
+                      && 9 <= (xC - xT) && (xC - xT) <= 61;
+                if (hit) {
+                    score += 50;
+                    t.assembly.setCurrentFeature(t.blamState);
+                        // The show has a timer that will move it to
+                        // empty 10 frames later
+                    if (Debug.PROFILE) {
+                        setScore(profileMessageTurtle, score);
+                        Profile.sendMessage(profileMessageTurtle);
+                    }
+                }
+            }
 
-	    //
-	    // Check to see if all troopers have now been hit, and if so,
-	    // start a timer to restore them.
-	    //
-	    if (hit) {
-		boolean all = true;
-		for (int i = 0; all && i < troopers.length; i++) {
-		    Trooper t = troopers[i];
-		    all = t.assembly.getCurrentPart() != t.showingState;
-		}
-		if (all) {
-		    trooperRestore.setCurrentFeature(trooperRestoreCountdown);
-		    	// 24 frames later, it will call restoreTroopers()
-			// for us.
-		}
-	    }
+            //
+            // Check to see if all troopers have now been hit, and if so,
+            // start a timer to restore them.
+            //
+            if (hit) {
+                boolean all = true;
+                for (int i = 0; all && i < troopers.length; i++) {
+                    Trooper t = troopers[i];
+                    all = t.assembly.getCurrentPart() != t.showingState;
+                }
+                if (all) {
+                    trooperRestore.setCurrentFeature(trooperRestoreCountdown);
+                        // 24 frames later, it will call restoreTroopers()
+                        // for us.
+                }
+            }
 
-	    //
-	    // Check to see if we've hit the saucer
-	    //
-	    if (!hit && saucerState == saucerShowingState) {
-		int x = saucerPos.getField(Translator.X_FIELD);
-		hit = -673 <= yC && yC <= -554 
-		      && 31 <= (xC - x) && (xC - x) <= 199;
-		if (hit) {
-		    score += 350;
-		    saucerAssembly.setCurrentFeature(saucerBlamState);
-		    if (Debug.PROFILE) {
-			setScore(profileMessageSaucer, score);
-			Profile.sendMessage(profileMessageSaucer);
-		    }
-		}
-	    }
+            //
+            // Check to see if we've hit the saucer
+            //
+            if (!hit && saucerState == saucerShowingState) {
+                int x = saucerPos.getField(Translator.X_FIELD);
+                hit = -673 <= yC && yC <= -554 
+                      && 31 <= (xC - x) && (xC - x) <= 199;
+                if (hit) {
+                    score += 350;
+                    saucerAssembly.setCurrentFeature(saucerBlamState);
+                    if (Debug.PROFILE) {
+                        setScore(profileMessageSaucer, score);
+                        Profile.sendMessage(profileMessageSaucer);
+                    }
+                }
+            }
 
-	    //
-	    // Check for carrot off top
-	    //
-	    if (!hit) {
-		if (yC <= -710) {
-		    hit = true;
-		}
-	    }
+            //
+            // Check for carrot off top
+            //
+            if (!hit) {
+                if (yC <= -710) {
+                    hit = true;
+                }
+            }
 
-	    //
-	    // Restore carrot to firable if we hit something
-	    //
-	    if (hit) {
-		carrotAssembly.setCurrentFeature(carrotEmptyState);
-	    }
-	}
-	updateShow();
+            //
+            // Restore carrot to firable if we hit something
+            //
+            if (hit) {
+                carrotAssembly.setCurrentFeature(carrotEmptyState);
+            }
+        }
+        updateShow();
     }
 
     //
     // Stuff the decimal score into the end of profileMessage
     //
     private void setScore(byte[] profileMessage, int score) {
-	if (Debug.PROFILE) {
-	    for (int i = 1; i <= 5; i++) {
-		profileMessage[profileMessage.length-i] 
-		    = (byte) ('0' + score % 10);
-		score /= 10;
-	    }
-	}
+        if (Debug.PROFILE) {
+            for (int i = 1; i <= 5; i++) {
+                profileMessage[profileMessage.length-i] 
+                    = (byte) ('0' + score % 10);
+                score /= 10;
+            }
+        }
     }
 
     /**
@@ -467,9 +467,9 @@ public class GrinBunnyDirector extends Director {
      * part of a java_command).
      **/
     public void restoreTroopers() {
-	for (int i = 0; i < troopers.length; i++) {
-	    troopers[i].assembly.setCurrentFeature(troopers[i].showingState);
-	}
+        for (int i = 0; i < troopers.length; i++) {
+            troopers[i].assembly.setCurrentFeature(troopers[i].showingState);
+        }
     }
 
     /**
@@ -477,7 +477,7 @@ public class GrinBunnyDirector extends Director {
      * bunny to move left
      **/
     public void moveBunnyLeft() {
-	bunnyXSpeed = -BUNNY_SPEED;
+        bunnyXSpeed = -BUNNY_SPEED;
     }
 
     /**
@@ -485,14 +485,14 @@ public class GrinBunnyDirector extends Director {
      * the bunny to move right.
      **/
     public void moveBunnyRight() {
-	bunnyXSpeed = BUNNY_SPEED;
+        bunnyXSpeed = BUNNY_SPEED;
     }
 
     /**
      * Called by a java_command in the show when the user asks the bunny to stop
      **/
     public void stopBunny() {
-	bunnyXSpeed = 0;
+        bunnyXSpeed = 0;
     }
 
 
@@ -500,15 +500,15 @@ public class GrinBunnyDirector extends Director {
      * Called by a java_command in the show when the user asks the bunny to fire
      **/
     public void fire() {
-	if (carrotAssembly.getCurrentPart() == carrotFiringState) {
-	    // We're already firing, so ignore.
-	    return;
-	}
-	carrotAssembly.setCurrentFeature(carrotFiringState);
-	carrotPos.setField(Translator.X_FIELD, bunnyX);
-	carrotPos.setField(Translator.Y_FIELD, CARROT_SPEED);
-		// This will become 0 when heartbeat() gets called,
-		// which will happen later in this same frame.
+        if (carrotAssembly.getCurrentPart() == carrotFiringState) {
+            // We're already firing, so ignore.
+            return;
+        }
+        carrotAssembly.setCurrentFeature(carrotFiringState);
+        carrotPos.setField(Translator.X_FIELD, bunnyX);
+        carrotPos.setField(Translator.Y_FIELD, CARROT_SPEED);
+                // This will become 0 when heartbeat() gets called,
+                // which will happen later in this same frame.
     }
 
 }

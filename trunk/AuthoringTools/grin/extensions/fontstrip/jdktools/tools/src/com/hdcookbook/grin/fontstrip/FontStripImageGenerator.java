@@ -102,13 +102,13 @@ public class FontStripImageGenerator {
     private double scaleY;
     
     public FontStripImageGenerator(String configFileName, 
-    				   double scaleX, double scaleY, 
-				   File[] assetDirs, String outputDir) 
+                                   double scaleX, double scaleY, 
+                                   File[] assetDirs, String outputDir) 
     {
         this.assetDirs = assetDirs;
         this.outputDir = outputDir;
-	this.scaleX = scaleX;
-	this.scaleY = scaleY;
+        this.scaleX = scaleX;
+        this.scaleY = scaleY;
         
         for (int i = 0; i < assetDirs.length; i++) {
             configFile = new File(assetDirs[i], configFileName);
@@ -168,7 +168,7 @@ public class FontStripImageGenerator {
 
             if (editedImageAvailable) {
                 System.out.println("Using existing " + imageFileName 
-				   + " to generate final images.");
+                                   + " to generate final images.");
             } else {
                 // Editor images not available in the asset dir... generate them.
                 try {
@@ -194,8 +194,8 @@ public class FontStripImageGenerator {
                 FontImageMosaic imageMosaic = imageMosaicMap.get(imageName);
                 if (imageMosaic == null) {
                     imageMosaic = new FontImageMosaic(
-		    			FontImageMosaic.DEFAULT_WIDTH, 3000, 
-					scaleX, scaleY);
+                                        FontImageMosaic.DEFAULT_WIDTH, 3000, 
+                                        scaleX, scaleY);
                     imageMosaicMap.put(imageName, imageMosaic);
                 }
                 FontDesignImage fontDesignImage = images[i];
@@ -239,11 +239,11 @@ public class FontStripImageGenerator {
             FontDescription fontDescription = data.getFontDescription(fileDescription);
 
             if (fontDescription == null) {
-		System.err.println("** ERROR **");
+                System.err.println("** ERROR **");
                 System.err.println(
                         "<fontDescription> section in the file \"fontstrip-config.xml\" \n" + "" +
                         "lacks information about the font \"" + fileDescription.getFontName() + "\".\n");
-		System.exit(1);
+                System.exit(1);
                 images[i] = null;
                 continue;
             }
@@ -257,7 +257,7 @@ public class FontStripImageGenerator {
             FontDesignImage fontImage = 
                     new FontDesignImage(fontDescription,
                                         maxWidth, maxHeight);
-	        images[i] = fontImage;
+                images[i] = fontImage;
         }
         
         return images;

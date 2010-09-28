@@ -8,7 +8,7 @@ show
 
 exports 
     segments {
-	S:Initialize 
+        S:Initialize 
     } features { 
     } handlers { 
     }
@@ -19,26 +19,26 @@ java_generated_class ShoeCommands [[
         import com.hdcookbook.grin.Show;
         import com.hdcookbook.grin.util.Debug;
         
-	public class ShoeCommands extends com.hdcookbook.grin.GrinXHelper {
-	
-	    public ShoeCommands(Show show) { 
-		super(show); 
-	    }
+        public class ShoeCommands extends com.hdcookbook.grin.GrinXHelper {
+        
+            public ShoeCommands(Show show) { 
+                super(show); 
+            }
 
-	    public EdSullivan getDirector() {
-		return (EdSullivan) show.getDirector();
-	    }
-	
-	    JAVA_COMMAND_BODY
-	
-	}
+            public EdSullivan getDirector() {
+                return (EdSullivan) show.getDirector();
+            }
+        
+            JAVA_COMMAND_BODY
+        
+        }
 
 ]]
 
 feature src_over F:Shoe.Image
     sub_feature fixed_image 
-	( middle 1000 middle 900 scale 1500 1500 mills ) 
-	"../../images/shoe_01.png" ;
+        ( middle 1000 middle 900 scale 1500 1500 mills ) 
+        "../../images/shoe_01.png" ;
 ;
 
 
@@ -65,24 +65,24 @@ feature group F:Everything {
 
 segment S:Initialize 
     setup { 
-	F:Everything
+        F:Everything
     } on_entry {
-	java_command [[ 
-	    Debug.println();
-	    Debug.println("***  Initializing big_shoe ***"); 
-	    Debug.println();
-	]]
+        java_command [[ 
+            Debug.println();
+            Debug.println("***  Initializing big_shoe ***"); 
+            Debug.println();
+        ]]
     } next {
-  	activate_segment S:Running ;
+        activate_segment S:Running ;
     }
 ;
 
 segment S:Running
     active {
-	F:Background
-	F:Shoe.Image
+        F:Background
+        F:Shoe.Image
     } setup {
-	F:Everything
+        F:Everything
     } rc_handlers {
     }
 ;

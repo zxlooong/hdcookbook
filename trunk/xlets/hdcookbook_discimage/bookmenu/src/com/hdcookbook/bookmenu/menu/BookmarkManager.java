@@ -91,10 +91,10 @@ public class BookmarkManager {
     private Command[] menuStateNormal = new Command[5];
     private Command[] menuStateSelected = new Command[5];
     private Command[] showNumBookmarks = new Command[6];  
-    				// [0] is the help message
+                                // [0] is the help message
     private Segment bookmarkSnapSegment;
     private Command[] setHandlerState = new Command[6];
-    				// [0] is for scenes
+                                // [0] is for scenes
     private Text[] bookmarkText = new Text[5];
     private long[] bookmarks = { Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE,
                                  Long.MIN_VALUE, Long.MIN_VALUE };
@@ -106,125 +106,125 @@ public class BookmarkManager {
      * Create the bookmark manager.
      **/
     public BookmarkManager(MenuXlet xlet) {
-	this.xlet = xlet;
+        this.xlet = xlet;
     }
 
     /**
      * Initialize the bookmark manager.  Called on xlet startup.
      **/
     public void init() {
-	Assembly a;
-	a = (Assembly) getFeature("F:BookmarksMenu.DeleteHelpMessage.State");
-	deleteHelpMessageOn = getPartSelectCommand(a, "on");
-	deleteHelpMessageOff = getPartSelectCommand(a, "off");
-	a = (Assembly) getFeature("F:BookmarksMenu.Scenes.State");
-	scenesNormal = getPartSelectCommand(a, "normal");
-	scenesSelected = getPartSelectCommand(a, "selected");
-	for (int i = 0; i < menuStateNormal.length; i++) {
-	    a = (Assembly) getFeature("F:BookmarksMenu." + (i+1) + ".State");
-	    menuStateNormal[i] = getPartSelectCommand(a, "normal");
-	    menuStateSelected[i] = getPartSelectCommand(a, "selected");
-	}
-	a = (Assembly) getFeature("F:BookmarksMenu.NumBookmarks.Assembly");
-	showNumBookmarks[0] = getPartSelectCommand(a, "help");
-	for (int i = 1; i < showNumBookmarks.length; i++) {
-	    showNumBookmarks[i] = getPartSelectCommand(a, Integer.toString(i));
-	}
-	bookmarkSnapSegment = xlet.show.getSegment("S:BookmarkSnap");
-	if (Debug.ASSERT && bookmarkSnapSegment == null) {
-	    Debug.assertFail();
-	}
-	VisualRCHandler h 
-	    = (VisualRCHandler) xlet.show.getRCHandler("H:BookmarksMenu");
-	int s = h.lookupState("scenes");
+        Assembly a;
+        a = (Assembly) getFeature("F:BookmarksMenu.DeleteHelpMessage.State");
+        deleteHelpMessageOn = getPartSelectCommand(a, "on");
+        deleteHelpMessageOff = getPartSelectCommand(a, "off");
+        a = (Assembly) getFeature("F:BookmarksMenu.Scenes.State");
+        scenesNormal = getPartSelectCommand(a, "normal");
+        scenesSelected = getPartSelectCommand(a, "selected");
+        for (int i = 0; i < menuStateNormal.length; i++) {
+            a = (Assembly) getFeature("F:BookmarksMenu." + (i+1) + ".State");
+            menuStateNormal[i] = getPartSelectCommand(a, "normal");
+            menuStateSelected[i] = getPartSelectCommand(a, "selected");
+        }
+        a = (Assembly) getFeature("F:BookmarksMenu.NumBookmarks.Assembly");
+        showNumBookmarks[0] = getPartSelectCommand(a, "help");
+        for (int i = 1; i < showNumBookmarks.length; i++) {
+            showNumBookmarks[i] = getPartSelectCommand(a, Integer.toString(i));
+        }
+        bookmarkSnapSegment = xlet.show.getSegment("S:BookmarkSnap");
+        if (Debug.ASSERT && bookmarkSnapSegment == null) {
+            Debug.assertFail();
+        }
+        VisualRCHandler h 
+            = (VisualRCHandler) xlet.show.getRCHandler("H:BookmarksMenu");
+        int s = h.lookupState("scenes");
         Show show = xlet.director.getShow();
-	setHandlerState[0] = new SetVisualRCStateCommand(show, false, s, h, false);
-	for (int i = 1; i < setHandlerState.length; i++)  {
-	    s = h.lookupState(Integer.toString(i));
-	    setHandlerState[i] = new SetVisualRCStateCommand(show, false, s, h,false);
-	}
-	for (int i = 0; i < bookmarkText.length; i++) {
-	    bookmarkText[i] 
-		= (Text) getFeature("F:BookmarksMenu." + (i+1) + ".Text");
-	}
-	readBookmarks();
+        setHandlerState[0] = new SetVisualRCStateCommand(show, false, s, h, false);
+        for (int i = 1; i < setHandlerState.length; i++)  {
+            s = h.lookupState(Integer.toString(i));
+            setHandlerState[i] = new SetVisualRCStateCommand(show, false, s, h,false);
+        }
+        for (int i = 0; i < bookmarkText.length; i++) {
+            bookmarkText[i] 
+                = (Text) getFeature("F:BookmarksMenu." + (i+1) + ".Text");
+        }
+        readBookmarks();
     }
 
     private Feature getFeature(String name) {
-	Feature f = xlet.show.getFeature(name);
-	if (Debug.ASSERT) {
-	    if (f == null) {
-		Debug.assertFail();
-	    }
-	}
-	return f;
+        Feature f = xlet.show.getFeature(name);
+        if (Debug.ASSERT) {
+            if (f == null) {
+                Debug.assertFail();
+            }
+        }
+        return f;
     }
 
     private Command getPartSelectCommand(Assembly assembly, String partName) {
-	Feature f= ((Assembly) assembly).findPart(partName);
-	if (Debug.ASSERT) {
-	    if (f == null) {
-		Debug.assertFail();
-	    }
-	}
-	return new ActivatePartCommand(xlet.director.getShow(), assembly, f);
+        Feature f= ((Assembly) assembly).findPart(partName);
+        if (Debug.ASSERT) {
+            if (f == null) {
+                Debug.assertFail();
+            }
+        }
+        return new ActivatePartCommand(xlet.director.getShow(), assembly, f);
     }
 
     private String bookmarksFileName() {
-	return System.getProperty("dvb.persistent.root")
-	       + "/" + xlet.context.getXletProperty("dvb.org.id")
-	       + "/" + xlet.context.getXletProperty("dvb.app.id")
-	       + "/bookmarks.dat";
+        return System.getProperty("dvb.persistent.root")
+               + "/" + xlet.context.getXletProperty("dvb.org.id")
+               + "/" + xlet.context.getXletProperty("dvb.app.id")
+               + "/bookmarks.dat";
     }
 
     //
     // Read the bookmarks from persistent storage
     //
     private void readBookmarks() {
-	bookmarksChanged = false;
-	FileInputStream is = null;
-	try {
-	    String nm = bookmarksFileName();
-	    if (Debug.LEVEL > 0) {
-		Debug.println("Reading bookmarks from " + nm);
-	    }
-	    is = new FileInputStream(nm);
-	    DataInputStream dis 
-		= new DataInputStream(new BufferedInputStream(is));
-	    int newNum = dis.readInt();
-	    if (newNum < 0 || newNum > bookmarks.length) {
-		if (Debug.LEVEL > 0) {
-		    Debug.println("**** Corrupt bookmark data ****");
-		}
-	    } else {
-		long[] newBookmarks = new long[bookmarks.length];
-		for (int i = 0; i < newBookmarks.length; i++) {
-		    newBookmarks[i] = dis.readLong();
-		}
-		numBookmarks = newNum;
-		bookmarks = newBookmarks;
-	    }
-	    dis.close();
-	    is = null;
-	} catch (IOException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-	    }
-	} catch (SecurityException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-		Debug.println();
-		Debug.println("***  No permission to read bookmarks ***");
-		Debug.println();
-	    }
-	} finally {
-	    if (is != null) {
-		try {
-		    is.close();
-		} catch (Throwable ignored) {
-		}
-	    }
-	}
+        bookmarksChanged = false;
+        FileInputStream is = null;
+        try {
+            String nm = bookmarksFileName();
+            if (Debug.LEVEL > 0) {
+                Debug.println("Reading bookmarks from " + nm);
+            }
+            is = new FileInputStream(nm);
+            DataInputStream dis 
+                = new DataInputStream(new BufferedInputStream(is));
+            int newNum = dis.readInt();
+            if (newNum < 0 || newNum > bookmarks.length) {
+                if (Debug.LEVEL > 0) {
+                    Debug.println("**** Corrupt bookmark data ****");
+                }
+            } else {
+                long[] newBookmarks = new long[bookmarks.length];
+                for (int i = 0; i < newBookmarks.length; i++) {
+                    newBookmarks[i] = dis.readLong();
+                }
+                numBookmarks = newNum;
+                bookmarks = newBookmarks;
+            }
+            dis.close();
+            is = null;
+        } catch (IOException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+            }
+        } catch (SecurityException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+                Debug.println();
+                Debug.println("***  No permission to read bookmarks ***");
+                Debug.println();
+            }
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (Throwable ignored) {
+                }
+            }
+        }
     }
 
     //
@@ -234,41 +234,41 @@ public class BookmarkManager {
     // It should be safe for us to wait until xlet termination to do this.
     //
     private void writeBookmarks() {
-	FileOutputStream os = null;
-	try {
-	    String nm = bookmarksFileName();
-	    if (Debug.LEVEL > 0) {
-		Debug.println("Writing bookmarks to " + nm);
-	    }
-	    os = new FileOutputStream(nm);
-	    DataOutputStream dos = new DataOutputStream(
-	    			       new BufferedOutputStream(os));
-	    dos.writeInt(numBookmarks);
-	    for (int i = 0; i < bookmarks.length; i++) {
-		dos.writeLong(bookmarks[i]);
-	    }
-	    dos.close();
-	    os = null;
-	} catch (SecurityException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-		Debug.println();
-		Debug.println("***  No permission to write bookmarks ***");
-		Debug.println();
-	    }
-	} catch (IOException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-	    }
-	} finally {
-	    if (os != null) {
-		try {
-		    os.close();
-		} catch (Throwable ignored) {
-		}
-	    }
-	}
-	bookmarksChanged = false;
+        FileOutputStream os = null;
+        try {
+            String nm = bookmarksFileName();
+            if (Debug.LEVEL > 0) {
+                Debug.println("Writing bookmarks to " + nm);
+            }
+            os = new FileOutputStream(nm);
+            DataOutputStream dos = new DataOutputStream(
+                                       new BufferedOutputStream(os));
+            dos.writeInt(numBookmarks);
+            for (int i = 0; i < bookmarks.length; i++) {
+                dos.writeLong(bookmarks[i]);
+            }
+            dos.close();
+            os = null;
+        } catch (SecurityException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+                Debug.println();
+                Debug.println("***  No permission to write bookmarks ***");
+                Debug.println();
+            }
+        } catch (IOException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+            }
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (Throwable ignored) {
+                }
+            }
+        }
+        bookmarksChanged = false;
     }
 
 
@@ -278,46 +278,46 @@ public class BookmarkManager {
      * the script sets it to activated when appropriate.
      *
      * @param bookmarkNum  Number of bookmark to select, 0 means "scenes",
-     *			   -1 means "none".
-     *			   If higher than the current number of bookmarks,
-     *			   it's adjusted downward.
+     *                     -1 means "none".
+     *                     If higher than the current number of bookmarks,
+     *                     it's adjusted downward.
      *
      * @return the media time of the given bookmark, or
-     * 	       Long.MIN_VALUE.
+     *         Long.MIN_VALUE.
      **/
     public synchronized long updateUI(int bookmarkNum) {
-	if (bookmarkNum > numBookmarks) {
-	    bookmarkNum = numBookmarks;
-	}
-	boolean scenesSel = bookmarkNum == 0;
-	if (bookmarkNum == -1) {
-	    bookmarkNum = 0;
-	}
-	this.currBookmark = bookmarkNum;
-	xlet.show.runCommand(showNumBookmarks[numBookmarks]);
-	if (scenesSel) {
-	    xlet.show.runCommand(scenesSelected);
-	} else {
-	    xlet.show.runCommand(scenesNormal);
-	}
-	for (int i = 0; i < numBookmarks; i++) {
-	    if ((i+1) == bookmarkNum) {
-		xlet.show.runCommand(menuStateSelected[i]);
-	    } else {
-		xlet.show.runCommand(menuStateNormal[i]);
-	    }
-	}
-	if (numBookmarks == 0 || bookmarkNum == 0) {
-	    xlet.show.runCommand(deleteHelpMessageOff);
-	} else {
-	    xlet.show.runCommand(deleteHelpMessageOn);
-	}
-	xlet.show.runCommand(setHandlerState[bookmarkNum]);
-	if (bookmarkNum == 0) {
-	    return Long.MIN_VALUE;
-	} else {
-	    return bookmarks[bookmarkNum-1];
-	}
+        if (bookmarkNum > numBookmarks) {
+            bookmarkNum = numBookmarks;
+        }
+        boolean scenesSel = bookmarkNum == 0;
+        if (bookmarkNum == -1) {
+            bookmarkNum = 0;
+        }
+        this.currBookmark = bookmarkNum;
+        xlet.show.runCommand(showNumBookmarks[numBookmarks]);
+        if (scenesSel) {
+            xlet.show.runCommand(scenesSelected);
+        } else {
+            xlet.show.runCommand(scenesNormal);
+        }
+        for (int i = 0; i < numBookmarks; i++) {
+            if ((i+1) == bookmarkNum) {
+                xlet.show.runCommand(menuStateSelected[i]);
+            } else {
+                xlet.show.runCommand(menuStateNormal[i]);
+            }
+        }
+        if (numBookmarks == 0 || bookmarkNum == 0) {
+            xlet.show.runCommand(deleteHelpMessageOff);
+        } else {
+            xlet.show.runCommand(deleteHelpMessageOn);
+        }
+        xlet.show.runCommand(setHandlerState[bookmarkNum]);
+        if (bookmarkNum == 0) {
+            return Long.MIN_VALUE;
+        } else {
+            return bookmarks[bookmarkNum-1];
+        }
     }
 
     /**
@@ -326,23 +326,23 @@ public class BookmarkManager {
      * To give user feedback, it goes to segment S:BookmarkSnap
      **/
     public void makeBookmark() {
-	long tm = xlet.navigator.getMediaTime();
-	if (tm == Long.MIN_VALUE) {
-	    // Couldn't determine time; give up.
-	    return;
-	}
-	bookmarksChanged = true;
-	if (numBookmarks >= bookmarks.length) {
-	    for (int i = 1; i < bookmarks.length; i++) {
-		bookmarks[i-1] = bookmarks[i];
-		setBookmarkText(i-1);
-	    }
-	} else {
-	    numBookmarks++;
-	}
-	bookmarks[numBookmarks - 1] = tm;
-	setBookmarkText(numBookmarks - 1);
-	xlet.show.activateSegment(bookmarkSnapSegment);
+        long tm = xlet.navigator.getMediaTime();
+        if (tm == Long.MIN_VALUE) {
+            // Couldn't determine time; give up.
+            return;
+        }
+        bookmarksChanged = true;
+        if (numBookmarks >= bookmarks.length) {
+            for (int i = 1; i < bookmarks.length; i++) {
+                bookmarks[i-1] = bookmarks[i];
+                setBookmarkText(i-1);
+            }
+        } else {
+            numBookmarks++;
+        }
+        bookmarks[numBookmarks - 1] = tm;
+        setBookmarkText(numBookmarks - 1);
+        xlet.show.activateSegment(bookmarkSnapSegment);
     }
 
     /**
@@ -350,51 +350,51 @@ public class BookmarkManager {
      * while the bookmarks menu is up.
      **/
     public void deleteCurrentBookmark() {
-	if (currBookmark == 0) {
-	    return;
-	}
-	if (Debug .ASSERT && numBookmarks <= 0) {
-	    Debug.assertFail();
-	}
-	bookmarksChanged = true;
-	for (int i = (currBookmark - 1); i < bookmarks.length-1; i++) {
-	    bookmarks[i] = bookmarks[i+1];
-	    setBookmarkText(i);
-	}
-	numBookmarks--;
-	updateUI(currBookmark);
+        if (currBookmark == 0) {
+            return;
+        }
+        if (Debug .ASSERT && numBookmarks <= 0) {
+            Debug.assertFail();
+        }
+        bookmarksChanged = true;
+        for (int i = (currBookmark - 1); i < bookmarks.length-1; i++) {
+            bookmarks[i] = bookmarks[i+1];
+            setBookmarkText(i);
+        }
+        numBookmarks--;
+        updateUI(currBookmark);
     }
 
     private final static long NANO = 1000000000;
 
     private void setBookmarkText(int b) {
-	long tm = bookmarks[b];
-	long h = tm / (NANO * 60L * 60L);
-	tm = tm - h * NANO * 60L * 60L;
-	long m = tm / (NANO * 60L);
-	tm = tm - m * NANO * 60L;
-	long s = tm / NANO;
-	tm = tm - s * NANO;
-	long f = tm / (NANO / 24L);
-	String str = twoDigits(h) + ":" + twoDigits(m) + ":" + twoDigits(s)
-		     + ":" + twoDigits(f);
-	bookmarkText[b].setText(new String[] { str });
+        long tm = bookmarks[b];
+        long h = tm / (NANO * 60L * 60L);
+        tm = tm - h * NANO * 60L * 60L;
+        long m = tm / (NANO * 60L);
+        tm = tm - m * NANO * 60L;
+        long s = tm / NANO;
+        tm = tm - s * NANO;
+        long f = tm / (NANO / 24L);
+        String str = twoDigits(h) + ":" + twoDigits(m) + ":" + twoDigits(s)
+                     + ":" + twoDigits(f);
+        bookmarkText[b].setText(new String[] { str });
     }
 
     private String twoDigits(long num) {
-	if (num < 0 || num > 99) {
-	    return "--";
-	} else {
-	    return "" + oneDigit(num / 10) + oneDigit(num % 10);
-	}
+        if (num < 0 || num > 99) {
+            return "--";
+        } else {
+            return "" + oneDigit(num / 10) + oneDigit(num % 10);
+        }
     }
 
     private char oneDigit(long num) {
-	if (num < 0 || num > 9) {
-	    return '-';
-	} else {
-	    return ((char) (((int) '0') + num));
-	}
+        if (num < 0 || num > 9) {
+            return '-';
+        } else {
+            return ((char) (((int) '0') + num));
+        }
     }
 
     /**
@@ -406,8 +406,8 @@ public class BookmarkManager {
      * finite number of writes.
      **/
     public synchronized void destroy() {
-	if (bookmarksChanged) {
-	    writeBookmarks();
-	}
+        if (bookmarksChanged) {
+            writeBookmarks();
+        }
     }
 }

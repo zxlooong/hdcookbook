@@ -72,14 +72,14 @@ public class SEFade extends Fade implements SENode, SEScalableNode {
     }
     
     public SEFade(SEShow show, String name, boolean srcOver, 
-    		  int[] keyframes, int[] keyAlphas, int repeatFrame,
-		  int loopCount, Command[] endCommands) 
+                  int[] keyframes, int[] keyAlphas, int repeatFrame,
+                  int loopCount, Command[] endCommands) 
     {
-	super(show);
+        super(show);
         this.name = name;
-	this.repeatFrame = repeatFrame;
-	this.loopCount = loopCount;
-	this.endCommands = endCommands;
+        this.repeatFrame = repeatFrame;
+        this.loopCount = loopCount;
+        this.endCommands = endCommands;
         this.keyframes = keyframes;
         this.keyAlphas = keyAlphas;
         this.srcOver = srcOver;
@@ -194,26 +194,26 @@ public class SEFade extends Fade implements SENode, SEScalableNode {
     public void changeFeatureReference(Feature from, Feature to) 
             throws IOException
     {
-	if (part == from) {
-	    part = to;
-	}
+        if (part == from) {
+            part = to;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-	// Do nothing
+        // Do nothing
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "fade @" + Integer.toHexString(hashCode());
-	} else {
-	    return "fade " + name;
-	}
+        if (name == null) {
+            return "fade @" + Integer.toHexString(hashCode());
+        } else {
+            return "fade " + name;
+        }
     }
 }

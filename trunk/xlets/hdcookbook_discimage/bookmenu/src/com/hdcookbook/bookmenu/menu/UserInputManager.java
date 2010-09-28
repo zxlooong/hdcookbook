@@ -73,24 +73,24 @@ public class UserInputManager {
     private Segment bonusSegment;
     private String[] originalMessage;
     private String[] ourMessage = new String[1];
-    private String[] currentMessage;	// either original or our
+    private String[] currentMessage;    // either original or our
     private int tries;
     private boolean firstChar = true;
 
     public UserInputManager(MenuXlet xlet) {
-	this.xlet = xlet;
+        this.xlet = xlet;
     }
 
     public void init() {
-	messageFeature = (Text) xlet.show.getFeature("F:UserInput.Message");
-	bonusSegment = xlet.show.getSegment("S:StartBonusVideo");
-	if (Debug.ASSERT) {
-	    if (messageFeature == null || bonusSegment == null) {
-		Debug.assertFail();
-	    }
-	}
-	originalMessage = messageFeature.getText();
-	currentMessage = originalMessage;
+        messageFeature = (Text) xlet.show.getFeature("F:UserInput.Message");
+        bonusSegment = xlet.show.getSegment("S:StartBonusVideo");
+        if (Debug.ASSERT) {
+            if (messageFeature == null || bonusSegment == null) {
+                Debug.assertFail();
+            }
+        }
+        originalMessage = messageFeature.getText();
+        currentMessage = originalMessage;
     }
 
     public synchronized void destroy() {
@@ -100,48 +100,48 @@ public class UserInputManager {
      * Called when a button is pressed in the alphabet grid UI.
      *
      * @param text  The uppercase letter to add, or one of the special 
-     *		    values "-enter-" or "-init-".
+     *              values "-enter-" or "-init-".
      **/
     public void setText(String text) {
-	// We're called from a command, so we know the show lock
-	// is being held.
-	if ("-init-".equals(text)) {
-	    tries = 0;
-	    firstChar = true;
-	    if (currentMessage != originalMessage) {
-		currentMessage = originalMessage;
-		messageFeature.setText(originalMessage);
-	    }
-	} else if ("-enter-".equals(text)) {
-	    handleEnter();
-	} else {
-	    if (currentMessage == originalMessage) {
-		currentMessage = ourMessage;
-	    }
-	    if (firstChar) {
-		ourMessage[0] = "";
-	    }
-	    ourMessage[0] = ourMessage[0] + text;
-	    firstChar = false;
-	    if (ourMessage[0].length() > 15) {
-		ourMessage[0] = ourMessage[0].substring(1);
-	    }
-	    messageFeature.setText(ourMessage);
-	}
+        // We're called from a command, so we know the show lock
+        // is being held.
+        if ("-init-".equals(text)) {
+            tries = 0;
+            firstChar = true;
+            if (currentMessage != originalMessage) {
+                currentMessage = originalMessage;
+                messageFeature.setText(originalMessage);
+            }
+        } else if ("-enter-".equals(text)) {
+            handleEnter();
+        } else {
+            if (currentMessage == originalMessage) {
+                currentMessage = ourMessage;
+            }
+            if (firstChar) {
+                ourMessage[0] = "";
+            }
+            ourMessage[0] = ourMessage[0] + text;
+            firstChar = false;
+            if (ourMessage[0].length() > 15) {
+                ourMessage[0] = ourMessage[0].substring(1);
+            }
+            messageFeature.setText(ourMessage);
+        }
     }
 
     private void handleEnter() {
-	tries++;
-	if ("BLURAY".equals(ourMessage[0])) {
-	    xlet.show.activateSegment(bonusSegment);
-	} else if (tries > 2) {
-	    ourMessage[0] = "The code is \"BLURAY\"";
-	    firstChar = true;
-	    messageFeature.setText(ourMessage);
-	} else {
-	    ourMessage[0] = "Please try again...";
-	    firstChar = true;
-	    messageFeature.setText(ourMessage);
-	}
+        tries++;
+        if ("BLURAY".equals(ourMessage[0])) {
+            xlet.show.activateSegment(bonusSegment);
+        } else if (tries > 2) {
+            ourMessage[0] = "The code is \"BLURAY\"";
+            firstChar = true;
+            messageFeature.setText(ourMessage);
+        } else {
+            ourMessage[0] = "Please try again...";
+            firstChar = true;
+            messageFeature.setText(ourMessage);
+        }
     }
 }

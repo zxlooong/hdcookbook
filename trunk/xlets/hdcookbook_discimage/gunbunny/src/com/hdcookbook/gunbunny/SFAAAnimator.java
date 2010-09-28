@@ -94,7 +94,7 @@ public class SFAAAnimator extends Animator {
     }
 
     public Rectangle getPosition() {
-	return position;
+        return position;
     }
 
     /**
@@ -102,31 +102,31 @@ public class SFAAAnimator extends Animator {
      * given frame.
      **/
     public synchronized void initAtFrame(int frame, Container container, 
-    					 Rectangle position) 
+                                         Rectangle position) 
     {
-	this.container = container;
-	this.position = position;
-	this.firstFrame = true;
-	this.startFrame = frame;
-	Dimension sz = new Dimension(position.width, position.height);
-	AnimationParameters ap = new AnimationParameters();
-	ap.threadPriority = Thread.NORM_PRIORITY - 1;
-	SyncFrameAccurateAnimation.setDefaultFrameRate(
-		SyncFrameAccurateAnimation.FRAME_RATE_24);
-	this.sfaa = SyncFrameAccurateAnimation.getInstance(sz, 1, ap);
-	container.add(this.sfaa);
-	this.sfaa.setLocation(position.x, position.y);
-	this.sfaa.setVisible(true);
-	this.sfaa.start();
+        this.container = container;
+        this.position = position;
+        this.firstFrame = true;
+        this.startFrame = frame;
+        Dimension sz = new Dimension(position.width, position.height);
+        AnimationParameters ap = new AnimationParameters();
+        ap.threadPriority = Thread.NORM_PRIORITY - 1;
+        SyncFrameAccurateAnimation.setDefaultFrameRate(
+                SyncFrameAccurateAnimation.FRAME_RATE_24);
+        this.sfaa = SyncFrameAccurateAnimation.getInstance(sz, 1, ap);
+        container.add(this.sfaa);
+        this.sfaa.setLocation(position.x, position.y);
+        this.sfaa.setVisible(true);
+        this.sfaa.start();
     }
 
     public void destroy() {
-	synchronized(this) {
-	    destroyed = true;
-	}
-	container.remove(sfaa);
-	sfaa.stop();
-	sfaa.destroy();
+        synchronized(this) {
+            destroyed = true;
+        }
+        container.remove(sfaa);
+        sfaa.stop();
+        sfaa.destroy();
     }
 
     /**
@@ -135,7 +135,7 @@ public class SFAAAnimator extends Animator {
      **/
     public synchronized DVBBufferedImage getDoubleBuffer(int width, int height) 
     {
-	return null;
+        return null;
     }
 
     /**
@@ -145,48 +145,48 @@ public class SFAAAnimator extends Animator {
      * mode of the graphics will be set to AlphaComposite.Src.
      **/
     public Graphics2D getDoubleBufferGraphics() {
-	return null;
+        return null;
     }
 
     /**
      * Return true if this animator needs the sprites to erase themselves.
      **/
     public boolean needsErase() {
-	return true;
+        return true;
     }
 
     /**
      * Called by the main loop once per frame.
      **/
     public void animateGame(int frame, Game game) throws InterruptedException {
-	synchronized(this) {
-	    if (destroyed) {
-		return;
-	    }
-	}
-	Graphics2D g = sfaa.startDrawing(frame - startFrame);
-	if (g == null) {
-	    framesDropped++;
-	} else {
-	    if (firstFrame) {
-		g.setColor(ImageUtil.colorTransparent);
-		g.fillRect(0, 0, position.width, position.height);
-	    }
-	    synchronized(game) {
-		game.advanceToFrame(frame);
-		game.paintFrame(g, firstFrame, this);
-	    }
-	    firstFrame = false;
-	    synchronized(this) {
-		if (destroyed) {
-		    return;
-		}
-	    }
-	    sfaa.finishDrawing(frame - startFrame);
-	}
-	if (Debug.LEVEL > 0 && frame % 100 == 0) {
-	    Debug.println("Frame " + (frame - startFrame) + ", " 
-	    		    + framesDropped + " frames dropped.");
-	}
+        synchronized(this) {
+            if (destroyed) {
+                return;
+            }
+        }
+        Graphics2D g = sfaa.startDrawing(frame - startFrame);
+        if (g == null) {
+            framesDropped++;
+        } else {
+            if (firstFrame) {
+                g.setColor(ImageUtil.colorTransparent);
+                g.fillRect(0, 0, position.width, position.height);
+            }
+            synchronized(game) {
+                game.advanceToFrame(frame);
+                game.paintFrame(g, firstFrame, this);
+            }
+            firstFrame = false;
+            synchronized(this) {
+                if (destroyed) {
+                    return;
+                }
+            }
+            sfaa.finishDrawing(frame - startFrame);
+        }
+        if (Debug.LEVEL > 0 && frame % 100 == 0) {
+            Debug.println("Frame " + (frame - startFrame) + ", " 
+                            + framesDropped + " frames dropped.");
+        }
     }
 }

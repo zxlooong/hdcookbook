@@ -104,45 +104,45 @@ public class Translator extends Modifier implements Node {
 
     protected InterpolatedModel model;
 
-    protected int fx = 0;	// Feature's start position (if absolute model)
+    protected int fx = 0;       // Feature's start position (if absolute model)
     protected int fy = 0;
-    protected boolean modelIsRelative;	// false if absolute.
+    protected boolean modelIsRelative;  // false if absolute.
 
-    private int dx;		// For this frame
+    private int dx;             // For this frame
     private int dy;
 
-    private int lastDx;		// For last frame shown
+    private int lastDx;         // For last frame shown
     private int lastDy;
 
     private DrawRecord drawRecord = new DrawRecord();
 
-	//
-	// Here, we make an inner class of RenderContext.  We
-	// pass this instance to our child; it modifies calls to the
-	// parent RenderContext from our child.
-	//
+        //
+        // Here, we make an inner class of RenderContext.  We
+        // pass this instance to our child; it modifies calls to the
+        // parent RenderContext from our child.
+        //
     private ChildContext childContext = new ChildContext();
 
     class ChildContext extends RenderContext {
-	RenderContext	parent;
+        RenderContext   parent;
 
-	public void addArea(DrawRecord r) {
-	    r.applyTranslation(dx, dy);
-	    if (dx != lastDx || dy != lastDy) {
-		r.setChanged();
-	    }
-	    parent.addArea(r);
-	}
+        public void addArea(DrawRecord r) {
+            r.applyTranslation(dx, dy);
+            if (dx != lastDx || dy != lastDy) {
+                r.setChanged();
+            }
+            parent.addArea(r);
+        }
 
-	public void guaranteeAreaFilled(DrawRecord r) {
-	    r.applyTranslation(dx, dy);
-	    parent.guaranteeAreaFilled(r);
-	}
+        public void guaranteeAreaFilled(DrawRecord r) {
+            r.applyTranslation(dx, dy);
+            parent.guaranteeAreaFilled(r);
+        }
 
-	public int setTarget(int target) {
-	    return parent.setTarget(target);
-	}
-    };	// End of RenderContext anonymous inner class
+        public int setTarget(int target) {
+            return parent.setTarget(target);
+        }
+    };  // End of RenderContext anonymous inner class
     
     public Translator(Show show) {
         super(show);
@@ -152,28 +152,28 @@ public class Translator extends Modifier implements Node {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup() || activated) {
-	    throw new IllegalStateException();
-	}
-	Translator result = new Translator(show);
-	result.part = part.makeNewClone(clones);
-	result.fx = fx;
-	result.fy = fy;
-	result.modelIsRelative = modelIsRelative;
-	result.dx = dx;
-	result.dy = dy;
-	result.lastDx = lastDx;
-	result.lastDy = lastDy;
-	return result;
+        if (!isSetup() || activated) {
+            throw new IllegalStateException();
+        }
+        Translator result = new Translator(show);
+        result.part = part.makeNewClone(clones);
+        result.fx = fx;
+        result.fy = fy;
+        result.modelIsRelative = modelIsRelative;
+        result.dx = dx;
+        result.dy = dy;
+        result.lastDx = lastDx;
+        result.lastDy = lastDy;
+        return result;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
-	super.initializeClone(original, clones);
-	Translator other = (Translator) original;
-	model = (InterpolatedModel)
+        super.initializeClone(original, clones);
+        Translator other = (Translator) original;
+        model = (InterpolatedModel)
                 Feature.clonedReference(other.model, clones);
     }
 
@@ -181,34 +181,34 @@ public class Translator extends Modifier implements Node {
      * Get the translation that moves us
      **/
     public InterpolatedModel getModel() {
-	return model;
+        return model;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void initialize() {
-	super.initialize();
+        super.initialize();
     }
     /**
      * {@inheritDoc}
      **/
     public void destroy() {
-	super.destroy();
+        super.destroy();
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	if (Debug.ASSERT && !model.getIsActivated()) {
-	    Debug.assertFail();
-	}
-	super.nextFrame();
+        if (Debug.ASSERT && !model.getIsActivated()) {
+            Debug.assertFail();
+        }
+        super.nextFrame();
 
-	// Note that at this point, we don't know if our model
-	// has advanced to the next frame or not, so we can't depend
-	// on its value
+        // Note that at this point, we don't know if our model
+        // has advanced to the next frame or not, so we can't depend
+        // on its value
     }
 
 
@@ -216,8 +216,8 @@ public class Translator extends Modifier implements Node {
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	dx = model.getField(X_FIELD);
-	dy = model.getField(Y_FIELD);
+        dx = model.getField(X_FIELD);
+        dy = model.getField(Y_FIELD);
         if (dx == OFFSCREEN || dy == OFFSCREEN) {
             return;
         }
@@ -225,34 +225,34 @@ public class Translator extends Modifier implements Node {
             dx -= fx;
             dy -= fy;
         }
-	childContext.parent = context;
-	part.addDisplayAreas(childContext);
-	lastDx = dx;
-	lastDy = dy;
+        childContext.parent = context;
+        part.addDisplayAreas(childContext);
+        lastDx = dx;
+        lastDy = dy;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getX() {
-	int x = model.getField(X_FIELD);
-	if (!modelIsRelative) {
-	    x -= fx;
-	}
-	x += part.getX();
-	return x;
+        int x = model.getField(X_FIELD);
+        if (!modelIsRelative) {
+            x -= fx;
+        }
+        x += part.getX();
+        return x;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getY() {
-	int y = model.getField(Y_FIELD);
-	if (!modelIsRelative) {
-	    y -= fy;
-	}
-	y += part.getY();
-	return y;
+        int y = model.getField(Y_FIELD);
+        if (!modelIsRelative) {
+            y -= fy;
+        }
+        y += part.getY();
+        return y;
     }
 
 
@@ -263,18 +263,18 @@ public class Translator extends Modifier implements Node {
         if (dx == OFFSCREEN || dy == OFFSCREEN) {
             return;
         }
-	gr.translate(dx, dy);
-	part.paintFrame(gr);
-	gr.translate(-dx, -dy);
+        gr.translate(dx, dy);
+        part.paintFrame(gr);
+        gr.translate(-dx, -dy);
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 
             throws IOException {
                 
         in.readSuperClassData(this);
- 	this.fx = in.readInt();
-	this.fy = in.readInt();
-	this.modelIsRelative = in.readBoolean();
+        this.fx = in.readInt();
+        this.fy = in.readInt();
+        this.modelIsRelative = in.readBoolean();
         this.model = (InterpolatedModel) in.readFeatureReference();
     }
 }

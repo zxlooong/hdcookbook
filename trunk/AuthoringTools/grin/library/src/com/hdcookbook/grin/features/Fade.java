@@ -93,51 +93,51 @@ public class Fade extends Modifier implements Node {
     protected int[] keyframes;
     protected int[] keyAlphas;
     protected boolean srcOver;
-    protected int repeatFrame;	// Integer.MAX_VALUE for "stick at end"
+    protected int repeatFrame;  // Integer.MAX_VALUE for "stick at end"
     private int alphaIndex;
-    protected int loopCount;	
-    	// # of times to repeat images before sending end commands
-	// Integer.MAX_VALUE means "infinite"
-    private int loopsRemaining;	// see loopCount
+    protected int loopCount;    
+        // # of times to repeat images before sending end commands
+        // Integer.MAX_VALUE means "infinite"
+    private int loopsRemaining; // see loopCount
     protected Command[] endCommands;
     private AlphaComposite currAlpha;
     private AlphaComposite lastAlpha;
 
-	//
-	// Here, we make an inner class of RenderContext.  We
-	// pass this instance to our child; it modifies calls to the
-	// parent RenderContext from our child.
-	//
+        //
+        // Here, we make an inner class of RenderContext.  We
+        // pass this instance to our child; it modifies calls to the
+        // parent RenderContext from our child.
+        //
     private ChildContext childContext = new ChildContext();
     
     class ChildContext extends RenderContext {
-	RenderContext	parent;
-	private int x;
-	private int y;
-	private int width;
-	private int height;
+        RenderContext   parent;
+        private int x;
+        private int y;
+        private int width;
+        private int height;
 
-	public void addArea(DrawRecord r) {
-	    if (srcOver) {
-		r.setSemiTransparent();
-	    }
-	    if (currAlpha != lastAlpha) {
-		r.setChanged();
-	    }
-	    parent.addArea(r);
-	}
+        public void addArea(DrawRecord r) {
+            if (srcOver) {
+                r.setSemiTransparent();
+            }
+            if (currAlpha != lastAlpha) {
+                r.setChanged();
+            }
+            parent.addArea(r);
+        }
 
-	public void guaranteeAreaFilled(DrawRecord r) {
-	    if (!srcOver || currAlpha == opaqueAlpha || currAlpha == null) {
-		parent.guaranteeAreaFilled(r);
-	    }
-	}
+        public void guaranteeAreaFilled(DrawRecord r) {
+            if (!srcOver || currAlpha == opaqueAlpha || currAlpha == null) {
+                parent.guaranteeAreaFilled(r);
+            }
+        }
 
-	public int setTarget(int target) {
-	    return parent.setTarget(target);
-	}
+        public int setTarget(int target) {
+            return parent.setTarget(target);
+        }
 
-    };	// End of RenderContext anonymous inner class
+    };  // End of RenderContext anonymous inner class
 
     public Fade(Show show) {
         super(show);
@@ -147,30 +147,30 @@ public class Fade extends Modifier implements Node {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (activated || alphas == null) {
-	    throw new IllegalStateException();
-	}
-	Fade result = new Fade(show);
-	result.part = part.makeNewClone(clones);
-	result.alphas = alphas;
-	result.opaqueAlpha = opaqueAlpha;
-	result.srcOver = srcOver;
-	result.repeatFrame = repeatFrame;
-	result.alphaIndex = alphaIndex;
-	result.loopCount = loopCount;
-	result.loopsRemaining = loopsRemaining;
-	result.currAlpha = currAlpha;
-	result.lastAlpha = lastAlpha;
-	return result;
+        if (activated || alphas == null) {
+            throw new IllegalStateException();
+        }
+        Fade result = new Fade(show);
+        result.part = part.makeNewClone(clones);
+        result.alphas = alphas;
+        result.opaqueAlpha = opaqueAlpha;
+        result.srcOver = srcOver;
+        result.repeatFrame = repeatFrame;
+        result.alphaIndex = alphaIndex;
+        result.loopCount = loopCount;
+        result.loopsRemaining = loopsRemaining;
+        result.currAlpha = currAlpha;
+        result.lastAlpha = lastAlpha;
+        return result;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
-	super.initializeClone(original, clones);
-	Fade other = (Fade) original;
-	endCommands = Feature.cloneCommands(other.endCommands, clones);
+        super.initializeClone(original, clones);
+        Fade other = (Fade) original;
+        endCommands = Feature.cloneCommands(other.endCommands, clones);
     }
 
     
@@ -178,35 +178,35 @@ public class Fade extends Modifier implements Node {
      * {@inheritDoc}
      **/
     public void initialize() {
-	if (keyframes.length == 1) {
-	    AlphaComposite ac = show.initializer.getAlpha(srcOver,keyAlphas[0]);
-	    alphas = new AlphaComposite[] { ac };
-	} else {
-	    alphas = new AlphaComposite[keyframes[keyframes.length-1]+1];
-	    int i = 0;		// keyframes[i] <= f < keyframes[i+1]
-	    for (int f = 0; f < alphas.length; f++) {
-		// Restore invariant on i
-		while ((i+1) < keyframes.length && f >= keyframes[i+1]) {
-		    i++;
-		}
-		int alpha;
-		if (f == keyframes[i]) {
-		    alpha = keyAlphas[i];
-		} else {
-		    int dist = keyframes[i+1] - keyframes[i];
-		    int distNext = keyframes[i+1] - f;
-		    int distLast = f - keyframes[i];
-		    if (Debug.ASSERT && (distNext < 0 || distLast < 0)) {
-			Debug.assertFail();
-		    }
-		    alpha = (keyAlphas[i+1]*distLast + keyAlphas[i]*distNext + dist/2) / dist;
-		}
-		alphas[f] = show.initializer.getAlpha(srcOver, alpha);
-		if (opaqueAlpha == null && alpha == 255) {
-		    opaqueAlpha = alphas[f];
-		}
-	    }
-	}
+        if (keyframes.length == 1) {
+            AlphaComposite ac = show.initializer.getAlpha(srcOver,keyAlphas[0]);
+            alphas = new AlphaComposite[] { ac };
+        } else {
+            alphas = new AlphaComposite[keyframes[keyframes.length-1]+1];
+            int i = 0;          // keyframes[i] <= f < keyframes[i+1]
+            for (int f = 0; f < alphas.length; f++) {
+                // Restore invariant on i
+                while ((i+1) < keyframes.length && f >= keyframes[i+1]) {
+                    i++;
+                }
+                int alpha;
+                if (f == keyframes[i]) {
+                    alpha = keyAlphas[i];
+                } else {
+                    int dist = keyframes[i+1] - keyframes[i];
+                    int distNext = keyframes[i+1] - f;
+                    int distLast = f - keyframes[i];
+                    if (Debug.ASSERT && (distNext < 0 || distLast < 0)) {
+                        Debug.assertFail();
+                    }
+                    alpha = (keyAlphas[i+1]*distLast + keyAlphas[i]*distNext + dist/2) / dist;
+                }
+                alphas[f] = show.initializer.getAlpha(srcOver, alpha);
+                if (opaqueAlpha == null && alpha == 255) {
+                    opaqueAlpha = alphas[f];
+                }
+            }
+        }
     }
 
     /**
@@ -219,55 +219,55 @@ public class Fade extends Modifier implements Node {
      * value, don't also try to control it by defining multiple keyframes.
      **/
     public final void setAlpha(AlphaComposite ac) {
-	if (Debug.ASSERT && alphas.length != 1) {
-	    Debug.assertFail();		// This is a value that is interpolated
-	}
-	alphas[0] = ac;
-	currAlpha = ac;
-	srcOver = ac.getRule() != AlphaComposite.SRC;
+        if (Debug.ASSERT && alphas.length != 1) {
+            Debug.assertFail();         // This is a value that is interpolated
+        }
+        alphas[0] = ac;
+        currAlpha = ac;
+        srcOver = ac.getRule() != AlphaComposite.SRC;
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
-	super.setActivateMode(mode);
-	if (mode) {
-	    alphaIndex = 0;
-	    lastAlpha = null;
-	    currAlpha = alphas[alphaIndex];
-	    loopsRemaining = loopCount;
-	}
+        super.setActivateMode(mode);
+        if (mode) {
+            alphaIndex = 0;
+            lastAlpha = null;
+            currAlpha = alphas[alphaIndex];
+            loopsRemaining = loopCount;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	super.nextFrame();
-	if (alphaIndex == Integer.MAX_VALUE) {
-	    return;
-	}
-	alphaIndex++;
-	if (alphaIndex == alphas.length) {
-	    if (loopCount != Integer.MAX_VALUE) {
-		loopsRemaining--;
-	    }
-	    if (loopsRemaining > 0) {
-		if (repeatFrame == Integer.MAX_VALUE) {
-		    alphaIndex = 0;
-		} else {
-		    alphaIndex = repeatFrame;
-		}
-	    } else {
-		loopsRemaining = loopCount;
-		show.runCommands(endCommands);
-		alphaIndex = repeatFrame;
-	    }
-	}
-	if (alphaIndex < alphas.length) {
-	    currAlpha = alphas[alphaIndex];
-	}
+        super.nextFrame();
+        if (alphaIndex == Integer.MAX_VALUE) {
+            return;
+        }
+        alphaIndex++;
+        if (alphaIndex == alphas.length) {
+            if (loopCount != Integer.MAX_VALUE) {
+                loopsRemaining--;
+            }
+            if (loopsRemaining > 0) {
+                if (repeatFrame == Integer.MAX_VALUE) {
+                    alphaIndex = 0;
+                } else {
+                    alphaIndex = repeatFrame;
+                }
+            } else {
+                loopsRemaining = loopCount;
+                show.runCommands(endCommands);
+                alphaIndex = repeatFrame;
+            }
+        }
+        if (alphaIndex < alphas.length) {
+            currAlpha = alphas[alphaIndex];
+        }
     }
 
 
@@ -275,23 +275,23 @@ public class Fade extends Modifier implements Node {
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	childContext.parent = context;
-	super.addDisplayAreas(childContext);
-	lastAlpha = currAlpha;
+        childContext.parent = context;
+        super.addDisplayAreas(childContext);
+        lastAlpha = currAlpha;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	if (currAlpha != null) {
-	    Composite old = gr.getComposite();
-	    gr.setComposite(currAlpha);
-	    part.paintFrame(gr);
-	    gr.setComposite(old);
-	} else {
-	    part.paintFrame(gr);
-	}
+        if (currAlpha != null) {
+            Composite old = gr.getComposite();
+            gr.setComposite(currAlpha);
+            part.paintFrame(gr);
+            gr.setComposite(old);
+        } else {
+            part.paintFrame(gr);
+        }
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 
@@ -301,8 +301,8 @@ public class Fade extends Modifier implements Node {
         this.srcOver = in.readBoolean();
         this.keyframes = in.readSharedIntArray();
         this.keyAlphas = in.readSharedIntArray();
-	this.repeatFrame = in.readInt();
-	loopCount = in.readInt();
+        this.repeatFrame = in.readInt();
+        loopCount = in.readInt();
         this.endCommands = in.readCommands();     
     }
 }

@@ -98,44 +98,44 @@ public class WeatherXlet extends GrinXlet implements ResourceClient {
      * and sizes the component to QHD.
      **/
     protected Container getRootContainer() {
-	graphicsDevice = HScreen.getDefaultHScreen()
-				.getDefaultHGraphicsDevice();
-	HGraphicsConfiguration[] config = graphicsDevice.getConfigurations();
+        graphicsDevice = HScreen.getDefaultHScreen()
+                                .getDefaultHGraphicsDevice();
+        HGraphicsConfiguration[] config = graphicsDevice.getConfigurations();
 
         // QHD_960_540
         // HD_1920_1080
         Dimension configWanted = new Dimension(960, 540);
-	HGraphicsConfiguration found = null;
+        HGraphicsConfiguration found = null;
         for (int i = 0; found == null && i < config.length; i++) {
             Dimension d = config[i].getPixelResolution();
             if (d.equals(configWanted)) {
                 found = config[i];
             } 
-	}
+        }
 
         if (found != null) {
             try {
                 graphicsDevice.reserveDevice(this);
                 graphicsDevice.setGraphicsConfiguration(found);
-		if (Debug.LEVEL > 0) {
-		    Debug.println("Set screen size to " + configWanted);
-		}
+                if (Debug.LEVEL > 0) {
+                    Debug.println("Set screen size to " + configWanted);
+                }
             } catch (Exception e) {
-		if (Debug.LEVEL > 0) {
-		    Debug.printStackTrace(e);
-		}
+                if (Debug.LEVEL > 0) {
+                    Debug.printStackTrace(e);
+                }
             } finally {
                 graphicsDevice.releaseDevice();
             }
         }
 
-	Container root = TVContainer.getRootContainer(xletContext);
-	root.setSize(960, 540);
-	if (Debug.LEVEL > 0) {
-	    Debug.println("Set root container size to " + root.getWidth()
-	    		  + "x" +root.getHeight());
-	}
-	return root;
+        Container root = TVContainer.getRootContainer(xletContext);
+        root.setSize(960, 540);
+        if (Debug.LEVEL > 0) {
+            Debug.println("Set root container size to " + root.getWidth()
+                          + "x" +root.getHeight());
+        }
+        return root;
     }
 
     //
@@ -157,9 +157,9 @@ public class WeatherXlet extends GrinXlet implements ResourceClient {
      * {@inheritDoc}
      **/
     public boolean requestRelease(ResourceProxy proxy, Object requestData) {
-	return false;	
-	// We release the graphicsDevice right after we get it, so we should
-	// never get this call, but if we do then we're in the middle of using
-	// it.
+        return false;   
+        // We release the graphicsDevice right after we get it, so we should
+        // never get this call, but if we do then we're in the middle of using
+        // it.
     }
 }

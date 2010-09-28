@@ -80,57 +80,57 @@ public abstract class SEGrinXHelper extends GrinXHelper implements SENode {
             throws IOException 
     {
         out.writeSuperClassData(this);
-	out.writeInt(commandNumber);
-	out.writeCommands(subCommands);
+        out.writeInt(commandNumber);
+        out.writeCommands(subCommands);
     }
 
     /**
      * Override of equals and hashCode to make canonicalization work
      **/
     public boolean equals(Object other) {
-	if (this == other) {
-	    return true;
-	} else if (!this.getClass().equals(other.getClass())) {
-	    return false;
-	}
-	SEGrinXHelper o = (SEGrinXHelper) other;
-	if (this.show != o.show || this.commandNumber != o.commandNumber) {
-	    return false;
-	}
-	if (this.subCommands == o.subCommands) {
-	    return true;
-	} else if (this.subCommands == null || o.subCommands == null) {
-	    return false;
-	} else if (this.subCommands.length != o.subCommands.length) {
-	    return false;
-	}
-	for (int i = 0; i < subCommands.length; i++) {
-	    if (!resolve(this.subCommands[i]).equals(resolve(o.subCommands[i])))
-	    {
-		return false;
-	    }
-	}
-	return true;
+        if (this == other) {
+            return true;
+        } else if (!this.getClass().equals(other.getClass())) {
+            return false;
+        }
+        SEGrinXHelper o = (SEGrinXHelper) other;
+        if (this.show != o.show || this.commandNumber != o.commandNumber) {
+            return false;
+        }
+        if (this.subCommands == o.subCommands) {
+            return true;
+        } else if (this.subCommands == null || o.subCommands == null) {
+            return false;
+        } else if (this.subCommands.length != o.subCommands.length) {
+            return false;
+        }
+        for (int i = 0; i < subCommands.length; i++) {
+            if (!resolve(this.subCommands[i]).equals(resolve(o.subCommands[i])))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Command resolve(Command command) {
-	while (command instanceof SERunNamedCommand) {
-	    command = ((SERunNamedCommand) command).getTarget();
-	}
-	return command;
+        while (command instanceof SERunNamedCommand) {
+            command = ((SERunNamedCommand) command).getTarget();
+        }
+        return command;
     }
 
     /**
      * Override of equals and hashCode to make canonicalization work
      **/
     public int hashCode() {
-	int result = show.hashCode() + (commandNumber * 11);
-	if (subCommands != null) {
-	    for (int i = 0; i < subCommands.length; i++) {
-		result = result ^ subCommands[i].hashCode();  // ^ is xor
-	    }
-	}
-	return result;
+        int result = show.hashCode() + (commandNumber * 11);
+        if (subCommands != null) {
+            for (int i = 0; i < subCommands.length; i++) {
+                result = result ^ subCommands[i].hashCode();  // ^ is xor
+            }
+        }
+        return result;
     }
 
 

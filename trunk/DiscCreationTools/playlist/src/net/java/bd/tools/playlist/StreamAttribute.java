@@ -85,7 +85,7 @@ public class StreamAttribute {
       
     public void readObject(DataInputStream din) throws IOException {
         din.skipBytes(1); // length
-        int t = din.readUnsignedByte();		// type
+        int t = din.readUnsignedByte();         // type
         setStreamCodingType(t);
         StreamCodingType type = StreamCodingType.getType(t);
         if (type == null) {

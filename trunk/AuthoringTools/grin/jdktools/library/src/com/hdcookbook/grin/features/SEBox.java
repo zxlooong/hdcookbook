@@ -73,26 +73,26 @@ public class SEBox extends Box implements SENode, SEScalableNode {
     }
     
     public SEBox(SEShow show, String name, int x, int y, int width, int height,
-    	       int outlineWidth, Color outlineColor, Color fillColor)
+               int outlineWidth, Color outlineColor, Color fillColor)
     {
-	super(show);
+        super(show);
         this.name = name;
-	this.x = x;
-	this.y = y;
-	this.width = width;
-	this.height = height;
-	this.outlineWidthX = outlineWidth;
-	this.outlineWidthY = outlineWidth;
-	this.outlineColor = outlineColor;
-	this.fillColor = fillColor;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.outlineWidthX = outlineWidth;
+        this.outlineWidthY = outlineWidth;
+        this.outlineColor = outlineColor;
+        this.fillColor = fillColor;
     }
 
     public int getWidth() {
-	return width;
+        return width;
     }
 
     public int getHeight() {
-	return height;
+        return height;
     }
     
     public int getOutlineWidthX() {
@@ -112,14 +112,14 @@ public class SEBox extends Box implements SENode, SEScalableNode {
     }
 
     public void setScalingModel(InterpolatedModel model) {
-	this.scalingModel = model;
-	if (model != null) {
-	    scaledBounds = new Rectangle();
-	}
+        this.scalingModel = model;
+        if (model != null) {
+            scaledBounds = new Rectangle();
+        }
     }
 
     public InterpolatedModel getScalingModel() {
-	return scalingModel;
+        return scalingModel;
     }
     
     public void setX(int x) {
@@ -196,22 +196,22 @@ public class SEBox extends Box implements SENode, SEScalableNode {
      * {@inheritDoc}
      **/
     public void scaleBy(int xScale, int yScale, int xOffset, int yOffset) {
-    	x = xOffset + Show.scale(x, xScale);
-    	y = yOffset + Show.scale(y, yScale);
-	width = Show.scale(width, xScale);
-	height = Show.scale(height, yScale);
-	outlineWidthX = Show.scale(outlineWidthX, xScale);
-	outlineWidthY = Show.scale(outlineWidthY, yScale);
+        x = xOffset + Show.scale(x, xScale);
+        y = yOffset + Show.scale(y, yScale);
+        width = Show.scale(width, xScale);
+        height = Show.scale(height, yScale);
+        outlineWidthX = Show.scale(outlineWidthX, xScale);
+        outlineWidthY = Show.scale(outlineWidthY, yScale);
     }
 
     /**
      * {@inheritDoc}
      **/
     public String toString() {
-	if (name == null) {
-	    return "box @" + Integer.toHexString(hashCode());
-	} else {
-	    return "box " + name;
-	}
+        if (name == null) {
+            return "box @" + Integer.toHexString(hashCode());
+        } else {
+            return "box " + name;
+        }
     }
 }

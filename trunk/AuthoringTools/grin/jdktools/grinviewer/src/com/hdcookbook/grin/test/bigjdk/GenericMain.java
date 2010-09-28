@@ -115,7 +115,7 @@ public class GenericMain extends Frame implements AnimationContext {
     private Director director;
     
     private Graphics2D frameGraphics;
-    private int frame;		// Current frame we're on
+    private int frame;          // Current frame we're on
     private float fps = 24.0f;
 
     private Image background = null;
@@ -146,9 +146,9 @@ public class GenericMain extends Frame implements AnimationContext {
     protected Object debugWaitingMonitor = new Object();
 
     public GenericMain() {
-	   grinXlet = new GrinXlet(this);
-	// This creates a facade for controlling us, e.g. from an xlet
-	// built on the generic game framework.
+           grinXlet = new GrinXlet(this);
+        // This creates a facade for controlling us, e.g. from an xlet
+        // built on the generic game framework.
     }
     public GenericMain(String grinxlet) {
         try {
@@ -157,54 +157,54 @@ public class GenericMain extends Frame implements AnimationContext {
         } catch (Exception e) {
             e.printStackTrace();
         }
-	// This creates a facade for controlling us, e.g. from an xlet
-	// built on the generic game framework.
+        // This creates a facade for controlling us, e.g. from an xlet
+        // built on the generic game framework.
     }
     /**
      * Get the list of animation clients
      **/
     public AnimationClient[] getAnimationClients() {
-	return engine.getAnimationClients();
+        return engine.getAnimationClients();
     }
 
     /**
      * Reset the list of animation clients
      **/
     public void resetAnimationClients(AnimationClient[] clients) {
-	engine.resetAnimationClients(clients);
+        engine.resetAnimationClients(clients);
     }
 
     /**
      * Give the animation engine
      **/
     public AnimationEngine getAnimationEngine() {
-	return engine;
+        return engine;
     }
 
     protected void setBackground(URL file) {
-	if (background != null) {
-	    background.flush();
-	}
-	if (file == null) {
-	    engine.setBackground(null);
-	    System.out.println("Set background null.");
-	    return;
-	}
-	System.out.println("Setting background to " + file);
-    	Toolkit tk = Toolkit.getDefaultToolkit();
-	background = tk.createImage(file);
-	MediaTracker tracker = new MediaTracker(this);
-	tracker.addImage(background, 0);
-	try {
-	    tracker.waitForAll();
-	} catch (InterruptedException ex) {
-	    Thread.currentThread().interrupt();
-	}
-	if (background.getWidth(null) <= 0) {
-	    System.out.println("Error reading background image " + file);
-	    System.exit(1);
-	}
-	engine.setBackground(background);
+        if (background != null) {
+            background.flush();
+        }
+        if (file == null) {
+            engine.setBackground(null);
+            System.out.println("Set background null.");
+            return;
+        }
+        System.out.println("Setting background to " + file);
+        Toolkit tk = Toolkit.getDefaultToolkit();
+        background = tk.createImage(file);
+        MediaTracker tracker = new MediaTracker(this);
+        tracker.addImage(background, 0);
+        try {
+            tracker.waitForAll();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        if (background.getWidth(null) <= 0) {
+            System.out.println("Error reading background image " + file);
+            System.exit(1);
+        }
+        engine.setBackground(background);
     }
    
     /**
@@ -214,11 +214,11 @@ public class GenericMain extends Frame implements AnimationContext {
     protected void adjustScreenSize(String scale, DeviceConfig config) {
         if (scale != null) {
            try {
-	      scaleDivisor = Integer.parseInt(scale);	
-   	   } catch (NumberFormatException e) {
-	      System.out.println("Could not reset the scaling factor " + scale);
-	      return;
-	   }
+              scaleDivisor = Integer.parseInt(scale);   
+           } catch (NumberFormatException e) {
+              System.out.println("Could not reset the scaling factor " + scale);
+              return;
+           }
         }   
 
         if (config != null) {
@@ -230,7 +230,7 @@ public class GenericMain extends Frame implements AnimationContext {
     }
 
     public void setDirectorClassName(String nm) {
-	directorClassName = nm;
+        directorClassName = nm;
     }
     
    
@@ -272,24 +272,24 @@ public class GenericMain extends Frame implements AnimationContext {
     }
 
     private SEShow createShow(String showName, Director director, 
-    			      ShowBuilder builder, boolean isBinary) 
+                              ShowBuilder builder, boolean isBinary) 
     {
-	SEShow show = new SEShow(director);
-	show.setIsBinary(isBinary);
-	URL source = null;
-	BufferedReader rdr = null;
+        SEShow show = new SEShow(director);
+        show.setIsBinary(isBinary);
+        URL source = null;
+        BufferedReader rdr = null;
         BufferedInputStream bis = null;
-	try {
-	    source = AssetFinder.getURL(showName);
-	    if (source == null) {
-		throw new IOException("Can't find resource " + showName);
-	    }
-	    if (AssetFinder.tryURL("images.map") != null) {
-		System.out.println("Found images.map, using mosaic.");
-		AssetFinder.setImageMap("images.map");
-	    } else {
-		System.out.println("No images.map found");
-	    }
+        try {
+            source = AssetFinder.getURL(showName);
+            if (source == null) {
+                throw new IOException("Can't find resource " + showName);
+            }
+            if (AssetFinder.tryURL("images.map") != null) {
+                System.out.println("Found images.map, using mosaic.");
+                AssetFinder.setImageMap("images.map");
+            } else {
+                System.out.println("No images.map found");
+            }
             
             if (!isBinary) {
                 rdr = new BufferedReader(
@@ -299,100 +299,100 @@ public class GenericMain extends Frame implements AnimationContext {
                 rdr.close();
             } else {
                 bis = new BufferedInputStream(source.openStream());
- 	        GrinBinaryReader reader = new GrinBinaryReader(bis);
+                GrinBinaryReader reader = new GrinBinaryReader(bis);
                 reader.readShow(show);
                 bis.close();
             }   
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.out.println();
-	    System.out.println(ex.getMessage());
-	    System.out.println();
-	    System.out.println("Error trying to parse " + showName);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.out.println();
+            System.out.println(ex.getMessage());
+            System.out.println();
+            System.out.println("Error trying to parse " + showName);
             System.out.println("    URL:  " + source);
-	    System.exit(1);
-	} finally {
-	    if (rdr != null) {
-		try {
-		    rdr.close();
-		} catch (IOException ex) {
-		}
-	    }   
+            System.exit(1);
+        } finally {
+            if (rdr != null) {
+                try {
+                    rdr.close();
+                } catch (IOException ex) {
+                }
+            }   
             if (bis != null) {
                 try {
                     bis.close();
                 } catch (IOException ex) {
                 }    
             }
-	}
+        }
         return show;
     }
 
 
     protected void exitGrinview() {
-	try {
-	    try {
-		Thread.sleep(100);
-	    } catch (InterruptedException ex) {
-	    }
-	    show.destroy();
-	} catch (Exception ex) {
-	    ex.printStackTrace();
-	    System.exit(1);
-	}
-	System.exit(0);
+        try {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+            }
+            show.destroy();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+        System.exit(0);
     }
 
     protected float getFps() {
-	return fps;
+        return fps;
     }
 
     private void printHelpMessage() {
-	System.out.println();
-	System.out.println("Commands:  ");
-	System.out.println("    f<number>    Set animation fps (0 is OK)");
-	System.out.println("    s<segment>   Go to named segment");
-	System.out.println("    +<number>    Advance that many frames");
-	System.out.println("    +            Advance one frame");
-	System.out.println("    w<number>    Wait this many seconds");
-	System.out.println("    ? or h       Get this help message");
-	System.out.println();
-	System.out.println("Currently displaying " + fps + " fps.");
-	System.out.println();
+        System.out.println();
+        System.out.println("Commands:  ");
+        System.out.println("    f<number>    Set animation fps (0 is OK)");
+        System.out.println("    s<segment>   Go to named segment");
+        System.out.println("    +<number>    Advance that many frames");
+        System.out.println("    +            Advance one frame");
+        System.out.println("    w<number>    Wait this many seconds");
+        System.out.println("    ? or h       Get this help message");
+        System.out.println();
+        System.out.println("Currently displaying " + fps + " fps.");
+        System.out.println();
     }
 
     protected void startEngine() {
-	setFps(fps);
-	engine = new ScalingDirectDrawEngine(scaleDivisor, this);
-	engine.initialize(this);	// Calls animationInitialize() and
-				        // animationFinishInitialiation()
-	engine.start();
+        setFps(fps);
+        engine = new ScalingDirectDrawEngine(scaleDivisor, this);
+        engine.initialize(this);        // Calls animationInitialize() and
+                                        // animationFinishInitialiation()
+        engine.start();
     }
 
     protected void inputLoop() {
-	try {
-	    BufferedReader in 
-		= new BufferedReader(new InputStreamReader(System.in));
-	    printHelpMessage();
-	    for (;;) {
-		String msg = null;
-		String s = in.readLine();
-		if (s == null) {	// EOF
-		    break;
-		}
-		if ("".equals(s) && userWaitingDone()) {
-		    continue;
-		    // Do nothing, we were waiting for enter
-		}
-		msg = doKeyboardCommand(s);
-		if (msg != null) {
-		    System.out.println(msg);
-		}
-	    }
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	    System.exit(1);
-	}
+        try {
+            BufferedReader in 
+                = new BufferedReader(new InputStreamReader(System.in));
+            printHelpMessage();
+            for (;;) {
+                String msg = null;
+                String s = in.readLine();
+                if (s == null) {        // EOF
+                    break;
+                }
+                if ("".equals(s) && userWaitingDone()) {
+                    continue;
+                    // Do nothing, we were waiting for enter
+                }
+                msg = doKeyboardCommand(s);
+                if (msg != null) {
+                    System.out.println(msg);
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
     }
 
     /**
@@ -400,9 +400,9 @@ public class GenericMain extends Frame implements AnimationContext {
      * something, like hit enter or press a button.
      **/
     protected void waitForUser(String msg) {
-	System.out.print("==>  " + msg + "; hit enter to advance...  ");
-	System.out.flush();
-	doWaitForUser();
+        System.out.print("==>  " + msg + "; hit enter to advance...  ");
+        System.out.flush();
+        doWaitForUser();
     }
 
     /**
@@ -410,24 +410,24 @@ public class GenericMain extends Frame implements AnimationContext {
      * frame has just finished.
      **/
     public void debugDrawFrameDone() {
-	// Overridden in GUI subclass
+        // Overridden in GUI subclass
     }
 
     /**
      * Do the actual waiting on the monitor for waitForUser
      **/
     protected final void doWaitForUser() {
-	synchronized(debugWaitingMonitor) {
-	    debugWaiting = debugDraw;
-	    while (debugWaiting) {
-		try { 
-		    debugWaitingMonitor.wait();
-		} catch (InterruptedException ex) {
-		    Thread.currentThread().interrupt();
-		    break;
-		}
-	    }
-	}
+        synchronized(debugWaitingMonitor) {
+            debugWaiting = debugDraw;
+            while (debugWaiting) {
+                try { 
+                    debugWaitingMonitor.wait();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
     }
 
 
@@ -437,62 +437,62 @@ public class GenericMain extends Frame implements AnimationContext {
      * @return true  if we were waiting
      **/
     protected boolean userWaitingDone() {
-	boolean wasWaiting;
-	synchronized(debugWaitingMonitor) {
-	    wasWaiting = debugWaiting;
-	    debugWaiting = false;
-	    debugWaitingMonitor.notifyAll();
-	}
-	return wasWaiting;
+        boolean wasWaiting;
+        synchronized(debugWaitingMonitor) {
+            wasWaiting = debugWaiting;
+            debugWaiting = false;
+            debugWaitingMonitor.notifyAll();
+        }
+        return wasWaiting;
     }
 
     public void snapshot() {
-	BufferedImage snapshot;
-	BufferedImage framebuffer;
-	snapshot = new BufferedImage(deviceConfig.width, deviceConfig.height, 
-					 BufferedImage.TYPE_INT_ARGB);
-	framebuffer = new BufferedImage(deviceConfig.width, deviceConfig.height, 
-					 BufferedImage.TYPE_INT_ARGB);
-	Graphics2D g = framebuffer.createGraphics();
-	try {
-	    engine.repaintFrame(g);
-	} catch (InterruptedException ignored) {
-	}
-	g.dispose();
-	g = snapshot.createGraphics();
-	g.setComposite(AlphaComposite.Src);
-	if (background == null) {
-	    g.setColor(new Color(0,0,0,0));
-	    g.fillRect(0, 0, deviceConfig.width, deviceConfig.height);
-	} else {
-	    g.drawImage(background, 0, 0, null, null);
-	}
-	g.setComposite(AlphaComposite.SrcOver);
-	g.drawImage(framebuffer, 0, 0, null, null);
-	g.dispose();
-	final BufferedImage snapshotF = snapshot;
-	new Thread(new Runnable() {
-	    public void run() {
-		JFileChooser fc = new JFileChooser();
-		fc.setDialogTitle("Save .png snapshot");
-		int ret = fc.showSaveDialog(GenericMain.this);
-		if (ret == JFileChooser.APPROVE_OPTION) {
-		    File file = fc.getSelectedFile();
-		    System.out.println("Saving PNG to " + file + "...");
-		    try {
-			boolean ok = ImageIO.write(snapshotF, "PNG", file);
-			if (ok) {
-			    System.out.println("Saved snapshot to " + file);
-			} else {
-			    System.out.println("**** Error writing to " + file);
-			}
-		    } catch (IOException ex) {
-			ex.printStackTrace();
-			System.out.println("**** Error writing to " + file);
-		    }
-		}
-	    }
-	}).start();
+        BufferedImage snapshot;
+        BufferedImage framebuffer;
+        snapshot = new BufferedImage(deviceConfig.width, deviceConfig.height, 
+                                         BufferedImage.TYPE_INT_ARGB);
+        framebuffer = new BufferedImage(deviceConfig.width, deviceConfig.height, 
+                                         BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = framebuffer.createGraphics();
+        try {
+            engine.repaintFrame(g);
+        } catch (InterruptedException ignored) {
+        }
+        g.dispose();
+        g = snapshot.createGraphics();
+        g.setComposite(AlphaComposite.Src);
+        if (background == null) {
+            g.setColor(new Color(0,0,0,0));
+            g.fillRect(0, 0, deviceConfig.width, deviceConfig.height);
+        } else {
+            g.drawImage(background, 0, 0, null, null);
+        }
+        g.setComposite(AlphaComposite.SrcOver);
+        g.drawImage(framebuffer, 0, 0, null, null);
+        g.dispose();
+        final BufferedImage snapshotF = snapshot;
+        new Thread(new Runnable() {
+            public void run() {
+                JFileChooser fc = new JFileChooser();
+                fc.setDialogTitle("Save .png snapshot");
+                int ret = fc.showSaveDialog(GenericMain.this);
+                if (ret == JFileChooser.APPROVE_OPTION) {
+                    File file = fc.getSelectedFile();
+                    System.out.println("Saving PNG to " + file + "...");
+                    try {
+                        boolean ok = ImageIO.write(snapshotF, "PNG", file);
+                        if (ok) {
+                            System.out.println("Saved snapshot to " + file);
+                        } else {
+                            System.out.println("**** Error writing to " + file);
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        System.out.println("**** Error writing to " + file);
+                    }
+                }
+            }
+        }).start();
     }
 
     public String doKeyboardCommand (String s) {
@@ -509,10 +509,10 @@ public class GenericMain extends Frame implements AnimationContext {
             }
         }
 
-	try {
-	    if (s.startsWith("s")) {
-		s = s.substring(1).trim();
-		return gotoSegment(s);
+        try {
+            if (s.startsWith("s")) {
+                s = s.substring(1).trim();
+                return gotoSegment(s);
             } else if (s.startsWith("w")) {
                 s = s.substring(1).trim();
                 float tm = 0f;
@@ -530,83 +530,83 @@ public class GenericMain extends Frame implements AnimationContext {
                     return null;
                 }
                 return "Slept " + tm + " seconds.";
-	    } else if (s.startsWith("+")) {
-		s = s.substring(1).trim();
-		int num = 0;
-		if ("".equals(s)) {
-		    num = 1;
-		} else {
-		    try {
-			num = Integer.parseInt(s);
-		    } catch (NumberFormatException ex) {
-			System.out.println(ex);
-		    }
-		}
-		return advanceFrames(num);
-	    } else if (s.startsWith("f")) {
-		s = s.substring(1).trim();
-		float newFps = 0f;
-		try {
-		    newFps = Float.parseFloat(s);
-		} catch (NumberFormatException ex) {
-		    System.out.println(ex);
-		}
-		return setFps(newFps);
-	    } else {
-		printHelpMessage();
-		if ("?".equals(s) || "h".equals(s)) {
-		    return null;
-		} else {
-		    return "Command \"" + s + "\" unrecognized.";
-		}
-	    }
-	} catch (NumberFormatException ex) {
-	    return ex.toString();
-	}
+            } else if (s.startsWith("+")) {
+                s = s.substring(1).trim();
+                int num = 0;
+                if ("".equals(s)) {
+                    num = 1;
+                } else {
+                    try {
+                        num = Integer.parseInt(s);
+                    } catch (NumberFormatException ex) {
+                        System.out.println(ex);
+                    }
+                }
+                return advanceFrames(num);
+            } else if (s.startsWith("f")) {
+                s = s.substring(1).trim();
+                float newFps = 0f;
+                try {
+                    newFps = Float.parseFloat(s);
+                } catch (NumberFormatException ex) {
+                    System.out.println(ex);
+                }
+                return setFps(newFps);
+            } else {
+                printHelpMessage();
+                if ("?".equals(s) || "h".equals(s)) {
+                    return null;
+                } else {
+                    return "Command \"" + s + "\" unrecognized.";
+                }
+            }
+        } catch (NumberFormatException ex) {
+            return ex.toString();
+        }
     }
 
     protected String gotoSegment(String name) {
-	Segment seg = show.getSegment(name);
-	String msg = null;
-	if (seg != null) {
-	    msg = "Activating public segment " + seg;
-	} else {
-	    seg = show.getPrivateSegment(name);
-	    if (seg != null) {
-		msg = "Activating private segment " + seg;
-	    }
-	}
-	if (msg == null) {
-	    return "No segment called \"" + name + "\".";
-	} else {
-	    show.activateSegment(seg);
-	    return msg;
-	}
+        Segment seg = show.getSegment(name);
+        String msg = null;
+        if (seg != null) {
+            msg = "Activating public segment " + seg;
+        } else {
+            seg = show.getPrivateSegment(name);
+            if (seg != null) {
+                msg = "Activating private segment " + seg;
+            }
+        }
+        if (msg == null) {
+            return "No segment called \"" + name + "\".";
+        } else {
+            show.activateSegment(seg);
+            return msg;
+        }
     }
     
     protected String advanceFrames(int num) {
-	try {
-	    engine.skipFrames(num);
-	} catch (InterruptedException ignored) {
-	}
-	return "    Skipped " + num + " frames.";
+        try {
+            engine.skipFrames(num);
+        } catch (InterruptedException ignored) {
+        }
+        return "    Skipped " + num + " frames.";
     }
 
     public void setDebugDraw(boolean doDebugDraw) {
-	debugDraw = doDebugDraw;
-	synchronized(debugWaitingMonitor) {
-	    if (!debugDraw) {
-		debugWaiting = false;
-		debugWaitingMonitor.notifyAll();
-	    }
-	}
-	if (engine != null) {
-	    engine.setDebugDraw(doDebugDraw);
-	}
+        debugDraw = doDebugDraw;
+        synchronized(debugWaitingMonitor) {
+            if (!debugDraw) {
+                debugWaiting = false;
+                debugWaitingMonitor.notifyAll();
+            }
+        }
+        if (engine != null) {
+            engine.setDebugDraw(doDebugDraw);
+        }
     }
 
     public void setSendKeyUp(boolean v) {
-	sendKeyUp = v;
+        sendKeyUp = v;
     }
 
     public boolean getSendKeyUp() {
@@ -614,59 +614,59 @@ public class GenericMain extends Frame implements AnimationContext {
     }
     
     protected String setFps(float newFps) {
-	if ((fps > 0) && (newFps <= 0)) {
-	    setDebugDraw(false);
-	    // Going into single-step mode when in debug draw
-	    // can lead to deadlocks.  Fixing this would probably require
-	    // cleaning up GrinView's locking model, which isn't worth
-	    // doing for just this, so when the framerate goes to 0, we
-	    // just uncheck the debug draw checkbox, and re-set debug draw
-	    // mode.
-	}
-	fps = newFps;
-	if (engine != null) {
-	    if (newFps <= 0) {
-		try {
-		    engine.pause();
-		    engine.skipFrames(1);  // Output one more, with background.
-		} catch (InterruptedException ignored) {
-		}
-	    } else {
-		engine.setFps((int) (newFps * 1001));
-		engine.start();
-	    }
-	}
-	return "    Set fps to " + newFps;
+        if ((fps > 0) && (newFps <= 0)) {
+            setDebugDraw(false);
+            // Going into single-step mode when in debug draw
+            // can lead to deadlocks.  Fixing this would probably require
+            // cleaning up GrinView's locking model, which isn't worth
+            // doing for just this, so when the framerate goes to 0, we
+            // just uncheck the debug draw checkbox, and re-set debug draw
+            // mode.
+        }
+        fps = newFps;
+        if (engine != null) {
+            if (newFps <= 0) {
+                try {
+                    engine.pause();
+                    engine.skipFrames(1);  // Output one more, with background.
+                } catch (InterruptedException ignored) {
+                }
+            } else {
+                engine.setFps((int) (newFps * 1001));
+                engine.start();
+            }
+        }
+        return "    Set fps to " + newFps;
     }
     
     public void animationInitialize() throws InterruptedException {
-	AnimationClient[] clients = { show };
-	engine.initClients(clients);
-	GraphicsConfiguration con = getGraphicsConfiguration();
-	if (con.getColorModel().getTransparency() != Transparency.TRANSLUCENT) {
-	    // On windows and Mac/Intel/Leopard (at least), alpha blending to a 
-	    // background image requires
-	    // special handling.  See the comments in paint(Graphics).
-	    BufferedImage im 
-	        = con.createCompatibleImage(screenWidth, screenHeight);
-	    engine.setNonTranslucentFix(im);
-	}
-	Rectangle ourBounds=new Rectangle(insets.left, insets.top, 1920, 1080);
-	engine.initContainer(this, ourBounds);
+        AnimationClient[] clients = { show };
+        engine.initClients(clients);
+        GraphicsConfiguration con = getGraphicsConfiguration();
+        if (con.getColorModel().getTransparency() != Transparency.TRANSLUCENT) {
+            // On windows and Mac/Intel/Leopard (at least), alpha blending to a 
+            // background image requires
+            // special handling.  See the comments in paint(Graphics).
+            BufferedImage im 
+                = con.createCompatibleImage(screenWidth, screenHeight);
+            engine.setNonTranslucentFix(im);
+        }
+        Rectangle ourBounds=new Rectangle(insets.left, insets.top, 1920, 1080);
+        engine.initContainer(this, ourBounds);
     }
 
     public void animationFinishInitialization() throws InterruptedException {
-	System.out.println("Starting frame pump...");
+        System.out.println("Starting frame pump...");
         synchronized(this) {
             initialized = true;
             notifyAll();
         }
-	if (initialSegmentName != null) {
-	    doKeyboardCommand("s " + initialSegmentName); 
+        if (initialSegmentName != null) {
+            doKeyboardCommand("s " + initialSegmentName); 
                 // Calls Show.activateSegment
-	}
+        }
         
-	requestFocus();
+        requestFocus();
 
         if (doAutoTest) {
             new Thread() {

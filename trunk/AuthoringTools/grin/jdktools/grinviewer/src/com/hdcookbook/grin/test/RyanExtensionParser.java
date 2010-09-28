@@ -82,30 +82,30 @@ public class RyanExtensionParser
 
     private static abstract class RyanCommand extends Command implements SENode
     {
-	public RyanCommand(Show show) {
-	    super(show);
-	}
-	public void writeInstanceData(GrinDataOutputStream out) {
-	    throw new UnsupportedOperationException("Not supported yet.");
-	}
-	public String getRuntimeClassName() {
-	    throw new UnsupportedOperationException("Not supported yet.");
-	}
-	public void accept(SEShowVisitor visitor) {
-	    visitor.visitUserDefinedCommand(this);
-	}
-	public void postProcess(ShowBuilder builder) {
-	}
-	public void changeFeatureReference(Feature from, Feature to) {
-	    throw new UnsupportedOperationException("Not supported yet.");
-	}
+        public RyanCommand(Show show) {
+            super(show);
+        }
+        public void writeInstanceData(GrinDataOutputStream out) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        public String getRuntimeClassName() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        public void accept(SEShowVisitor visitor) {
+            visitor.visitUserDefinedCommand(this);
+        }
+        public void postProcess(ShowBuilder builder) {
+        }
+        public void changeFeatureReference(Feature from, Feature to) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     public RyanExtensionParser() {
-	this.director = null;	// used with GrinView
+        this.director = null;   // used with GrinView
     }
     public RyanExtensionParser(RyanDirector director) {
-	this.director = director;
+        this.director = director;
     }
 
 
@@ -117,80 +117,80 @@ public class RyanExtensionParser
     }
 
     public Modifier getModifier(Show show, String typeName, 
-    			        String name, Lexer lexer)
+                                String name, Lexer lexer)
                                 throws IOException
     {
         return null;
     }
 
     //public Command parseCommand(Show show, String typeName, Lexer lex,
-    //			        ShowParser parser) 
+    //                          ShowParser parser) 
     
     public Command getCommand(Show show, String typeName, 
             Lexer lexer)
-			throws IOException
+                        throws IOException
     {
-	Command result = null;
-	if ("ryan:start_video".equals(typeName)) {
-	    result = new RyanCommand(show) {
-	       public void execute() { 
-		    if (director == null) {
-			System.out.println("Pretending to start video");
-		    } else {
-			director.startVideo();
-		    }
-	       }
+        Command result = null;
+        if ("ryan:start_video".equals(typeName)) {
+            result = new RyanCommand(show) {
+               public void execute() { 
+                    if (director == null) {
+                        System.out.println("Pretending to start video");
+                    } else {
+                        director.startVideo();
+                    }
+               }
                public void readInstanceData(GrinDataInputStream in) throws IOException {
                     throw new UnsupportedOperationException("Not supported yet.");
                }
-	    };
-	} else if ("ryan:play_mode_interactive".equals(typeName)) {
-	    final boolean val = lexer.getBoolean();
-	    result = new RyanCommand(show) {
-	       public void execute() { 
-		    if (director == null) {
-			System.out.println("Pretending to set interactive mode"
-					   + val);
-		    } else {
-			director.setInteractiveMode(val);
-		    }
-	       }
+            };
+        } else if ("ryan:play_mode_interactive".equals(typeName)) {
+            final boolean val = lexer.getBoolean();
+            result = new RyanCommand(show) {
+               public void execute() { 
+                    if (director == null) {
+                        System.out.println("Pretending to set interactive mode"
+                                           + val);
+                    } else {
+                        director.setInteractiveMode(val);
+                    }
+               }
                public void readInstanceData(GrinDataInputStream in) throws IOException {
                     throw new UnsupportedOperationException("Not supported yet.");
                }
-	    };
-	} else if ("ryan:toggle_commentary".equals(typeName)) {
-	    result = new RyanCommand(show) {
-	       public void execute() { 
-		    if (director == null) {
-			System.out.println("Pretending to toggle commentary");
-		    } else {
-			director.toggleCommentary();
-		    }
-	       }
+            };
+        } else if ("ryan:toggle_commentary".equals(typeName)) {
+            result = new RyanCommand(show) {
+               public void execute() { 
+                    if (director == null) {
+                        System.out.println("Pretending to toggle commentary");
+                    } else {
+                        director.toggleCommentary();
+                    }
+               }
                public void readInstanceData(GrinDataInputStream in) throws IOException {
                     throw new UnsupportedOperationException("Not supported yet.");
                }
-	    };
-	} else if ("ryan:commentary_start".equals(typeName)) {
-	    result = new RyanCommand(show) {
-	       public void execute() { 
-		    if (director == null) {
-			System.out.println("Pretending to start commentary");
-		    } else {
-			director.startCommentary();
-		    }
-	       }
+            };
+        } else if ("ryan:commentary_start".equals(typeName)) {
+            result = new RyanCommand(show) {
+               public void execute() { 
+                    if (director == null) {
+                        System.out.println("Pretending to start commentary");
+                    } else {
+                        director.startCommentary();
+                    }
+               }
                public void readInstanceData(GrinDataInputStream in) throws IOException {
                     throw new UnsupportedOperationException("Not supported yet.");
                }
-	    };
-	} else {
-	    throw new IOException("Unrecognized command type \"" + typeName + "\"");
-	}
+            };
+        } else {
+            throw new IOException("Unrecognized command type \"" + typeName + "\"");
+        }
         
         lexer.parseExpected(";");
         
-	return result;
+        return result;
     }
 }

@@ -76,16 +76,16 @@ public class SEImagePlacement implements SEImageSeqPlacement {
     private HorizontalAlignment xAlign;
     private int y;
     private VerticalAlignment yAlign;
-    private double scaleX;	// may be negative
-    private double scaleY;	// may be negative
+    private double scaleX;      // may be negative
+    private double scaleY;      // may be negative
 
     public SEImagePlacement() {
-	x = 0;
-	xAlign = HorizontalAlignment.LEFT;
-	y = 0;
-	yAlign = VerticalAlignment.TOP;
-	scaleX = 1.0;
-	scaleY = 1.0;
+        x = 0;
+        xAlign = HorizontalAlignment.LEFT;
+        y = 0;
+        yAlign = VerticalAlignment.TOP;
+        scaleX = 1.0;
+        scaleY = 1.0;
     }
 
     public void setScaleX(double scaleX) {
@@ -141,18 +141,18 @@ public class SEImagePlacement implements SEImageSeqPlacement {
      * {@inheritDoc}
      **/
     public Rectangle[] getImageSeqPlacementRects(String[] images) 
-    		throws IOException
+                throws IOException
     {
-	Rectangle[] result = new Rectangle[images.length];
-	for (int i = 0; i < images.length; i++) {
-	    String im = images[i];
-	    if (im == null) {
-		result[i] = null;
-	    } else {
-		result[i] = getImagePlacementRect(images[i]);
-	    }
-	}
-	return result;
+        Rectangle[] result = new Rectangle[images.length];
+        for (int i = 0; i < images.length; i++) {
+            String im = images[i];
+            if (im == null) {
+                result[i] = null;
+            } else {
+                result[i] = getImagePlacementRect(images[i]);
+            }
+        }
+        return result;
     }
 
     /**
@@ -167,57 +167,57 @@ public class SEImagePlacement implements SEImageSeqPlacement {
      * so you can call 
      * <code>g.draw(..., r.x, r.y, r.x+r.width, r.y+r.height, ...)</code>.
      *
-     * @throws	IOException	If there's a problem reading the image file
+     * @throws  IOException     If there's a problem reading the image file
      **/
     public Rectangle getImagePlacementRect(String imageFileName) 
-    		throws IOException 
+                throws IOException 
     {
-	Rectangle result = new Rectangle();
+        Rectangle result = new Rectangle();
 
-	// 
-	// First, we see if this image exists in a mosaic.  This can
-	// happen with GrinView, and in this case the original image
-	// file isn't available.  If we don't find a mosaic tile, then
-	// we use ImageIO, because that works even if we're running
-	// in a program that has no GUI.
-	//
-	ManagedImage mi = ImageManager.getImage(imageFileName);
-	try {
-	    if (mi instanceof ManagedSubImage) {
-		result.width = (int) Math.round(mi.getWidth() * scaleX);
-		result.height = (int) Math.round(mi.getHeight() * scaleY);
-	    } else {
-		BufferedImage im = ImageIO.read(
-					AssetFinder.getURL(imageFileName));
-		result.width = (int) Math.round(im.getWidth() * scaleX);
-		result.height = (int) Math.round(im.getHeight() * scaleY);
-	    }
-	} finally {
-	    ImageManager.ungetImage(mi);
-	}
+        // 
+        // First, we see if this image exists in a mosaic.  This can
+        // happen with GrinView, and in this case the original image
+        // file isn't available.  If we don't find a mosaic tile, then
+        // we use ImageIO, because that works even if we're running
+        // in a program that has no GUI.
+        //
+        ManagedImage mi = ImageManager.getImage(imageFileName);
+        try {
+            if (mi instanceof ManagedSubImage) {
+                result.width = (int) Math.round(mi.getWidth() * scaleX);
+                result.height = (int) Math.round(mi.getHeight() * scaleY);
+            } else {
+                BufferedImage im = ImageIO.read(
+                                        AssetFinder.getURL(imageFileName));
+                result.width = (int) Math.round(im.getWidth() * scaleX);
+                result.height = (int) Math.round(im.getHeight() * scaleY);
+            }
+        } finally {
+            ImageManager.ungetImage(mi);
+        }
 
-	if (xAlign == HorizontalAlignment.LEFT) {
-	    result.x = x;
-	} else if (xAlign == HorizontalAlignment.MIDDLE) {
-	    result.x = x - (int) Math.round(0.5 * Math.abs(result.width));
-	} else {
-	    assert xAlign == HorizontalAlignment.RIGHT;
-	    result.x = x - Math.abs(result.width);
-	}
-	if (yAlign == VerticalAlignment.TOP) {
-	    result.y = y;
-	} else if (yAlign == VerticalAlignment.MIDDLE) {
-	    result.y = y - (int) Math.round(0.5 * Math.abs(result.height));
-	} else {
-	    assert yAlign == VerticalAlignment.BOTTOM;
-	    result.y = y - Math.abs(result.height);
-	}
-	if (result.width < 0) {
-	    result.x -= result.width;	// Set up for Graphics.draw(...)
-	}
-	if (result.height < 0) {
-	    result.y -= result.height;
-	}
-	return result;
+        if (xAlign == HorizontalAlignment.LEFT) {
+            result.x = x;
+        } else if (xAlign == HorizontalAlignment.MIDDLE) {
+            result.x = x - (int) Math.round(0.5 * Math.abs(result.width));
+        } else {
+            assert xAlign == HorizontalAlignment.RIGHT;
+            result.x = x - Math.abs(result.width);
+        }
+        if (yAlign == VerticalAlignment.TOP) {
+            result.y = y;
+        } else if (yAlign == VerticalAlignment.MIDDLE) {
+            result.y = y - (int) Math.round(0.5 * Math.abs(result.height));
+        } else {
+            assert yAlign == VerticalAlignment.BOTTOM;
+            result.y = y - Math.abs(result.height);
+        }
+        if (result.width < 0) {
+            result.x -= result.width;   // Set up for Graphics.draw(...)
+        }
+        if (result.height < 0) {
+            result.y -= result.height;
+        }
+        return result;
     }
 }

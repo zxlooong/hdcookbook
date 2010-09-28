@@ -80,8 +80,8 @@ public class DriverXlet implements Xlet {
     }
     
     private AppProxy getAppProxy(int orgID, int appID) {
-	AppsDatabase db = AppsDatabase.getAppsDatabase();
-	return db.getAppProxy(new AppID(orgID, appID));
+        AppsDatabase db = AppsDatabase.getAppsDatabase();
+        return db.getAppProxy(new AppID(orgID, appID));
     }    
 }
 

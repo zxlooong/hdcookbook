@@ -72,45 +72,45 @@ public class MosaicPart {
     private Rectangle placement;
 
     public MosaicPart(ManagedImage image, Mosaic mosaic, 
-    		      int maxWidth, int maxHeight) 
+                      int maxWidth, int maxHeight) 
     {
-	this.image = image;
-	this.mosaic = mosaic;
-	this.placement = new Rectangle();
-	placement.width = Math.min(image.getWidth(), maxWidth);
-	placement.height = Math.min(image.getHeight(), maxHeight);
-	placement.x = 0;
-	placement.y = 0;
+        this.image = image;
+        this.mosaic = mosaic;
+        this.placement = new Rectangle();
+        placement.width = Math.min(image.getWidth(), maxWidth);
+        placement.height = Math.min(image.getHeight(), maxHeight);
+        placement.x = 0;
+        placement.y = 0;
     }
 
     /** 
      * Get the name of the original image for this part
      **/
     public String getName() {
-	return image.getName();
+        return image.getName();
     }
 
     /**
      * Get the area where the original image was placed within the mosaic.
      **/
     public Rectangle getPlacement() {
-	return placement;
+        return placement;
     }
 
     public ManagedImage getImage() {
-	return image;
+        return image;
     }
 
     void setPosition(int x, int y) {
-	placement.x = x;
-	placement.y = y;
+        placement.x = x;
+        placement.y = y;
     }
 
     /**
      * Get the mosaic we're contained within.
      **/
     public Mosaic getMosaic() {
-	return mosaic;
+        return mosaic;
     }
 
 }

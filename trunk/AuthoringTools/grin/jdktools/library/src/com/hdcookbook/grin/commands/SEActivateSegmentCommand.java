@@ -69,7 +69,7 @@ public class SEActivateSegmentCommand extends ActivateSegmentCommand implements 
     }
     
     public SEActivateSegmentCommand(SEShow show, boolean push, boolean pop) {
-	super(show, push, pop);
+        super(show, push, pop);
     }
     
     public void setPush(boolean push) {
@@ -84,33 +84,33 @@ public class SEActivateSegmentCommand extends ActivateSegmentCommand implements 
      * Override of equals and hashCode to make canonicalization work
      **/
     public boolean equals(Object other) {
-	if (this == other) {
-	    return true;
-	} else if (!this.getClass().equals(other.getClass())) {
-	    return false;
-	}
-	SEActivateSegmentCommand o = (SEActivateSegmentCommand) other;
-	return this.show == o.show
-	       && this.push == o.push
-	       && this.pop == o.pop
-	       && this.segment == o.segment;
+        if (this == other) {
+            return true;
+        } else if (!this.getClass().equals(other.getClass())) {
+            return false;
+        }
+        SEActivateSegmentCommand o = (SEActivateSegmentCommand) other;
+        return this.show == o.show
+               && this.push == o.push
+               && this.pop == o.pop
+               && this.segment == o.segment;
     }
 
     /**
      * Override of equals and hashCode to make canonicalization work
      **/
     public int hashCode() {
-	int result = 0;
-	if (pop) {
-	    result += 0x0f1;
-	}
-	if (push) {
-	    result += 0xf0;
-	}
-	if (segment != null)  {
-	    result ^= segment.hashCode();
-	}
-	return show.hashCode() ^ result;
+        int result = 0;
+        if (pop) {
+            result += 0x0f1;
+        }
+        if (push) {
+            result += 0xf0;
+        }
+        if (segment != null)  {
+            result ^= segment.hashCode();
+        }
+        return show.hashCode() ^ result;
     }
     
     public void writeInstanceData(GrinDataOutputStream out) 
@@ -146,16 +146,16 @@ public class SEActivateSegmentCommand extends ActivateSegmentCommand implements 
      * {@inheritDoc}
      **/
     public String toString() {
-	String result = "activate_segment ";
-	if (pop) {
-	    return result + "<pop>";
-	}
-	result = result + segment;
-	if (push) {
-	    return result + " <push>";
-	} else {
-	    return result;
-	}
+        String result = "activate_segment ";
+        if (pop) {
+            return result + "<pop>";
+        }
+        result = result + segment;
+        if (push) {
+            return result + " <push>";
+        } else {
+            return result;
+        }
     }
     
 }

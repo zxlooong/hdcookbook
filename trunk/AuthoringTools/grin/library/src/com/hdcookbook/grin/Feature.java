@@ -90,12 +90,12 @@ public abstract class Feature {
     private int setupCount = 0;
 
     /**
-     * @param show	The show this feature is attached to.  The value
-     *			can be null, as long as it's set to a real value
-     *			before the feature is used.
+     * @param show      The show this feature is attached to.  The value
+     *                  can be null, as long as it's set to a real value
+     *                  before the feature is used.
      **/
     protected Feature(Show show) {
-	this.show = show;
+        this.show = show;
     }
     
     /**
@@ -115,7 +115,7 @@ public abstract class Feature {
      * @return the name of this feature, or null if it is not known.
      **/
     public String getName() {
-	return name;
+        return name;
     }
 
     /**
@@ -224,15 +224,15 @@ public abstract class Feature {
      * @see #unsetup()
      *
      * @return A lower bound on the number of setup commands that will
-     *		be generated due to this call.
+     *          be generated due to this call.
      **/
     final public int setup() {
-	setupCount++;
-	if (setupCount == 1) {
-	    return setSetupMode(true);
-	} else {
-	    return 0;
-	}
+        setupCount++;
+        if (setupCount == 1) {
+            return setSetupMode(true);
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -244,10 +244,10 @@ public abstract class Feature {
      * @see #setup()
      **/
     final public void unsetup() {
-	setupCount--;
-	if (setupCount == 0) {
-	    setSetupMode(false);
-	}
+        setupCount--;
+        if (setupCount == 0) {
+            setSetupMode(false);
+        }
     }
 
     /**
@@ -255,7 +255,7 @@ public abstract class Feature {
      * to be set up.
      **/
     final public boolean isSetup() {
-	return setupCount > 0;
+        return setupCount > 0;
     }
 
     /**
@@ -270,10 +270,10 @@ public abstract class Feature {
      * @see #deactivate()
      **/
     final public void activate() {
-	activateCount++;
-	if (activateCount == 1) {
-	    setActivateMode(true);
-	}
+        activateCount++;
+        if (activateCount == 1) {
+            setActivateMode(true);
+        }
     }
 
     /**
@@ -285,10 +285,10 @@ public abstract class Feature {
      * @see #activate()
      **/
     final public void deactivate() {
-	activateCount--;
-	if (activateCount == 0) {
-	    setActivateMode(false);
-	}
+        activateCount--;
+        if (activateCount == 0) {
+            setActivateMode(false);
+        }
     }
 
     private Command featureSetupCommand = null;
@@ -307,7 +307,7 @@ public abstract class Feature {
             c.setCommandNumber(GrinXHelper.FEATURE_SETUP);
             featureSetupCommand = c;
         }
-	show.runCommand(featureSetupCommand);
+        show.runCommand(featureSetupCommand);
     }
 
     /**
@@ -322,7 +322,7 @@ public abstract class Feature {
      * Clients of the GRIN framework should not call this method directly.
      * Feature subclasses must implement this method.
      * 
-     * @param	context	The context for tracking rendering state
+     * @param   context The context for tracking rendering state
      *
      * @see com.hdcookbook.grin.animator.DrawRecord
      **/
@@ -364,10 +364,10 @@ public abstract class Feature {
      * state of the feature to what it was when first activated.
      **/
     public final void resetFeature() {
-	if (activateCount > 0) {
-	    setActivateMode(false);
-	    setActivateMode(true);
-	}
+        if (activateCount > 0) {
+            setActivateMode(false);
+            setActivateMode(true);
+        }
     }
 
     /**
@@ -398,45 +398,45 @@ public abstract class Feature {
      * carries state (like a translation's model) should be in the set of
      * features being cloned.
      *
-     * @param	clones  A map from original feature to its clone, which should
-     *			initially be empty.  When this method completes it
-     *			will be populated with all cloned features, including
-     *			the top node of the cloned subgraph.  You can use
-     *			this map to locate the clones of features in your 
-     *			graph, e.g. named features that you've previously looked
-     *			up.  This must not be null.  The key of each entry
-     *			is the original feature, and the value is its clone.
+     * @param   clones  A map from original feature to its clone, which should
+     *                  initially be empty.  When this method completes it
+     *                  will be populated with all cloned features, including
+     *                  the top node of the cloned subgraph.  You can use
+     *                  this map to locate the clones of features in your 
+     *                  graph, e.g. named features that you've previously looked
+     *                  up.  This must not be null.  The key of each entry
+     *                  is the original feature, and the value is its clone.
      *
      * @throws UnsupportedOperationException if this feature's class doesn't
-     *	 	implement cloneFeature(), or if any features or commands this
-     *		feature refers to doesn't implement cloning.  All built-in 
-     *		GRIN commands and features features do
-     *		implement cloning, but extension subclasses might not.
-     *		The implementation of cloneFeature() in the Feature superclass
-     *		always throws this exception.
+     *          implement cloneFeature(), or if any features or commands this
+     *          feature refers to doesn't implement cloning.  All built-in 
+     *          GRIN commands and features features do
+     *          implement cloning, but extension subclasses might not.
+     *          The implementation of cloneFeature() in the Feature superclass
+     *          always throws this exception.
      *
      * @throws IllegalStateException may be thrown if the feature has not been 
-     *		initialized and set up, if the feature is currently activated
-     *	        (that is, visible), or if the feature has been destroyed.  
+     *          initialized and set up, if the feature is currently activated
+     *          (that is, visible), or if the feature has been destroyed.  
      *
      * @see com.hdcookbook.grin.features.Group#resetVisibleParts(com.hdcookbook.grin.Feature[])
      * @see #initialize()
      * @see #destroyClonedSubgraph()
      **/
     final public Feature cloneSubgraph(HashMap clones) {
-	if (Debug.ASSERT && !clones.isEmpty()) {
-	    Debug.assertFail();
-	}
-	Feature result = makeNewClone(clones);
-	if (Debug.ASSERT && clones.get(this) == null) {
-	    Debug.assertFail();
-	}
-	for (Iterator it = clones.keySet().iterator(); it.hasNext(); ) {
-	    Feature key = (Feature) it.next();
-	    Feature value = (Feature) clones.get(key);
-	    value.initializeClone(key, clones);
-	}
-	return result;
+        if (Debug.ASSERT && !clones.isEmpty()) {
+            Debug.assertFail();
+        }
+        Feature result = makeNewClone(clones);
+        if (Debug.ASSERT && clones.get(this) == null) {
+            Debug.assertFail();
+        }
+        for (Iterator it = clones.keySet().iterator(); it.hasNext(); ) {
+            Feature key = (Feature) it.next();
+            Feature value = (Feature) clones.get(key);
+            value.initializeClone(key, clones);
+        }
+        return result;
     }
 
     /**
@@ -461,31 +461,31 @@ public abstract class Feature {
      * remove the code from your method that used to add clones to the 
      * clones map.
      *
-     * @param	clones	A map from original feature to cloned feature.  Entries
-     *			are added by makeNewClone()
+     * @param   clones  A map from original feature to cloned feature.  Entries
+     *                  are added by makeNewClone()
      *
      * @throws UnsupportedOperationException as specified in 
-     *		Feature.cloneSubgraph()
+     *          Feature.cloneSubgraph()
      *
      * @throws IllegalStateException as specified in 
-     *		Feature.cloneSubgraph()
+     *          Feature.cloneSubgraph()
      *
      * @see #cloneSubgraph(java.util.HashMap)
      * @see #createClone(java.util.HashMap)
      **/
     final public Feature makeNewClone(HashMap clones) {
-	Feature clone = (Feature) clones.get(this);
-	if (clone == null) {
-	    clone = createClone(clones);
-	    if (Debug.ASSERT && clones.get(this) != null) {
-		Debug.assertFail();
-		    // A well-formed scene graph is a directed acyclic graph, so
-		    // if one of our children added us, the scene graph is 
-		    // not well-formed.
-	    }
-	    clones.put(this, clone);
-	}
-	return clone;
+        Feature clone = (Feature) clones.get(this);
+        if (clone == null) {
+            clone = createClone(clones);
+            if (Debug.ASSERT && clones.get(this) != null) {
+                Debug.assertFail();
+                    // A well-formed scene graph is a directed acyclic graph, so
+                    // if one of our children added us, the scene graph is 
+                    // not well-formed.
+            }
+            clones.put(this, clone);
+        }
+        return clone;
     }
 
     /**
@@ -503,21 +503,21 @@ public abstract class Feature {
      * of runtime exceptions this method can throw.  Subclasses that wish
      * to support cloning must override this method.
      *
-     * @param	clones	A map from original feature to cloned feature.  Entries
-     *			are added by Feature.makeNewClone().
+     * @param   clones  A map from original feature to cloned feature.  Entries
+     *                  are added by Feature.makeNewClone().
      *
      * @throws UnsupportedOperationException as specified in 
-     *		Feature.cloneSubgraph()
+     *          Feature.cloneSubgraph()
      *
      * @throws IllegalStateException as specified in 
-     *		Feature.cloneSubgraph()
+     *          Feature.cloneSubgraph()
      *
      * @see #makeNewClone(java.util.HashMap)
      * @see #cloneSubgraph(java.util.HashMap)
      **/
     protected Feature createClone(HashMap clones) {
-	throw new UnsupportedOperationException(getClass().getName()
-						    + ".createClone()");
+        throw new UnsupportedOperationException(getClass().getName()
+                                                    + ".createClone()");
     }
 
     /**
@@ -560,12 +560,12 @@ public abstract class Feature {
      * @see #cloneSubgraph(java.util.HashMap)
      **/
     public final void destroyClonedSubgraph() {
-	HashSet set = new HashSet();
-	addSubgraph(set);
-	for (Iterator it = set.iterator(); it.hasNext(); ) {
-	    Feature f = (Feature) it.next();
-	    f.destroy();
-	}
+        HashSet set = new HashSet();
+        addSubgraph(set);
+        for (Iterator it = set.iterator(); it.hasNext(); ) {
+            Feature f = (Feature) it.next();
+            f.destroy();
+        }
     }
 
     /**
@@ -581,7 +581,7 @@ public abstract class Feature {
      * on each child.
      **/
     public void addSubgraph(HashSet set) {
-	set.add(this);
+        set.add(this);
     }
 
 
@@ -592,47 +592,47 @@ public abstract class Feature {
      * give a reference to a clone of the feature being called, if
      * one was made, or if not, to this original feature.
      *
-     * @param f		The feature reference.  This may be null.
+     * @param f         The feature reference.  This may be null.
      **/
     protected static Feature clonedReference(Feature f, HashMap clones) {
-	if (f == null) {
-	    return null;
-	}
-	Object result = clones.get(f);
-	if (result == null) {
-	    return f;
-	} else {
-	    return (Feature) result;
-	}
+        if (f == null) {
+            return null;
+        }
+        Object result = clones.get(f);
+        if (result == null) {
+            return f;
+        } else {
+            return (Feature) result;
+        }
     }
 
     /**
      * Clone a command array within a feature.  This is used by some features'
      * implementation of makeNewClone().
      *
-     *  @param commands		The array to clone.  May be null.
-     *  @param	clones		A map from original feature to their clones.
+     *  @param commands         The array to clone.  May be null.
+     *  @param  clones          A map from original feature to their clones.
      *
      * @throws UnsupportedOperationException as specified in 
-     *		Feature.cloneSubgraph()
+     *          Feature.cloneSubgraph()
      *
      * @throws IllegalStateException as specified in 
-     *		Feature.cloneSubgraph()
+     *          Feature.cloneSubgraph()
      **/
     protected static Command[] cloneCommands(Command[] commands, HashMap clones)
     {
-	if (commands == null || commands.length == 0) {
-	    return commands;
-	}
-	Command[] result = new Command[commands.length];
-	boolean changed = false;
-	for (int i = 0; i < commands.length; i++) {
-	    result[i] = commands[i].cloneIfNeeded(clones);
-	    changed = changed || result[i] != commands[i];
-	}
-	if (!changed) {
-	    result = commands;
-	}
-	return result;
+        if (commands == null || commands.length == 0) {
+            return commands;
+        }
+        Command[] result = new Command[commands.length];
+        boolean changed = false;
+        for (int i = 0; i < commands.length; i++) {
+            result[i] = commands[i].cloneIfNeeded(clones);
+            changed = changed || result[i] != commands[i];
+        }
+        if (!changed) {
+            result = commands;
+        }
+        return result;
     }
 }

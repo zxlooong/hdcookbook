@@ -106,48 +106,48 @@ public class Group extends Feature implements Node {
      * {@inheritDoc}
      **/
     protected Feature createClone(HashMap clones) {
-	if (!isSetup() || activated) {
-	    throw new IllegalStateException();
-	}
-	Group result = new Group(show);
-	result.parts = new Feature[parts.length];
-	result.numSetupChecked = numSetupChecked;
-	for (int i = 0; i < parts.length; i++) {
-	    result.parts[i] = parts[i].makeNewClone(clones);
-	}
-	    // result.activated remains false
-	return result;
-	    // No initializeClone() of this feature is needed.
+        if (!isSetup() || activated) {
+            throw new IllegalStateException();
+        }
+        Group result = new Group(show);
+        result.parts = new Feature[parts.length];
+        result.numSetupChecked = numSetupChecked;
+        for (int i = 0; i < parts.length; i++) {
+            result.parts[i] = parts[i].makeNewClone(clones);
+        }
+            // result.activated remains false
+        return result;
+            // No initializeClone() of this feature is needed.
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void initializeClone(Feature original, HashMap clones) {
-	super.initializeClone(original, clones);
-	Group other = (Group) original;
-	if (other.visibleParts == other.parts) {
-	    visibleParts = parts;
-	} else {
-	    visibleParts = new Feature[other.visibleParts.length];
-	    for (int i = 0; i < visibleParts.length; i++) {
-	    	Feature f = other.visibleParts[i];
-		visibleParts[i] = Feature.clonedReference(f, clones);
-	    }
-	}
+        super.initializeClone(original, clones);
+        Group other = (Group) original;
+        if (other.visibleParts == other.parts) {
+            visibleParts = parts;
+        } else {
+            visibleParts = new Feature[other.visibleParts.length];
+            for (int i = 0; i < visibleParts.length; i++) {
+                Feature f = other.visibleParts[i];
+                visibleParts[i] = Feature.clonedReference(f, clones);
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addSubgraph(HashSet set) {
-	if (set.contains(this)) {
-	    return;		// Avoid O(n^2) with assemblies 
-	}
-	super.addSubgraph(set);
-	for (int i = 0; i < parts.length; i++) {
-	    parts[i].addSubgraph(set);
-	}
+        if (set.contains(this)) {
+            return;             // Avoid O(n^2) with assemblies 
+        }
+        super.addSubgraph(set);
+        for (int i = 0; i < parts.length; i++) {
+            parts[i].addSubgraph(set);
+        }
     }
 
     /**
@@ -156,7 +156,7 @@ public class Group extends Feature implements Node {
      * modify this array.
      **/
     public Feature[] getParts() {
-	return parts;
+        return parts;
     }
 
     /**
@@ -164,36 +164,36 @@ public class Group extends Feature implements Node {
      * called when the object is initially being populated.
      **/
     protected void setParts(Feature[] parts) {
-	this.parts = parts;
-	this.visibleParts = parts;
+        this.parts = parts;
+        this.visibleParts = parts;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getX() {
-	int x = Integer.MAX_VALUE;
-	for (int i = 0; i < visibleParts.length; i++) {
-	    int val = visibleParts[i].getX();
-	    if (val < x) {
-		x = val;
-	    }
-	}
-	return x;
+        int x = Integer.MAX_VALUE;
+        for (int i = 0; i < visibleParts.length; i++) {
+            int val = visibleParts[i].getX();
+            if (val < x) {
+                x = val;
+            }
+        }
+        return x;
     }
 
     /**
      * {@inheritDoc}
      **/
     public int getY() {
-	int y = Integer.MAX_VALUE;
-	for (int i = 0; i < visibleParts.length; i++) {
-	    int val = visibleParts[i].getY();
-	    if (val < y) {
-		y = val;
-	    }
-	}
-	return y;
+        int y = Integer.MAX_VALUE;
+        for (int i = 0; i < visibleParts.length; i++) {
+            int val = visibleParts[i].getY();
+            if (val < y) {
+                y = val;
+            }
+        }
+        return y;
     }
 
     /**
@@ -202,8 +202,8 @@ public class Group extends Feature implements Node {
      * the segments.
      **/
     public void initialize() {
-	// The show will initialize our sub-features, so we don't
-	// need to do anything here.
+        // The show will initialize our sub-features, so we don't
+        // need to do anything here.
     }
 
     /**
@@ -217,8 +217,8 @@ public class Group extends Feature implements Node {
      * too!).
      **/
     public void destroy() {
-	// The show will destroy our sub-features, so we don't
-	// need to do anything here.
+        // The show will destroy our sub-features, so we don't
+        // need to do anything here.
     }
 
     /**
@@ -245,57 +245,57 @@ public class Group extends Feature implements Node {
      * This method relies on resetVisiblePartsNoAssert(Feature[]) after 
      * performing appropriate parameter and state checks.
      *
-     * @param visibleParts	An array of parts.  We take
-     *				ownership of the array.  A value of null
-     *				re-sets this group to its original state.
+     * @param visibleParts      An array of parts.  We take
+     *                          ownership of the array.  A value of null
+     *                          re-sets this group to its original state.
      *
      * @see com.hdcookbook.grin.Feature#cloneSubgraph(java.util.HashMap)
      * @see #resetVisiblePartsNoAssert(Feature[])
      **/
     public void resetVisibleParts(Feature[] visibleParts) {
-	if (Debug.ASSERT && !isSetup()) {
-	    if (visibleParts != null || activated) {
-		Debug.assertFail();
-	    }
-	}
+        if (Debug.ASSERT && !isSetup()) {
+            if (visibleParts != null || activated) {
+                Debug.assertFail();
+            }
+        }
         if (Debug.ASSERT && visibleParts != null) {
-	    //
-	    // Check that each child's graph is disjoint from every other child's.
-	    // This property is necessary for the correctness of the scene graph,
-	    // which must be a directed acyclic graph where each node can only
-	    // be active through one path at any given time.
-	    //
-	    // Note that even with this assertion, a programmer could force a
-	    // scene graph that's invalid, e.g. by having a group that contains
-	    // two children, each a group, and then by populating each child group
-	    // with the same set of nodes as its sibling.  To catch that,
-	    // we could do a global validity check of the entire tree every time
-	    // resetVisibleParts() is called on any group, but that seems like
-	    // overkill; this assetion as it stands will hopefully catch all 
-	    // unintentional  programmer errors.
-	    //
-	    // No assertion is needed if we're re-setting the Group to its original
-	    // state, because that set was already checked for us by 
-	    // SEDoubleUseChecker.
-	    //
-	    HashSet union = null;
-	    for (int i = 0; i < visibleParts.length; i++) {
-		HashSet child = new HashSet();
-		visibleParts[i].addSubgraph(child);
-		if (union == null) {
-		    union = child;
-		} else {
-		    for (Iterator it = child.iterator(); it.hasNext(); ) {
-			Object f = it.next();
-			if (union.contains(f)) {
-			    Debug.assertFail("Invalid cloned scene graph - "
-			    		     + " see comments in Group");
-			}
-			union.add(f);
-		    }
-		}
-	    }
-	}
+            //
+            // Check that each child's graph is disjoint from every other child's.
+            // This property is necessary for the correctness of the scene graph,
+            // which must be a directed acyclic graph where each node can only
+            // be active through one path at any given time.
+            //
+            // Note that even with this assertion, a programmer could force a
+            // scene graph that's invalid, e.g. by having a group that contains
+            // two children, each a group, and then by populating each child group
+            // with the same set of nodes as its sibling.  To catch that,
+            // we could do a global validity check of the entire tree every time
+            // resetVisibleParts() is called on any group, but that seems like
+            // overkill; this assetion as it stands will hopefully catch all 
+            // unintentional  programmer errors.
+            //
+            // No assertion is needed if we're re-setting the Group to its original
+            // state, because that set was already checked for us by 
+            // SEDoubleUseChecker.
+            //
+            HashSet union = null;
+            for (int i = 0; i < visibleParts.length; i++) {
+                HashSet child = new HashSet();
+                visibleParts[i].addSubgraph(child);
+                if (union == null) {
+                    union = child;
+                } else {
+                    for (Iterator it = child.iterator(); it.hasNext(); ) {
+                        Object f = it.next();
+                        if (union.contains(f)) {
+                            Debug.assertFail("Invalid cloned scene graph - "
+                                             + " see comments in Group");
+                        }
+                        union.add(f);
+                    }
+                }
+            }
+        }
 
         resetVisiblePartsNoAssert(visibleParts);
     }
@@ -304,142 +304,142 @@ public class Group extends Feature implements Node {
      * Re-sets the parts that are visible in this group to a new set
      * without performing any of the assertion checks.
      * 
-     * @param visibleParts	An array of parts.  We take
-     *				ownership of the array.  A value of null
-     *				re-sets this group to its original state.
+     * @param visibleParts      An array of parts.  We take
+     *                          ownership of the array.  A value of null
+     *                          re-sets this group to its original state.
      *
      * @see #resetVisibleParts(Feature[])
      */
     public void resetVisiblePartsNoAssert(Feature[] visibleParts) {
         if (visibleParts == null) {
-	    visibleParts = parts;
+            visibleParts = parts;
         }
- 	if (activated) {
-	    for (int i = 0; i < visibleParts.length; i++) {
-		visibleParts[i].activate();
-	    }
-	    for (int i = 0; i < this.visibleParts.length; i++) {
-		this.visibleParts[i].deactivate();
-	    }
-	}
-	this.visibleParts = visibleParts;       
+        if (activated) {
+            for (int i = 0; i < visibleParts.length; i++) {
+                visibleParts[i].activate();
+            }
+            for (int i = 0; i < this.visibleParts.length; i++) {
+                this.visibleParts[i].deactivate();
+            }
+        }
+        this.visibleParts = visibleParts;       
     }
 
     /**
      * {@inheritDoc}
      **/
     protected void setActivateMode(boolean mode) {
-	// This is synchronized to only occur within model updates.
-	activated = mode;
-	if (mode) {
-	    for (int i = 0; i < visibleParts.length; i++) {
-		visibleParts[i].activate();
-	    }
-	} else {
-	    for (int i = 0; i < visibleParts.length; i++) {
-		visibleParts[i].deactivate();
-	    }
-	}
+        // This is synchronized to only occur within model updates.
+        activated = mode;
+        if (mode) {
+            for (int i = 0; i < visibleParts.length; i++) {
+                visibleParts[i].activate();
+            }
+        } else {
+            for (int i = 0; i < visibleParts.length; i++) {
+                visibleParts[i].deactivate();
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     protected int setSetupMode(boolean mode) {
-	//
-	// Note that setup is  only done on the original scene graph;
-	// cloned features are exempt from setup/unsetup.  This is
-	// enforced by only doing setup on the original scene graph,
-	// and by only setting cloned features into a scene graph by
-	// virtue of a group.
-	//
-	if (mode) {
-	    numSetupChecked = 0;
-	    int num = 0;
-	    for (int i = 0; i < parts.length; i++) {
-		num += parts[i].setup();
-	    }
-	    return num;
-	} else {
-	    for (int i = 0; i < parts.length; i++) {
-		parts[i].unsetup();
-	    }
-	    return 0;
-	}
+        //
+        // Note that setup is  only done on the original scene graph;
+        // cloned features are exempt from setup/unsetup.  This is
+        // enforced by only doing setup on the original scene graph,
+        // and by only setting cloned features into a scene graph by
+        // virtue of a group.
+        //
+        if (mode) {
+            numSetupChecked = 0;
+            int num = 0;
+            for (int i = 0; i < parts.length; i++) {
+                num += parts[i].setup();
+            }
+            return num;
+        } else {
+            for (int i = 0; i < parts.length; i++) {
+                parts[i].unsetup();
+            }
+            return 0;
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public boolean needsMoreSetup() {
-	//
-	// See note about cloned features in setSetupMode()
-	//
-	while (numSetupChecked < parts.length) {
-	    if (parts[numSetupChecked].needsMoreSetup()) {
-		return true;
-	    }
-	    numSetupChecked++;
-	    	// Once a part doesn't need more setup, it will never go
-		// back to needing setup until we call unsetup() then
-		// setup().  numSetupChecked is re-set to 0 just before
-		// callin setup() on our part, so this is safe.  Note
-		// that the contract of Feature requires that setup()
-		// be called before needsMoreSetup() is consulted.
-		//
-		// This optimization helps speed the calculation of
-		// needsMoreSetup() in the case where a group or an
-		// assembly is the child of multiple parts of an assembly.
-		// With this optimization, a potential O(n^2) is turned
-		// into O(n) (albeit typically with a small n).
-	}
-	return false;
+        //
+        // See note about cloned features in setSetupMode()
+        //
+        while (numSetupChecked < parts.length) {
+            if (parts[numSetupChecked].needsMoreSetup()) {
+                return true;
+            }
+            numSetupChecked++;
+                // Once a part doesn't need more setup, it will never go
+                // back to needing setup until we call unsetup() then
+                // setup().  numSetupChecked is re-set to 0 just before
+                // callin setup() on our part, so this is safe.  Note
+                // that the contract of Feature requires that setup()
+                // be called before needsMoreSetup() is consulted.
+                //
+                // This optimization helps speed the calculation of
+                // needsMoreSetup() in the case where a group or an
+                // assembly is the child of multiple parts of an assembly.
+                // With this optimization, a potential O(n^2) is turned
+                // into O(n) (albeit typically with a small n).
+        }
+        return false;
     }
 
     /**
      * {@inheritDoc}
      **/
     public void markDisplayAreasChanged() {
-	for (int i = 0; i < visibleParts.length; i++) {
-	    visibleParts[i].markDisplayAreasChanged();
-	    	// Even if visibleParts changes in this frame, this will
-		// be correct, because the only way a DrawRecord could fail
-		// to be marked as changed is if it were active in both
-		// the previoius and the next frame.
-	}
+        for (int i = 0; i < visibleParts.length; i++) {
+            visibleParts[i].markDisplayAreasChanged();
+                // Even if visibleParts changes in this frame, this will
+                // be correct, because the only way a DrawRecord could fail
+                // to be marked as changed is if it were active in both
+                // the previoius and the next frame.
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void addDisplayAreas(RenderContext context) {
-	for (int i = 0; i < visibleParts.length; i++) {
-	    visibleParts[i].addDisplayAreas(context);
-	}
+        for (int i = 0; i < visibleParts.length; i++) {
+            visibleParts[i].addDisplayAreas(context);
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void paintFrame(Graphics2D gr) {
-	for (int i = 0; i < visibleParts.length; i++) {
-	    visibleParts[i].paintFrame(gr);
-	}
+        for (int i = 0; i < visibleParts.length; i++) {
+            visibleParts[i].paintFrame(gr);
+        }
     }
 
     /**
      * {@inheritDoc}
      **/
     public void nextFrame() {
-	for (int i = 0; i < visibleParts.length; i++) {
-	    visibleParts[i].nextFrame();
-	}
+        for (int i = 0; i < visibleParts.length; i++) {
+            visibleParts[i].nextFrame();
+        }
     }
 
     public void readInstanceData(GrinDataInputStream in, int length) 
             throws IOException 
     {
         in.readSuperClassData(this);
-	setParts(in.readFeaturesArrayReference());
+        setParts(in.readFeaturesArrayReference());
     }
 }

@@ -102,45 +102,45 @@ public class AssetFinder  {
      * by calling one of the helperXXX methods.
      **/
     public static void setHelper(AssetFinder helperArg) {
-	helper = helperArg;
+        helper = helperArg;
     }
 
     /**
      * @param  appJarPathArg  A list of paths within the classpath
-     *			      of the app, for use by Class.getResource
+     *                        of the app, for use by Class.getResource
      * @param  filePathArg    A list of paths in the filesystem,
      *                        e.g. from mounting a DSMCC carousel.
      **/
     public static void setSearchPath(String[] appJarPathArg, 
-    				     File[] filePathArg) 
+                                     File[] filePathArg) 
     {
-	if (appJarPathArg == null) {
-	    appJarPath = null;
-	} else {
-	    appJarPath = new String[appJarPathArg.length];
-	    for (int i = 0; i < appJarPathArg.length; i++) {
-		if (appJarPathArg[i].endsWith("/")) {
-		    appJarPath[i] = appJarPathArg[i];
-		} else {
-		    appJarPath[i] = appJarPathArg[i] + "/";
-		}
-	    }
-	}
-	filePath = filePathArg;
+        if (appJarPathArg == null) {
+            appJarPath = null;
+        } else {
+            appJarPath = new String[appJarPathArg.length];
+            for (int i = 0; i < appJarPathArg.length; i++) {
+                if (appJarPathArg[i].endsWith("/")) {
+                    appJarPath[i] = appJarPathArg[i];
+                } else {
+                    appJarPath[i] = appJarPathArg[i] + "/";
+                }
+            }
+        }
+        filePath = filePathArg;
     }
 
     /**
      * Get the filePathArg as set by setSearchPath()
      **/
     public static String[] getSearchPathJar() {
-	return appJarPath;
+        return appJarPath;
     }
 
     /**
      * Get the appJarPathArg as set by setSearchPath()
      **/
     public static File[] getSearchPathFile() {
-	return filePath;
+        return filePath;
     }
     
     /**
@@ -154,23 +154,23 @@ public class AssetFinder  {
      * with the new map as an atomic operation when the image map file
      * has been completely read.
      * 
-     * @param	mapFile The name of an image map file produced by MosaicMaker 
+     * @param   mapFile The name of an image map file produced by MosaicMaker 
      * 
      * @see #setImageMap(String[])
      **/
     public static void setImageMap(String mapFile) {
-	Hashtable map = new Hashtable();
-	try {
-	    ImageManager.readImageMap(mapFile, map);
-	    ImageManager.setImageMap(map);
-	} catch (IOException ex) {
-	    if (Debug.LEVEL > 0) {
-		Debug.printStackTrace(ex);
-	    }
-	    if (Debug.ASSERT) {
-		Debug.assertFail();
-	    }
-	}
+        Hashtable map = new Hashtable();
+        try {
+            ImageManager.readImageMap(mapFile, map);
+            ImageManager.setImageMap(map);
+        } catch (IOException ex) {
+            if (Debug.LEVEL > 0) {
+                Debug.printStackTrace(ex);
+            }
+            if (Debug.ASSERT) {
+                Debug.assertFail();
+            }
+        }
     }
 
     /**
@@ -189,43 +189,43 @@ public class AssetFinder  {
      * collisions, either in the name of the source images, or in the
      * names of the mosaics.
      * 
-     * @param	mapFiles The name of image map files produced by MosaicMaker 
+     * @param   mapFiles The name of image map files produced by MosaicMaker 
      *
      * @see #setImageMap(String)
      **/
     public static void setImageMap(String[] mapFiles) {
-	Hashtable map = new Hashtable();
-	try {
-	    for (int i = 0; i < mapFiles.length; i++) {
-		ImageManager.readImageMap(mapFiles[i], map);
-	    }
-	    ImageManager.setImageMap(map);
-	} catch (IOException ex) {
-	    Debug.printStackTrace(ex);
-	    Debug.assertFail();
-	}
+        Hashtable map = new Hashtable();
+        try {
+            for (int i = 0; i < mapFiles.length; i++) {
+                ImageManager.readImageMap(mapFiles[i], map);
+            }
+            ImageManager.setImageMap(map);
+        } catch (IOException ex) {
+            Debug.printStackTrace(ex);
+            Debug.assertFail();
+        }
     }
 
     /**
      * Get a URL to an asset.  If the asset doesn't exist, emits debug
      * messages and returns null.
      *
-     * @param path	A string, relative to the search path for assets
+     * @param path      A string, relative to the search path for assets
      *                  TODO: Maybe need to search locators, too
      **/
     public static URL getURL(String path) {
-	URL u = tryURL(path);
+        URL u = tryURL(path);
         if (Debug.ASSERT && u == null) {
-	    if (appJarPath != null) {
-		for (int i = 0; i < appJarPath.length; i++) {
-		    Debug.println("   Tried " + appJarPath[i] + path);
-		}
-	    }
-	    if (filePath != null) {
-		for (int i = 0; i < filePath.length; i++) {
-		    Debug.println("   Tried " + new File(filePath[i], path));
-		}
-	    }
+            if (appJarPath != null) {
+                for (int i = 0; i < appJarPath.length; i++) {
+                    Debug.println("   Tried " + appJarPath[i] + path);
+                }
+            }
+            if (filePath != null) {
+                for (int i = 0; i < filePath.length; i++) {
+                    Debug.println("   Tried " + new File(filePath[i], path));
+                }
+            }
             Debug.println();
             Debug.println("****  Resource " + path + " does not exist!  ****");
             Debug.println();
@@ -238,43 +238,43 @@ public class AssetFinder  {
      * return null.
      **/
     public static URL tryURL(String path) {
-	if (helper != null) {
-	    URL u = helper.tryURLHelper(path);
-	    if (u != null) {
-		return u;
-	    }
-	}
-	if (Debug.ASSERT && appJarPath == null && filePath == null) {
-	    Debug.assertFail("Search path not set.");
-	}
-	if (appJarPath != null) {
-	    for (int i = 0; i < appJarPath.length; i++) {
-		URL u = theClass.getResource(appJarPath[i] + path);
-		if (u != null) {
-		    return u;
-		}
-	    }
-	}
-	if (filePath != null) {
-	    for (int i = 0; i < filePath.length; i++) {
-		File f = new File(filePath[i], path);
-		if (f.exists()) {
-		    try {
-			return f.toURL();
+        if (helper != null) {
+            URL u = helper.tryURLHelper(path);
+            if (u != null) {
+                return u;
+            }
+        }
+        if (Debug.ASSERT && appJarPath == null && filePath == null) {
+            Debug.assertFail("Search path not set.");
+        }
+        if (appJarPath != null) {
+            for (int i = 0; i < appJarPath.length; i++) {
+                URL u = theClass.getResource(appJarPath[i] + path);
+                if (u != null) {
+                    return u;
+                }
+            }
+        }
+        if (filePath != null) {
+            for (int i = 0; i < filePath.length; i++) {
+                File f = new File(filePath[i], path);
+                if (f.exists()) {
+                    try {
+                        return f.toURL();
                             // When compiled against desktop JDK, this will
                             // generate a warning about the method being
                             // deprecated.  Ignore that; the suggested
                             // replacement is "f.toURI().toURL()", which
                             // doesn't exist in PBP.
-		    } catch (Exception ex) {
-			// This should never happen
-			if (Debug.LEVEL > 0) {
-			    Debug.printStackTrace(ex);
-			}
-		    }
-		}
-	    }
-	}
+                    } catch (Exception ex) {
+                        // This should never happen
+                        if (Debug.LEVEL > 0) {
+                            Debug.printStackTrace(ex);
+                        }
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -283,7 +283,7 @@ public class AssetFinder  {
      * generic assets, like images.
      **/
     protected URL tryURLHelper(String path) {
-	return null;
+        return null;
     }
 
 
@@ -293,11 +293,11 @@ public class AssetFinder  {
      * with the same rgba values.
      **/
     public static Color getColor(int r, int g, int b, int a) {
-	Color c = new Color(r, g, b, a);
-	return c;
-	// We could consider canonicalizing Color instances for efficiency.  Not
-	// sure if this should use weak refs, or just a static 
-	// AssetFinder.clear() method.
+        Color c = new Color(r, g, b, a);
+        return c;
+        // We could consider canonicalizing Color instances for efficiency.  Not
+        // sure if this should use weak refs, or just a static 
+        // AssetFinder.clear() method.
     }
 
     /**
@@ -306,20 +306,20 @@ public class AssetFinder  {
      * factories for multiple calls with the same specifications.
      **/
     public static Font getFont(String fontName, int style, int size) {
-	if (helper != null) {
-	    Font f = helper.getFontHelper(fontName, style, size);
-	    if (f != null) {
-		return f;
-	    }
-	    if (Debug.LEVEL > 0 && !("SansSerif".equals(fontName))) {
-	    		// SansSerif is the one font guaranteed to be present
-			// on all players.  It's useful for debugging, but since
-			// there's no guarantee of appearance, it probably shouldn't
-			// be used in production.
-		Debug.println("*** Helper didn't find font " + fontName);
-	    }
-	}
-	return new Font(fontName, style, size);
+        if (helper != null) {
+            Font f = helper.getFontHelper(fontName, style, size);
+            if (f != null) {
+                return f;
+            }
+            if (Debug.LEVEL > 0 && !("SansSerif".equals(fontName))) {
+                        // SansSerif is the one font guaranteed to be present
+                        // on all players.  It's useful for debugging, but since
+                        // there's no guarantee of appearance, it probably shouldn't
+                        // be used in production.
+                Debug.println("*** Helper didn't find font " + fontName);
+            }
+        }
+        return new Font(fontName, style, size);
     }
 
     /**
@@ -327,7 +327,7 @@ public class AssetFinder  {
      * generic assets, like images.
      **/
     protected Font getFontHelper(String fontName, int style, int size) {
-	return null;
+        return null;
     }
 
     /**
@@ -351,15 +351,15 @@ public class AssetFinder  {
      * @see #destroyImageBuffer(java.awt.Image)
      **/
     public static Image createCompatibleImageBuffer(Component c, 
-						    int width, int height) 
+                                                    int width, int height) 
     {
-	if (helper != null) {
-	    Image im = helper.createCompatibleImageBufferHelper(c,width,height);
-	    if (im != null) {
-		return im;
-	    }
-	}
-	return c.getGraphicsConfiguration().createCompatibleImage(width,height);
+        if (helper != null) {
+            Image im = helper.createCompatibleImageBufferHelper(c,width,height);
+            if (im != null) {
+                return im;
+            }
+        }
+        return c.getGraphicsConfiguration().createCompatibleImage(width,height);
     }
 
     /**
@@ -369,9 +369,9 @@ public class AssetFinder  {
      * @see #createCompatibleImageBufferHelper(java.awt.Component, int, int)
      **/
     protected Image createCompatibleImageBufferHelper(Component c,
-    					             int width, int height)
+                                                     int width, int height)
     {
-	return null;
+        return null;
     }
 
     /**
@@ -382,13 +382,13 @@ public class AssetFinder  {
      * @see #createCompatibleImageBuffer(java.awt.Component, int, int)
      **/
     public static Graphics2D createGraphicsFromImageBuffer(Image buffer) {
-	if (helper != null) {
-	    Graphics2D g = helper.createGraphicsFromImageBufferHelper(buffer);
-	    if (g != null) {
-		return g;
-	    }
-	}
-	return ((BufferedImage) buffer).createGraphics();
+        if (helper != null) {
+            Graphics2D g = helper.createGraphicsFromImageBufferHelper(buffer);
+            if (g != null) {
+                return g;
+            }
+        }
+        return ((BufferedImage) buffer).createGraphics();
     }
 
     /**
@@ -398,7 +398,7 @@ public class AssetFinder  {
      * @see #createGraphicsFromImageBuffer(java.awt.Image)
      **/
     protected Graphics2D createGraphicsFromImageBufferHelper(Image buffer) {
-	return null;
+        return null;
     }
 
     /**
@@ -413,9 +413,9 @@ public class AssetFinder  {
      * @see #createCompatibleImageBuffer(java.awt.Component, int, int)
      **/
     public static void destroyImageBuffer(Image buffer) {
-	if (helper != null) {
-	    helper.destroyImageBufferHelper(buffer);
-	}
+        if (helper != null) {
+            helper.destroyImageBufferHelper(buffer);
+        }
     }
 
     /**
@@ -433,16 +433,16 @@ public class AssetFinder  {
      * @param path should be an absolute path within asset finder's path.
      **/
     public static Image loadImage(String path) {
-	if (helper != null) {
-	    Image im = helper.loadImageHelper(path);
-	    if (im != null) {
-		return im;
-	    }
-	}
+        if (helper != null) {
+            Image im = helper.loadImageHelper(path);
+            if (im != null) {
+                return im;
+            }
+        }
 
-	Toolkit tk = Toolkit.getDefaultToolkit();
+        Toolkit tk = Toolkit.getDefaultToolkit();
         URL url = getURL(path);
-	return tk.createImage(url);
+        return tk.createImage(url);
     }
 
     /**
@@ -454,7 +454,7 @@ public class AssetFinder  {
      * this method too.
      **/
     protected Image loadImageHelper(String path) {
-	return null;
+        return null;
     }
 
     /**
@@ -464,34 +464,34 @@ public class AssetFinder  {
      * See the HD cookbook page 19-4, "Those Crazy Color Keys" for an
      * algorithm.
      *
-     * @param c		A color that is == to one of the standard
-     *			constants Color.red, Color.green, Color.yellow
-     *			or Color.blue.
+     * @param c         A color that is == to one of the standard
+     *                  constants Color.red, Color.green, Color.yellow
+     *                  or Color.blue.
      *
-     * @return 	A HAVi key code in the range 403..406 inclusive
+     * @return  A HAVi key code in the range 403..406 inclusive
      **/
     public static int getColorKeyCode(Color c) {
-	int code = -1;
-	if (helper != null) {
-	    code = helper.getColorKeyCodeHelper(c);
-	}
-	if (code == -1) {
-	    if (c == Color.red) {
-		return 403;	// VK_COLORED_KEY_0
-	    } else if (c == Color.green) {
-		return 404;	// VK_COLORED_KEY_1
-	    } else if (c == Color.yellow) {
-		return 405;	// VK_COLORED_KEY_2
-	    } else if (c == Color.blue) {
-		return 406;	// VK_COLORED_KEY_3
-	    } 
-	} 
-	if (Debug.ASSERT) {
-	    if (code < 403 || code > 406) {
-		Debug.assertFail();
-	    }
-	}
-	return code;
+        int code = -1;
+        if (helper != null) {
+            code = helper.getColorKeyCodeHelper(c);
+        }
+        if (code == -1) {
+            if (c == Color.red) {
+                return 403;     // VK_COLORED_KEY_0
+            } else if (c == Color.green) {
+                return 404;     // VK_COLORED_KEY_1
+            } else if (c == Color.yellow) {
+                return 405;     // VK_COLORED_KEY_2
+            } else if (c == Color.blue) {
+                return 406;     // VK_COLORED_KEY_3
+            } 
+        } 
+        if (Debug.ASSERT) {
+            if (code < 403 || code > 406) {
+                Debug.assertFail();
+            }
+        }
+        return code;
     }
 
     /**
@@ -504,14 +504,14 @@ public class AssetFinder  {
      * also available, in the GrinXlet directory project.  See, for example,
      * xlets/GrinXlet/src/deploy/com/hdcookbook/grinxlet/GrinXlet.java
      *
-     * @param c		A color that is == to one of the standard
-     *			constants Color.red, Color.green, Color.yellow
-     *			or Color.blue.
+     * @param c         A color that is == to one of the standard
+     *                  constants Color.red, Color.green, Color.yellow
+     *                  or Color.blue.
      *
-     * @return 	A HAVi key code in the range 403..406 inclusive
+     * @return  A HAVi key code in the range 403..406 inclusive
      **/
     protected int getColorKeyCodeHelper(Color c) {
-    	return -1;
+        return -1;
     }
 
     /**
@@ -521,10 +521,10 @@ public class AssetFinder  {
      * System.exit(1) on big JDK, or ejecting the disc on a player.
      **/
     public static void abort() {
-	if (helper != null) {
-	    helper.abortHelper();
-	}
-	throw new RuntimeException("ABORT");
+        if (helper != null) {
+            helper.abortHelper();
+        }
+        throw new RuntimeException("ABORT");
     }
 
     /**
@@ -545,12 +545,12 @@ public class AssetFinder  {
      * @see #notifyUnloaded(ManagedFullImage, int, int)
      **/
     public static void notifyLoaded(ManagedFullImage mi) {
-	if (Debug.LEVEL > 1) {
-	    Debug.println("Loaded image " + mi.getName());
-	}
-	if (helper != null) {
-	    helper.notifyLoadedHelper(mi);
-	}
+        if (Debug.LEVEL > 1) {
+            Debug.println("Loaded image " + mi.getName());
+        }
+        if (helper != null) {
+            helper.notifyLoadedHelper(mi);
+        }
     }
 
     /**
@@ -563,7 +563,7 @@ public class AssetFinder  {
      * @see #notifyUnloadedHelper(ManagedFullImage, int, int)
      **/
     protected void notifyLoadedHelper(ManagedFullImage mi) {
-	// do nothing
+        // do nothing
     }
 
     /**
@@ -578,14 +578,14 @@ public class AssetFinder  {
      * @see #notifyLoaded(ManagedFullImage)
      **/
     public static void notifyUnloaded(ManagedFullImage mi, 
-    				      int width, int height)
+                                      int width, int height)
     {
-	if (Debug.LEVEL > 1) {
-	    Debug.println("Unloaded image " + mi.getName());
-	}
-	if (helper != null) {
-	    helper.notifyUnloadedHelper(mi, width, height);
-	}
+        if (Debug.LEVEL > 1) {
+            Debug.println("Unloaded image " + mi.getName());
+        }
+        if (helper != null) {
+            helper.notifyUnloadedHelper(mi, width, height);
+        }
     }
 
     /**
@@ -599,8 +599,8 @@ public class AssetFinder  {
      * @see #notifyLoadedHelper(ManagedFullImage)
      **/
     protected void notifyUnloadedHelper(ManagedFullImage mi, 
-    				        int width, int height) 
+                                        int width, int height) 
     {
-	// do nothing
+        // do nothing
     }
 }
