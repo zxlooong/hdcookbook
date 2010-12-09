@@ -117,7 +117,7 @@ public class AppInfoBDMV {
         Hz_30000_1001,
         RESERVED_5,
         Hz_50,
-        Mz_60000_1001;
+        Hz_60000_1001;
         
         public int getEncoding() {
             return ordinal();

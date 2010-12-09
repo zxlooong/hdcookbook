@@ -291,7 +291,7 @@ public class StreamAttribute {
         Hz_30000_1001,
         RESERVED_5,
         Hz_50,
-        Mz_60000_1001;
+        Hz_60000_1001;
         
         public byte getEncoding() {
             return (byte) ordinal();

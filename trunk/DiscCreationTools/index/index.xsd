@@ -9,8 +9,11 @@
       <xs:element name="extensionData" type="extensionData" minOccurs="0"/>
       <xs:element name="indexes" type="indexes" minOccurs="0"/>
       <xs:element name="paddingN1" type="xs:int"/>
+      <xs:element name="paddingN1Data" type="xs:short" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="paddingN2" type="xs:int"/>
+      <xs:element name="paddingN2Data" type="xs:short" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="paddingN3" type="xs:int"/>
+      <xs:element name="paddingN3Data" type="xs:short" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="version" type="xs:string" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
@@ -18,8 +21,7 @@
   <xs:complexType name="appInfoBDMV">
     <xs:sequence>
       <xs:element name="frameRate" type="frameRate" minOccurs="0"/>
-      <xs:element name="initialOutputModePreference" 
-                  type="initialOutputModePreference" minOccurs="0"/>
+      <xs:element name="initialOutputModePreference" type="initialOutputModePreferenceType" minOccurs="0"/>
       <xs:element name="SSContentExistFlag" type="xs:boolean"/>
       <xs:element name="videoFormat" type="videoFormat" minOccurs="0"/>
     </xs:sequence>
@@ -27,7 +29,7 @@
 
   <xs:complexType name="extensionData">
     <xs:sequence>
-      <xs:element name="data" type="xs:string" minOccurs="0"/>
+      <xs:element name="data" type="xs:short" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -68,15 +70,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:simpleType name="titleAccessType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="V_00"/>
-      <xs:enumeration value="V_01"/>
-      <xs:enumeration value="V_10"/>
-      <xs:enumeration value="V_11"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <xs:simpleType name="frameRate">
     <xs:restriction base="xs:string">
       <xs:enumeration value="IGNORED"/>
@@ -86,11 +79,11 @@
       <xs:enumeration value="Hz_30000_1001"/>
       <xs:enumeration value="RESERVED_5"/>
       <xs:enumeration value="Hz_50"/>
-      <xs:enumeration value="Mz_60000_1001"/>
+      <xs:enumeration value="Hz_60000_1001"/>
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:simpleType name="initialOutputModePreference">
+  <xs:simpleType name="initialOutputModePreferenceType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Mode2D"/>
       <xs:enumeration value="Mode3D"/>
@@ -110,6 +103,13 @@
     </xs:restriction>
   </xs:simpleType>
 
-
+  <xs:simpleType name="titleAccessType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="V_00"/>
+      <xs:enumeration value="V_01"/>
+      <xs:enumeration value="V_10"/>
+      <xs:enumeration value="V_11"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>
 

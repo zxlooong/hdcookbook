@@ -285,7 +285,7 @@
       <xs:enumeration value="Hz_30000_1001"/>
       <xs:enumeration value="RESERVED_5"/>
       <xs:enumeration value="Hz_50"/>
-      <xs:enumeration value="Mz_60000_1001"/>
+      <xs:enumeration value="Hz_60000_1001"/>
     </xs:restriction>
   </xs:simpleType>
 
