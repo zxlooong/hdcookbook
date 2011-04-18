@@ -259,6 +259,9 @@ abstract public class ManagedImage {
      * one good way to do that is to start the loading, then poll for
      * the completion of the loading in a once-per-frame "heartbeat"
      * method.
+     * <p>
+     * If the image is already loading or loaded, calling this method is
+     * harmless, and has no effect.
      *
      * @see #prepare()
      * @see #unprepare()
