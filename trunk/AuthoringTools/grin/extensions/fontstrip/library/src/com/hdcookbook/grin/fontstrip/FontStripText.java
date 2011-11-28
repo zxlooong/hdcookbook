@@ -64,12 +64,14 @@ import com.hdcookbook.grin.util.Debug;
 import com.hdcookbook.grin.util.ImageManager;
 import com.hdcookbook.grin.util.ManagedImage;
 import com.hdcookbook.grin.util.SetupClient;
+
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * A feature for drawing font strip text.
@@ -158,6 +160,46 @@ public class FontStripText extends Feature implements Node, SetupClient {
     public FontStripText(Show show) {
         super(show);
     }
+
+    /**
+     * {@inheritDoc}
+     **/
+    protected Feature createClone(HashMap clones) {
+        if (!setupMode || !imageSetup || isActivated) {
+            throw new IllegalStateException();
+        }
+        FontStripText result = new FontStripText(show);
+        result.xArg = xArg;
+        result.yArg = yArg;
+        result.strings = strings;
+        result.bakedStrings = bakedStrings;
+        result.fontImageFileName = fontImageFileName;
+        result.fontInfo = fontInfo;
+        result.hspace = hspace;
+        result.vspace = vspace;
+        result.background = background;
+        result.isActivated = isActivated;
+        result.alignedX = alignedX;
+        result.alignedY = alignedY;
+        result.drawX = drawX;
+        result.drawY = drawY;
+        result.drawWidth = drawWidth;
+        result.drawHeight = drawHeight;
+        result.changed = changed;
+        result.setupMode = setupMode;
+        result.imageSetup = imageSetup;
+        result.fontImage = fontImage;
+        result.loadingFailed = loadingFailed;
+
+        if (!loadingFailed) {
+            ImageManager.getImage(result.fontImage);
+                // This increments the reference count of this ManagedImage.
+                // See FixedImage.createClone() for details.
+            result.fontImage.prepare();
+                // Balanced by an unprepare in destroy()
+        }
+        return result;
+    }
     
     public int getX() {
         return alignedX;
@@ -191,7 +233,11 @@ public class FontStripText extends Feature implements Node, SetupClient {
             return;
         }        
         fontImage = ImageManager.getImage(fontImageFileName);
- 
+
+        bakeStrings();
+    }
+
+    private void bakeStrings() {
         changed = true;
         
         bakedStrings = new CharImageInfo[strings.length][];
@@ -281,7 +327,17 @@ public class FontStripText extends Feature implements Node, SetupClient {
         drawHeight = drawMaxY - drawY;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void destroy() {
+        if (setupMode) {
+            // That is, if this is a cloned feature.  See FixedImage.destroy().
+            if (Debug.ASSERT && !imageSetup) {
+                Debug.assertFail();
+            }
+            fontImage.unprepare();
+        }
         if (!loadingFailed) {
             ImageManager.ungetImage(fontImage);
         } else if (Debug.ASSERT && fontImage != null) {
@@ -502,7 +558,10 @@ public class FontStripText extends Feature implements Node, SetupClient {
     public void setText(String[] newText) {
         synchronized(show) {    // Shouldn't be necessary, but doesn't hurt
             strings = newText;
-            initialize();
+            bakeStrings();
+            // We don't want to do a full initialize() here, because that's
+            // extra work, and because initialize() increments the reference
+            // count for fontImageFile.
         }
     }
     

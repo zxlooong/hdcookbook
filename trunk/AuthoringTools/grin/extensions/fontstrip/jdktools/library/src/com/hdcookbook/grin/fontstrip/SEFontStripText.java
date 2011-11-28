@@ -63,6 +63,7 @@ import com.hdcookbook.grin.SEShowVisitor;
 import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.io.ShowBuilder;
 import com.hdcookbook.grin.io.binary.GrinDataOutputStream;
+
 import java.awt.Color;
 import java.io.IOException;
 
