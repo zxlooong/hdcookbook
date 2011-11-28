@@ -169,6 +169,7 @@ public class FontStripText extends Feature implements Node, SetupClient {
             throw new IllegalStateException();
         }
         FontStripText result = new FontStripText(show);
+        result.alignment = alignment;
         result.xArg = xArg;
         result.yArg = yArg;
         result.strings = strings;
