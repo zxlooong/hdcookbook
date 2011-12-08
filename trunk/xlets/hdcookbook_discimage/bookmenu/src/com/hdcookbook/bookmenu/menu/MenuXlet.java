@@ -440,13 +440,14 @@ public class MenuXlet implements Xlet, UserEventListener,
      * Mouse clicked callback
      **/
     public void mouseClicked(MouseEvent e) {
-        show.handleMouseClicked(e.getX(), e.getY());
     }
 
     /**
      * Mouse pressed callback
      **/
-    public void mousePressed(MouseEvent e) { }
+    public void mousePressed(MouseEvent e) { 
+        show.handleMousePressed(e.getX(), e.getY());
+    }
 
     /**
      * Mouse released callback

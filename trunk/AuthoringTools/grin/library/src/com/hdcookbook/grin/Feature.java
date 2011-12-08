@@ -361,7 +361,8 @@ public abstract class Feature {
 
     /**
      * Called from the ResetFeatureCommand, this should reset the internal
-     * state of the feature to what it was when first activated.
+     * state of the feature to what it was when first activated.  Clients
+     * may call this within another command, e.g. a java_command from a show.
      **/
     public final void resetFeature() {
         if (activateCount > 0) {

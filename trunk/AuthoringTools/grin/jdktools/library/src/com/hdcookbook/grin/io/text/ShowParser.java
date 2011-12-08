@@ -2218,7 +2218,7 @@ public class ShowParser {
                 break;
             }
             Integer state = states.get(tok);
-            if (state == -1) {
+            if (state == null || state.intValue() == -1) {
                 lexer.reportError("State " + tok + " not found");
             }
             result.add(state);

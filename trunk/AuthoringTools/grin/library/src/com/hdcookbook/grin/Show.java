@@ -791,16 +791,12 @@ public class Show implements AnimationClient {
     // it's OK to proceed, or false if we've been interrupted 
     // and should bail out.
     //
-    // This is needed because the remote control key handlers execute
+    // This is probably no longer needed, except perhaps for the "bookmenu"
+    // xlet where mouse events are delivered asynchronously.  Before, it was
+    // needed because the remote control key handlers execute
     // show commands synchronously, in the AWT thread.  This means that
     // the show must be in a safe state for the execution of commands
     // before the keypress can be allowed in.
-    //
-    // Experiments were done with queuing the commands that result from
-    // keypresses to the command, but that caused problems, because 
-    // it meant that a command keypress might be processed resulting
-    // in a state-changing command (like activate_segment), and then
-    // another keypress might come in before that command runs.
     //
     private synchronized boolean waitForInputOK() {
         if ((!inputOK) && (!destroyed)) {
@@ -908,7 +904,7 @@ public class Show implements AnimationClient {
     /**
      * Called by the xlet when a key typed event is received, or generated
      * (e.g. from a virtual keyboard).  Note that not
-     * all devices generate a key released.  In order to extend GRIN to
+     * all devices generate a key typed.  In order to extend GRIN to
      * support key typed events, a subclass of RCKeyEvent will be required;
      * see the protected RCKeyEvent constructor for details.
      * <p>
@@ -929,6 +925,36 @@ public class Show implements AnimationClient {
     }
 
     /**
+     * Called by an xlet when a key typed event is received, or generated
+     * (e.g. from a virtual keyboard).  Note that not all devices generate
+     * a key typed.
+     * <p>
+     * This director-based event delivery mechanism is implemented in the
+     * core GRIN library, e.g. it is called by GrinXlet.  The mechanism
+     * exposed through handleKeyTyped() was not.  Frameworks extending GRIN
+     * that call handleKeyTyped() should also call the present method, so
+     * that the director-based key typed event delivery mechanism will work.
+     **/
+    public void handleKeyTypedToDirector(char key) {
+	if (director.wantsKeyTyped()) {
+	    synchronized(pendingCommands) {
+		GrinXHelper h = new GrinXHelper(this);
+		h.setCommandNumber(GrinXHelper.HANDLE_KEY_TYPED_FOR_DIRECTOR);
+		h.setCommandObject(new Character(key));
+		pendingCommands.add(h);
+	    }
+	}
+    }
+
+    /**
+     * Called by GrinXHelper for a HANDLE_KEY_TYPED
+     */
+    void internalHandleKeyTypedToDirector(char key) {
+	director.notifyKeyTyped(key);
+    }
+
+
+    /**
      * This method is to be called by a subclass of RCKeyEvent that is created
      * by someone extending GRIN to support key typed events.
      **/
@@ -943,43 +969,47 @@ public class Show implements AnimationClient {
      * Called by the xlet when the mouse moves.  This should be called
      * when a mouse moved event or a mouse dragged event is received.
      * <p>
-     * Note that mouse events are handled synchronously, unlike remote
-     * control keypresses which are queued within the show.  We assume that
-     * only fast players (like PC players) support mice.
+     * Mouse events are delivered in the animation thread, just like remote
+     * control keypresses, except in the "bookmenu" demo xlet.
      **/
     public synchronized void handleMouseMoved(int x, int y) {
+	if (!waitForInputOK()) {
+	    return;
+	}
         boolean used = false;
-        if (currentSegment != null) {
-            if (!waitForInputOK()) {
-                return;
-            }
-            used = currentSegment.handleMouse(x, y, false);
-        }
+        if (currentSegment != null && currentSegment.handleMouse(x, y, false)) {
+	    used = true;
+	}
+	if (director.notifyMouseMoved(x, y)) {
+	    used = true;
+	}
         Cursor c = used ? Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)
                         : Cursor.getDefaultCursor();
+	//
+	// This isn't quite right.  If there are multiple shows on the key
+	// interest list, the last one to get the mouse event will set the
+	// cursor.  A better behavior would be that if any show uses the
+	// mouse moved event, the cursor would be set to crosshair.
+	//
         if (component != null && c != component.getCursor()) {
             component.setCursor(c);
         }
     }
    
     /**
-     * Called by the xlet when the mouse is clicked.
+     * Called by the xlet when the mouse is pressed.
      * <p>
-     * Note that mouse events are handled synchronously, unlike remote
-     * control keypresses which are queued within the show.  We assume that
-     * only fast players (like PC players) support mice.
+     * Mouse events are delivered in the animation thread, just like remote
+     * control keypresses, except in the "bookmenu" demo xlet.
      **/
-    public synchronized void handleMouseClicked(int x, int y) {
+    public synchronized void handleMousePressed(int x, int y) {
+	if (!waitForInputOK()) {
+	    return;
+	}
         if (currentSegment != null) {
-            if (!waitForInputOK()) {
-                return;
-            }
             currentSegment.handleMouse(x, y, true);
         }
-        Cursor c = Cursor.getDefaultCursor();
-        if (component != null && c != component.getCursor()) {
-            component.setCursor(c);
-        }
+	director.notifyMousePressed(x, y);
     }
 
     /**

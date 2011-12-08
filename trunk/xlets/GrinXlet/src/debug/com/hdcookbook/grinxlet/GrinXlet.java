@@ -87,6 +87,7 @@ import com.hdcookbook.grin.util.AssetFinder;
 import com.hdcookbook.grin.util.Debug;
 
 import org.dvb.event.EventManager;
+import org.dvb.event.OverallRepository;
 import org.dvb.event.UserEvent;
 import org.dvb.event.UserEventListener;
 import org.dvb.event.UserEventRepository;
@@ -472,17 +473,40 @@ public class GrinXlet
         show.activateSegment(show.getSegment(showInitialSegment));
         xletShow.activateSegment(xletShow.getSegment("S:Initialize"));
 
-        UserEventRepository userEventRepo = new UserEventRepository("x");
-        userEventRepo.addAllArrowKeys();
-        userEventRepo.addAllColourKeys();
-        userEventRepo.addAllNumericKeys();
-        userEventRepo.addKey(HRcEvent.VK_ENTER);
-        userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
+        UserEventRepository userEventRepo;
+	if (director.wantsKeyTyped()) {
+	    userEventRepo = new OverallRepository();
+	    // This code was added in 2011.  It's probaly fine to always
+	    // use OverallRepository in all cases, but this has not been
+	    // tested extensively, so to be conservative, we only use
+	    // OverallRepository when we actually need it, to get the
+	    // full set of key typed events.
+	    //
+	    // See {Director.wantsKeyTyped()}.  This is the reason for the
+	    // odd rule that the initial director of an xlet must want key 
+	    // typed, in order for key typed to be delivered at all.
+	} else {
+	    userEventRepo = new UserEventRepository("x");
+	}
+	//
+	// We add in all of the normal Blu-ray events, even on an
+	// OverallRepository.  For OverallRepository, this should not be
+	// necessary, but circa 2011 at least one hardware player was
+	// observed to deliver KEY_PRESSED events but not KEY_RELEASED
+	// events on an OverallRepository.  On the player in question,
+	// calling the addXXX methods fixed the problem, resulting in 
+	// KEY_RELEASED events being corrctly generated.
+	//
+	userEventRepo.addAllArrowKeys();
+	userEventRepo.addAllColourKeys();
+	userEventRepo.addAllNumericKeys();
+	userEventRepo.addKey(HRcEvent.VK_ENTER);
+	userEventRepo.addKey(HRcEvent.VK_POPUP_MENU);
 
         EventManager.getInstance().addUserEventListener(this, userEventRepo);
         pushKeyInterest(show);
         rootContainer.addMouseMotionListener(this);
-            rootContainer.addMouseListener(this);
+	rootContainer.addMouseListener(this);
         rootContainer.requestFocus();
     }
 
@@ -510,13 +534,18 @@ public class GrinXlet
                     break;
                 }
             }
-        // Note that Gun Bunny doesn't do anything on key_released,
-        // or at least it didn't when this comment was written.
-        // Because of this setting sendKeyUp false doesn't have
-        // a visible effect on this particular game, but this xlet
-        // can trivially be adapted for use as a generic game xlet.
-        // If you do this, then being able to turn off key up events
-        // is really useful.
+	    // Note that Gun Bunny doesn't do anything on key_released,
+	    // or at least it didn't when this comment was written.
+	    // Because of this setting sendKeyUp false doesn't have
+	    // a visible effect on this particular game, but this xlet
+	    // can trivially be adapted for use as a generic game xlet.
+	    // If you do this, then being able to turn off key up events
+	    // is really useful.
+        } else if (type == HRcEvent.KEY_TYPED) {
+	    char key = e.getKeyChar();
+            for (int i = 0; i < keyInterestOrder.length; i++) {
+                keyInterestOrder[i].handleKeyTypedToDirector(key);
+            }
         }
     }
 
@@ -610,26 +639,26 @@ public class GrinXlet
      * Mouse clicked callback
      **/
     public void mouseClicked(MouseEvent e) {
-        int x = e.getX();
-        int y = e.getY();
-        GrinXHelper helper = new GrinXHelper(xletShow);
-        helper.setCommandNumber(GrinXHelper.MOUSE_CLICK);
-        helper.setCommandObject(new Point(x,y));
-        xletShow.runCommand(helper);
-
-        for (int i = 0; i < keyInterestOrder.length; i++) {
-            Show show = (Show) keyInterestOrder[i];
-            helper = new GrinXHelper(show);
-            helper.setCommandNumber(GrinXHelper.MOUSE_CLICK);
-            helper.setCommandObject(new Point(x, y));
-            show.runCommand(helper);
-        }
     }
 
     /**
      * Mouse pressed callback
      **/
     public void mousePressed(MouseEvent e) {
+        int x = e.getX();
+        int y = e.getY();
+        GrinXHelper helper = new GrinXHelper(xletShow);
+        helper.setCommandNumber(GrinXHelper.MOUSE_PRESS);
+        helper.setCommandObject(new Point(x,y));
+        xletShow.runCommand(helper);
+
+        for (int i = 0; i < keyInterestOrder.length; i++) {
+            Show show = (Show) keyInterestOrder[i];
+            helper = new GrinXHelper(show);
+            helper.setCommandNumber(GrinXHelper.MOUSE_PRESS);
+            helper.setCommandObject(new Point(x, y));
+            show.runCommand(helper);
+        }
     }
 
     /**

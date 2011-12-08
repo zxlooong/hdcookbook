@@ -472,7 +472,8 @@ public class FontStripText extends Feature implements Node, SetupClient {
             CharImageInfo charInfo = (CharImageInfo) fontInfo.charMap.get(ch);
             if (charInfo == null) {
                if (Debug.LEVEL > 0) {
-                   Debug.println("No charInfo found for " + ch);
+		   Debug.println("No charInfo found for " + ch + " in " 
+			   + fontImageFileName);
                }
                charInfo = new CharImageInfo();
                charInfo.ascent = 0;

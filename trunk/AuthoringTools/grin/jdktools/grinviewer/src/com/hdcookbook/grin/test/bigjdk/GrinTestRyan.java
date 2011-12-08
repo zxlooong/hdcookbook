@@ -157,8 +157,8 @@ public class GrinTestRyan extends Frame {
         };
         addKeyListener(listener);
         java.awt.event.MouseAdapter mouseL = new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                show.handleMouseClicked(e.getX(), e.getY());
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                show.handleMousePressed(e.getX(), e.getY());
             }
         };
         addMouseListener(mouseL);

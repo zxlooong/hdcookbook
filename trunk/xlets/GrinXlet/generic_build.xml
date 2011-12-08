@@ -36,6 +36,7 @@ Game xlet project.  See the documentation in vars.properties for details.
     <property name="xlet.class.name"
 	      value="com.hdcookbook.grinxlet.GrinXlet"/>
     <property name="debug.screen.scale" value="1.0"/>
+    <property name="xlet.mouse.wanted" value="false"/>
     <condition property="debug.is.set">
 	  <equals arg1="${debug.or.deploy}" arg2="debug"/>
     </condition>
@@ -741,6 +742,8 @@ ${show.file}.txt
         <initialHaviConfig>HD_1920_1080</initialHaviConfig>
         <menuCallMask>false</menuCallMask>
         <titleSearchMask>false</titleSearchMask>
+	<mouseSupported>${xlet.mouse.wanted}</mouseSupported>
+	<mouseInterest>${xlet.mouse.wanted}</mouseInterest>
     </terminalInfo>
     <version>V_0200</version>
 </bdjo>

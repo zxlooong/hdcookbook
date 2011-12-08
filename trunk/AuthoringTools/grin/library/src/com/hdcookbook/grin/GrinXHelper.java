@@ -163,14 +163,23 @@ public class GrinXHelper extends Command implements Node {
      **/
     public final static int MOUSE_MOVE = 4;
     /**
-     * The commandNumber for handling MOUSE_CLICK event
+     * The commandNumber for handling MOUSE_PRESS event
      **/
-    public final static int MOUSE_CLICK = 5;
+    public final static int MOUSE_PRESS = 5;
+    /**
+     * The commandNumber for handling KEY_TYPED events that are delivered
+     * to the director.
+     *
+     * @see Director#wantsKeyTyped()
+     **/
+    public final static int HANDLE_KEY_TYPED_FOR_DIRECTOR = 6;
+
     /*
      * A data member that can be used to hold additional info for
-     * executing a command.  For MOUSE_MOVE and MOUSE_CLICK commands,
+     * executing a command.  For MOUSE_MOVE and MOUSE_PRESS commands,
      * this data is expected to be java.awt.Point that holds x,y of the
-     * mouse event.
+     * mouse event.  For HANDLE_KEY_TYPED_FOR_DIRECTOR, it is a Character
+     * representing the key that was typed.
      */
     private Object data = null;
 
@@ -264,9 +273,14 @@ public class GrinXHelper extends Command implements Node {
                 show.handleMouseMoved(p.x, p.y);
                 break;
             }
-            case MOUSE_CLICK: {
+            case MOUSE_PRESS: {
                 Point p = (Point) data;
-                show.handleMouseClicked(p.x, p.y);
+                show.handleMousePressed(p.x, p.y);
+                break;
+            }
+            case HANDLE_KEY_TYPED_FOR_DIRECTOR: {
+                Character key = (Character) data;
+                show.internalHandleKeyTypedToDirector(key.charValue());
                 break;
             }
             default: {

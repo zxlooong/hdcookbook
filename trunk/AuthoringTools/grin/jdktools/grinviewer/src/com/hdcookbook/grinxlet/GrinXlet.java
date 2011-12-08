@@ -98,6 +98,7 @@ public class GrinXlet implements KeyListener, MouseListener, MouseMotionListener
     private static GrinXlet theInstance = null;
     private static GenericMain grinView;
     private Show[] keyInterestOrder;
+    private boolean directorWantsKeyTyped = false;
 
     /**
      * This constructor is used by GrinView
@@ -152,6 +153,11 @@ public class GrinXlet implements KeyListener, MouseListener, MouseMotionListener
      */
     public synchronized void pushKeyInterest(Show show) {
         if (keyInterestOrder == null) {
+	    // First time called.  We intentionally emulate the GrinXlet
+	    // behavior of insisting that the initial director indicate that it
+	    // wants key typed events if we are to ever deliver key typed
+	    // events.  See GrinXlet if you're curious why.
+	    directorWantsKeyTyped = show.getDirector().wantsKeyTyped();
             keyInterestOrder = new Show[] {show} ;
             return;
         }
@@ -186,7 +192,18 @@ public class GrinXlet implements KeyListener, MouseListener, MouseMotionListener
         return show;
     }
 
-    public void keyTyped(KeyEvent arg0) {
+    public void keyTyped(KeyEvent event) {
+	if (!directorWantsKeyTyped) {
+	    return;
+	}
+	char key = event.getKeyChar();
+	synchronized(this) {
+	    for (int i = 0; i < keyInterestOrder.length; i++) {
+		keyInterestOrder[i].handleKeyTypedToDirector(key);
+	    }
+	}
+	// Core GRIN never implemented a subclass of RCKeyEvent that would let
+	// us call show.handleKeyTyped().
     }
 
     public void keyPressed(java.awt.event.KeyEvent e) {
@@ -231,6 +248,9 @@ public class GrinXlet implements KeyListener, MouseListener, MouseMotionListener
     }
 
     public void mouseClicked(MouseEvent e) {
+    }
+
+    public void mousePressed(MouseEvent e) {
         Insets insets       = grinView.getInsets();
         int    scaleDivisor = grinView.getScaleDivisor();
         final int x = (e.getX() - insets.left) * scaleDivisor;
@@ -239,14 +259,11 @@ public class GrinXlet implements KeyListener, MouseListener, MouseMotionListener
             for (int i = 0; i < keyInterestOrder.length; i++) {
                 Show show = (Show) keyInterestOrder[i];
                 GrinXHelper helper = new GrinXHelper(show);
-                helper.setCommandNumber(GrinXHelper.MOUSE_CLICK);
+                helper.setCommandNumber(GrinXHelper.MOUSE_PRESS);
                 helper.setCommandObject(new Point(x,y));
                 show.runCommand(helper);
             }
         }
-    }
-
-    public void mousePressed(MouseEvent arg0) {
     }
 
     public void mouseReleased(MouseEvent arg0) {

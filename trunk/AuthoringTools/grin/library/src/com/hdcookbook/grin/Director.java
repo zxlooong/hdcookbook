@@ -168,6 +168,98 @@ public class Director {
     }
 
 
+    /**
+     * Is this director interested in KEY_TYPED EVENTS?  This method may be
+     * called during Xlet startup, shortly after the Director instance is 
+     * created, and potentially subsequent to that, e.g. in the system 
+     * thread where event delivery occurs.  If this method returns true, 
+     * KEY_TYPED events will be queued, and and delivered to the director 
+     * in the animation thread via notifyKeyTyped().  The semantics of 
+     * event delivery are undefined if this method does not consistently
+     * return the same value. A typical and recommend override in a director 
+     * would be to return true from this method.
+     * <p>
+     * Note that {com.hdcookbook.grinxlet.GrinXlet} will only deliver
+     * key typed events if the director in effect at xlet startup returns
+     * true from this method.  If it is false, events will not be delivered,
+     * even if 
+     * {com.hdcookbook.grinxlet.GrinXlet#pushKeyInterest(com.hdcookbook.grin.Show)}
+     * is subsequently called with a director that returns true.
+     * <p>
+     * It is unknown if any Blu-ray players or other GEM devices implement
+     * the optional support for key typed events.  However, they may in the
+     * future, and other environments where GRIN might be applied
+     * (such as Android) do have the equivalent of KEY_TYPED events.
+     **/
+    public boolean wantsKeyTyped() {
+        return false;
+    }
+
+    /**
+     * Notify the director that a key typed event has been received.
+     * This will only be called if wantsKeyTyped() returns true, and if the
+     * other conditions described in that method are true.  Key typed events
+     * are delivered in the animation thread, just like commands.  Director
+     * instances interested in key typed events should override this method.
+     * <p>
+     * This Director-based handling of key typed events is unrelated to
+     * any mechanism based on an RC handler and subclassing of
+     * {com.hdcookbook.grin.input.RCKeyEvent}.  That mechanism was never
+     * implemented in the core GRIN library in the HD Cookbook project, though
+     * minimal support was provided so that it could be implemented through
+     * subclassing.
+     *
+     * @see java.awt.event.KeyEvent#getKeyChar()
+     * @see #wantsKeyTyped()
+     *
+     * @param   keyChar  The key that was typed
+     **/
+    public void notifyKeyTyped(char keyChar) {
+    }
+
+    /**
+     * Notify the director that the mouse has moved.  This method will be
+     * called in the animation thread for all shows in the "key" interest
+     * table when a mouse move event is received.
+     * <p>
+     * Mouse event notification to the director occurs independent of, and
+     * in addition to, mouse notification via the RC handler mechanism.
+     * If a mouse event is "consumed" via the RC handler mechanism, it will
+     * still be delivered to all directors in the "key" interest table.
+     * <p>
+     * Unlike the case with {Director#wantsKeyTyped()}, no method is consulted
+     * at xlet startup.  That's because delivery of mouse events is controlled
+     * by two flags in the BDJO file.
+     *
+     * @return true    if the mouse is now in an active area, such that the
+     *		       cursor should indicate that pressing would be meaningful.
+     *
+     * @see #wantsKeyTyped()
+     **/
+    public boolean notifyMouseMoved(int x, int y) {
+	return false;
+    }
+
+    /**
+     * Notify the director that the mouse has been pressed.  This method will be
+     * called in the animation thread for all shows in the "key" interest
+     * table when a mouse move event is received.
+     * <p>
+     * Mouse event notification to the director occurs independent of, and
+     * in addition to, mouse notification via the RC handler mechanism.
+     * If a mouse event is "consumed" via the RC handler mechanism, it will
+     * still be delivered to all directors in the "key" interest table.
+     * <p>
+     * Unlike the case with {Director#wantsKeyTyped()}, no method is consulted
+     * at xlet startup.  That's because delivery of mouse events is controlled
+     * by two flags in the BDJO file.
+     *
+     * @see #wantsKeyTyped()
+     **/
+    public void notifyMousePressed(int x, int y) {
+    }
+
+
 
     /**
      * Notify the director that the model is moving to the next frame.
