@@ -76,6 +76,8 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.IOException;
 
 
@@ -165,10 +167,6 @@ public class Show implements AnimationClient {
     private boolean deferringPendingCommands = false;
     private int numTargets = 1;   // number of RenderContext targets needed 
                                   // by this show
-    private boolean inputOK = true;     
-        // Condition variable on this instance of show
-    private int inputOKWaiting = 0;
-        // # of threads waiting on inputOK
 
     protected String fontName[];
     protected int fontStyleSize[];  // style in lower two bits, >> 2 for size
@@ -744,13 +742,6 @@ public class Show implements AnimationClient {
     public synchronized void addDisplayAreas(RenderContext context) 
                                 throws InterruptedException 
     {
-        while (inputOKWaiting > 0) {
-            // If input is pending, let it in first
-            wait();     // can throw InterruptedException
-        }
-        inputOK = false;
-            // We could call notifyAll() here, but nobody waits for
-            // inputOK to turn false, so there's no need.
         if (currentSegment != null) {
             int old = context.setTarget(defaultDrawTarget);
             showTop.addDisplayAreas(context);
@@ -781,39 +772,7 @@ public class Show implements AnimationClient {
     /**
      * {@inheritDoc}
      **/
-    public synchronized void paintDone() {
-        inputOK = true;
-        notifyAll();    // Remote control input might be waiting on inputOK
-    }
-
-    //
-    // Wait until it's safe to receive input.  Returns true if 
-    // it's OK to proceed, or false if we've been interrupted 
-    // and should bail out.
-    //
-    // This is probably no longer needed, except perhaps for the "bookmenu"
-    // xlet where mouse events are delivered asynchronously.  Before, it was
-    // needed because the remote control key handlers execute
-    // show commands synchronously, in the AWT thread.  This means that
-    // the show must be in a safe state for the execution of commands
-    // before the keypress can be allowed in.
-    //
-    private synchronized boolean waitForInputOK() {
-        if ((!inputOK) && (!destroyed)) {
-            inputOKWaiting++;
-            try {
-                while ((!inputOK) && (!destroyed)) {
-                    wait();
-                }
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                return false;
-            } finally {
-                inputOKWaiting--;
-                notifyAll();
-            }
-        }
-        return !destroyed;
+    public void paintDone() {
     }
 
     /**
@@ -972,44 +931,132 @@ public class Show implements AnimationClient {
      * Mouse events are delivered in the animation thread, just like remote
      * control keypresses, except in the "bookmenu" demo xlet.
      **/
-    public synchronized void handleMouseMoved(int x, int y) {
-	if (!waitForInputOK()) {
-	    return;
+    /**
+     * Called by the xlet when the mouse is moved.
+     * <p>
+     * In Dec. 2011, this method was changed to make it consistent with the
+     * way remote control keypresses are handled.  Now, the Show checks
+     * if the current segment is interested in the mouse event, by consulting
+     * its handlers.  This happens in the AWT event delivery thread.  If it
+     * is interested, the event is queued on the command list, for eventual
+     * processing on the animation thread.  Note that it is possible that
+     * the show's state might change between computation of interest, and
+     * eventual delivery.
+     * <p>
+     * Previously, the re-dispatch was handled at the GrinXlet level, and
+     * mouse events were not "consumed" at all.
+     * <p>
+     * For code-based mouse handling, the Director event delivery mechanism
+     * might be more appropriate.  There, mouse events are not consumed; it is
+     * left to application code to coordinate event usage among different
+     * shows.
+     *
+     * @param consumed  true if the event was consumed by a show before us,
+     *			and thus should only be delivered to the director.
+     *
+     * @return true     If the mouse move is enqueued for an RC handler, and 
+     *			thus is expected to be used.
+     *
+     * @see #handleMousePressed(int, int)
+     * @see #handleKeyPressed(int)
+     * @see Director#notifyMouseMoved(int, int)
+     **/
+    public boolean handleMouseMoved(int x, int y, boolean consumed) {
+	boolean wants = !consumed && wantsMouseEvent(x, y);
+	GrinXHelper event = new GrinXHelper(this);
+	if (wants) {
+	    event.setCommandNumber(GrinXHelper.MOUSE_MOVE);
+	} else {
+	    event.setCommandNumber(GrinXHelper.MOUSE_MOVE_DIRECTOR_ONLY);
 	}
-        boolean used = false;
-        if (currentSegment != null && currentSegment.handleMouse(x, y, false)) {
-	    used = true;
+	event.setCommandObject(new Point(x, y));
+	pendingCommands.add(event);
+	return wants;
+    }
+
+    synchronized void internalHandleMouseMoved(int x, int y) {
+        Cursor c;
+        if (currentSegment == null)  {
+	    c = Cursor.getDefaultCursor();
+	} else {
+	    currentSegment.handleMouse(x, y, false);
+	    c = Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
 	}
-	if (director.notifyMouseMoved(x, y)) {
-	    used = true;
-	}
-        Cursor c = used ? Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)
-                        : Cursor.getDefaultCursor();
-	//
-	// This isn't quite right.  If there are multiple shows on the key
-	// interest list, the last one to get the mouse event will set the
-	// cursor.  A better behavior would be that if any show uses the
-	// mouse moved event, the cursor would be set to crosshair.
-	//
         if (component != null && c != component.getCursor()) {
             component.setCursor(c);
         }
     }
-   
+
+    void directorHandleMouseMoved(int x, int y) {
+	director.notifyMouseMoved(x, y);
+    }
+
     /**
      * Called by the xlet when the mouse is pressed.
      * <p>
-     * Mouse events are delivered in the animation thread, just like remote
-     * control keypresses, except in the "bookmenu" demo xlet.
+     * In Dec. 2011, this method was changed to make it consistent with the
+     * way remote control keypresses are handled.  Now, the Show checks
+     * if the current segment is interested in the mouse event, by consulting
+     * its handlers.  This happens in the AWT event delivery thread.  If it
+     * is interested, the event is queued on the command list, for eventual
+     * processing on the animation thread.  Note that it is possible that
+     * the show's state might change between computation of interest, and
+     * eventual delivery.
+     * <p>
+     * Previously, the re-dispatch was handled at the GrinXlet level, and
+     * mouse events were not "consumed" at all.
+     * <p>
+     * For code-based mouse handling, the Director event delivery mechanism
+     * might be more appropriate.  There, mouse events are not consumed; it is
+     * left to application code to coordinate event usage among different
+     * shows.
+     *
+     * @param consumed  true if the event was consumed by a show before us,
+     *			and thus should only be delivered to the director.
+     *
+     * @return true     If the mouse move is enqueued for an RC handler, and 
+     *			thus is expected to be used.
+     *
+     * @see #handleMouseMoved(int, int)
+     * @see #handleKeyPressed(int)
+     * @see Director#notifyMousePressed(int, int)
      **/
-    public synchronized void handleMousePressed(int x, int y) {
-	if (!waitForInputOK()) {
-	    return;
+    public boolean handleMousePressed(int x, int y, boolean consumed) {
+	boolean wants = !consumed && wantsMouseEvent(x, y);
+	GrinXHelper event = new GrinXHelper(this);
+	if (wants) {
+	    event.setCommandNumber(GrinXHelper.MOUSE_PRESS);
+	} else {
+	    event.setCommandNumber(GrinXHelper.MOUSE_PRESS_DIRECTOR_ONLY);
 	}
-        if (currentSegment != null) {
-            currentSegment.handleMouse(x, y, true);
-        }
+	event.setCommandObject(new Point(x, y));
+	pendingCommands.add(event);
+	return wants;
+    }
+
+    synchronized void internalHandleMousePressed(int x, int y) {
+        if (currentSegment != null)  {
+	    currentSegment.handleMouse(x, y, true);
+	}
+    }
+
+    void directorHandleMousePressed(int x, int y) {
 	director.notifyMousePressed(x, y);
+    }
+
+    //
+    // Is a mouse event is wanted by the show in its current state?
+    //
+    private synchronized boolean wantsMouseEvent(int x, int y) {
+	if (currentSegment != null) {
+	    Rectangle[] rects = currentSegment.getMouseRects();
+	    for (int i = 0; i < rects.length; i++) {
+		if (rects[i].contains(x, y)) {
+		    return true;
+		}
+	    }
+	}
+	return false;
     }
 
     /**

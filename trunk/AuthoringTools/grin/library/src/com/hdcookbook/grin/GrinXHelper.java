@@ -167,12 +167,20 @@ public class GrinXHelper extends Command implements Node {
      **/
     public final static int MOUSE_PRESS = 5;
     /**
+     * The commandNumber for handling MOUSE_MOVE_DIRECTOR_ONLY event
+     **/
+    public final static int MOUSE_MOVE_DIRECTOR_ONLY = 6;
+    /**
+     * The commandNumber for handling MOUSE_PRESS_DIRECTOR_ONLY event
+     **/
+    public final static int MOUSE_PRESS_DIRECTOR_ONLY = 7;
+    /**
      * The commandNumber for handling KEY_TYPED events that are delivered
      * to the director.
      *
      * @see Director#wantsKeyTyped()
      **/
-    public final static int HANDLE_KEY_TYPED_FOR_DIRECTOR = 6;
+    public final static int HANDLE_KEY_TYPED_FOR_DIRECTOR = 8;
 
     /*
      * A data member that can be used to hold additional info for
@@ -270,12 +278,24 @@ public class GrinXHelper extends Command implements Node {
             }
             case MOUSE_MOVE: {
                 Point p = (Point) data;
-                show.handleMouseMoved(p.x, p.y);
+                show.internalHandleMouseMoved(p.x, p.y);
+		show.directorHandleMouseMoved(p.x, p.y);
                 break;
             }
             case MOUSE_PRESS: {
                 Point p = (Point) data;
-                show.handleMousePressed(p.x, p.y);
+                show.internalHandleMousePressed(p.x, p.y);
+		show.directorHandleMousePressed(p.x, p.y);
+                break;
+            }
+            case MOUSE_MOVE_DIRECTOR_ONLY: {
+                Point p = (Point) data;
+		show.directorHandleMouseMoved(p.x, p.y);
+                break;
+            }
+            case MOUSE_PRESS_DIRECTOR_ONLY: {
+                Point p = (Point) data;
+		show.directorHandleMousePressed(p.x, p.y);
                 break;
             }
             case HANDLE_KEY_TYPED_FOR_DIRECTOR: {

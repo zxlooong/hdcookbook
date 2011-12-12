@@ -59,6 +59,8 @@ import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.Segment;
 import com.hdcookbook.grin.Show;
 
+import java.awt.Rectangle;
+
 /**
  * Superclass for remote control keypress handlers.  Some also handle
  * mouse events.
@@ -136,6 +138,11 @@ public abstract class RCHandler {
      * @return true if something is done with the mouse
      **/
     abstract public boolean handleMouse(int x, int y, boolean activate);
+
+    /**
+     * @return  The list of mouse interest areas, or null if there are none.
+     */
+    abstract public Rectangle[] getMouseRects();
 
     /**
      * Called for handlers in s when s is activated

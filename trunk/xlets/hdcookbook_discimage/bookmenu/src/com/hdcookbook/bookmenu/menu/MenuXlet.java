@@ -426,14 +426,14 @@ public class MenuXlet implements Xlet, UserEventListener,
      * Mouse motion callback
      **/
     public void mouseMoved(MouseEvent e) {
-        show.handleMouseMoved(e.getX(), e.getY());
+        show.handleMouseMoved(e.getX(), e.getY(), false);
     }
 
     /**
      * Mouse motion callback (when a button is down)
      **/
     public void mouseDragged(MouseEvent e) {
-        show.handleMouseMoved(e.getX(), e.getY());
+        show.handleMouseMoved(e.getX(), e.getY(), false);
     }
 
     /**
@@ -446,7 +446,7 @@ public class MenuXlet implements Xlet, UserEventListener,
      * Mouse pressed callback
      **/
     public void mousePressed(MouseEvent e) { 
-        show.handleMousePressed(e.getX(), e.getY());
+        show.handleMousePressed(e.getX(), e.getY(), false);
     }
 
     /**

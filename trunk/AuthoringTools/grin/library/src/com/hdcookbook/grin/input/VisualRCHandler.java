@@ -146,8 +146,8 @@ public class VisualRCHandler extends RCHandler implements Node {
                                       // any element can be null.
     protected Feature[] activateFeatures;  // by state #, etc.
     protected Command[][] activateCommands;  // by state #
-    protected Rectangle[] mouseRects;   // hit zones on screen for the mouse
-    protected int[] mouseRectStates;    // The state # corresponding to each rect
+    protected Rectangle[] mouseRects;  // hit zones on screen for the mouse
+    protected int[] mouseRectStates;   // The state # corresponding to each rect
     protected int timeout;      // -1 means "no timeout"
     protected Command[] timeoutCommands;
 
@@ -300,6 +300,13 @@ public class VisualRCHandler extends RCHandler implements Node {
             }
         }
         return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public Rectangle[] getMouseRects() {
+	return mouseRects;
     }
     
     /**

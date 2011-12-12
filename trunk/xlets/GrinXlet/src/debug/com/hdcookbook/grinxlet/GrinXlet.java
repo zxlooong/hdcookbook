@@ -601,18 +601,15 @@ public class GrinXlet
     public void mouseMoved(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        GrinXHelper helper = new GrinXHelper(xletShow);
-        helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
-        helper.setCommandObject(new Point(x,y));
-        xletShow.runCommand(helper);
+        xletShow.handleMouseMoved(x, y, false);
 
-        for (int i = 0; i < keyInterestOrder.length; i++) {
-            Show show = (Show) keyInterestOrder[i];
-            helper = new GrinXHelper(show);
-            helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
-            helper.setCommandObject(new Point(x, y));
-            show.runCommand(helper);
-        }
+	boolean consumed = false;
+	for (int i = 0; i < keyInterestOrder.length; i++) {
+	    Show show = keyInterestOrder[i];
+	    if (show.handleMouseMoved(x, y, consumed)) {
+		consumed = true;
+	    }
+	}
     }
 
     /**
@@ -621,18 +618,15 @@ public class GrinXlet
     public void mouseDragged(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        GrinXHelper helper = new GrinXHelper(xletShow);
-        helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
-        helper.setCommandObject(new Point(x,y));
-        xletShow.runCommand(helper);
+        xletShow.handleMouseMoved(x, y, false);
 
-        for (int i = 0; i < keyInterestOrder.length; i++) {
-            Show show = (Show) keyInterestOrder[i];
-            helper = new GrinXHelper(show);
-            helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
-            helper.setCommandObject(new Point(x, y));
-            show.runCommand(helper);
-        }
+	boolean consumed = false;
+	for (int i = 0; i < keyInterestOrder.length; i++) {
+	    Show show = keyInterestOrder[i];
+	    if (show.handleMouseMoved(x, y, consumed)) {
+		consumed = true;
+	    }
+	}
     }
 
     /**
@@ -647,18 +641,15 @@ public class GrinXlet
     public void mousePressed(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        GrinXHelper helper = new GrinXHelper(xletShow);
-        helper.setCommandNumber(GrinXHelper.MOUSE_PRESS);
-        helper.setCommandObject(new Point(x,y));
-        xletShow.runCommand(helper);
+        xletShow.handleMousePressed(x, y, false);
 
-        for (int i = 0; i < keyInterestOrder.length; i++) {
-            Show show = (Show) keyInterestOrder[i];
-            helper = new GrinXHelper(show);
-            helper.setCommandNumber(GrinXHelper.MOUSE_PRESS);
-            helper.setCommandObject(new Point(x, y));
-            show.runCommand(helper);
-        }
+	boolean consumed = false;
+	for (int i = 0; i < keyInterestOrder.length; i++) {
+	    Show show = keyInterestOrder[i];
+	    if (show.handleMousePressed(x, y, consumed)) {
+		consumed = true;
+	    }
+	}
     }
 
     /**

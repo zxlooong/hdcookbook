@@ -66,6 +66,7 @@ import com.hdcookbook.grin.util.Debug;
 
 import java.awt.Graphics2D;
 import java.io.IOException;
+import java.awt.Rectangle;
 
 /**
  * A segment within a show.  A show is composed of segments, and at all
@@ -78,6 +79,8 @@ import java.io.IOException;
  *   @author     Bill Foote (http://jovial.com)
  **/
 public class Segment implements Node {
+
+    private final static Rectangle[] EMPTY_RECTANGLE_ARRAY = new Rectangle[0];
 
     protected String name;
     protected Show show;
@@ -103,6 +106,9 @@ public class Segment implements Node {
      * this segment has handlers for.
      **/
     protected int keyTypedInterest;
+
+    protected Rectangle[] mouseRects = null;   
+	// hit zones on screen for the mouse.  Populated on demand.
 
     private boolean active = false;
     private boolean segmentSetupComplete;
@@ -555,4 +561,44 @@ public class Segment implements Node {
         return rcHandlers;
     }
 
+    //
+    // Called by Show.  Returns the list of mouse interest areas.  If
+    // there are none, returns a zero-length array.
+    //
+    Rectangle[] getMouseRects() {
+	if (mouseRects == null) {
+	    // Calculate the list of hit zones for the mouse.
+	    //
+	    // In GRIN, we normally try very hard to avoid creating heap
+	    // traffic, so data structures like this are normally stored
+	    // in the .grin file.  However, we only expect mouse events to
+	    // be generated on fast players, where this isn't nearly as much
+	    // of a concern.
+	    int numRects = 0;
+	    for (int i = 0; i < rcHandlers.length; i++) {
+		Rectangle[] r = rcHandlers[i].getMouseRects();
+		if (r != null) {
+		    if (mouseRects == null) {
+			mouseRects = r;		// it's immutable
+		    }
+		    numRects += r.length;
+		}
+	    }
+	    if (mouseRects == null) {
+		mouseRects = EMPTY_RECTANGLE_ARRAY;
+	    } else if (numRects > mouseRects.length) {
+		mouseRects = new Rectangle[numRects];
+		int i = 0;
+		for (int j = 0; j < rcHandlers.length; j++) {
+		    Rectangle[] r = rcHandlers[j].getMouseRects();
+		    if (r != null) {
+			for (int k = 0; k < r.length; k++) {
+			    mouseRects[i++] = r[k];
+			}
+		    }
+		}
+	    }
+	}
+	return mouseRects;
+    }
 }

@@ -60,6 +60,8 @@ import com.hdcookbook.grin.Show;
 import com.hdcookbook.grin.commands.Command;
 import com.hdcookbook.grin.Node;
 import com.hdcookbook.grin.io.binary.GrinDataInputStream;
+
+import java.awt.Rectangle;
 import java.io.IOException;
 
 /**
@@ -118,6 +120,13 @@ public class CommandRCHandler extends RCHandler implements Node {
      **/
     public boolean handleMouse(int x, int y, boolean activate) {
         return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     **/
+    public Rectangle[] getMouseRects() {
+	return null;
     }
 
     /**

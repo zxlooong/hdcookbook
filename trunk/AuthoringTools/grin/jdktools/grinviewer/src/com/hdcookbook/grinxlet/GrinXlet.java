@@ -256,12 +256,12 @@ public class GrinXlet implements KeyListener, MouseListener, MouseMotionListener
         final int x = (e.getX() - insets.left) * scaleDivisor;
         final int y = (e.getY() - insets.top) * scaleDivisor;
         synchronized(this) {
+	    boolean consumed = false;
             for (int i = 0; i < keyInterestOrder.length; i++) {
-                Show show = (Show) keyInterestOrder[i];
-                GrinXHelper helper = new GrinXHelper(show);
-                helper.setCommandNumber(GrinXHelper.MOUSE_PRESS);
-                helper.setCommandObject(new Point(x,y));
-                show.runCommand(helper);
+                Show show = keyInterestOrder[i];
+		if (show.handleMousePressed(x, y, consumed)) {
+		    consumed = true;
+		}
             }
         }
     }
@@ -284,12 +284,12 @@ public class GrinXlet implements KeyListener, MouseListener, MouseMotionListener
         int x = (e.getX() - insets.left) * scaleDivisor;
         int y = (e.getY() - insets.top) * scaleDivisor;
         synchronized(this) {
+	    boolean consumed = false;
             for (int i = 0; i < keyInterestOrder.length; i++) {
-                Show show = (Show) keyInterestOrder[i];
-                GrinXHelper helper = new GrinXHelper(show);
-                helper.setCommandNumber(GrinXHelper.MOUSE_MOVE);
-                helper.setCommandObject(new Point(x,y));
-                show.runCommand(helper);
+                Show show = keyInterestOrder[i];
+		if (show.handleMouseMoved(x, y, consumed)) {
+		    consumed = true;
+		}
             }
         }
     }
