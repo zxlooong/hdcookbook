@@ -764,9 +764,6 @@ public class Show implements AnimationClient {
         if (currentSegment != null) {
            showTop.paintFrame(gr);
         }
-        if (Debug.ASSERT && deferringPendingCommands) {
-            Debug.assertFail();
-        }
     }
 
     /**
