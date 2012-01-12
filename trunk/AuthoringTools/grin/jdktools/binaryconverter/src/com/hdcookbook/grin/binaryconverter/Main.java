@@ -244,7 +244,7 @@ public class Main {
             e.printStackTrace();
             System.exit(1);
         }
-        System.exit(0);
+        //System.exit(0); /// HDCOOKBOOK-220: This causes the negative value exit problem
    }
 
     private static int argToInt(String s) {
