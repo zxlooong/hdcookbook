@@ -125,7 +125,6 @@ public class WeatherDirector extends Director {
         zipCode = (Text) getFeature("F:ZipCode");
         String[] zip = zipCode.getText();
         zipBuf = new StringBuffer(zip[0]);
-        NetworkManager.start(); // will be ignored if the manager is already started.
         NetworkManager.start();
     }
 
