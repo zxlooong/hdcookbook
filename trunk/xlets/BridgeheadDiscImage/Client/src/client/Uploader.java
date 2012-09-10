@@ -69,9 +69,9 @@ public class Uploader {
 
     public static final int DEFAULT_PORT = 4444;
 
-    public static void doUpload(String ip, int port, String file) {
+    public static void doUpload(String ip, int port, String dir) {
         
-        File srcDir = new File(file);
+        File srcDir = new File(dir);
         if (!srcDir.exists()) {
             System.out.println("Couldn't locate " + srcDir);
             return;
@@ -127,6 +127,7 @@ public class Uploader {
     public static void main(String args[]) {
         if (args.length == 0) {
             System.out.println("Invoke with \"-help\" for more options.");
+            System.out.println("These optional allow operation without a GUI.");
             ClientFrame.launchGUI();
         } else if (args.length != 2) {
             usage();

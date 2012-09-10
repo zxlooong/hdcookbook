@@ -2,8 +2,9 @@
 <project name="test" default="make-zip" basedir=".">
   
     <!-- This build file can be an example for converting any
-         existing disc image's BDMV structure to a zip file
-         in which Bridgehead Xlet can upload.  -->
+         existing disc image's BDMV structure to a file
+         that Bridgehead Xlet can upload.  In an earlier version,
+         this was a zip file; hence the name of this build file.  -->
     
     <!-- Property Definitions -->
     <property file="../../../user.vars.properties"/>
@@ -80,6 +81,10 @@
             <arg value="${vfs-dir}/manifest.xml"/>
             <classpath refid="sec.tools.path"/>
         </jdktools.java>
+
+        <!--  Copy the title.txt file to the upload directory -->
+        <copy todir = "${vfs-dir}"
+              file="bdmv/title.txt" />
 
         <!-- Remove the certificate file --> 
 	<delete dir="${bdmv-dir}/../CERTIFICATE"/>

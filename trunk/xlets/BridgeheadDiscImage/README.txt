@@ -75,3 +75,16 @@ requirements, then the Bridgehead Xlet will refuse to perform the VFS
 update with the downloaded image.  (By the way, you can convert index.bdmv 
 file to an xml format and back using a tool under tools/index in hdcookbook.)
 
+5.  The bridghead xlet allows you to select a title from its menu; this should
+be a title that starts the disc image to be tested.  By default, it's title
+1 (bd://1), but the bridgehead xlet lets you use a different title, by
+putting a locator string in the file "title.txt" in same BUDA directory
+as the manifest file.
+
+If you have a disc image you want to test, you can take modify the
+index.bdmv file of that disc image, moving its first play title to the
+end of index.bdmv, and setting the bridgehead xlet as the first play
+title.  Then, make a locator to the old first play title, and put that
+locator string in title.txt.  This way the disc under test always boots
+to the bridgehead xlet, so you can always undo the VFS update and download
+changes to the disc image under test.

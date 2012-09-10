@@ -56,13 +56,16 @@ package bridgehead;
 
 import java.awt.event.KeyEvent;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -105,14 +108,17 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
     private final static int NO_OPTION = 0;
     private final static int TITLE_SELECT_OPTION = 1;
     private final static int UPLOAD_PC_OPTION = 2;
-    private final static int UPLOAD_URL_OPTION = 3;
-    private final static int UNDO_VFS_OPTION = 4;
-    private final static int ERASE_OPTION = 5;
+    private final static int UPLOAD_PC_NO_ERASE_OPTION = 3;
+    private final static int UPLOAD_URL_OPTION = 4;
+    private final static int UNDO_VFS_OPTION = 5;
+    private final static int ERASE_OPTION = 6;
     private int option = NO_OPTION;
     private String uploadURL = null;
 
     private boolean initialized = false;
     private boolean enterKeyPressed = false;
+    private boolean waitingForEnter = false;
+    private String titleToSelect;
     
     public void initXlet(XletContext context) {
         this.context = context;
@@ -126,7 +132,8 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         
         String ada = System.getProperty("dvb.persistent.root")
                + "/" + orgID + "/" + appID;
-      
+     
+        boolean b = XletLogger.initializeSetup(false);
         // Set the logging output file, if desired.
         // This can be useful on software players, where you can
         // read it off your PC's hard disc, but on real hardware
@@ -137,9 +144,11 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         
         UserEventRepository uer = new UserEventRepository("BridgeheadXlet");
         uer.addKey(KeyEvent.VK_ENTER);
+        uer.addKey(KeyEvent.VK_0);
         uer.addKey(KeyEvent.VK_1);
         uer.addKey(KeyEvent.VK_2);        
         uer.addKey(KeyEvent.VK_3);        
+        uer.addKey(KeyEvent.VK_4);        
         EventManager em = EventManager.getInstance();
         em.addUserEventListener(this, uer);        
 
@@ -180,19 +189,50 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
             initialized = true;
         }
     }
+
+    private void readTitleFile() {
+        titleToSelect = "bd://1";
+        File titleF = new File(bindingUnitDir + "/" + "title.txt");
+        XletLogger.log(" ");
+        if (!titleF.exists()) {
+            XletLogger.log("No file named " + titleF.getAbsolutePath());
+            XletLogger.log("Will use default title:  " + titleToSelect);
+        } else {
+            BufferedReader in = null;
+            try {
+                in = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(titleF), "UTF-8"));
+                titleToSelect = in.readLine();
+                XletLogger.log("Read title from " + titleF.getAbsolutePath()
+                                + ":  " + titleToSelect);
+            } catch (IOException ex) {
+                XletLogger.log("Error reading " + titleF, ex);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException ex) {
+                    }
+                }
+            }
+        }
+        XletLogger.log(" ");
+    }
     
     public void startXlet() {
   
         XletLogger.setVisible(true);  
+        readTitleFile();
   
         // If the player doesn't support VFS, stop.
         if (!isPlayerCompatible()) {
             XletLogger.log("*******************************************");
-            XletLogger.log("This player doen't support VFS.");
+            XletLogger.log("This player doesn't support VFS.");
             XletLogger.log("Sorry, but I can't do anything for you.");
             return;
         }
-    
+   
+        XletLogger.log("Current VFS state:  " + getVFSState());
         if (option == NO_OPTION) {
             showIntroMessage();
         } else {
@@ -204,12 +244,13 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         
         XletLogger.log("*******************************************");
         XletLogger.log("***** Welcome to the Bridgehead Xlet ******");
-        XletLogger.log("Reinsert the disc anytime to get back to this screen.");
+        XletLogger.log("Reinsert the disc any time to get back to this screen.");
         XletLogger.log(" ");
-        XletLogger.log("Press 0 or Enter to start Title 1.");    
-        XletLogger.log("Press 1 to upload a new disc image from your PC and do a VFS update.");
-        XletLogger.log("Press 2 to cancel previous VFS updates and go back to the optical disc.");
-        XletLogger.log("Press 3 to erase contents of the VFS directory.");
+        XletLogger.log("Press 0 or Enter to start title " + titleToSelect);
+        XletLogger.log("Press 1 to erase the BUDA, upload a new disc image from your PC and do a VFS update.");
+        XletLogger.log("Press 2 to upload a disc image update from your PC and do a VFS update (no erase).");
+        XletLogger.log("Press 3 to cancel previous VFS updates and go back to the optical disc.");
+        XletLogger.log("Press 4 to erase contents of the VFS directory.");
         XletLogger.log("*******************************************");      
         XletLogger.log("*******************************************");
         XletLogger.log("");
@@ -218,10 +259,12 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
 
     public synchronized void waitForKey() throws InterruptedException {
         enterKeyPressed = false;
+        waitingForEnter = true;
         XletLogger.log("Press enter/OK to continue...");
         while (!enterKeyPressed) {
             wait();
         }
+        waitingForEnter = false;
     }
      
     public synchronized void userEventReceived(UserEvent ue) {   
@@ -230,6 +273,13 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         {
             enterKeyPressed = true;
             notifyAll();
+            if (waitingForEnter) {
+                return;
+            }
+        }
+        if (ue.getType()==HRcEvent.KEY_PRESSED && waitingForEnter) {
+            XletLogger.log("Please press enter/OK");
+            return;
         }
         if (!initialized || option != NO_OPTION) {
             return;
@@ -241,9 +291,12 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
                     option = UPLOAD_PC_OPTION;
                     break;
                 case KeyEvent.VK_2:
-                    option = UNDO_VFS_OPTION;
+                    option = UPLOAD_PC_NO_ERASE_OPTION;
                     break;
                 case KeyEvent.VK_3:
+                    option = UNDO_VFS_OPTION;
+                    break;
+                case KeyEvent.VK_4:
                     option = ERASE_OPTION;
                     break;
                 case KeyEvent.VK_0:
@@ -275,6 +328,8 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
                 case UPLOAD_PC_OPTION:
                     XletLogger.log("Erasing VFS.");
                     eraseContents("", new File(bindingUnitDir));
+                    // And fall through to the "no erase" option
+                case UPLOAD_PC_NO_ERASE_OPTION:
                     XletLogger.log("Uploading from PC.");
                     doDownload(bindingUnitDir);
                     doVFSUpdate(bumfxml, bumfsf);
@@ -309,8 +364,9 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
                                    + option);
             }
         } catch (Exception e) {
-            XletLogger.log("", e);
+            XletLogger.log("Error!", e);
         }
+        readTitleFile();
         showIntroMessage();
         cleanup();
     }
@@ -453,17 +509,38 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
     public void doVFSUpdate(String xmlFile, String sigFile) 
             throws PreparingFailedException {
         XletLogger.log("Calling VFS update");     
-        VFSManager.getInstance().requestUpdating(xmlFile, sigFile, true);
+        VFSManager mgr = VFSManager.getInstance();
+        mgr.requestUpdating(xmlFile, sigFile, true);
+        XletLogger.log("VFS update done; state now " + getVFSState());
+    }
+    
+    private String getVFSState() {
+        VFSManager mgr = VFSManager.getInstance();
+        int state = mgr.getState();
+        switch (state) {
+            case VFSManager.STABLE:
+                return "STABLE";
+            case VFSManager.PREPARING:
+                return "PREPARING";
+            case VFSManager.PREPARED:
+                return "PREPARED";
+            case VFSManager.UPDATING:
+                return "UPDATING";
+            default:
+                return "unknown state " + state;
+        }
     }
     
     public void doTitleSelection() 
             throws ServiceContextException {
         
         try {
-            XletLogger.log("Selecting title 1 on the disc.");
-            BDLocator loc = new BDLocator("bd://1");
+            XletLogger.log("Selecting title " + titleToSelect
+                           + " on the disc.");
+            BDLocator loc = new BDLocator(titleToSelect);
             ServiceContextFactory factory = ServiceContextFactory.getInstance(); 
-            TitleContext titleContext =(TitleContext) factory.getServiceContext(context);
+            TitleContext titleContext =
+                (TitleContext) factory.getServiceContext(context);
             Title title = (Title) SIManager.createInstance().getService(loc);
             titleContext.start(title, true);        
         } catch (SecurityException ex) {
