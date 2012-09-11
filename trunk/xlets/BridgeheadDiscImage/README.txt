@@ -100,7 +100,9 @@ best to sign the xlet under test to match the CERTIFICATE directory on
 the bridgehead disc.
 
 6.  The bridgehead disc uses the HD Cookbook test organization ID, which
-is 0x56789abc.  If the disc images you want to debug have a different
+is 0x5678-9abc.  A dash was inserted so that an automated script to repalce
+the org ID won't change that sentence :-)  This instance of bridgehead has org
+ID 0x56789abc.  If the disc images you want to debug have a different
 organization ID, you'll need to change the bridgehead disc to match,
 because the CERTIFICATE directories of the bridgehead and the downloaded
 image should match.  The org ID is set in more than one place, alas; you'll
