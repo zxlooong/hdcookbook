@@ -88,3 +88,41 @@ title.  Then, make a locator to the old first play title, and put that
 locator string in title.txt.  This way the disc under test always boots
 to the bridgehead xlet, so you can always undo the VFS update and download
 changes to the disc image under test.
+
+Note that you'll probably want to re-sign the JAR files of the disc image
+under test, to use the bridgehead keys and the bridgehead org ID.  Trying 
+to change the CERTIFICATE directory via VFS update might or might not work; 
+we didn't research what the spec says about this, and in any case, doing 
+this is unlikely to have received extensive conformance testing.  Besides, 
+even if it is possible to change the CERTIFICATE directory to a new org ID, 
+the bridgehead xlet would almost certainly lose a needed permission!  It's 
+best to sign the xlet under test to match the CERTIFICATE directory on 
+the bridgehead disc.
+
+6.  The bridgehead disc uses the HD Cookbook test organization ID, which
+is 0x56789abc.  If the disc images you want to debug have a different
+organization ID, you'll need to change the bridgehead disc to match,
+because the CERTIFICATE directories of the bridgehead and the downloaded
+image should match.  The org ID is set in more than one place, alas; you'll
+need to change it in these places:
+
+    ./BridgeheadDiscImage/bdmv/BridgeheadBDJO.xml
+    ./BridgeheadDiscImage/bdmv/FirstTitleBDJO.xml
+    ./BridgeheadDiscImage/src/bridgehead/bluray.BridgeheadXlet.perm
+    ./BridgeheadDiscImage/src/firsttitle/bluray.FirstTitleXlet.perm
+    ./build-bridgehead.xml
+    ./SampleDiscImage/bdmv/id.xml
+    ./SampleDiscImage/build-zip.xml
+    ./SampleDiscImage/build.xml
+    ./SampleDiscImage/src/hellotvxlet/bluray.HelloTVXlet.perm
+    ./tools/keystore/keystore.store
+
+Note that this includes the keystore file.  You'll need to replace the one
+provided with one that has the information needed to sign xlets with your 
+org ID.  Unlike other bits of HD Cookbook, the bridgehead xlet's keystore 
+is kept in the Subversion repository.  That's because we handed out physical
+BD-R discs at JavaOne in 2009, and those discs are only useful if
+developers can get the test private keys we used to make those discs.
+For that reason, we didn't automate the creation of the keystore.store
+(but there are plenty of examples of creating a keystore in the
+cookbook project).
