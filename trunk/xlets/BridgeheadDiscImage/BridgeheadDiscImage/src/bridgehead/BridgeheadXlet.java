@@ -56,8 +56,10 @@ package bridgehead;
 
 import java.awt.event.KeyEvent;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -98,6 +100,7 @@ import org.dvb.event.UserEventRepository;
 public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventListener {
 
     public static final int PORT = 4444;
+    private final static String PROPERTIES_FILE = "bridge_h.p";
     
     private XletContext  context;
     private String       bindingUnitDir;    
@@ -119,6 +122,7 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
     private boolean enterKeyPressed = false;
     private boolean waitingForEnter = false;
     private String titleToSelect;
+    private boolean vfsUpdateApplied;
     
     public void initXlet(XletContext context) {
         this.context = context;
@@ -222,6 +226,7 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
     public void startXlet() {
   
         XletLogger.setVisible(true);  
+        readProperties();
         readTitleFile();
   
         // If the player doesn't support VFS, stop.
@@ -350,7 +355,7 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
                 case UNDO_VFS_OPTION:
                     doVFSUpdate(null, null);
                     waitForKey();
-                    doTitleSelection();
+                    doTitleSelection("bd://2"); // Re-launch bridgehead
                     break;
                 case ERASE_OPTION:
                     eraseContents("", new File(bindingUnitDir));
@@ -512,6 +517,9 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
         VFSManager mgr = VFSManager.getInstance();
         mgr.requestUpdating(xmlFile, sigFile, true);
         XletLogger.log("VFS update done; state now " + getVFSState());
+        vfsUpdateApplied = xmlFile != null;
+        writeProperties();
+        readTitleFile();
     }
     
     private String getVFSState() {
@@ -530,14 +538,18 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
                 return "unknown state " + state;
         }
     }
-    
     public void doTitleSelection() 
+            throws ServiceContextException {
+        doTitleSelection(titleToSelect);
+    }
+    
+    public void doTitleSelection(String titleString) 
             throws ServiceContextException {
         
         try {
-            XletLogger.log("Selecting title " + titleToSelect
+            XletLogger.log("Selecting title " + titleString
                            + " on the disc.");
-            BDLocator loc = new BDLocator(titleToSelect);
+            BDLocator loc = new BDLocator(titleString);
             ServiceContextFactory factory = ServiceContextFactory.getInstance(); 
             TitleContext titleContext =
                 (TitleContext) factory.getServiceContext(context);
@@ -550,6 +562,33 @@ public class BridgeheadXlet implements javax.tv.xlet.Xlet, Runnable, UserEventLi
             XletLogger.log("Error in making locator", ex);
         } catch (org.davic.net.InvalidLocatorException ex) {
             XletLogger.log("Error in making locator", ex);
+        }
+    }
+
+    private void readProperties() {
+        vfsUpdateApplied = false;
+        try {
+            File propsF = new File(bindingUnitDir + "/" + PROPERTIES_FILE);
+            DataInputStream din = new DataInputStream(
+                                  new BufferedInputStream(
+                                  new FileInputStream(propsF)));
+            vfsUpdateApplied = din.readBoolean();
+            din.close();
+        } catch (IOException ex) {
+            XletLogger.log("Error reading properties file" + ex);
+        }
+    }
+
+    private void writeProperties() {
+        try {
+            File propsF = new File(bindingUnitDir + "/" + PROPERTIES_FILE);
+            DataOutputStream dout = new DataOutputStream(
+                                  new BufferedOutputStream(
+                                  new FileOutputStream(propsF)));
+            dout.writeBoolean(vfsUpdateApplied);
+            dout.close();
+        } catch (IOException ex) {
+            XletLogger.log("Error writing properties file" + ex);
         }
     }
 
