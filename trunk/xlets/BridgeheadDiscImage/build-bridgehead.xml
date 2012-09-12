@@ -177,5 +177,16 @@
               file="${bridgehead.build.dir}/app.discroot.crt"/>
         <copy todir = "${target.dir}/CERTIFICATE/BACKUP" 
               file="${bridgehead.build.dir}/bu.discroot.crt"/>
+        <mkdir dir="${target.dir}/developer"/>
+
+        <!--
+        Put the keystore on the optical bridgehead disc.  That's 
+        a convenient place to put it to make sure that it doesn't 
+        get lost when doing development, or that one doesn't use 
+        the wrong keystore by mistake.  Of course, one would never 
+        do this with a non-debug key!
+        -->
+        <copy todir = "${target.dir}/developer" 
+              file="${keystore.dir}/keystore.store"/>
     </target>
 </project>
